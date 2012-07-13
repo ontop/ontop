@@ -313,7 +313,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			});
 			queryRunnerThread.start();
 		} catch (Exception e) {
-			DialogUtils.showQuickErrorDialog(this, e);
+			DialogUtils.showQuickErrorDialog(null, e);
 		}
 	}// GEN-LAST:event_buttonExecuteActionPerformed
 

@@ -195,7 +195,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Tahoma" size="11" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Target Query:"/>
+                <Property name="text" type="java.lang.String" value="Target (Triples Template):"/>
                 <Property name="focusable" type="boolean" value="false"/>
               </Properties>
               <Constraints>
@@ -228,7 +228,6 @@
                 <Component class="javax.swing.JTextPane" name="txtTargetQuery">
                   <Properties>
                     <Property name="focusCycleRoot" type="boolean" value="false"/>
-                    <Property name="focusTraversalKeysEnabled" type="boolean" value="false"/>
                     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[600, 170]"/>
                     </Property>
@@ -288,7 +287,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Tahoma" size="11" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Source Query:"/>
+                    <Property name="text" type="java.lang.String" value="Source (SQL Query):"/>
                     <Property name="focusable" type="boolean" value="false"/>
                   </Properties>
                   <Constraints>
@@ -315,7 +314,6 @@
                     <Component class="javax.swing.JTextPane" name="txtSourceQuery">
                       <Properties>
                         <Property name="focusCycleRoot" type="boolean" value="false"/>
-                        <Property name="focusTraversalKeysEnabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                   </SubComponents>
