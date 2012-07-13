@@ -280,8 +280,8 @@ public class ModelIOManager {
                 writer.write("\n");
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
-            writer.write(Label.target.name() + "\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
-            writer.write(Label.source.name() + "\t" + mapping.getSourceQuery() + "\n");
+            writer.write(Label.target.name() + "\t\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
+            writer.write(Label.source.name() + "\t\t" + mapping.getSourceQuery() + "\n");
             needLineBreak = true;
         }
         writer.write(END_COLLECTION_SYMBOL);
