@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLConnection;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -133,10 +134,10 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
 
 		// Now we are ready for querying
-		OWLStatement st = reasoner.getStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z }";
 		try {
@@ -158,6 +159,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			} catch (Exception e) {
 				st.close();
 			}
+			conn.close();
 			reasoner.dispose();
 		}
 	}
