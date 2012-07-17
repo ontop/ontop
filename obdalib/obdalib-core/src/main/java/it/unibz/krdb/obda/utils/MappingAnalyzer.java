@@ -28,6 +28,7 @@ import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.LogicalOperator;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
+import it.unibz.krdb.sql.api.Projection;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
@@ -338,9 +339,7 @@ public class MappingAnalyzer {
 			String varName = var.getName();
 			String termName = lookupTable.lookup(varName);
 			if (termName == null) {
-				throw new RuntimeException(
-						String.format("Column %s not found. Hint: don't use wildecards in your SQL query, e.g., star *, " +
-								"and verify word-casing for case-sensitive database.", var));
+				throw new RuntimeException(String.format("Error in identifying column name \"%s\", please check the query source in the mappings.\nPossible reasons:\n1. The name is ambiguous, or\n2. The name is not defined in the database schema.", var));
 			}
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
@@ -362,6 +361,8 @@ public class MappingAnalyzer {
 
 		// Collect all the possible column names from tables.
 		ArrayList<Relation> tableList = queryTree.getTableSet();
+		int offset = 0; // the index offset
+
 		for (Relation table : tableList) {
 			String tableName = table.getName();
 			DataDefinition def = dbMetaData.getDefinition(tableName);
@@ -369,7 +370,7 @@ public class MappingAnalyzer {
 				throw new RuntimeException("Definition not found for table '" + tableName + "'.");
 			}
 			int size = def.countAttribute();
-
+			
 			String[] columnList = new String[3];
 			for (int i = 1; i <= size; i++) {
 				// simple attribute name
@@ -378,12 +379,15 @@ public class MappingAnalyzer {
 				// full qualified attribute name
 				columnList[1] = dbMetaData.getFullQualifiedAttributeName(tableName, i);
 				
-				if (table.getAlias() != null) {
+				String alias = table.getAlias();
+				if (!alias.isEmpty()) {
 					// full qualified attribute name using table alias
 					columnList[2] = dbMetaData.getFullQualifiedAttributeName(tableName, table.getAlias(), i);
 				}
-				lookupTable.add(columnList);
+				int index = i + offset;
+				lookupTable.add(columnList, index);
 			}
+			offset += size;
 		}
 
 		// Add the aliases
@@ -394,7 +398,6 @@ public class MappingAnalyzer {
 			String columnName = reference[1];
 			lookupTable.add(aliasName, columnName);
 		}
-
 		return lookupTable;
 	}
 }

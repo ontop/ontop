@@ -1,0 +1,28 @@
+[PrefixDeclaration]
+:		http://it.unibz.krdb/obda/test/simple#
+quest:	http://obda.org/quest#
+
+[ClassDeclaration] @collection [[
+:A
+]]
+
+[ObjectPropertyDeclaration] @collection [[
+:P, :Q
+]]
+
+[DataPropertyDeclaration] @collection [[
+:U, :V
+]]
+
+[SourceDeclaration]
+sourceUri	      h2
+connectionUrl	  jdbc:h2:mem:questjunitdb
+username	      sa
+password	
+driverClass	      org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	M:0
+target	    <"&:;{$table1.id}"> a :A; :P <"&:;$table2.sid"> .
+source	    SELECT table1.id, table2.sid FROM table1, table2
+]]

@@ -15,8 +15,7 @@ import java.util.Set;
 public class LookupTable {
 
 	private static final String DEFAULT_NAME_FORMAT = "t%s"; // e.g., t1, t2,
-																// ...
-
+	
 	/**
 	 * Map of entries that have an alternative name.
 	 */
@@ -28,17 +27,11 @@ public class LookupTable {
 	private HashMap<Integer, String> master = new HashMap<Integer, String>();
 
 	/**
-	 * Set with all unsafe names, names with multiple columns (not qulaified)
-	 * use for excption trowing
+	 * Set with all unsafe names, names with multiple columns (not qualified)
+	 * use for throwing exception.
 	 */
 	private HashSet<String> unsafeEntries = new HashSet<String>();
-
-	/**
-	 * A special number that connects one or more entries to its alternative
-	 * name.
-	 */
-	private int index = 1;
-
+	
 	public LookupTable() {
 		// NO-OP
 	}
@@ -50,14 +43,14 @@ public class LookupTable {
 	 * 
 	 * @param entry
 	 *            Any string.
+	 * @param index
+	 *            The entry index.
 	 */
-	public void add(String entry) {
-		if (entry == null) {
-			return;
+	public void add(String entry, int index) {
+		if (entry != null) {
+			putEntry(entry, index);
+			register(index);
 		}
-		putEntry(entry, index);
-		register();
-		increaseIndex();
 	}
 
 	/**
@@ -66,15 +59,16 @@ public class LookupTable {
 	 * 
 	 * @param entries
 	 *            An array of strings.
+	 * @param index
+	 *            The entries index, all entries share the same index number.
 	 */
-	public void add(String[] entries) {
+	public void add(String[] entries, int index) {
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				putEntry(entries[i], index);
 			}
 		}
-		register();
-		increaseIndex();
+		register(index);
 	}
 
 	/**
@@ -101,20 +95,15 @@ public class LookupTable {
 	 *            A new entry.
 	 * @param reference
 	 *            An entry that exists already in the lookup table. The method
-	 *            will get its index and assign it to the new entry. If the
-	 *            reference is not existed yet, then the new entry will get a
-	 *            new index.
+	 *            will get its index and assign it to the new entry.
 	 */
 	public void add(String entry, String reference) {
-		if (entry == null) {
+		if (entry == null || reference == null) {
 			return;
 		}
-
-		if (!exist(reference)) {
-			add(entry);
-		} else {
-			Integer index = getEntry(reference);
-			putEntry(entry, index);
+		Integer index = getEntry(reference);
+		if (index != null) {
+			putAliasEntry(entry, index);
 		}
 	}
 
@@ -123,9 +112,6 @@ public class LookupTable {
 	 */
 	public String lookup(String entry) {
 		if (exist(entry)) {
-			if (unsafeEntries.contains(entry.toLowerCase()))
-				throw new RuntimeException("The column name '" + entry
-						+ "' is ambiguous. Use a fully qualified name to solve this issue. E.g., table.column");
 			Integer index = getEntry(entry);
 			return retrieve(index);
 		}
@@ -212,17 +198,57 @@ public class LookupTable {
 	 */
 	private void putEntry(String entry, Integer index) {
 		final String insertedEntry = entry.toLowerCase();
-
 		/*
 		 * looking for repeated entries, if they exists they are unsafe
 		 * (generally unqualified names) and they are marked as unsafe.
 		 */
-		Integer currentIndex = log.get(insertedEntry);
-		if (currentIndex != null) {
-			unsafeEntries.add(insertedEntry);
+		boolean isExist = log.containsKey(insertedEntry);
+		
+		if (!ambiguous(insertedEntry)) {
+			if (!isExist) {
+				log.put(insertedEntry, index);
+			} else {
+				if (!identical(insertedEntry, index)) {
+					// Add the entry to unsafe entries list if the new entry is ambiguous.
+					unsafeEntries.add(insertedEntry);
+					log.remove(insertedEntry);
+				}
+			}
 		}
+	}
+	
+	/*
+	 * Utility method to add an alias entry in the lookup table. Input string will be
+	 * written in lower case.
+	 */
+	private void putAliasEntry(String entry, Integer index) {
+		final String insertedEntry = entry.toLowerCase();
+		/*
+		 * looking for repeated entries, if they exists they are unsafe
+		 * (generally unqualified names) and they are marked as unsafe.
+		 */
+		boolean isExist = log.containsKey(insertedEntry);
+		
+		if (!isExist) {
+			log.put(insertedEntry, index);
+		} else {
+			if (!identical(insertedEntry, index)) {
+				// Add the entry to unsafe entries list if the new entry is ambiguous.
+				unsafeEntries.add(insertedEntry);
+				log.remove(insertedEntry);
+			}
+		}
+	}
 
-		log.put(insertedEntry, index);
+	private boolean ambiguous(String entry) {
+		return unsafeEntries.contains(entry);
+	}
+
+	/*
+	 * Checks if the already existed entry is actually identical entry by checking also its index.
+	 */
+	private boolean identical(String insertedEntry, Integer index) {
+		return (index == log.get(insertedEntry)) ? true : false;
 	}
 
 	/*
@@ -230,14 +256,7 @@ public class LookupTable {
 	 * be written in lower case.
 	 */
 	private Integer getEntry(String entry) {
-		final String sourceEntry = entry.toLowerCase();
-		
-		if (unsafeEntries.contains(entry))
-			throw new RuntimeException("The column reference '" + entry
-					+ "' is ambiguous. Use a fully qualified name to solve this issue. E.g., table.column");
-		// Integer location = log.get(sourceEntry);
-
-		return log.get(sourceEntry);
+		return log.get(entry.toLowerCase());
 	}
 
 	/*
@@ -266,7 +285,7 @@ public class LookupTable {
 	/*
 	 * Assigns the newly added entry to an alternative name.
 	 */
-	private void register() {
+	private void register(int index) {
 		if (!master.containsKey(index)) {
 			String name = String.format(DEFAULT_NAME_FORMAT, index);
 			master.put(index, name);
@@ -295,10 +314,5 @@ public class LookupTable {
 				master.remove(masterIndex[i]);
 			}
 		}
-	}
-
-	/* Advances by one the index number. */
-	private void increaseIndex() {
-		index++;
 	}
 }

@@ -7,11 +7,17 @@ public class LookupTableTest extends TestCase {
 	private LookupTable lookupTable = new LookupTable();
 	
 	public void setUp() {
-		lookupTable.add("Employee.id");
-		lookupTable.add("Employee.name");
-		lookupTable.add(new String[] {"public.Salary.id", "Salary.id", "id"});
-		lookupTable.add(new String[] {"public.Salary.amount", "Salary.amount", "amount"});
-		lookupTable.add(new String[] {"public.Salary.pid", "Salary.pid", "pid"});
+		lookupTable.add("Employee.id", 1);
+		lookupTable.add("Employee.name", 2);
+		lookupTable.add("public.Salary.id", 3);
+		lookupTable.add("Salary.id", 3);
+		lookupTable.add("id", 3);
+		lookupTable.add("public.Salary.amount", 4);
+		lookupTable.add("Salary.amount", 4);
+		lookupTable.add("amount", 4);
+		lookupTable.add("public.Salary.pid", 5);
+		lookupTable.add("Salary.pid", 5);
+		lookupTable.add("pid", 5);
 	}
 	
 	public void testPrintTable() {
@@ -36,12 +42,14 @@ public class LookupTableTest extends TestCase {
 	}
 	
 	public void testEntryOverride() {
-		lookupTable.add(new String[] {"public.Position.id", "Position.id", "id"});
+		lookupTable.add("public.Position.tid", 6);
+		lookupTable.add("Position.tid", 6);
+		lookupTable.add("tid", 6);
 		
 		String altName = lookupTable.lookup("Salary.id");
 		assertEquals(altName, "t3");
 		
-		altName = lookupTable.lookup("id");  // i.e., Salary.id
+		altName = lookupTable.lookup("tid");  // i.e., Salary.id
 		assertEquals(altName, "t6");
 	}
 	
@@ -63,7 +71,7 @@ public class LookupTableTest extends TestCase {
 		
 		lookupTable.remove("Employee.id");
 		String name = lookupTable.lookup("Employee.id");
-		assertEquals(name, "");
+		assertEquals(name, null);
 		
 		lookupTable.remove("public.Salary.id");
 		name = lookupTable.lookup("Salary.id");
