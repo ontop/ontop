@@ -131,9 +131,7 @@ public class SQL99ParserFileTest extends TestCase
     PrefixManager prefixManager = model.getPrefixManager();
     try {
         dataManager.loadOBDADataFromURI(obdaUri, ontologyUri, prefixManager);
-    } catch (IOException e) {
-        log.debug(e.toString());
-    } catch (SAXException e) {
+    } catch (Exception e) {
         log.debug(e.toString());
     }
     return model;

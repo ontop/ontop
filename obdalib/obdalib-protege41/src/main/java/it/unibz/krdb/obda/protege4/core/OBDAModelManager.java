@@ -327,10 +327,7 @@ public class OBDAModelManager implements Disposable {
 		activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
 
 		// Add the model
-		URI modelUri = URI.create(defaultPrefix.replace("#", "")); // Model URI
-																	// doesn't
-																	// have hash
-																	// sign.
+		URI modelUri = URI.create(defaultPrefix.replace("#", "")); // Model URI doesn't have hash sign.
 		obdamodels.put(modelUri, activeOBDAModel);
 	}
 
@@ -407,8 +404,7 @@ public class OBDAModelManager implements Disposable {
 				ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 				if (factory instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
 					ProtegeOBDAOWLReformulationPlatformFactory questfactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
-					ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit
-							.get(QuestPreferences.class.getName());
+					ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(QuestPreferences.class.getName());
 					questfactory.setPreferences(reasonerPreference);
 					questfactory.setOBDAModel(getActiveOBDAModel());
 				}
@@ -450,9 +446,7 @@ public class OBDAModelManager implements Disposable {
 							URI obdaDocumentUri = obdaFile.toURI();
 							ioManager.loadOBDADataFromURI(obdaDocumentUri, ontologyIRI.toURI(), activeOBDAModel.getPrefixManager());
 
-						} catch (SAXException e) { // Migration Plan: Use the
-													// new IO manager if the the
-													// old one fails to load
+						} catch (SAXException e) { // Migration Plan: Use the new IO manager if the the old one fails to load
 							try {
 								// Load the OBDA model
 								ModelIOManager modelIO = new ModelIOManager(activeOBDAModel);
