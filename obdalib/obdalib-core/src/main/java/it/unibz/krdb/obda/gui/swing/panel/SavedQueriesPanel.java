@@ -354,7 +354,11 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			QueryStorageManager man = new QueryStorageManager(queryController);
-			man.loadQueries(file.toURI());
+			try {
+				man.loadQueries(file.toURI());
+			} catch (Exception e) {
+				DialogUtils.showQuickErrorDialog(null, e);
+			}
 		}
     }//GEN-LAST:event_cmdImportActionPerformed
 

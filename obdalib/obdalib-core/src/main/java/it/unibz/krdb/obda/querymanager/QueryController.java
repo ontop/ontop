@@ -58,14 +58,14 @@ public class QueryController implements Serializable {
 	/**
 	 * Creates a new group and adds it to the vector QueryControllerEntity
 	 */
-	public void createGroup(String groupId) {
+	public void createGroup(String groupId) throws Exception {
 		if (getElementPosition(groupId) == -1) {
 			QueryControllerGroup group = new QueryControllerGroup(groupId);
 			entities.add(group);
 			fireElementAdded(group);
 		}
 		else {
-			log.info("Group already exists!");
+			throw new Exception("The name is already taken, either by a query group or a query item");
 		}
 	}
 

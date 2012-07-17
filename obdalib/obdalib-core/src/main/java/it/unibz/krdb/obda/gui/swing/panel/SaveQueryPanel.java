@@ -238,8 +238,13 @@ public class SaveQueryPanel extends JPanel {
 				JOptionPane.showMessageDialog(this, "The group ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			queryController.createGroup(group);
-			queryController.addQuery(query, id, group);
+			try {
+				queryController.createGroup(group);
+				queryController.addQuery(query, id, group);
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 		} else { // a group selected
 			queryController.addQuery(query, id, group);
 		}

@@ -206,10 +206,11 @@ public class DataManager {
 
 	/***************************************************************************
 	 * loads ALL OBDA data from a file
+	 * @throws Exception 
 	 * 
 	 * @throws ParserConfigurationException
 	 */
-	public void loadOBDADataFromURI(URI obdaFileURI, URI currentOntologyURI, PrefixManager prefixManager) throws IOException, SAXException {
+	public void loadOBDADataFromURI(URI obdaFileURI, URI currentOntologyURI, PrefixManager prefixManager) throws Exception {
 
 		File obdaFile = new File(obdaFileURI);
 
@@ -472,10 +473,11 @@ public class DataManager {
 	 * 
 	 * @param queryRoot
 	 *            the query root in the XML file.
+	 * @throws Exception 
 	 * @see QueryControllerGroup
 	 * @see QueryControllerQuery
 	 */
-	protected void importQueriesFromXML(Element queryRoot) {
+	protected void importQueriesFromXML(Element queryRoot) throws Exception {
 		NodeList childs = queryRoot.getChildNodes();
 		for (int i = 0; i < childs.getLength(); i++) {
 			Node node = childs.item(i);

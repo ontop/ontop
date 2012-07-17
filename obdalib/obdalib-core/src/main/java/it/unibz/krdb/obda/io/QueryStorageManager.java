@@ -43,15 +43,14 @@ public class QueryStorageManager {
 		xmlReader = new QueryGroupXMLReader();
 	}
 	
-	public void loadQueries(URI fileUri){
+	public void loadQueries(URI fileUri) throws Exception {
 		File obdaFile = new File(fileUri);
 
 		if (!obdaFile.exists()) {
 			return;
 		}
 		if (!obdaFile.canRead()) {
-			log.error("WARNING: can't read the OBDA file:" +
-			    obdaFile.toString());
+			log.error("WARNING: can't read the OBDA file:" + obdaFile.toString());
 		}
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -106,7 +105,7 @@ public class QueryStorageManager {
 		}
 	}
 	
-	protected void importQueriesFromXML(Element queryRoot) {
+	protected void importQueriesFromXML(Element queryRoot) throws Exception {
 		NodeList childs = queryRoot.getChildNodes();
 		for (int i = 0; i < childs.getLength(); i++) {
 			Node node = childs.item(i);
@@ -120,8 +119,7 @@ public class QueryStorageManager {
 					queryCon.createGroup(group.getID());
 					Vector<QueryControllerQuery> queries = group.getQueries();
 					for (QueryControllerQuery query : queries) {
-						queryCon.addQuery(query.getQuery(), query.getID(),
-								group.getID());
+						queryCon.addQuery(query.getQuery(), query.getID(), group.getID());
 					}
 				}
 			}
