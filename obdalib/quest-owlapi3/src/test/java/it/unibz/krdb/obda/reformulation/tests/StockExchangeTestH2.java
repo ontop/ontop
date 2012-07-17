@@ -170,7 +170,7 @@ public class StockExchangeTestH2 extends TestCase {
 		conn.commit();
 	}
 
-	private void prepareTestQueries(int[] answer) {
+	private void prepareTestQueries(int[] answer) throws Exception {
 		/*
 		 * Loading the queries (we have 61 queries)
 		 */

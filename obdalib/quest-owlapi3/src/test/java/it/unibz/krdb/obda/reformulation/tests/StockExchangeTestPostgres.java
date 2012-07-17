@@ -163,7 +163,7 @@ public class StockExchangeTestPostgres extends TestCase {
 		}
 	}
 
-	private void prepareTestQueries(int[] answer) {
+	private void prepareTestQueries(int[] answer) throws Exception {
 		/*
 		 * Loading the queries (we have 61 queries)
 		 */

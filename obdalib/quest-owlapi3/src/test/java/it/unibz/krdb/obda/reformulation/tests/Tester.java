@@ -181,7 +181,7 @@ public class Tester {
         return tuples;
     }
 
-    private void loadOntology(String owlfile) throws OWLOntologyCreationException, IOException, SAXException {
+    private void loadOntology(String owlfile) throws Exception {
 
         manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
