@@ -6,7 +6,7 @@ import java.io.Serializable;
  * The DerivedColumn class stores the column expression
  * and the alternative name (its alias).
  */
-public class DerivedColumn implements Serializable{
+public class DerivedColumn implements Serializable {
 	
 	private AbstractValueExpression value;
 	private String alias = "";
@@ -46,6 +46,13 @@ public class DerivedColumn implements Serializable{
 	 */
 	public AbstractValueExpression getValueExpression() {
 		return value;
+	}
+	
+	/**
+	 * Gets the column name.
+	 */
+	public String getName() {
+		return value.toString();
 	}
 	
 	/**

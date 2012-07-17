@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class DBMetadata implements Serializable {
 
@@ -100,18 +101,62 @@ public class DBMetadata implements Serializable {
 	 * Returns the attribute name based on the table/view name and its position
 	 * in the meta data.
 	 * 
-	 * @param name
+	 * @param tableName
 	 *            Can be a table name or a view name.
 	 * @param pos
 	 *            The index position.
 	 * @return
 	 */
-	public String getAttributeName(String name, int pos) {
-		DataDefinition dd = getDefinition(name);
+	public String getAttributeName(String tableName, int pos) {
+		DataDefinition dd = getDefinition(tableName);
 		if (dd == null) {
-			throw new RuntimeException("Unknown table definition: " + name);
+			throw new RuntimeException("Unknown table definition: " + tableName);
 		}
 		return dd.getAttributeName(pos);
+	}
+	
+	/**
+	 * Returns the attribute position in the database metadata given the table name
+	 * and the attribute name.
+	 * 
+	 * @param tableName
+	 *            Can be a table name or a view name.
+	 * @param attributeName
+	 *            The target attribute name.
+	 * @return Returns the index position or -1 if attribute name can't be found
+	 */
+	public int getAttributeIndex(String tableName, String attributeName) {
+		DataDefinition dd = getDefinition(tableName);
+		if (dd == null) {
+			throw new RuntimeException("Unknown table definition: " + tableName);
+		}
+		return dd.getAttributePosition(attributeName);
+	}
+
+	/**
+	 * Returns the attribute position in the database metadata given only the attribute
+	 * name. The method will search to all tables in the schema and can throw ambiguous
+	 * name exception if more than one table use the same name.
+	 * 
+	 * @param attributeName
+	 * 			The target attribute name.
+	 * @return Returns the index position or -1 if attribute name can't be found
+	 */
+	public int getAttributeIndex(String attributeName) {
+		int index = -1;
+		for (String tableName : schema.keySet()) {
+			int pos = getAttributeIndex(tableName, attributeName);
+			if (pos != -1) {
+				if (index == -1) {
+					// If previously no table uses the attribute name.
+					index = pos;
+				} else {
+					// Found a same name
+					throw new RuntimeException(String.format("The column name \"%s\" is ambiguous.", attributeName));
+				}
+			}
+		}
+		return index;
 	}
 
 	/**

@@ -52,6 +52,17 @@ public abstract class DataDefinition implements Serializable {
 		return list;
 	}
 
+	public int getAttributePosition(String attributeName) {
+		int index = 0;
+		for (Attribute value : attributes.values()) {
+			if (value.hasName(attributeName)) {
+				return index;
+			}
+			index++;
+		}
+		return -1;
+	}
+
 	public int countAttribute() {
 		return attributes.size();
 	}

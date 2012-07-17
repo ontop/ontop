@@ -115,7 +115,7 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	        
 	        Projection prj = currentNode.value().getProjection();
 	        if (prj != null) {
-	        	ArrayList<DerivedColumn> selectList = prj.getSelectList();
+	        	ArrayList<DerivedColumn> selectList = prj.getColumnList();
 	        	for (DerivedColumn selection : selectList) {
 	        		if (selection == null) {  // an asterisk was found
 	        			break;
@@ -182,6 +182,10 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	 */
 	public Selection getSelection() {
         return this.value().getSelection();
+	}
+	
+	public Projection getProjection() {
+		return this.value().getProjection();
 	}
 	
 	/**

@@ -44,6 +44,6 @@ public class Attribute implements Serializable{
 	 * or false, otherwise.
 	 */
 	public boolean hasName(String name) {
-		return (this.name == name)? true : false;
+		return (this.name.equals(name)) ? true : false;
 	}
 }

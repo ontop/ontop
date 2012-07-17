@@ -72,10 +72,21 @@ public class Projection implements Serializable {
 	/**
 	 * Retrieves all columns that are mentioned in the SELECT clause.
 	 */
-	public ArrayList<DerivedColumn> getSelectList() {
+	public ArrayList<DerivedColumn> getColumnList() {
 		return selectList;
 	}
-
+	
+	/**
+	 * Retrieves all column names that are mentioned in the SELECT clause.
+	 */
+	public ArrayList<String> getColumnNameList() {
+		ArrayList<String> result = new ArrayList<String>();
+		for (DerivedColumn column : getColumnList()) {
+			result.add(column.getName());
+		}
+		return result;
+	}
+	
 	/**
 	 * Retrieves all column names that are particularly used in the query string
 	 * for a specific table name.
@@ -85,8 +96,7 @@ public class Projection implements Serializable {
 	 * @return Returns a list of table name.
 	 */
 	public String[] getColumns(String table) {
-		TreeSet<String> list = new TreeSet<String>(); // use set to avoid
-														// duplication.
+		TreeSet<String> list = new TreeSet<String>(); // use set to avoid duplication.
 		for (DerivedColumn column : selectList) {
 			ArrayList<ColumnReference> factors = column.getValueExpression().getAll();
 			for (ColumnReference value : factors) {
@@ -126,5 +136,25 @@ public class Projection implements Serializable {
 			bNeedComma = true;
 		}
 		return str + " " + "from";
+	}
+	
+	/**
+	 * Checks if the name can be found in the projection. The name can be a
+	 * column name or an alias.
+	 * 
+	 * @param name
+	 * 			A column name or an alias.
+	 * @return Returns true if the name is in the projection or false, otherwise.
+	 */
+	public boolean contains(String name) {
+		for (DerivedColumn column : getColumnList()) {
+			if (column.getName().equalsIgnoreCase(name)) {
+				return true;
+			}
+			if (column.getAlias().equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
