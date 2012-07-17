@@ -103,7 +103,10 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	@Override
 	public OBDAResultSet execute(String strquery) throws OBDAException {
-
+		if (strquery.isEmpty()) {
+			throw new OBDAException("Cannot execute an empty query");
+		}
+		
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			throw new OBDAException("ETable queries are currently disabled");
 			// return executeEpistemicQuery(strquery);
