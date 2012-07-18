@@ -8,6 +8,7 @@ public class Attribute implements Serializable{
 	public final String name;
 	public final int type;
 	public final boolean bPrimaryKey;
+	public final boolean bForeignKey;
 	public final int canNull;
 	
 	
@@ -16,21 +17,22 @@ public class Attribute implements Serializable{
 	}
 	
 	public Attribute(String name) {
-		this(name, 0, false, 0);
+		this(name, 0, false, false, 0);
 	}
 
 	public Attribute(String name, int type) {
-		this(name, type, false, 0);
+		this(name, type, false, false, 0);
 	}
 
-	public Attribute(String name, int type, boolean primaryKey) {
-		this(name, type, primaryKey, 0);
+	public Attribute(String name, int type, boolean primaryKey, boolean foreignKey) {
+		this(name, type, primaryKey, foreignKey, 0);
 	}
 	
-	public Attribute(String name, int type, boolean primaryKey, int canNull) {
+	public Attribute(String name, int type, boolean primaryKey, boolean foreignKey, int canNull) {
 		this.name = name;
 		this.type = type;
 		this.bPrimaryKey = primaryKey;
+		this.bForeignKey = foreignKey;
 		this.canNull = canNull;
 	}
 	

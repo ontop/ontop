@@ -308,6 +308,7 @@ public class JDBCConnectionManager {
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
+				final ArrayList<String> foreignKeys = getForeignKey(md, null, null, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
 
@@ -318,11 +319,11 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final boolean isForeignKey = foreignKeys.contains(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isForeignKey, isNullable));
 
-						// Check if the columns are unique regardless their
-						// letter cases
+						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
 							throw new RuntimeException("The system cannot process duplicate table columns!");
@@ -357,7 +358,8 @@ public class JDBCConnectionManager {
 
 				final String tblName = rsTables.getString("object_name");
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, null, null, tblName);
-
+				final ArrayList<String> foreignKeys = getForeignKey(md, null, null, tblName);
+				
 				TableDefinition td = new TableDefinition(tblName);
 
 				ResultSet rsColumns = null;
@@ -367,8 +369,9 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final boolean isForeignKey = foreignKeys.contains(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isForeignKey, isNullable));
 
 						// Check if the columns are unique regardless their
 						// letter cases
@@ -402,6 +405,17 @@ public class JDBCConnectionManager {
 			}
 		}
 		return pk;
+	}
+	
+	/* Retrives the foreign key(s) from a table */
+	private static ArrayList<String> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
+		ArrayList<String> fk = new ArrayList<String>();
+		ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table);
+		while (rsForeignKeys.next()) {
+			String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
+			fk.add(colName);
+		}
+		return fk;
 	}
 
 	/**

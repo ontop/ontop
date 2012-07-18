@@ -22,8 +22,12 @@ public class TableDefinition extends DataDefinition {
 			}
 			Attribute at = attributes.get(i);
 			bf.append(at);
-			if (at.bPrimaryKey)
+			if (at.bPrimaryKey) {
 				bf.append(":PK");
+			}
+			if (at.bForeignKey) {
+				bf.append(":FK");
+			}
 			comma = true;
 		}
 		bf.append("]");
