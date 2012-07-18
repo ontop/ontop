@@ -519,8 +519,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		releaseResultset();
 
-		final String targetQueryString = txtTargetQuery.getText().trim();
-		final String sourceQueryString = txtSourceQuery.getText().trim();
+		final String targetQueryString = makePlainText(txtTargetQuery.getText());
+		final String sourceQueryString = makePlainText(txtSourceQuery.getText());
 
 		if (txtMappingID.getText().trim().length() == 0) {
 			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
@@ -537,6 +537,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		insertMapping(targetQueryString, sourceQueryString);
 	}// GEN-LAST:event_cmdInsertMappingActionPerformed
 
+	/* A utility method to make the text plain by removing white spaces, tabs and newlines */
+	private String makePlainText(String text) {
+		return text.replaceAll("\\s+", " ").trim();
+	}
+	
 	private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdCancelActionPerformed
 		parent.setVisible(false);
 		parent.dispose();
