@@ -28,7 +28,6 @@ import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.LogicalOperator;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
-import it.unibz.krdb.sql.api.Projection;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
@@ -39,6 +38,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -361,6 +361,10 @@ public class MappingAnalyzer {
 
 		// Collect all the possible column names from tables.
 		ArrayList<Relation> tableList = queryTree.getTableSet();
+
+		// Collect all known column aliases
+		HashMap<String, String> aliasMap = queryTree.getAliasMap();
+		
 		int offset = 0; // the index offset
 
 		for (Relation table : tableList) {
@@ -370,33 +374,36 @@ public class MappingAnalyzer {
 				throw new RuntimeException("Definition not found for table '" + tableName + "'.");
 			}
 			int size = def.countAttribute();
-			
-			String[] columnList = new String[3];
+
 			for (int i = 1; i <= size; i++) {
+				// assigned index number
+				int index = i + offset;
+				
 				// simple attribute name
-				columnList[0] = dbMetaData.getAttributeName(tableName, i);
+				String columnName = dbMetaData.getAttributeName(tableName, i);
+				lookupTable.add(columnName, index);
+				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(columnName), columnName);
+				}
 				
 				// full qualified attribute name
-				columnList[1] = dbMetaData.getFullQualifiedAttributeName(tableName, i);
-				
-				String alias = table.getAlias();
-				if (!alias.isEmpty()) {
-					// full qualified attribute name using table alias
-					columnList[2] = dbMetaData.getFullQualifiedAttributeName(tableName, table.getAlias(), i);
+				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
+				lookupTable.add(qualifiedColumnName, index);
+				if (aliasMap.containsKey(qualifiedColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
 				}
-				int index = i + offset;
-				lookupTable.add(columnList, index);
+				
+				// full qualified attribute name using table alias
+				String tableAlias = table.getAlias();
+				if (!tableAlias.isEmpty()) {
+					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
+					lookupTable.add(qualifiedColumnAlias, index);
+					if (aliasMap.containsKey(columnName) || aliasMap.containsKey(qualifiedColumnName) || aliasMap.containsKey(qualifiedColumnAlias)) {
+						lookupTable.add(tableAlias + "." + aliasMap.get(columnName), columnName);
+					}
+				}
 			}
 			offset += size;
-		}
-
-		// Add the aliases
-		ArrayList<String> aliasMap = queryTree.getAliasMap();
-		for (String alias : aliasMap) {
-			String[] reference = alias.split("=");
-			String aliasName = reference[0];
-			String columnName = reference[1];
-			lookupTable.add(aliasName, columnName);
 		}
 		return lookupTable;
 	}
