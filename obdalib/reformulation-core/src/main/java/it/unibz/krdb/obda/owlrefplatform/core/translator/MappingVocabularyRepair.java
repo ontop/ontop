@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -96,11 +97,14 @@ public class MappingVocabularyRepair {
 				 * Fixing wrapping each variable with a URI function if the
 				 * position corresponds to an URI only position
 				 */
-				if (newTerms.get(0) instanceof Variable) {
-					newTerms.set(0, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), newTerms.get(0)));
+				Term t0 = newTerms.get(0);
+				if (!(t0 instanceof Function)){
+					newTerms.set(0, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), t0));
 				}
 				
-				if (predicate.isObjectProperty() && newTerms.get(1) instanceof Variable) {
+				
+				
+				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
 					newTerms.set(1, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
 				}
 				

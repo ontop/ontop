@@ -214,6 +214,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				}
 			}
 			evaluation.removeAll(toRemove);
+			if (evaluation.isEmpty())
+				System.out.println("AH!");
 			if (!inserted.isEmpty()) {
 				workingSet = inserted;
 			} else {

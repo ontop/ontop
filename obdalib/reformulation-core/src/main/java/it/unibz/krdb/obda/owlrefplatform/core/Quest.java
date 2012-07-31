@@ -9,10 +9,12 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
@@ -47,6 +49,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -155,6 +158,8 @@ public class Quest implements Serializable {
 	private String aboxJdbcPassword;
 
 	private String aboxJdbcDriver;
+
+	private Iterator<Assertion> aboxIterator;
 
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
@@ -478,6 +483,12 @@ public class Quest implements Serializable {
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
+			/***
+			 * Adding ABox as facts in the unfolding program
+			 */
+			if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
+				ABoxToFactConverter.addFacts(this.aboxIterator, unfoldingProgram, this.equivalenceMaps);
+			}
 			/*
 			 * T-mappings implementation
 			 */
@@ -513,8 +524,9 @@ public class Quest implements Serializable {
 			 */
 			unfolder = new DatalogUnfolder(unfoldingProgram, metadata);
 			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,sqladapter);
+			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource
+					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
 
 			/*
 			 * Setting up the TBox we will use for the reformulation
@@ -551,7 +563,7 @@ public class Quest implements Serializable {
 			// log.error(e.getMessage(), e);
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-			
+
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
 				SQLException e1 = sqle.getNextException();
@@ -602,5 +614,10 @@ public class Quest implements Serializable {
 		}
 
 		return new QuestConnection(this, conn);
+	}
+
+	public void setABox(Iterator<Assertion> owlapi3aBoxIterator) {
+		this.aboxIterator = owlapi3aBoxIterator;
+
 	}
 }
