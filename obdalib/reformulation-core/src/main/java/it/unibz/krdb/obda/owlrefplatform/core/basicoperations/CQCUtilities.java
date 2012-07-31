@@ -146,7 +146,7 @@ public class CQCUtilities {
 				if (atom == null) {
 					continue;
 				}
-				
+
 				Atom patom = (Atom) atom;
 				Predicate predicate = atom.getPredicate();
 
@@ -241,9 +241,9 @@ public class CQCUtilities {
 							newTerm2 = fac.getNondistinguishedVariable();
 							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
 						}
-					} else if (right instanceof DataType) { 
+					} else if (right instanceof DataType) {
 						// Does nothing
-					} else if (right instanceof PropertySomeDataTypeRestriction) { 
+					} else if (right instanceof PropertySomeDataTypeRestriction) {
 						PropertySomeDataTypeRestriction rightExistential = (PropertySomeDataTypeRestriction) right;
 						newPredicate = rightExistential.getPredicate();
 						if (rightExistential.isInverse()) {
@@ -255,8 +255,8 @@ public class CQCUtilities {
 							newTerm2 = fac.getNondistinguishedVariable();
 							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
 						}
-					}  
-					
+					}
+
 					else {
 						throw new RuntimeException("ERROR: Unsupported dependency: " + pi.toString());
 					}
@@ -496,6 +496,9 @@ public class CQCUtilities {
 		queryStack.push(null);
 
 		HashMap<Integer, Stack<Atom>> choicesMap = new HashMap<Integer, Stack<Atom>>(bodysize * 2);
+
+		if (currentBody.size() == 0)
+			return true;
 
 		int currentAtomIdx = 0;
 		while (currentAtomIdx >= 0) {
