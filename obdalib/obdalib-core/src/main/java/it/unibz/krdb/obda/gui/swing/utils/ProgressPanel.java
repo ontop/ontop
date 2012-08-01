@@ -20,6 +20,7 @@ public class ProgressPanel extends javax.swing.JPanel {
 
     	initComponents();   	
     	lblMessage.setText(msg);
+    	cmdCancelOperation.setEnabled(true);
     }
 
     /** This method is called from within the constructor to

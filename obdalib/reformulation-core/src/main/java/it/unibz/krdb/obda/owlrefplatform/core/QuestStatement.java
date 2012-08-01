@@ -40,6 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
@@ -81,6 +82,10 @@ public class QuestStatement implements OBDAStatement {
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
+	Thread runningThread = null;
+
+	private QueryExecutionThread executionthread;
+
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
 
 		this.questInstance = questinstance;
@@ -98,6 +103,135 @@ public class QuestStatement implements OBDAStatement {
 
 	}
 
+	private class QueryExecutionThread extends Thread {
+
+		private final CountDownLatch monitor;
+		private final String strquery;
+		private OBDAResultSet result;
+		private boolean error = false;
+		private OBDAException exception;
+
+		boolean cancelled = false;
+
+		boolean executingSQL = false;
+
+		public QueryExecutionThread(String strquery, CountDownLatch monitor) {
+			this.monitor = monitor;
+			this.strquery = strquery;
+		}
+
+		public boolean errorStatus() {
+			return error;
+		}
+
+		public Exception getException() {
+			return exception;
+		}
+
+		public OBDAResultSet getResult() {
+			return result;
+		}
+
+		public void cancel() throws SQLException {
+			if (!executingSQL)
+				this.stop();
+			else
+				sqlstatement.cancel();
+		}
+
+		@Override
+		public void run() {
+			try {
+
+				List<String> signature = getSignature(strquery);
+				DatalogProgram program;
+				try {
+					program = translateAndPreProcess(strquery);
+				} catch (Exception e1) {
+					OBDAException obdaException = new OBDAException("Error in SPARQL query. \n" + e1.getLocalizedMessage());
+					obdaException.setStackTrace(e1.getStackTrace());
+					throw obdaException;
+				}
+
+				log.debug("Start the rewriting process...");
+				DatalogProgram rewriting;
+				try {
+					rewriting = getRewriting(program);
+				} catch (Exception e1) {
+					OBDAException obdaException = new OBDAException("Error rewriting query. \n" + e1.getMessage());
+					obdaException.setStackTrace(e1.getStackTrace());
+					throw obdaException;
+				}
+
+				DatalogProgram unfolding;
+				try {
+					unfolding = getUnfolding(rewriting);
+				} catch (Exception e1) {
+					OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
+					obdaException.setStackTrace(e1.getStackTrace());
+					throw obdaException;
+				}
+
+				String sql;
+				try {
+					sql = getSQL(unfolding, signature);
+				} catch (Exception e1) {
+					OBDAException obdaException = new OBDAException("Error generating SQL. \n" + e1.getMessage());
+					obdaException.setStackTrace(e1.getStackTrace());
+					throw obdaException;
+				}
+
+				OBDAResultSet result;
+
+				boolean isBoolean = isDPBoolean(program);
+				log.debug("Executing the query and get the result...");
+				if (sql.equals("") && !isBoolean) {
+					/***
+					 * Empty unfolding, constructing an empty result set
+					 */
+					if (program.getRules().size() < 1) {
+						throw new OBDAException("Error, invalid query");
+					}
+					result = new EmptyQueryResultSet(signature, QuestStatement.this);
+				} else if (sql.equals("")) {
+					/***
+					 * Empty unfolding, constructing an false result set
+					 */
+					if (program.getRules().size() < 1) {
+						throw new OBDAException("Error, invalid query");
+					}
+					result = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
+				} else {
+					ResultSet set;
+					try {
+
+						synchronized (this) {
+							executingSQL = true;
+						}
+
+						set = sqlstatement.executeQuery(sql);
+					} catch (SQLException e) {
+						throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql);
+					}
+					if (isBoolean) {
+						result = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
+					} else {
+						result = new QuestResultset(set, signature, QuestStatement.this);
+					}
+				}
+
+				log.debug("Finish.\n");
+				this.result = result;
+			} catch (OBDAException e) {
+				this.exception = e;
+				this.error = true;
+			} finally {
+				monitor.countDown();
+			}
+		}
+
+	}
+
 	/**
 	 * Returns the result set for the given query
 	 */
@@ -106,7 +240,7 @@ public class QuestStatement implements OBDAStatement {
 		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
-		
+
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			throw new OBDAException("ETable queries are currently disabled");
 			// return executeEpistemicQuery(strquery);
@@ -244,8 +378,9 @@ public class QuestStatement implements OBDAStatement {
 					bf.append(v.getName());
 					comma = true;
 				}
-				throw new OBDAException("Found variable(s) in SELECT clause that is not metioned in the WHERE clause. \nOffending variables: "
-						+ bf.toString());
+				throw new OBDAException(
+						"Found variable(s) in SELECT clause that is not metioned in the WHERE clause. \nOffending variables: "
+								+ bf.toString());
 			}
 
 		}
@@ -273,80 +408,15 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	private OBDAResultSet executeConjunctiveQuery(String strquery) throws OBDAException {
-		List<String> signature = getSignature(strquery);
-		DatalogProgram program;
+		CountDownLatch monitor = new CountDownLatch(1);
+		executionthread = new QueryExecutionThread(strquery, monitor);
+		executionthread.start();
 		try {
-			program = translateAndPreProcess(strquery);
-		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error in SPARQL query. \n" + e1.getLocalizedMessage());
-			obdaException.setStackTrace(e1.getStackTrace());
-			throw obdaException;
+			monitor.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-
-		log.debug("Start the rewriting process...");
-		DatalogProgram rewriting;
-		try {
-			rewriting = getRewriting(program);
-		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error rewriting query. \n" + e1.getMessage());
-			obdaException.setStackTrace(e1.getStackTrace());
-			throw obdaException;
-		}
-
-		DatalogProgram unfolding;
-		try {
-			unfolding = getUnfolding(rewriting);
-		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
-			obdaException.setStackTrace(e1.getStackTrace());
-			throw obdaException;
-		}
-
-		String sql;
-		try {
-			sql = getSQL(unfolding, signature);
-		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error generating SQL. \n" + e1.getMessage());
-			obdaException.setStackTrace(e1.getStackTrace());
-			throw obdaException;
-		}
-
-		OBDAResultSet result;
-
-		boolean isBoolean = isDPBoolean(program);
-		log.debug("Executing the query and get the result...");
-		if (sql.equals("") && !isBoolean) {
-			/***
-			 * Empty unfolding, constructing an empty result set
-			 */
-			if (program.getRules().size() < 1) {
-				throw new OBDAException("Error, invalid query");
-			}
-			result = new EmptyQueryResultSet(signature, this);
-		} else if (sql.equals("")) {
-			/***
-			 * Empty unfolding, constructing an false result set
-			 */
-			if (program.getRules().size() < 1) {
-				throw new OBDAException("Error, invalid query");
-			}
-			result = new BooleanOWLOBDARefResultSet(false, this);
-		} else {
-			ResultSet set;
-			try {
-				set = sqlstatement.executeQuery(sql);
-			} catch (SQLException e) {
-				throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql);
-			}
-			if (isBoolean) {
-				result = new BooleanOWLOBDARefResultSet(set, this);
-			} else {
-				result = new QuestResultset(set, signature, this);
-			}
-		}
-
-		log.debug("Finish.\n");
-		return result;
+		return executionthread.getResult();
 	}
 
 	/**
@@ -542,8 +612,13 @@ public class QuestStatement implements OBDAStatement {
 
 	@Override
 	public void cancel() throws OBDAException {
-		// TODO Auto-generated method stub
-
+		try {
+			QuestStatement.this.executionthread.cancel();
+		} catch (SQLException e) {
+			OBDAException o = new OBDAException(e);
+			o.setStackTrace(e.getStackTrace());
+			throw o;
+		}
 	}
 
 	@Override

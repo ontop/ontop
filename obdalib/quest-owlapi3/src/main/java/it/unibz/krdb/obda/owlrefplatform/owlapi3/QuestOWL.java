@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 
@@ -230,6 +231,12 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 		// Load the preferences
 		questInstance.setPreferences(preferences);
+		
+		if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
+			questInstance.setABox(new OWLAPI3ABoxIterator(man.getImportsClosure(getRootOntology()),
+							questInstance.getEquivalenceMap()));
+			
+		}
 
 		try {
 			// pm.reasonerTaskProgressChanged(1, 4);

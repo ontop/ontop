@@ -472,8 +472,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (reasoner instanceof OWLQueryReasoner) {
 						try {
 							OWLQueryReasoner dqr = (OWLQueryReasoner) reasoner;
-							OWLStatement st = dqr.getStatement();
-							result = st.execute(query);
+							statement = dqr.getStatement();
+							result = statement.execute(query);
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
@@ -496,13 +496,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		public void actionCanceled() {
 			try {
 				if (statement != null) {
-					statement.close();
+					statement.cancel();
 				}
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				log.error("Error while counting.", e);
-				DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
+				DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
 			}
 		}
 
