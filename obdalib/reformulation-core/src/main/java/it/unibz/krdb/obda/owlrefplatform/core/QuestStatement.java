@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
@@ -86,9 +87,20 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryExecutionThread executionthread;
 
+	final Map<String, String> querycache;
+
+	final Map<String, List<String>> signaturecache;
+
+	final Map<String, Boolean> isbooleancache;
+
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
 
 		this.questInstance = questinstance;
+
+		this.querycache = questinstance.getSQLCache();
+		this.signaturecache = questinstance.getSignatureCache();
+		this.isbooleancache = questinstance.getIsBooleanCache();
+
 		this.repository = questinstance.dataRepository;
 		this.conn = conn;
 		this.rewriter = questinstance.rewriter;
@@ -124,7 +136,7 @@ public class QuestStatement implements OBDAStatement {
 			return error;
 		}
 
-		public Exception getException() {
+		public OBDAException getException() {
 			return exception;
 		}
 
@@ -133,73 +145,91 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		public void cancel() throws SQLException {
-			if (!executingSQL)
-				this.stop();
-			else
-				sqlstatement.cancel();
+			synchronized (this) {
+				if (!executingSQL)
+					this.stop();
+				else
+					sqlstatement.cancel();
+			}
+
 		}
 
 		@Override
 		public void run() {
 			try {
-
-				List<String> signature = getSignature(strquery);
-				DatalogProgram program;
-				try {
-					program = translateAndPreProcess(strquery);
-				} catch (Exception e1) {
-					OBDAException obdaException = new OBDAException("Error in SPARQL query. \n" + e1.getLocalizedMessage());
-					obdaException.setStackTrace(e1.getStackTrace());
-					throw obdaException;
-				}
-
-				log.debug("Start the rewriting process...");
-				DatalogProgram rewriting;
-				try {
-					rewriting = getRewriting(program);
-				} catch (Exception e1) {
-					OBDAException obdaException = new OBDAException("Error rewriting query. \n" + e1.getMessage());
-					obdaException.setStackTrace(e1.getStackTrace());
-					throw obdaException;
-				}
-
-				DatalogProgram unfolding;
-				try {
-					unfolding = getUnfolding(rewriting);
-				} catch (Exception e1) {
-					OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
-					obdaException.setStackTrace(e1.getStackTrace());
-					throw obdaException;
-				}
-
 				String sql;
-				try {
-					sql = getSQL(unfolding, signature);
-				} catch (Exception e1) {
-					OBDAException obdaException = new OBDAException("Error generating SQL. \n" + e1.getMessage());
-					obdaException.setStackTrace(e1.getStackTrace());
-					throw obdaException;
+				boolean isBoolean;
+				List<String> signature;
+
+				if (querycache.containsKey(strquery)) {
+
+					sql = querycache.get(strquery);
+					isBoolean = isbooleancache.get(strquery);
+					signature = signaturecache.get(strquery);
+
+				} else {
+
+					signature = getSignature(strquery);
+					signaturecache.put(strquery, signature);
+
+					DatalogProgram program;
+
+					try {
+						program = translateAndPreProcess(strquery);
+
+						/***
+						 * Empty unfolding, constructing an empty result set
+						 */
+						if (program.getRules().size() < 1) {
+							throw new OBDAException("Error, invalid query");
+						}
+					} catch (Exception e1) {
+						OBDAException obdaException = new OBDAException("Error in SPARQL query. \n" + e1.getLocalizedMessage());
+						obdaException.setStackTrace(e1.getStackTrace());
+						throw obdaException;
+					}
+
+					isBoolean = isDPBoolean(program);
+					isbooleancache.put(strquery, isBoolean);
+
+					log.debug("Start the rewriting process...");
+					DatalogProgram rewriting;
+					try {
+						rewriting = getRewriting(program);
+					} catch (Exception e1) {
+						OBDAException obdaException = new OBDAException("Error rewriting query. \n" + e1.getMessage());
+						obdaException.setStackTrace(e1.getStackTrace());
+						throw obdaException;
+					}
+
+					DatalogProgram unfolding;
+					try {
+						unfolding = getUnfolding(rewriting);
+					} catch (Exception e1) {
+						OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
+						obdaException.setStackTrace(e1.getStackTrace());
+						throw obdaException;
+					}
+
+					try {
+						sql = getSQL(unfolding, signature);
+						querycache.put(strquery, sql);
+					} catch (Exception e1) {
+						OBDAException obdaException = new OBDAException("Error generating SQL. \n" + e1.getMessage());
+						obdaException.setStackTrace(e1.getStackTrace());
+						throw obdaException;
+					}
+
 				}
 
 				OBDAResultSet result;
 
-				boolean isBoolean = isDPBoolean(program);
 				log.debug("Executing the query and get the result...");
 				if (sql.equals("") && !isBoolean) {
-					/***
-					 * Empty unfolding, constructing an empty result set
-					 */
-					if (program.getRules().size() < 1) {
-						throw new OBDAException("Error, invalid query");
-					}
+
 					result = new EmptyQueryResultSet(signature, QuestStatement.this);
 				} else if (sql.equals("")) {
-					/***
-					 * Empty unfolding, constructing an false result set
-					 */
-					if (program.getRules().size() < 1) {
-						throw new OBDAException("Error, invalid query");
-					}
+
 					result = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
 				} else {
 					ResultSet set;
@@ -229,7 +259,6 @@ public class QuestStatement implements OBDAStatement {
 				monitor.countDown();
 			}
 		}
-
 	}
 
 	/**
@@ -416,6 +445,16 @@ public class QuestStatement implements OBDAStatement {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		if (executionthread.getException() != null) {
+			throw executionthread.getException();
+		}
+
+		if (canceled == true) {
+			synchronized (this) {
+				canceled = false;
+			}
+			throw new OBDAException("Query execution was cancelled");
+		}
 		return executionthread.getResult();
 	}
 
@@ -517,10 +556,28 @@ public class QuestStatement implements OBDAStatement {
 		} else if (strquery.contains("/*direct*/")) {
 			sql = strquery;
 		} else {
-			DatalogProgram p = translateAndPreProcess(strquery);
-			DatalogProgram rewriting = getRewriting(p);
-			DatalogProgram unfolding = getUnfolding(rewriting);
-			sql = getSQL(unfolding, getSignature(strquery));
+
+			List<String> signature;
+
+			if (querycache.containsKey(strquery)) {
+				sql = querycache.get(strquery);
+
+			} else {
+
+				signature = getSignature(strquery);
+				signaturecache.put(strquery, signature);
+
+				DatalogProgram p = translateAndPreProcess(strquery);
+
+				Boolean isBoolean = isDPBoolean(p);
+				isbooleancache.put(strquery, isBoolean);
+
+				DatalogProgram rewriting = getRewriting(p);
+				DatalogProgram unfolding = getUnfolding(rewriting);
+				sql = getSQL(unfolding, signature);
+				querycache.put(strquery, sql);
+			}
+
 		}
 		return sql;
 	}

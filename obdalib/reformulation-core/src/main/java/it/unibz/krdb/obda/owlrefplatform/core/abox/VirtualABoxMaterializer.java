@@ -123,7 +123,7 @@ public class VirtualABoxMaterializer {
 			Ontology ontology = ofac.createOntology();
 			ontology.addEntities(model.getDeclaredPredicates());
 			questInstance.loadTBox(ontology);
-			questInstance.loadOBDAModel(newModel);
+			questInstance.loadOBDAModel(newModel);			
 			questInstance.setupRepository();
 			
 			questInstanceMap.put(source, questInstance);

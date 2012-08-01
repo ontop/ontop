@@ -23,6 +23,8 @@ public class QuestOWLResultSet implements OWLResultSet {
 	private final OWLStatement owlst;
 
 	public QuestOWLResultSet(OBDAResultSet res, QuestOWLStatement owlst) {
+		if (res == null)
+			throw new IllegalArgumentException("The result set must not be null");
 		this.res = res;
 		this.owlst = owlst;
 	}

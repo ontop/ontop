@@ -50,6 +50,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -160,10 +161,45 @@ public class Quest implements Serializable {
 	private String aboxJdbcDriver;
 
 	private Iterator<Assertion> aboxIterator;
+	
+	Map<String, String> querycache = new HashMap<String, String>();
+	
+	Map<String, List<String>> signaturecache = new HashMap<String, List<String>>();
+	
+	Map<String, Boolean> isbooleancache = new HashMap<String, Boolean>();
 
+
+	protected Map<String,String> getSQLCache() {
+		return querycache;
+	}
+	
+	protected Map<String,List<String>> getSignatureCache() {
+		return signaturecache;
+	}
+	
+	protected Map<String,Boolean> getIsBooleanCache() {
+		return isbooleancache;
+	}
+	
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
 		inputOBDAModel = (OBDAModel) model.clone();
+		aboxIterator = new Iterator<Assertion>() {
+
+			@Override
+			public boolean hasNext() {
+				return false;
+			}
+
+			@Override
+			public Assertion next() {
+				return null;
+			}
+
+			@Override
+			public void remove() {
+			}
+		};
 	}
 
 	public OBDAModel getOBDAModel() {

@@ -6,12 +6,16 @@ import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.semanticweb.owlapi.model.OWLException;
 
 public class QuestOWLStatement implements OWLStatement {
 
 	private QuestStatement st;
 	private QuestOWLConnection conn;
+
 
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
