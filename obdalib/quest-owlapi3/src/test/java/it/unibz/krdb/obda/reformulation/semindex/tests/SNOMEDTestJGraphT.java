@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.TBoxDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.TBoxDAGImpl;
 
 import java.io.File;
 import java.util.List;
@@ -38,7 +38,7 @@ public class SNOMEDTestJGraphT {
 		Ontology o = translator.translate(ontology);
 
 		log.info("Generating dag");
-		TBoxDAG dag = new TBoxDAG(o);
+		TBoxDAGImpl dag = new TBoxDAGImpl(o);
 
 		log.info("Computing connected components");
 		StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(
@@ -57,7 +57,7 @@ public class SNOMEDTestJGraphT {
 		
 		log.info("Transitive closure");
 		TransitiveClosure t = TransitiveClosure.INSTANCE;
-		t.closeSimpleDirectedGraph(dag.getDag());
+//		t.closeSimpleDirectedGraph(dag.getDag());
 
 		
 
