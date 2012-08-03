@@ -5,7 +5,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class DBMetadata implements Serializable {
 
@@ -95,6 +94,13 @@ public class DBMetadata implements Serializable {
 	 */
 	public DataDefinition getDefinition(String name) {
 		return schema.get(name);
+	}
+	
+	/**
+	 * Retrieves the table list form the metadata.
+	 */
+	public List<DataDefinition> getTableList() {
+		return (List<DataDefinition>) schema.values();
 	}
 
 	/**
