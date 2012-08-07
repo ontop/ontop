@@ -19,6 +19,11 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				}
 				// Replace the URI with the corresponding prefix.
 				shortUri = uri.replace(prefixUriDefinition, prefix);
+				
+				// Clean the URI string from <> signs, if exist
+				if (shortUri.contains("<") && shortUri.contains(">")) {
+					shortUri = shortUri.replace("<", "").replace(">", "");
+				}
 				return shortUri;
 			}
 		}
