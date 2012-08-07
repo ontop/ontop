@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
@@ -27,7 +28,6 @@ import java.awt.Font;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -439,7 +439,7 @@ public class QueryPainter {
 		}
 
 		for (Atom atom : current_query.getBody()) {
-			URI predicate = atom.getPredicate().getName();
+			Predicate predicate = atom.getPredicate();
 			String predicateName = man.getShortForm(atom.getPredicate().toString());
 
 			if (validator.isClass(predicate)) {

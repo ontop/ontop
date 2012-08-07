@@ -4,22 +4,20 @@ import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
-import java.net.URI;
 import java.util.Vector;
 
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
-	/** The source ontology for validating the target query */
-	private OWLOntology ontology;
+	/** The OBDA model for validating the target query */
+	private OBDAModel obdaModel;
 
 	/** Data factory **/
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
@@ -30,8 +28,8 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	/** Logger */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public TargetQueryValidator(OWLOntology ontology) {
-		this.ontology = ontology;
+	public TargetQueryValidator(OBDAModel obdaModel) {
+		this.obdaModel = obdaModel;
 	}
 	
 	@Override
@@ -41,17 +39,17 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 		// Get the predicates in the target query.
 		for (Atom atom : targetQuery.getBody()) {
-			URI predicateUri = atom.getPredicate().getName();
+			Predicate p = atom.getPredicate();
 
-			boolean isClass = isClass(predicateUri);
-			boolean isObjectProp = isObjectProperty(predicateUri);
-			boolean isDataProp = isDataProperty(predicateUri);
+			boolean isClass = isClass(p);
+			boolean isObjectProp = isObjectProperty(p);
+			boolean isDataProp = isDataProperty(p);
 
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data property).
 			boolean isPredicateValid = isClass || isObjectProp || isDataProp;
 
-			String debugMsg = "The predicate: [" + predicateUri.toString() + "]";
+			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
 			if (isPredicateValid) {
 				COL_TYPE colType[] = null;
 				if (isClass) {
@@ -64,11 +62,11 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL };
 					debugMsg += " is a Data property.";
 				}
-				Predicate predicate = dataFactory.getPredicate(predicateUri, atom.getArity(), colType);
+				Predicate predicate = dataFactory.getPredicate(p.getName(), atom.getArity(), colType);
 				atom.setPredicate(predicate); // TODO Fix the API!
 				log.debug(debugMsg);
 			} else {
-				invalidPredicates.add(predicateUri.toString());
+				invalidPredicates.add(p.getName().toString());
 //				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
 			}
 		}
@@ -85,17 +83,17 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 
 	@Override
-	public boolean isClass(URI predicate) {
-		return ontology.containsClassInSignature(IRI.create(predicate));
+	public boolean isClass(Predicate predicate) {
+		return obdaModel.isDeclaredClass(predicate);
 	}
 	
 	@Override
-	public boolean isObjectProperty(URI predicate) {
-		return ontology.containsObjectPropertyInSignature(IRI.create(predicate));
+	public boolean isObjectProperty(Predicate predicate) {
+		return obdaModel.isDeclaredObjectProperty(predicate);
 	}
 
 	@Override
-	public boolean isDataProperty(URI predicate) {
-		return ontology.containsDataPropertyInSignature(IRI.create(predicate));
+	public boolean isDataProperty(Predicate predicate) {
+		return obdaModel.isDeclaredDataProperty(predicate);
 	}
 }

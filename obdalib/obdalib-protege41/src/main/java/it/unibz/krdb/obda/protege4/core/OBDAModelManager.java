@@ -296,20 +296,22 @@ public class OBDAModelManager implements Disposable {
 		queryController.addListener(qlistener);
 
 		OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
-		OWLOntology activeOntology = mmgr.getActiveOntology();
 
-		// Setup the entity declarations
-		for (OWLClass c : activeOntology.getClassesInSignature()) {
-			Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
-			activeOBDAModel.declareClass(pred);
-		}
-		for (OWLObjectProperty r : activeOntology.getObjectPropertiesInSignature()) {
-			Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
-			activeOBDAModel.declareObjectProperty(pred);
-		}
-		for (OWLDataProperty p : activeOntology.getDataPropertiesInSignature()) {
-			Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
-			activeOBDAModel.declareDataProperty(pred);
+		Set<OWLOntology> ontologies = mmgr.getOntologies();
+		for (OWLOntology ontology : ontologies) {
+			// Setup the entity declarations
+			for (OWLClass c : ontology.getClassesInSignature()) {
+				Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
+				activeOBDAModel.declareClass(pred);
+			}
+			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
+				Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
+				activeOBDAModel.declareObjectProperty(pred);
+			}
+			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
+				Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
+				activeOBDAModel.declareDataProperty(pred);
+			}
 		}
 
 		// Setup the prefixes
@@ -318,6 +320,8 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixManagerWrapper prefixwrapper = new PrefixManagerWrapper(prefixManager);
 		activeOBDAModel.setPrefixManager(prefixwrapper);
+
+		OWLOntology activeOntology = mmgr.getActiveOntology();
 
 		String defaultPrefix = prefixManager.getDefaultPrefix();
 		if (defaultPrefix == null) {

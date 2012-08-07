@@ -19,7 +19,7 @@ public class OBDAModelRefactorer {
 	// TODO We should reduce the dependency to OWL-API to define the ontology.
 	public OBDAModelRefactorer(OBDAModel obdaModel, OWLOntology ontology) {
 		this.obdaModel = obdaModel;
-		validator = new TargetQueryValidator(ontology);
+		validator = new TargetQueryValidator(obdaModel);
 	}
 	
 	public void run() throws Exception {

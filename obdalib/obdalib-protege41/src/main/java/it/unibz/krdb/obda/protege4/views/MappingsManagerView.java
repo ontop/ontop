@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.protege4.views;
 import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
 import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.TargetQueryValidator;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
@@ -26,7 +27,6 @@ import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, Findable<OWLEntity> {
 
@@ -52,12 +52,12 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
 
-		OWLOntology ontology = editor.getModelManager().getActiveOntology();
-
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);
+		OBDAModel obdaModel = controller.getActiveOBDAModel();
+		
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel);
 		
 		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(controller.getActiveOBDAModel(), validator);
+		mappingPanel = new MappingManagerPanel(obdaModel, validator);
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
 			@Override
@@ -118,12 +118,12 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	public void activeOntologyChanged() {
-		mappingPanel.setOBDAModel(controller.getActiveOBDAModel());
+		OBDAModel obdaModel = controller.getActiveOBDAModel();
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel);
 
-		OWLOntology ontology = getOWLModelManager().getActiveOntology();
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);
+		mappingPanel.setOBDAModel(obdaModel);
 		mappingPanel.setTargetQueryValidator(validator);
-		datasourceSelector.setDatasourceController(controller.getActiveOBDAModel());
+		datasourceSelector.setDatasourceController(obdaModel);
 	}
 
 	@Override
