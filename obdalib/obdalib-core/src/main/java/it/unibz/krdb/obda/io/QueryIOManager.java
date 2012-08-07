@@ -92,7 +92,7 @@ public class QueryIOManager {
      */
     public void load(File file) throws IOException {
         if (!file.exists()) {
-            // NO-OP: Users may not have the saved file
+            return; // NO-OP: Users may not have the saved file
         }
         if (!file.canRead()) {
             throw new IOException(String.format("Error while reading the file located at %s.\n" +

@@ -67,10 +67,8 @@ import org.xml.sax.SAXException;
 
 public class OBDAModelManager implements Disposable {
 
-	private static final String OBDA_EXT = "obda"; // The default OBDA file
-													// extension.
-	private static final String QUERY_EXT = "q"; // The default query file
-													// extension.
+	private static final String OBDA_EXT = "obda"; // The default OBDA file extension.
+	private static final String QUERY_EXT = "q"; // The default query file extension.
 
 	private OWLEditorKit owlEditorKit;
 
@@ -468,11 +466,10 @@ public class OBDAModelManager implements Disposable {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
 					OBDAModelRefactorer refactorer = new OBDAModelRefactorer(activeOBDAModel, activeOntology);
-					refactorer.run(); // adding type information to the mapping
-										// predicates.
+					refactorer.run(); // adding type information to the mapping predicates.
 				} catch (Exception e) {
-					OBDAException ex = new OBDAException("Error loading OBDA file, please check the syntax of the OBDA file for errors.\nMessage: " + e.getMessage());
-					DialogUtils.showQuickErrorDialog(null, ex, "Error opening OBDA file");
+					OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
+					DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
 					log.error(e.getMessage());
 				} finally {
 					loadingData = false; // flag off
