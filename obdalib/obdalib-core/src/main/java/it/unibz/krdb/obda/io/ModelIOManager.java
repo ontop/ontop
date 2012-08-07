@@ -160,8 +160,8 @@ public class ModelIOManager {
         String line = "";
         URI sourceUri = null;
         while ((line = reader.readLine()) != null) {
-            if (isCommentLine(line)) {
-                continue; // skip comment lines
+            if (isCommentLine(line) || line.isEmpty()) {
+                continue; // skip comment lines and blank lines
             }
             if (line.contains(PREFIX_DECLARATION_TAG)) {
                 readPrefixDeclaration(reader);
@@ -175,6 +175,8 @@ public class ModelIOManager {
                 sourceUri = readSourceDeclaration(reader);
             } else if (line.contains(MAPPING_DECLARATION_TAG)) {
                 readMappingDeclaration(reader, sourceUri);
+            } else {
+                throw new IOException(String.format("Invalid input at line: %s", reader.getLineNumber()));
             }
         }
         
@@ -249,7 +251,14 @@ public class ModelIOManager {
             if (needComma) {
                 writer.write(", ");
             }
-            writer.write(prefixManager.getShortForm(p.toString()));
+            String prefixedName = prefixManager.getShortForm(p.toString());
+            
+            if (prefixedName.equals(p.toString())) { // if the name doesn't get shortened (i.e., still in full URI)
+                writer.write("<" + p.toString() + ">");
+            }
+            else {
+                writer.write(prefixedName);
+            }
             needComma = true;
             count++;
         }
@@ -309,7 +318,7 @@ public class ModelIOManager {
                 String declaration = tokens[i].trim();
                 String className = "";
                 if (declaration.contains("<") && declaration.contains(">")) { // if the class declaration is written in full URI
-                    className = declaration.substring(1, declaration.length()+1);
+                    className = declaration.substring(1, declaration.length()-1);
                 } else {
                    className = expand(declaration);
                 }
@@ -357,7 +366,6 @@ public class ModelIOManager {
                 predicateDeclarations.add(predicate);
                
                 model.declareDataProperty(predicate);
-
             }
         }
     }
