@@ -447,19 +447,22 @@ public class OBDAModelManager implements Disposable {
 							DataManager ioManager = new DataManager(activeOBDAModel, queryController);
 							URI obdaDocumentUri = obdaFile.toURI();
 							ioManager.loadOBDADataFromURI(obdaDocumentUri, ontologyIRI.toURI(), activeOBDAModel.getPrefixManager());
-
 						} catch (SAXException e) { // Migration Plan: Use the new IO manager if the the old one fails to load
 							try {
 								// Load the OBDA model
 								ModelIOManager modelIO = new ModelIOManager(activeOBDAModel);
 								modelIO.load(obdaFile);
-
+							} catch (Exception ex) {
+								activeOBDAModel.reset();
+								throw new Exception(ex.getMessage() + " (at " + obdaFile + ")");
+							}
+							try {
 								// Load the saved queries
 								QueryIOManager queryIO = new QueryIOManager(queryController);
 								queryIO.load(queryFile);
 							} catch (Exception ex) {
-								activeOBDAModel.reset();
-								throw ex;
+								queryController.reset();
+								throw new Exception(ex.getMessage() + " (at " + queryFile + ")");
 							}
 						}
 					} else {
