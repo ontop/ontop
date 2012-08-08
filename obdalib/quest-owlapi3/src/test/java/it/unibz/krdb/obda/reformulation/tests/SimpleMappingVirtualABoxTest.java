@@ -60,6 +60,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
+		
+		
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */

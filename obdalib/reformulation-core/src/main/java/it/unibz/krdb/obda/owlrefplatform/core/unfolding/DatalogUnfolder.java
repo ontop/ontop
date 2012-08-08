@@ -214,8 +214,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				}
 			}
 			evaluation.removeAll(toRemove);
-			if (evaluation.isEmpty())
-				System.out.println("AH!");
 			if (!inserted.isEmpty()) {
 				workingSet = inserted;
 			} else {
@@ -384,9 +382,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			CQIE freshMappingRule = getFreshRule(mappingRule, count);
 
 			CQIE pev = resolutionEngine.resolve(freshMappingRule, currentQuery, pos);
+			
 			if (pev != null) {
-
-				// TODO Hack. The following is a small hack
+				
+				
 
 				/*
 				 * The following blocks eliminate redundant atoms w.r.t. query
@@ -404,6 +403,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					if (newatom.getPredicate() instanceof BooleanOperationPredicate)
 						continue;
 
+					
+					
 					/*
 					 * OPTIMIZATION 1: PRIMARY KEYS
 					 * 
@@ -457,10 +458,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 							}
 						}
+
 						if (replacement != null) {
 
 							if (mgu == null)
-								throw new RuntimeException("Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
+								throw new RuntimeException(
+										"Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
 							pev = Unifier.applyUnifier(pev, mgu);
 							newbody = pev.getBody();
 							newbody.remove(newatomidx);
@@ -468,6 +471,63 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							continue;
 						}
 					}
+
+					/*
+					 * We remove all atoms that do not impose extra conditions
+					 * on existing data. These are atoms that are implied by
+					 * other atoms, and only check for the existance of data.
+					 * They are redundant because there exists another atom that
+					 * guarnatees satisfiabiliy of this atom. E.g.,
+					 */
+
+//					Atom replacement = null;
+//					Map<Variable,Integer> variableCount = pev.getVariableCount();
+//
+//					Map<Variable, Term> mgu = null;
+//					for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
+//						Atom tempatom = newbody.get(idx2);
+//
+//						if (tempatom.getPredicate().equals(newatom.getPredicate())) {
+//
+//							/*
+//							 * Checking if all terms are the same, or if they
+//							 * are different, the all variables in the current
+//							 * atom are free variables (they do not appear anywhere else)
+//							 */
+//							int termindex = 0;
+//							boolean redundant = true;
+//							for (termindex = 0; termindex < tempatom.getTerms().size(); termindex++) {
+//								Term currenTerm = newatom.getTerm(termindex);
+//								if (!currenTerm.equals(tempatom.getTerm(termindex)) && !(variableCount.get(currenTerm) == 1))
+//								{
+//									redundant = false;
+//									break;
+//								}
+//							}
+//
+//							if (redundant) {
+//								/* found a candidate replacement atom */
+//								mgu = Unifier.getMGU(newatom, tempatom);
+//								if (mgu != null) {
+//									replacement = tempatom;
+//									break;
+//								}
+//							}
+//
+//						}
+//					}
+//
+//					if (replacement != null) {
+//
+//						if (mgu == null)
+//							throw new RuntimeException(
+//									"Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
+//						pev = Unifier.applyUnifier(pev, mgu);
+//						newbody = pev.getBody();
+//						newbody.remove(newatomidx);
+//						newatomidx -= 1;
+//						continue;
+//					}
 
 					/*
 					 * We remove all atoms that do not impose extra conditions
