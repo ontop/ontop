@@ -5,12 +5,12 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.LineNumberReader;
 
 public class QueryIOManager {
 
@@ -23,8 +23,11 @@ public class QueryIOManager {
     private static final String START_COLLECTION_SYMBOL = "@collection [[";
     private static final String END_COLLECTION_SYMBOL = "]]";
 
+    private static final String START_CONTENT_SYMBOL = "<![";
+    private static final String END_CONTENT_SYMBOL = "]>";
+
     private static final String COMMENT_SYMBOL = ";";
-    
+
     private QueryController queryController;
 
     /**
@@ -98,67 +101,63 @@ public class QueryIOManager {
             throw new IOException(String.format("Error while reading the file located at %s.\n" +
                     "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
         }
-
+        
         // Clean the controller first before loading
         queryController.reset();
-
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = "";
-        String groupId = "";
-        String queryId = "";
-        StringBuffer buffer = new StringBuffer();
         
-        /* This flag is used to tell the query controller when to load the query item.
-         * The system won't take into account line-breaks to start loading the query item 
-         * since there is a possibility that users put line-breaks in their query string.
-         * Instead, the system will load the query when it recognizes the next query group 
-         * tag or the next query item tag or the closing collection tag has been reached 
-         * by the file reader.
-         */
-        boolean hasUnsavedQuery = false;
+        LineNumberReader reader = new LineNumberReader(new FileReader(file));
+        String line = "";
         while ((line = reader.readLine()) != null) {
-            if (isCommentLine(line)) {
-                continue; // skip comment lines
+            if (isCommentLine(line) || line.isEmpty()) {
+                continue; // skip comment lines and empty lines
             }
             if (line.contains(QUERY_GROUP)) {
-                if (hasUnsavedQuery) {
-                    String queryText = removeBlankLines(buffer.toString());
-                    addQueryItem(queryText, queryId, groupId);
-                    hasUnsavedQuery = false;
-                    buffer = new StringBuffer();
-                }
                 // The group ID is enclosed by a double-quotes sign
-                groupId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-            } else if (line.contains(QUERY_ITEM)) {
-                if (hasUnsavedQuery) {
-                    String queryText = removeBlankLines(buffer.toString());
-                    addQueryItem(queryText, queryId, groupId);
-                    buffer = new StringBuffer();
-                }
+                String groupId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
+                readQueryGroup(reader, groupId);
+            } else if (line.contains(QUERY_ITEM) && line.contains(START_CONTENT_SYMBOL)) {
                 // The query ID is enclosed by a double-quotes sign
-                queryId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-                hasUnsavedQuery = true;
-            } else if (line.contains(END_COLLECTION_SYMBOL)) {
-                if (hasUnsavedQuery) {
-                    String queryText = removeBlankLines(buffer.toString());
-                    addQueryItem(queryText, queryId, groupId);
-                    hasUnsavedQuery = false;
-                    groupId = ""; // reset the previous group id
-                    buffer = new StringBuffer();
-                }
+                String queryId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
+                readQueryContent(reader, "", queryId);
             } else {
-                buffer.append(line + "\n");
+                throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()));
             }
-        }
-        if (hasUnsavedQuery) {
-            String queryText = removeBlankLines(buffer.toString());
-            addQueryItem(queryText, queryId, groupId);
         }
     }
 
     /*
      * Private helper methods.
      */
+
+    private void readQueryGroup(LineNumberReader reader, String groupId) throws IOException {
+        String line = "";
+        while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
+            if (isCommentLine(line) || line.isEmpty()) {
+                continue; // skip comment lines
+            }
+            if (line.contains(QUERY_ITEM) && line.contains(START_CONTENT_SYMBOL)) {
+                // The query ID is enclosed by a double-quotes sign
+                String queryId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
+                readQueryContent(reader, groupId, queryId);
+            } else {
+                throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()));
+            }
+        }
+    }
+
+    private void readQueryContent(LineNumberReader reader, String groupId, String queryId) throws IOException {
+        if (queryId.isEmpty()) {
+           throw new IOException("Query ID is missing");
+        }
+        
+        StringBuffer buffer = new StringBuffer();
+        String line = "";
+        while (!(line = reader.readLine()).equals(END_CONTENT_SYMBOL)) {
+            buffer.append(line + "\n");
+        }
+        String queryText = buffer.toString();
+        addQueryItem(queryText, queryId, groupId);
+    }
 
     private void writeQueryGroup(QueryControllerGroup group, BufferedWriter writer) throws IOException {
         writer.append("\n");
@@ -178,8 +177,10 @@ public class QueryIOManager {
     }
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
-        writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + "\n");
+        writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + " ");
+        writer.append(START_CONTENT_SYMBOL + "\n");
         writer.append(query.getQuery() + "\n");
+        writer.append(END_CONTENT_SYMBOL + "\n");
     }
 
     private void addQueryItem(String queryText, String queryId, String groupId) {
@@ -188,10 +189,6 @@ public class QueryIOManager {
         } else {
             queryController.addQuery(queryText, queryId);
         }
-    }
-
-    private String removeBlankLines(String input) {
-        return input.replaceFirst("\\A\\n{1,}", "").replaceFirst("\\n{1,}\\z", "");
     }
 
     private boolean isCommentLine(String line) {
