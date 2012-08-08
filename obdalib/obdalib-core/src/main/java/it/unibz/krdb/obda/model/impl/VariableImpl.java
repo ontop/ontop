@@ -3,6 +3,8 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
@@ -72,6 +74,13 @@ public class VariableImpl implements Variable {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return Collections.singleton((Variable)this);
+	}
+	
+	@Override
+	public Map<Variable, Integer> getVariableCount() {
+		Map<Variable,Integer> count =  new HashMap<Variable,Integer>();
+		count.put(this, 1);
+		return count;
 	}
 
 }

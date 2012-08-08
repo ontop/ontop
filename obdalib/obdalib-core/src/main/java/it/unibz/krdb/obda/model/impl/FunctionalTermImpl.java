@@ -9,9 +9,11 @@ import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class FunctionalTermImpl implements Function, ListListener {
@@ -194,4 +196,23 @@ public class FunctionalTermImpl implements Function, ListListener {
 		}
 		return vars;
 	}
+
+	@Override
+	public Map<Variable, Integer> getVariableCount() {
+		Map<Variable, Integer> currentcount = new HashMap<Variable, Integer>();
+		for (Term t : terms) {
+			Map<Variable, Integer> atomCount = t.getVariableCount();
+			for (Variable var: atomCount.keySet()) {
+				Integer count = currentcount.get(var);
+				if (count != null) {
+					currentcount.put(var, count + atomCount.get(var));
+				} else {
+					currentcount.put(var, new Integer(atomCount.get(var)));
+				}
+			}
+		}
+		return currentcount;		
+	}
+	
+	
 }

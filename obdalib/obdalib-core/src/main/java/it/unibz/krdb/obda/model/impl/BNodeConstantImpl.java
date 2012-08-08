@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.model.impl;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.BNode;
@@ -67,5 +69,10 @@ public class BNodeConstantImpl implements BNode {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
+	}
+	
+	@Override
+	public Map<Variable, Integer> getVariableCount() {
+		return new HashMap<Variable,Integer>();
 	}
 }

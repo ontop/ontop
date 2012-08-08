@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.model.impl;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.Variable;
@@ -60,5 +62,13 @@ public class AnonymousVariable implements Variable {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
+	}
+	
+	@Override
+	public Map<Variable, Integer> getVariableCount() {
+		/* This is wrong but it shouldn't affect query containment */
+		Map<Variable,Integer> count =  new HashMap<Variable,Integer>();
+		count.put(this, 1);
+		return count;
 	}
 }

@@ -4,7 +4,9 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -74,5 +76,12 @@ public class URIConstantImpl implements URIConstant {
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
+
+	@Override
+	public Map<Variable, Integer> getVariableCount() {
+		return new HashMap<Variable,Integer>();
+	}
+	
+	
 
 }
