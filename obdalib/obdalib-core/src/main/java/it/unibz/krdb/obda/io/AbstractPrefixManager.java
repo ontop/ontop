@@ -10,9 +10,35 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	
 	public String getShortForm(String uri, boolean insideQuotes) {
 		final Map<String, String> prefixMap = getPrefixMap();
+		
+		/* Clean the URI string from <...> signs, if they exist.
+		 * <http://www.example.org/library#Book> --> http://www.example.org/library#Book
+		 */
+		if (uri.contains("<") && uri.contains(">")) {
+			uri = uri.replace("<", "").replace(">", "");
+		}
+		
+		// Initial value for the short URI
 		String shortUri = uri;
+		
+		String subUri = "";
+		if (uri.contains("#")) {
+			/* 
+			 * Obtain the URI definition that contains a hash sign
+			 * http://www.example.org/library#Book --> http://www.example.org/library#
+			 */
+			subUri = uri.substring(0, uri.lastIndexOf("#")+1);
+		} else {
+			/* 
+			 * Obtain the URI definition that contains a slash sign
+			 * http://www.example.org/library/Book --> http://www.example.org/library/
+			 */
+			subUri = uri.substring(0, uri.lastIndexOf("/")+1);
+		}
+		
+		// Check if the URI string has a matched prefix
 		for (String prefixUriDefinition : prefixMap.values()) {
-			if (uri.contains(prefixUriDefinition)) {
+			if (subUri.equals(prefixUriDefinition)) {
 				String prefix = getPrefix(prefixUriDefinition);
 				if (insideQuotes) {
 					prefix = String.format("&%s;", removeColon(prefix));
@@ -20,10 +46,6 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				// Replace the URI with the corresponding prefix.
 				shortUri = uri.replace(prefixUriDefinition, prefix);
 				
-				// Clean the URI string from <> signs, if exist
-				if (shortUri.contains("<") && shortUri.contains(">")) {
-					shortUri = shortUri.replace("<", "").replace(">", "");
-				}
 				return shortUri;
 			}
 		}
