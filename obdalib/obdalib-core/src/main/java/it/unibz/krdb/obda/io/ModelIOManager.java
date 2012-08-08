@@ -338,7 +338,7 @@ public class ModelIOManager {
                 String declaration = tokens[i].trim();
                 String propertyName = "";
                 if (declaration.contains("<") && declaration.contains(">")) { // if the object property declaration is written in full URI
-                    propertyName = declaration.substring(1, declaration.length()+1);
+                    propertyName = declaration.substring(1, declaration.length()-1);
                 } else {
                     propertyName = expand(declaration);
                 }
@@ -358,7 +358,7 @@ public class ModelIOManager {
                 String declaration = tokens[i].trim();
                 String propertyName = "";
                 if (declaration.contains("<") && declaration.contains(">")) { // if the object property declaration is written in full URI
-                    propertyName = declaration.substring(1, declaration.length()+1);
+                    propertyName = declaration.substring(1, declaration.length()-1);
                 } else {
                     propertyName = expand(declaration);
                 }
