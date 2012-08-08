@@ -160,7 +160,6 @@ public class QueryIOManager {
     }
 
     private void writeQueryGroup(QueryControllerGroup group, BufferedWriter writer) throws IOException {
-        writer.append("\n");
         writer.append(String.format(QUERY_GROUP_TAG, group.getID()) + " ");
         writer.append(START_COLLECTION_SYMBOL + "\n");
         
@@ -173,13 +172,13 @@ public class QueryIOManager {
             needLineBreak = true;
         }
         writer.append(END_COLLECTION_SYMBOL);
-        writer.append("\n");
+        writer.append("\n\n");
     }
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
         writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + " ");
         writer.append(START_CONTENT_SYMBOL + "\n");
-        writer.append(query.getQuery() + "\n");
+        writer.append(query.getQuery().trim() + "\n");
         writer.append(END_CONTENT_SYMBOL + "\n");
     }
 
