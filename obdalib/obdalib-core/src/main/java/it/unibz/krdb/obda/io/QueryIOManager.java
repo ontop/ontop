@@ -59,11 +59,23 @@ public class QueryIOManager {
     public void save(File file) throws IOException {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            
+            boolean needLineBreakForGroup = false;
+            boolean needLineBreakForItem = false;
             for (QueryControllerEntity entity : queryController.getElements()) {
                 if (entity instanceof QueryControllerGroup) {
+                    if (needLineBreakForGroup) {
+                        writer.write("\n");
+                    }
                     writeQueryGroup((QueryControllerGroup) entity, writer);
+                    needLineBreakForGroup = true;
                 } else if (entity instanceof QueryControllerQuery) {
+                    if (needLineBreakForItem) {
+                        writer.write("\n");
+                    }
                     writeQueryItem((QueryControllerQuery) entity, writer);
+                    needLineBreakForItem = true;
+                    needLineBreakForGroup = true;
                 }
             }
             writer.flush();
@@ -172,7 +184,7 @@ public class QueryIOManager {
             needLineBreak = true;
         }
         writer.append(END_COLLECTION_SYMBOL);
-        writer.append("\n\n");
+        writer.append("\n");
     }
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
