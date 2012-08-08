@@ -329,7 +329,7 @@ public class OBDAModelManager implements Disposable {
 		activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
 
 		// Add the model
-		URI modelUri = URI.create(defaultPrefix.replace("#", "")); // Model URI doesn't have hash sign.
+		URI modelUri = activeOntology.getOntologyID().getOntologyIRI().toURI();
 		obdamodels.put(modelUri, activeOBDAModel);
 	}
 
