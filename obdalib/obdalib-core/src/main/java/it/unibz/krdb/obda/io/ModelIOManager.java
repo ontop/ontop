@@ -176,7 +176,7 @@ public class ModelIOManager {
             } else if (line.contains(MAPPING_DECLARATION_TAG)) {
                 readMappingDeclaration(reader, sourceUri);
             } else {
-                throw new IOException(String.format("Invalid input at line: %s", reader.getLineNumber()));
+                throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()));
             }
         }
         
