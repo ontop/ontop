@@ -276,7 +276,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		} else {
 			log.debug("Removing redundatnt queries by CQC.");
 		}
-		CQCUtilities.removeContainedQueriesSorted(resultlist, true, sigma);
+		resultlist = CQCUtilities.removeContainedQueriesSorted(resultlist, true, sigma);
 		// }
 
 		DatalogProgram resultprogram = fac.getDatalogProgram();

@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -743,15 +742,19 @@ public class CQCUtilities {
 	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses) {
 		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
 		result.setQueryModifiers(program.getQueryModifiers());
-		LinkedList<CQIE> rules = new LinkedList<CQIE>();
+		List<CQIE> rules = new LinkedList<CQIE>();
 		rules.addAll(program.getRules());
-		removeContainedQueriesSorted(rules, twopasses, null);
+		rules = removeContainedQueriesSorted(rules, twopasses, null);
 		result.appendRule(rules);
 		return result;
 	}
 
-	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, Ontology sigma) {
-		removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
+	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, Ontology sigma) {
+		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
+		result.setQueryModifiers(program.getQueryModifiers());
+		List<CQIE> rules = removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
+		result.appendRule(rules);
+		return result; 
 	}
 
 	/***
@@ -765,8 +768,8 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, Ontology sigma) {
-		removeContainedQueries(queries, twopasses, sigma, true);
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, Ontology sigma) {
+		return removeContainedQueries(queries, twopasses, sigma, true);
 	}
 
 	/***
@@ -780,9 +783,12 @@ public class CQCUtilities {
 	 * 
 	 * @param querieslist
 	 */
-	public static void removeContainedQueries(List<CQIE> queries, boolean twopasses, Ontology sigma, boolean sort) {
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, boolean sort) {
 
 		// queries = new LinkedList<CQIE>(queries);
+		LinkedList<CQIE> queries = new LinkedList<CQIE>();
+		queries.addAll(queriesInput);
+		
 		int initialsize = queries.size();
 		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 
@@ -861,6 +867,8 @@ public class CQCUtilities {
 		double time = (endtime - startime) / 1000;
 
 		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
+		
+		return queries;
 	}
 
 }
