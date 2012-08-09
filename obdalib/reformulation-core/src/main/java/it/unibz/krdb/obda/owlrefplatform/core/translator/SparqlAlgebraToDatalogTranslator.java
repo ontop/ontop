@@ -75,7 +75,9 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueString;
 public class SparqlAlgebraToDatalogTranslator {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	
+
+	private static int randvarcount = 0;
+
 	public static List<List<Atom>> translate(Op op, Map<Variable, Term> mgu) {
 		List<List<Atom>> result = new LinkedList<List<Atom>>();
 		if (op instanceof OpFilter) {
@@ -99,7 +101,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					result.add(joinedList);
 				}
 			}
-			
+
 		} else if (op instanceof OpUnion) {
 			OpUnion union = (OpUnion) op;
 			List<List<Atom>> left = translate(union.getLeft(), mgu);
@@ -107,7 +109,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			result.addAll(left);
 			result.addAll(right);
-			
+
 		} else {
 			throw new QueryException("Operation not supported: " + op.toString());
 		}
@@ -171,23 +173,23 @@ public class SparqlAlgebraToDatalogTranslator {
 	public static DatalogProgram translate(Op query, boolean isBoolean, List<String> signature) {
 
 		DatalogProgram datalog = ofac.getDatalogProgram();
-		
+
 		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
-		
+
 		// Add LIMIT and OFFSET modifiers, if any
-		if (query instanceof OpSlice) { 
+		if (query instanceof OpSlice) {
 			OpSlice sliceOp = (OpSlice) query;
 			datalog.getQueryModifiers().setOffset(sliceOp.getStart());
 			datalog.getQueryModifiers().setLimit(sliceOp.getLength());
 			query = sliceOp.getSubOp(); // narrow down the query
 		}
-		
+
 		// Add DISTINCT modifier, if any
 		if (query instanceof OpDistinct) {
 			OpDistinct distinctOp = (OpDistinct) query;
 			datalog.getQueryModifiers().setDistinct();
 			query = distinctOp.getSubOp(); // narrow down the query
-		} 
+		}
 
 		// Add PROJECTION modifier, if any
 		if (query instanceof OpProject) {
@@ -195,24 +197,24 @@ public class SparqlAlgebraToDatalogTranslator {
 			// NO-OP
 			query = projectOp.getSubOp(); // narrow down the query
 		}
-		
+
 		// Add ALIAS modifier, if any
 		if (query instanceof OpExtend) {
 			OpExtend extendOp = (OpExtend) query;
-			query =  extendOp.getSubOp(); // narrow down the query
+			query = extendOp.getSubOp(); // narrow down the query
 		}
 
 		// Add ORDER BY modifier, if any
-		if (query instanceof OpOrder) { 
+		if (query instanceof OpOrder) {
 			OpOrder orderOp = (OpOrder) query;
 			for (SortCondition c : orderOp.getConditions()) {
 				Variable var = ofac.getVariable(c.getExpression().getVarName());
 				int direction = (c.direction == Query.ORDER_DESCENDING ? OrderCondition.ORDER_DESCENDING : OrderCondition.ORDER_ASCENDING);
 				datalog.getQueryModifiers().addOrderCondition(var, direction);
 			}
-			query =  orderOp.getSubOp(); // narrow down the query
+			query = orderOp.getSubOp(); // narrow down the query
 		}
-		
+
 		Atom head = null;
 		List<Term> headVars = new LinkedList<Term>();
 		if (isBoolean) {
@@ -242,12 +244,20 @@ public class SparqlAlgebraToDatalogTranslator {
 	public static List<Atom> translate(BasicPattern bp) {
 		List<Atom> atoms = new LinkedList<Atom>();
 		for (Triple t : bp.getList()) {
-			atoms.add(translate(t));
+			atoms.addAll(translate(t));
 		}
 		return atoms;
 	}
 
-	public static Atom translate(Triple triple) {
+	/***
+	 * This translates a single triple. In most cases it will generate one
+	 * single atom, however, if URI's are present, it will generate also
+	 * equality atoms.
+	 * 
+	 * @param triple
+	 * @return
+	 */
+	public static List<Atom> translate(Triple triple) {
 		Node o = triple.getObject();
 		Node p = triple.getPredicate();
 		Node s = triple.getSubject();
@@ -256,6 +266,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			// if predicate is a variable or literal
 			throw new QueryException("Unsupported query syntax");
 		}
+
+		LinkedList<Atom> result = new LinkedList<Atom>();
 
 		// Instantiate the subject and object URI
 		URI subjectUri = null;
@@ -279,10 +291,24 @@ public class SparqlAlgebraToDatalogTranslator {
 				ValueConstant constant = getConstant(subject);
 				terms.add(constant);
 			} else if (s instanceof Node_URI) {
+
+				/*
+				 * Found a URI, here we need to create a variable and add an
+				 * equation of the variable to uri("http:....")
+				 */
+
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
 				subjectUri = URI.create(subject.getURI());
-				terms.add(ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri)));
+
+				Function functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri));
+				Variable freshVariable = getFreshVariable();
+				Atom eqAtom = ofac.getEQAtom(freshVariable, functionURI);
+				result.add(eqAtom);
+				
+				terms.add(freshVariable);
+
+
 			}
 
 			// Object node
@@ -333,7 +359,13 @@ public class SparqlAlgebraToDatalogTranslator {
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
 				subjectUri = URI.create(subject.getURI());
-				terms.add(ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri)));
+
+				Function functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri));
+				Variable freshVariable = getFreshVariable();
+				Atom eqAtom = ofac.getEQAtom(freshVariable, functionURI);
+				result.add(eqAtom);
+
+				terms.add(freshVariable);
 			}
 
 			// Object node
@@ -367,7 +399,15 @@ public class SparqlAlgebraToDatalogTranslator {
 				Node_URI object = (Node_URI) o;
 				objectType = COL_TYPE.OBJECT;
 				objectUri = URI.create(object.getURI());
-				terms.add(ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(objectUri)));
+
+				Function functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(objectUri));
+				Variable freshVariable = getFreshVariable();
+				Atom eqAtom = ofac.getEQAtom(freshVariable, functionURI);
+				result.add(eqAtom);
+				
+				terms.add(freshVariable);
+
+
 			}
 			// Construct the predicate
 			URI predicateUri = URI.create(p.getURI());
@@ -375,7 +415,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		// Construct the atom
 		Atom atom = ofac.getAtom(predicate, terms);
-		return atom;
+		result.addFirst(atom);
+		return result;
+	}
+
+	private static Variable getFreshVariable() {
+		randvarcount += 1;
+		return ofac.getVariable("VAR" + randvarcount);
 	}
 
 	public static ValueConstant getConstant(Node_Literal literal) {

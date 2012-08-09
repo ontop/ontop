@@ -459,7 +459,7 @@ public class QuestStatement implements OBDAStatement {
 		program = validator.replaceEquivalences(program);
 
 		// Flattening the query datalog
-		program = DatalogNormalizer.normalizeDatalogProgram(program);
+//		program = DatalogNormalizer.normalizeDatalogProgram(program);
 
 		return program;
 	}
