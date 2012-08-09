@@ -272,9 +272,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 					while (positionIterator.hasNext()) {
 						Integer position2 = positionIterator.next();
 						String currentView = viewNames[index];
-						String column1 = metadata.getAttributeName(tableNames[index], position1 + 1);
-						String column2 = metadata.getAttributeName(tableNames[index], position2 + 1);
+						String attributeName1 = metadata.getAttributeName(tableNames[index], position1 + 1);
+						String column1 = getColumnName(attributeName1);
 						String qualifiedNameColumn1 = sqladapter.sqlQualifiedColumn(currentView, column1);
+						String attributeName2 = metadata.getAttributeName(tableNames[index], position2 + 1);
+						String column2 = getColumnName(attributeName2);
 						String qualifiedNameColumn2 = sqladapter.sqlQualifiedColumn(currentView, column2);
 						String currentcondition = String.format("(" + EQ_OPERATOR + ")", qualifiedNameColumn1, qualifiedNameColumn2);
 						whereConditions.add(currentcondition);
@@ -291,12 +293,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 					Atom atom2 = body.get(indexatom2);
 					for (int indexatom2var2 : varAtomTermIndex.get(var).get(atom2)) {
 						String view1 = viewNames[indexatom1];
-						String column1 = metadata.getAttributeName(tableNames[indexatom1], indexatom1var + 1);
+						String attributeName1 = metadata.getAttributeName(tableNames[indexatom1], indexatom1var + 1);
+						String column1 = getColumnName(attributeName1);
 						String qualifiedNameColumn1 = sqladapter.sqlQualifiedColumn(view1, column1);
 						String view2 = viewNames[indexatom2];
-						String column2 = metadata.getAttributeName(tableNames[indexatom2], indexatom2var2 + 1);
+						String attributeName2 = metadata.getAttributeName(tableNames[indexatom2], indexatom2var2 + 1);
+						String column2 = getColumnName(attributeName2);
 						String qualifiedNameColumn2 = sqladapter.sqlQualifiedColumn(view2, column2);
-
 						String currentcondition = String.format("(" + EQ_OPERATOR + ")", qualifiedNameColumn1, qualifiedNameColumn2);
 						whereConditions.add(currentcondition);
 					}
@@ -330,14 +333,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 						if (term instanceof ValueConstant) {
 							ValueConstant ct = (ValueConstant) term;
 							String value = jdbcutil.getSQLLexicalForm(ct);
-							String colname = metadata.getAttributeName(tableNames[i1], termj + 1);
+							String attributeName = metadata.getAttributeName(tableNames[i1], termj + 1);
+							String colname = getColumnName(attributeName);
 							String qualifiedName = sqladapter.sqlQualifiedColumn(viewNames[i1], colname);
 							String condition = String.format("(" + EQ_OPERATOR + ")", qualifiedName, value);
 							whereConditions.add(condition);
 						} else if (term instanceof URIConstant) {
 							URIConstant ct = (URIConstant) term;
 							String value = jdbcutil.getSQLLexicalForm(ct.getURI().toString());
-							String colname = metadata.getAttributeName(tableNames[i1], termj + 1);
+							String attributeName = metadata.getAttributeName(tableNames[i1], termj + 1);
+							String colname = getColumnName(attributeName);
 							String qualifiedName = sqladapter.sqlQualifiedColumn(viewNames[i1], colname);
 							String condition = String.format("(" + EQ_OPERATOR + ")", qualifiedName, value);
 							whereConditions.add(condition);
@@ -660,11 +665,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			List<Integer> posList = varAtomIndex.get(var); // Locating the first
-															// occurrence of the
-															// variable in a DB
-															// atom (using the
-															// indexes)
+			List<Integer> posList = varAtomIndex.get(var); // Locating the first occurrence of the variable in a DB atom (using the indexes)
 			if (posList == null) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
@@ -672,7 +673,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Atom atom = body.get(atomidx);
 			int termidx = varAtomTermIndex.get(var).get(atom).get(0);
 			String viewname = viewName[atomidx];
-			String columnName = metadata.getAttributeName(tableName[atomidx], termidx + 1);
+			String attributeName = metadata.getAttributeName(tableName[atomidx], termidx + 1);
+			String columnName = getColumnName(attributeName);
 			result.append(sqladapter.sqlQualifiedColumn(viewname, columnName));
 
 		} else if (term instanceof Function) {
@@ -749,5 +751,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
 		return operator;
+	}
+
+	private String getColumnName(String attributeName) {
+		String columnName = attributeName;
+		if (attributeName.contains(".")) {
+			 // Get the column name only. E.g., `Person.name` --> `name`
+			columnName = attributeName.substring(attributeName.lastIndexOf(".")+1, attributeName.length());
+		}
+		return columnName;
 	}
 }
