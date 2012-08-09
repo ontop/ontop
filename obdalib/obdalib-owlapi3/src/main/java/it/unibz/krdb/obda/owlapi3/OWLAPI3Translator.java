@@ -27,6 +27,9 @@ import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
@@ -79,7 +82,6 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.profiles.OWL2QLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
-import org.semanticweb.owlapi.profiles.OWLProfileViolation;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,15 +180,26 @@ public class OWLAPI3Translator {
 		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
 		OWL2QLProfile owlprofile = new OWL2QLProfile();
-		
+
 		OWLProfileReport report = owlprofile.checkOntology(owl);
 		Set<OWLAxiom> axiomIgnoresOWL2QL = new HashSet<OWLAxiom>();
 
 		if (!report.isInProfile()) {
 			log.warn("WARNING. The current ontology is not in the OWL 2 QL profile.");
-			log.warn(report.toString());
-//			for (OWLProfileViolation violation : report.getViolations())
-//				axiomIgnoresOWL2QL.add(violation.getAxiom());
+			try {
+				File profileReport = new File("quest-profile-report.log");
+				if (profileReport.canWrite()) {
+					BufferedWriter bf =new BufferedWriter(new FileWriter(profileReport));
+					bf.write(report.toString());
+					bf.flush();
+					bf.close();
+				}
+			} catch (Exception e) {
+				
+			}
+//			log.warn(report.toString());
+			// for (OWLProfileViolation violation : report.getViolations())
+			// axiomIgnoresOWL2QL.add(violation.getAxiom());
 		}
 
 		Ontology dl_onto = ofac.createOntology(owl.getOntologyID().getOntologyIRI().toURI());
@@ -200,29 +213,34 @@ public class OWLAPI3Translator {
 		 */
 		Set<OWLEntity> entities = owl.getSignature();
 		Iterator<OWLEntity> eit = entities.iterator();
+
+		HashSet<String> punnedPredicates = new HashSet<String>();
+
 		while (eit.hasNext()) {
 			OWLEntity entity = eit.next();
 			Predicate p = getPredicate(entity);
 			if (p == null)
 				continue;
-			if (p.getArity() == 1) {
-				if (dataproperties.contains(p.getName().toString()) || objectproperties.contains(p.getName().toString())) {
-					throw new PunningException("Punning not allowed. Offending entity: " + p.getName());
-				} else {
-					classes.add(p.getName().toString());
-					dl_onto.addConcept(p);
-				}
+
+			/*
+			 * When we register predicates punning is not allowed between data
+			 * and object properties
+			 */
+
+			if (p.isClass()) {
+				dl_onto.addConcept(p);
+
 			} else {
-				if (p.getType(1) == COL_TYPE.OBJECT) {
-					if (dataproperties.contains(p.getName().toString()) || classes.contains(p.getName().toString())) {
-						throw new PunningException("Punning not allowed. Offending entity: " + p.getName());
+				if (p.isObjectProperty()) {
+					if (dataproperties.contains(p.getName().toString())) {
+						punnedPredicates.add(p.getName().toString());
 					} else {
 						objectproperties.add(p.getName().toString());
 						dl_onto.addRole(p);
 					}
 				} else {
-					if (objectproperties.contains(p.getName().toString()) || classes.contains(p.getName().toString())) {
-						throw new PunningException("Punning not allowed. Offending entity: " + p.getName());
+					if (objectproperties.contains(p.getName().toString())) {						
+						punnedPredicates.add(p.getName().toString());
 					} else {
 						dataproperties.add(p.getName().toString());
 						dl_onto.addRole(p);
@@ -231,16 +249,27 @@ public class OWLAPI3Translator {
 			}
 		}
 
+		/*
+		 * Generating a WARNING about all punned predicates which have been
+		 * ignored
+		 */
+		if (!punnedPredicates.isEmpty()) {
+			log.warn("Quest can become unstable with properties declared as both, data and object property. Offending properties: ");
+			for (String predicates : punnedPredicates) {
+				log.warn("  " + predicates);
+			}
+		}
+
 		Set<OWLAxiom> axioms = owl.getAxioms();
 		Iterator<OWLAxiom> it = axioms.iterator();
 		while (it.hasNext()) {
 
 			OWLAxiom axiom = it.next();
-			
-			if (axiomIgnoresOWL2QL.contains(axiom))
-			{
+
+			if (axiomIgnoresOWL2QL.contains(axiom)) {
 				/*
-				 * This axiom is not part of OWL 2 QL according to the OWLAPI, we need to ignore it
+				 * This axiom is not part of OWL 2 QL according to the OWLAPI,
+				 * we need to ignore it
 				 */
 				continue;
 			}
@@ -288,9 +317,14 @@ public class OWLAPI3Translator {
 					ClassDescription subclass = ofac.getPropertySomeRestriction(role.getPredicate(), true);
 					OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
 
-					Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
-					DataType datatype = ofac.createDataType(getDataTypePredicate(columnType));
-					addSubclassAxiom(dl_onto, subclass, datatype);
+					if (rangeDatatype.isBuiltIn()) {
+
+						Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
+						DataType datatype = ofac.createDataType(getDataTypePredicate(columnType));
+						addSubclassAxiom(dl_onto, subclass, datatype);
+					} else {
+						log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
+					}
 
 				} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
 

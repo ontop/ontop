@@ -44,7 +44,7 @@ public class QueryVocabularyValidator implements Serializable {
 		this.equivalences = equivalences;
 	}
 
-	public boolean validate(DatalogProgram input) {
+	public boolean validatePredicates(DatalogProgram input) {
 		// Reset the invalid list
 		invalidPredicates.clear();
 

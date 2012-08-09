@@ -423,7 +423,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			}
 
 		} catch (Exception e) {
-			throw new ReasonerInternalException(e.getMessage());
+			throw new ReasonerInternalException(e);
 		} finally {
 			prepared = true;
 			pm.reasonerTaskStopped();

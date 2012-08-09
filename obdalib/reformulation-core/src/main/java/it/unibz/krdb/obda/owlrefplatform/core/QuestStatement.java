@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.OperationPredicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -27,7 +28,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.utils.QueryValidator;
 
 import java.io.IOException;
@@ -35,6 +35,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +46,6 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +122,7 @@ public class QuestStatement implements OBDAStatement {
 		private final String strquery;
 		private OBDAResultSet result;
 		private boolean error = false;
-		private OBDAException exception;
+		private Exception exception;
 
 		boolean cancelled = false;
 
@@ -136,7 +137,7 @@ public class QuestStatement implements OBDAStatement {
 			return error;
 		}
 
-		public OBDAException getException() {
+		public Exception getException() {
 			return exception;
 		}
 
@@ -252,7 +253,7 @@ public class QuestStatement implements OBDAStatement {
 
 				log.debug("Finish.\n");
 				this.result = result;
-			} catch (OBDAException e) {
+			} catch (Exception e) {
 				this.exception = e;
 				this.error = true;
 			} finally {
@@ -364,23 +365,23 @@ public class QuestStatement implements OBDAStatement {
 			throw e;
 		}
 
-		if (program == null) { // if the SPARQL translator doesn't work,
-			// use the Datalog parser.
-			DatalogProgramParser datalogParser = new DatalogProgramParser();
-			try {
-				program = datalogParser.parse(strquery);
-			} catch (RecognitionException e) {
-				log.warn(e.getMessage());
-				program = null;
-			} catch (IllegalArgumentException e2) {
-				log.warn(e2.getMessage());
-			}
-		}
+		// if (program == null) { // if the SPARQL translator doesn't work,
+		// // use the Datalog parser.
+		// DatalogProgramParser datalogParser = new DatalogProgramParser();
+		// try {
+		// program = datalogParser.parse(strquery);
+		// } catch (RecognitionException e) {
+		// log.warn(e.getMessage());
+		// program = null;
+		// } catch (IllegalArgumentException e2) {
+		// log.warn(e2.getMessage());
+		// }
+		// }
 
 		// Check the datalog object
 		if (validator != null) {
 			log.debug("Validating the user query...");
-			boolean isValid = validator.validate(program);
+			boolean isValid = validator.validatePredicates(program);
 
 			if (!isValid) {
 				Vector<String> invalidList = validator.getInvalidPredicates();
@@ -411,6 +412,47 @@ public class QuestStatement implements OBDAStatement {
 						"Found variable(s) in SELECT clause that is not metioned in the WHERE clause. \nOffending variables: "
 								+ bf.toString());
 			}
+
+			/*
+			 * Validating variables in the body (variables in condition
+			 * predicates must appear in a data predicate)
+			 */
+
+			Set<Variable> invalidVariables = new HashSet<Variable>();
+			
+			
+			// Collecting all variables in data predicates
+			Set<Variable> dataVariables = new HashSet<Variable>();
+			for (CQIE rule : program.getRules()) {
+				for (Atom atom : rule.getBody()) {
+					if (atom.getPredicate() instanceof OperationPredicate)
+						continue;
+					Set<Variable> vars = atom.getVariables();
+					dataVariables.addAll(vars);
+				}
+			}
+			
+			// Collecting all variables in operation predicates
+			Set<Variable> conditionedVariables = new HashSet<Variable>();
+			for (CQIE rule : program.getRules()) {
+				for (Atom atom : rule.getBody()) {
+					if (!(atom.getPredicate() instanceof OperationPredicate))
+						continue;
+					Set<Variable> vars = atom.getVariables();
+					conditionedVariables.addAll(vars);
+				}
+			}
+			conditionedVariables.removeAll(dataVariables);
+			
+			if (!conditionedVariables.isEmpty()) {
+				StringBuffer errorMsg = new StringBuffer();
+				errorMsg.append("The following conditioned variables are not bound to a triple pattern: ");
+				for (Variable v: conditionedVariables) {
+					errorMsg.append(v.toString() + " ");
+				}
+				throw new OBDAException(errorMsg.toString());
+			}
+			
 
 		}
 		log.debug("Replacing equivalences...");
@@ -446,7 +488,9 @@ public class QuestStatement implements OBDAStatement {
 			e.printStackTrace();
 		}
 		if (executionthread.getException() != null) {
-			throw executionthread.getException();
+			OBDAException ex = new OBDAException(executionthread.getException().getMessage());
+			ex.setStackTrace(executionthread.getStackTrace());
+			throw ex;
 		}
 
 		if (canceled == true) {

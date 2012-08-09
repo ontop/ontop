@@ -28,7 +28,8 @@ public class ABoxToFactConverter {
 
 	private static void addFact(Assertion assertion, DatalogProgram p, Map<Predicate, Description> equivalences) {
 		CQIE fact = getRule(assertion);
-		p.appendRule(fact);
+		if (fact != null)
+			p.appendRule(fact);
 	}
 
 	private static CQIE getRule(Assertion assertion) {
@@ -39,7 +40,9 @@ public class ABoxToFactConverter {
 			Predicate p = ca.getConcept();
 			Predicate urifuction = factory.getUriTemplatePredicate(1);
 			head = factory.getAtom(p, factory.getFunctionalTerm(urifuction, c));
-//			head = factory.getAtom(p, c);
+			// head = factory.getAtom(p, c);
+		} else {
+			return null;
 		}
 		/***
 		 * The rest is not supported yet
