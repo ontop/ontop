@@ -548,39 +548,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 					/***
 					 * New template based URI building functions
 					 */
-					Term t = ov.getTerms().get(0);
-					if (t instanceof ValueConstant) {
-						ValueConstant c = (ValueConstant) t;
-						StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
-						functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
-						int termIndex = 1;
-						do {
-							Term currentTerm = ov.getTerms().get(termIndex);
-							vex.add(getSQLString(currentTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false));
-							if (tokenizer.hasMoreTokens()) {
-								vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
-							}
-							termIndex += 1;
-						} while (tokenizer.hasMoreElements() || termIndex < ov.getTerms().size());
-						String[] params = new String[vex.size() + 1];
-						int i = 0;
-						params[i] = functionString;
-						i += 1;
-						for (String param : vex) {
-							params[i] = param;
-							i += 1;
-						}
-						String concat = sqladapter.strconcat(params);
-						sb.append(concat);
-					} else if (t instanceof Variable) {
-						sb.append(getSQLString(((Variable) t), body, tableName, viewName, varAtomIndex, varAtomTermIndex, false));
-					} else if (t instanceof URIConstant) {
-						URIConstant uc = (URIConstant) t;
-						sb.append(jdbcutil.getSQLLexicalForm(uc.getURI().toString()));
-					} else {
-						throw new IllegalArgumentException("Error, cannot generate SELECT clause for a term. Contact the authors. Term: "
-								+ ov.toString());
-					}
+					String result = "";
+					
+					result = getSQLStringForURIFunction(ov, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
+					
+					sb.append(result);
 
 				} else {
 					throw new IllegalArgumentException(
@@ -597,6 +569,45 @@ public class SQLGenerator implements SQLQueryGenerator {
 			hpos++;
 		}
 		return sb.toString();
+	}
+	
+	public String getSQLStringForURIFunction(Function ov, List<Atom> body, String[] tableName, String[] viewName, Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex, boolean b) {
+		String result = "";
+		Term t = ov.getTerms().get(0);
+		if (t instanceof ValueConstant) {
+			ValueConstant c = (ValueConstant) t;
+			StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
+			String functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+			List<String> vex = new LinkedList<String>();
+			int termIndex = 1;
+			do {
+				Term currentTerm = ov.getTerms().get(termIndex);
+				vex.add(getSQLString(currentTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false));
+				if (tokenizer.hasMoreTokens()) {
+					vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
+				}
+				termIndex += 1;
+			} while (tokenizer.hasMoreElements() || termIndex < ov.getTerms().size());
+			String[] params = new String[vex.size() + 1];
+			int i = 0;
+			params[i] = functionString;
+			i += 1;
+			for (String param : vex) {
+				params[i] = param;
+				i += 1;
+			}
+			String concat = sqladapter.strconcat(params);
+			result = concat;
+		} else if (t instanceof Variable) {
+			result = getSQLString(((Variable) t), body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
+		} else if (t instanceof URIConstant) {
+			URIConstant uc = (URIConstant) t;
+			result = jdbcutil.getSQLLexicalForm(uc.getURI().toString());
+		} else {
+			throw new IllegalArgumentException("Error, cannot generate URI constructor clause for a term. Contact the authors. Term: "
+					+ ov.toString());
+		}
+		return result;
 	}
 
 	public String getSQLCondition(Atom atom, List<Atom> body, String[] tableName, String[] viewName,
@@ -701,6 +712,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 						result.append(")");
 					}
 				}
+			} else if (function.getFunctionSymbol().toString().equals("http://obda.org/quest#uri")) {
+				result.append(getSQLStringForURIFunction(function, body, tableName, viewName, varAtomIndex, varAtomTermIndex, true));
+				
 			} else {
 				throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 			}
