@@ -37,6 +37,9 @@ import org.slf4j.LoggerFactory;
 
 public class StockExchangeTestOracle extends TestCase {
 	
+	// TODO We need to extend this test to import the contents of the mappings
+	// into OWL and repeat everything taking form OWL
+
 	private OBDADataFactory fac;
 	private Connection conn;
 
@@ -55,9 +58,11 @@ public class StockExchangeTestOracle extends TestCase {
 	
 	/* These are the distinct tuples that we know each query returns 
 	 * 
-	 * Note:
-	 * - Oracle has no boolean datatype 
-	 * */ 
+	 * Note: 
+	 * - Pgsql can handle query: [...] WHERE number="+3"
+	 * - Pgsql can handle query: [...] WHERE date="2008-04-02T00:00:00Z"
+	 * - Pgsql can't handle query: [...] WHERE shareType=1 (the DBMS stores boolean as 't' or 'f')
+	 * */
 	final int[] tuples = { 
 		7, 0, 4, 1,								// Simple queries group
 		1, 2, 2, 1, 4, 3, 3, 					// CQs group
@@ -67,14 +72,16 @@ public class StockExchangeTestOracle extends TestCase {
 		0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)
 		0, 2, 2, 0, 2, 2, 0, 0, 0,  			// Double: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
 		0, 0, 0, -1, -1, -1, -1, -1, 1,  	 	// Date time: (Incompatible, Incompatible, Incompatible); (Invalid, Invalid, Invalid); (Invalid, Invalid, OK)
-		0, 0, 0, 0, 0, 0, -1, 5, 0, -1, -1, 0,  // Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (Incompatible, Incompatible, Invalid, OK); (Incompatible, Invalid, Invalid, Incompatible)
+		0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,  // Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (OK, OK, Invalid, Invalid); (OK, Invalid, Invalid, OK)
         2, 5,								    // FILTER: String (EQ, NEQ)
         2, 5, 5, 7, 0, 2,					    // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
         1, 3, 2, 3, 1, 2,					    // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
         2, 0, 0, 2, 0, 2,					    // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
         1, 3, 2, 3, 1, 2,					    // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-        0, 5,    							    // FILTER: Boolean (EQ, NEQ)
-        10										// FILTER: LangMatches
+        5, 5,    							    // FILTER: Boolean (EQ, NEQ)
+        10,										// FILTER: LangMatches
+        1, 2, 1, 3, 2,							// Nested boolean expression
+		3, 3, 5, 5, 3, 7, 7, 7, 3, 10			// Query modifiers: LIMIT, OFFSET, and ORDER BY
 	};
 
 	public class TestQuery {
@@ -96,9 +103,9 @@ public class StockExchangeTestOracle extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		driver = "oracle.jdbc.driver.OracleDriver";
-		url = "jdbc:oracle:thin:@//localhost:1521/xe";
-		username = "oracle";
-		password = "obdaps83";
+		url = "jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe";
+		username = "obdajunit";
+		password = "obda09";
 		log.debug("Driver: {}", driver);
 		log.debug("Url: {}", url);
 		log.debug("Username: {}", username);
@@ -252,7 +259,7 @@ public class StockExchangeTestOracle extends TestCase {
 			totaltime += summary.timeelapsed;
 			fail = fail | tq.distinctTuples != summary.distinctTuples;
 			String out = "Query: %3d   Tup. Ex.: %6d Tup. ret.: %6d    Time elapsed: %6.3f s     ";
-			log.error(String.format(out, i, tq.distinctTuples, summary.distinctTuples, (double) summary.timeelapsed / (double) 1000)
+			log.debug(String.format(out, i, tq.distinctTuples, summary.distinctTuples, (double) summary.timeelapsed / (double) 1000)
 					+ "   " + (tq.distinctTuples == summary.distinctTuples ? " " : "ERROR"));
 
 		}
@@ -432,3 +439,4 @@ public class StockExchangeTestOracle extends TestCase {
 		runTests(p);
 	}
 }
+

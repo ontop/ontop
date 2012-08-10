@@ -81,7 +81,7 @@
       <SQLQuery string="SELECT ID FROM TRANSACTION WHERE TYPE=1"/>
     </mapping>                                                                                  
   </mappings>
-  <dataSource URI="RandBStockExchange" databaseDriver="oracle.jdbc.driver.OracleDriver" databasePassword="obdaps83" databaseURL="jdbc:oracle:thin:@//localhost:1521/xe" databaseUsername="oracle" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
+  <dataSource URI="RandBStockExchange" databaseDriver="oracle.jdbc.driver.OracleDriver" databasePassword="obda09" databaseURL="jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe" databaseUsername="obdajunit" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
   <SavedQueries>
     <QueryGroup id="Simple queries">
       <Query id="Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address ; &#xa;&#x9;&#x9; :addressID $id; &#xa;&#x9;&#x9; :inStreet $street; &#xa;&#x9;&#x9; :inCity $city;&#xa;&#x9;&#x9; :inCountry $country; &#xa;&#x9;&#x9; :inState $state;&#xa;&#x9;&#x9; :hasNumber $number.&#xa; } "/>
