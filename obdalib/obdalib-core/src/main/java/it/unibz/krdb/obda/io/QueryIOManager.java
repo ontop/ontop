@@ -189,7 +189,7 @@ public class QueryIOManager {
     }
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
-        writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + " ");
+        writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + "\n");
         writer.append(query.getQuery().trim() + "\n");
     }
 
