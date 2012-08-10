@@ -117,7 +117,7 @@ public class NTripleOBDAMaterializerTest extends TestCase {
 		conn.commit();
 	}
 
-	public void testMaterialization() throws Exception {
+	public void disabledtestMaterialization() throws Exception {
 		System.out.println("Triples: " + NTripleOBDAMaterializer.materialize(new File("stockMaterialized.nt"), obdaModel));
 	}
 
