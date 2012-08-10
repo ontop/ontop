@@ -23,9 +23,6 @@ public class QueryIOManager {
     private static final String START_COLLECTION_SYMBOL = "@collection [[";
     private static final String END_COLLECTION_SYMBOL = "]]";
 
-    private static final String START_CONTENT_SYMBOL = "<![";
-    private static final String END_CONTENT_SYMBOL = "]>";
-
     private static final String COMMENT_SYMBOL = ";";
 
     private QueryController queryController;
@@ -164,7 +161,7 @@ public class QueryIOManager {
         
         StringBuffer buffer = new StringBuffer();
         String line = reader.readLine();
-        while (!(line==null||line.contains(QUERY_ITEM)||line.contains(this.END_COLLECTION_SYMBOL))) {
+        while (!(line==null||line.contains(QUERY_ITEM)||line.contains(END_COLLECTION_SYMBOL))) {
         	reader.mark(100000);
             buffer.append(line + "\n");
             line = reader.readLine();
@@ -193,9 +190,7 @@ public class QueryIOManager {
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
         writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + " ");
-        writer.append(START_CONTENT_SYMBOL + "\n");
         writer.append(query.getQuery().trim() + "\n");
-        writer.append(END_CONTENT_SYMBOL + "\n");
     }
 
     private void addQueryItem(String queryText, String queryId, String groupId) {
