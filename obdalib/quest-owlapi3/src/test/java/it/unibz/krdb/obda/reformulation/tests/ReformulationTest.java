@@ -24,8 +24,6 @@ public class ReformulationTest extends TestCase {
     	tester.load(ontoname, pref);
     	for (String id : tester.getQueryIds()) {
     		log.debug("Testing query: {}", id);
-    		if (!(id.equals("g")))
-    				continue;
     		Set<String> exp = tester.getExpectedResult(id);
     		Set<String> res = tester.executeQuery(id);
     		assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
