@@ -161,8 +161,8 @@ public class QueryIOManager {
         
         StringBuffer buffer = new StringBuffer();
         String line = reader.readLine();
-        while (!(line==null||line.contains(QUERY_ITEM)||line.contains(END_COLLECTION_SYMBOL))) {
-        	reader.mark(100000);
+        while (!(line==null||line.contains(QUERY_ITEM)||line.contains(QUERY_GROUP)||line.contains(END_COLLECTION_SYMBOL))) {
+            reader.mark(100000);
             buffer.append(line + "\n");
             line = reader.readLine();
         }
