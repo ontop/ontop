@@ -2,32 +2,27 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.util.URIref;
 
 public class QuestResultset implements OBDAResultSet {
 
@@ -36,9 +31,9 @@ public class QuestResultset implements OBDAResultSet {
 	private Vector<String> signature;
 
 	private HashMap<String, Integer> columnMap = new HashMap<String, Integer>();
-//	private List<Term> signatureTyping;
+	// private List<Term> signatureTyping;
 
-//	private HashMap<String, Term> typingMap = new HashMap<String, Term>();
+	// private HashMap<String, Term> typingMap = new HashMap<String, Term>();
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -67,53 +62,53 @@ public class QuestResultset implements OBDAResultSet {
 
 	}
 
-//	/***
-//	 * Returns a COL_TYPE that describes the type of the given column in this
-//	 * result set. The type is determined by the mapping of RDF Datatypes to
-//	 * COL_TYPE see in OBDAVocabulary.
-//	 * 
-//	 * @param column
-//	 * @return
-//	 */
-//	public COL_TYPE getType(int column) {
-//		Term term = signatureTyping.get(column);
-//		if (term instanceof Variable) {
-//			// Variables without a data-type function have no data-type!
-//			return null;
-//		} else if (term instanceof Constant) {
-//			Constant constant = (Constant) term;
-//			if (constant instanceof ValueConstant) {
-//				return ((ValueConstant) constant).getType();
-//			} else if (constant instanceof URIConstant) {
-//				return COL_TYPE.OBJECT;
-//			} else if (constant instanceof BNode) {
-//				return COL_TYPE.BNODE;
-//			}
-//		} else if (term instanceof Function) {
-//			Predicate function = ((Function) term).getFunctionSymbol();
-//			if (function == OBDAVocabulary.XSD_BOOLEAN) {
-//				return COL_TYPE.BOOLEAN;
-//			} else if (function == OBDAVocabulary.XSD_DATETIME) {
-//				return COL_TYPE.DATETIME;
-//			} else if (function == OBDAVocabulary.XSD_DECIMAL) {
-//				return COL_TYPE.DECIMAL;
-//			} else if (function == OBDAVocabulary.XSD_DOUBLE) {
-//				return COL_TYPE.DOUBLE;
-//			} else if (function == OBDAVocabulary.XSD_INTEGER) {
-//				return COL_TYPE.INTEGER;
-//			} else if (function == OBDAVocabulary.XSD_STRING) {
-//				return COL_TYPE.STRING;
-//			} else if (function == OBDAVocabulary.RDFS_LITERAL) {
-//				return COL_TYPE.LITERAL;
-//			} else if (function.getName().equals(OBDAVocabulary.QUEST_URI)) {
-//				return COL_TYPE.OBJECT;
-//			} else if (function.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
-//				return COL_TYPE.BNODE;
-//			}
-//		}
-//		// For other kind of term class.
-//		return null;
-//	}
+	// /***
+	// * Returns a COL_TYPE that describes the type of the given column in this
+	// * result set. The type is determined by the mapping of RDF Datatypes to
+	// * COL_TYPE see in OBDAVocabulary.
+	// *
+	// * @param column
+	// * @return
+	// */
+	// public COL_TYPE getType(int column) {
+	// Term term = signatureTyping.get(column);
+	// if (term instanceof Variable) {
+	// // Variables without a data-type function have no data-type!
+	// return null;
+	// } else if (term instanceof Constant) {
+	// Constant constant = (Constant) term;
+	// if (constant instanceof ValueConstant) {
+	// return ((ValueConstant) constant).getType();
+	// } else if (constant instanceof URIConstant) {
+	// return COL_TYPE.OBJECT;
+	// } else if (constant instanceof BNode) {
+	// return COL_TYPE.BNODE;
+	// }
+	// } else if (term instanceof Function) {
+	// Predicate function = ((Function) term).getFunctionSymbol();
+	// if (function == OBDAVocabulary.XSD_BOOLEAN) {
+	// return COL_TYPE.BOOLEAN;
+	// } else if (function == OBDAVocabulary.XSD_DATETIME) {
+	// return COL_TYPE.DATETIME;
+	// } else if (function == OBDAVocabulary.XSD_DECIMAL) {
+	// return COL_TYPE.DECIMAL;
+	// } else if (function == OBDAVocabulary.XSD_DOUBLE) {
+	// return COL_TYPE.DOUBLE;
+	// } else if (function == OBDAVocabulary.XSD_INTEGER) {
+	// return COL_TYPE.INTEGER;
+	// } else if (function == OBDAVocabulary.XSD_STRING) {
+	// return COL_TYPE.STRING;
+	// } else if (function == OBDAVocabulary.RDFS_LITERAL) {
+	// return COL_TYPE.LITERAL;
+	// } else if (function.getName().equals(OBDAVocabulary.QUEST_URI)) {
+	// return COL_TYPE.OBJECT;
+	// } else if (function.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
+	// return COL_TYPE.BNODE;
+	// }
+	// }
+	// // For other kind of term class.
+	// return null;
+	// }
 
 	public double getDouble(int column) throws OBDAException {
 		try {
@@ -210,13 +205,12 @@ public class QuestResultset implements OBDAResultSet {
 		Constant result = null;
 
 		try {
-			
 
-			 COL_TYPE type = getQuestType(set.getByte(name + "QuestType"));
+			COL_TYPE type = getQuestType(set.getByte(name + "QuestType"));
 
 			if (type == COL_TYPE.OBJECT || type == null) {
-				String value = set.getString(name);
-				result = fac.getURIConstant(URI.create(value));
+				URI value = getURI(name);
+				result = fac.getURIConstant(value);
 			} else if (type == COL_TYPE.BNODE) {
 				result = fac.getBNodeConstant(set.getString(name));
 			} else {
@@ -257,9 +251,11 @@ public class QuestResultset implements OBDAResultSet {
 		} catch (IllegalArgumentException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof URISyntaxException) {
-				throw new OBDAException(
+				OBDAException ex = new OBDAException(
 						"Error creating an object's URI. This is often due to mapping with URI templates that refer to columns in which illegal values may appear, e.g., white spaces and special characters. To avoid this error do not use these columns for URI templates in your mappings, or process them using SQL functions (e.g., string replacement) in the SQL queries of your mappings. Note that this last option can be bad for performance, future versions of Quest will allow to string manipulation functions in URI templates to avoid these performance problems."
 								+ "\n\nDetailed message: " + cause.getMessage());
+				ex.setStackTrace(e.getStackTrace());
+				throw ex;
 			}
 			throw e;
 		} catch (SQLException e) {
@@ -293,11 +289,14 @@ public class QuestResultset implements OBDAResultSet {
 
 	@Override
 	public URI getURI(String name) throws OBDAException {
+		String result = "";
 		try {
-			return URI.create(set.getString(name));
+			result = set.getString(name);
+			String encoded = URIref.encode(result);
+			return URI.create(encoded);
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
-		}
+		} 
 	}
 
 	@Override
