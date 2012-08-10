@@ -2,6 +2,9 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.io.AbstractPrefixManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
@@ -12,7 +15,7 @@ import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
  */
 public class PrefixManagerWrapper extends AbstractPrefixManager {
 
-	PrefixOWLOntologyFormat	owlmapper;
+	PrefixOWLOntologyFormat owlmapper;
 
 	public PrefixManagerWrapper(PrefixOWLOntologyFormat owlmapper) {
 		this.owlmapper = owlmapper;
@@ -56,5 +59,15 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	@Override
 	public void clear() {
 		owlmapper.clearPrefixes();
+	}
+
+	@Override
+	public List<String> getNamespaceList() {
+		ArrayList<String> namespaceList = new ArrayList<String>();
+		for (String uri : getPrefixMap().values()) {
+			namespaceList.add(uri);
+		}
+		Collections.sort(namespaceList, Collections.reverseOrder());
+		return namespaceList;
 	}
 }

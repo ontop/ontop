@@ -1,6 +1,9 @@
 package it.unibz.krdb.obda.io;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
@@ -76,5 +79,15 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	public void clear() {
 		prefixToURIMap.clear();
 		uriToPrefixMap.clear();
+	}
+
+	@Override
+	public List<String> getNamespaceList() {
+		ArrayList<String> namespaceList = new ArrayList<String>();
+		for (String uri : getPrefixMap().values()) {
+			namespaceList.add(uri);
+		}
+		Collections.sort(namespaceList, Collections.reverseOrder());
+		return namespaceList;
 	}
 }
