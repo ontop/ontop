@@ -1132,11 +1132,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		DAGOperations.buildAncestors(dag);
 		DAGOperations.buildDescendants(dag);
 
-		 try {
-		 GraphGenerator.dumpISA(dag,"sidag");
-		 } catch (IOException e) {
-		 // e.printStackTrace();
-		 }
+//		 try {
+//		 GraphGenerator.dumpISA(dag,"sidag");
+//		 } catch (IOException e) {
+//		 // e.printStackTrace();
+//		 }
 
 		Set<DAGNode> roleNodes = new HashSet<DAGNode>();
 		Map<DAGNode, List<DAGNode>> roleInverseMaps = new HashMap<DAGNode, List<DAGNode>>();
