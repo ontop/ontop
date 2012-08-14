@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.codec;
 
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
@@ -17,6 +18,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
@@ -61,7 +63,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					predicate = "<" + predicate + ">";
 				object = getDisplayName(atom.getTerm(1));
 			}
-			
+
 			turtle.put(subject, predicate, object);
 		}
 		return turtle.print();
@@ -77,9 +79,51 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	/**
 	 * Prints the short form of the predicate (by omitting the complete URI and
 	 * replacing it by a prefix name).
+	 * 
+	 * Note that by default this method will consider a set of predefined
+	 * prefixes, i.e., rdf:, rdfs:, owl:, xsd: and quest: To support this
+	 * prefixes the method will temporally add the prefixes if they dont exist
+	 * already, taken care to remove them if they didn't exist.
+	 * 
+	 * The implementation requires at the moment, the implementation requires
+	 * cloning the existing prefix manager, and hence this is highly inefficient
+	 * method. *
 	 */
 	private String getAbbreviatedName(String uri, boolean insideQuotes) {
-		return prefMan.getShortForm(uri, insideQuotes);
+		
+		/* cloning the existing manager */
+		
+		PrefixManager prefManClone = new SimplePrefixManager();
+		Map<String,String> currentMap = this.prefMan.getPrefixMap();
+		for (String prefix: currentMap.keySet()) {
+			prefManClone.addPrefix(prefix.substring(0,prefix.length()), this.prefMan.getURIDefinition(prefix));
+		}
+
+		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
+		boolean containsRDFPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDF);
+		boolean containsRDFSPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDFS);
+		boolean containsOWLPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_OWL);
+		boolean containsQUESTPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_QUEST);
+
+		if (!containsXSDPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
+		}
+		if (!containsRDFPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDF, OBDAVocabulary.NS_RDF);
+		}
+		if (!containsRDFSPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
+		}
+		if (!containsOWLPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
+		}
+		if (!containsQUESTPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
+		}
+
+		String shortForm = prefManClone.getShortForm(uri, insideQuotes);
+
+		return shortForm;
 	}
 
 	/**
@@ -117,19 +161,20 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					sb.append(fname);
 				}
 			} else {
-				if (fname.equals("quest:uri")) { // TODO: Make this as a BuildinPredicate
+				if (fname.equals("quest:uri")) { // TODO: Make this as a
+													// BuildinPredicate
 					String uriTemplate = function.getTerms().get(0).toString();
-					
+
 					// Shorten the URI if possible
 					uriTemplate = getAbbreviatedName(uriTemplate, true);
-					
+
 					sb.append("<");
-					sb.append("\"");					
+					sb.append("\"");
 					StringTokenizer st = new StringTokenizer(uriTemplate, "}", true);
 					for (Term innerTerm : function.getTerms()) {
 						if (innerTerm instanceof Variable) {
 							while (st.hasMoreTokens()) {
-								String token = st.nextToken();								
+								String token = st.nextToken();
 								if (token.equals("}")) {
 									sb.append(getDisplayName(innerTerm));
 									sb.append("}");
@@ -139,7 +184,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 								}
 							}
 						}
-					}					
+					}
 					while (st.hasMoreTokens()) {
 						// Append the rest of the tokens, if exist
 						sb.append(st.nextToken());
@@ -165,13 +210,18 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			sb.append("$");
 			sb.append(term.toString());
 		} else if (term instanceof URIConstant) {
-			String originalUri = term.toString();			
-			String abbreviatedUri = getAbbreviatedName(originalUri, false); // Shorten the URI if possible
-			
+			String originalUri = term.toString();
+			String abbreviatedUri = getAbbreviatedName(originalUri, false); // Shorten
+																			// the
+																			// URI
+																			// if
+																			// possible
+
 			if (!abbreviatedUri.equals(originalUri)) {
 				sb.append(abbreviatedUri);
 			} else {
-				// If the URI can't be shorten then use the full URI within brackets
+				// If the URI can't be shorten then use the full URI within
+				// brackets
 				sb.append("<");
 				sb.append(originalUri);
 				sb.append(">");
@@ -183,7 +233,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		}
 		return sb.toString();
 	}
-	
+
 	private boolean isLiteralDataType(Predicate predicate) {
 		return predicate.equals(OBDAVocabulary.RDFS_LITERAL);
 	}

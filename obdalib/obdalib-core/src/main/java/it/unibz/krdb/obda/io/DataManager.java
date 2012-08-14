@@ -17,11 +17,11 @@ import it.unibz.krdb.obda.codec.MappingXMLCodec;
 import it.unibz.krdb.obda.codec.QueryGroupXMLReader;
 import it.unibz.krdb.obda.codec.QueryGroupXMLRenderer;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
@@ -57,7 +57,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.query.QueryParseException;
 
@@ -305,9 +304,9 @@ public class DataManager {
 	 * Append here all default prefixes used by the system.
 	 */
 	private void addOBDADefaultPrefixes(PrefixManager prefixManager) {
-		if (!prefixManager.contains("quest:")) {
-			prefixManager.addPrefix("quest:", "http://obda.org/quest#");
-		}
+//		if (!prefixManager.contains("quest:")) {
+//			prefixManager.addPrefix("quest:", OBDAVocabulary.QUEST_NS);
+//		}
 	}
 
 	/**

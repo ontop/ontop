@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlapi3.OBDAModelRefactorer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -314,7 +315,7 @@ public class OBDAModelManager implements Disposable {
 
 		// Setup the prefixes
 		PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
-		addOBDACommonPrefixes(prefixManager);
+//		addOBDACommonPrefixes(prefixManager);
 
 		PrefixManagerWrapper prefixwrapper = new PrefixManagerWrapper(prefixManager);
 		activeOBDAModel.setPrefixManager(prefixwrapper);
@@ -333,14 +334,19 @@ public class OBDAModelManager implements Disposable {
 		obdamodels.put(modelUri, activeOBDAModel);
 	}
 
-	/**
-	 * Append here all default prefixes used by the system.
-	 */
-	private void addOBDACommonPrefixes(PrefixOWLOntologyFormat prefixManager) {
-		if (!prefixManager.containsPrefixMapping("quest")) {
-			prefixManager.setPrefix("quest", "http://obda.org/quest#");
-		}
-	}
+//	/**
+//	 * Append here all default prefixes used by the system.
+//	 */
+//	private void addOBDACommonPrefixes(PrefixOWLOntologyFormat prefixManager) {
+//		if (!prefixManager.containsPrefixMapping("quest")) {
+////			sb.append("@PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> .\n");
+////			sb.append("@PREFIX rdfs: <http:  //www.w3.org/2000/01/rdf-schema#> .\n");
+////			sb.append("@PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n");
+////			sb.append("@PREFIX owl: <http://www.w3.org/2002/07/owl#> .\n");
+//
+//			prefixManager.setPrefix("quest", OBDAVocabulary.QUEST_NS);
+//		}
+//	}
 
 	public QueryController getQueryController() {
 		if (queryController == null) {

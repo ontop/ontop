@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.Map;
 
@@ -65,7 +66,8 @@ public class TurtleSyntaxParser {
 		}
 
 		ANTLRStringStream inputStream = new ANTLRStringStream(bf.toString());
-		TurtleLexer lexer= new TurtleLexer(inputStream);;
+		TurtleLexer lexer = new TurtleLexer(inputStream);
+		;
 		CommonTokenStream tokenStream;
 		try {
 			tokenStream = new CommonTokenStream(lexer);
@@ -82,9 +84,9 @@ public class TurtleSyntaxParser {
 		return output;
 	}
 
-	
-	
 	/**
+	 * The turtle syntax predefines the quest, rdf, rdfs and owl prefixes.
+	 * 
 	 * Adds directives to the query header from the PrefixManager.
 	 */
 	private void appendDirectives(StringBuffer query) {
@@ -103,6 +105,12 @@ public class TurtleSyntaxParser {
 			sb.append(" .\n");
 
 		}
+		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_XSD + " <" + OBDAVocabulary.NS_XSD + "> .\n");
+		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_QUEST + " <" + OBDAVocabulary.NS_QUEST + "> .\n");
+		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_RDF + " <" + OBDAVocabulary.NS_RDF + "> .\n");
+		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_RDFS + " <" + OBDAVocabulary.NS_RDFS + "> .\n");
+		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_OWL + " <" + OBDAVocabulary.NS_OWL + "> .\n");
+
 		query.insert(0, sb);
 
 	}

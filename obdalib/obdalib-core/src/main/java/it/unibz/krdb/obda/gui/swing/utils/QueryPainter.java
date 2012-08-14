@@ -178,6 +178,7 @@ public class QueryPainter {
 	private void handleDocumentUpdated() {
 		timer.restart();
 		clearError();
+		
 		// performHighlighting();
 	}
 
@@ -323,6 +324,10 @@ public class QueryPainter {
 
 		invalidQuery = doc.addStyle("INVALID_STYLE", null);
 		StyleConstants.setForeground(invalidQuery, INVALID);
+		
+		foreground =  doc.addStyle("FOREGROUND", null);
+		StyleConstants.setForeground(foreground, Color.black);
+		 
 
 		/****
 		 * Snippets
@@ -360,11 +365,18 @@ public class QueryPainter {
 	}
 
 	private void resetStyles() {
-		doc.setParagraphAttributes(0, doc.getLength(), plainStyle, true);
+//		doc.setParagraphAttributes(0, doc.getLength(), plainStyle, true);
+		
 		StyleConstants.setFontSize(fontSizeStyle, getFontSize());
 		Font f = plainFont;
+		
+		
+		
 		StyleConstants.setFontFamily(fontSizeStyle, f.getFamily());
-		doc.setParagraphAttributes(0, doc.getLength(), fontSizeStyle, false);
+		StyleConstants.setForeground(fontSizeStyle, Color.black);
+		fontSizeStyle.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
+		doc.setParagraphAttributes(0, doc.getLength(), fontSizeStyle, true);
+		
 		setupFont();
 
 	}
@@ -411,6 +423,13 @@ public class QueryPainter {
 			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
 
 		input = doc.getText(0, doc.getLength());
+		
+		resetStyles();
+		
+//		if (true)
+//			return;
+		
+//		doc.setCharacterAttributes(0, doc.getLength(), , false);
 
 		int pos = input.indexOf("(", 0);
 		while (pos != -1) {
@@ -472,12 +491,13 @@ public class QueryPainter {
 
 		}
 
+		
 		ColorTask[] taskArray = order(tasks);
 		for (int i = 0; i < taskArray.length; i++) {
 			if (taskArray[i].text != null) {
 				int index = input.indexOf(taskArray[i].text, 0);
 				while (index != -1) {
-					doc.setCharacterAttributes(index, taskArray[i].text.length(), taskArray[i].set, false);
+					doc.setCharacterAttributes(index, taskArray[i].text.length(), taskArray[i].set, true);
 					index = input.indexOf(taskArray[i].text, index + 1);
 				}
 			}

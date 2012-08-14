@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.net.URI;
 import java.util.Collection;
@@ -147,7 +148,7 @@ public class MappingVocabularyRepair {
 			// no fix nexessary
 			return term;
 		}
-		if (predicate.getName().toString().equals("http://obda.org/quest#uri")) {
+		if (predicate.getName().toString().equals(OBDAVocabulary.QUEST_URI)) {
 			// no fix necessary
 			return term;
 		}

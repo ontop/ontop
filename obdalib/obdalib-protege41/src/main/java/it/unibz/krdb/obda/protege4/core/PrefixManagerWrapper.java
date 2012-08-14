@@ -38,7 +38,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 
 	@Override
 	public Map<String, String> getPrefixMap() {
-		return owlmapper.getPrefixName2PrefixMap();
+		return Collections.unmodifiableMap(owlmapper.getPrefixName2PrefixMap());
 	}
 
 	@Override
@@ -70,4 +70,6 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
 	}
+
+	
 }

@@ -544,7 +544,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 							sb.append(jdbcutil.getSQLLexicalForm(c));
 						}
 					}
-				} else if (functionString.equals("http://obda.org/quest#uri")) {
+				} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
 					/***
 					 * New template based URI building functions
 					 */
@@ -712,7 +712,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						result.append(")");
 					}
 				}
-			} else if (function.getFunctionSymbol().toString().equals("http://obda.org/quest#uri")) {
+			} else if (function.getFunctionSymbol().toString().equals(OBDAVocabulary.QUEST_URI)) {
 				result.append(getSQLStringForURIFunction(function, body, tableName, viewName, varAtomIndex, varAtomTermIndex, true));
 				
 			} else {

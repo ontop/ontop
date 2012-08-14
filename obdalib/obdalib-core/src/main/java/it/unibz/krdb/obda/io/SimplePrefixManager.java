@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
@@ -28,6 +29,15 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 
 	@Override
 	public void addPrefix(String prefix, String uri) {
+		
+		if (uri == null) {
+			throw new NullPointerException("Prefix name must not be null");
+		}
+		if (!prefix.endsWith(":")) {
+			throw new IllegalArgumentException(
+					"Prefix names must end with a colon (:)");
+		}
+		
 		prefixToURIMap.put(prefix, getProperPrefixURI(uri));
 		uriToPrefixMap.put(getProperPrefixURI(uri), prefix);
 	}
@@ -60,8 +70,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 * 
 	 * @return a hash map
 	 */
-	public HashMap<String, String> getPrefixMap() {
-		return prefixToURIMap;
+	public Map<String, String> getPrefixMap() {
+		return Collections.unmodifiableMap(prefixToURIMap);
 	}
 
 	/**
@@ -90,4 +100,5 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
 	}
+
 }
