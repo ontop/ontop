@@ -96,7 +96,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		PrefixManager prefManClone = new SimplePrefixManager();
 		Map<String,String> currentMap = this.prefMan.getPrefixMap();
 		for (String prefix: currentMap.keySet()) {
-			prefManClone.addPrefix(prefix.substring(0,prefix.length()), this.prefMan.getURIDefinition(prefix));
+			prefManClone.addPrefix(prefix, this.prefMan.getURIDefinition(prefix));
 		}
 
 		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
