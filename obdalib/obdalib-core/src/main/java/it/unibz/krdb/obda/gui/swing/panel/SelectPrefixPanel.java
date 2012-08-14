@@ -6,6 +6,8 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -35,8 +37,43 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	/** Creates new form SelectPrefixDialog */
 	public SelectPrefixPanel(PrefixManager manager, JTextPane parent) {
 		super();
-		prefixMap = manager.getPrefixMap();
+
+		/* cloning the existing manager */
+
+		PrefixManager prefManClone = new SimplePrefixManager();
+		Map<String, String> currentMap = manager.getPrefixMap();
+		for (String prefix : currentMap.keySet()) {
+			prefManClone.addPrefix(prefix, manager.getURIDefinition(prefix));
+		}
+		prefixMap = prefManClone.getPrefixMap();
 		querypane = parent;
+
+		/*
+		 * Adding predefined prefixes
+		 */
+
+		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
+		boolean containsRDFPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDF);
+		boolean containsRDFSPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDFS);
+		boolean containsOWLPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_OWL);
+		boolean containsQUESTPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_QUEST);
+
+		if (!containsXSDPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
+		}
+		if (!containsRDFPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDF, OBDAVocabulary.NS_RDF);
+		}
+		if (!containsRDFSPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
+		}
+		if (!containsOWLPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
+		}
+		if (!containsQUESTPrefix) {
+			prefManClone.addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
+		}
+
 		initComponents();
 		drawCheckBoxes();
 	}
@@ -58,9 +95,9 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	private boolean isBasePrefix(String prefix) {
 		return (prefix.equals(":")) ? true : false;
 	}
-	
+
 	private void drawCheckBoxes() {
-		
+
 		checkboxes = new Vector<JCheckBox>();
 		int gridYIndex = 1;
 		for (String key : prefixMap.keySet()) {
@@ -78,7 +115,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : gridYIndex;
 				gridBagConstraints.weightx = 0.0;
 				jPanel2.add(jCheckBox1, gridBagConstraints);
-				
+
 				jLabel1 = new JLabel();
 				jLabel1.setText("<" + prefixMap.get(key) + ">");
 				jLabel1.setPreferredSize(new Dimension(350, 15));
@@ -90,7 +127,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : gridYIndex;
 				gridBagConstraints.weightx = 1.0;
 				jPanel2.add(jLabel1, gridBagConstraints);
-				
+
 				// Arrange the check-box list
 				if (isBasePrefix(key)) {
 					// Always put the base prefix on top of the list.
@@ -98,7 +135,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				} else {
 					checkboxes.add(jCheckBox1);
 				}
-				
+
 				// Increase the index Y counter
 				gridYIndex++;
 			}
