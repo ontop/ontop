@@ -109,6 +109,7 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 				innertermlist.addListener(this);
 			}
 		}
+		listChanged();
 	}
 
 	public Atom clone() {
@@ -209,6 +210,7 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 
 	@Override
 	public Term setTerm(int index, Term newTerm) {
+		listChanged();
 		return terms.set(index, newTerm);
 	}
 

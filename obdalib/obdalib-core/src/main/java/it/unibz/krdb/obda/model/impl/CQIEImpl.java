@@ -90,6 +90,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void updateBody(List<Atom> body) {
 		this.body.clear();
 		this.body.addAll(body);
+		listChanged();
 	}
 
 	@Override
@@ -164,6 +165,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
+		listChanged();
 	}
 
 	@Override
