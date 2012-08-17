@@ -3,6 +3,7 @@ package it.unibz.krdb.sql;
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -97,10 +98,23 @@ public class DBMetadata implements Serializable {
 	}
 	
 	/**
+	 * Retrieves the relation list (table and view definition) form the metadata.
+	 */
+	public List<DataDefinition> getRelationList() {
+		return new ArrayList<DataDefinition>(schema.values());
+	}
+	
+	/**
 	 * Retrieves the table list form the metadata.
 	 */
-	public List<DataDefinition> getTableList() {
-		return (List<DataDefinition>) schema.values();
+	public List<TableDefinition> getTableList() {
+		List<TableDefinition> tableList = new ArrayList<TableDefinition>();
+		for (DataDefinition dd : getRelationList()) {
+			if (dd instanceof TableDefinition) {
+				tableList.add((TableDefinition) dd);
+			}
+		}
+		return tableList;
 	}
 
 	/**
