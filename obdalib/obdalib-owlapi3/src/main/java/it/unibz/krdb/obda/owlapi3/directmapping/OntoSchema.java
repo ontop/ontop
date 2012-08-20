@@ -4,16 +4,13 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Set;
 
-import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -28,7 +25,7 @@ public class OntoSchema {
 	private String baseURI;
 	
 	public OntoSchema(){
-		this.baseURI=new String(":");
+		this.baseURI=new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
 	}
 	
 	public OntoSchema(DataDefinition dd){
@@ -59,13 +56,11 @@ public class OntoSchema {
 	
 	public void addClass(OWLOntology rootOntology) throws OWLOntologyStorageException{
 		if(!existClass(rootOntology)){
-			OWLOntologyManager manager =rootOntology.getOWLOntologyManager();
+			OWLOntologyManager manager =rootOntology.getOWLOntologyManager();		
 			OWLDataFactory dataFactory = manager.getOWLDataFactory();
 			OWLClass newclass = dataFactory.getOWLClass(IRI.create(baseURI+this.tablename));
-			OWLClass thing = dataFactory.getOWLThing();
-			OWLAxiom axiom = dataFactory.getOWLSubClassOfAxiom(newclass, thing);
-			AddAxiom addAxiom = new AddAxiom(rootOntology, axiom);
-			manager.applyChange(addAxiom);
+			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
+			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
 	}
@@ -84,19 +79,15 @@ public class OntoSchema {
 		OWLOntologyManager manager =rootOntology.getOWLOntologyManager();
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		if(!existDataProperty(rootOntology, at)){
-			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(baseURI+this.tablename+"#"+new String(at.name)));
-			OWLDataProperty topDataProperty = dataFactory.getOWLTopDataProperty();
-			OWLAxiom axiom = dataFactory.getOWLSubDataPropertyOfAxiom(newdproperty, topDataProperty);
-			AddAxiom addAxiom = new AddAxiom(rootOntology, axiom);
-			manager.applyChange(addAxiom);
+			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(baseURI+this.tablename+"-"+new String(at.name)));
+			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newdproperty);
+			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
 		if(at.bForeignKey && !existObjectProperty(rootOntology, at)){
-			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(baseURI+this.tablename+"#ref-"+new String(at.name)));
-			OWLObjectProperty topObjectProperty = dataFactory.getOWLTopObjectProperty();
-			OWLAxiom axiom = dataFactory.getOWLSubObjectPropertyOfAxiom(newoproperty, topObjectProperty);
-			AddAxiom addAxiom = new AddAxiom(rootOntology, axiom);
-			manager.applyChange(addAxiom);
+			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(baseURI+this.tablename+"-ref-"+new String(at.name)));
+			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newoproperty);
+			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
 	}
@@ -104,7 +95,7 @@ public class OntoSchema {
 	private boolean existDataProperty(OWLOntology rootOntology, Attribute at){
 		boolean existDataProperty=false;
 		for(OWLDataProperty dtpp : rootOntology.getDataPropertiesInSignature()){
-			if(dtpp.toString().contains(this.tablename+"#"+at.name+">")){
+			if(dtpp.toString().contains(this.tablename+"-"+at.name+">")){
 				existDataProperty=true;
 			}
 		}
@@ -114,7 +105,7 @@ public class OntoSchema {
 	private boolean existObjectProperty(OWLOntology rootOntology, Attribute at){
 		boolean existObjectProperty=false;
 		for(OWLObjectProperty obpp : rootOntology.getObjectPropertiesInSignature()){
-			if(obpp.toString().contains(this.tablename+"#ref-"+at.name+">")){
+			if(obpp.toString().contains(this.tablename+"-ref-"+at.name+">")){
 				existObjectProperty=true;
 			}
 		}
