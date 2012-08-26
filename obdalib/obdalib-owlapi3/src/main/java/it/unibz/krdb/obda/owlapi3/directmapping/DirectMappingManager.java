@@ -18,16 +18,24 @@ public class DirectMappingManager {
 	private DatabaseMetaData md;
 	private DBMetadata obdamd;
 	private List<DirectMappingAxiom> DMList;
+	private String baseuri;
 	
 	public DirectMappingManager(){
 		this.DMList=new ArrayList<DirectMappingAxiom>();
+		this.baseuri = new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
 	}
 	
 	public DirectMappingManager(DatabaseMetaData md, DBMetadata obdamd){
 		this.DMList=new ArrayList<DirectMappingAxiom>();
 		this.md = md;
 		this.obdamd = obdamd;
+		this.baseuri = new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
 	}
+	
+	public void setBaseURI(String uri){
+		this.baseuri = uri;
+	}
+	
 	
 	public List<DirectMappingAxiom> getDirectMapping() throws RecognitionException{
 		return DMList;
@@ -37,10 +45,12 @@ public class DirectMappingManager {
 		for(int i=0;i<this.obdamd.getTableList().size();i++){
 			if(existPK(this.obdamd.getTableList().get(i))){
 				DirectMappingAxiomBasic temp = new DirectMappingAxiomBasic(obdamd.getTableList().get(i),md, obdamd);
+				temp.setBaseURI(this.baseuri);
 				temp.generateCQ();
 				this.DMList.add(new DirectMappingAxiom(temp));
 			}else if(numFK(this.obdamd.getTableList().get(i))>1){
 				DirectMappingAxiomN_Ary temp = new DirectMappingAxiomN_Ary(obdamd.getTableList().get(i),md, obdamd);
+				temp.setBaseURI(this.baseuri);
 				temp.generateCQ();
 				this.DMList.add(new DirectMappingAxiom(temp));
 			}

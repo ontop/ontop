@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.owlapi3.directmapping;
 
+import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 
@@ -11,6 +15,7 @@ public class DirectMappingAxiom {
 	protected DataDefinition table;
 	protected String SQLString;
 	protected String CQString;
+	protected String baseuri;
 	
 	public DirectMappingAxiom(){		
 	}
@@ -24,16 +29,29 @@ public class DirectMappingAxiom {
 	
 	public DirectMappingAxiom(DirectMappingAxiom dmab){
 		this.SQLString = new String(dmab.getSQL());
-		this.CQString = new String(dmab.getCQ());
+		this.CQString = new String(dmab.getCQString());
+		this.baseuri = new String(dmab.getbaseuri());
 	}
+	
 	
 	
 	public String getSQL(){
 		return this.SQLString;
 	}
 	
-	public String getCQ(){
-		return this.CQString;
+	public String getbaseuri(){
+		return baseuri;
+	}
+	
+	public CQIE getCQ() throws Exception{
+		PrefixManager pm = new SimplePrefixManager();
+		pm.addPrefix(":", this.baseuri);
+		TurtleSyntaxParser tsp = new TurtleSyntaxParser(pm);
+		return tsp.parse(CQString);
+	}
+	
+	public String getCQString(){
+		return CQString;
 	}
 	
 	
@@ -43,6 +61,10 @@ public class DirectMappingAxiom {
 	
 	public void setDBMD(DatabaseMetaData md){
 		this.md = md;
+	}
+	
+	public void setBaseURI(String uri){
+		this.baseuri = new String(uri);		
 	}
 
 }
