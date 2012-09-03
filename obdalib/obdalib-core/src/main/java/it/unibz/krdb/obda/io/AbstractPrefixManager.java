@@ -6,10 +6,12 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 
 	public abstract List<String> getNamespaceList();
 	
+	@Override
 	public String getShortForm(String uri) {
 		return getShortForm(uri, false);
 	}
 	
+	@Override
 	public String getShortForm(String uri, boolean insideQuotes) {
 		final List<String> namespaceList = getNamespaceList();
 		
@@ -39,6 +41,54 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		return shortUri;
 	}
 	
+	@Override
+	public String getExpandForm(String prefixedName) {
+		return getExpandForm(prefixedName, false);
+	}
+	
+	@Override
+	public String getExpandForm(String prefixedName, boolean insideQuotes) {
+		String prefix = "";
+		String prefixPlaceHolder = "";
+		
+		/* Clean the URI string from "<...>" signs, if they exist.
+		 * e.g., "<&ex;Book>" --> "&ex;Book"
+		 */
+		if (prefixedName.contains("<") && prefixedName.contains(">")) {
+			prefixedName = prefixedName.replace("<", "").replace(">", "");
+		}
+		
+		if (insideQuotes) {
+			// &ex;Book
+			int start = prefixedName.indexOf("&");
+			int end = prefixedName.indexOf(";");
+
+			// extract the whole prefix placeholder, e.g., "&ex;Book" --> "&ex;"
+			prefixPlaceHolder = prefixedName.substring(start, end + 1);
+
+			// extract the prefix name, e.g., "&ex;" --> "ex:"
+			prefix = prefixPlaceHolder.substring(1, prefixPlaceHolder.length() - 1);
+			if (!prefix.equals(":")) {
+				prefix = prefix + ":"; // add a colon
+			}
+		} else {
+			// ex:Book
+			int index = prefixedName.indexOf(":");
+			
+			// extract the whole prefix placeholder, e.g., "ex:Book" --> "ex:"
+			prefixPlaceHolder = prefixedName.substring(0, index);
+			
+			// extract the prefix name
+			prefix = prefixPlaceHolder;
+		}
+		String uri = getURIDefinition(prefix);
+		if (uri == null) {
+			throw new RuntimeException("The prefix name is unknown: " + prefix); // the prefix is unknown.
+		}
+		return prefixedName.replaceFirst(prefixPlaceHolder, uri);
+	}
+	
+	@Override
 	public String getDefaultPrefix() {
 		return getPrefixMap().get(DEFAULT_PREFIX);
 	}
