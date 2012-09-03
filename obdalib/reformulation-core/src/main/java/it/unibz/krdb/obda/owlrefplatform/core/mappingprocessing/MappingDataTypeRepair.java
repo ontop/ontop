@@ -17,11 +17,11 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -110,23 +110,8 @@ public class MappingDataTypeRepair {
         
         Attribute attribute = tableMetadata.getAttribute(pos);
         
-        switch (attribute.type) {
-            case Types.VARCHAR: return dfac.getDataTypePredicateString();
-            case Types.INTEGER:
-            case Types.BIGINT:
-            case Types.SMALLINT: return dfac.getDataTypePredicateInteger();
-            case Types.NUMERIC: // Decimal type for PgSQL
-            case Types.DECIMAL: return dfac.getDataTypePredicateDecimal();
-            case Types.FLOAT:
-            case Types.DOUBLE:
-            case Types.REAL: return dfac.getDataTypePredicateDouble();
-            case Types.DATE: // Date time type for H2
-            case Types.TIMESTAMP: return dfac.getDataTypePredicateDateTime();
-            case Types.BOOLEAN: 
-            case Types.BINARY:
-            case Types.BIT: return dfac.getDataTypePredicateBoolean();
-            default: return dfac.getDataTypePredicateLiteral();
-        }
+        TypeMapper typeMapper = TypeMapper.getInstance();
+        return typeMapper.getPredicate(attribute.type);
     }
     
     private void prepareIndex(CQIE rule) {
