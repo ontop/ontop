@@ -111,7 +111,7 @@ public class MappingDataTypeRepair {
         Attribute attribute = tableMetadata.getAttribute(pos);
         
         TypeMapper typeMapper = TypeMapper.getInstance();
-        return typeMapper.getPredicate(attribute.type);
+        return typeMapper.getPredicate(attribute.getType());
     }
     
     private void prepareIndex(CQIE rule) {

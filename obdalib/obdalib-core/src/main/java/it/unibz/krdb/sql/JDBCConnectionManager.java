@@ -14,6 +14,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -308,7 +309,7 @@ public class JDBCConnectionManager {
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
-				final ArrayList<String> foreignKeys = getForeignKey(md, null, null, tblName);
+				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
 
@@ -319,9 +320,9 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
-						final boolean isForeignKey = foreignKeys.contains(columnName);
+						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isForeignKey, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 
 						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
@@ -358,7 +359,7 @@ public class JDBCConnectionManager {
 
 				final String tblName = rsTables.getString("object_name");
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, null, null, tblName);
-				final ArrayList<String> foreignKeys = getForeignKey(md, null, null, tblName);
+				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
 				
 				TableDefinition td = new TableDefinition(tblName);
 
@@ -369,9 +370,9 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
-						final boolean isForeignKey = foreignKeys.contains(columnName);
+						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isForeignKey, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 
 						// Check if the columns are unique regardless their
 						// letter cases
@@ -408,12 +409,14 @@ public class JDBCConnectionManager {
 	}
 	
 	/* Retrives the foreign key(s) from a table */
-	private static ArrayList<String> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
-		ArrayList<String> fk = new ArrayList<String>();
+	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
+		Map<String, Reference> fk = new HashMap<String, Reference>();
 		ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table);
 		while (rsForeignKeys.next()) {
 			String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
-			fk.add(colName);
+			String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
+			String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
+			fk.put(colName, new Reference(pkTableName, pkColumnName));
 		}
 		return fk;
 	}

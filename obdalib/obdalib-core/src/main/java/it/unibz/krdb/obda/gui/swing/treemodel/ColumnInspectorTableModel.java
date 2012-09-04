@@ -68,10 +68,10 @@ public class ColumnInspectorTableModel implements TableModel {
 		Attribute attr = attributes.get(row);
 		
 		switch(column) {
-			case 0: return attr.name;
-			case 1: return attr.type;
-			case 2: return (attr.bPrimaryKey)? "Yes" : "No";
-			case 3: return (attr.canNull==0)? "No" : "Yes";
+			case 0: return attr.getName();
+			case 1: return attr.getType();
+			case 2: return (attr.isPrimaryKey())? "Yes" : "No";
+			case 3: return (attr.canNull())? "Yes" : "No";
 		}
 		return "";
 	}

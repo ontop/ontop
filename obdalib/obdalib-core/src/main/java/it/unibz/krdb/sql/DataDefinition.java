@@ -36,7 +36,7 @@ public abstract class DataDefinition implements Serializable {
 
 	public String getAttributeName(int pos) {
 		Attribute attribute = attributes.get(pos);
-		return attribute.name;
+		return attribute.getName();
 	}
 
 	public Attribute getAttribute(int pos) {
@@ -66,5 +66,4 @@ public abstract class DataDefinition implements Serializable {
 	public int countAttribute() {
 		return attributes.size();
 	}
-
 }

@@ -112,7 +112,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				List<Integer> pkeyIdx = new LinkedList<Integer>();
 				for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
 					Attribute column = def.getAttribute(columnidx);
-					if (column.bPrimaryKey) {
+					if (column.isPrimaryKey()) {
 						pkeyIdx.add(columnidx);
 					}
 
