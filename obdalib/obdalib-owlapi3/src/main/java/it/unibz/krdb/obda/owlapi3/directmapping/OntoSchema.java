@@ -24,13 +24,22 @@ public class OntoSchema {
 	private List<Attribute> attrList;
 	private String baseURI;
 	
+	//The template IRIs of class, datatype property and objecttype property
+	private String classIRI;
+	private String dataIRI;
+	private String objectIRI;
+	
 	public OntoSchema(){
-		this.baseURI=new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
 	}
 	
 	public OntoSchema(DataDefinition dd){
 		this.tablename=dd.getName();
 		this.attrList=dd.getAttributes();
+		
+		baseURI=new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
+		classIRI=new String(baseURI+"%s");
+		dataIRI=new String(baseURI+"%s"+"#"+"%s");
+		objectIRI=new String(baseURI+"%s"+"#ref-"+"%s");
 	}
 	
 	public void setBaseURI(String uri){
@@ -58,7 +67,9 @@ public class OntoSchema {
 		if(!existClass(rootOntology)){
 			OWLOntologyManager manager =rootOntology.getOWLOntologyManager();		
 			OWLDataFactory dataFactory = manager.getOWLDataFactory();
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(baseURI+this.tablename));
+			
+			//The uri is created according to the class template. The name of the table is percent-encoded.
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(String.format(classIRI, percentEncode(tablename))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
@@ -68,7 +79,7 @@ public class OntoSchema {
 	private boolean existClass(OWLOntology rootOntology){
 		boolean existClass=false;
 		for(OWLClass cls : rootOntology.getClassesInSignature()){
-			if(cls.toString().contains(tablename+">")){
+			if(cls.toString().equalsIgnoreCase("<"+String.format(classIRI, percentEncode(tablename))+">")){
 				existClass=true;
 			}
 		}
@@ -79,13 +90,13 @@ public class OntoSchema {
 		OWLOntologyManager manager =rootOntology.getOWLOntologyManager();
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		if(!existDataProperty(rootOntology, at)){
-			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(baseURI+this.tablename+"-"+new String(at.name)));
+			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newdproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
-		if(at.bForeignKey && !existObjectProperty(rootOntology, at)){
-			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(baseURI+this.tablename+"-ref-"+new String(at.name)));
+		if(at.isForeignKey() && !existObjectProperty(rootOntology, at)){
+			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newoproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
@@ -95,7 +106,7 @@ public class OntoSchema {
 	private boolean existDataProperty(OWLOntology rootOntology, Attribute at){
 		boolean existDataProperty=false;
 		for(OWLDataProperty dtpp : rootOntology.getDataPropertiesInSignature()){
-			if(dtpp.toString().contains(this.tablename+"-"+at.name+">")){
+			if(dtpp.toString().equalsIgnoreCase("<"+String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName()))+">")){
 				existDataProperty=true;
 			}
 		}
@@ -105,11 +116,38 @@ public class OntoSchema {
 	private boolean existObjectProperty(OWLOntology rootOntology, Attribute at){
 		boolean existObjectProperty=false;
 		for(OWLObjectProperty obpp : rootOntology.getObjectPropertiesInSignature()){
-			if(obpp.toString().contains(this.tablename+"-ref-"+at.name+">")){
+			if(obpp.toString().equalsIgnoreCase("<"+String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))+">")){
 				existObjectProperty=true;
 			}
 		}
 		return existObjectProperty;
+	}
+	
+	
+	private String percentEncode(String pe){
+		pe = pe.replace("#", "%23");
+		pe = pe.replace(".", "%2E");
+		pe = pe.replace("-", "%2D");
+		pe = pe.replace("/", "%2F");
+		
+		pe = pe.replace(" ", "%20");
+		pe = pe.replace("!", "%21");
+		pe = pe.replace("$", "%24");
+		pe = pe.replace("&", "%26");
+		pe = pe.replace("'", "%27");
+		pe = pe.replace("(", "%28");
+		pe = pe.replace(")", "%29");
+		pe = pe.replace("*", "%2A");
+		pe = pe.replace("+", "%2B");
+		pe = pe.replace(",", "%2C");
+		pe = pe.replace(":", "%3A");
+		pe = pe.replace(";", "%3B");
+		pe = pe.replace("=", "%3D");
+		pe = pe.replace("?", "%3F");
+		pe = pe.replace("@", "%40");
+		pe = pe.replace("[", "%5B");
+		pe = pe.replace("]", "%5D");
+		return new String(pe);
 	}
 	
 
