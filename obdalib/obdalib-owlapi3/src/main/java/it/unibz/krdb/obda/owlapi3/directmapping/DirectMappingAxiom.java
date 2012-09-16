@@ -99,7 +99,8 @@ public class DirectMappingAxiom {
 		return URI.create(String.format(temple, percentEncode(table)));
 	}
 	
-	/*Generate an URI for datatype property from a string(name of column)
+	/*
+	 * Generate an URI for datatype property from a string(name of column)
 	 * The style should be baseuri#tablename#columnname as required in Direct Mapping Definition
 	 * But Class URI does not accept two "#" in URI construction, since # "means" ending in URI
 	 * "-" is used to constructed the URI at the position of the second "#"
@@ -115,7 +116,14 @@ public class DirectMappingAxiom {
 		return URI.create(String.format(temple, percentEncode(table), percentEncode(column)));
 	}
 	
-	//Generate the subject term of the table
+	/*
+	 * Generate the subject term of the table
+	 * 
+	 * 
+	 * TODO replace URI predicate to BNode predicate for tables without PKs
+	 * 		in the following method after 'else'
+	 */
+	
 	private Term generateSubject(OBDADataFactory df, TableDefinition td){
 		if(td.getPrimaryKeys().size()>0){
 			Predicate uritemple = df.getUriTemplatePredicate(td.getPrimaryKeys().size()+1);
@@ -127,7 +135,19 @@ public class DirectMappingAxiom {
 			return df.getFunctionalTerm(uritemple, terms);
 			
 		}
-		else return df.getBNodeConstant(td.getName());
+		else{
+			StringBuffer columns = new StringBuffer();
+			for(int i=0;i<td.countAttribute();i++){
+				columns.append(td.getAttributeName(i+1));
+			}
+			
+			/*
+			 * TODO replace this predicate with BNode predicate
+			 * 
+			 */
+			Predicate URIStandingForBNode = df.getUriTemplatePredicate(1);			
+			return df.getFunctionalTerm(URIStandingForBNode, df.getVariable(columns.toString()));
+		}
 	}
 	
 	
