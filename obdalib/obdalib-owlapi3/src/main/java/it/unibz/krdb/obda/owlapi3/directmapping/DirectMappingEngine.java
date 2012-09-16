@@ -2,8 +2,14 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -14,6 +20,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.sql.DataDefinition;
@@ -54,7 +61,36 @@ public class DirectMappingEngine {
 	
 	public OWLOntology getOntology(OWLOntologyManager manager, OBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 		OWLOntology ontology = manager.createOntology();
-		enrichOntology(ontology, model);
+		OWLDataFactory dataFactory = manager.getOWLDataFactory();
+		
+		Set<Predicate> classset = model.getDeclaredClasses();
+		Set<Predicate> objectset = model.getDeclaredObjectProperties();
+		Set<Predicate> dataset = model.getDeclaredDataProperties();
+		
+		//Add all the classes
+		for(Iterator<Predicate> it = classset.iterator(); it.hasNext();){
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName()));
+			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
+			manager.addAxiom(ontology,declarationAxiom );
+			manager.saveOntology(ontology);
+		}
+		
+		//Add all the object properties
+		for(Iterator<Predicate> it = objectset.iterator(); it.hasNext();){
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName()));
+			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
+			manager.addAxiom(ontology,declarationAxiom );
+			manager.saveOntology(ontology);
+		}
+		
+		//Add all the data properties
+		for(Iterator<Predicate> it = dataset.iterator(); it.hasNext();){
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName()));
+			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
+			manager.addAxiom(ontology,declarationAxiom );
+			manager.saveOntology(ontology);
+		}
+				
 		return ontology;		
 	}
 	
