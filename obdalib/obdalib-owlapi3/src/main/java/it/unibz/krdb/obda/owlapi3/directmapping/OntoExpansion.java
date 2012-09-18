@@ -11,7 +11,7 @@ public class OntoExpansion {
 	private String baseURI;
 	
 	public OntoExpansion(){
-		this.baseURI=new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
+		this.baseURI=new String("http://example.org#");
 	}
 	
 	public void setURI(String uri){

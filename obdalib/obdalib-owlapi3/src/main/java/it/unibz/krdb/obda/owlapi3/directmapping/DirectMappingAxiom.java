@@ -41,9 +41,10 @@ public class DirectMappingAxiom {
 		
 	public String getSQL(){
 		String SQLStringTemple=new String("SELECT %s FROM %s");
-		String Columns =new String();
-		for(int i=0;i<table.countAttribute();i++){
-			Columns+=table.getAttributeName(i+1);
+		
+		String Columns =new String(table.getAttributeName(1));
+		for(int i=0;i<table.countAttribute()-1;i++){
+			Columns+=", "+table.getAttributeName(i+2);
 		}
 		SQLString=String.format(SQLStringTemple, Columns, this.table.getName());
 		return new String(SQLString);
@@ -93,6 +94,8 @@ public class DirectMappingAxiom {
 		return df.getCQIE(head, atoms);
 	}
 	
+	
+	
 	//Generate an URI for class predicate from a string(name of table)
 	private URI generateClassURI(String table){
 		String temple = new String(baseuri+"%s");
@@ -106,15 +109,17 @@ public class DirectMappingAxiom {
 	 * "-" is used to constructed the URI at the position of the second "#"
 	 */
 	private URI generateDPURI(String table, String column){
-		String temple = new String(baseuri+"%s"+"-"+"%s");	
+		String temple = new String(baseuri+"%s"+"#"+"%s");	
 		return URI.create(String.format(temple, percentEncode(table), percentEncode(column)));
 	}
 	
 	//Generate an URI for object property from a string(name of column)
 	private URI generateOPURI(String table, String column){
-		String temple = new String(baseuri+"%s"+"-ref-"+"%s");
+		String temple = new String(baseuri+"%s"+"#ref-"+"%s");
 		return URI.create(String.format(temple, percentEncode(table), percentEncode(column)));
 	}
+	
+	
 	
 	/*
 	 * Generate the subject term of the table

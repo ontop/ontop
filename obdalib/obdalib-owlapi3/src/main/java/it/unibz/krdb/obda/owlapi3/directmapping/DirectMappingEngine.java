@@ -104,6 +104,7 @@ public class DirectMappingEngine {
 	
 	//Duplicate Exception may happen
 	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
+		this.baseuri =  model.getPrefixManager().getDefaultPrefix();
 		for(int i=0;i<conMan.getMetaData(source).getTableList().size();i++){
 			TableDefinition td = conMan.getMetaData(source).getTableList().get(i);
 			model.addMapping(source.getSourceID(), getMapping(td, source));

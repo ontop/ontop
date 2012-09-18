@@ -36,10 +36,10 @@ public class OntoSchema {
 		this.tablename=dd.getName();
 		this.attrList=dd.getAttributes();
 		
-		baseURI=new String("http://www.semanticweb.org/owlapi/ontologies/ontology#");
+		baseURI=new String("http://example.org#");
 		classIRI=new String(baseURI+"%s");
-		dataIRI=new String(baseURI+"%s"+"#"+"%s");
-		objectIRI=new String(baseURI+"%s"+"#ref-"+"%s");
+		dataIRI=new String(baseURI+"%s"+"-"+"%s");
+		objectIRI=new String(baseURI+"%s"+"-ref-"+"%s");
 	}
 	
 	public void setBaseURI(String uri){
