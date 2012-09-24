@@ -271,6 +271,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty("rewrite", "true");
 
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
@@ -286,6 +287,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty("rewrite", "true");
 
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
@@ -301,6 +303,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty("rewrite", "true");
 
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
@@ -316,6 +319,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty("rewrite", "true");
 
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
@@ -392,7 +396,8 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
+		p.setProperty("rewrite", "true");
+		
 		runTests(p);
 	}
 
@@ -404,6 +409,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setProperty("rewrite", "true");
 
 		runTests(p);
 	}
@@ -421,6 +427,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setProperty("rewrite", "true");
 
 		runTests(p);
 	}
@@ -438,6 +445,7 @@ public class StockExchangeTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setProperty("rewrite", "true");
 
 		runTests(p);
 	}

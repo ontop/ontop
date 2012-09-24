@@ -34,8 +34,8 @@ public class ConfigPanel extends javax.swing.JPanel {
             cmbReformulationMethods.setSelectedIndex(1);
         }
 
-        boolean bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_EQUIVALENCES);
-        chkOptimizeEquivalences.setSelected(bChecked);
+        boolean bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.REWRITE);
+        chkRewrite.setSelected(bChecked);
 
         value = (String) preference.getCurrentValue(QuestPreferences.ABOX_MODE);
         if (value.equals(QuestConstants.VIRTUAL)) {
@@ -126,199 +126,150 @@ public class ConfigPanel extends javax.swing.JPanel {
         mapper = new javax.swing.ButtonGroup();
         datalocationGroup = new javax.swing.ButtonGroup();
         AboxMode = new javax.swing.ButtonGroup();
-        pnlTWOption = new javax.swing.JPanel();
-        lblTechniqueWrapper = new javax.swing.JLabel();
-        cmbTechniqueWrapper = new javax.swing.JComboBox();
-        pnlTWConfiguration = new javax.swing.JPanel();
+        labelNote = new javax.swing.JLabel();
         pnlReformulationMethods = new javax.swing.JPanel();
-        pnlReformulationTechnique = new javax.swing.JPanel();
+        chkRewrite = new javax.swing.JCheckBox();
         lblReformulationTechnique = new javax.swing.JLabel();
         cmbReformulationMethods = new javax.swing.JComboBox();
-        pnlReformulationOption = new javax.swing.JPanel();
-        pnlPadding = new javax.swing.JPanel();
-        chkOptimizeEquivalences = new javax.swing.JCheckBox();
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
         pnlABoxConfiguration = new javax.swing.JPanel();
-        pnlMappingOptions = new javax.swing.JPanel();
-        pnlVirtualMode = new javax.swing.JPanel();
         radVirtualObda = new javax.swing.JRadioButton();
-        lblVirtualModeInfo = new javax.swing.JLabel();
-        pnlClassicMode = new javax.swing.JPanel();
-        pnlClassicalModeInfo = new javax.swing.JPanel();
         radClassicObda = new javax.swing.JRadioButton();
-        lblClassicModeInfo = new javax.swing.JLabel();
-        pnlDatabaseType = new javax.swing.JPanel();
         lblDataStrategy = new javax.swing.JLabel();
         radDirect = new javax.swing.JRadioButton();
         radUniversal = new javax.swing.JRadioButton();
         radSemanticIndex = new javax.swing.JRadioButton();
-        pnlDataLocation = new javax.swing.JPanel();
         lblDataLocation = new javax.swing.JLabel();
         radRemoteDatabase = new javax.swing.JRadioButton();
         radInMemoryDatabase = new javax.swing.JRadioButton();
-        pnlABoxSource = new javax.swing.JPanel();
         lblDataSource = new javax.swing.JLabel();
         chkObtainFromOntology = new javax.swing.JCheckBox();
         chkObtainFromMappings = new javax.swing.JCheckBox();
+        fillerPanel = new javax.swing.JPanel();
 
         setMinimumSize(new java.awt.Dimension(525, 485));
         setPreferredSize(new java.awt.Dimension(525, 485));
-        setLayout(new java.awt.BorderLayout(0, 5));
+        setLayout(new java.awt.GridBagLayout());
 
-        pnlTWOption.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Technique Wrappers"));
-        pnlTWOption.setMinimumSize(new java.awt.Dimension(525, 70));
-        pnlTWOption.setPreferredSize(new java.awt.Dimension(525, 70));
-        pnlTWOption.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 7));
+        labelNote.setText("<html><b>Note:</b> You will need to restart Quest for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Quest\" in Protege's menu)</html>");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(5, 15, 5, 5);
+        add(labelNote, gridBagConstraints);
 
-        lblTechniqueWrapper.setText("Technique Wrapper:");
-        lblTechniqueWrapper.setMinimumSize(new java.awt.Dimension(170, 30));
-        lblTechniqueWrapper.setPreferredSize(new java.awt.Dimension(140, 20));
-        pnlTWOption.add(lblTechniqueWrapper);
-
-        cmbTechniqueWrapper.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Quest Technique Wrapper" }));
-        cmbTechniqueWrapper.setMaximumSize(new java.awt.Dimension(180, 32767));
-        cmbTechniqueWrapper.setMinimumSize(new java.awt.Dimension(125, 18));
-        cmbTechniqueWrapper.setPreferredSize(new java.awt.Dimension(280, 20));
-        cmbTechniqueWrapper.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbTechniqueWrapperActionPerformed(evt);
-            }
-        });
-        pnlTWOption.add(cmbTechniqueWrapper);
-
-        add(pnlTWOption, java.awt.BorderLayout.NORTH);
-        pnlTWOption.getAccessibleContext().setAccessibleName("Bolzano Reformulation Technique");
-
-        pnlTWConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Technique Wrapper Configuration"));
-        pnlTWConfiguration.setMinimumSize(new java.awt.Dimension(525, 405));
-        pnlTWConfiguration.setPreferredSize(new java.awt.Dimension(525, 405));
-        pnlTWConfiguration.setLayout(new java.awt.GridBagLayout());
-
-        pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Reformulation Methods\n"));
+        pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "First Order reformulation"));
         pnlReformulationMethods.setMinimumSize(new java.awt.Dimension(590, 85));
         pnlReformulationMethods.setPreferredSize(new java.awt.Dimension(590, 85));
         pnlReformulationMethods.setRequestFocusEnabled(false);
         pnlReformulationMethods.setLayout(new java.awt.GridBagLayout());
 
+        chkRewrite.setText("Enable query rewriting (disable for best performance)");
+        chkRewrite.setToolTipText("Enable only if your application requires reasoning w.r.t. to existential constants in the queries");
+        chkRewrite.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        chkRewrite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkRewriteActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
+        pnlReformulationMethods.add(chkRewrite, gridBagConstraints);
+
+        lblReformulationTechnique.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblReformulationTechnique.setText("Reformulation Method: ");
+        lblReformulationTechnique.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         lblReformulationTechnique.setMinimumSize(new java.awt.Dimension(150, 30));
         lblReformulationTechnique.setPreferredSize(new java.awt.Dimension(150, 20));
-        pnlReformulationTechnique.add(lblReformulationTechnique);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 5, 5, 5);
+        pnlReformulationMethods.add(lblReformulationTechnique, gridBagConstraints);
 
         cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Quest's reformulation", "PerfectRef", " " }));
+        cmbReformulationMethods.setEnabled(false);
         cmbReformulationMethods.setPreferredSize(new java.awt.Dimension(280, 20));
         cmbReformulationMethods.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbReformulationMethodsActionPerformed(evt);
             }
         });
-        pnlReformulationTechnique.add(cmbReformulationMethods);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(-8, 0, 0, 0);
-        pnlReformulationMethods.add(pnlReformulationTechnique, gridBagConstraints);
-
-        pnlReformulationOption.setPreferredSize(new java.awt.Dimension(100, 25));
-
-        pnlPadding.setPreferredSize(new java.awt.Dimension(75, 10));
-        pnlReformulationOption.add(pnlPadding);
-
-        chkOptimizeEquivalences.setSelected(true);
-        chkOptimizeEquivalences.setText("Optimize equivalences (experimental)");
-        chkOptimizeEquivalences.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        chkOptimizeEquivalences.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkOptimizeEquivalencesActionPerformed(evt);
-            }
-        });
-        pnlReformulationOption.add(chkOptimizeEquivalences);
-
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 5, 5, 5);
+        pnlReformulationMethods.add(cmbReformulationMethods, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(-5, 0, 0, 0);
-        pnlReformulationMethods.add(pnlReformulationOption, gridBagConstraints);
+        gridBagConstraints.weightx = 2.0;
+        pnlReformulationMethods.add(filler2, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
-        pnlTWConfiguration.add(pnlReformulationMethods, gridBagConstraints);
+        add(pnlReformulationMethods, gridBagConstraints);
 
-        pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "ABox mode"));
-        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(520, 280));
-        pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(520, 280));
-        pnlABoxConfiguration.setLayout(new java.awt.BorderLayout());
-
-        pnlMappingOptions.setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
-        pnlMappingOptions.setMinimumSize(new java.awt.Dimension(500, 270));
-        pnlMappingOptions.setPreferredSize(new java.awt.Dimension(500, 270));
-        pnlMappingOptions.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 3, 3));
-
-        pnlVirtualMode.setPreferredSize(new java.awt.Dimension(480, 20));
-        pnlVirtualMode.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 0));
+        pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Data Configuration"));
+        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(620, 480));
+        pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(620, 350));
+        pnlABoxConfiguration.setLayout(new java.awt.GridBagLayout());
 
         AboxMode.add(radVirtualObda);
-        radVirtualObda.setFont(new java.awt.Font("Tahoma", 1, 11));
         radVirtualObda.setSelected(true);
-        radVirtualObda.setText("Virtual ABox.");
+        radVirtualObda.setText("Virtual ABox (virtual RDF graph)");
         radVirtualObda.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         radVirtualObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radVirtualObdaActionPerformed(evt);
             }
         });
-        pnlVirtualMode.add(radVirtualObda);
-
-        lblVirtualModeInfo.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        lblVirtualModeInfo.setText("Requires OBDA model and obtains the data originally from its source.");
-        lblVirtualModeInfo.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        lblVirtualModeInfo.setIconTextGap(0);
-        pnlVirtualMode.add(lblVirtualModeInfo);
-
-        pnlMappingOptions.add(pnlVirtualMode);
-
-        pnlClassicMode.setMinimumSize(new java.awt.Dimension(480, 220));
-        pnlClassicMode.setPreferredSize(new java.awt.Dimension(480, 220));
-        pnlClassicMode.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 2));
-
-        pnlClassicalModeInfo.setPreferredSize(new java.awt.Dimension(480, 25));
-        pnlClassicalModeInfo.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 3));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 0);
+        pnlABoxConfiguration.add(radVirtualObda, gridBagConstraints);
 
         AboxMode.add(radClassicObda);
-        radClassicObda.setFont(new java.awt.Font("Tahoma", 1, 11));
-        radClassicObda.setText("Classic ABox.");
-        radClassicObda.setActionCommand("Classic ABox");
+        radClassicObda.setActionCommand("Classic ABox (= uses pre-defined ABox in the ontology)");
+        radClassicObda.setLabel("Classic ABox ");
         radClassicObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radClassicObdaActionPerformed(evt);
             }
         });
-        pnlClassicalModeInfo.add(radClassicObda);
-        radClassicObda.getAccessibleContext().setAccessibleName("Classic ABox. The system will maintain ABox assertions in a DB.");
-
-        lblClassicModeInfo.setText("");
-        pnlClassicalModeInfo.add(lblClassicModeInfo);
-
-        pnlClassicMode.add(pnlClassicalModeInfo);
-
-        pnlDatabaseType.setPreferredSize(new java.awt.Dimension(480, 95));
-        pnlDatabaseType.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 5, 3, 0);
+        pnlABoxConfiguration.add(radClassicObda, gridBagConstraints);
+        radClassicObda.getAccessibleContext().setAccessibleName("Classic ABox. Uses pre-defined ABox in the ontology.");
 
         lblDataStrategy.setText("(1) Strategy for the database schema organization:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 27, 3, 0);
-        pnlDatabaseType.add(lblDataStrategy, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 27, 3, 0);
+        pnlABoxConfiguration.add(lblDataStrategy, gridBagConstraints);
 
         mapper.add(radDirect);
         radDirect.setText("Direct");
@@ -330,12 +281,11 @@ public class ConfigPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 0);
-        pnlDatabaseType.add(radDirect, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(radDirect, gridBagConstraints);
 
         mapper.add(radUniversal);
         radUniversal.setText("Universal");
@@ -347,16 +297,16 @@ public class ConfigPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 0);
-        pnlDatabaseType.add(radUniversal, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(radUniversal, gridBagConstraints);
 
         mapper.add(radSemanticIndex);
         radSemanticIndex.setSelected(true);
         radSemanticIndex.setText("Semantic Index (recommended)");
+        radSemanticIndex.setToolTipText("SPOG schema optimised for very large hierarchies.");
         radSemanticIndex.setPreferredSize(new java.awt.Dimension(177, 20));
         radSemanticIndex.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -365,30 +315,25 @@ public class ConfigPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 0);
-        pnlDatabaseType.add(radSemanticIndex, gridBagConstraints);
-
-        pnlClassicMode.add(pnlDatabaseType);
-
-        pnlDataLocation.setMinimumSize(new java.awt.Dimension(480, 90));
-        pnlDataLocation.setPreferredSize(new java.awt.Dimension(480, 60));
-        pnlDataLocation.setLayout(new java.awt.GridBagLayout());
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(radSemanticIndex, gridBagConstraints);
 
         lblDataLocation.setText("(2) Database location:");
         lblDataLocation.setPreferredSize(new java.awt.Dimension(66, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 27, 5, 0);
-        pnlDataLocation.add(lblDataLocation, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 27, 3, 0);
+        pnlABoxConfiguration.add(lblDataLocation, gridBagConstraints);
 
         datalocationGroup.add(radRemoteDatabase);
         radRemoteDatabase.setText("Remote server");
+        radRemoteDatabase.setToolTipText("ABox assertions/triples are stored in a remote relational database. Quest creates the schema and manages the data, however, the database is under control of the user.");
         radRemoteDatabase.setPreferredSize(new java.awt.Dimension(97, 20));
         radRemoteDatabase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -396,17 +341,18 @@ public class ConfigPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 0);
-        pnlDataLocation.add(radRemoteDatabase, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(radRemoteDatabase, gridBagConstraints);
         radRemoteDatabase.getAccessibleContext().setAccessibleName("Remote database (the user provides the JDBC connection)");
 
         datalocationGroup.add(radInMemoryDatabase);
         radInMemoryDatabase.setSelected(true);
-        radInMemoryDatabase.setText("In-memory");
+        radInMemoryDatabase.setText("In-Memory (H2-DB)");
+        radInMemoryDatabase.setToolTipText("ABox assertions/triples are stored in a in-memory relational database created and managed by Quest.");
         radInMemoryDatabase.setPreferredSize(new java.awt.Dimension(97, 20));
         radInMemoryDatabase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -415,165 +361,157 @@ public class ConfigPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 0);
-        pnlDataLocation.add(radInMemoryDatabase, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(radInMemoryDatabase, gridBagConstraints);
         radInMemoryDatabase.getAccessibleContext().setAccessibleName("In-memory database (i.e., the system will obtain the ABox from locations below)");
-
-        pnlClassicMode.add(pnlDataLocation);
-
-        pnlABoxSource.setMinimumSize(new java.awt.Dimension(480, 90));
-        pnlABoxSource.setPreferredSize(new java.awt.Dimension(470, 35));
 
         lblDataSource.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblDataSource.setText("(3) Data source(s):");
         lblDataSource.setPreferredSize(new java.awt.Dimension(98, 14));
-        pnlABoxSource.add(lblDataSource);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 27, 3, 0);
+        pnlABoxConfiguration.add(lblDataSource, gridBagConstraints);
 
         chkObtainFromOntology.setSelected(true);
-        chkObtainFromOntology.setText("From the active ontology.");
+        chkObtainFromOntology.setText("From the active ontology's ABox.");
         chkObtainFromOntology.setPreferredSize(new java.awt.Dimension(150, 23));
         chkObtainFromOntology.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkObtainFromOntologyActionPerformed(evt);
             }
         });
-        pnlABoxSource.add(chkObtainFromOntology);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(chkObtainFromOntology, gridBagConstraints);
 
-        chkObtainFromMappings.setText("From the active OBDA model.");
+        chkObtainFromMappings.setText("From the current mappings in the OBDA model");
+        chkObtainFromMappings.setMaximumSize(new java.awt.Dimension(193, 23));
+        chkObtainFromMappings.setMinimumSize(new java.awt.Dimension(193, 23));
         chkObtainFromMappings.setPreferredSize(new java.awt.Dimension(168, 23));
         chkObtainFromMappings.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkObtainFromMappingsActionPerformed(evt);
             }
         });
-        pnlABoxSource.add(chkObtainFromMappings);
-
-        pnlClassicMode.add(pnlABoxSource);
-
-        pnlMappingOptions.add(pnlClassicMode);
-
-        pnlABoxConfiguration.add(pnlMappingOptions, java.awt.BorderLayout.CENTER);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
+        pnlABoxConfiguration.add(chkObtainFromMappings, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weighty = 2.0;
+        pnlABoxConfiguration.add(fillerPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 6, 7, 6);
-        pnlTWConfiguration.add(pnlABoxConfiguration, gridBagConstraints);
-
-        add(pnlTWConfiguration, java.awt.BorderLayout.CENTER);
+        gridBagConstraints.weighty = 2.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 6, 15, 6);
+        add(pnlABoxConfiguration, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void cmbTechniqueWrapperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTechniqueWrapperActionPerformed
-        // Does nothing because we have only one TW!
-    }//GEN-LAST:event_cmbTechniqueWrapperActionPerformed
+    private void chkObtainFromMappingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromMappingsActionPerformed
+        if (chkObtainFromMappings.isSelected()) {
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+        } else {
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
+        }
+    }//GEN-LAST:event_chkObtainFromMappingsActionPerformed
+
+    private void chkObtainFromOntologyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromOntologyActionPerformed
+        if (chkObtainFromOntology.isSelected()) {
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+        } else {
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+        }
+    }//GEN-LAST:event_chkObtainFromOntologyActionPerformed
+
+    private void radInMemoryDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radInMemoryDatabaseActionPerformed
+//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+    }//GEN-LAST:event_radInMemoryDatabaseActionPerformed
+
+    private void radRemoteDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radRemoteDatabaseActionPerformed
+//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
+    }//GEN-LAST:event_radRemoteDatabaseActionPerformed
+
+    private void radSemanticIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSemanticIndexActionPerformed
+        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+    }//GEN-LAST:event_radSemanticIndexActionPerformed
+
+    private void radUniversalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUniversalActionPerformed
+        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.UNIVERSAL);
+    }//GEN-LAST:event_radUniversalActionPerformed
+
+    private void radDirectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDirectActionPerformed
+        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+    }//GEN-LAST:event_radDirectActionPerformed
+
+    private void radClassicObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radClassicObdaActionPerformed
+        classicModeSelected();
+        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+    }//GEN-LAST:event_radClassicObdaActionPerformed
+
+    private void radVirtualObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVirtualObdaActionPerformed
+        virtualModeSelected();
+        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+    }//GEN-LAST:event_radVirtualObdaActionPerformed
+
+    private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
+        if (chkRewrite.isSelected()) {
+            preference.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+        } else {
+            preference.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+        }
+    }//GEN-LAST:event_chkRewriteActionPerformed
 
     private void cmbReformulationMethodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbReformulationMethodsActionPerformed
         javax.swing.JComboBox cb = (javax.swing.JComboBox) evt.getSource();
         String optValue = (String) cb.getSelectedItem();
         if (optValue.equals(QuestConstants.PERFECTREFORMULATION)) {
             preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.PERFECTREFORMULATION);
-        }
-        else {
+        } else {
             preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
         }
     }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
 
-private void radRemoteDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radRemoteDatabaseActionPerformed
-//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
-}//GEN-LAST:event_radRemoteDatabaseActionPerformed
-
-private void radVirtualObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVirtualObdaActionPerformed
-    virtualModeSelected();
-    preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-}//GEN-LAST:event_radVirtualObdaActionPerformed
-
-private void chkOptimizeEquivalencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOptimizeEquivalencesActionPerformed
-    if (chkOptimizeEquivalences.isSelected()) {
-        preference.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-    }
-    else {
-        preference.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-    }
-}//GEN-LAST:event_chkOptimizeEquivalencesActionPerformed
-
-private void radClassicObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radClassicObdaActionPerformed
-    classicModeSelected();
-    preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
-//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-}//GEN-LAST:event_radClassicObdaActionPerformed
-
-private void radDirectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDirectActionPerformed
-    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
-}//GEN-LAST:event_radDirectActionPerformed
-
-private void radUniversalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUniversalActionPerformed
-    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.UNIVERSAL);
-}//GEN-LAST:event_radUniversalActionPerformed
-
-private void radSemanticIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSemanticIndexActionPerformed
-    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
-}//GEN-LAST:event_radSemanticIndexActionPerformed
-
-private void radInMemoryDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radInMemoryDatabaseActionPerformed
-//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-}//GEN-LAST:event_radInMemoryDatabaseActionPerformed
-
-private void chkObtainFromOntologyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromOntologyActionPerformed
-    if (chkObtainFromOntology.isSelected()) {
-        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-    }
-    else {
-        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-    }
-}//GEN-LAST:event_chkObtainFromOntologyActionPerformed
-
-private void chkObtainFromMappingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromMappingsActionPerformed
-    if (chkObtainFromMappings.isSelected()) {
-        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-    }
-    else {
-        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-    }
-}//GEN-LAST:event_chkObtainFromMappingsActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup AboxMode;
     private javax.swing.JCheckBox chkObtainFromMappings;
     private javax.swing.JCheckBox chkObtainFromOntology;
-    private javax.swing.JCheckBox chkOptimizeEquivalences;
+    private javax.swing.JCheckBox chkRewrite;
     private javax.swing.JComboBox cmbReformulationMethods;
-    private javax.swing.JComboBox cmbTechniqueWrapper;
     private javax.swing.ButtonGroup datalocationGroup;
-    private javax.swing.JLabel lblClassicModeInfo;
+    private javax.swing.Box.Filler filler2;
+    private javax.swing.JPanel fillerPanel;
+    private javax.swing.JLabel labelNote;
     private javax.swing.JLabel lblDataLocation;
     private javax.swing.JLabel lblDataSource;
     private javax.swing.JLabel lblDataStrategy;
     private javax.swing.JLabel lblReformulationTechnique;
-    private javax.swing.JLabel lblTechniqueWrapper;
-    private javax.swing.JLabel lblVirtualModeInfo;
     private javax.swing.ButtonGroup mapper;
     private javax.swing.ButtonGroup mappingMode;
     private javax.swing.JPanel pnlABoxConfiguration;
-    private javax.swing.JPanel pnlABoxSource;
-    private javax.swing.JPanel pnlClassicMode;
-    private javax.swing.JPanel pnlClassicalModeInfo;
-    private javax.swing.JPanel pnlDataLocation;
-    private javax.swing.JPanel pnlDatabaseType;
-    private javax.swing.JPanel pnlMappingOptions;
-    private javax.swing.JPanel pnlPadding;
     private javax.swing.JPanel pnlReformulationMethods;
-    private javax.swing.JPanel pnlReformulationOption;
-    private javax.swing.JPanel pnlReformulationTechnique;
-    private javax.swing.JPanel pnlTWConfiguration;
-    private javax.swing.JPanel pnlTWOption;
-    private javax.swing.JPanel pnlVirtualMode;
     private javax.swing.JRadioButton radClassicObda;
     private javax.swing.JRadioButton radDirect;
     private javax.swing.JRadioButton radInMemoryDatabase;

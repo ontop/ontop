@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
@@ -130,6 +131,8 @@ public class Quest implements Serializable {
 
 	// private boolean optimizeEquivalences = true;
 
+	private boolean reformulate = false;
+
 	private boolean optimizeSigma = false;
 
 	private String reformulationTechnique = QuestConstants.UCQBASED;
@@ -161,26 +164,25 @@ public class Quest implements Serializable {
 	private String aboxJdbcDriver;
 
 	private Iterator<Assertion> aboxIterator;
-	
+
 	Map<String, String> querycache = new HashMap<String, String>();
-	
+
 	Map<String, List<String>> signaturecache = new HashMap<String, List<String>>();
-	
+
 	Map<String, Boolean> isbooleancache = new HashMap<String, Boolean>();
 
-
-	protected Map<String,String> getSQLCache() {
+	protected Map<String, String> getSQLCache() {
 		return querycache;
 	}
-	
-	protected Map<String,List<String>> getSignatureCache() {
+
+	protected Map<String, List<String>> getSignatureCache() {
 		return signaturecache;
 	}
-	
-	protected Map<String,Boolean> getIsBooleanCache() {
+
+	protected Map<String, Boolean> getIsBooleanCache() {
 		return isbooleancache;
 	}
-	
+
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
 		inputOBDAModel = (OBDAModel) model.clone();
@@ -270,6 +272,7 @@ public class Quest implements Serializable {
 	public void setPreferences(Properties preferences) {
 		this.preferences = preferences;
 
+		reformulate = Boolean.valueOf((String) preferences.get(QuestPreferences.REWRITE));
 		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
 		bOptimizeTBoxSigma = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_TBOX_SIGMA));
@@ -575,7 +578,9 @@ public class Quest implements Serializable {
 			/*
 			 * Setting up the reformulation engine
 			 */
-			if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
+			if (reformulate == false) {
+				rewriter = new DummyReformulator();
+			} else if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator();
 			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
 				rewriter = new TreeRedReformulator();

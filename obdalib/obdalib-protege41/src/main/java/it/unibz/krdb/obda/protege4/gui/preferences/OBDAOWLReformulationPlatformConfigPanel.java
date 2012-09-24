@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.protege4.gui.preferences;
 
 
+import java.awt.BorderLayout;
+
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.protege4.panels.ConfigPanel;
 
@@ -25,8 +27,9 @@ public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel
 		preference = (QuestPreferences)
 			getEditorKit().get(QuestPreferences.class.getName());
 		
+		this.setLayout(new BorderLayout());
 		configPanel = new ConfigPanel(preference);
-		this.add(configPanel);
+		this.add(configPanel,BorderLayout.CENTER);
 	}
 
 	@Override
