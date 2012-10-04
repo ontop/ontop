@@ -54,11 +54,11 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		String prefixPlaceHolder = "";
 		
 		try {
-			/* Clean the URI string from "<...>" signs, if they exist.
-			 * e.g., "<&ex;Book>" --> "&ex;Book"
+			/* Clean the URI string from <"..."> signs, if they exist.
+			 * e.g., <"&ex;Book"> --> &ex;Book
 			 */
-			if (prefixedName.contains("<") && prefixedName.contains(">")) {
-				prefixedName = prefixedName.replace("<", "").replace(">", "");
+			if (prefixedName.contains("<\"") && prefixedName.contains("\">")) {
+				prefixedName = prefixedName.replace("<\"", "").replace("\">", "");
 			}
 			
 			if (insideQuotes) {
