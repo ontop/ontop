@@ -1,0 +1,351 @@
+<class-diagram version="1.0.10" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="true">  
+  <class id="1" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator" 
+    project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/translator/SparqlAlgebraToDatalogTranslator.java" 
+    binary="false">    
+    <position height="573" width="441" x="52" y="747"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="2" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/unfolding/DatalogUnfolder.java" 
+    binary="false">    
+    <position height="330" width="346" x="2595" y="1072"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="3" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/basicoperations/DatalogNormalizer.java" 
+    binary="false">    
+    <position height="-1" width="-1" x="274" y="191"/>    
+    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="4" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/unfolding/ExpressionEvaluator.java" 
+    binary="false">    
+    <position height="250" width="442" x="55" y="408"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="5" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator" 
+    project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/sql/SQLGenerator.java" binary="false">    
+    <position height="398" width="337" x="2601" y="504"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="6" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/basicoperations/Unifier.java" 
+    binary="false">    
+    <position height="250" width="446" x="52" y="1383"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="7" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.Quest" 
+    project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/Quest.java" binary="false">    
+    <position height="524" width="318" x="2162" y="445"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="false" private="false"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <interface id="8" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/unfolding/UnfoldingMechanism.java" 
+    binary="false">    
+    <position height="63" width="348" x="2593" y="959"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </interface>  
+  <class id="9" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.QuestStatement" 
+    project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/QuestStatement.java" binary="false">    
+    <position height="663" width="338" x="971" y="388"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="false" protected="true" private="true"/>      
+      <operations public="true" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="10" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement" project="quest-owlapi3" 
+    file="/quest-owlapi3/src/main/java/it/unibz/krdb/obda/owlrefplatform/owlapi3/QuestOWLStatement.java" binary="false">    
+    <position height="375" width="335" x="578" y="532"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <interface id="11" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlapi3.OWLStatement" 
+    project="obdalib-owlapi3" file="/obdalib-owlapi3/src/main/java/it/unibz/krdb/obda/owlapi3/OWLStatement.java" 
+    binary="false">    
+    <position height="305" width="326" x="585" y="166"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </interface>  
+  <interface id="12" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.model.OBDAStatement" 
+    project="obdalib-core" file="/obdalib-core/src/main/java/it/unibz/krdb/obda/model/OBDAStatement.java" binary="false">    
+    <position height="288" width="330" x="976" y="49"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </interface>  
+  <interface id="13" corner="BOTTOM_RIGHT" language="java" 
+    name="it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/srcquerygeneration/SQLQueryGenerator.java" 
+    binary="false">    
+    <position height="72" width="343" x="2601" y="388"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </interface>  
+  <class id="14" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL" 
+    project="quest-owlapi3" file="/quest-owlapi3/src/main/java/it/unibz/krdb/obda/owlrefplatform/owlapi3/QuestOWL.java" 
+    binary="false">    
+    <position height="36" width="229" x="1739" y="841"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <interface id="15" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.model.OBDAModel" 
+    project="obdalib-core" file="/obdalib-core/src/main/java/it/unibz/krdb/obda/model/OBDAModel.java" binary="false">    
+    <position height="52" width="267" x="1442" y="509"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </interface>  
+  <class id="16" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.QuestConnection" 
+    project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/QuestConnection.java" binary="false">    
+    <position height="-1" width="-1" x="1461" y="862"/>    
+    <display autosize="true" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="false" package="false" protected="false" private="false"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <interface id="17" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlapi3.OWLQueryReasoner" 
+    project="obdalib-owlapi3" file="/obdalib-owlapi3/src/main/java/it/unibz/krdb/obda/owlapi3/OWLQueryReasoner.java" 
+    binary="false">    
+    <position height="80" width="229" x="1601" y="724"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </interface>  
+  <interface id="18" corner="BOTTOM_RIGHT" language="java" name="it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner" 
+    project="obdalib-owlapi3" file="/obdalib-owlapi3/src/main/java/it/unibz/krdb/obda/owlapi3/OBDAOWLReasoner.java" 
+    binary="false">    
+    <position height="63" width="230" x="1857" y="738"/>    
+    <display autosize="false" stereotype="false" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </interface>  
+  <association id="19">    
+    <end type="SOURCE" refId="14" navigable="false">      
+      <attribute id="20" name="conn"/>      
+      <multiplicity id="21" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="16" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <realization id="22">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="13"/>  
+  </realization>  
+  <association id="23">    
+    <bendpoint x="1337" y="418"/>    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="24" name="querygenerator">        
+        <position height="14" width="79" x="2514" y="404"/>      
+      </attribute>      
+      <multiplicity id="25" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="13" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="26">    
+    <bendpoint x="2493" y="459"/>    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="27" name="datasourceQueryGenerator">        
+        <position height="14" width="140" x="2448" y="430"/>      
+      </attribute>      
+      <multiplicity id="28" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="13" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="29">    
+    <bendpoint x="2146" y="861"/>    
+    <end type="SOURCE" refId="14" navigable="false">      
+      <attribute id="30" name="questInstance">        
+        <position height="14" width="72" x="2088" y="865"/>      
+      </attribute>      
+      <multiplicity id="31" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="32">    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="33" name="conn">        
+        <position height="14" width="28" x="1324" y="830"/>      
+      </attribute>      
+      <multiplicity id="34" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="16" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="35">    
+    <bendpoint x="1333" y="990"/>    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="36" name="unfoldingmechanism">        
+        <position height="14" width="102" x="2483" y="975"/>      
+      </attribute>      
+      <multiplicity id="37" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="38">    
+    <bendpoint x="2103" y="838"/>    
+    <bendpoint x="2103" y="590"/>    
+    <end type="SOURCE" refId="14" navigable="false">      
+      <attribute id="39" name="obdaModel">        
+        <position height="14" width="56" x="1716" y="539"/>      
+      </attribute>      
+      <multiplicity id="40" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="15" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <realization id="41">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="17"/>  
+  </realization>  
+  <association id="42">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="43" name="st"/>      
+      <multiplicity id="44" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="9" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="45">    
+    <bendpoint x="1332" y="534"/>    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="46" name="unfoldingOBDAModel">        
+        <position height="14" width="106" x="1332" y="539"/>      
+      </attribute>      
+      <multiplicity id="47" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="15" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="48">    
+    <bendpoint x="2509" y="952"/>    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="49" name="unfolder">        
+        <position height="14" width="46" x="2543" y="940"/>      
+      </attribute>      
+      <multiplicity id="50" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <realization id="51">    
+    <end type="SOURCE" refId="14"/>    
+    <end type="TARGET" refId="18"/>  
+  </realization>  
+  <realization id="52">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="11"/>  
+  </realization>  
+  <association id="53">    
+    <bendpoint x="2139" y="545"/>    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="54" name="unfoldingOBDAModel">        
+        <position height="14" width="108" x="1719" y="512"/>      
+      </attribute>      
+      <multiplicity id="55" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="15" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <realization id="56">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="12"/>  
+  </realization>  
+  <association id="57">    
+    <bendpoint x="2144" y="501"/>    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="58" name="inputOBDAModel">        
+        <position height="14" width="87" x="1722" y="526"/>      
+      </attribute>      
+      <multiplicity id="59" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="15" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <realization id="60">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="8"/>  
+  </realization>  
+  <association id="61">    
+    <bendpoint x="1334" y="476"/>    
+    <bendpoint x="2153" y="476"/>    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="62" name="questInstance">        
+        <position height="14" width="74" x="2085" y="460"/>      
+      </attribute>      
+      <multiplicity id="63" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <association id="64">    
+    <bendpoint x="1595" y="926"/>    
+    <bendpoint x="2144" y="927"/>    
+    <end type="SOURCE" refId="16" navigable="false">      
+      <attribute id="65" name="questinstance">        
+        <position height="14" width="72" x="2085" y="930"/>      
+      </attribute>      
+      <multiplicity id="66" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="false"/>  
+  </association>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true"/>    
+    <operations public="true" package="true" protected="true" private="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
