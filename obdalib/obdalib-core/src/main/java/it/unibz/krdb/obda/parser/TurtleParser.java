@@ -39,6 +39,7 @@ import org.antlr.runtime.*;
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class TurtleParser extends Parser {
@@ -1881,12 +1882,12 @@ public class TurtleParser extends Parser {
                     int end = template.indexOf("}");
                     
                     // extract the whole placeholder, e.g., "{?var}"
-                    String placeHolder = template.substring(start, end+1);
-                    template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
+                    String placeHolder = Pattern.quote(template.substring(start, end+1));
+                    template = template.replaceFirst(placeHolder, "[]"); // change the placeholder string temporarly
                     
                     // extract the variable name only, e.g., "{?var}" --> "var"
                     try {
-                   	  String variableName = placeHolder.substring(2, placeHolder.length()-1);
+                   	  String variableName = placeHolder.substring(4, placeHolder.length()-3);
                    	  if (variableName.equals("")) {
                    	    throw new RuntimeException("Variable name must have at least 1 character");
                    	  }
@@ -1896,7 +1897,7 @@ public class TurtleParser extends Parser {
                     }
                   }
                   // replace the placeholder string to the original. The current string becomes the template
-                  template = template.replaceAll("\\[\\]", "{}");
+                  template = template.replace("[]", "{}");
                   ValueConstant uriTemplate = dfac.getValueConstant(template);
                   
                   // the URI template is always on the first position in the term list

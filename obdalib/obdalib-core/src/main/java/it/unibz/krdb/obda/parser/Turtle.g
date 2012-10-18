@@ -44,6 +44,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.MismatchedSetException;
@@ -392,12 +393,12 @@ uriTemplateFunction returns [Function value]
         int end = template.indexOf("}");
         
         // extract the whole placeholder, e.g., "{?var}"
-        String placeHolder = template.substring(start, end+1);
-        template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
+        String placeHolder = Pattern.quote(template.substring(start, end+1));
+        template = template.replaceFirst(placeHolder, "[]"); // change the placeholder string temporarly
         
         // extract the variable name only, e.g., "{?var}" --> "var"
         try {
-       	  String variableName = placeHolder.substring(2, placeHolder.length()-1);
+       	  String variableName = placeHolder.substring(4, placeHolder.length()-3);
        	  if (variableName.equals("")) {
        	    throw new RuntimeException("Variable name must have at least 1 character");
        	  }
@@ -407,7 +408,7 @@ uriTemplateFunction returns [Function value]
         }
       }
       // replace the placeholder string to the original. The current string becomes the template
-      template = template.replaceAll("\\[\\]", "{}");
+      template = template.replace("[]", "{}");
       ValueConstant uriTemplate = dfac.getValueConstant(template);
       
       // the URI template is always on the first position in the term list
