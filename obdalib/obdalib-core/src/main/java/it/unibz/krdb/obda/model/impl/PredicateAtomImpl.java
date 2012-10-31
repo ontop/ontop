@@ -49,7 +49,8 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 
 	protected PredicateAtomImpl(Predicate predicate, List<Term> terms) {
 		if (predicate.getArity() != terms.size()) {
-			throw new IllegalArgumentException("There must be the same number of terms as indicated by predicate");
+			throw new IllegalArgumentException(
+					"There must be the same number of terms as indicated by predicate");
 		}
 		this.predicate = predicate;
 
@@ -62,7 +63,8 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingLinkedList<Term> innertermlist = (EventGeneratingLinkedList<Term>) function.getTerms();
+				EventGeneratingLinkedList<Term> innertermlist = (EventGeneratingLinkedList<Term>) function
+						.getTerms();
 				innertermlist.addListener(this);
 			}
 		}
@@ -94,7 +96,8 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingLinkedList<Term> innertermlist = (EventGeneratingLinkedList<Term>) function.getTerms();
+				EventGeneratingLinkedList<Term> innertermlist = (EventGeneratingLinkedList<Term>) function
+						.getTerms();
 				innertermlist.removeListener(this);
 			}
 		}
@@ -105,7 +108,8 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingLinkedList<Term> innertermlist = (EventGeneratingLinkedList<Term>) function.getTerms();
+				EventGeneratingLinkedList<Term> innertermlist = (EventGeneratingLinkedList<Term>) function
+						.getTerms();
 				innertermlist.addListener(this);
 			}
 		}
@@ -121,49 +125,49 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		PredicateAtomImpl clone = new PredicateAtomImpl(predicate, v);
 		clone.hash = hash;
 		clone.rehash = rehash;
+		clone.string = this.string;
 		return clone;
 	}
 
 	@Override
 	public String toString() {
-		if (string != null)
-			return string;
+		if (string == null) {
 
-		StringBuffer bf = new StringBuffer();
+			StringBuffer bf = new StringBuffer();
 
-		if (predicate == OBDAVocabulary.EQ) {
-			bf.append("EQ");
-		} else if (predicate == OBDAVocabulary.NEQ) {
-			bf.append("NEQ");
-		} else if (predicate == OBDAVocabulary.GT) {
-			bf.append("GT");
-		} else if (predicate == OBDAVocabulary.GTE) {
-			bf.append("GTE");
-		} else if (predicate == OBDAVocabulary.LT) {
-			bf.append("LT");
-		} else if (predicate == OBDAVocabulary.LTE) {
-			bf.append("LTE");
-		} else if (predicate == OBDAVocabulary.NOT) {
-			bf.append("NOT");
-		} else if (predicate == OBDAVocabulary.AND) {
-			bf.append("AND");
-		} else if (predicate == OBDAVocabulary.OR) {
-			bf.append("OR");
-		} else {
-			bf.append(this.predicate.getName().toString());
-		}
-
-		bf.append("(");
-		for (int i = 0; i < terms.size(); i++) {
-			bf.append(terms.get(i));
-			if (i + 1 < terms.size()) {
-				bf.append(",");
+			if (predicate == OBDAVocabulary.EQ) {
+				bf.append("EQ");
+			} else if (predicate == OBDAVocabulary.NEQ) {
+				bf.append("NEQ");
+			} else if (predicate == OBDAVocabulary.GT) {
+				bf.append("GT");
+			} else if (predicate == OBDAVocabulary.GTE) {
+				bf.append("GTE");
+			} else if (predicate == OBDAVocabulary.LT) {
+				bf.append("LT");
+			} else if (predicate == OBDAVocabulary.LTE) {
+				bf.append("LTE");
+			} else if (predicate == OBDAVocabulary.NOT) {
+				bf.append("NOT");
+			} else if (predicate == OBDAVocabulary.AND) {
+				bf.append("AND");
+			} else if (predicate == OBDAVocabulary.OR) {
+				bf.append("OR");
+			} else {
+				bf.append(this.predicate.getName().toString());
 			}
+
+			bf.append("(");
+			for (int i = 0; i < terms.size(); i++) {
+				bf.append(terms.get(i));
+				if (i + 1 < terms.size()) {
+					bf.append(",");
+				}
+			}
+			bf.append(")");
+
+			string = bf.toString();
 		}
-		bf.append(")");
-
-		string = bf.toString();
-
 		return string;
 	}
 
@@ -235,7 +239,7 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		Map<Variable, Integer> currentcount = new HashMap<Variable, Integer>();
 		for (Term t : terms) {
 			Map<Variable, Integer> atomCount = t.getVariableCount();
-			for (Variable var: atomCount.keySet()) {
+			for (Variable var : atomCount.keySet()) {
 				Integer count = currentcount.get(var);
 				if (count != null) {
 					currentcount.put(var, count + atomCount.get(var));
@@ -245,7 +249,7 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 			}
 		}
 		return currentcount;
-		
+
 	}
-	
+
 }

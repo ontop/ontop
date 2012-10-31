@@ -1,13 +1,14 @@
 package it.unibz.krdb.obda.reformulation.tests;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-
-import java.util.Set;
-
 import junit.framework.TestCase;
-
+import java.util.Set;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
 
 public class ReformulationTest extends TestCase {
@@ -1220,6 +1221,72 @@ pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		String ontoname = "test_198";
 		test_function(ontoname,pref);
 	}
+	public void test_500SINoEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_500";
+		test_function(ontoname,pref);
+	}
+	public void test_501SINoEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_501";
+		test_function(ontoname,pref);
+	}
+	public void test_502SINoEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_502";
+		test_function(ontoname,pref);
+	}
+	public void test_503SINoEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_503";
+		test_function(ontoname,pref);
+	}
+	public void test_504SINoEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_504";
+		test_function(ontoname,pref);
+	}
+	public void test_505SINoEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_505";
+		test_function(ontoname,pref);
+	}
 	public void test_600SIEqNoSig() throws Exception {
 QuestPreferences pref = new QuestPreferences();
 pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
@@ -2406,6 +2473,72 @@ pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		String ontoname = "test_198";
+		test_function(ontoname,pref);
+	}
+	public void test_500SIEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_500";
+		test_function(ontoname,pref);
+	}
+	public void test_501SIEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_501";
+		test_function(ontoname,pref);
+	}
+	public void test_502SIEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_502";
+		test_function(ontoname,pref);
+	}
+	public void test_503SIEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_503";
+		test_function(ontoname,pref);
+	}
+	public void test_504SIEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_504";
+		test_function(ontoname,pref);
+	}
+	public void test_505SIEqNoSig() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		String ontoname = "test_505";
 		test_function(ontoname,pref);
 	}
 	public void test_600SINoEqSigma() throws Exception {
@@ -3596,6 +3729,72 @@ pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		String ontoname = "test_198";
 		test_function(ontoname,pref);
 	}
+	public void test_500SINoEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_500";
+		test_function(ontoname,pref);
+	}
+	public void test_501SINoEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_501";
+		test_function(ontoname,pref);
+	}
+	public void test_502SINoEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_502";
+		test_function(ontoname,pref);
+	}
+	public void test_503SINoEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_503";
+		test_function(ontoname,pref);
+	}
+	public void test_504SINoEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_504";
+		test_function(ontoname,pref);
+	}
+	public void test_505SINoEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_505";
+		test_function(ontoname,pref);
+	}
 	public void test_600SIEqSigma() throws Exception {
 QuestPreferences pref = new QuestPreferences();
 pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
@@ -4782,6 +4981,72 @@ pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		String ontoname = "test_198";
+		test_function(ontoname,pref);
+	}
+	public void test_500SIEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_500";
+		test_function(ontoname,pref);
+	}
+	public void test_501SIEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_501";
+		test_function(ontoname,pref);
+	}
+	public void test_502SIEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_502";
+		test_function(ontoname,pref);
+	}
+	public void test_503SIEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_503";
+		test_function(ontoname,pref);
+	}
+	public void test_504SIEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_504";
+		test_function(ontoname,pref);
+	}
+	public void test_505SIEqSigma() throws Exception {
+QuestPreferences pref = new QuestPreferences();
+pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String ontoname = "test_505";
 		test_function(ontoname,pref);
 	}
 }

@@ -83,8 +83,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 		this.head = head;
 
-		rehash = true;
-		string = null;
+		listChanged();
 	}
 
 	public void updateBody(List<Atom> body) {
@@ -138,8 +137,13 @@ public class CQIEImpl implements CQIE, ListListener {
 				copyBody.add(atom.clone());
 			}
 		}
+		
+		CQIEImpl newquery = new CQIEImpl(copyHead, copyBody);
+		newquery.rehash = this.rehash;
+		newquery.string = this.string;
+		newquery.hash = this.hash;
 
-		return new CQIEImpl(copyHead, copyBody);
+		return newquery;
 	}
 
 	@Override

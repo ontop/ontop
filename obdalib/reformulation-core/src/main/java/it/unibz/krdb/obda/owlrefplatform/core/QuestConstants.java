@@ -6,6 +6,7 @@ public class QuestConstants {
 	//Reformulation Techniques
 	public static final String PERFECTREFORMULATION = "PerfectRef";
 	public static final String UCQBASED = "UCQ-based";
+	public static final String TW = "TreeWitness";
 	
 	//ABox modes
 	public static final String CLASSIC = "classic";

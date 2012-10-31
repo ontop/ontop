@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<results>
+    <result queryid="a">
+        <head>
+            <variable>x</variable>
+            <variable>w</variable>
+        </head>
+        <tuples/>
+    </result>
+</results>

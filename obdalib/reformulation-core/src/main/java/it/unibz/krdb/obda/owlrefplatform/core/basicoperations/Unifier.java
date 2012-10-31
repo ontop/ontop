@@ -17,7 +17,9 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
+import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.PredicateAtomImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -114,16 +116,33 @@ public class Unifier {
 	 */
 	public static CQIE applyUnifier(CQIE q, Map<Variable, Term> unifier) {
 		CQIE newq = q.clone();
-
-		/* applying the unifier to every term in the head */
-		Atom head = newq.getHead();
-		applyUnifier(head, unifier);
-		for (Atom bodyatom : newq.getBody()) {
-			applyUnifier(bodyatom, unifier);
-		}
+		applyUnifierInPlace(newq, unifier);
 		return newq;
 	}
 
+	/***
+	 * This method applies the unifier to the *original* query q. 
+	 * 
+	 * Note that this method will actually change the original query,
+	 * replacing variables in the domain of the unifier with their substitution
+	 * term.
+	 * 
+	 * @param q
+	 * @param unifier
+	 * @return
+	 */
+
+	public static void applyUnifierInPlace(CQIE q, Map<Variable, Term> unifier) {
+		/* applying the unifier to every term in the head */
+		Atom head = q.getHead();
+		applyUnifier(head, unifier);
+		for (Atom bodyatom : q.getBody()) {
+			applyUnifier(bodyatom, unifier);
+		}
+		((CQIEImpl)q).listChanged();
+	}
+
+	
 	/**
 	 * This method will apply the substitution in the unifier to all the terms
 	 * of the atom. If nested terms occur, it will apply the unifier to ONLY the
@@ -138,11 +157,13 @@ public class Unifier {
 	 */
 	public static void applyUnifier(Atom atom, Map<Variable, Term> unifier) {
 		applyUnifier(atom.getTerms(), unifier);
+		((PredicateAtomImpl)atom).listChanged();
 	}
 
 	public static void applyUnifier(Function term, Map<Variable, Term> unifier) {
 		List<Term> terms = term.getTerms();
 		applyUnifier(terms, unifier);
+		
 	}
 
 	public static void applyUnifier(List<Term> terms, Map<Variable, Term> unifier) {
@@ -158,6 +179,7 @@ public class Unifier {
 					terms.set(i, replacement);
 			} else if (t instanceof Function) {
 				applyUnifier((Function) t, unifier);
+				((FunctionalTermImpl)t).listChanged();
 			}
 		}
 	}
@@ -173,24 +195,22 @@ public class Unifier {
 	 * @return
 	 */
 	public static Map<Variable, Term> getMGU(Atom first, Atom second) {
-
-		Atom firstAtom = (Atom) first;
-		Atom secondAtom = (Atom) second;
-
 		/*
 		 * Basic case, predicates are different or their arity is different,
 		 * then no unifier
 		 */
-		if (!(firstAtom.getPredicate().equals(secondAtom.getPredicate())) || firstAtom.getArity() != secondAtom.getArity()) {
+		if (!(first.getPredicate().equals(second.getPredicate())) || first.getArity() != second.getArity()) {
 			return null;
 
 		}
 
-		/* Computing the disagreement set */
+		// MUST CLONE, OTHERWISE IT MODIFIES THE "DEEP" CONTENTS OF THE TERMS
 
-		int arity = firstAtom.getPredicate().getArity();
-		List<Term> terms1 = new ArrayList<Term>(firstAtom.getTerms());
-		List<Term> terms2 = new ArrayList<Term>(secondAtom.getTerms());
+		int arity = first.getArity();
+		List<Term> terms1 = first.clone().getTerms();
+		List<Term> terms2 = second.clone().getTerms();
+
+		/* Computing the disagreement set */
 
 		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
 
@@ -202,7 +222,7 @@ public class Unifier {
 			/*
 			 * Checking if there are already substitutions calculated for the
 			 * current terms. If there are any, then we have to take the
-			 * substitutted terms instead of the original ones.
+			 * substituted terms instead of the original ones.
 			 */
 			Term currentTerm1 = mgu.get(term1);
 			Term currentTerm2 = mgu.get(term2);

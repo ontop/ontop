@@ -14,12 +14,12 @@
 	</appender>
 	
 	<!-- Main component -->
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="DEBUG" />
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="WARN" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="WARN" />
 
 
 	<!--  Quest Core -->
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.Quest" level="DEBUG"/>
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.Quest" level="WARN"/>
 
 	<!-- Query Rewriting component -->
 	<!--
@@ -51,7 +51,7 @@
 	<logger name="it.unibz.krdb.obda.owlrefplatform.core.dag" level="DEBUG" />
 	-->
 
-	<root level="INFO">
+	<root level="WARN">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</root>

@@ -4,567 +4,518 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
+import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeWitnessRewriter implements QueryRewriter {
 /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	private Ontology tbox;
-	private List<SubClassAxiomImpl> generatingAxioms;
+ * 
+ */
 
-	private static OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
-	private static OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	
+public class TreeWitnessRewriter implements QueryRewriter {
+	private static final long serialVersionUID = 1L;
+
+	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
+	private TreeWitnessReasonerLite reasoner = new TreeWitnessReasonerLite();
+	private ExtPredicateCache cache = new ExtPredicateCache();
+	
+	private Ontology sigma = null;
+	
+	@Override
+	public void setTBox(Ontology ontology) {
+		double startime = System.currentTimeMillis();
+
+		cache.clear();
+		reasoner.setTBox(ontology);
+		
+		double endtime = System.currentTimeMillis();
+		double tm = (endtime - startime) / 1000;
+		time += tm;
+		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));
+	}
+	
+	@Override
+	public void setCBox(Ontology sigma) {
+		log.debug("SET SIGMA");
+		this.sigma = sigma;
+		for (Axiom ax : sigma.getAssertions()) {
+			log.debug("SIGMA: " + ax);
+		}
+		cache.clear();
+	}
 
 	@Override
-	public void setTBox(Ontology ontology) 
-	{
-		this.tbox = ontology;
+	public void initialize() {
+		// TODO Auto-generated method stub
+	}
 
-		// collect generating axioms
-		generatingAxioms = new LinkedList<SubClassAxiomImpl>();
-		log.debug("AXIOMS");
-		for (Axiom ax: tbox.getAssertions())
-		{
-			if (ax instanceof SubClassAxiomImpl)
-			{
-				SubClassAxiomImpl sax = (SubClassAxiomImpl)ax;
-				ClassDescription sc = sax.getSuper();
-				if (sc instanceof PropertySomeClassRestriction)
-				{
-					PropertySomeClassRestriction some = (PropertySomeClassRestriction)sc;
-					log.debug("property " + some.getPredicate() + ", filler " + some.getFiller() + " from " + sax);
-					generatingAxioms.add(sax);
-				}
-				else //if (sc instanceof OClass)
-				{
-					log.debug("SUBCLASS OF " + sc + ": " + sax + ((sc instanceof OClass) ? "": " UNKNOWN TYPE"));
-				}
+	/*
+	 * adds the Ext_E atoms for all atoms E in a given collection of atoms; saves used Ext_E predicates in usedExts
+	 */
+	
+	private  void addExtAtoms(Collection<Atom> extAtoms, Collection<Atom> atoms, Set<Predicate> usedExts) {
+		for (Atom a : atoms) {
+			Predicate ext = cache.getCheckedExtPredicate(a.getPredicate(), usedExts);
+			extAtoms.add((ext == null) ? a: fac.getAtom(ext, a.getTerms()));
+		}
+	}
+
+	/*
+	 * returns the Ext_E atoms for all atoms E in a given edge; saves used Ext_E predicates in usedExts
+	 */
+		
+	private List<Atom> getExtAtoms(Edge edge, Set<Predicate> usedExts) {
+		List<Atom> extAtoms = new ArrayList<Atom>(edge.size());
+		addExtAtoms(extAtoms, edge.getBAtoms(), usedExts);
+		addExtAtoms(extAtoms, edge.getAtoms0(), usedExts);
+		addExtAtoms(extAtoms, edge.getAtoms1(), usedExts);	
+		return extAtoms;
+	}
+	
+	/*
+	 * returns the Ext_E atoms for all atoms E of a given collection of tree witness generators; 
+	 * the `free' variable of the generators is replaced by the term r0;
+	 * saves used Ext_E predicates in usedExts
+	 */
+
+	private List<Atom> getExtAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0, Set<Predicate> usedExts)  {
+		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens);		
+		List<Atom> extAtoms = new ArrayList<Atom>(concepts.size());
+		Term x = fac.getNondistinguishedVariable(); 
+		
+		for (BasicClassDescription con : concepts) {
+			log.debug("  BASIC CONCEPT: " + con);
+			if (con instanceof OClass) {
+				Predicate ext = cache.getExtPredicate(((OClass)con).getPredicate(), usedExts);
+				extAtoms.add(fac.getAtom(ext, r0));
 			}
-			else
-				log.debug(ax.toString());
-		}
-	}
-	
-
-
-	@Override
-	public void setCBox(Ontology sigma) 
-	{
-		// TODO Auto-generated method stub	
-	}
-
-	@Override
-	public void initialize() 
-	{
-		// TODO Auto-generated method stub	
-	}
-	
-	private static CQIE getCQIE(Atom head, Atom body)
-	{
-		List<Atom> b = new LinkedList<Atom>();
-		b.add(body);
-		return fac.getCQIE(head, b);		
-	}
-	
-	private static CQIE getCQIE(Atom head, Atom body1, Atom body2)
-	{
-		List<Atom> b = new LinkedList<Atom>();
-		b.add(body1);
-		b.add(body2);
-		return fac.getCQIE(head, b);		
-	}
-	
-	private static Atom getAtom(URI name, List<Term> terms) 
-	{
-		return fac.getAtom(fac.getPredicate(name, terms.size()), terms);
-	}
-	
-	private static Atom getAtom(URI name, Term term) 
-	{
-		List<Term> terms = new LinkedList<Term>();
-		terms.add(term);
-		return fac.getAtom(fac.getPredicate(name, 1), terms);
-	}
-	
-	private static Atom getAtom(URI name, Term term1, Term term2) 
-	{
-		List<Term> terms = new LinkedList<Term>();
-		terms.add(term1);
-		terms.add(term2);
-		return fac.getAtom(fac.getPredicate(name, 1), terms);
-	}
-	
-	private static Atom getRoleAtom(PropertySomeClassRestriction p, Term t1, Term t2) //throws MalformedURIException
-	{
-		if (!p.isInverse())
-			return getAtom(p.getPredicate().getName(), t1, t2);
-		else
-			return getAtom(p.getPredicate().getName(), t2, t1);
-	}
-
-	private static class AdjacentTermsPair 
-	{
-		private Term t1, t2;
-		
-		public AdjacentTermsPair(Term t1, Term t2)
-		{
-			this.t1 = t1;
-			this.t2 = t2;
-		}
-		
-		public boolean equals(Object o)
-		{
-			if (o instanceof AdjacentTermsPair)
-			{
-				AdjacentTermsPair other = (AdjacentTermsPair)o;
-				if (this.t1.equals(other.t1) && this.t2.equals(other.t2))
-					return true;
-				if (this.t2.equals(other.t1) && this.t1.equals(other.t2))
-					return true;
+			else {
+				PropertySomeRestriction some = (PropertySomeRestriction)con;
+				Predicate ext = cache.getExtPredicate(some.getPredicate(), usedExts);
+				extAtoms.add((!some.isInverse()) ?  fac.getAtom(ext, r0, x) : fac.getAtom(ext, x, r0));  						 
 			}
-			return false;
 		}
-		
-		public String toString()
-		{
-			return "term pair: {" + t1 + ", " + t2 + "}";
-		}
+		return extAtoms;
 	}
 	
-	@Override
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException 
-	{	
-		// public DatalogProgram getRewriting(Set<TreeWitness> tws) //throws MalformedURIException
-		CQIE cqie = (CQIE)input;
-		
-		Set<TreeWitness> tws = getReducedSetOfTreeWitnesses(cqie);
-		
-		DatalogProgram output = fac.getDatalogProgram(); //(cqie.getHead().getPredicate());
-		
+	/*
+	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
+	 */
+	
+	private static Atom getHeadAtom(URI basis, String fragment, List<Term> arguments) {
+		URI uri = null;
 		try {
-		int Q = 0;
-		{
-			List<Atom> mainbody = new LinkedList<Atom>();
-			for (Atom a: cqie.getBody())
-				if (a.getArity() == 2)
-						mainbody.add(getAtom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
-			
-			// if no binary predicates
-			if (mainbody.size() == 0)
-				for (Atom a: cqie.getBody())
-					mainbody.add(getAtom(getExtName(a.getPredicate().getName()), a.getTerms()));			
-			
-			output.appendRule(fac.getCQIE(cqie.getHead(), mainbody));
-		}
-		Q = 0;
-		for (Atom a: cqie.getBody())
-			if (a.getArity() == 2)
-			{
-				URI Qname = getQName(a.getPredicate().getName(), ++Q);
-				// TODO: groups for pairs of terms
-				List<Atom> group = new LinkedList<Atom>();
-				group.add(getAtom(getExtName(a.getPredicate().getName()), a.getTerms()));
-				for (Atom aa: cqie.getBody())
-					if ((aa.getArity() == 1) && a.getTerms().contains(aa.getTerm(0)))
-						group.add(getAtom(getExtName(aa.getPredicate().getName()), aa.getTerms()));
-					
-				output.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), group));
-			
-				for (TreeWitness tw: tws)
-					if (tw.getDomain().containsAll(a.getTerms()))
-					{
-						// TREE WITNESS FORMULAS
-						List<Atom> twf = new LinkedList<Atom>();
-						List<Term> roots = new LinkedList<Term>(tw.getRoots());
-						Term r0 = roots.get(0);
-						twf.add(getAtom(getExtName(tw.getGenerator()), r0));
-						for (Term rt: roots)
-							if (!rt.equals(roots.get(0)))
-								twf.add(getAtom(new URI("http://EQ"), rt, r0));
-						for (ClassDescription c: tw.getRootType())
-						{
-							OClass cl = (OClass)c;
-							twf.add(getAtom(getExtName(cl.getPredicate().getName()), r0));
-						}
-						
-						output.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), twf));
-					}
-			}
-		
-		Set<PropertySomeClassRestriction> gen = new HashSet<PropertySomeClassRestriction>();
-		for (TreeWitness tw: tws)
-			gen.add(tw.getGenerator());
-		
-		//System.out.println("\nEXT PREDICATES");
-		for (CQIE ext: getExtPredicates(cqie, gen))
-			output.appendRule(ext);
+			uri = new URI(basis.getScheme(), basis.getSchemeSpecificPart(), fragment);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return fac.getAtom(fac.getPredicate(uri, arguments.size()), arguments);
+	}
+	
+	/*
+	 * rewrites a given connected CQ with the rules put into output
+	 */
+	
+	private void rewriteCC(QueryConnectedComponent cc, Atom headAtom, DatalogProgram output, Set<Predicate> usedExts, DatalogProgram edgeDP) {
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
+
+		if (cc.hasNoFreeTerms()) {  
+			for (Atom a : getExtAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getNondistinguishedVariable(), usedExts))
+				output.appendRule(fac.getCQIE(headAtom, a)); 
+		}
+
+		// COMPUTE AND STORE TREE WITNESS FORMULAS
+		for (TreeWitness tw : tws.getTWs()) {
+			log.debug("TREE WITNESS: " + tw);		
+			MinimalCQProducer twf = new MinimalCQProducer(reasoner, cc.getVariables()); 
+			
+			// equality atoms
+			Iterator<Term> i = tw.getRoots().iterator();
+			Term r0 = i.next();
+			while (i.hasNext()) 
+				twf.add(fac.getEQAtom(i.next(), r0));
+			
+			// root atoms
+			for (Atom a : tw.getRootAtoms()) {
+				Predicate ext = cache.getExtPredicate(a.getPredicate(), usedExts);
+				twf.add((a.getArity() == 1) ? fac.getAtom(ext, r0) : fac.getAtom(ext, r0, r0));
+			}
+			
+			List<Atom> genAtoms = getExtAtomsForGenerators(tw.getGenerators(), r0, usedExts);			
+			boolean subsumes = false;
+			for (Atom a : genAtoms) 				
+				if (twf.wouldSubsume(a)) {
+					subsumes = true;
+					log.debug("TWF " + twf.getBody() + " SUBSUMES " + a);
+					break;
+				}
+
+			List<List<Atom>> twfs = new ArrayList<List<Atom>>(subsumes ? 1 : genAtoms.size());			
+			if (!subsumes) {
+				List<Atom> twfbody = twf.getBody();		
+				for (Atom a : genAtoms) {				
+					List<Atom> twfa = new ArrayList<Atom>(twfbody.size() + 1); 
+					twfa.add(a); // 
+					twfa.addAll(twfbody);
+					twfs.add(twfa);
+				}
+			}
+			else
+				twfs.add(twf.getBody());
+			
+			tw.setFormula(twfs);
+		}
+				
+		if (!cc.isDegenerate()) {			
+			if (tws.hasConflicts()) { 
+				// there are conflicting tree witnesses
+				// use compact exponential rewriting by enumerating all compatible subsets of tree witnesses
+				URI atomURI = headAtom.getPredicate().getName();
+				CompatibleTreeWitnessSetIterator iterator = tws.getIterator();
+				while (iterator.hasNext()) {
+					Collection<TreeWitness> compatibleTWs = iterator.next();
+					log.debug("COMPATIBLE: " + compatibleTWs);
+					MinimalCQProducer mainbody = new MinimalCQProducer(reasoner, cc.getFreeVariables()); 
+					
+					for (Edge edge : cc.getEdges()) {
+						boolean contained = false;
+						for (TreeWitness tw : compatibleTWs)
+							if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
+								contained = true;
+								log.debug("EDGE " + edge + " COVERED BY " + tw);
+								break;
+							}
+						if (!contained) {
+							log.debug("EDGE " + edge + " NOT COVERED BY ANY TW");
+							for (Atom a : getExtAtoms(edge, usedExts))
+								mainbody.add(a);
+						}
+					}
+					for (TreeWitness tw : compatibleTWs) {
+						Atom twAtom = getHeadAtom(atomURI, "TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
+						mainbody.addNoCheck(twAtom);				
+						for (List<Atom> twfa : tw.getFormula())
+							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
+					}	
+					output.appendRule(fac.getCQIE(headAtom, mainbody.getBody())); 
+				}
+			}
+			else {
+				// no conflicting tree witnesses
+				// use polynomial tree witness rewriting by treating each edge independently 
+				MinimalCQProducer mainbody = new MinimalCQProducer(reasoner, cc.getFreeVariables()); 		
+				for (Edge edge : cc.getEdges()) {
+					log.debug("EDGE " + edge);
+					List<Atom> extAtoms = getExtAtoms(edge, usedExts);
+					
+					Atom edgeAtom = null;
+					for (TreeWitness tw : tws.getTWs())
+						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
+							if (edgeAtom == null) {
+								URI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
+								edgeAtom = getHeadAtom(atomURI, 
+										"E_" + (edgeDP.getRules().size() + 1) + "_" + atomURI.getFragment(), cc.getVariables());
+								mainbody.addNoCheck(edgeAtom);				
+								edgeDP.appendRule(fac.getCQIE(edgeAtom, extAtoms));													
+							}
+							
+							for (List<Atom> twfa : tw.getFormula())
+								edgeDP.appendRule(fac.getCQIE(edgeAtom, twfa));
+						}
+					
+					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
+						for (Atom a : extAtoms)
+							mainbody.add(a);
+				}
+				output.appendRule(fac.getCQIE(headAtom, mainbody.getBody())); 
+			}
+		}
+		else {
+			// degenerate connected component -- a single loop
+			Loop loop = cc.getLoop();
+			log.debug("LOOP " + loop);
+			List<Atom> extAtoms = new ArrayList<Atom>(loop.getAtoms().size());			
+			addExtAtoms(extAtoms, loop.getAtoms(), usedExts);
+			output.appendRule(fac.getCQIE(headAtom, extAtoms)); 
+		}
+	}
+	
+	private double time = 0;
+	
+	@Override
+	public OBDAQuery rewrite(OBDAQuery input) {
+		
+		double startime = System.currentTimeMillis();
+		
+		DatalogProgram dp = (DatalogProgram) input;
+		DatalogProgram output = fac.getDatalogProgram();
+		DatalogProgram ccDP = fac.getDatalogProgram();
+		DatalogProgram edgeDP = fac.getDatalogProgram();
+
+		Set<Predicate> exts = new HashSet<Predicate>();
+		
+		for (CQIE cqie : dp.getRules()) {
+			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(cqie);	
+			Atom cqieAtom = cqie.getHead();
+		
+			if (ccs.size() == 1) {
+				QueryConnectedComponent cc = ccs.iterator().next();
+				log.debug("CONNECTED COMPONENT (" + cc.getFreeVariables() + ")" + " EXISTS " + cc.getQuantifiedVariables() + " WITH EDGES " + cc.getEdges() + " AND LOOP " + cc.getLoop());
+				rewriteCC(cc, cqieAtom, output, exts, edgeDP); 				
+			}
+			else {
+				URI cqieURI = cqieAtom.getPredicate().getName();
+				List<Atom> ccBody = new ArrayList<Atom>(ccs.size());
+				for (QueryConnectedComponent cc : ccs) {
+					log.debug("CONNECTED COMPONENT (" + cc.getFreeVariables() + ")" + " EXISTS " + cc.getQuantifiedVariables() + " WITH EDGES " + cc.getEdges());
+					Atom ccAtom = getHeadAtom(cqieURI, 
+							cqieURI.getFragment() + "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
+					rewriteCC(cc, ccAtom, ccDP, exts, edgeDP); 
+					ccBody.add(ccAtom);
+				}
+				output.appendRule(fac.getCQIE(cqieAtom, ccBody));
+			}
+		}
+		
+		DatalogProgram extDP = cache.getExtDP(exts);
+			
+		log.debug("REWRITTEN PROGRAM\n" + output + "CC DEFS\n"+ ccDP + "EDGE DEFS\n" + edgeDP + "EXT DEFS\n" + extDP);			
+		if (!edgeDP.getRules().isEmpty()) {
+			output = DatalogQueryServices.plugInDefinitions(output, edgeDP);
+			if (!ccDP.getRules().isEmpty())
+				ccDP = DatalogQueryServices.plugInDefinitions(ccDP, edgeDP);
+			log.debug("INLINE EDGE PROGRAM\n" + output + "CC DEFS\n" + ccDP);
+		}
+		if (!ccDP.getRules().isEmpty()) {
+			output = DatalogQueryServices.plugInDefinitions(output, ccDP);
+			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n" + output);
+		}
+		if (extDP != null) {
+			output = DatalogQueryServices.plugInDefinitions(output, extDP);
+			log.debug("INLINE EXT PROGRAM\n" + output);
+		}
+		QueryUtils.copyQueryModifiers(input, output);
+
+		double endtime = System.currentTimeMillis();
+		double tm = (endtime - startime) / 1000;
+		time += tm;
+		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
 		
 		return output;
 	}
 	
-	
-	public List<CQIE> getExtPredicates(CQIE cqie, Set<PropertySomeClassRestriction> gencon) throws URISyntaxException //throws MalformedURIException
-	{
-		List<CQIE> list = new LinkedList<CQIE>();
-		Set<Predicate> exts = new HashSet<Predicate>();
 
-		for (Atom a: cqie.getBody())
-			exts.add(a.getPredicate());
-				
+	/**
+	 * Ext predicates cache entry
+	 * 		ext: the Ext_E predicate for a query predicate E
+	 * 		dp:  list of CQs to represent the Datalog program for this ext
+	 * note that both dp and ext can be null (at the same time) meaning that the definition of Ext_E is trivial
+	 *  
+	 * @author Roman Kontchakov
+	 *
+	 */
+	
+	private static class ExtPredicateCacheEntry {
+		private final Predicate ext;
+		private final List<CQIE> dp;
 		
-		// GENERATING CONCEPTS
-		
-		for (PropertySomeClassRestriction some: gencon)
-		{
-			URI uri = getExtName(some);
-			Term x = fac.getVariable("x");
-			
-			for (Predicate c: tbox.getConcepts())
-				//COMM if (!c.isOWLNothing() && r.isSubsumed(c, some))
-				{
-					//System.out.println("EXT COMPUTE SUBCLASSES: " + c);
-					list.add(getCQIE(getAtom(uri, x), getAtom(c.getName(), x)));
-				}
-			
-			{
-				Term w = fac.getVariable("w");
-				Atom ra = getRoleAtom(some, x, w);
-				exts.add(ra.getPredicate());
-				ra.setPredicate(fac.getPredicate(getExtName(ra.getPredicate().getName()), 2));
-				//System.out.println(ra);
-				//COMM if(r.isSubsumed(f.getOWLObjectSomeValuesFrom(some.getProperty(), f.getOWLThing()), some))
-					list.add(getCQIE(getAtom(uri, x), ra));
-			}
-			/*
-			for (OWLObjectPropertyExpression p: getProperties())
-				if (!p.isOWLBottomObjectProperty())
-				{
-					if(isSubsumed(f.getOWLObjectSomeValuesFrom(p, f.getOWLThing()), some))
-					{
-						list.add(getCQIE(new Atom(uri, x), getRoleAtom(p, x, w)));
-						continue;
-					}
-					
-					for (OWLClassExpression c: getClasses())
-						if (!c.isOWLNothing() && isSubsumed(f.getOWLObjectSomeValuesFrom(p, c), some))
-							list.add(getCQIE(new Atom(uri, x), getRoleAtom(p, x, w), new Atom(new URI(c.asOWLClass().getIRI().toString()), w)));						
-				}
-			*/
+		public ExtPredicateCacheEntry(Predicate ext, List<CQIE> dp) {
+			this.ext = ext;
+			this.dp = dp;
 		}
-				
-	/* COMM	
-		for (Predicate pred: exts)
-		{
-			if (pred.getArity() == 1)
-			{
-				URI ext = getExtName(pred.getName());
-				OWLClass ac = f.getOWLClass(pred.getIRI());
-				Term x = fac.getVariable("x");
-				//list.add(getCQIE(new Atom(ext, x), new Atom(a.getPredicate().getName(), x)));
-				
-				for (OWLClass c: r.getClasses())
-					if (!c.isOWLNothing() && r.isSubsumed(c, ac))
-						list.add(getCQIE(getAtom(ext, x), getAtom(new URI(c.getIRI().toString()), x)));
-				
-				for (OWLObjectPropertyExpression p: r.getProperties())
-					if (!p.isOWLBottomObjectProperty() && r.isSubsumed(f.getOWLObjectSomeValuesFrom(p, f.getOWLThing()), ac))
-						list.add(getCQIE(getAtom(ext, x), getRoleAtom(p, x, fac.getVariable("w"))));						
-			}
-			else if (pred.getArity() == 2)
-			{
-				URI ext = getExtName(pred.getName());
-				OWLObjectProperty pa = f.getOWLObjectProperty(pred.getIRI());
-				Term x = fac.getVariable("x");
-				Term y = fac.getVariable("y");
-				//list.add(getCQIE(new Atom(ext, x, y), new Atom(a.getPredicate().getName(), x, y)));
-				
-				for (OWLObjectPropertyExpression p: r.getProperties())
-					if (!p.isOWLBottomObjectProperty() && r.isSubsumed(p, pa))
-					{
-						//OWLObjectPropertyExpression pi = p.getInverseProperty().getSimplified();
-						//if (!pi.isAnonymous() && isSubsumed(pa, pi.getInverseProperty()))
-						//{
-						//	System.out.println("INVERSE " + pi + " OF " + a.getPredicate() + ": NO EXTRA RULE GENERATED");
-						//	continue;
-						//}
-						list.add(getCQIE(getAtom(ext, x, y), getRoleAtom(p, x, y)));
-					}
-			}
-		}
-	*/	
-		return list;
 	}
 	
-	private static URI getExtName(URI name) throws URISyntaxException
-	{
-		return new URI(name.getScheme(), name.getSchemeSpecificPart(), 
-				"EXT_" + name.getFragment());
-	}
-
-	private static URI getExtName(PropertySomeClassRestriction some) throws URISyntaxException //throws MalformedURIException 
-	{
-		URI property = some.getPredicate().getName();
-		return new URI(property.getScheme(), property.getSchemeSpecificPart(), 
-					"EXT_" + property.getFragment() + (some.isInverse() ? "_I_" : "_") 
-					+ some.getFiller().getPredicate().getName().getFragment());
-	}
-
-	private static URI getQName(URI name, int pos) throws URISyntaxException  
-	{
-		return new URI(name.getScheme(), name.getSchemeSpecificPart(), 
-					"Q_" + pos + "_" + name.getFragment());
-	}
-
+	/**
+	 * cache for the Ext_E predicates and Datalog programs they are defined by
+	 * 
+	 * @author Roman Kontchakov
+	 *
+	 */
 	
-	private Set<TreeWitness> getReducedSetOfTreeWitnesses(CQIE cqie)
-	{
-		Set<TreeWitness> treewitnesses = getTreeWitnesses(cqie);
-
-		Set<TreeWitness> subtws = new HashSet<TreeWitness>();
-		for (TreeWitness tw: treewitnesses)
-		{
-			boolean subsumed = false;
-			for (TreeWitness tw1: treewitnesses)
-				if (!tw.equals(tw1) && tw.getDomain().equals(tw1.getDomain()) && tw.getRoots().equals(tw1.getRoots()))
-					// COMM if (reasoner.isEntailed(f.getOWLSubClassOfAxiom(tw.getGenerator(), tw1.getGenerator())))
-					{
-						System.out.println("SUBSUMED: " + tw + " BY " + tw1);
-						subsumed = true;
-						//break;
-					}
-			if (!subsumed)
-				subtws.add(tw);
-		}
-		return subtws;
-	}
-	
+	private class ExtPredicateCache {
+		private Map<Predicate, ExtPredicateCacheEntry> extPredicateMap = new HashMap<Predicate, ExtPredicateCacheEntry>();
 		
-	private Set<TreeWitness> getTreeWitnesses(CQIE cqie)
-	{
-		Set<TreeWitness> treewitnesses = new HashSet<TreeWitness>();
-/* COMM		
-		for (Term v: cqie.getVariables())
-		{
-			System.out.println("VARIABLE " + v);
-			if (cqie.getHead().getTerms().contains(v))
-			{
-				System.out.println("   IS FREE, SKIPPING");
-				continue;
-			}
-			List<OWLObjectPropertyExpression> edges = new LinkedList<OWLObjectPropertyExpression>();
-			Set<ClassDescription> endtype = new HashSet<ClassDescription>();
-			Set<Term> roots = new HashSet<Term>();
-			for (Atom a: cqie.getBody())
-			{
-				if ((a.getArity() == 1) && (a.getTerm(0).equals(v)))
-				{	
-					endtype.add(ontFactory.createClass(a.getPredicate().getName()));
-				}
-				else if ((a.getArity() == 2) && (a.getTerm(0).equals(v)))
-				{
-					edges.add(f.getOWLObjectProperty(IRI.create(a.getPredicate().getName().toString()))
-							.getInverseProperty());
-					roots.add(a.getTerm(1));
-				}
-				else if ((a.getArity() == 2) && (a.getTerm(1).equals(v)))
-				{
-					edges.add(f.getOWLObjectProperty(IRI.create(a.getPredicate().getName().toString())));
-					roots.add(a.getTerm(0));
-				}
-			}
-			System.out.println("  EDGES " + edges);
-			System.out.println("  ENDTYPE " + endtype);
-
-			for (SubClassAxiomImpl a: generatingAxioms)
-			{
-				PropertySomeClassRestriction some = (PropertySomeClassRestriction)a.getSuper();
-				if (isTreeWitness(some, roots, edges, endtype))
-				{
-					TreeWitness tw = new TreeWitness(some, roots, getRootType(cqie, roots), v);
-					System.out.println(tw);
-					treewitnesses.add(tw);				
-				}
-			}
+		/**
+		 * clears the cache (called when a new CBox is set)
+		 */
+		
+		public void clear() {
+			extPredicateMap.clear();
 		}
 		
-		Set<TreeWitness> delta = new HashSet<TreeWitness>();
-		do
-			for (TreeWitness tw: treewitnesses)
-			{
-				Set<TreeWitness> twa = new HashSet<TreeWitness>();
-				twa.add(tw);
-				saturateTreeWitnesses(treewitnesses, delta, new HashSet<Term>(), new LinkedList<OWLObjectPropertyExpression>(), twa);
-			}
-		while (treewitnesses.addAll(delta));
-*/		
-		return treewitnesses;
-	}
-	
-/* COMM	
-	private void saturateTreeWitnesses(CQIE cqie, Set<TreeWitness> treewitnesses, Set<TreeWitness> delta, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<TreeWitness> tws)
-	{
-		boolean saturated = true;
-		for (Atom a: cqie.getBody())
-		{
-			if (a.getArity() == 2) 
-			{
-				for (TreeWitness tw: tws)
-				{
-					Term r = null;
-					Term nonr = null;
-					OWLObjectPropertyExpression edge = null;
-					if (tw.getRoots().contains(a.getTerm(0)) && !tw.getDomain().contains(a.getTerm(1)) && !roots.contains(a.getTerm(1)))
-					{
-						r = a.getTerm(0);
-						nonr = a.getTerm(1);
-						edge = f.getOWLObjectProperty(IRI.create(a.getPredicate().getName().toString()))
-									.getInverseProperty();
-					}
-					else if (tw.getRoots().contains(a.getTerm(1)) && !tw.getDomain().contains(a.getTerm(0)) && !roots.contains(a.getTerm(0)))
-					{
-						r = a.getTerm(1);
-						nonr = a.getTerm(0);
-						edge = f.getOWLObjectProperty(IRI.create(a.getPredicate().getName().toString()));
-					}
-					else
-						continue;
-					
-					System.out.println("ATOM " + a + " IS ADJACENT TO THE TREE WITNESS " + tw);
-					saturated = false;
-					for (TreeWitness twa: treewitnesses)
-					{
-						if (twa.getRoots().contains(r) && tw.getDomain().contains(nonr))
-						{
-							Set<TreeWitness> tws2 = new HashSet<TreeWitness>(tws);
-							tws2.add(twa);
-							System.out.println("    ATTACHING THE TREE WITNESS " + twa);
-							saturateTreeWitnesses(treewitnesses, delta, roots, edges, tws2);
-						}
-					}
-					Set<Term> roots2 = new HashSet<Term>(roots);
-					roots2.add(nonr); 
-					List<OWLObjectPropertyExpression> edges2 = new LinkedList<OWLObjectPropertyExpression>(edges);
-					edges2.add(edge);
-					System.out.println("    ATTACHING THE HANDLE " + edge);
-					saturateTreeWitnesses(treewitnesses, delta, roots2, edges2, tws);
-				}
-			}
-		}
-		if (saturated)
-		{
-			System.out.println("CHEKCING WHETHER THE ROOTS " + roots + " WITH EDGES " + edges + " CAN BE ATTACHED TO THE FOLLOWING: ");
-			for (TreeWitness tw: tws)
-				System.out.println(tw);
-			
-			// collect the type of the root
-			Set<ClassDescription> endtype = new HashSet<ClassDescription>();
-			Set<Term> nonroots = new HashSet<Term>();
-			boolean nonrootsbound = true;
-			for (TreeWitness tw: tws)
-			{
-				endtype.add(tw.getGenerator());
-				nonroots.addAll(tw.getDomain());
-				// check whether the variables are bound
-				for (Term t: tw.getRoots())
-					if (cqie.getHead().getTerms().contains(t))
-						nonrootsbound = false;
-			}
-			
-			System.out.println("      NON-ROOTS ARE " + (nonrootsbound ? "" : "NOT") + " BOUND");
-			if (nonrootsbound)
-				for (SubClassAxiomImpl a: generatingAxioms)
-				{
-					PropertySomeClassRestriction some = (PropertySomeClassRestriction)a.getSuper();
-					if (isTreeWitness(some, roots, edges, endtype))
-					{
-						TreeWitness tw = new TreeWitness(some, roots, getRootType(cqie, roots), nonroots);
-						System.out.println(tw);
-						delta.add(tw);				
-					}
-				}
+		/**
+		 * 
+		 * @param p: a query predicate E
+		 * @param usedExts: a collection of Ext_E predicates that have been used in the rewriting so far
+		 * @return the Ext_E predicate or null if Ext_E is trivially defined (i.e., with a single rule Ext_E :- E)
+		 */
+		
+		public Predicate getCheckedExtPredicate(Predicate p, Set<Predicate> usedExts)  {
+			ExtPredicateCacheEntry e = getEntryFor(p);
+			if (e.ext != null)
+				usedExts.add(p);
+			return e.ext;
 		}
 		
-	}
-	*/
-	/* COMM
-	private boolean isTreeWitness(PropertySomeClassRestriction some, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<ClassDescription> endtype)
-	{
-		System.out.println("      CHECKING " + some);
-		boolean match = false;
-		if (r.isSubsumed(some.getFiller(), f.getOWLObjectIntersectionOf(endtype)))
-		{
-			System.out.println("         ENDTYPE MATCH " + some.getFiller() + " <= " + f.getOWLObjectIntersectionOf(endtype));
-			match = true;
-		}
-		if (r.isSubsumed(f.getOWLObjectSomeValuesFrom(some.getProperty().getInverseProperty(), f.getOWLThing()), f.getOWLObjectIntersectionOf(endtype)))
-		{
-			System.out.println("         ENDARROW MATCH " + some.getProperty().getInverseProperty() + " <= " + f.getOWLObjectIntersectionOf(endtype));
-			match = true;
-		}
-		if (!match)
-			return false;
+		/**
+		 * 
+		 * @param p: a query predicate E
+		 * @param usedExts: a collection of Ext_E predicates that have been used in the rewriting so far
+		 * @return the Ext_E predicate or E if Ext_E is trivially defined (i.e., with a single rule Ext_E :- E)
+		 */
 		
-		for (OWLObjectPropertyExpression p: edges)
-		{
-			if (r.isSubsumed(some.getProperty(), p))
-				System.out.println("         ROLE MATCH " + some.getProperty() + " <= " + p);
+		public Predicate getExtPredicate(Predicate p, Set<Predicate> usedExts)  {
+			ExtPredicateCacheEntry e = getEntryFor(p);
+			if (e.ext != null) {
+				usedExts.add(p);
+				return e.ext;
+			}
 			else
-			{
-				System.out.println("         ROLE NOT MATCHED " + some.getProperty() + " !<= " + p);
-				return false;
+				return p;
+		}
+		
+		/**
+		 * 
+		 * @param usedExts: a collection of Ext_E predicates that have been used in the rewriting so far
+		 * @return Datalog program containing definitions for all Ext_E in usedExts
+		 */
+		
+		public DatalogProgram getExtDP(Set<Predicate> usedExts) {
+			if (usedExts.isEmpty())
+				return null;
+			
+			DatalogProgram extDP = fac.getDatalogProgram();		
+			for (Predicate pred : usedExts) { 
+				List<CQIE> extDef = extPredicateMap.get(pred).dp;			 
+				extDP.appendRule(extDef); // NEED TO CLONE?				 
+			}
+			return extDP;
+		}
+		
+		private final Term x = fac.getVariable("x");			
+		private final Term y = fac.getVariable("y");
+		private final Term w = fac.getNondistinguishedVariable(); 
+		
+		private ExtPredicateCacheEntry getEntryFor(Predicate p) {
+			ExtPredicateCacheEntry entry = extPredicateMap.get(p);
+			if (entry != null) 
+				return entry;
+				
+			URI extURI = null;
+			try {
+				URI pURI = p.getName();
+				extURI = new URI(pURI.getScheme(), pURI.getSchemeSpecificPart(), "EXT_" + pURI.getFragment());
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			ExtDatalogProgramDef dp = null;
+			if (p.getArity() == 1) {
+				Collection<BasicClassDescription> subc = reasoner.getSubConcepts(p);
+				if (subc.size() > 1) {
+					dp = new ExtDatalogProgramDef(fac.getAtom(fac.getClassPredicate(extURI), x), fac.getAtom(p, x));
+					for (BasicClassDescription c : subc) 
+						if (c instanceof OClass) 
+							dp.add(fac.getAtom(((OClass)c).getPredicate(), x));
+						else {     //if (c instanceof PropertySomeRestriction) {
+							PropertySomeRestriction some = (PropertySomeRestriction)c;
+							dp.add((!some.isInverse()) ? 
+									fac.getAtom(some.getPredicate(), x, w) : fac.getAtom(some.getPredicate(), w, x)); 
+						}		
+				}
+			}
+			else  {
+				Collection<Property> subp = reasoner.getSubProperties(p, false); 
+				if (subp.size() > 1) {
+					dp = new ExtDatalogProgramDef(fac.getAtom(fac.getObjectPropertyPredicate(extURI), x, y), 
+												fac.getAtom(p, x, y));
+					for (Property sub: subp)
+						dp.add((!sub.isInverse()) ? 
+							fac.getAtom(sub.getPredicate(), x, y) : fac.getAtom(sub.getPredicate(), y, x)); 
+				}
+			}
+			if (dp == null) 
+				entry = new ExtPredicateCacheEntry(null, null);
+			else {
+				log.debug("DP FOR " + p + " IS " + dp.dp);
+				dp.minimise();			
+				entry = (dp.dp.size() <= 1)  
+						? new ExtPredicateCacheEntry(null, null) : new ExtPredicateCacheEntry(dp.extAtom.getPredicate(), dp.dp);
+			}
+			extPredicateMap.put(p, entry);
+			return entry;
+		}
+	
+	}
+	
+	/**
+	 * class for Datalog program definitions of the Ext_E
+	 * implements simplified CQ containment checks
+	 * 
+	 * @author Roman Kontchakov
+	 *
+	 */
+	
+	private class ExtDatalogProgramDef {
+		private final Atom extAtom;
+		private final Predicate mainPredicate;
+		private final CQIE mainQuery;
+		private List<CQIE> dp = new LinkedList<CQIE>();
+		
+		public ExtDatalogProgramDef(Atom extAtom, Atom mainAtom) {
+			this.extAtom = extAtom;
+			this.mainPredicate = mainAtom.getPredicate();
+			this.mainQuery = fac.getCQIE(extAtom, mainAtom);
+		}
+		
+		public void add(Atom body) {
+			if (body.getPredicate().equals(mainPredicate))
+				return;
+			
+			CQIE query = fac.getCQIE(extAtom, body);
+			CQCUtilities cqc = new CQCUtilities(query, sigma);
+			if (!cqc.isContainedIn(mainQuery)) 
+				dp.add(query);
+			else
+				log.debug("    CQC CONTAINMENT: " + query +  " IN " + mainQuery);
+		}
+		
+		public void minimise() {
+			if (dp.size() > 0) {
+				dp.add(mainQuery);
+				dp = CQCUtilities.removeContainedQueries(dp, true, sigma, false);
+				log.debug("SIMPLIFIED DP FOR " + extAtom + " IS " + dp);
 			}
 		}
-		System.out.println("         ALL MATCHED");
-		return true;
 	}
-*/
-	private Set<ClassDescription> getRootType(CQIE cqie, Set<Term> roots)
-	{
-		Set<ClassDescription> roottype = new HashSet<ClassDescription>();
-		//System.out.println("         ROOTS " + roots);
-		for (Atom a: cqie.getBody())
-			if ((a.getArity() == 1) && roots.contains(a.getTerm(0)))
-				roottype.add(ontFactory.createClass(a.getPredicate()));
-
-		// TODO: reflexivity stuff
-		
-		//System.out.println("         ROOT TYPE " + roottype);
-		return roottype;
-	}
-	
-	
 	
 }

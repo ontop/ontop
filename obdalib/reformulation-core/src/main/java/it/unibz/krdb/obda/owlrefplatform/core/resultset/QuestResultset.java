@@ -12,7 +12,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -23,7 +22,6 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.util.URIref;
 
 public class QuestResultset implements OBDAResultSet {
@@ -294,15 +292,9 @@ public class QuestResultset implements OBDAResultSet {
 		String result = "";
 		try {
 			result = set.getString(name);
-//			String encoded = result;
-			String encoded = result.replace(" ", "%b");
-//			String encoded = URLEncoder.encode(result,"utf-8");
-//			String encoded = URIref.encode(result);
-			
+			String encoded = URIref.encode(result);
 			return URI.create(encoded);
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
-		} catch (Exception e) {
 			throw new OBDAException(e.getMessage());
 		} 
 	}

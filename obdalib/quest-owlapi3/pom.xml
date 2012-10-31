@@ -58,17 +58,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>sqljdbc4</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc16</artifactId>
-			<scope>test</scope>
-		</dependency>
+	
 
 
 
