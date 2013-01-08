@@ -21,7 +21,7 @@
 			value="it.unibz.krdb.obda.protege4.views.MappingsManagerView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>		
+		<category value="OBDA"></category>
 		<navigates value="@org.protege.classcategory"/>
 	</extension>
 	
@@ -35,11 +35,11 @@
 		<category value="OBDA"></category>
 	</extension> -->
 	
-	<extension id="SQLQueryInterfaceViewComponent"
+	<extension id="MappingAssistantViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="SQL query editor"></label>
+		<label value="Mapping assistant"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.views.SQLQueryInterfaceView">
+			value="it.unibz.krdb.obda.protege4.views.MappingAssistantView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>

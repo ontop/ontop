@@ -72,7 +72,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		selectorPanel.add(datasourceSelector, gridBagConstraints);
 
 		selectorPanel.setBorder(new TitledBorder("Datasource selection"));
-		queryPanel.setBorder(new TitledBorder("SQL Query"));
+		queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 
 		setLayout(new BorderLayout());
 		add(queryPanel, BorderLayout.CENTER);

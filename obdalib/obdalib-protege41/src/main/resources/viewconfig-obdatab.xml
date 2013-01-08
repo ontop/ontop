@@ -38,9 +38,9 @@
 				</Component>
 				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
 					value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
-				<Component label="SQL Query Interface">
+				<Component label="Mapping Assistant">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.SQLQueryInterfaceViewComponent" />
+						value="it.unibz.krdb.obda.protege4.MappingAssistantViewComponent" />
 				</Component>
 			</CNode>
 		</VSNode>
