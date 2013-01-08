@@ -42,7 +42,14 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					
+					<excludes>
+						<exclude>**/directmapping/*.java</exclude>
+					</excludes>
+					
+					
 				</configuration>
+				
 			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>

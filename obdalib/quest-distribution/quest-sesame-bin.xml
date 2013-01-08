@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>sesame-bin</id>
+	<formats>
+		<format>jar</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+
+	<!-- <moduleSets> <moduleSet> <includes> <include>inf.unibz.it.obda:quest-owlapi3</include> 
+		</includes> <binaries> <outputDirectory>/</outputDirectory> <unpack>false</unpack> 
+		<includeDependencies>true</includeDependencies> <dependencySets> <dependencySet> 
+		<outputDirectory>/lib</outputDirectory> </dependencySet> </dependencySets> 
+		</binaries> </moduleSet> </moduleSets> -->
+
+  <fileSets>
+		<fileSet>
+			<directory>${project.basedir}/../obdalib-core/copyright</directory>
+			<outputDirectory>/copyright</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+		
+		<fileSet>
+			<directory>${project.basedir}/../obdalib-core/target/classes/it</directory>
+			<outputDirectory>/it</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../obdalib-owlapi3/target/classes/it</directory>
+			<outputDirectory>/it</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../obdalib-owlapi3/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../quest-db/target/classes/it</directory>
+			<outputDirectory>/it</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../quest-owlapi3/target/classes/it</directory>
+			<outputDirectory>/it</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../quest-sesame/target/classes/sesameWrapper</directory>
+			<outputDirectory>/sesameWrapper</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../quest-sesame/services</directory>
+			<outputDirectory>/META-INF/services</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../reformulation-core/target/classes/it</directory>
+			<outputDirectory>/it</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly> 

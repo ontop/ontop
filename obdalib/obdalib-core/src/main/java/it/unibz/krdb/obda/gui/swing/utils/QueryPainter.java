@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
 
@@ -472,8 +472,8 @@ public class QueryPainter {
 				tasks.add(task);
 			}
 
-			Term term1 = null;
-			Term term2 = null;
+			NewLiteral term1 = null;
+			NewLiteral term2 = null;
 			term1 = atom.getTerm(0);
 			if (atom.getArity() == 2) {
 				term2 = atom.getTerm(1);

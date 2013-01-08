@@ -1,7 +1,8 @@
 package it.unibz.krdb.obda.ontology;
 
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
 import java.net.URI;
@@ -50,9 +51,11 @@ public interface OntologyFactory {
 	
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
 
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, URIConstant o1, URIConstant o2);
+	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
 
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, URIConstant o1, ValueConstant o2);
+	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2);
 	
-	public ClassAssertion createClassAssertion(Predicate concept, URIConstant object);
+	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2);
+	
+	public ClassAssertion createClassAssertion(Predicate concept, ObjectConstant object);
 }

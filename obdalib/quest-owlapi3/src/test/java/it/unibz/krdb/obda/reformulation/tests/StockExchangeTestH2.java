@@ -225,6 +225,7 @@ public class StockExchangeTestH2 extends TestCase {
 					count += 1;
 				}
 			} catch (Exception e) {
+				log.debug(e.getMessage(), e);
 				end = System.currentTimeMillis();
 				count = -1;
 			}

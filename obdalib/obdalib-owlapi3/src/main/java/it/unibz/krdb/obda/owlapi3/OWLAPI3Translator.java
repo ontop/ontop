@@ -320,7 +320,7 @@ public class OWLAPI3Translator {
 					if (rangeDatatype.isBuiltIn()) {
 
 						Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
-						DataType datatype = ofac.createDataType(getDataTypePredicate(columnType));
+						DataType datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
 						addSubclassAxiom(dl_onto, subclass, datatype);
 					} else {
 						log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
@@ -725,7 +725,7 @@ public class OWLAPI3Translator {
 	private DataType getDataTypeExpression(OWLDataRange filler) throws TranslationException {
 		OWLDatatype owlDatatype = (OWLDatatype) filler;
 		COL_TYPE datatype = getColumnType(owlDatatype);
-		return ofac.createDataType(getDataTypePredicate(datatype));
+		return ofac.createDataType(dfac.getTypePredicate(datatype));
 	}
 
 	private ClassDescription getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
@@ -991,7 +991,6 @@ public class OWLAPI3Translator {
 		if (datatype.isString() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_STRING) { // xsd:string
 			return Predicate.COL_TYPE.STRING;
 		} else if (datatype.isRDFPlainLiteral() || datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL // rdf:PlainLiteral
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_XML_LITERAL // rdf:XmlLiteral
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) { // rdfs:Literal
 			return Predicate.COL_TYPE.LITERAL;
 		} else if (datatype.isInteger()
@@ -1019,24 +1018,24 @@ public class OWLAPI3Translator {
 		}
 	}
 
-	private Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
-		switch (type) {
-		case LITERAL:
-			return dfac.getDataTypePredicateLiteral();
-		case STRING:
-			return dfac.getDataTypePredicateString();
-		case INTEGER:
-			return dfac.getDataTypePredicateInteger();
-		case DECIMAL:
-			return dfac.getDataTypePredicateDecimal();
-		case DOUBLE:
-			return dfac.getDataTypePredicateDouble();
-		case DATETIME:
-			return dfac.getDataTypePredicateDateTime();
-		case BOOLEAN:
-			return dfac.getDataTypePredicateBoolean();
-		default:
-			return dfac.getDataTypePredicateLiteral();
-		}
-	}
+//	public Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
+//		switch (type) {
+//		case LITERAL:
+//			return dfac.getDataTypePredicateLiteral();
+//		case STRING:
+//			return dfac.getDataTypePredicateString();
+//		case INTEGER:
+//			return dfac.getDataTypePredicateInteger();
+//		case DECIMAL:
+//			return dfac.getDataTypePredicateDecimal();
+//		case DOUBLE:
+//			return dfac.getDataTypePredicateDouble();
+//		case DATETIME:
+//			return dfac.getDataTypePredicateDateTime();
+//		case BOOLEAN:
+//			return dfac.getDataTypePredicateBoolean();
+//		default:
+//			return dfac.getDataTypePredicateLiteral();
+//		}
+//	}
 }

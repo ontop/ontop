@@ -41,36 +41,36 @@ import org.slf4j.LoggerFactory;
 
 public class TestFileGenerator {
 
-	private static final String															ONTOURI								= "http://obda.inf.unibz.it/ontologies/tests/dllitef/";
+	private static final String ONTOURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/";
 
-	private static final String															SPARQL_MODE							= "sparql";
-	private static final String															DATALOG_MODE						= "datalog";
+	private static final String SPARQL_MODE = "sparql";
+	private static final String DATALOG_MODE = "datalog";
 
-	private String																		obdalocation						= null;
-	private String																		xmllocation							= null;
-	private String																		testlocation						= null;
-	private String																		mode								= null;
+	private String obdalocation = null;
+	private String xmllocation = null;
+	private String testlocation = null;
+	private String mode = null;
 
 	// private OWLOntologyManager manager = null;
-//	private OWLDataFactory																dataFactory							= null;
-	private OBDAModel																	apic								= null;
-	private it.unibz.krdb.obda.reformulation.tests.XMLResultWriter						writer								= null;
-	private Vector<String>																tests								= null;
+	// private OWLDataFactory dataFactory = null;
+	private OBDAModel apic = null;
+	private it.unibz.krdb.obda.reformulation.tests.XMLResultWriter writer = null;
+	private Vector<String> tests = null;
 
-	private Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>	expressions							= null;
+	private Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression> expressions = null;
 
-	private int																			linenr								= 1;
+	private int linenr = 1;
 
-//	private boolean																		GENERATE_ALTERNATIVES_FOR_EXISTS	= false;
+	// private boolean GENERATE_ALTERNATIVES_FOR_EXISTS = false;
 
-	Logger																				log									= LoggerFactory
-																																	.getLogger(this
-																																			.getClass());
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public TestFileGenerator(String basefolder, String mode) {
-		this.obdalocation = "file://" + basefolder + "src/test/resources/test/ontologies/";
-		this.xmllocation =  basefolder + "src/test/resources/test/ontologies/";
-		this.testlocation =  basefolder + "src/test/java/it/unibz/krdb/obda/reformulation/tests/";
+		this.obdalocation = "file://" + basefolder
+				+ "src/test/resources/test/ontologies/";
+		this.xmllocation = basefolder + "src/test/resources/test/ontologies/";
+		this.testlocation = basefolder
+				+ "src/test/java/it/unibz/krdb/obda/reformulation/tests/";
 		this.mode = mode;
 		tests = new Vector<String>();
 		expressions = new Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>();
@@ -85,15 +85,15 @@ public class TestFileGenerator {
 	public static void main(String[] args) throws Exception {
 
 		if (args.length != 3) {
-			throw new Exception("The program requires 3 parameters.\n" + "1. root folder for the tests"
-					+  "2. the query mode. Can either be 'sparql' or 'datalog'" 
+			throw new Exception("The program requires 3 parameters.\n"
+					+ "1. root folder for the tests"
+					+ "2. the query mode. Can either be 'sparql' or 'datalog'"
 					+ "3. path to the input file\n");
 		}
 
 		String tl = args[0];
 		String mode = args[1];
 		String inputfile = args[2];
-		
 
 		TestFileGenerator gen = new TestFileGenerator(tl, mode);
 		gen.parseInputFile(inputfile);
@@ -129,7 +129,8 @@ public class TestFileGenerator {
 					line = line.replace("||", "#");
 					String[] array = line.split("#");
 					if (array.length != 7) {
-						throw new Exception(" Input at " + linenr + " is not in proper format!");
+						throw new Exception(" Input at " + linenr
+								+ " is not in proper format!");
 					} else {
 						if (lineContainsScenario(array[0].trim())) {
 							if (array[0].trim().length() > 0) {
@@ -139,7 +140,8 @@ public class TestFileGenerator {
 								String id = array[0].trim();
 								String tbox = array[2].trim();
 								String abox = array[3].trim();
-								expression = new OntologyGeneratorExpression(id, tbox, abox);
+								expression = new OntologyGeneratorExpression(
+										id, tbox, abox);
 							}
 							String queryid = array[1].trim();
 							String query = array[4].trim();
@@ -185,7 +187,8 @@ public class TestFileGenerator {
 
 			OWLOntology onto = null;
 			try {
-				onto = createOntology(id, abox, tbox, manager, manager.getOWLDataFactory());
+				onto = createOntology(id, abox, tbox, manager,
+						manager.getOWLDataFactory());
 			} catch (Exception e) {
 				log.error(e.getMessage());
 				log.error("Processing ontology: {} {}", id, abox + " " + tbox);
@@ -229,7 +232,8 @@ public class TestFileGenerator {
 
 			/* we start from 7 because the location must start with file:// */
 			String owluri = obdalocation.substring(7) + ontoname + ".owl";
-			manager.saveOntology(onto, new DefaultOntologyFormat(), IRI.create(new File(owluri).toURI()));
+			manager.saveOntology(onto, new DefaultOntologyFormat(),
+					IRI.create(new File(owluri).toURI()));
 			String xmluri = xmllocation + ontoname + ".xml";
 			writer.saveXMLResults(xmluri);
 			tests.add(ontoname);
@@ -258,50 +262,62 @@ public class TestFileGenerator {
 		}
 	}
 
-	private OWLClassExpression getOWLEntity(URI ontouri, String e, OWLDataFactory dataFactory) {
+	private OWLClassExpression getOWLEntity(URI ontouri, String e,
+			OWLDataFactory dataFactory) {
 		e = e.trim();
-		
+
 		if (e.length() == 0)
 			return null;
 		if (e.startsWith("E")) {
 			e = e.substring(1);
 			if (e.contains("-")) {
 				e = e.substring(0, e.length() - 5);// remove ^^-^^ from end
-				OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + e)));
+				OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI
+						.create(URI.create(ontouri.toString() + "#" + e)));
 				OWLObjectInverseOf inv = dataFactory.getOWLObjectInverseOf(op);
-				return dataFactory.getOWLObjectSomeValuesFrom(inv, dataFactory.getOWLThing());
+				return dataFactory.getOWLObjectSomeValuesFrom(inv,
+						dataFactory.getOWLThing());
 			} else {
-				OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + e)));
-				return dataFactory.getOWLObjectSomeValuesFrom(op, dataFactory.getOWLThing());
+				OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI
+						.create(URI.create(ontouri.toString() + "#" + e)));
+				return dataFactory.getOWLObjectSomeValuesFrom(op,
+						dataFactory.getOWLThing());
 			}
 		}
-		return dataFactory.getOWLClass(IRI.create(URI.create(ontouri.toString() + "#" + e)));
+		return dataFactory.getOWLClass(IRI.create(URI.create(ontouri.toString()
+				+ "#" + e)));
 
 	}
 
-	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri, String name, OWLDataFactory dataFactory) {
+	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri,
+			String name, OWLDataFactory dataFactory) {
 		name = name.trim();
-//		System.out.println(name);
+		// System.out.println(name);
 		if (name.contains("-")) {
 			name = name.substring(0, name.length() - 5);// remove ^^-^^ from end
-			OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + name)));
+			OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI
+					.create(URI.create(ontouri.toString() + "#" + name)));
 			return dataFactory.getOWLObjectInverseOf(op);
 		} else {
-			return dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + name)));
+			return dataFactory.getOWLObjectProperty(IRI.create(URI
+					.create(ontouri.toString() + "#" + name)));
 		}
 	}
 
-	private OWLOntology createOntology(String testid, String abox, String tbox, OWLOntologyManager manager, OWLDataFactory dataFactory) throws Exception {
+	private OWLOntology createOntology(String testid, String abox, String tbox,
+			OWLOntologyManager manager, OWLDataFactory dataFactory)
+			throws Exception {
 
-		
-//		URI uri = URI.create(ONTOURI + "test.owl");
-		URI uri = URI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl");
+		// URI uri = URI.create(ONTOURI + "test.owl");
+		URI uri = URI
+				.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl");
 
 		/*
 		 * Adding the TBox
 		 */
 		String tboxcontent[] = tbox.split(",");
-		List<OWLAxiom> axioms = getAxiomsFromTBox(tboxcontent, uri, manager, dataFactory);
+		List<OWLAxiom> axioms = getAxiomsFromTBox(tboxcontent, uri, manager,
+				dataFactory);
 		OWLOntology onto = getOntolgoies(axioms, testid);
 
 		/*
@@ -320,25 +336,31 @@ public class TestFileGenerator {
 				axiom = null;
 				if (names.length == 2) {
 					String objprop = uri.toString() + "#" + entity;
-					OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(objprop)));
+					OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI
+							.create(URI.create(objprop)));
 					String ind1uri = uri + "#" + names[0];
 					String ind2uri = uri + "#" + names[1];
-					OWLIndividual ind1 = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(ind1uri)));
-					OWLIndividual ind2 = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(ind2uri)));
-					
-					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(op, ind1, ind2);
+					OWLIndividual ind1 = dataFactory.getOWLNamedIndividual(IRI
+							.create(URI.create(ind1uri)));
+					OWLIndividual ind2 = dataFactory.getOWLNamedIndividual(IRI
+							.create(URI.create(ind2uri)));
+
+					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(op,
+							ind1, ind2);
 
 					// declaration
-					manager.addAxiom(onto, dataFactory.getOWLDeclarationAxiom(op));
+					manager.addAxiom(onto,
+							dataFactory.getOWLDeclarationAxiom(op));
 
 				} else {
 					String clazz = uri.toString() + "#" + entity;
-					OWLClass cl = dataFactory.getOWLClass(IRI.create(URI.create(clazz)));
+					OWLClass cl = dataFactory.getOWLClass(IRI.create(URI
+							.create(clazz)));
 					String induri = uri + "#" + parameters;
-					OWLIndividual ind = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(induri)));
-					axiom = dataFactory.getOWLClassAssertionAxiom( cl,ind);
+					OWLIndividual ind = dataFactory.getOWLNamedIndividual(IRI
+							.create(URI.create(induri)));
+					axiom = dataFactory.getOWLClassAssertionAxiom(cl, ind);
 
-					
 				}
 			}
 			if (axiom != null) {
@@ -349,11 +371,14 @@ public class TestFileGenerator {
 		return onto;
 	}
 
-	private OWLOntology getOntolgoies(List<OWLAxiom> axioms, String testid) throws Exception {
+	private OWLOntology getOntolgoies(List<OWLAxiom> axioms, String testid)
+			throws Exception {
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create(ONTOURI + "test_" + testid.trim() + ".owl")));
-//		OWLOntology onto = manager.createOntology(IRI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl"));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create(ONTOURI
+				+ "test_" + testid.trim() + ".owl")));
+		// OWLOntology onto =
+		// manager.createOntology(IRI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl"));
 
 		for (int i = 0; i < axioms.size(); i++) {
 			OWLAxiom vex = axioms.get(i);
@@ -362,7 +387,9 @@ public class TestFileGenerator {
 		return onto;
 	}
 
-	private List<OWLAxiom> getAxiomsFromTBox(String[] tbox, URI uri, OWLOntologyManager manager, OWLDataFactory dataFactory) throws Exception {
+	private List<OWLAxiom> getAxiomsFromTBox(String[] tbox, URI uri,
+			OWLOntologyManager manager, OWLDataFactory dataFactory)
+			throws Exception {
 
 		List<OWLAxiom> axioms = new LinkedList<OWLAxiom>();
 		for (int i = 0; i < tbox.length; i++) {
@@ -379,14 +406,18 @@ public class TestFileGenerator {
 			}
 
 			if (entities.length != 2)
-				throw new Exception(" TBox at " + linenr + " is not in proper format!");
+				throw new Exception(" TBox at " + linenr
+						+ " is not in proper format!");
 
 			String s1 = entities[0].trim();
 			String s2 = entities[1].trim();
 			if (isRoleInclusion) {
-				OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri, s1, dataFactory);
-				OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri, s2, dataFactory);
-				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyOfAxiom(role1, role2);
+				OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri,
+						s1, dataFactory);
+				OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri,
+						s2, dataFactory);
+				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyOfAxiom(role1,
+						role2);
 
 				for (OWLEntity ent : role1.getSignature()) {
 					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
@@ -458,7 +489,8 @@ public class TestFileGenerator {
 			if (parameters.contains(",")) {
 				String[] p = parameters.split(",");
 				if (p.length != 2) {
-					throw new Exception("Wrong query format at line nr " + linenr);
+					throw new Exception("Wrong query format at line nr "
+							+ linenr);
 				}
 				sb1.append(getSPARQLTerm(p[0]));
 				// if (!(p[0].startsWith("'") && p[0].endsWith("'"))) {
@@ -611,6 +643,17 @@ public class TestFileGenerator {
 			out.append("\t\ttester = new Tester(propfile);\n");
 			out.append("\t}\n");
 
+			out.append("@Override\n");
+			out.append("public void setUp() {\n");
+			out.append("tester = new Tester(propfile);\n");
+			out.append("}\n");
+
+			out.append("@Override\n");
+			out.append("public void tearDown() {\n");
+			out.append("tester.dispose();\n");
+			out.append("tester = null;\n");
+			out.append("}\n");
+
 			out.append("        private void test_function(String ontoname, QuestPreferences pref) throws Exception {\n");
 			out.append("    \tlog.debug(\"Test case: {}\", ontoname);\n");
 			out.append("    \tlog.debug(\"Quest configuration: {}\", pref.toString());\n");
@@ -626,82 +669,86 @@ public class TestFileGenerator {
 			out.append("    \t}\n");
 			out.append("    }\n");
 
+			// for (int i = 0; i < tests.size(); i++) {
+			// out.append("\tpublic void " + tests.get(i) +
+			// "DirectNoEqNoSig() throws Exception {");
+			// out.newLine();
+			// out.append("QuestPreferences pref = new QuestPreferences();\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+			// out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+			// out.append("\t\ttest_function(ontoname,pref);\n");
+			// out.append("\t}");
+			// out.newLine();
+			// }
+			// for (int i = 0; i < tests.size(); i++) {
+			//
+			// out.append("\tpublic void " + tests.get(i) +
+			// "DirectEqNoSig() throws Exception {");
+			// out.newLine();
+			// out.append("QuestPreferences pref = new QuestPreferences();\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+			// out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+			// out.append("\t\ttest_function(ontoname,pref);\n");
+			// out.append("\t}");
+			// out.newLine();
+			// }
+			//
+			// for (int i = 0; i < tests.size(); i++) {
+			//
+			// out.append("\tpublic void " + tests.get(i) +
+			// "DirectNoEqSigma() throws Exception {");
+			// out.newLine();
+			// out.append("QuestPreferences pref = new QuestPreferences();\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+			// out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+			// out.append("\t\ttest_function(ontoname,pref);\n");
+			// out.append("\t}");
+			// out.newLine();
+			// }
+			// for (int i = 0; i < tests.size(); i++) {
+			//
+			// out.append("\tpublic void " + tests.get(i) +
+			// "DirectEqSigma() throws Exception {");
+			// out.newLine();
+			// out.append("QuestPreferences pref = new QuestPreferences();\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+			// out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+			// out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+			// out.append("\t\ttest_function(ontoname,pref);\n");
+			// out.append("\t}");
+			// out.newLine();
+			// }
 
-//			for (int i = 0; i < tests.size(); i++) {
-//				out.append("\tpublic void " + tests.get(i) + "DirectNoEqNoSig() throws Exception {");
-//				out.newLine();
-//				out.append("QuestPreferences pref = new QuestPreferences();\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
-//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-//				out.append("\t\ttest_function(ontoname,pref);\n");
-//				out.append("\t}");
-//				out.newLine();
-//			}
-//			for (int i = 0; i < tests.size(); i++) {
-//
-//				out.append("\tpublic void " + tests.get(i) + "DirectEqNoSig() throws Exception {");
-//				out.newLine();
-//				out.append("QuestPreferences pref = new QuestPreferences();\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
-//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-//				out.append("\t\ttest_function(ontoname,pref);\n");
-//				out.append("\t}");
-//				out.newLine();
-//			}
-//			
-//			for (int i = 0; i < tests.size(); i++) {
-//				
-//				out.append("\tpublic void " + tests.get(i) + "DirectNoEqSigma() throws Exception {");
-//				out.newLine();
-//				out.append("QuestPreferences pref = new QuestPreferences();\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
-//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-//				out.append("\t\ttest_function(ontoname,pref);\n");
-//				out.append("\t}");
-//				out.newLine();
-//			}
-//			for (int i = 0; i < tests.size(); i++) {
-//
-//				out.append("\tpublic void " + tests.get(i) + "DirectEqSigma() throws Exception {");
-//				out.newLine();
-//				out.append("QuestPreferences pref = new QuestPreferences();\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
-//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-//				out.append("\t\ttest_function(ontoname,pref);\n");
-//				out.append("\t}");
-//				out.newLine();
-//			}
-			
 			for (int i = 0; i < tests.size(); i++) {
-		
-				out.append("\tpublic void " + tests.get(i) + "SINoEqNoSig() throws Exception {");
+
+				out.append("\tpublic void " + tests.get(i)
+						+ "SINoEqNoSig() throws Exception {");
 				out.newLine();
 				out.append("QuestPreferences pref = new QuestPreferences();\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
@@ -709,33 +756,35 @@ public class TestFileGenerator {
 				out.newLine();
 			}
 			for (int i = 0; i < tests.size(); i++) {
-	
-				out.append("\tpublic void " + tests.get(i) + "SIEqNoSig() throws Exception {");
+
+				out.append("\tpublic void " + tests.get(i)
+						+ "SIEqNoSig() throws Exception {");
 				out.newLine();
 				out.append("QuestPreferences pref = new QuestPreferences();\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
 				out.newLine();
-			
+
 			}
 
 			for (int i = 0; i < tests.size(); i++) {
-	
-				out.append("\tpublic void " + tests.get(i) + "SINoEqSigma() throws Exception {");
+
+				out.append("\tpublic void " + tests.get(i)
+						+ "SINoEqSigma() throws Exception {");
 				out.newLine();
 				out.append("QuestPreferences pref = new QuestPreferences();\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
@@ -743,15 +792,16 @@ public class TestFileGenerator {
 				out.newLine();
 			}
 			for (int i = 0; i < tests.size(); i++) {
-	
-				out.append("\tpublic void " + tests.get(i) + "SIEqSigma() throws Exception {");
+
+				out.append("\tpublic void " + tests.get(i)
+						+ "SIEqSigma() throws Exception {");
 				out.newLine();
 				out.append("QuestPreferences pref = new QuestPreferences();\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
 				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");

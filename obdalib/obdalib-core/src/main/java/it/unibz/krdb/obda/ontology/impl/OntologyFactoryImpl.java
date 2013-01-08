@@ -1,10 +1,12 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
@@ -24,15 +26,17 @@ import java.net.URI;
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
-	private static OntologyFactoryImpl	instance	= new OntologyFactoryImpl();
+	private static OntologyFactoryImpl instance = new OntologyFactoryImpl();
 
-	private OBDADataFactory				ofac		= OBDADataFactoryImpl.getInstance();
+	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	public static OntologyFactory getInstance() {
 		return instance;
 	}
 
-	public ClassAssertion createClassAssertion(Predicate concept, URIConstant object) {
+	@Override
+	public ClassAssertion createClassAssertion(Predicate concept,
+			ObjectConstant object) {
 		return new ClassAssertionImpl(concept, object);
 	}
 
@@ -61,7 +65,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * it.unibz.krdb.obda.owlrefplatform.core.ontology.Property)
 	 */
 	@Override
-	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including) {
+	public SubDescriptionAxiom createSubPropertyAxiom(Property included,
+			Property including) {
 		return new SubPropertyAxiomImpl(included, including);
 	}
 
@@ -74,7 +79,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription)
 	 */
 	@Override
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2) {
+	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1,
+			ClassDescription concept2) {
 		return new SubClassAxiomImpl(concept1, concept2);
 	}
 
@@ -86,7 +92,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * boolean)
 	 */
 	@Override
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse) {
+	public PropertySomeRestriction createPropertySomeRestriction(Predicate p,
+			boolean isInverse) {
 		return new PropertySomeRestrictionImpl(p, isInverse);
 	}
 
@@ -111,7 +118,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * it.unibz.krdb.obda.model.URIConstant)
 	 */
 	@Override
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, URIConstant o1, URIConstant o2) {
+	public ObjectPropertyAssertion createObjectPropertyAssertion(
+			Predicate role, ObjectConstant o1, ObjectConstant o2) {
 		return new ObjectPropertyAssertionImpl(role, o1, o2);
 	}
 
@@ -124,34 +132,40 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * it.unibz.krdb.obda.model.ValueConstant)
 	 */
 	@Override
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, URIConstant o1, ValueConstant o2) {
+	public DataPropertyAssertion createDataPropertyAssertion(
+			Predicate attribute, ObjectConstant o1, ValueConstant o2) {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse) {
+	public PropertySomeRestriction getPropertySomeRestriction(Predicate p,
+			boolean inverse) {
 		if (p.getArity() != 2) {
 			throw new IllegalArgumentException("Roles must have arity = 2");
 		}
 		return new PropertySomeRestrictionImpl(p, inverse);
 	}
 
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler) {
+	public PropertySomeClassRestriction createPropertySomeClassRestriction(
+			Predicate p, boolean isInverse, OClass filler) {
 		if (p.getArity() != 2) {
 			throw new IllegalArgumentException("Roles must have arity = 2");
 		}
 		if (filler == null) {
-			throw new IllegalArgumentException("Must provide an atomic concept as a filler");
+			throw new IllegalArgumentException(
+					"Must provide an atomic concept as a filler");
 		}
 		return new PropertySomeClassRestrictionImpl(p, isInverse, filler);
 	}
 
 	@Override
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler) {
+	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(
+			Predicate p, boolean isInverse, DataType filler) {
 		if (p.getArity() != 2) {
 			throw new IllegalArgumentException("Roles must have arity = 2");
 		}
 		if (filler == null) {
-			throw new IllegalArgumentException("Must provide a data type object as the filler");
+			throw new IllegalArgumentException(
+					"Must provide a data type object as the filler");
 		}
 		return new PropertySomeDataTypeRestrictionImpl(p, isInverse, filler);
 	}
@@ -219,5 +233,16 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public DataType createDataType(Predicate p) {
 		return new DataTypeImpl(p);
+	}
+
+	@Override
+	public Assertion createPropertyAssertion(Predicate attribute,
+			ObjectConstant o1, Constant o2) {
+		if (o2 instanceof ObjectConstant)
+			return createObjectPropertyAssertion(attribute, o1,
+					(ObjectConstant) o2);
+
+		return createDataPropertyAssertion(attribute, o1, (ValueConstant) o2);
+
 	}
 }

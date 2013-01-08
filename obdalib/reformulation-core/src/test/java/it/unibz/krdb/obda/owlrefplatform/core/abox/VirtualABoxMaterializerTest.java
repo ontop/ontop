@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -91,7 +91,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -99,7 +99,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
@@ -191,7 +191,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -199,7 +199,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
@@ -299,7 +299,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -307,7 +307,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
@@ -479,7 +479,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -487,7 +487,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
@@ -569,7 +569,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql6 = "SELECT fn, ln, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -577,7 +577,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 //		List<Atom> body = new LinkedList<Atom>();

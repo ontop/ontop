@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Predicate;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,7 +24,17 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	private Map<Predicate, List<CQIE>> predicateIndex = null;
 
-	private OBDAQueryModifiers modifiers;
+	protected OBDAQueryModifiers modifiers;
+
+	@Override
+	public DatalogProgram clone() {
+		DatalogProgramImpl clone = new DatalogProgramImpl();
+		for (CQIE query : rules) {
+			clone.appendRule(query.clone());
+		}
+		clone.modifiers = modifiers.clone();
+		return clone;
+	}
 
 	protected DatalogProgramImpl() {
 		modifiers = new OBDAQueryModifiers();
@@ -33,7 +44,8 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	public void appendRule(CQIE rule) {
 		if (rule == null) {
-			throw new IllegalArgumentException("DatalogProgram: Recieved a null rule.");
+			throw new IllegalArgumentException(
+					"DatalogProgram: Recieved a null rule.");
 		}
 
 		if (rules.contains(rule)) {
@@ -55,7 +67,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 		}
 	}
 
-	public void appendRule(List<CQIE> rules) {
+	public void appendRule(Collection<CQIE> rules) {
 		for (CQIE rule : rules) {
 			appendRule(rule);
 		}
@@ -63,14 +75,19 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	public void removeRule(CQIE rule) {
+
+		if (rule == null)
+			throw new RuntimeException("Invalid parameter: null");
+
 		rules.remove(rule);
 
 		Predicate predicate = rule.getHead().getPredicate();
-		List<CQIE> indexedRules = this.getRules(predicate);
-		indexedRules.remove(rule);
+		List<CQIE> indexedRules = this.predicateIndex.get(predicate);
+		if (indexedRules != null)
+			indexedRules.remove(rule);
 	}
 
-	public void removeRules(List<CQIE> rules) {
+	public void removeRules(Collection<CQIE> rules) {
 		for (CQIE rule : rules) {
 			removeRule(rule);
 		}
@@ -86,7 +103,8 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 				CQIE ruleI = rules.get(i);
 				Atom headI = ruleI.getHead();
-				if (head0.getArity() != headI.getArity() || !(head0.getPredicate().equals(headI.getPredicate()))) {
+				if (head0.getArity() != headI.getArity()
+						|| !(head0.getPredicate().equals(headI.getPredicate()))) {
 					isucq = false;
 				}
 			}

@@ -3,43 +3,24 @@ package it.unibz.krdb.obda.gui.swing.utils;
 import java.awt.Color;
 import java.awt.Font;
 
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * ShowSQLQueryPanel.java
- *
- * Created on Jul 31, 2009, 1:49:47 PM
- */
-
-/**
- *
- * @author Manfred Gerstgrasser
- */
 public class TextMessageFrame extends javax.swing.JDialog {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = -200114540739796897L;
-	/** Creates new form ShowSQLQueryPanel */
-    public TextMessageFrame() {
+	
+	/** 
+	 * Creates new form ShowSQLQueryPanel 
+	 */
+    public TextMessageFrame(String title) {
     	super();
         initComponents();
-        jTextArea1.setWrapStyleWord(true);
-        jTextArea1.setBackground(Color.white);
-        jTextArea1.setFont(new Font("Dialog", Font.PLAIN, 12));
+        setTitle(title);
     }
     
-    public void displaySQL(String sql){
+    public void setTextMessage(String sql){
     	jTextArea1.setText(sql);
-    	
     }
     
-    public void updateStatus(String time){
+    public void setTimeProcessingMessage(String time){
     	jLabel1.setText(time);
     }
     
@@ -68,12 +49,14 @@ public class TextMessageFrame extends javax.swing.JDialog {
         setMinimumSize(new java.awt.Dimension(700, 550));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("SQL Unfolding"));
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         jTextArea1.setColumns(20);
         jTextArea1.setEditable(false);
         jTextArea1.setRows(5);
+        jTextArea1.setWrapStyleWord(true);
+        jTextArea1.setBackground(Color.white);
+        jTextArea1.setFont(new Font("Dialog", Font.PLAIN, 12));
         jScrollPane1.setViewportView(jTextArea1);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

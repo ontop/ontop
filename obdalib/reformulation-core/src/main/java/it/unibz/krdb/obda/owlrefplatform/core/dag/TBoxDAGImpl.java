@@ -94,11 +94,11 @@ public class TBoxDAGImpl implements TBoxDAG {
 			}
 		}
 
-		System.out.println(dag);
+	//	System.out.println(dag);
 		eliminateCycles();
-		System.out.println(equivalencesMap);
+	//	System.out.println(equivalencesMap);
 		eliminateRedundantEdges();
-		System.out.println(dag);
+	//	System.out.println(dag);
 	}
 
 	/***

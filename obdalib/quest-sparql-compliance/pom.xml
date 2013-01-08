@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>obdalib-parent</artifactId>
+		<groupId>inf.unibz.it.obda</groupId>
+		<version>1.7-alpha</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>quest-sparql-compliance</artifactId>
+
+
+	<dependencies>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-core</artifactId>
+			<version>1.7-alpha</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-owlapi3</artifactId>
+			<version>1.7-alpha</version>
+		</dependency>
+
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>reformulation-core</artifactId>
+			<version>1.7-alpha</version>
+		</dependency> 
+		
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>quest-sesame</artifactId>
+			<version>1.7-alpha</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.2.3-r1824</version>
+			<classifier>jar</classifier>
+		</dependency>
+
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>sqljdbc4</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc16</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ibm</groupId>
+			<artifactId>db2jcc4.jar</artifactId>
+			<version>10.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-runtime</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sparql-compliance</artifactId>
+            <version>2.6.9</version>
+            <type>war</type>
+        </dependency>
+                     
+
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sparql-testsuite</artifactId>
+            <version>2.6.9</version>
+        </dependency>      
+
+	</dependencies>
+                          
+	<repositories>
+
+		<repository>
+			<id>sesame-official-repository</id>
+			<url>http://repo.aduna-software.org/maven2/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases> 
+			 <snapshots>
+    				<enabled>true</enabled>
+    			</snapshots>
+		</repository>
+
+		<repository>
+			<id>bolzano-nexus-public</id>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

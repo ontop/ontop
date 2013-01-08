@@ -13,6 +13,8 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public void addAssertions(Collection<Axiom> assertion);
 
+	public void addEntity(Predicate c);
+	
 	public void addConcept(Predicate c);
 
 	public void addRole(Predicate role);

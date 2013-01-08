@@ -1,0 +1,84 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.org/> .
+
+{
+    ex:graph1 dc:publisher "Bob" ;
+	      ex:containsPerson ex:bob .
+
+    ex:graph2 dc:publisher "Alice" ;
+	      ex:containsPerson ex:alice .
+
+    ex:graph3 dc:publisher "William" ;
+	      ex:containsPerson ex:william .
+
+    ex:groupconcat-test 
+         ex:p "a";
+         ex:p "b"; 
+	 ex:p "c";
+	 ex:p "d";
+	 ex:q "b";
+	 ex:q "c".
+}
+
+ex:graph1 {
+    ex:bob foaf:name "Bob" ;
+       foaf:mbox "bob@example.org" ;
+       foaf:knows ex:alice .
+
+    ex:bob foaf:knows ex:alice .
+    ex:bob foaf:knows ex:william .
+
+    ex:alice foaf:knows ex:bob .
+}
+
+ex:graph2 {
+    ex:alice foaf:name "Alice" ;
+	foaf:mbox "alice@example.org" .
+
+    ex:alice foaf:knows ex:william .
+}
+
+ex:graph3 {
+    ex:william foaf:name "William" ;
+	foaf:mbox "william@example.org" .
+}
+
+ex:tree-graph {
+    ex:a ex:name "aa" .
+    ex:b ex:name "bb" .
+    ex:c ex:name "cc" .
+    ex:d ex:name "dd" .
+    ex:e ex:name "ee" .
+    ex:f ex:name "ff" .
+    ex:g ex:name "gg" .
+    ex:h ex:name "hh" .
+    ex:i ex:name "ii" .
+    ex:j ex:name "jj" .
+    ex:k ex:name "kk" .
+
+    ex:b ex:hasParent ex:a .
+    ex:c ex:hasParent ex:a .
+    ex:d ex:hasParent ex:a .
+
+    ex:g ex:hasParent ex:c .
+    
+    ex:e ex:hasParent ex:b .
+    ex:f ex:hasParent ex:b .
+    
+    ex:i ex:hasParent ex:g .
+    ex:h ex:hasPerent ex:g .
+
+    ex:j ex:hasParent ex:f .
+    ex:k ex:hasParent ex:f .
+}
+
+ex:optional-sameterm-graph {
+	ex:a ex:p ex:A ;
+		 rdfs:label "label" ;
+		 ex:prop1 "prop1" ;
+		 ex:prop2 "prop2" .
+}

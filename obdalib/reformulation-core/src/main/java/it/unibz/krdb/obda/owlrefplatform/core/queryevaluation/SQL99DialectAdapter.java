@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
+import java.sql.Types;
 import java.util.List;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
@@ -10,10 +11,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String strconcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
-		
+
 		if (strings.length == 1)
 			return strings[0];
-		
+
 		StringBuffer sql = new StringBuffer();
 
 		sql.append(String.format("(%s", strings[0]));
@@ -68,7 +69,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String sqlQuote(String name) {
 		return String.format("\"%s\"", name);
 	}
-	
+
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		// TODO Auto-generated method stub
@@ -90,5 +91,28 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			needComma = true;
 		}
 		return sql;
+	}
+
+	@Override
+	public String sqlCast(String value, int type) {
+		String strType = null;
+		if (type == Types.VARCHAR) {
+			strType = "CHAR";
+		} else {
+			throw new RuntimeException("Unsupported SQL type");
+		}
+		return "CAST(" + value + " AS " + strType + ")";
+	}
+
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		if (caseinSensitive) {
+			return " LOWER(" + columnname + ") LIKE " + "'%"
+					+ pattern.toLowerCase() + "%'";
+		}
+		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
 }

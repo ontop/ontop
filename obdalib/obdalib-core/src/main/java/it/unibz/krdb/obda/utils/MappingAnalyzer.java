@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
@@ -97,16 +97,15 @@ public class MappingAnalyzer {
 					int arity = dbMetaData.getDefinition(tableName).countAttribute();
 					Predicate predicate = dfac.getPredicate(predicateName, arity);
 
-					// Swap the column name with a new variable from the lookup
-					// table
-					List<Term> terms = new ArrayList<Term>();
+					// Swap the column name with a new variable from the lookup table
+					List<NewLiteral> terms = new ArrayList<NewLiteral>();
 					for (int i = 1; i <= arity; i++) {
-						String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
+						String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, table.getAlias(), i);
 						String termName = lookupTable.lookup(columnName);
 						if (termName == null) {
 							throw new RuntimeException("Column '" + columnName + "'was not found in the lookup table: ");
 						}
-						Term term = dfac.getVariable(termName);
+						NewLiteral term = dfac.getVariable(termName);
 						terms.add(term);
 					}
 					// Create an atom for a particular table
@@ -127,8 +126,8 @@ public class MappingAnalyzer {
 					if (lookup2 == null)
 						throw new RuntimeException("Unable to get column name for variable: " + rightValue);
 
-					Term t1 = dfac.getVariable(lookup1);
-					Term t2 = dfac.getVariable(lookup2);
+					NewLiteral t1 = dfac.getVariable(lookup1);
+					NewLiteral t2 = dfac.getVariable(lookup2);
 
 					Atom atom = dfac.getEQAtom(t1, t2);
 					atoms.add(atom);
@@ -166,14 +165,14 @@ public class MappingAnalyzer {
 								i++; // the right-hand condition
 								if (condition instanceof ComparisonPredicate) {
 									ComparisonPredicate pred = (ComparisonPredicate) condition;
-									Term leftCondition = stack.pop();
-									Term rightCondition = getFunction(pred, lookupTable);
+									NewLiteral leftCondition = stack.pop();
+									NewLiteral rightCondition = getFunction(pred, lookupTable);
 									Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
 									stack.push(andOperator);
 								} else if (condition instanceof NullPredicate) {
 									NullPredicate pred = (NullPredicate) condition;
-									Term leftCondition = stack.pop();
-									Term rightCondition = getFunction(pred, lookupTable);
+									NewLiteral leftCondition = stack.pop();
+									NewLiteral rightCondition = getFunction(pred, lookupTable);
 									Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
 									stack.push(andOperator);
 								}
@@ -199,9 +198,9 @@ public class MappingAnalyzer {
 				// Construct the head from the target query.
 				List<Atom> atomList = targetQuery.getBody();
 				for (Atom atom : atomList) {
-					List<Term> terms = atom.getTerms();
-					List<Term> newterms = new LinkedList<Term>();
-					for (Term term : terms) {
+					List<NewLiteral> terms = atom.getTerms();
+					List<NewLiteral> newterms = new LinkedList<NewLiteral>();
+					for (NewLiteral term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
 					Atom newhead = dfac.getAtom(atom.getPredicate(), newterms);
@@ -232,7 +231,7 @@ public class MappingAnalyzer {
 		if (variableName == null) {
 			throw new RuntimeException("Unable to find column name for variable: " + columnName);
 		}
-		Term var = dfac.getVariable(variableName);
+		NewLiteral var = dfac.getVariable(variableName);
 
 		if (pred.useIsNullOperator()) {
 			return dfac.getIsNullFunction(var);
@@ -250,10 +249,10 @@ public class MappingAnalyzer {
 		if (termLeftName == null) {
 			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
 		}
-		Term t1 = dfac.getVariable(termLeftName);
+		NewLiteral t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
-		Term t2 = null;
+		NewLiteral t2 = null;
 		if (right instanceof ReferenceValueExpression) {
 			String rightValueName = right.toString();
 			termRightName = lookupTable.lookup(rightValueName);
@@ -332,8 +331,8 @@ public class MappingAnalyzer {
 	 * @param lookupTable
 	 * @return
 	 */
-	private Term updateTerm(Term term, LookupTable lookupTable) {
-		Term result = null;
+	private NewLiteral updateTerm(NewLiteral term, LookupTable lookupTable) {
+		NewLiteral result = null;
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			String varName = var.getName();
@@ -344,9 +343,9 @@ public class MappingAnalyzer {
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
 			Function func = (Function) term;
-			List<Term> terms = func.getTerms();
-			List<Term> newterms = new LinkedList<Term>();
-			for (Term innerTerm : terms) {
+			List<NewLiteral> terms = func.getTerms();
+			List<NewLiteral> newterms = new LinkedList<NewLiteral>();
+			for (NewLiteral innerTerm : terms) {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 			}
 			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);
@@ -398,8 +397,14 @@ public class MappingAnalyzer {
 				if (!tableAlias.isEmpty()) {
 					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
-					if (aliasMap.containsKey(columnName) || aliasMap.containsKey(qualifiedColumnName) || aliasMap.containsKey(qualifiedColumnAlias)) {
-						lookupTable.add(tableAlias + "." + aliasMap.get(columnName), columnName);
+					if (aliasMap.containsKey(columnName)) {
+						lookupTable.add(aliasMap.get(columnName), columnName);
+					}
+					if (aliasMap.containsKey(qualifiedColumnName)) {
+						lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
+					}
+					if (aliasMap.containsKey(qualifiedColumnAlias)) {
+						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);
 					}
 				}
 			}

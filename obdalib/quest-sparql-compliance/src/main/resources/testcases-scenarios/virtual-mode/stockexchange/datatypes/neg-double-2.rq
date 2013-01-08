@@ -1,0 +1,6 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+
+SELECT DISTINCT $x $name 
+WHERE { 
+   $x a :Company; :companyName $name; :netWorth -1.2345678e+03 . 
+}

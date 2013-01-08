@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
+import java.sql.Types;
+
 public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
@@ -18,7 +20,6 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		sql.append(")");
 		return sql.toString();
 	}
-
 	
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
@@ -38,10 +39,16 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit == Long.MIN_VALUE || limit == 0) {
-			/* If the limit is not specified then put a big number as suggested 
-			 * in http://dev.mysql.com/doc/refman/5.0/en/select.html
-			 */
-			return String.format("LIMIT %d,18446744073709551615", offset);
+			if (offset == Long.MIN_VALUE) {
+				/* If both limit and offset is not specified.
+				 */
+				return "LIMIT 0";
+			} else {
+				/* If the limit is not specified then put a big number as suggested 
+				 * in http://dev.mysql.com/doc/refman/5.0/en/select.html
+				 */
+				return String.format("LIMIT %d,18446744073709551615", offset);
+			}
 		} else {
 			if (offset == Long.MIN_VALUE) {
 				// If the offset is not specified

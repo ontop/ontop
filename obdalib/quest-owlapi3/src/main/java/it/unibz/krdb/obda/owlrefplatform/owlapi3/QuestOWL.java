@@ -294,6 +294,11 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		super.dispose();
 		try {
 			conn.close();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
+		
+		try {
 			questInstance.dispose();
 		} catch (Exception e) {
 			log.debug(e.getMessage());

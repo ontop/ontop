@@ -6,10 +6,11 @@ import java.net.URI;
 
 public class BooleanOperationPredicateImpl extends PredicateImpl implements BooleanOperationPredicate {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2415971199358517200L;
+	private static final long serialVersionUID = 1L;
+
+	protected BooleanOperationPredicateImpl(URI name) {
+		super(name, 1, null);
+	}
 
 	protected BooleanOperationPredicateImpl(URI name, int arity) {
 		super(name, arity, null);

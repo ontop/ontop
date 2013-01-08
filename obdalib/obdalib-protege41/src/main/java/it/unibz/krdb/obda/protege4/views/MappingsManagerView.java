@@ -134,6 +134,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	public void show(OWLEntity owlEntity) {
-		System.out.println(owlEntity);
+	//	System.out.println(owlEntity);
 	}
 }

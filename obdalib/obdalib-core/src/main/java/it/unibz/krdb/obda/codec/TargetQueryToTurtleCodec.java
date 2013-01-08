@@ -5,10 +5,10 @@ import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -120,7 +120,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		if (!containsQUESTPrefix) {
 			prefManClone.addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
 		}
-
+		
 		String shortForm = prefManClone.getShortForm(uri, insideQuotes);
 
 		return shortForm;
@@ -129,7 +129,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	/**
 	 * Prints the text representation of different terms.
 	 */
-	private String getDisplayName(Term term) {
+	private String getDisplayName(NewLiteral term) {
 		StringBuffer sb = new StringBuffer();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
@@ -142,36 +142,42 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					int arity = function.getArity();
 					if (arity == 1) {
 						// without the language tag
-						Term var = function.getTerms().get(0);
+						NewLiteral var = function.getTerms().get(0);
 						sb.append(getDisplayName(var));
 						sb.append("^^rdfs:Literal");
 					} else if (arity == 2) {
 						// with the language tag
-						Term var = function.getTerms().get(0);
-						Term lang = function.getTerms().get(1);
+						NewLiteral var = function.getTerms().get(0);
+						NewLiteral lang = function.getTerms().get(1);
 						sb.append(getDisplayName(var));
 						sb.append("@");
-						sb.append(lang.toString());
+						if (lang instanceof ValueConstant) {
+							/*
+							 * Don't pass this to getDisplayName() because language constant
+							 * is not written as @'lang-tag'
+							 */
+							sb.append(((ValueConstant) lang).getValue());
+						} else {
+							sb.append(getDisplayName(lang));
+						}
 					}
 				} else {
 					// for the other data types
-					Term var = function.getTerms().get(0);
+					NewLiteral var = function.getTerms().get(0);
 					sb.append(getDisplayName(var));
 					sb.append("^^");
 					sb.append(fname);
 				}
-			} else {
-				if (fname.equals("quest:uri")) { // TODO: Make this as a
-													// BuildinPredicate
-					String uriTemplate = function.getTerms().get(0).toString();
-
+			} else { // For non-datatype predicate names
+				String functionSymbolName = functionSymbol.getName().toString();
+				if (functionSymbolName.equals(OBDAVocabulary.QUEST_URI) || functionSymbolName.equals(OBDAVocabulary.QUEST_URI_LEGACY)) {
+					String uriTemplate = ((ValueConstant) function.getTerms().get(0)).getValue();
 					// Shorten the URI if possible
 					uriTemplate = getAbbreviatedName(uriTemplate, true);
-
 					sb.append("<");
 					sb.append("\"");
 					StringTokenizer st = new StringTokenizer(uriTemplate, "}", true);
-					for (Term innerTerm : function.getTerms()) {
+					for (NewLiteral innerTerm : function.getTerms()) {
 						if (innerTerm instanceof Variable) {
 							while (st.hasMoreTokens()) {
 								String token = st.nextToken();
@@ -196,7 +202,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					sb.append(fname);
 					sb.append("(");
 					boolean separator = false;
-					for (Term innerTerm : function.getTerms()) {
+					for (NewLiteral innerTerm : function.getTerms()) {
 						if (separator) {
 							sb.append(", ");
 						}
@@ -208,34 +214,30 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			}
 		} else if (term instanceof Variable) {
 			sb.append("$");
-			sb.append(term.toString());
+			sb.append(((Variable) term).getName());
 		} else if (term instanceof URIConstant) {
 			String originalUri = term.toString();
-			String abbreviatedUri = getAbbreviatedName(originalUri, false); // Shorten
-																			// the
-																			// URI
-																			// if
-																			// possible
-
+			
+			// Shorten the URI if possible
+			String abbreviatedUri = getAbbreviatedName(originalUri, false);
 			if (!abbreviatedUri.equals(originalUri)) {
 				sb.append(abbreviatedUri);
 			} else {
-				// If the URI can't be shorten then use the full URI within
-				// brackets
+				// If the URI can't be shorten then use the full URI within brackets
 				sb.append("<");
 				sb.append(originalUri);
 				sb.append(">");
 			}
 		} else if (term instanceof ValueConstant) {
 			sb.append("\"");
-			sb.append(term.toString());
+			sb.append(((ValueConstant) term).getValue());
 			sb.append("\"");
 		}
 		return sb.toString();
 	}
 
 	private boolean isLiteralDataType(Predicate predicate) {
-		return predicate.equals(OBDAVocabulary.RDFS_LITERAL);
+		return predicate.equals(OBDAVocabulary.RDFS_LITERAL) || predicate.equals(OBDAVocabulary.RDFS_LITERAL_LANG);
 	}
 
 	@Override

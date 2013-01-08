@@ -76,6 +76,8 @@
 					<target>1.6</target>
 
 					<testExcludes>
+						<exclude>**/RDBMSDirect*.java</exclude>
+						<exclude>**/OWLAPI2ABox*.java</exclude>
 						<exclude>**/SemanticIndexTestSuite.java</exclude>
 					</testExcludes>
 				</configuration>

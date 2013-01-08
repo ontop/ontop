@@ -5,14 +5,6 @@ package it.unibz.krdb.obda.model;
  */
 public interface ValueConstant extends Constant {
 
-	public String getValue();
 	
-	public String getLanguage();
-	
-	/**
-	 * Get the data type of the constant.
-	 *
-	 * @return the data type.
-	 */
-	public Predicate.COL_TYPE getType();
+
 }

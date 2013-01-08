@@ -37,7 +37,8 @@ public class OWLResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public OWLResultSetTableModel(OWLResultSet results, PrefixManager prefixman, boolean useshortform) throws OWLException {
+	public OWLResultSetTableModel(OWLResultSet results,
+			PrefixManager prefixman, boolean useshortform) throws OWLException {
 		this.prefixman = prefixman;
 		this.useshortform = useshortform;
 
@@ -57,7 +58,8 @@ public class OWLResultSetTableModel implements TableModel {
 
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
-					OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
+					OWLPropertyAssertionObject constant = results
+							.getOWLPropertyAssertionObject(j + 1);
 					if (constant != null)
 						crow[j] = constant.toString();
 					else
@@ -78,7 +80,8 @@ public class OWLResultSetTableModel implements TableModel {
 	public List<String[]> getTabularData() {
 		List<String[]> tabularData = new ArrayList<String[]>();
 		try {
-			String[] columnName = results.getSignature().toArray(new String[results.getSignature().size()]);
+			String[] columnName = results.getSignature().toArray(
+					new String[results.getSignature().size()]);
 			tabularData.add(columnName);
 			tabularData.addAll(resultsTable);
 		} catch (OWLException e) {
@@ -159,10 +162,13 @@ public class OWLResultSetTableModel implements TableModel {
 			e.printStackTrace();
 		}
 
-		if (useshortform) {
-			return prefixman.getShortForm(resultsTable.get(row)[column].toString());
+		String value = resultsTable.get(row)[column];
+		if (value == null)
+			return "";
+		else if (useshortform) {
+			return prefixman.getShortForm(value);
 		} else {
-			return resultsTable.get(row)[column].toString();
+			return value;
 		}
 
 		// } catch (QueryResultException e) {
@@ -205,8 +211,12 @@ public class OWLResultSetTableModel implements TableModel {
 			if (results.nextRow()) {
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
-					OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
-					crow[j] = constant.toString();
+					OWLPropertyAssertionObject constant = results
+							.getOWLPropertyAssertionObject(j + 1);
+					if (constant != null)
+						crow[j] = constant.toString();
+					else
+						crow[j] = null;
 				}
 				resultsTable.add(crow);
 				i += 1;

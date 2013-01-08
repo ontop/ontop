@@ -1,0 +1,20 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://www.w3.org/2001/sw/DataAccess/tests/data-r2/syntax-sparql1/manifest#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
+@prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:comment "BSBM Benchmark queries" ;
+    mf:entries
+    (
+    	:bsbm-bi-q5
+    ).
+    
+:bsbm-bi-q5  mf:name  "BSBM BI use case query 5" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:checkOrder "true"^^xsd:boolean ;
+         mf:action [ qt:query <bsbm-bi-q5.rq> ; qt:data <bsbm-100.ttl> ] ;
+         mf:result <bsbm-bi-q5.srx> .

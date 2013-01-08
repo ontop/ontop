@@ -1,0 +1,15 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#
+
+[ClassDeclaration] @collection [[
+:Book
+]]
+
+[ObjectPropertyDeclaration] @collection [[
+:isReading
+]]
+
+[DataPropertyDeclaration] @collection [[
+:title, :author
+]]
+

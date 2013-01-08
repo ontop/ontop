@@ -1,0 +1,17 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Quest query evaluation scenario tests" ;
+    mf:include (
+        <bsbm/manifest-h2.ttl>
+        <fishmark/manifest-h2.ttl>
+        <iLog/manifest-h2.ttl>
+        <stockexchange/datatypes/manifest-h2.ttl>
+        <stockexchange/filters/manifest-h2.ttl>
+        <stockexchange/modifiers/manifest-h2.ttl>
+        <stockexchange/simplecq/manifest-h2.ttl>
+    ).
+

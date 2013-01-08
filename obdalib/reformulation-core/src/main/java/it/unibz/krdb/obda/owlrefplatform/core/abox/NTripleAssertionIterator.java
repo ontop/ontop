@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -28,7 +29,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 
-	private String RDF_TYPE_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+	private String RDF_TYPE_STRING = OBDAVocabulary.RDF_TYPE;
 
 	private int rdftype_hash = RDF_TYPE_STRING.hashCode();
 

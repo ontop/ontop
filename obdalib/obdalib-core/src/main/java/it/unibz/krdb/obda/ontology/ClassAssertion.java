@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.ontology;
 
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 
@@ -15,7 +16,14 @@ import it.unibz.krdb.obda.model.URIConstant;
  */
 public interface ClassAssertion extends Assertion {
 
-	public URIConstant getObject();
+	// TODO: Change the method name to getSubject() because it gets the subject of the class assertion.
+	public ObjectConstant getObject();
 
+	/***
+	 * Use get predicate instead
+	 * 
+	 * @return
+	 */
+	@Deprecated
 	public Predicate getConcept();
 }

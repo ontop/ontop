@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -79,18 +79,18 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 		atomString.append(pm.getShortForm(atomuri.toString()));
 		atomString.append("(");
 		
-		List<Term> para = a.getTerms();
-		Iterator<Term> pit = para.iterator();
+		List<NewLiteral> para = a.getTerms();
+		Iterator<NewLiteral> pit = para.iterator();
 		StringBuffer atomvar = new StringBuffer();
 		while(pit.hasNext()){
-			Term t = pit.next();
+			NewLiteral t = pit.next();
 			if(atomvar.length()>0){
 				atomvar.append(",");
 			}
 			if (t instanceof FunctionalTermImpl) {
 				FunctionalTermImpl f = (FunctionalTermImpl) t;
 				atomString.append(pm.getShortForm(f.getFunctionSymbol().toString()));
-				Iterator<Term> innerterms = f.getTerms().iterator();
+				Iterator<NewLiteral> innerterms = f.getTerms().iterator();
 				while (innerterms.hasNext()) {
 					atomvar.append(pm.getShortForm(innerterms.next().toString(), false));
 					if (innerterms.hasNext())

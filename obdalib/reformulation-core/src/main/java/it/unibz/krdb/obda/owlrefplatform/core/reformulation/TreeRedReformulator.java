@@ -89,6 +89,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		/* Query preprocessing */
 
 		DatalogProgram anonymizedProgram = anonymizer.anonymize(prog);
+		
 
 		// log.debug("Removing redundant atoms by query containment");
 		/* Simpliying the query by removing redundant atoms w.r.t. to CQC */
@@ -138,6 +139,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
 					newqueriesbyPI.add(anonymizer.anonymize(newcq));
+					
 				}
 
 			}
@@ -319,7 +321,10 @@ public class TreeRedReformulator implements QueryRewriter {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
 			for (Atom atom : body) {
-				if (atom.getPredicate().getName().toString().substring(0, OntologyImpl.AUXROLEURI.length()).equals(OntologyImpl.AUXROLEURI)) {
+				String name = atom.getPredicate().getName().toString();
+				if (name.length() < OntologyImpl.AUXROLEURI.length())
+					continue;
+				if (name.substring(0, OntologyImpl.AUXROLEURI.length()).equals(OntologyImpl.AUXROLEURI)) {
 					auxiliary = true;
 					break;
 				}

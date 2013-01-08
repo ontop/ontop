@@ -33,6 +33,17 @@
 			<version>1.7-alpha</version>
 		</dependency>
 		
+		<dependency>
+			<!-- this includes ALL seasame -->
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-runtime</artifactId>
+		</dependency>
+
+		<!-- These will download some of the sources -->
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-api</artifactId>
+		</dependency>
 		
 
 		<dependency>
@@ -58,6 +69,11 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					
+					<testExcludes>
+						<exclude>**/DirectStore*.java</exclude>
+					</testExcludes>
+					
 				</configuration>
 			</plugin>
 		</plugins>

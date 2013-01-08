@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -112,9 +112,9 @@ private static final URI RDF_TYPE_URI = URI.create(RDF_TYPE);
 private HashMap<String, String> directives = new HashMap<String, String>();
 
 /** The current subject term */
-private Term subject;
+private NewLiteral subject;
 
-private Set<Term> variableSet = new HashSet<Term>();
+private Set<NewLiteral> variableSet = new HashSet<NewLiteral>();
 
 /** A factory to construct the predicates and terms */
 private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -168,7 +168,7 @@ parse returns [CQIE value]
   : directiveStatement*
     t1=triplesStatement {
       int arity = variableSet.size();
-      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
+      List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
       Atom head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
       
       // Create a new rule
@@ -223,7 +223,7 @@ predicateObjectList returns [List<Atom> value]
    $value = new LinkedList<Atom>();
 }
   : v1=verb l1=objectList {
-      for (Term object : $l1.value) {
+      for (NewLiteral object : $l1.value) {
         Atom atom = null;
         if ($v1.value.equals(RDF_TYPE_URI)) {
           URIConstant c = (URIConstant) object;  // it has to be a URI constant
@@ -237,7 +237,7 @@ predicateObjectList returns [List<Atom> value]
       }
     } 
     (SEMI v2=verb l2=objectList {
-      for (Term object : $l2.value) {
+      for (NewLiteral object : $l2.value) {
         Atom atom = null;
         if ($v2.value.equals(RDF_TYPE_URI)) {
           URIConstant c = (URIConstant) object;  // it has to be a URI constant
@@ -257,14 +257,14 @@ verb returns [URI value]
   | 'a' { $value = RDF_TYPE_URI; }
   ;
 
-objectList returns [List<Term> value]
+objectList returns [List<NewLiteral> value]
 @init {
-  $value = new ArrayList<Term>();
+  $value = new ArrayList<NewLiteral>();
 }
   : o1=object { $value.add($o1.value); } (COMMA o2=object { $value.add($o2.value); })* 
   ;
 
-subject returns [Term value]
+subject returns [NewLiteral value]
   : resource { $value = dfac.getURIConstant($resource.value); }
   | variable { $value = $variable.value; }
   | function { $value = $function.value; }
@@ -276,7 +276,7 @@ predicate returns [URI value]
   : resource { $value = $resource.value; }
   ;
 
-object returns [Term value]
+object returns [NewLiteral value]
   : resource { $value = dfac.getURIConstant($resource.value); }
   | function { $value = $function.value; }
   | literal  { $value = $literal.value; }
@@ -326,9 +326,9 @@ function returns [Function value]
 
 dataTypeFunction returns [Function value]
   : variable AT language {
-      Predicate functionSymbol = dfac.getDataTypePredicateLiteral();
+      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
       Variable var = $variable.value;
-      ValueConstant lang = dfac.getValueConstant($language.text);
+      NewLiteral lang = $language.value;   
       $value = dfac.getFunctionalTerm(functionSymbol, var, lang);
     }
   | variable REFERENCE resource {
@@ -356,9 +356,18 @@ dataTypeFunction returns [Function value]
     }
   ;
 
+language returns [NewLiteral value]
+  : languageTag {
+    	$value = dfac.getValueConstant($languageTag.text.toLowerCase(), COL_TYPE.STRING);
+    }
+  | variable {
+    	$value = $variable.value;
+    }
+  ;
+
 uriTemplateFunction returns [Function value]
 @init {
-  List<Term> terms = new ArrayList<Term>();
+  List<NewLiteral> terms = new ArrayList<NewLiteral>();
 }
   : STRING_WITH_TEMPLATE_SIGN {
       String template = $STRING_WITH_TEMPLATE_SIGN.text;
@@ -417,27 +426,28 @@ uriTemplateFunction returns [Function value]
     }
   ;
 
-terms returns [Vector<Term> value]
+terms returns [Vector<NewLiteral> value]
 @init {
-  $value = new Vector<Term>();
+  $value = new Vector<NewLiteral>();
 }
   : t1=term { $value.add($t1.value); } (COMMA t2=term { $value.add($t2.value); })*
   ;
 
-term returns [Term value]
+term returns [NewLiteral value]
   : function { $value = $function.value; }
   | variable { $value = $variable.value; }
   | literal { $value = $literal.value; }
   ;
 
-literal returns [Term value]
+literal returns [NewLiteral value]
   : stringLiteral (AT language)? {
-       Predicate functionSymbol = dfac.getDataTypePredicateLiteral();
        ValueConstant constant = $stringLiteral.value;
-       if ($language.text != null && $language.text.trim().length() > 0) {
-         constant = dfac.getValueConstant(constant.getValue(), $language.text);
+       NewLiteral lang = $language.value;
+       if (lang != null) {
+         $value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+       } else {
+       	 $value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), constant);
        }
-       $value = dfac.getFunctionalTerm(functionSymbol, constant);
     }
   | dataTypeString { $value = $dataTypeString.value; }
   | numericLiteral { $value = $numericLiteral.value; }
@@ -451,7 +461,7 @@ stringLiteral returns [ValueConstant value]
     }
   ;
 
-dataTypeString returns [Term value]
+dataTypeString returns [NewLiteral value]
   :  stringLiteral REFERENCE resource {
       ValueConstant constant = $stringLiteral.value;
       String functionName = $resource.value.toString();
@@ -503,7 +513,7 @@ name
   : VARNAME
   ;
 
-language
+languageTag
   : VARNAME
   ;
 

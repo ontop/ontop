@@ -39,7 +39,8 @@ public class OWLAPI3IndividualTranslator {
 			IRI conceptIRI = IRI.create(ca.getConcept().getName());
 
 			OWLClass description = dataFactory.getOWLClass(conceptIRI);
-			OWLIndividual object = (OWLNamedIndividual) translate(ca.getObject());
+			OWLIndividual object = (OWLNamedIndividual) translate(ca
+					.getObject());
 
 			return dataFactory.getOWLClassAssertionAxiom(description, object);
 
@@ -47,21 +48,28 @@ public class OWLAPI3IndividualTranslator {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
 			IRI roleIRI = IRI.create(opa.getRole().getName());
 
-			OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
-			OWLIndividual subject = (OWLNamedIndividual) translate(opa.getFirstObject());
-			OWLIndividual object = (OWLNamedIndividual) translate(opa.getSecondObject());
+			OWLObjectProperty property = dataFactory
+					.getOWLObjectProperty(roleIRI);
+			OWLIndividual subject = (OWLNamedIndividual) translate(opa
+					.getFirstObject());
+			OWLIndividual object = (OWLNamedIndividual) translate(opa
+					.getSecondObject());
 
-			return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
+			return dataFactory.getOWLObjectPropertyAssertionAxiom(property,
+					subject, object);
 
 		} else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
 			IRI attributeIRI = IRI.create(dpa.getAttribute().getName());
 
-			OWLDataProperty property = dataFactory.getOWLDataProperty(attributeIRI);
-			OWLIndividual subject = (OWLNamedIndividual) translate(dpa.getObject());
+			OWLDataProperty property = dataFactory
+					.getOWLDataProperty(attributeIRI);
+			OWLIndividual subject = (OWLNamedIndividual) translate(dpa
+					.getObject());
 			OWLLiteral object = (OWLLiteral) translate(dpa.getValue());
 
-			return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object);
+			return dataFactory.getOWLDataPropertyAssertionAxiom(property,
+					subject, object);
 		}
 		return null;
 	}
@@ -77,9 +85,11 @@ public class OWLAPI3IndividualTranslator {
 		OWLPropertyAssertionObject result = null;
 		if (constant instanceof URIConstant) {
 
-			result = dataFactory.getOWLNamedIndividual(IRI.create(((URIConstant) constant).getURI()));
+			result = dataFactory.getOWLNamedIndividual(IRI
+					.create(((URIConstant) constant).getURI()));
 		} else if (constant instanceof BNode) {
-			result = dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
+			result = dataFactory.getOWLAnonymousIndividual(((BNode) constant)
+					.getName());
 		} else if (constant instanceof ValueConstant) {
 			ValueConstant v = (ValueConstant) constant;
 
@@ -87,26 +97,35 @@ public class OWLAPI3IndividualTranslator {
 			if (value == null) {
 				result = null;
 			} else if (v.getType() == COL_TYPE.BOOLEAN) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_BOOLEAN);
+				result = dataFactory.getOWLLiteral(value,
+						OWL2Datatype.XSD_BOOLEAN);
 			} else if (v.getType() == COL_TYPE.DATETIME) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
+				result = dataFactory.getOWLLiteral(value,
+						OWL2Datatype.XSD_DATE_TIME);
 			} else if (v.getType() == COL_TYPE.DECIMAL) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DECIMAL);
+				result = dataFactory.getOWLLiteral(value,
+						OWL2Datatype.XSD_DECIMAL);
 			} else if (v.getType() == COL_TYPE.DOUBLE) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DOUBLE);
+				result = dataFactory.getOWLLiteral(value,
+						OWL2Datatype.XSD_DOUBLE);
 			} else if (v.getType() == COL_TYPE.INTEGER) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_INTEGER);
+				result = dataFactory.getOWLLiteral(value,
+						OWL2Datatype.XSD_INTEGER);
 			} else if (v.getType() == COL_TYPE.LITERAL) {
 				if (v.getLanguage() == null || !v.getLanguage().equals("")) {
 					result = dataFactory.getOWLLiteral(value, v.getLanguage());
 				} else {
-					result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
+					result = dataFactory.getOWLLiteral(value,
+							OWL2Datatype.RDF_PLAIN_LITERAL);
 				}
 			} else if (v.getType() == COL_TYPE.STRING) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_STRING);
+				result = dataFactory.getOWLLiteral(value,
+						OWL2Datatype.XSD_STRING);
 			} else {
 				throw new IllegalArgumentException(v.getType().toString());
 			}
+		} else if (constant == null) {
+			return null;
 		} else {
 			throw new IllegalArgumentException(constant.getClass().toString());
 		}

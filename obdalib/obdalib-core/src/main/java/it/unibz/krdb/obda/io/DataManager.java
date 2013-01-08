@@ -299,6 +299,11 @@ public class DataManager {
 			}
 		}
 	}
+	
+	public OBDAModel getOBDAModel()
+	{
+		return this.apic;
+	}
 
 	/**
 	 * Append here all default prefixes used by the system.

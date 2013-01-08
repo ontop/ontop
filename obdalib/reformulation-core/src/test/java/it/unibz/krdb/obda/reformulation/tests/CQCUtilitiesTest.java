@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -35,13 +35,13 @@ public class CQCUtilitiesTest extends TestCase {
 	Predicate q = pfac.getPredicate(URI.create("q"), 5, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT, COL_TYPE.OBJECT,
 			COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 
-	Term x = tfac.getVariable("x");
-	Term y = tfac.getVariable("y");
-	Term c1 = tfac.getURIConstant(URI.create("URI1"));
-	Term c2 = tfac.getValueConstant("m");
+	NewLiteral x = tfac.getVariable("x");
+	NewLiteral y = tfac.getVariable("y");
+	NewLiteral c1 = tfac.getURIConstant(URI.create("URI1"));
+	NewLiteral c2 = tfac.getValueConstant("m");
 
-	Term u1 = tfac.getNondistinguishedVariable();
-	Term u2 = tfac.getNondistinguishedVariable();
+	NewLiteral u1 = tfac.getNondistinguishedVariable();
+	NewLiteral u2 = tfac.getNondistinguishedVariable();
 
 	public void setUp() throws Exception {
 		/*
@@ -54,12 +54,12 @@ public class CQCUtilitiesTest extends TestCase {
 		 * q('CANx1', <URI1>, 'm', 'CANy2', f('CANx1','CANy2')) :-
 		 * R('CANx1','CANy2'), S('m', f('CANx1'), 'CANy')
 		 */
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(x);
 		headTerms.add(c1);
 		headTerms.add(c2);
 		headTerms.add(y);
-		List<Term> fterms1 = new LinkedList<Term>();
+		List<NewLiteral> fterms1 = new LinkedList<NewLiteral>();
 		fterms1.add(x);
 		fterms1.add(y);
 		headTerms.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("f"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -69,14 +69,14 @@ public class CQCUtilitiesTest extends TestCase {
 
 		List<Atom> body = new LinkedList<Atom>();
 
-		List<Term> atomTerms1 = new LinkedList<Term>();
+		List<NewLiteral> atomTerms1 = new LinkedList<NewLiteral>();
 		atomTerms1.add(x);
 		atomTerms1.add(y);
 		body.add(tfac.getAtom(r, atomTerms1));
 
-		List<Term> atomTerms2 = new LinkedList<Term>();
+		List<NewLiteral> atomTerms2 = new LinkedList<NewLiteral>();
 		atomTerms2.add(c2);
-		List<Term> fterms2 = new LinkedList<Term>();
+		List<NewLiteral> fterms2 = new LinkedList<NewLiteral>();
 		fterms2.add(x);
 		atomTerms2.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("f"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), fterms2));
 		atomTerms2.add(y);
@@ -89,7 +89,7 @@ public class CQCUtilitiesTest extends TestCase {
 		CQCUtilities cqcutil = new CQCUtilities(initialquery1);
 		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
 
-		List<Term> head = groundedcq.getHead().getTerms();
+		List<NewLiteral> head = groundedcq.getHead().getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
 		assertTrue(head.get(1).equals(tfac.getURIConstant(URI.create("URI1"))));
 		assertTrue(head.get(2).equals(tfac.getValueConstant("m")));
@@ -113,7 +113,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 1 - q(x,y) :- R(x,y), R(y,z)
 
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(x);
 		headTerms.add(y);
 
@@ -121,12 +121,12 @@ public class CQCUtilitiesTest extends TestCase {
 
 		List<Atom> body = new LinkedList<Atom>();
 
-		List<Term> terms = new LinkedList<Term>();
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("z"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
@@ -135,7 +135,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 2 - q(y,y) :- R(y,y)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("y"));
 		headTerms.add(tfac.getVariable("y"));
 
@@ -143,7 +143,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("y"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
@@ -152,7 +152,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 3 - q(m,n) :- R(m,n)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("m"));
 		headTerms.add(tfac.getVariable("n"));
 
@@ -160,7 +160,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("m"));
 		terms.add(tfac.getVariable("n"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
@@ -169,7 +169,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 4 - q(m,n) :- S(m,n) R(m,n)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("m"));
 		headTerms.add(tfac.getVariable("n"));
 
@@ -177,12 +177,12 @@ public class CQCUtilitiesTest extends TestCase {
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("m"));
 		terms.add(tfac.getVariable("n"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("S"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("m"));
 		terms.add(tfac.getVariable("n"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
@@ -191,7 +191,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 5 - q() :- S(x,y)
 
-		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<Term>());
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<NewLiteral>());
 		body = new LinkedList<Atom>();
 		body.add(pfac.getAtom(pfac.getPredicate(URI.create("S"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				pfac.getVariable("x"), pfac.getVariable("y")));
@@ -200,7 +200,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 6 - q() :- S(_,_))
 
-		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<Term>());
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<NewLiteral>());
 		body = new LinkedList<Atom>();
 		body.add(pfac.getAtom(pfac.getPredicate(URI.create("S"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
@@ -233,7 +233,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 9 - q() :- R(x,m), R(x,y), S(m,n), S(y,z),T(n,o),T(z,x)
 
-		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<Term>());
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<NewLiteral>());
 		body = new LinkedList<Atom>();
 		body.add(pfac.getAtom(pfac.getObjectPropertyPredicate("R"), pfac.getVariable("x"), pfac.getVariable("m")));
 		body.add(pfac.getAtom(pfac.getObjectPropertyPredicate("R"), pfac.getVariable("x"), pfac.getVariable("y")));
@@ -246,7 +246,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 10 - q() :- R(i,j), S(j,k), T(k,i)
 
-		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<Term>());
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0, null), new LinkedList<NewLiteral>());
 		body = new LinkedList<Atom>();
 		body.add(pfac.getAtom(pfac.getObjectPropertyPredicate("R"), pfac.getVariable("i"), pfac.getVariable("j")));
 		body.add(pfac.getAtom(pfac.getObjectPropertyPredicate("S"), pfac.getVariable("j"), pfac.getVariable("k")));
@@ -315,24 +315,24 @@ public class CQCUtilitiesTest extends TestCase {
 		// Query 2 - q(x) :- R(x,y)
 		// Query 3 - q(x) :- A(x)
 
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(x);
 
 		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
-		List<Term> terms = new LinkedList<Term>();
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("z"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("A"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
 
@@ -340,14 +340,14 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 2 - q(x) :- R(x,y)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("x"));
 
 		head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
@@ -356,14 +356,14 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 3 - q(x) :- A(x)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("x"));
 
 		head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("A"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
 
@@ -388,24 +388,24 @@ public class CQCUtilitiesTest extends TestCase {
 		// Query 2 - q(x) :- R(x,y)
 		// Query 3 - q(x) :- A(x)
 
-		List<Term> headTerms = new LinkedList<Term>();
+		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(x);
 
 		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
-		List<Term> terms = new LinkedList<Term>();
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("z"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("A"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
 
@@ -413,14 +413,14 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 2 - q(x) :- R(x,y)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("x"));
 
 		head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("R"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
@@ -429,14 +429,14 @@ public class CQCUtilitiesTest extends TestCase {
 
 		// Query 3 - q(x) :- A(x)
 
-		headTerms = new LinkedList<Term>();
+		headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(tfac.getVariable("x"));
 
 		head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Atom>();
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("x"));
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("A"), 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
 

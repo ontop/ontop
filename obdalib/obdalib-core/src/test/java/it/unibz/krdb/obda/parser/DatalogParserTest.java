@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
@@ -87,8 +87,8 @@ public class DatalogParserTest extends TestCase {
 	private DatalogProgramParser parser;
 	private DatalogProgram datalog;
 	private String uri;
-	private List<Term> terms;
-	private Term term;
+	private List<NewLiteral> terms;
+	private NewLiteral term;
 
 	//@Beforere
 	public void setUp() throws Exception {
@@ -345,11 +345,11 @@ public class DatalogParserTest extends TestCase {
 				"http://base.org/stuff/1.0/s");
 
 		//------ Object term
-		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
+		List<NewLiteral> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
-		Term objVarTerm = objVarTerms.get(0);
+		NewLiteral objVarTerm = objVarTerms.get(0);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof VariableImpl);
 		assertEquals("Mismatch variable name!",
@@ -541,11 +541,11 @@ public class DatalogParserTest extends TestCase {
 				"http://base.org/stuff/1.0/f");
 
 		//------- Object term
-		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
+		List<NewLiteral> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
-		Term objVarTerm = objVarTerms.get(0);
+		NewLiteral objVarTerm = objVarTerms.get(0);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
@@ -625,11 +625,11 @@ public class DatalogParserTest extends TestCase {
 				"http://example.org/stuff/1.0/r");
 
 		//------ Object term I1
-		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
+		List<NewLiteral> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
-		Term objVarTerm = objVarTerms.get(0);
+		NewLiteral objVarTerm = objVarTerms.get(0);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
@@ -1081,11 +1081,11 @@ public class DatalogParserTest extends TestCase {
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term
-		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
+		List<NewLiteral> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
-		Term objVarTerm = objVarTerms.get(0);
+		NewLiteral objVarTerm = objVarTerms.get(0);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof VariableImpl);
 		assertEquals("Mismatch variable name!",

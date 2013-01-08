@@ -2,6 +2,7 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
@@ -17,7 +18,8 @@ public class SesameClassicJDBCRepo extends SesameClassicRepo {
 		
 		//try to restore
 		try{
-		classicStore = (QuestDBClassicStore) classicStore.restore(restorePath+name+".qst");
+			
+		
 		}
 		catch(Exception e)
 		{
@@ -44,9 +46,9 @@ public class SesameClassicJDBCRepo extends SesameClassicRepo {
 		 
 		 
 		createStore(name, tboxFile, p); 
-		QuestDBClassicStore.saveState(storePath, classicStore);
 		}
 		
+//		classicStore.saveState(storePath);
 	}
 
 }

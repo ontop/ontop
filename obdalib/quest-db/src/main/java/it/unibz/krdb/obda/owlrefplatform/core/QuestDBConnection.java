@@ -36,17 +36,17 @@ public class QuestDBConnection implements OBDAConnection {
 
 	@Override
 	public boolean getAutoCommit() throws OBDAException {
-		return getAutoCommit();
+		return conn.getAutoCommit();
 	}
 
 	@Override
 	public boolean isClosed() throws OBDAException {
-		return isClosed();
+		return conn.isClosed();
 	}
 
 	@Override
 	public boolean isReadOnly() throws OBDAException {
-		return isReadOnly();
+		return conn.isReadOnly();
 	}
 
 	@Override

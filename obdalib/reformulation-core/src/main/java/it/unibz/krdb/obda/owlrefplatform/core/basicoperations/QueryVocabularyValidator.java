@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -11,10 +12,10 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.utils.ObdaFileCompatibilityRepair;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -31,15 +32,18 @@ public class QueryVocabularyValidator implements Serializable {
 	private static final long serialVersionUID = -2901421485090507301L;
 
 	/** List of invalid predicates */
-	private Vector<String>				invalidPredicates	= new Vector<String>();
+	private Vector<String> invalidPredicates = new Vector<String>();
 
-	Logger								log					= LoggerFactory.getLogger(QueryVocabularyValidator.class);
+	Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
 
-	private Ontology					ontology;
+	private Ontology ontology;
 
-	private Map<Predicate, Description>	equivalences;
+	private Map<Predicate, Description> equivalences;
 
-	public QueryVocabularyValidator(Ontology ontology, Map<Predicate, Description> equivalences) {
+	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+	public QueryVocabularyValidator(Ontology ontology,
+			Map<Predicate, Description> equivalences) {
 		this.ontology = ontology;
 		this.equivalences = equivalences;
 	}
@@ -64,13 +68,13 @@ public class QueryVocabularyValidator implements Serializable {
 	private boolean isEmptyOntology() {
 		return (ontology.getAssertions().size() == 0) ? true : false;
 	}
-	
+
 	private void validate(CQIE query) {
-//		if (isEmptyOntology()) {
-//			// Skip if the input ontology is empty.
-//			return;
-//		}
-		
+		// if (isEmptyOntology()) {
+		// // Skip if the input ontology is empty.
+		// return;
+		// }
+
 		// Get the predicates in the target query.
 		Iterator<Atom> iterAtom = query.getBody().iterator();
 		while (iterAtom.hasNext()) {
@@ -86,16 +90,21 @@ public class QueryVocabularyValidator implements Serializable {
 			boolean isObjectProp = false;
 			boolean isDataProp = false;
 			boolean isBooleanOpFunction = false;
-			
-			isClass = isClass || ontology.getConcepts().contains(predicate) || (equivalences.get(predicate) != null);
-			isObjectProp = isObjectProp || ontology.getRoles().contains(predicate) || (equivalences.get(predicate) != null);
-			isDataProp = isDataProp || ontology.getRoles().contains(predicate) || (equivalences.get(predicate) != null);
+
+			isClass = isClass || ontology.getConcepts().contains(predicate)
+					|| (equivalences.get(predicate) != null);
+			isObjectProp = isObjectProp
+					|| ontology.getRoles().contains(predicate)
+					|| (equivalences.get(predicate) != null);
+			isDataProp = isDataProp || ontology.getRoles().contains(predicate)
+					|| (equivalences.get(predicate) != null);
 			isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
-					
+
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data
 			// property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isBooleanOpFunction;
+			boolean isPredicateValid = isClass || isObjectProp || isDataProp
+					|| isBooleanOpFunction;
 
 			String debugMsg = "The predicate: [" + predicate.toString() + "]";
 			if (isPredicateValid) {
@@ -111,7 +120,8 @@ public class QueryVocabularyValidator implements Serializable {
 				log.debug(debugMsg);
 			} else {
 				invalidPredicates.add(predicate.toString());
-				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
+				log.warn("WARNING: " + debugMsg
+						+ " is missing in the ontology!");
 			}
 		}
 	}
@@ -127,42 +137,59 @@ public class QueryVocabularyValidator implements Serializable {
 		DatalogProgram newprogram = fac.getDatalogProgram();
 		newprogram.setQueryModifiers(queries.getQueryModifiers());
 		for (CQIE query : queries.getRules()) {
-			newprogram.appendRule(replaceEquivalences(query));
+			newprogram.appendRule(replaceEquivalences(query.clone(), true));
 		}
 		return newprogram;
 	}
 
-	public CQIE replaceEquivalences(CQIE query) {
-		Atom newhead = query.getHead();
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		List<Atom> newbody = new LinkedList<Atom>();
+	public CQIE replaceEquivalences(CQIE query, boolean inplace) {
+		if (!inplace)
+			query = query.clone();
 
+		replaceEquivalences(query.getBody());
+
+		return query;
+	}
+
+	public void replaceEquivalences(List body) {
 		// Get the predicates in the target query.
 
-		for (int i = 0; i < query.getBody().size(); i++) {
-			Atom atom = query.getBody().get(i);
+		for (int i = 0; i < body.size(); i++) {
+			Function atom = (Function) body.get(i);
 
-			Description equivalent = equivalences.get(atom.getPredicate());
-
-			if (equivalent == null)
-				newbody.add(atom);
-			else {
-				Atom newatom = null;
-				if (equivalent instanceof OClass) {
-					newatom = fac.getAtom(((OClass) equivalent).getPredicate(), atom.getTerm(0));
-				} else if (equivalent instanceof Property) {
-					Property equiproperty = (Property) equivalent;
-					if (!equiproperty.isInverse()) {
-						newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
-					} else {
-						newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
-					}
-				}
-				newbody.add(newatom);
+			/*
+			 * Calling recursively for nested expressions
+			 */
+			if (atom.isAlgebraFunction()) {
+				replaceEquivalences(atom.getTerms());
+				continue;
 			}
+			
+			if (atom.isBooleanFunction())
+				continue;
+
+			Description equivalent = equivalences.get(atom.getFunctionSymbol());
+			if (equivalent == null) {
+				/* Nothing to replace */
+				continue;
+			}
+			Atom newatom = null;
+
+			if (equivalent instanceof OClass) {
+				newatom = fac.getAtom(((OClass) equivalent).getPredicate(),
+						atom.getTerm(0));
+			} else if (equivalent instanceof Property) {
+				Property equiproperty = (Property) equivalent;
+				if (!equiproperty.isInverse()) {
+					newatom = fac.getAtom(equiproperty.getPredicate(),
+							atom.getTerm(0), atom.getTerm(1));
+				} else {
+					newatom = fac.getAtom(equiproperty.getPredicate(),
+							atom.getTerm(1), atom.getTerm(0));
+				}
+			}
+			body.set(i, newatom);
 		}
-		CQIE newquery = fac.getCQIE(newhead, newbody);
-		return newquery;
 	}
 
 	public Vector<String> getInvalidPredicates() {

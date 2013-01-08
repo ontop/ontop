@@ -3,22 +3,24 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +31,9 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
-	private static OBDADataFactoryImpl instance = null;
+	private static OBDADataFactory instance = null;
+	
+	private static int mappingIDCounter = 0;
 
 	protected OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
@@ -49,7 +53,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Deprecated
 	public PredicateImpl getPredicate(URI name, int arity) {
 		if (arity == 1) {
-			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
+			return new PredicateImpl(name, arity,
+					new COL_TYPE[] { COL_TYPE.OBJECT });
 		} else {
 			return new PredicateImpl(name, arity, null);
 		}
@@ -60,11 +65,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	public Predicate getObjectPropertyPredicate(URI name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT,
+				COL_TYPE.OBJECT });
 	}
 
 	public Predicate getDataPropertyPredicate(URI name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT,
+				COL_TYPE.LITERAL });
 	}
 
 	public Predicate getClassPredicate(URI name) {
@@ -85,10 +92,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public ValueConstant getValueConstant(String value, COL_TYPE type) {
 		return new ValueConstantImpl(value, type);
 	}
-	
+
 	@Override
 	public ValueConstant getValueConstant(String value, String language) {
-		return new ValueConstantImpl(value, language, COL_TYPE.LITERAL);
+		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
 	}
 
 	@Override
@@ -107,18 +114,26 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionalTerm(Predicate functor, List<Term> arguments) {
+	public Function getFunctionalTerm(Predicate functor,
+			NewLiteral... arguments) {
+		return new FunctionalTermImpl(functor, arguments);
+	}
+	
+	@Override
+	public Function getFunctionalTerm(Predicate functor,
+			List<NewLiteral> arguments) {
 		return new FunctionalTermImpl(functor, arguments);
 	}
 
 	@Override
-	public Function getFunctionalTerm(Predicate functor, Term term1) {
+	public Function getFunctionalTerm(Predicate functor, NewLiteral term1) {
 		return new FunctionalTermImpl(functor, Collections.singletonList(term1));
 	}
 
 	@Override
-	public Function getFunctionalTerm(Predicate functor, Term term1, Term term2) {
-		LinkedList<Term> terms = new LinkedList<Term>();
+	public Function getFunctionalTerm(Predicate functor, NewLiteral term1,
+			NewLiteral term2) {
+		LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(term1);
 		terms.add(term2);
 		return new FunctionalTermImpl(functor, terms);
@@ -130,21 +145,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Atom getAtom(Predicate predicate, List<Term> terms) {
-		return new PredicateAtomImpl(predicate, terms);
+	public Atom getAtom(Predicate predicate, List<NewLiteral> terms) {
+		// return new PredicateAtomImpl(predicate, terms);
+		return getFunctionalTerm(predicate, terms).asAtom();
 	}
 
 	@Override
-	public Atom getAtom(Predicate predicate, Term term1) {
-		return new PredicateAtomImpl(predicate, Collections.singletonList(term1));
+	public Atom getAtom(Predicate predicate, NewLiteral term1) {
+		return getAtom(predicate, Collections.singletonList(term1));
 	}
 
 	@Override
-	public Atom getAtom(Predicate predicate, Term term1, Term term2) {
-		LinkedList<Term> terms = new LinkedList<Term>();
+	public Atom getAtom(Predicate predicate, NewLiteral term1, NewLiteral term2) {
+		LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(term1);
 		terms.add(term2);
-		return new PredicateAtomImpl(predicate, terms);
+		return getAtom(predicate, terms);
 	}
 
 	@Override
@@ -170,14 +186,15 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(List<CQIE> rules) {
+	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		return p;
 	}
 
 	@Override
-	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
+	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id,
+			OBDAQuery sourceQuery, OBDAQuery targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
 	}
 
@@ -187,63 +204,66 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery) {
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql,
+			OBDAQuery targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, new SQLQueryImpl(sql), targetQuery);
 	}
 
 	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery) {
-		String id = new String("MAP" + System.nanoTime());
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql,
+			OBDAQuery targetQuery) {
+		String id = new String("MAPID" + mappingIDCounter);
+		mappingIDCounter += 1;
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
 
 	@Override
-	public Atom getEQAtom(Term firstTerm, Term secondTerm) {
+	public Atom getEQAtom(NewLiteral firstTerm, NewLiteral secondTerm) {
 
 		return getAtom(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Atom getGTEAtom(Term firstTerm, Term secondTerm) {
+	public Atom getGTEAtom(NewLiteral firstTerm, NewLiteral secondTerm) {
 
 		return getAtom(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Atom getGTAtom(Term firstTerm, Term secondTerm) {
+	public Atom getGTAtom(NewLiteral firstTerm, NewLiteral secondTerm) {
 
 		return getAtom(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Atom getLTEAtom(Term firstTerm, Term secondTerm) {
+	public Atom getLTEAtom(NewLiteral firstTerm, NewLiteral secondTerm) {
 
 		return getAtom(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Atom getLTAtom(Term firstTerm, Term secondTerm) {
+	public Atom getLTAtom(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getAtom(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Atom getNEQAtom(Term firstTerm, Term secondTerm) {
+	public Atom getNEQAtom(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getAtom(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Atom getNOTAtom(Term term) {
+	public Atom getNOTAtom(NewLiteral term) {
 		return getAtom(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public Atom getANDAtom(Term term1, Term term2) {
+	public Atom getANDAtom(NewLiteral term1, NewLiteral term2) {
 		return getAtom(OBDAVocabulary.AND, term1, term2);
 	}
 
 	@Override
-	public Atom getANDAtom(Term term1, Term term2, Term term3) {
-		List<Term> terms = new LinkedList<Term>();
+	public Atom getANDAtom(NewLiteral term1, NewLiteral term2, NewLiteral term3) {
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(term1);
 		terms.add(term2);
 		terms.add(term3);
@@ -251,16 +271,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Atom getANDAtom(List<Term> terms) {
+	public Atom getANDAtom(List<NewLiteral> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("AND requires at least 2 terms");
 
-		LinkedList<Term> auxTerms = new LinkedList<Term>();
+		LinkedList<NewLiteral> auxTerms = new LinkedList<NewLiteral>();
 
 		if (terms.size() == 2)
 			return getAtom(OBDAVocabulary.AND, terms.get(0), terms.get(1));
 
-		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+		NewLiteral nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0),
+				terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
 		while (auxTerms.size() > 1) {
@@ -271,13 +292,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Atom getORAtom(Term term1, Term term2) {
+	public Atom getORAtom(NewLiteral term1, NewLiteral term2) {
 		return getAtom(OBDAVocabulary.OR, term1, term2);
 	}
 
 	@Override
-	public Atom getORAtom(Term term1, Term term2, Term term3) {
-		List<Term> terms = new LinkedList<Term>();
+	public Atom getORAtom(NewLiteral term1, NewLiteral term2, NewLiteral term3) {
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(term1);
 		terms.add(term2);
 		terms.add(term3);
@@ -285,16 +306,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Atom getORAtom(List<Term> terms) {
+	public Atom getORAtom(List<NewLiteral> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("OR requires at least 2 terms");
 
-		LinkedList<Term> auxTerms = new LinkedList<Term>();
+		LinkedList<NewLiteral> auxTerms = new LinkedList<NewLiteral>();
 
 		if (terms.size() == 2)
 			return getAtom(OBDAVocabulary.OR, terms.get(0), terms.get(1));
 
-		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+		NewLiteral nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0),
+				terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
 		while (auxTerms.size() > 1) {
@@ -305,15 +327,15 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Atom getIsNullAtom(Term term) {
+	public Atom getIsNullAtom(NewLiteral term) {
 		return getAtom(OBDAVocabulary.IS_NULL, term);
 	}
 
 	@Override
-	public Atom getIsNotNullAtom(Term term) {
+	public Atom getIsNotNullAtom(NewLiteral term) {
 		return getAtom(OBDAVocabulary.IS_NOT_NULL, term);
 	}
-	
+
 	@Override
 	public Predicate getObjectPropertyPredicate(String name) {
 		return getObjectPropertyPredicate(URI.create(name));
@@ -333,85 +355,96 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Predicate getDataTypePredicateLiteral() {
 		return OBDAVocabulary.RDFS_LITERAL;
 	}
+	
+	@Override
+	public Predicate getDataTypePredicateLiteralLang() {
+		return OBDAVocabulary.RDFS_LITERAL_LANG;
+	}
 
 	@Override
 	public Predicate getDataTypePredicateString() {
 		return OBDAVocabulary.XSD_STRING;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateInteger() {
 		return OBDAVocabulary.XSD_INTEGER;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateDecimal() {
 		return OBDAVocabulary.XSD_DECIMAL;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateDouble() {
 		return OBDAVocabulary.XSD_DOUBLE;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateDateTime() {
 		return OBDAVocabulary.XSD_DATETIME;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateBoolean() {
 		return OBDAVocabulary.XSD_BOOLEAN;
 	}
-	
+
 	@Override
 	public Predicate getUriTemplatePredicate(int arity) {
 		return new URITemplatePredicateImpl(arity);
 	}
 
 	@Override
-	public Function getEQFunction(Term firstTerm, Term secondTerm) {
+	public Predicate getBNodeTemplatePredicate(int arity) {
+		return new BNodePredicateImpl(arity);
+	}
+
+	@Override
+	public Function getEQFunction(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getGTEFunction(Term firstTerm, Term secondTerm) {
+	public Function getGTEFunction(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getGTFunction(Term firstTerm, Term secondTerm) {
+	public Function getGTFunction(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getLTEFunction(Term firstTerm, Term secondTerm) {
+	public Function getLTEFunction(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getLTFunction(Term firstTerm, Term secondTerm) {
+	public Function getLTFunction(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getNEQFunction(Term firstTerm, Term secondTerm) {
+	public Function getNEQFunction(NewLiteral firstTerm, NewLiteral secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getNOTFunction(Term term) {
+	public Function getNOTFunction(NewLiteral term) {
 		return getFunctionalTerm(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public Function getANDFunction(Term term1, Term term2) {
+	public Function getANDFunction(NewLiteral term1, NewLiteral term2) {
 		return getFunctionalTerm(OBDAVocabulary.AND, term1, term2);
 	}
 
 	@Override
-	public Function getANDFunction(Term term1, Term term2, Term term3) {
-		List<Term> terms = new LinkedList<Term>();
+	public Function getANDFunction(NewLiteral term1, NewLiteral term2,
+			NewLiteral term3) {
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(term1);
 		terms.add(term2);
 		terms.add(term3);
@@ -419,16 +452,18 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getANDFunction(List<Term> terms) {
+	public Function getANDFunction(List<NewLiteral> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("AND requires at least 2 terms");
 
-		LinkedList<Term> auxTerms = new LinkedList<Term>();
+		LinkedList<NewLiteral> auxTerms = new LinkedList<NewLiteral>();
 
 		if (terms.size() == 2)
-			return getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+			return getFunctionalTerm(OBDAVocabulary.AND, terms.get(0),
+					terms.get(1));
 
-		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+		NewLiteral nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0),
+				terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
 		while (auxTerms.size() > 1) {
@@ -439,13 +474,14 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getORFunction(Term term1, Term term2) {
+	public Function getORFunction(NewLiteral term1, NewLiteral term2) {
 		return getFunctionalTerm(OBDAVocabulary.OR, term1, term2);
 	}
 
 	@Override
-	public Function getORFunction(Term term1, Term term2, Term term3) {
-		List<Term> terms = new LinkedList<Term>();
+	public Function getORFunction(NewLiteral term1, NewLiteral term2,
+			NewLiteral term3) {
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(term1);
 		terms.add(term2);
 		terms.add(term3);
@@ -453,16 +489,18 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getORFunction(List<Term> terms) {
+	public Function getORFunction(List<NewLiteral> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("OR requires at least 2 terms");
 
-		LinkedList<Term> auxTerms = new LinkedList<Term>();
+		LinkedList<NewLiteral> auxTerms = new LinkedList<NewLiteral>();
 
 		if (terms.size() == 2)
-			return getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+			return getFunctionalTerm(OBDAVocabulary.OR, terms.get(0),
+					terms.get(1));
 
-		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+		NewLiteral nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0),
+				terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
 		while (auxTerms.size() > 1) {
@@ -473,28 +511,60 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getIsNullFunction(Term term) {
+	public Function getIsNullFunction(NewLiteral term) {
 		return getFunctionalTerm(OBDAVocabulary.IS_NULL, term);
 	}
 
 	@Override
-	public Function getIsNotNullFunction(Term term) {
+	public Function getIsNotNullFunction(NewLiteral term) {
 		return getFunctionalTerm(OBDAVocabulary.IS_NOT_NULL, term);
 	}
 
 	@Override
-	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass) {
-		URI id = URI.create(UUID.randomUUID().toString());
-		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
+	public Function getLANGMATCHESFunction(NewLiteral term1, NewLiteral term2) {
+		return getFunctionalTerm(OBDAVocabulary.SPARQL_LANGMATCHES, term1,
+				term2);
 	}
 
 	@Override
-	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass) {
+	public Function getMinusFunction(NewLiteral term1) {
+		return getFunctionalTerm(OBDAVocabulary.MINUS, term1);
+	}
+
+	@Override
+	public Function getAddFunction(NewLiteral term1, NewLiteral term2) {
+		return getFunctionalTerm(OBDAVocabulary.ADD, term1, term2);
+	}
+
+	@Override
+	public Function getSubstractFunction(NewLiteral term1, NewLiteral term2) {
+		return getFunctionalTerm(OBDAVocabulary.SUBSTRACT, term1, term2);
+	}
+
+	@Override
+	public Function getMultiplyFunction(NewLiteral term1, NewLiteral term2) {
+		return getFunctionalTerm(OBDAVocabulary.MULTIPLY, term1, term2);
+	}
+
+	@Override
+	public OBDADataSource getJDBCDataSource(String jdbcurl, String username,
+			String password, String driverclass) {
+		URI id = URI.create(UUID.randomUUID().toString());
+		return getJDBCDataSource(id.toString(), jdbcurl, username, password,
+				driverclass);
+	}
+
+	@Override
+	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl,
+			String username, String password, String driverclass) {
 		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driverclass);
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD,
+				password);
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME,
+				username);
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER,
+				driverclass);
 		return source;
 
 	}
@@ -530,5 +600,60 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public BNode getBNodeConstant(String name) {
 		return new BNodeConstantImpl(name);
+	}
+
+	@Override
+	public Constant getNULL() {
+		return OBDAVocabulary.NULL;
+	}
+
+	@Override
+	public Constant getTrue() {
+		return OBDAVocabulary.TRUE;
+	}
+
+	@Override
+	public Constant getFalse() {
+		return OBDAVocabulary.FALSE;
+	}
+
+	@Override
+	public Predicate getDataTypePredicateUnsupported(String uri) {
+		return getDataTypePredicateUnsupported(URI.create(uri));
+
+	}
+
+	@Override
+	public Predicate getDataTypePredicateUnsupported(URI uri) {
+		return new DataTypePredicateImpl(uri, COL_TYPE.UNSUPPORTED);
+
+	}
+
+	@Override
+	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
+		switch (type) {
+		case LITERAL:
+			return getDataTypePredicateLiteral();
+		case LITERAL_LANG:
+			return getDataTypePredicateLiteral();
+		case STRING:
+			return getDataTypePredicateString();
+		case INTEGER:
+			return getDataTypePredicateInteger();
+		case DECIMAL:
+			return getDataTypePredicateDecimal();
+		case DOUBLE:
+			return getDataTypePredicateDouble();
+		case DATETIME:
+			return getDataTypePredicateDateTime();
+		case BOOLEAN:
+			return getDataTypePredicateBoolean();
+		case OBJECT:
+			return getUriTemplatePredicate(1);
+		case BNODE:
+			return getBNodeTemplatePredicate(1);
+		default:
+			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
+		}
 	}
 }

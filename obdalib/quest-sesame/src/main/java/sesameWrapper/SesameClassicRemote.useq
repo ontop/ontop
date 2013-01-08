@@ -1,0 +1,163 @@
+<sequence-diagram version="1.0.10" icons="true">  
+  <object id="1" language="java" name="sesameWrapper.SesameClassicJDBCRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameClassicJDBCRepo.java" binary="false" 
+    label="sesameClassicJDBCRepo" type="class" autoSize="true">    
+    <position height="-1" width="-1" x="139" y="0"/>    
+    <execution id="2">      
+      <position height="167" width="0" x="0" y="98"/>    
+    </execution>    
+    <execution id="7">      
+      <position height="329" width="172" x="5" y="291"/>    
+    </execution>    
+    <execution id="10">      
+      <position height="189" width="172" x="5" y="643"/>    
+    </execution>    
+    <execution id="13">      
+      <position height="117" width="172" x="5" y="861"/>    
+    </execution>  
+  </object>  
+  <object id="16" language="java" name="sesameWrapper.SesameClassicRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameClassicRepo.java" binary="false" label="sesameClassicRepo2" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="4">      
+      <position height="72" width="0" x="0" y="119"/>    
+    </execution>    
+    <execution id="9">      
+      <position height="287" width="143" x="181" y="312"/>    
+    </execution>    
+    <execution id="12">      
+      <position height="147" width="143" x="181" y="664"/>    
+    </execution>  
+  </object>  
+  <object id="23" language="java" name="sesameWrapper.SesameAbstractRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameAbstractRepo.java" binary="false" label="sesameAbstractRepo2" 
+    type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="18">      
+      <position height="21" width="0" x="0" y="149"/>    
+    </execution>    
+    <execution id="15">      
+      <position height="75" width="150" x="328" y="882"/>    
+    </execution>  
+  </object>  
+  <object id="26" language="java" name="sesameWrapper.RepositoryConnection" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/RepositoryConnection.java" binary="false" 
+    label="repositoryConnection" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="25">      
+      <position height="21" width="0" x="0" y="915"/>    
+    </execution>  
+  </object>  
+  <object id="27" language="java" name="it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore" 
+    project="quest-db" file="/quest-db/src/main/java/it/unibz/krdb/obda/owlrefplatform/questdb/QuestDBClassicStore.java" 
+    binary="false" label="questDBClassicStore" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="20">      
+      <position height="230" width="0" x="0" y="348"/>    
+    </execution>    
+    <execution id="29">      
+      <position height="154" width="0" x="0" y="403"/>    
+    </execution>    
+    <execution id="22">      
+      <position height="105" width="179" x="482" y="685"/>    
+    </execution>  
+  </object>  
+  <object id="38" language="java" name="it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBAbstractStore" 
+    project="quest-db" 
+    file="/quest-db/src/main/java/it/unibz/krdb/obda/owlrefplatform/questdb/QuestDBAbstractStore.java" binary="false" 
+    label="questDBAbstractStore2" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="6">      
+      <position height="21" width="0" x="0" y="223"/>    
+    </execution>    
+    <execution id="37">      
+      <position height="63" width="179" x="665" y="706"/>    
+    </execution>  
+  </object>  
+  <object id="41" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.Quest" project="reformulation-core" 
+    file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/Quest.java" binary="false" 
+    label="quest" type="class" autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="31">      
+      <position height="21" width="164" x="665" y="424"/>    
+    </execution>    
+    <execution id="33">      
+      <position height="21" width="164" x="665" y="471"/>    
+    </execution>    
+    <execution id="35">      
+      <position height="21" width="164" x="665" y="515"/>    
+    </execution>  
+  </object>  
+  <object id="42" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection" project="quest-db" 
+    file="/quest-db/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/QuestDBConnection.java" binary="false" 
+    label="questDBConnection" type="class" autoSize="true">    
+    <position height="-1" width="-1" x="755" y="0"/>    
+    <execution id="40">      
+      <position height="21" width="164" x="1016" y="727"/>    
+    </execution>  
+  </object>  
+  <message id="3" operation="SesameClassicRepo()">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>  
+  <message id="5">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="6"/>  
+  </message>  
+  <message id="8" 
+    operation="createStore(java.lang.String,org.openrdf.query.Dataset,it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences):void">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="9"/>  
+  </message>  
+  <message id="11" operation="initialize():void">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="12"/>  
+  </message>  
+  <message id="14" operation="getConnection():sesameWrapper.RepositoryConnection">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="15"/>  
+  </message>  
+  <message id="17" operation="SesameAbstractRepo()">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="18"/>  
+  </message>  
+  <message id="19" 
+    operation="QuestDBClassicStore(java.lang.String,org.openrdf.query.Dataset,it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences)">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="20"/>  
+  </message>  
+  <message id="21">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="22"/>  
+  </message>  
+  <message id="24" 
+    operation="RepositoryConnection(sesameWrapper.SesameAbstractRepo,it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection)">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="25"/>  
+  </message>  
+  <message id="28" operation="createInstance(it.unibz.krdb.obda.ontology.Ontology,java.util.Properties):void">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="29"/>  
+  </message>  
+  <message id="30" operation="setPreferences(java.util.Properties):void">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="31"/>  
+  </message>  
+  <message id="32" operation="loadTBox(it.unibz.krdb.obda.ontology.Ontology):void">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="33"/>  
+  </message>  
+  <message id="34" operation="setupRepository():void">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="35"/>  
+  </message>  
+  <message id="36" operation="getConnection():it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection">    
+    <end type="SOURCE" refId="22"/>    
+    <end type="TARGET" refId="37"/>  
+  </message>  
+  <message id="39" operation="QuestDBConnection(it.unibz.krdb.obda.owlrefplatform.core.QuestConnection)">    
+    <end type="SOURCE" refId="37"/>    
+    <end type="TARGET" refId="40"/>  
+  </message>
+</sequence-diagram>

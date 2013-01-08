@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -35,26 +35,26 @@ public class ThetaApplicationTest extends TestCase {
 	 */
 	public void test_1() {
 
-		Term t1 = termFactory.getVariable("x");
-		Term t2 = termFactory.getVariable("y");
-		Term t3 = termFactory.getVariable("z");
+		NewLiteral t1 = termFactory.getVariable("x");
+		NewLiteral t2 = termFactory.getVariable("y");
+		NewLiteral t3 = termFactory.getVariable("z");
 
-		Term t4 = termFactory.getVariable("x");
-		List<Term> vars = new Vector<Term>();
+		NewLiteral t4 = termFactory.getVariable("x");
+		List<NewLiteral> vars = new Vector<NewLiteral>();
 		vars.add(t4);
 		Predicate fs = predFactory.getPredicate(URI.create("p"), vars.size());
 		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs, vars);
 
-		Term t5 = termFactory.getValueConstant("con");
-		Term t51 = termFactory.getValueConstant("st");
-		List<Term> vars5 = new Vector<Term>();
+		NewLiteral t5 = termFactory.getValueConstant("con");
+		NewLiteral t51 = termFactory.getValueConstant("st");
+		List<NewLiteral> vars5 = new Vector<NewLiteral>();
 		vars5.add(t5);
 		vars5.add(t51);
 		Predicate fs2 = predFactory.getPredicate(URI.create("p"), vars5.size());
 		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs2, vars5);
 
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 5);
-		List<Term> terms1 = new Vector<Term>();
+		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t1);
 		terms1.add(t2);
 		terms1.add(t3);
@@ -64,20 +64,20 @@ public class ThetaApplicationTest extends TestCase {
 		List<Atom> body = new Vector<Atom>();
 		body.add(atom1);
 
-		Term t7 = termFactory.getVariable("x");
-		Term t6 = termFactory.getVariable("t");
-		Term t8 = termFactory.getVariable("z");
-		Term t9 = termFactory.getValueConstant("elf");
-		Term t10 = termFactory.getVariable("x");
-		Term t11 = termFactory.getVariable("y");
-		Term t12 = termFactory.getVariable("p");
-		List<Term> vars3 = new Vector<Term>();
+		NewLiteral t7 = termFactory.getVariable("x");
+		NewLiteral t6 = termFactory.getVariable("t");
+		NewLiteral t8 = termFactory.getVariable("z");
+		NewLiteral t9 = termFactory.getValueConstant("elf");
+		NewLiteral t10 = termFactory.getVariable("x");
+		NewLiteral t11 = termFactory.getVariable("y");
+		NewLiteral t12 = termFactory.getVariable("p");
+		List<NewLiteral> vars3 = new Vector<NewLiteral>();
 		vars3.add(t12);
 		Predicate fs3 = predFactory.getPredicate(URI.create("uri"), vars3.size());
 		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs3, vars3);
 
 		Predicate head = predFactory.getPredicate(URI.create("q"), 1);
-		List<Term> terms2 = new Vector<Term>();
+		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(t10);
 		Atom h = predFactory.getAtom(head, terms2);
 
@@ -87,7 +87,7 @@ public class ThetaApplicationTest extends TestCase {
 		Substitution s2 = new Substitution(t8, t9);
 		Substitution s3 = new Substitution(t11, otx);
 
-		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
+		Map<Variable, NewLiteral> mgu = new HashMap<Variable, NewLiteral>();
 		mgu.put((Variable) s1.getVariable(), s1.getTerm());
 		mgu.put((Variable) s2.getVariable(), s2.getTerm());
 		mgu.put((Variable) s3.getVariable(), s3.getTerm());
@@ -99,7 +99,7 @@ public class ThetaApplicationTest extends TestCase {
 		assertEquals(1, newbody.size());
 
 		Atom a = (Atom) newbody.get(0);
-		List<Term> terms = a.getTerms();
+		List<NewLiteral> terms = a.getTerms();
 		assertEquals(5, terms.size());
 
 		VariableImpl term1 = (VariableImpl) terms.get(0);
@@ -111,9 +111,9 @@ public class ThetaApplicationTest extends TestCase {
 		assertEquals("t", term1.getName());
 		assertEquals("elf", term3.getValue());
 
-		List<Term> para_t2 = term2.getTerms();
-		List<Term> para_t4 = term4.getTerms();
-		List<Term> para_t5 = term5.getTerms();
+		List<NewLiteral> para_t2 = term2.getTerms();
+		List<NewLiteral> para_t4 = term4.getTerms();
+		List<NewLiteral> para_t5 = term5.getTerms();
 
 		assertEquals(1, para_t2.size());
 		assertEquals(1, para_t4.size());

@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -38,25 +38,25 @@ public class UnificationTest2 extends TestCase {
 		OBDADataFactory predFac = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 
-		Term t1 = factory.getVariable("x");
-		Term t2 = factory.getVariable("y");
-		Term t3 = factory.getVariable("x");
+		NewLiteral t1 = factory.getVariable("x");
+		NewLiteral t2 = factory.getVariable("y");
+		NewLiteral t3 = factory.getVariable("x");
 
 		Predicate r1 = predFac.getPredicate(URI.create("R"), 2);
 		Predicate r2 = predFac.getPredicate(URI.create("R"), 2);
 		Predicate s = predFac.getPredicate(URI.create("S"), 2);
 		Predicate p = predFac.getPredicate(URI.create("p"), 2);
 
-		List<Term> terms1 = new Vector<Term>();
+		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t1);
 		terms1.add(factory.getNondistinguishedVariable());
-		List<Term> terms2 = new Vector<Term>();
+		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(factory.getNondistinguishedVariable());
 		terms2.add(t2);
-		List<Term> terms3 = new Vector<Term>();
+		List<NewLiteral> terms3 = new Vector<NewLiteral>();
 		terms3.add(t3);
 		terms3.add(factory.getNondistinguishedVariable());
-		List<Term> terms4 = new Vector<Term>();
+		List<NewLiteral> terms4 = new Vector<NewLiteral>();
 		terms4.add(t3.clone());
 		terms4.add(t2.clone());
 
@@ -86,10 +86,10 @@ public class UnificationTest2 extends TestCase {
 		Atom at1 = (Atom) newbody.get(0);
 		Atom at2 = (Atom) newbody.get(1);
 
-		Term term1 = at1.getTerms().get(0);
-		Term term2 = at1.getTerms().get(1);
-		Term term3 = at2.getTerms().get(0);
-		Term term4 = at2.getTerms().get(1);
+		NewLiteral term1 = at1.getTerms().get(0);
+		NewLiteral term2 = at1.getTerms().get(1);
+		NewLiteral term3 = at2.getTerms().get(0);
+		NewLiteral term4 = at2.getTerms().get(1);
 
 		assertEquals("x", ((Variable) term1).getName());
 		assertEquals("y", ((Variable) term2).getName());

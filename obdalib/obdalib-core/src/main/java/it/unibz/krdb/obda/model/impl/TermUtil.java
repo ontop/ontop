@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.Variable;
  */
 public class TermUtil {
 
-	public static String toString(Term term) {
+	public static String toString(NewLiteral term) {
 		if (term instanceof Variable) {
 			Variable variable = (Variable) term;
 			return String.format("$%s", variable.getName());
@@ -31,7 +31,7 @@ public class TermUtil {
 			
 			StringBuffer args = new StringBuffer();
 			boolean separator = false;
-			for (Term innerTerm : function.getTerms()) {
+			for (NewLiteral innerTerm : function.getTerms()) {
 				if (separator) {
 					args.append(", ");
 				}

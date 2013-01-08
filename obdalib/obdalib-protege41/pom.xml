@@ -225,6 +225,8 @@
 						<exclude>*it/unibz/krdb/obda/owlrefplatform/core/reformulation/TreeWitness*</exclude>
 						<exclude>**/TW*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
+						<exclude>**/directmapping/*.java</exclude>
+					
 					</excludes>
 					<testExcludes>
 						<exclude>**/MappingToRuleTester.java</exclude>
@@ -267,7 +269,7 @@
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
 						<!-- <Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
-						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
+						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
 						<Bundle-Name>-ontopPro-</Bundle-Name>
 						<!-- necessary for protege 4 plugins -->
@@ -275,14 +277,14 @@
 
 						<!-- general information -->
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
-						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
+						<Bundle-DocURL>http://ontop.inf.unibz.it</Bundle-DocURL>
 						<Bundle-Description>-ontopPro- Protege 4</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen-Bolzano. KRDB Research Centre</Bundle-Vendor>
-						<Implementation-Version>${project.version}.b1479</Implementation-Version>
+						<Implementation-Version>${project.version}.b2039</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
-						<Build-Number>1517</Build-Number>
+						<Build-Number>2039</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
 						<Import-Package>it.unibz.krdb.obda.protege4.*,!org.json, javax.xml.datatype, javax.swing.*,

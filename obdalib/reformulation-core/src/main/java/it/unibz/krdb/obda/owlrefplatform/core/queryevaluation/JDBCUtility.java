@@ -146,7 +146,7 @@ public class JDBCUtility implements Serializable {
 		int minuslocation = datetime.indexOf('-');
 		int pluslocation = datetime.indexOf('+');
 		StringBuffer bf = new StringBuffer(datetime);
-		if (zlocation != 1) {
+		if (zlocation != -1) {
 			/*
 			 * replacing Z by +00:00
 			 */
@@ -162,15 +162,29 @@ public class JDBCUtility implements Serializable {
 			// sections (e.g., oracle,db2, postgres)
 			// so that when supported, we use it.
 			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
-			if (endlocation == -1)
+			if (endlocation == -1) {
 				endlocation = datetime.length();
+			}
 			bf.replace(dotlocation, endlocation, "");
 		}
-		if (driver == Driver.H2 && bf.length() > 19) {
+		if ((driver == Driver.H2 
+				|| driver == Driver.SQLSERVER
+				|| driver == Driver.ORACLE 
+				|| driver == Driver.DB2) && bf.length() > 19) {
 			bf.delete(19, bf.length());
 		}
 		bf.insert(0, "'");
 		bf.append("'");
+		
+		/*
+		 * Oracle has a special treatment for datetime datatype such that it requires a default
+		 * datetime format. In this case, the default is 'YYYY-MM-DD HH24:MI:SS.FF' as in SPARQL
+		 * standard, e.g., to_date('2012-12-18 09:58:23.2','YYYY-MM-DD HH24:MI:SS.FF')
+		 */
+		if (driver == Driver.ORACLE) {
+			bf.insert(0, "to_date(");
+			bf.append(",'YYYY-MM-DD HH24:MI:SS')");
+		}
 		return bf.toString();
 	}
 

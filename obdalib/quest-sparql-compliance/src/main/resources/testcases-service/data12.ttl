@@ -1,0 +1,10 @@
+@prefix : <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dbpedia: <http://dbpedia.org/resource/> .
+@prefix dbpedia-yago: <http://dbpedia.org/class/yago/> .
+
+<http://dbpedia.org/resource/Barack_Obama> rdf:type dbpedia-yago:PresidentsOfTheUnitedStates .
+<http://dbpedia.org/resource/George_Washington> rdf:type dbpedia-yago:PresidentsOfTheUnitedStates .
+<http://dbpedia.org/resource/George_W._Bush> rdf:type dbpedia-yago:PresidentsOfTheUnitedStates .
+<http://dbpedia.org/resource/Bill_Clinton> rdf:type dbpedia-yago:PresidentsOfTheUnitedStates .
+<http://dbpedia.org/resource/Franklin_D._Roosevelt> rdf:type dbpedia-yago:PresidentsOfTheUnitedStates .

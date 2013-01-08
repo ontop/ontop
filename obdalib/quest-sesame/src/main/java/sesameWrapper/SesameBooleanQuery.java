@@ -40,11 +40,12 @@ public class SesameBooleanQuery implements BooleanQuery {
 			if (next)
 				return (rs.getInt(1) == 1);
 
+			return false;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new QueryEvaluationException(e.getMessage());
 		}
-		return false;
 	}
 
 	public int getMaxQueryTime() {

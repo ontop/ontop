@@ -1,0 +1,11 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> 
+
+SELECT ?genus ?author ?family
+WHERE {  
+   ?code fd:species_Species "adonis" .
+   ?code fd:species_Genus ?genus .
+   ?code fd:species_Author ?author .
+   ?code fd:species_FamCode ?fcode .
+   ?fcode fd:families_Family ?family .
+}

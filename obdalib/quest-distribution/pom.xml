@@ -39,6 +39,18 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>quest-sesame</artifactId>
+			<version>1.7-alpha</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.0.8</version>
+		</dependency>
+            
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
 		</dependency>
@@ -54,6 +66,8 @@
 				<configuration>
 					<descriptors>
 						<descriptor>quest-bin.xml</descriptor>
+						<descriptor>quest-sesame-bin.xml</descriptor>
+						<descriptor>dependencies.xml</descriptor>
 					</descriptors>
 				</configuration>
 			</plugin>

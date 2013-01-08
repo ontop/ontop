@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.ontology;
 
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
 /***
@@ -13,10 +13,16 @@ import it.unibz.krdb.obda.model.ValueConstant;
  */
 public interface DataPropertyAssertion extends Assertion {
 
-	public URIConstant getObject();
+	public ObjectConstant getObject();
 
 	public ValueConstant getValue();
 
+	/***
+	 * Use get predicate instead
+	 * 
+	 * @return
+	 */
+	@Deprecated
 	public Predicate getAttribute();
 
 }

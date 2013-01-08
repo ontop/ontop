@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -12,6 +13,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
+import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -32,14 +34,16 @@ public class QuestDBStatement implements OBDAStatement {
 
 	Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
-	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	protected transient OWLOntologyManager man = OWLManager
+			.createOWLOntologyManager();
 
 	protected QuestDBStatement(QuestStatement st) {
 		this.st = st;
 	}
 
 	public int add(Assertion data) throws SQLException {
-		return st.insertData(Collections.singleton(data).iterator(), false, -1, -1);
+		return st.insertData(Collections.singleton(data).iterator(), false, -1,
+				-1);
 	}
 
 	public int add(Iterator<Assertion> data) throws SQLException {
@@ -52,7 +56,8 @@ public class QuestDBStatement implements OBDAStatement {
 	 * @param data
 	 * @throws SQLException
 	 */
-	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
+	public int add(Iterator<Assertion> data, int commit, int batch)
+			throws SQLException {
 		return st.insertData(data, false, commit, batch);
 	}
 
@@ -72,7 +77,8 @@ public class QuestDBStatement implements OBDAStatement {
 		return loadOBDAModel(obdaFile, false, -1, -1);
 	}
 
-	public int addFromOBDA(URI obdaFile, int commitrate, int batchinserts) throws OBDAException {
+	public int addFromOBDA(URI obdaFile, int commitrate, int batchinserts)
+			throws OBDAException {
 		return loadOBDAModel(obdaFile, false, commitrate, batchinserts);
 	}
 
@@ -81,7 +87,8 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	/* Move to query time ? */
-	private int load(URI rdffile, boolean useFile, int commit, int batch) throws OBDAException {
+	private int load(URI rdffile, boolean useFile, int commit, int batch)
+			throws OBDAException {
 		// checkConnection();
 		String pathstr = rdffile.toString();
 		int dotidx = pathstr.lastIndexOf('.');
@@ -92,13 +99,16 @@ public class QuestDBStatement implements OBDAStatement {
 
 			if (ext.toLowerCase().equals(".owl")) {
 
-				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
+				OWLOntology owlontology = man
+						.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 
-				OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontos, st.questInstance.getEquivalenceMap());
+				OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontos,
+						st.questInstance.getEquivalenceMap());
 				result = st.insertData(aBoxIter, useFile, commit, batch);
 			} else if (ext.toLowerCase().equals(".nt")) {
-				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile, st.questInstance.getEquivalenceMap());
+				NTripleAssertionIterator it = new NTripleAssertionIterator(
+						rdffile, st.questInstance.getEquivalenceMap());
 				result = st.insertData(it, useFile, commit, batch);
 			}
 			return result;
@@ -112,15 +122,21 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	/* Move to query time ? */
-	private int loadOBDAModel(URI uri, boolean useFile, int commit, int batch) throws OBDAException {
+	private int loadOBDAModel(URI uri, boolean useFile, int commit, int batch)
+			throws OBDAException {
 		// checkConnection();
 		VirtualTriplePredicateIterator assertionIter = null;
 		try {
-			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			DataManager io = new DataManager(obdaModel);
-			io.loadOBDADataFromURI(uri, URI.create(""), obdaModel.getPrefixManager());
-			VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
-			assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
+			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance()
+					.getOBDAModel();
+			QueryController qcontroller = new QueryController();
+			DataManager io = new DataManager(obdaModel, qcontroller);
+			io.loadOBDADataFromURI(uri, URI.create(""),
+					obdaModel.getPrefixManager());
+			VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(
+					obdaModel);
+			assertionIter = (VirtualTriplePredicateIterator) materializer
+					.getAssertionIterator();
 			int result = st.insertData(assertionIter, useFile, commit, batch);
 			return result;
 
@@ -142,18 +158,26 @@ public class QuestDBStatement implements OBDAStatement {
 	@Override
 	public void cancel() throws OBDAException {
 		st.cancel();
-
 	}
 
 	@Override
 	public void close() throws OBDAException {
 		st.close();
-
 	}
 
 	@Override
 	public OBDAResultSet execute(String query) throws OBDAException {
 		return st.execute(query);
+	}
+	
+	@Override
+	public GraphResultSet executeConstruct(String query) throws OBDAException {
+		return st.executeConstruct(query);
+	}
+
+	@Override
+	public GraphResultSet executeDescribe(String query) throws OBDAException {
+		return st.executeDescribe(query);
 	}
 
 	@Override
@@ -249,9 +273,8 @@ public class QuestDBStatement implements OBDAStatement {
 	public String getSQL(String query) throws Exception {
 		return st.getUnfolding(query);
 	}
-	
+
 	public String getRewriting(String query) throws Exception {
 		return st.getRewriting(query);
 	}
-
 }

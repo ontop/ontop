@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export JDBC_PLUGINS_PATH=/Applications/Protege_4.1-obdalib-1.7-alpha/plugins
-export REVISION=1529
+export REVISION=2039
 echo "pluginVersion=1.7-alpha.b$REVISION" >  obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties 
 rm -fr obdalib-protege41/dist
 svn update

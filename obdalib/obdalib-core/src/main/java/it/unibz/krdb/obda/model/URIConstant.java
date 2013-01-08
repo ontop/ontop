@@ -5,7 +5,7 @@ import java.net.URI;
 /**
  * Provides an interface for storing the URI constant.
  */
-public interface URIConstant extends Constant {
+public interface URIConstant extends ObjectConstant {
 
 	/**
 	 * Get the URI object from this constant.

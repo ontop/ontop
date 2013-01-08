@@ -561,13 +561,18 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public void addEntities(Set<Predicate> referencedEntities) {
 		for (Predicate pred : referencedEntities) {
-			if (pred.getArity() == 1) {
-				addConcept(pred);
-			} else {
-				addRole(pred);
-			}
+			addEntity(pred);
 		}
 
+	}
+	
+	@Override
+	public void addEntity(Predicate pred) {
+		if (pred.getArity() == 1) {
+			addConcept(pred);
+		} else {
+			addRole(pred);
+		}
 	}
 
 }

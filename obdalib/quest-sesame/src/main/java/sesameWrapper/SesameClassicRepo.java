@@ -1,18 +1,14 @@
 package sesameWrapper;
-import java.io.File;
-import java.net.URI;
-
-import org.openrdf.repository.RepositoryException;
-import org.semanticweb.owlapi.model.OWLOntology;
-
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
+
+import java.io.File;
+
+import org.openrdf.query.Dataset;
+import org.openrdf.repository.RepositoryException;
 
 public abstract class SesameClassicRepo extends SesameAbstractRepo{
 
@@ -24,6 +20,8 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo{
 		
 	}
 	
+
+	
 	protected void createStore(String name, String tboxFile, QuestPreferences config) throws Exception 
 	{
 		if (config.getProperty(QuestPreferences.ABOX_MODE) != QuestConstants.CLASSIC)
@@ -33,6 +31,13 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo{
 	}
 	
 	
+	protected void createStore(String name, Dataset data, QuestPreferences config) throws Exception 
+	{
+		if (config.getProperty(QuestPreferences.ABOX_MODE) != QuestConstants.CLASSIC)
+			throw new RepositoryException("Must be in classic mode!");
+		
+		this.classicStore = new QuestDBClassicStore(name, data, config);
+	}
 	
 	
 	

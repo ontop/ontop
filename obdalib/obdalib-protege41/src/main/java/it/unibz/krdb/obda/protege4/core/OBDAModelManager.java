@@ -124,7 +124,7 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		// Printing the version information to the console
-		System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
+	//	System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
 	}
 
 	/***

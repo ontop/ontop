@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.model.impl;
 
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 
@@ -12,7 +14,7 @@ import java.util.Set;
 /**
  * Provides a storage to put the URI constant.
  */
-public class URIConstantImpl implements URIConstant {
+public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	/**
 	 * 
@@ -23,6 +25,8 @@ public class URIConstantImpl implements URIConstant {
 
 	private final int identifier;
 
+	private final String uristr;
+
 	/**
 	 * The default constructor.
 	 * 
@@ -31,6 +35,7 @@ public class URIConstantImpl implements URIConstant {
 	 */
 	protected URIConstantImpl(URI uri) {
 		this.uri = uri;
+		this.uristr = uri.toString();
 		this.identifier = uri.hashCode();
 	}
 
@@ -69,9 +74,9 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public String toString() {
-		return uri.toString();
+		return uristr;
 	}
-	
+
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
@@ -79,9 +84,28 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable,Integer>();
+		return new HashMap<Variable, Integer>();
 	}
-	
-	
+
+	@Override
+	public Atom asAtom() {
+		throw new RuntimeException("Impossible to cast as atom: "
+				+ this.getClass());
+	}
+
+	@Override
+	public COL_TYPE getType() {
+		return COL_TYPE.OBJECT;
+	}
+
+	@Override
+	public String getValue() {
+		return uristr;
+	}
+
+	@Override
+	public String getLanguage() {
+		return null;
+	}
 
 }

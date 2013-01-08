@@ -13,11 +13,9 @@
  */
 package it.unibz.krdb.obda.gui.swing;
 
-import it.unibz.krdb.obda.gui.swing.panel.QueryInterfacePanel;
-
 public interface OBDADataQueryAction{
 	
-	public void run(String query, QueryInterfacePanel panel);
+	public void run(String query);
 	
 	public long getExecutionTime();
 	

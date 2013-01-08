@@ -352,8 +352,7 @@ public class JDBCConnectionManager {
 		ResultSet rsTables = null;
 		try {
 			stmt = conn.createStatement();
-			rsTables = stmt
-					.executeQuery("select object_name from user_objects where object_type = 'TABLE' and NOT object_name LIKE 'BIN$%'");
+			rsTables = stmt.executeQuery("select object_name from user_objects where object_type = 'TABLE' and (NOT object_name LIKE '%$%' and NOT object_name LIKE 'LOG%' and object_name != 'HELP' and object_name != 'SQLPLUS_PRODUCT_PROFILE')");
 			while (rsTables.next()) {
 				Set<String> tableColumns = new HashSet<String>();
 
@@ -365,7 +364,7 @@ public class JDBCConnectionManager {
 
 				ResultSet rsColumns = null;
 				try {
-					rsColumns = md.getColumns(null, null, tblName, null);
+					rsColumns = md.getColumns(null, "SYSTEM", tblName, null);
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
@@ -374,11 +373,10 @@ public class JDBCConnectionManager {
 						final int isNullable = rsColumns.getInt("NULLABLE");
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 
-						// Check if the columns are unique regardless their
-						// letter cases
+						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
-							throw new RuntimeException("The system cannot process duplicate table columns!");
+							break;
 						}
 					}
 					// Add this information to the DBMetadata

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>dependencies</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory></outputDirectory>
+			<excludes>
+				<exclude>inf.unibz.it.obda*</exclude>
+				<exclude>antlr*</exclude>
+				<exclude>log4j*</exclude>
+				<exclude>org.log4j*</exclude>
+				<exclude>org.slf4j*</exclude>
+				<exclude>ch.qos.logback*</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+</assembly> 

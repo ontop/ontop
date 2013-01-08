@@ -1,0 +1,78 @@
+package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
+
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class UriTemplateMatcher {
+
+	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+
+	private Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+	
+	public UriTemplateMatcher() {
+		// NO-OP
+	}
+	
+	public UriTemplateMatcher(Map<Pattern, Function> existing) {
+		uriTemplateMatcher.putAll(existing);
+	}
+	
+	public void put(Pattern uriTemplatePattern, Function uriFunction) {
+		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
+	}
+	
+	/***
+	 * We will try to match the URI to one of our patterns, if this happens, we
+	 * have a corresponding function, and the paramters for this function. The
+	 * parameters are the values for the groups of the pattern.
+	 */
+	public Function generateURIFunction(URI subjectUri) {
+		Function functionURI = null;
+		String uriString = subjectUri.toString();
+		for (Pattern pattern : uriTemplateMatcher.keySet()) {
+
+			Matcher matcher = pattern.matcher(uriString);
+			boolean match = matcher.matches();
+			if (!match) {
+				continue;
+			}
+			Function matchingFunction = uriTemplateMatcher.get(pattern);
+			NewLiteral baseParameter = matchingFunction.getTerms().get(0);
+			if (baseParameter instanceof Constant) {
+				/*
+				 * This is a general tempalte function of the form
+				 * uri("http://....", var1, var2,...) <p> we need to match var1,
+				 * var2, etc with substrings from the subjectURI
+				 */
+				List<NewLiteral> values = new LinkedList<NewLiteral>();
+				values.add(baseParameter);
+				for (int i = 0; i < matcher.groupCount(); i++) {
+					String value = matcher.group(i + 1);
+					values.add(ofac.getValueConstant(value));
+				}
+				functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(values.size()), values);
+			} else if (baseParameter instanceof Variable) {
+				/*
+				 * This is a direct mapping to a column, uri(x)
+				 * we need to match x with the subjectURI
+				 */
+				functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), 
+						ofac.getValueConstant(subjectUri.toString()));
+			}
+			break;
+		}
+		return functionURI;
+	}
+}

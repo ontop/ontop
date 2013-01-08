@@ -1,0 +1,6 @@
+PREFIX  dc:  <http://purl.org/dc/elements/1.1/>
+PREFIX  :  <http://example/>
+SELECT  ?Y (IRI(?Y) as ?iri)
+ WHERE {
+   	?X :uriAsLiteral ?Y . 
+}

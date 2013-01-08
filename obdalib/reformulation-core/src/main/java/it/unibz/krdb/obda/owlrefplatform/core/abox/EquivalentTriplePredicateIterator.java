@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -39,7 +40,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			Predicate concept = ca.getConcept();
-			URIConstant object = ca.getObject();
+			ObjectConstant object = ca.getObject();
 			
 			Description description = equivalenceMap.get(concept);
 			if (description != null) {
@@ -48,8 +49,8 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		} else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
 			Predicate role = opa.getRole();
-			URIConstant object1 = opa.getFirstObject();
-			URIConstant object2 = opa.getSecondObject();
+			ObjectConstant object1 = opa.getFirstObject();
+			ObjectConstant object2 = opa.getSecondObject();
 			
 			Description description = equivalenceMap.get(role);
 			if (description != null) {
@@ -63,7 +64,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		} else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
 			Predicate attribute = dpa.getAttribute();
-			URIConstant object = dpa.getObject();
+			ObjectConstant object = dpa.getObject();
 			ValueConstant constant = dpa.getValue();
 			
 			Description description = equivalenceMap.get(attribute);

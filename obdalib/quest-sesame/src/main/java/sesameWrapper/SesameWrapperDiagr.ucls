@@ -1,0 +1,170 @@
+<class-diagram version="1.0.10" icons="true" automaticImage="JPEG" always-add-relationships="false" 
+  generalizations="true" realizations="true" associations="true" dependencies="false" nesting-relationships="true">  
+  <class id="1" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.RepositoryConnection" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/RepositoryConnection.java" binary="false">    
+    <position height="878" width="439" x="-23" y="-222"/>    
+    <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="2" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.RepositoryConnection.Process" 
+    project="quest-sesame" file="/quest-sesame/src/main/java/sesameWrapper/RepositoryConnection.java" binary="false">    
+    <position height="51" width="165" x="-23" y="865"/>    
+    <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="3" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.RepositoryConnection.Insert" 
+    project="quest-sesame" file="/quest-sesame/src/main/java/sesameWrapper/RepositoryConnection.java" binary="false">    
+    <position height="51" width="201" x="182" y="865"/>    
+    <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="4" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameAbstractRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameAbstractRepo.java" binary="false">    
+    <position height="-1" width="-1" x="739" y="-94"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="5" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameBindingSet" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameBindingSet.java" binary="false">    
+    <position height="-1" width="-1" x="866" y="666"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="6" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameClassicRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameClassicRepo.java" binary="false">    
+    <position height="-1" width="-1" x="938" y="210"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="7" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameVirtualRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameVirtualRepo.java" binary="false">    
+    <position height="163" width="230" x="498" y="121"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="8" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameClassicInMemoryRepo" 
+    project="quest-sesame" file="/quest-sesame/src/main/java/sesameWrapper/SesameClassicInMemoryRepo.java" 
+    binary="false">    
+    <position height="-1" width="-1" x="1094" y="414"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="9" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameClassicJDBCRepo" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameClassicJDBCRepo.java" binary="false">    
+    <position height="-1" width="-1" x="831" y="420"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="10" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameRDFIterator" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameRDFIterator.java" binary="false">    
+    <position height="-1" width="-1" x="621" y="737"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="11" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameTupleQuery" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameTupleQuery.java" binary="false">    
+    <position height="-1" width="-1" x="1140" y="731"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="12" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameBooleanQuery" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameBooleanQuery.java" binary="false">    
+    <position height="-1" width="-1" x="1145" y="1117"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="13" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameGraphQuery" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameGraphQuery.java" binary="false">    
+    <position height="-1" width="-1" x="1440" y="748"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="14" corner="BOTTOM_RIGHT" language="java" name="sesameWrapper.SesameStatement" project="quest-sesame" 
+    file="/quest-sesame/src/main/java/sesameWrapper/SesameStatement.java" binary="false">    
+    <position height="-1" width="-1" x="1432" y="1116"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <nesting id="15">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="3"/>  
+  </nesting>  
+  <association id="16">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="17" name="iterator"/>      
+      <multiplicity id="18" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="19">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="20" name="repository"/>      
+      <multiplicity id="21" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="22">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <generalization id="23">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <generalization id="24">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="4"/>  
+  </generalization>  
+  <association id="25">    
+    <end type="SOURCE" refId="4" navigable="false">      
+      <attribute id="26" name="repoConnection"/>      
+      <multiplicity id="27" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="1" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <nesting id="28">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="2"/>  
+  </nesting>  
+  <generalization id="29">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="4"/>  
+  </generalization>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true"/>    
+    <operations public="true" package="true" protected="true" private="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

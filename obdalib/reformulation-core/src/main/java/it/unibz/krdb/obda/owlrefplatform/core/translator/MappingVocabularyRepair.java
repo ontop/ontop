@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -89,8 +89,8 @@ public class MappingVocabularyRepair {
 				}
 
 				/* Fixing terms */
-				LinkedList<Term> newTerms = new LinkedList<Term>();
-				for (Term term : atom.getTerms()) {
+				LinkedList<NewLiteral> newTerms = new LinkedList<NewLiteral>();
+				for (NewLiteral term : atom.getTerms()) {
 					newTerms.add(fixTerm(term));
 				}
 
@@ -98,7 +98,7 @@ public class MappingVocabularyRepair {
 				 * Fixing wrapping each variable with a URI function if the
 				 * position corresponds to an URI only position
 				 */
-				Term t0 = newTerms.get(0);
+				NewLiteral t0 = newTerms.get(0);
 				if (!(t0 instanceof Function)){
 					newTerms.set(0, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), t0));
 				}
@@ -126,8 +126,8 @@ public class MappingVocabularyRepair {
 	 * @param term
 	 * @return
 	 */
-	public Term fixTerm(Term term) {
-		Term result = term;
+	public NewLiteral fixTerm(NewLiteral term) {
+		NewLiteral result = term;
 		if (term instanceof Function) {
 			result = fixTerm((Function) term);
 		}
@@ -162,7 +162,7 @@ public class MappingVocabularyRepair {
 			newTemplate.append("-{}");
 		}
 
-		LinkedList<Term> newTerms = new LinkedList<Term>();
+		LinkedList<NewLiteral> newTerms = new LinkedList<NewLiteral>();
 		newTerms.add(dfac.getValueConstant(newTemplate.toString()));
 		newTerms.addAll(term.getTerms());
 

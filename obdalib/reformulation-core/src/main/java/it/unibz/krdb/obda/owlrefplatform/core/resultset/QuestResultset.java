@@ -31,13 +31,19 @@ public class QuestResultset implements OBDAResultSet {
 	private Vector<String> signature;
 
 	private HashMap<String, Integer> columnMap = new HashMap<String, Integer>();
+
+	private HashMap<String, String> bnodeMap = new HashMap<String, String>();
+
+	private int bnodeCounter = 0;
+
 	// private List<Term> signatureTyping;
 
 	// private HashMap<String, Term> typingMap = new HashMap<String, Term>();
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private static final Logger log = LoggerFactory.getLogger(QuestResultset.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(QuestResultset.class);
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -51,7 +57,8 @@ public class QuestResultset implements OBDAResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestResultset(ResultSet set, List<String> signature, OBDAStatement st) throws OBDAException {
+	public QuestResultset(ResultSet set, List<String> signature,
+			OBDAStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
 
@@ -200,52 +207,53 @@ public class QuestResultset implements OBDAResultSet {
 
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
-		int index = columnMap.get(name);
-
 		Constant result = null;
-
 		try {
-
-			COL_TYPE type = getQuestType(set.getByte(name + "QuestType"));
-
-			if (type == COL_TYPE.OBJECT || type == null) {
-				URI value = getURI(name);
-				result = fac.getURIConstant(value);
-			} else if (type == COL_TYPE.BNODE) {
-				result = fac.getBNodeConstant(set.getString(name));
+			COL_TYPE type = getQuestType((byte) set.getInt(name + "QuestType"));
+			String realValue = set.getString(name);
+			
+			if (type == null || realValue == null) {
+				return null;
 			} else {
-				/*
-				 * The constant is a literal, we need to find if its
-				 * rdfs:Literal or a normal literal and construct it properly.
-				 */
-				if (type == COL_TYPE.LITERAL) {
-					String value = set.getString(name);
-					String language = set.getString(name + "Lang");
-					if (language == null || language.trim().equals("")) {
-						result = fac.getValueConstant(value);
-					} else {
-						result = fac.getValueConstant(value, language);
+				if (type == COL_TYPE.OBJECT) {
+					URI value = getURI(name);
+					result = fac.getURIConstant(value);
+				} else if (type == COL_TYPE.BNODE) {
+					String rawLabel = set.getString(name);
+					String scopedLabel = this.bnodeMap.get(rawLabel);
+					if (scopedLabel == null) {
+						scopedLabel = "b" + bnodeCounter;
+						bnodeCounter += 1;
+						bnodeMap.put(rawLabel, scopedLabel);
 					}
-
-				} else if (type == COL_TYPE.BOOLEAN) {
-					boolean value = set.getBoolean(name);
-					if (value)
-						result = fac.getValueConstant("true", type);
-					else
-						result = fac.getValueConstant("false", type);
-
-				} else if (type == COL_TYPE.DATETIME) {
-					Timestamp value = set.getTimestamp(name);
-					result = fac.getValueConstant(value.toString().replace(' ', 'T'), type);
-
-					// if (value)
-					// result = fac.getValueConstant("true", type);
-					// else
-					// result = fac.getValueConstant("false", type);
-
+					result = fac.getBNodeConstant(scopedLabel);
 				} else {
-
-					result = fac.getValueConstant(set.getString(name), type);
+					/*
+					 * The constant is a literal, we need to find if its
+					 * rdfs:Literal or a normal literal and construct it properly.
+					 */
+					if (type == COL_TYPE.LITERAL) {
+						String value = set.getString(name);
+						String language = set.getString(name + "Lang");
+						if (language == null || language.trim().equals("")) {
+							result = fac.getValueConstant(value);
+						} else {
+							result = fac.getValueConstant(value, language);
+						}
+					} else if (type == COL_TYPE.BOOLEAN) {
+						boolean value = set.getBoolean(name);
+						if (value) {
+							result = fac.getValueConstant("true", type);
+						} else {
+							result = fac.getValueConstant("false", type);
+						}
+					} else if (type == COL_TYPE.DATETIME) {
+						Timestamp value = set.getTimestamp(name);
+						result = fac.getValueConstant(
+								value.toString().replace(' ', 'T'), type);
+					} else {
+						result = fac.getValueConstant(realValue, type);
+					}
 				}
 			}
 		} catch (IllegalArgumentException e) {
@@ -283,8 +291,11 @@ public class QuestResultset implements OBDAResultSet {
 			return COL_TYPE.DATETIME;
 		} else if (sqltype == 9) {
 			return COL_TYPE.BOOLEAN;
+		}else if (sqltype == 0) {
+			return null;
+		} else {
+			throw new RuntimeException("COLTYPE unknown: " + sqltype);
 		}
-		return COL_TYPE.UNBOUND;
 	}
 
 	@Override
@@ -292,11 +303,14 @@ public class QuestResultset implements OBDAResultSet {
 		String result = "";
 		try {
 			result = set.getString(name);
-			String encoded = URIref.encode(result);
-			return URI.create(encoded);
+			
+//			result
+//			String encoded = URIref.encode(result);
+			
+			return URI.create(result.replace(' ', '_'));
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
-		} 
+		}
 	}
 
 	@Override

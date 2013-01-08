@@ -1,107 +1,84 @@
 package sesameWrapper;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 
-import org.openrdf.repository.RepositoryException;
-import org.semanticweb.owlapi.model.OWLOntology;
-
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URI;
+
+import org.openrdf.repository.RepositoryException;
 
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
 	private QuestDBVirtualStore virtualStore;
-	
-	
-	public SesameVirtualRepo(String name, String tboxFile, String obdaFile) throws Exception
-	{
+	private QuestDBConnection questDBConn;
+
+	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
+			throws Exception {
 		super();
+
+		QuestPreferences pref = new QuestPreferences();
+		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		if (existential)
+			pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+		else
+			pref.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+		if (rewriting.equals("TreeWitness"))
+			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		else if (rewriting.equals("Default"))
+			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		
-		setupRemoteDB();
-		
-		URI obdaURI = (new File(obdaFile)).toURI();
-		this.virtualStore = new QuestDBVirtualStore(name, (new File(tboxFile)).toURI(), obdaURI);
-	
-		
+		URI obdaURI = (new File(obdaFile)).toURI(); 
+		URI tboxURI = (new File(tboxFile)).toURI(); 
+		this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, null);
+		questDBConn = virtualStore.getConnection();
+	}
+
+	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
+		super();
+		QuestPreferences pref = new QuestPreferences();
+		if (!configFileName.isEmpty()) {
+			File configFile = new File(URI.create(configFileName));
+			pref.readDefaultPropertiesFile(new FileInputStream(configFile));
+		} else {
+			pref.readDefaultPropertiesFile();
+		}
+		URI obdaURI = URI.create(obdaFile);
+		URI tboxURI = URI.create(tboxFile);
+		this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, pref);
+		questDBConn = virtualStore.getConnection();
 	}
 	
-	private void setupRemoteDB() throws Exception
-	{
-		try {
-			//setup virtual mode - remote db
-			String driver = "org.postgresql.Driver";
-			String url = "jdbc:postgresql://obdalin.inf.unibz.it/quest-junit-db";
-			String username = "obda";
-			String password = "obda09";
+	@Override
+	public QuestDBConnection getQuestConnection() throws OBDAException {
+		return questDBConn;
+	}
 
-			Connection conn = DriverManager.getConnection(url, username, password);
-			Statement st = conn.createStatement();
-
-			FileReader reader = new FileReader("/home/timi/workspace/obdalib-parent/quest-owlapi3/src/test/resources/test/stockexchange-create-postgres.sql");
-			BufferedReader in = new BufferedReader(reader);
-			StringBuilder bf = new StringBuilder();
-			String line = in.readLine();
-			while (line != null) {
-				bf.append(line);
-				line = in.readLine();
-			}
-
-			st.executeUpdate(bf.toString());
-			//end of setup remote db
-			}
-			catch(Exception e)
-			{
-				throw e;
-			}
-			
+	@Override
+	public boolean isWritable() throws RepositoryException {
+		// Checks whether this repository is writable, i.e.
+		// if the data contained in this repository can be changed.
+		// The writability of the repository is determined by the writability
+		// of the Sail that this repository operates on.
+		return false;
 	}
 	
-
-	
-	public void initialize() throws RepositoryException
-	{
-		super.initialize();
+	@Override
+	public void shutDown() throws RepositoryException {
+		super.shutDown();
 		try {
-			virtualStore.getConnection();
+			questDBConn.close();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	@Override
-	public QuestDBConnection getQuestConnection() throws OBDAException
-	{
-		return virtualStore.getConnection();
-	}
-	
-	@Override
-	public boolean isWritable() throws RepositoryException {
-		//Checks whether this repository is writable, i.e. 
-		//if the data contained in this repository can be changed. 
-		//The writability of the repository is determined by the writability 
-		//of the Sail that this repository operates on. 
-		return false;
-	}
-	
-	
-	public  String getType()
-	{
+
+	public String getType() {
 		return QuestConstants.VIRTUAL;
 	}
-	
-
 
 }

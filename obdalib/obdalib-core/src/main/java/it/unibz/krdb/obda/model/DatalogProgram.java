@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.model;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface DatalogProgram extends OBDAQuery {
@@ -8,11 +9,11 @@ public interface DatalogProgram extends OBDAQuery {
 
 	public void appendRule(CQIE rule);
 
-	public void appendRule(List<CQIE> rule);
+	public void appendRule(Collection<CQIE> rule);
 
 	public void removeRule(CQIE rule);
 
-	public void removeRules(List<CQIE> rule);
+	public void removeRules(Collection<CQIE> rule);
 
 	public boolean isUCQ();
 
@@ -23,6 +24,7 @@ public interface DatalogProgram extends OBDAQuery {
 	 * @return
 	 */
 	public List<CQIE> getRules(Predicate headPredicate);
-	
-	
+
+	public DatalogProgram clone();
+
 }

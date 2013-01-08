@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.Predicate;
 
 import java.io.Serializable;
 
@@ -23,5 +24,8 @@ public interface UnfoldingMechanism extends Serializable {
 	 * @return the unfolded query
 	 * @throws Exception
 	 */
-	public DatalogProgram unfold(DatalogProgram query) throws OBDAException;
+	public DatalogProgram unfold(DatalogProgram query, String targetPredicate)
+			throws OBDAException;
+
+	
 }

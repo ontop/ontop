@@ -25,6 +25,9 @@
 		<module>obdalib-protege41</module>
 		<module>quest-owlapi3</module>
 		<module>quest-distribution</module>
+		<module>quest-sparql-compliance</module>
+		<module>quest-sesame</module>
+		<module>quest-db</module>
 	</modules>
 
 	<profiles>
@@ -33,9 +36,7 @@
 			<modules>
 				<module>obdalib-owlapi</module>
 				<module>obdalib-protege4</module>
-				<module>quest-sesame</module>
 				<module>quest-owlapi2</module>
-				<module>quest-db</module>
 				<module>quest-benchmarks</module>
 			</modules>
 		</profile>
@@ -46,7 +47,18 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<repositories>
+	<repositories>  
+	    <repository>
+			<id>sesame-official-repository</id>
+			<url>http://repo.aduna-software.org/maven2/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		
 		<repository>
 			<id>bolzano-nexus-public</id>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
@@ -57,13 +69,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>sesame-official-repository</id>
-			<url>http://repo.aduna-software.org/maven2/releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
+		
 	</repositories>
 
 	<scm>
@@ -265,14 +271,14 @@
 				<!-- this includes ALL seasame -->
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-runtime</artifactId>
-				<version>2.6.1</version>
+				<version>2.6.9</version>
 			</dependency>
 
 			<!-- These will download some of the sources -->
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-api</artifactId>
-				<version>2.6.1</version>
+				<version>2.6.9</version>
 			</dependency>
 
 			<!-- JDBC Drivers -->
@@ -294,7 +300,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.3.157</version>
+				<version>1.3.168</version>
 			</dependency>
 
 			<dependency>
@@ -316,6 +322,34 @@
 			</dependency>
 
 
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-http</artifactId>
+				<version>7.4.5.v20110725</version>
+				<type>jar</type>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>7.4.5.v20110725</version>
+				<type>jar</type>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>7.4.5.v20110725</version>
+				<type>jar</type>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-webapp</artifactId>
+				<version>7.4.5.v20110725</version>
+				<type>jar</type>
+				<scope>compile</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

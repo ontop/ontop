@@ -104,9 +104,9 @@ public class QuestDB {
 
 				QuestDBAbstractStore dbstore;
 				try {
-					dbstore = QuestDBAbstractStore.restore(STORES_HOME + storeFiles[i]);
+					//dbstore = QuestDBAbstractStore.restore(STORES_HOME + storeFiles[i]);
 
-					stores.put(dbstore.getName(), dbstore);
+					//stores.put(dbstore.getName(), dbstore);
 				} catch (Exception e) {
 					log.error("Couldn't restore \"" + storeFiles[i] + "\". Corrupted file?");
 					log.error(e.getMessage());
@@ -154,7 +154,7 @@ public class QuestDB {
 
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
-			QuestDBAbstractStore.saveState(String.format(STORE_PATH, storename), dbstore);
+		//	QuestDBAbstractStore.saveState(String.format(STORE_PATH, storename), dbstore);
 		} catch (Exception e) {
 			throw new Exception("Impossible to serialize to the store. ", e);
 		}

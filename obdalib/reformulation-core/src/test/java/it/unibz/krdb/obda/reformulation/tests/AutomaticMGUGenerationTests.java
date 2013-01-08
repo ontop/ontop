@@ -5,7 +5,7 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
@@ -79,11 +79,11 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 
-			Map<Variable, Term> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Map<Variable, NewLiteral> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (Term var : mgu.keySet()) {
+				for (NewLiteral var : mgu.keySet()) {
 					computedmgu.add(new Substitution(var, mgu.get(var)));
 				}
 			}

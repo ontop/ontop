@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -34,15 +34,15 @@ public class PrefixRendererTest extends TestCase {
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 		query = tfac.getDatalogProgram();
 
-		LinkedList<Term> innerterms = new LinkedList<Term>();
+		LinkedList<NewLiteral> innerterms = new LinkedList<NewLiteral>();
 		innerterms.add(tfac.getVariable("id"));
 
-		List<Term> terms = new LinkedList<Term>();
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("http://obda.org/onto.owl#person-individual"), 1), innerterms));
 
 		Atom body = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/onto.owl#Person"), 1), terms);
 
-		terms = new LinkedList<Term>();
+		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("id"));
 		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
 

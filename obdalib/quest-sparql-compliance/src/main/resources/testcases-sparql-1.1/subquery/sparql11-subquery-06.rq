@@ -1,0 +1,12 @@
+PREFIX : <http://example/> 
+SELECT ?s ?o
+WHERE { 
+    {
+	  SELECT ?s 
+	  WHERE {?s :knows ?o}
+    }
+    {
+       SELECT ?o 
+       WHERE { ?o :knows ?x }
+    } 
+}

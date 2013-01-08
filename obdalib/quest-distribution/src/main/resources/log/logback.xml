@@ -7,48 +7,48 @@
 
 	<!-- Main component -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="DEBUG" />
-    <logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="ERROR" />
+    <logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="ERROR" />
     -->
 
 	<!-- Query Rewriting component -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.reformulation" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.reformulation" level="ERROR" />
 	-->
 
 	<!-- Query Unfolding component -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.unfolding" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.unfolding" level="ERROR" />
 	-->
 
 	<!-- Query Generator component -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration" level="ERROR" />
 	-->
 
 	<!-- Optimization component -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing" level="ERROR" />
 	-->
 	
 	<!-- ABox Processing component (Classic Mode only) -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.abox" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.abox" level="ERROR" />
 	-->
 	
 	<!-- DAG Analyzer component -->
 	<!--
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.dag" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.dag" level="ERROR" />
 	-->
 	
-	<logger name="it.unibz.krdb.obda.owlapi3" level="INFO"/>
+	<logger name="it.unibz.krdb.obda.owlapi3" level="ERROR"/>
 	
 	<!-- Other -->
 	
-	<logger name="it.unibz.krdb.obda.model" level="INFO" />
+	<logger name="it.unibz.krdb.obda.model" level="ERROR" />
 	
 	
-	<root level="INFO">
+	<root level="ERROR">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

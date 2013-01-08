@@ -183,7 +183,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 				Thread thread = new Thread() {
 					public void run() {
 						String query = querypanel.getQuery();
-						getCountAllTuplesActionForUCQ().run(query, querypanel);
+						getCountAllTuplesActionForUCQ().run(query);
 					}
 				};
 				thread.start();

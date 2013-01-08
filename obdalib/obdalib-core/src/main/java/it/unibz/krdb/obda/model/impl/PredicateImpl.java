@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.model.impl;
 
+import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
+import it.unibz.krdb.obda.model.BooleanOperationPredicate;
+import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 
 import java.net.URI;
@@ -44,9 +48,6 @@ public class PredicateImpl implements Predicate {
 			return false;
 
 		PredicateImpl pred2 = (PredicateImpl) obj;
-		if (pred2.arity != arity)
-			return false;
-
 		return this.identifier == pred2.identifier;
 	}
 
@@ -97,4 +98,28 @@ public class PredicateImpl implements Predicate {
 		return false;
 	}
 
+	@Override
+	public boolean isDataPredicate() {
+		return (!(isBooleanPredicate() || isAlgebraPredicate() || isArithmeticPredicate() || isDataTypePredicate()));
+	}
+
+	@Override
+	public boolean isBooleanPredicate() {
+		return this instanceof BooleanOperationPredicate;
+	}
+	
+	@Override
+	public boolean isArithmeticPredicate() {
+		return this instanceof NumericalOperationPredicate;
+	}
+
+	@Override
+	public boolean isAlgebraPredicate() {
+		return this instanceof AlgebraOperatorPredicate;
+	}
+
+	@Override
+	public boolean isDataTypePredicate() {
+		return this instanceof DataTypePredicate;
+	}
 }

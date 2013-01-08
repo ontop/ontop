@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -105,12 +105,12 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 				String name = at.getPredicate().toString();
 				sb.append(name);
 				sb.append("(");
-				List<Term> t_list = at.getTerms();
-				Iterator<Term> tit = t_list.iterator();
+				List<NewLiteral> t_list = at.getTerms();
+				Iterator<NewLiteral> tit = t_list.iterator();
 				StringBuffer term_sb = new StringBuffer();
 				boolean comma = false;
 				while (tit.hasNext()) {
-					Term qt = tit.next();
+					NewLiteral qt = tit.next();
 					if (comma == true) {
 						term_sb.append(",");
 					}
@@ -128,7 +128,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 		return sb.toString();
 	}
 
-	private String render(Term term) {
+	private String render(NewLiteral term) {
 		PrefixManager man = apic.getPrefixManager();
 
 		StringBuffer term_sb = new StringBuffer();
@@ -137,15 +137,15 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 			String fname = ft.getFunctionSymbol().toString();
 			term_sb.append(fname);
 			term_sb.append("(");
-			List<Term> t_list2 = ft.getTerms();
-			Iterator<Term> tit2 = t_list2.iterator();
+			List<NewLiteral> t_list2 = ft.getTerms();
+			Iterator<NewLiteral> tit2 = t_list2.iterator();
 			boolean comma = false;
 			while (tit2.hasNext()) {
 				if (comma == true) {
 					term_sb.append(",");
 				}
 
-				Term qt2 = tit2.next();
+				NewLiteral qt2 = tit2.next();
 				term_sb.append(render(qt2));
 				comma = true;
 			}

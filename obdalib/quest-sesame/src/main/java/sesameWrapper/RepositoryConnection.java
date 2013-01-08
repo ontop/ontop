@@ -1,4 +1,6 @@
 package sesameWrapper;
+import info.aduna.iteration.CloseableIteration;
+import info.aduna.iteration.CloseableIteratorIteration;
 import info.aduna.iteration.Iteration;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -14,8 +16,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.openrdf.OpenRDFUtil;
 import org.openrdf.model.Namespace;
@@ -23,14 +29,22 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.NamespaceImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
+import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.Query;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.Update;
+import org.openrdf.query.parser.ParsedBooleanQuery;
+import org.openrdf.query.parser.ParsedGraphQuery;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.ParsedTupleQuery;
+import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
@@ -50,18 +64,17 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     private boolean isOpen;
     private boolean autoCommit;
     private  RDFParser rdfParser;
+    private QuestDBStatement questStm;
 
 	
-	public RepositoryConnection(SesameAbstractRepo rep) throws OBDAException
+	public RepositoryConnection(SesameAbstractRepo rep, QuestDBConnection connection) throws OBDAException
 	{
 		this.repository = rep;
-		this.questConn = repository.getQuestConnection();
-		this.isOpen = true;
-		this.autoCommit = true;
+		this.questConn = connection;
+		this.isOpen = !connection.isClosed();
+		this.autoCommit = connection.getAutoCommit();
+	
 	}
-
-       
-     
 
 	
 	public void add(Statement st, Resource... contexts)
@@ -82,9 +95,9 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		} finally{
         autoCommit();
-
+		}
 	}
 
 	public void add(Iterable<? extends Statement> statements, Resource... contexts)
@@ -112,6 +125,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			e.printStackTrace();
 		} finally {
              setAutoCommit(autoCommit);
+             autoCommit();
          }
 
 	}
@@ -142,51 +156,47 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			e.printStackTrace();
 		} finally {
               setAutoCommit(autoCommit);
+              autoCommit();
           }
 
 	}
 
 
-
-
-
-
 	public void add(File file, String baseURI, RDFFormat dataFormat, Resource... contexts)
 			throws IOException, RDFParseException, RepositoryException {
 		//Adds RDF data from the specified file to a specific contexts in the repository. 
-		
-		
-		   if (baseURI == null) {
-               // default baseURI to file
-               baseURI = file.toURI().toString();
-           }
 
-           InputStream in = new FileInputStream(file);
+		if (baseURI == null) {
+			// default baseURI to file
+			baseURI = file.toURI().toString();
+		}
 
-           try {
-               add(in, baseURI, dataFormat, contexts);
-           } finally {
-               in.close();
-           }
+		InputStream in = new FileInputStream(file);
 
+		try {
+			add(in, baseURI, dataFormat, contexts);
+		} finally {
+			in.close();
+		}
 	}
 
 	 public void add(URL url, String baseURI, RDFFormat dataFormat,
              Resource... contexts) throws IOException,
              RDFParseException, RepositoryException {
-		//Adds the RDF data that can be found at the specified URL to the repository,
-		//optionally to one or more named contexts. 
-         if (baseURI == null) {
-             baseURI = url.toExternalForm();
-         }
+		// Adds the RDF data that can be found at the specified URL to the
+		// repository,
+		// optionally to one or more named contexts.
+		if (baseURI == null) {
+			baseURI = url.toExternalForm();
+		}
 
-         InputStream in = url.openStream();
+		InputStream in = url.openStream();
 
-         try {
-             add(in, baseURI, dataFormat, contexts);
-         } finally {
-             in.close();
-         }
+		try {
+			add(in, baseURI, dataFormat, contexts);
+		} finally {
+			in.close();
+		}
      }
 
      public void add(InputStream in, String baseURI,
@@ -218,7 +228,6 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		
 		add(st, contexts);
 		
-        autoCommit();
 
 	}
 	
@@ -280,10 +289,14 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
                                 + inputStreamOrReader.getClass());
             }
             
-            System.out.println("Parsing... ");
+           // System.out.println("Parsing... ");
                     
+            questStm = questConn.createStatement();
+    		
             Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseURI));
-            Thread process = new Thread(new Process(rdfHandler));
+            Thread process = new Thread(new Process(rdfHandler, questStm));
+            
+           
           
             //start threads
             insert.start();
@@ -291,10 +304,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
             
             insert.join();
             process.join();
+            
+            questStm.close();
                      
      
         } catch (RuntimeException e) {
-        	System.out.println("exception, rolling back!");
+        	//System.out.println("exception, rolling back!");
         	e.printStackTrace();
         	
             if (autoCommit) {
@@ -314,6 +329,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	            }
 		} finally {
             setAutoCommit(autoCommit);
+            autoCommit();
         }
     }
 
@@ -345,18 +361,18 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
           }
           
           private class Process implements Runnable{
-        	  private QuestDBStatement st;
         	  private SesameRDFIterator iterator;
-        	  public Process(SesameRDFIterator iterator) throws OBDAException
+        	  private QuestDBStatement questStmt;
+        	  public Process(SesameRDFIterator iterator, QuestDBStatement qstm) throws OBDAException
         	  {
-        		  st = questConn.createStatement();
         		  this.iterator = iterator;
+        		  this.questStmt = qstm;
         	  }
         	  
         	  public void run()
         	  {
         		    try {
-						st.add(iterator, boolToInt(autoCommit), 5000);
+						questStmt.add(iterator, boolToInt(autoCommit), 5000);
         		    	
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -378,17 +394,19 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     	}
     	boolean currCommit = autoCommit;
     	autoCommit = false;
-    	//create new quest statement
-    	QuestDBStatement stm = questConn.createStatement();
  
     	SesameRDFIterator it = new SesameRDFIterator(stmIterator);
     	
     	//insert data   useFile=false, batch=0
-    	try {
-			stm.add(it);
+    	try {	
+    		questStm = questConn.createStatement();
+			questStm.add(it);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+    	finally{
+    		questStm.close();
+    	}
 		
 		autoCommit = currCommit;
     }
@@ -443,7 +461,10 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		//all non-committed operations will be lost. 
 		this.isOpen = false;
 		try {
-			questConn.close();
+			if(questStm!=null && !questStm.isClosed())
+			{
+				questStm.close();
+			}
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
@@ -452,6 +473,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	public void commit() throws RepositoryException {
 		//Commits all updates that have been performed as part of this connection sofar. 
 		try {
+			//System.out.println("QuestConn commit..");
 			questConn.commit();
 		} catch (OBDAException e) {
 			e.printStackTrace();
@@ -469,8 +491,21 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			throws RepositoryException, RDFHandlerException {
 		//Exports all statements with a specific subject, predicate 
 		//and/or object from the repository, optionally from the specified contexts. 
-		getStatements(subj, pred, obj, includeInferred, contexts);
-		
+		RepositoryResult<Statement> stms = getStatements(subj, pred, obj, includeInferred, contexts);
+
+		handler.startRDF();
+		// handle
+		if (stms != null) {
+			while (stms.hasNext()) {
+				{
+					Statement st = stms.next();
+					if (st!=null)
+						handler.handleStatement(st);
+				}
+			}
+		}
+		handler.endRDF();
+
 	}
 
 	public RepositoryResult<Resource> getContextIDs()
@@ -478,21 +513,29 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		//Gets all resources that are used as content identifiers. 
 		//Care should be taken that the returned RepositoryResult 
 		//is closed to free any resources that it keeps hold of. 
-		return null;
+		List<Resource> contexts = new LinkedList<Resource>();
+		return new RepositoryResult<Resource>(new CloseableIteratorIteration<Resource, RepositoryException>(contexts.iterator()));
 	}
 
 	public String getNamespace(String prefix) throws RepositoryException {
-		// TODO Auto-generated method stub
 		//Gets the namespace that is associated with the specified prefix, if any. 
-		return null;
+		return repository.getNamespace(prefix);
 	}
 
 	public RepositoryResult<Namespace> getNamespaces()
 			throws RepositoryException {
-		// TODO Auto-generated method stub
 		//Gets all declared namespaces as a RepositoryResult of Namespace objects. 
 		//Each Namespace object consists of a prefix and a namespace name. 
-		throw new RepositoryException("getNamespaces() not supported");
+		Set<Namespace> namespSet = new HashSet<Namespace>();
+		Map<String, String> namesp = repository.getNamespaces();
+		Set<String> keys = namesp.keySet();
+		for (String key : keys)
+		{
+			//convert into namespace objects
+			namespSet.add(new NamespaceImpl(key, namesp.get(key)));
+		}
+		return new RepositoryResult<Namespace>(new CloseableIteratorIteration<Namespace, RepositoryException>(
+                namespSet.iterator()));
 	}
 
 	public ParserConfig getParserConfig() {
@@ -508,12 +551,49 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	public RepositoryResult<Statement> getStatements(Resource subj, org.openrdf.model.URI pred,
 			Value obj, boolean includeInferred, Resource... contexts)
 			throws RepositoryException {
-		// TODO Auto-generated method stub
 		//Gets all statements with a specific subject, 
 		//predicate and/or object from the repository.
 		//The result is optionally restricted to the specified set of named contexts. 
-		//construct query for it
 		
+		//construct query for it
+		String queryString = "CONSTRUCT {";
+		String s="", p="", o="";
+		if (subj == null)
+			s = "?s ";
+		else
+			s = subj.stringValue();
+		if (pred == null)
+			p = "?p ";
+		else 
+			p = pred.stringValue();
+		if (obj == null)
+			o = "?o ";
+		else
+			o = obj.stringValue();
+		queryString+= s+p+o+"} WHERE {"+s+p+o+"}";
+			
+		//execute construct query
+		try {
+			GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
+					queryString);
+			GraphQueryResult result = query.evaluate();
+
+			List<Statement> list = new LinkedList<Statement>();
+		//	System.out.println("result: "+result.hasNext());
+			while (result.hasNext())
+				list.add(result.next());
+			//result.close();
+
+			CloseableIteration<Statement, RepositoryException> iter = new CloseableIteratorIteration<Statement, RepositoryException>(
+					list.iterator());
+			RepositoryResult<Statement> repoResult = new RepositoryResult<Statement>(iter);
+
+			return repoResult;
+		} catch (MalformedQueryException e) {
+			e.printStackTrace();
+		} catch (QueryEvaluationException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -576,11 +656,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			throw new MalformedQueryException("SPARQL query expected!");
 		
 		try {
-			return new SesameBooleanQuery(queryString, baseURI, questConn.createStatement());
+			this.questStm = questConn.createStatement();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new SesameBooleanQuery(queryString, baseURI, questStm);
+		
 	}
 
 	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString)
@@ -594,9 +675,15 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
 			String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares queries that produce RDF graphs. 
-		
-		throw new MalformedQueryException("System does not support Graph Queries!");
-		
+		if (ql != QueryLanguage.SPARQL)
+			throw new MalformedQueryException("SPARQL query expected!");
+	
+		try {
+			this.questStm = questConn.createStatement();
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
+		return new SesameGraphQuery(queryString, baseURI, questStm);
 	}
 
 	public Query prepareQuery(QueryLanguage ql, String query)
@@ -612,15 +699,16 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected! ");
 		
+		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseURI);
 		
-		if (queryString.startsWith("SELECT"))
+		if (q instanceof ParsedTupleQuery)
 			return prepareTupleQuery(ql,queryString, baseURI);
-		else if (queryString.startsWith("ASK"))
+		else if (q instanceof ParsedBooleanQuery)
 			return prepareBooleanQuery(ql, queryString, baseURI);
-		else if (queryString.startsWith("CONSTRUCT"))
+		else if (q instanceof ParsedGraphQuery)
 			return prepareGraphQuery(ql, queryString, baseURI);
 		else 
-			throw new MalformedQueryException("Unrecognized query type!");
+			throw new MalformedQueryException("Unrecognized query type. " + queryString);
 		
 	}
 
@@ -640,11 +728,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			throw new MalformedQueryException("SPARQL query expected!");
 		
 		try {
-			return new SesameTupleQuery(queryString, baseURI, questConn.createStatement());
+			this.questStm = questConn.createStatement();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new SesameTupleQuery(queryString, baseURI, questStm);
+		
 	}
 
 	public Update prepareUpdate(QueryLanguage arg0, String arg1)
@@ -736,8 +825,9 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 
 	}
 
-	public void removeNamespace(String arg0) throws RepositoryException {
+	public void removeNamespace(String key) throws RepositoryException {
 		//Removes a namespace declaration by removing the association between a prefix and a namespace name. 
+		repository.removeNamespace(key);
 		
 	}
 
@@ -777,11 +867,10 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		
 	}
 
-	public void setNamespace(String arg0, String arg1)
+	public void setNamespace(String key, String value)
 			throws RepositoryException {
-		// TODO Auto-generated method stub
 		//Sets the prefix for a namespace. 
-	
+		repository.setNamespace(key, value);
 		
 	}
 

@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -44,7 +45,7 @@ public class NTripleOBDAMaterializer {
 		OWLAPI3IndividualIterator individuals = new OWLAPI3IndividualIterator(model);
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outputFile));
 
-		String rdftype = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+		String rdftype = OBDAVocabulary.RDF_TYPE;
 		int count = 0;
 		while (individuals.hasNext()) {
 			OWLIndividualAxiom axiom = individuals.next();

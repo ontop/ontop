@@ -1,0 +1,105 @@
+[PrefixDeclaration]
+:		http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/
+
+[ClassDeclaration] @collection [[
+:fl_transportdetails, :fl_processdetails, :webuse, :keys_table, :speed, :predatorhierarchy, :rp_region, :disref, :predatorecosystemtype, :ration
+:gicim_photosx, :zweb_rdecomnameslanguage, :orderage, :estimatedepth, :diseases, :data2010, :larvalswimspeed, :popchar, :spawning, :fl_fishingdetails
+:aquariumref, :ecosysfam, :address, :cultsys, :zweb_cn3, :myersrecruitmentdatabase, :ecology, :frynurserysystem, :collectionsref, :oceanprovinces
+:zweb_rdecomnamescountry, :dispic, :cas_bibliogen, :popll, :poplf, :latgraphs, :faoaquacult, :language, :label_index, :ecosystem
+:diet_items, :zweb_country_importance, :tabnotes, :fl_location, :matrix, :acknowledge, :oceanprovincesref, :collaborators_us, :cultures, :ciguafb
+:classes, :cl50, :faoarord, :swimming, :zweb_continent, :zweb_userstypelist, :fubh, :fbusers, :seafoodad, :estimate
+:larvdyn, :revisions, :instspecies, :fl_storagedetails, :sounds, :searchpagestats, :synonyms, :countfao, :seafoodadref, :cas_biblio
+:orders, :countrysub, :elecdat, :broodstock, :abnorm, :languagecountry, :foodtroph, :country, :occurrence_x, :popular
+:citesfb, :abundancedelta, :larvae, :oxygen, :popgrowth, :myersdata, :abundance, :isscaap, :occurrence, :eggnurserysystem
+:journals, :faocatch, :morphdat, :stocks, :gazetteer, :zweb_foridentification, :webfish, :languagegroup, :gicim_photos_01, :popqb
+:museum, :massconversion, :instmembership, :materialsexamined, :morphorders, :proxims, :intrcase, :species, :biblio2, :food
+:fl_fish, :oceanprovfaoref, :allgenus, :faoarref, :ecosystemcountry, :eggs, :cellabel2d30w, :elecstudies, :myersbiblio, :miniessay
+:morphmet, :instlanguage, :cellabel1d30w, :families, :glossary, :zweb_factsheetmaint_aquaculture, :elecsub, :keyquestions, :enzymes, :genera
+:fbrelinks, :picturesmain, :icescatch, :zweb_tour, :poplw, :aquamaint, :languagescriptcountry, :ecosystemcntref, :collaborators, :cultspec
+:larvaepresence, :predatortroph, :larvalnurserysystem, :countref, :biblio, :reproduc, :aquarium, :cellabel10d30w, :fl_losses, :genedat
+:zweb_factsheetmaint, :zweb_rdecountrycoordinators, :institution, :ecosystemfaoref, :graphcateg, :sponsors, :genetics, :morphmettlratios, :fl_lossesother, :poplfdata
+:vision, :zweb_picturetype, :abnormref, :fl_datasource, :zweb_picturetype_lifestage, :ecosyslhref, :cigua, :cas_bibliosp, :maturity, :comnames
+:strains, :data2050, :whatsnew, :diet, :alieninvasive, :pop_rm, :refrens, :countfaoref, :gillarea, :fl_lossesfinance
+:urls, :ecosystemref, :foodecosystemtype, :eggdev, :countrysubref, :brains, :predats, :fooditems, :languagescript, :faoarfam
+:checklist, :otoliths, :faoareas, :rp_province, :waterquality
+]]
+
+[ObjectPropertyDeclaration] @collection [[
+:species_FamCode, :morphdat_Speccode, :country_SpecCode, :picturesmain_SpecCode, :comnames_C_Code, :comnames_SpecCode, :country_C_Code
+]]
+
+[DataPropertyDeclaration] @collection [[
+:collaborators_Prename, :families_FamiliesRefNo, :collaborators_Year, :species_AnaCat, :families_Activity, :collaborators_Keywords, :collaborators_StaffPhoto, :morphdat_AddChars, :picturesmain_LifeStage, :species_Comments
+:families_Aquarium, :collaborators_Personnel, :countref_PAESE, :refrens_RefNo, :country_Importance, :collaborators_Institute, :families_Freshwater, :species_Author, :picturesmain_PicName, :species_PicPreferredName
+:families_Marine, :comnames_NameType, :species_Genus, :comnames_ComName, :species_UsedforAquaculture, :families_Species, :collaborators_Country, :families_Brackish, :country_Aquaculture, :collaborators_E-mail
+:families_Division, :families_Order, :picturesmain_AuthName, :families_Remark, :species_Aquarium, :refrens_Year, :species_SpecCode, :country_Brackish, :collaborators_WebPage, :refrens_Author
+:country_Status, :families_Family, :collaborators_FAX, :species_Dangerous, :collaborators_City, :countref_Factbook, :country_Saltwater, :families_Genera, :species_GameRef, :country_Freshwater
+:picturesmain_autoctr, :comnames_Language, :species_SpeciesRefNo, :species_Species, :species_DemersPelag, :families_Class, :families_SpeciesCount, :species_FBname, :collaborators_Street, :families_ReprGuild
+:picturesmain_Entered, :country_Game, :species_GameFish, :collaborators_Comments, :country_LiveExport, :collaborators_Surname
+]]
+
+[SourceDeclaration]
+sourceUri	fishdelish
+connectionUrl	
+username	fish
+password	fish
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Species
+target		<"&:;species/{$Genus}/{$Species}"> a :species; :species_Genus $Genus; :species_SpecCode $SpecCode; :species_Species $Species; :species_SpeciesRefNo $SpeciesRefNo; :species_Author $Author; :species_FBname $FBname; :species_PicPreferredName $PicPreferredName; :species_AnaCat $AnaCat; :species_Comments $Comments; :species_Dangerous $Dangerous; :species_DemersPelag $DemersPelag; :species_GameFish $GameFish; :species_GameRef $GameRef; :species_UsedforAquaculture $usedForAquaculture; :species_Aquarium $Aquarium . 
+source		select SpecCode, Genus, Species, SpeciesRefNo, Author, FBname, PicPreferredName, FamCode, AnaCat, Comments, Dangerous, DemersPelag, GameFish, GameRef, usedForAquaculture, Aquarium from species
+
+mappingId	Families
+target		<"&:;families/{$Family}"> a :families; :families_FamiliesRefNo $FamiliesRefNo; :families_Activity $Activity; :families_Aquarium $Aquarium; :families_Freshwater $Freshwater; :families_Marine $Marine; :families_Species $Species; :families_Brackish $Brackish; :families_Division $Division; :families_Order $FamilyOrder; :families_Remark $Remark; :families_Family $Family; :families_Genera $Genera; :families_Class $Class; :families_SpeciesCount $SpeciesCount; :families_ReprGuild $ReprGuild . 
+source		select FamiliesRefNo, Activity, Aquarium, Brackish, Class, Division, Family, FamCode, Genera, Freshwater, Marine, FamilyOrder, Remark, ReprGuild, Species, SpeciesCount from families
+
+mappingId	Collaborators
+target		<"&:;collaborators/{$Surname}_{$Prename}"> a :collaborators; :collaborators_City $City; :collaborators_Comments $Comments; :collaborators_Country $Country; :collaborators_E-mail $Email; :collaborators_FAX $FAX; :collaborators_Institute $Institute; :collaborators_Keywords $Keywords; :collaborators_Personnel $Personnel; :collaborators_Prename $Prename; :collaborators_StaffPhoto $StaffPhoto; :collaborators_Street $Street; :collaborators_Surname $Surname; :collaborators_WebPage $WebPage; :collaborators_Year $Year . 
+source		select Surname, Prename, City, Comments, Country, Email, FAX, Institute, Keywords, Personnel, StaffPhoto, Street, WebPage, Year from collaborators
+
+mappingId	Common Names
+target		<"&:;comnames/{$autoctr}/{$ComName}/{$StockCode}/{$C_Code}/{$Language}/{$NameType}"> a :comnames; :comnames_ComName $ComName; :comnames_Language $Language; :comnames_NameType $NameType; :comnames_C_Code <"&:;countref/{$C_Code}"> . 
+source		select autoctr, ComName, StockCode, C_Code, Language, NameType, SpecCode from comnames
+
+mappingId	Country Ref
+target		<"&:;countref/{$C_Code}"> a :countref; :countref_PAESE $PAESE; :countref_Factbook $Factbook . 
+source		select C_Code, PAESE, Factbook from countref
+
+mappingId	Country
+target		<"&:;country/{$Stockcode}/{$C_Code}"> a :country; :country_Aquaculture $Aquaculture; :country_Brackish $Brackish; :country_Freshwater $Freshwater; :country_Importance $Importance; :country_LiveExport $LiveExport; :country_Saltwater $Saltwater; :country_Status $Status; :country_Game $Game; :country_C_Code <"&:;countref/{$C_Code}"> . 
+source		select Stockcode, C_Code, Aquaculture, Brackish, Freshwater, Importance, LiveExport, Saltwater, Status, Game, SpecCode from country
+
+mappingId	Morph Data
+target		<"&:;morphdat/{$StockCode}"> a :morphdat; :morphdat_AddChars $AddChars . 
+source		select StockCode, AddChars, Speccode from morphdat
+
+mappingId	Pictures Main
+target		<"&:;picturesmain/{$autoctr}"> a :picturesmain; :picturesmain_PicName $PicName; :picturesmain_AuthName $AuthName; :picturesmain_Entered $Entered; :picturesmain_LifeStage $LifeStage; :picturesmain_autoctr $autoctr . 
+source		select PicName, AuthName, Entered, LifeStage, autoctr, SpecCode from picturesmain
+
+mappingId	References
+target		<"&:;refrens/{$autoctr}"> a :refrens; :refrens_RefNo $RefNo; :refrens_Year $Year; :refrens_Author $Author . 
+source		select autoctr, Author, RefNo, Year from refrens
+
+mappingId	mapping-picturesmain-species
+target		<"&:;picturesmain/{$autoctr}"> :picturesmain_SpecCode <"&:;species/{$Genus}/{$Species}"> . 
+source		select autoctr, Genus, Species from picturesmain , species where species.SpecCode=picturesmain.SpecCode
+
+mappingId	mapping-country-species
+target		<"&:;country/{$Stockcode}/{$C_Code}"> :country_SpecCode <"&:;species/{$Genus}/{$Species}"> . 
+source		select Species, Genus, Stockcode, C_Code from species , country  where species.SpecCode=country.SpecCode
+
+mappingId	mapping-comnames-species
+target		<"&:;comnames/{$autoctr}/{$ComName}/{$StockCode}/{$C_Code}/{$Language}/{$NameType}"> :comnames_SpecCode <"&:;species/{$Genus}/{$Species}"> . 
+source		select Genus, Species, autoctr, ComName, StockCode, C_Code, Language, NameType from species, comnames  where species.SpecCode=comnames.SpecCode
+
+mappingId	mapping-morphdat-species
+target		<"&:;morphdat/{$StockCode}"> :morphdat_Speccode <"&:;species/{$Genus}/{$Species}"> . 
+source		select Genus, Species, StockCode from species, morphdat where species.SpecCode=morphdat.SpecCode
+
+mappingId	mapping-species-families
+target		<"&:;species/{$Genus}/{$Specs}"> :species_FamCode <"&:;families/{$Family}"> . 
+source		select Genus, species.Species as Specs, Family from species, families where species.FamCode=families.FamCode
+]]
+

@@ -2,10 +2,11 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
+import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
@@ -50,12 +51,16 @@ public class CQIEImpl implements CQIE, ListListener {
 		// The syntax for CQ may contain no body, thus, this condition will
 		// check whether the construction of the link list is possible or not.
 		if (body != null) {
-			EventGeneratingLinkedList<Atom> eventbody = new EventGeneratingLinkedList<Atom>();
+			EventGeneratingArrayList<Atom> eventbody = new EventGeneratingArrayList<Atom>(body.size()*20);
 			eventbody.addAll(body);
 
 			this.body = eventbody;
 
-			eventbody.addListener(this);
+			registerListeners(eventbody);
+			
+			// TODO possible memory leak!!! we should also de-register when objects are removed
+			
+			
 		}
 
 		// The syntax for CQ may also contain no head, thus, this condition
@@ -63,8 +68,25 @@ public class CQIEImpl implements CQIE, ListListener {
 		if (head != null) {
 			this.head = head;
 
-			EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
+			EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
 			headterms.addListener(this);
+		}
+	}
+
+	private void registerListeners(EventGeneratingArrayList functions) {
+
+		functions.addListener(this);
+
+		for (Object o : functions) {
+			if (!(o instanceof Function))
+				continue;
+			Function f = (Function) o;
+			EventGeneratingArrayList list = (EventGeneratingArrayList) f
+					.getTerms();
+
+			list.addListener(this);
+
+			registerListeners(list);
 		}
 	}
 
@@ -78,10 +100,12 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	public void updateHead(Atom head) {
 
-		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
+		EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head
+				.getTerms();
 		headterms.removeListener(this);
 
 		this.head = head;
+		((EventGeneratingArrayList) head.getTerms()).addListener(this);
 
 		listChanged();
 	}
@@ -115,7 +139,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 			Iterator<Atom> bit = body.iterator();
 			while (bit.hasNext()) {
-				Atom atom = bit.next();
+				Function atom = bit.next();
 				sb.append(atom.toString());
 
 				if (bit.hasNext()) { // if there is a next atom.
@@ -177,7 +201,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 		Set<Variable> vars = new LinkedHashSet<Variable>();
 		for (Atom atom : body)
-			for (Term t : atom.getTerms()) {
+			for (NewLiteral t : atom.getTerms()) {
 				for (Variable v : t.getReferencedVariables())
 					vars.add(v);
 			}
@@ -189,7 +213,7 @@ public class CQIEImpl implements CQIE, ListListener {
 		Map<Variable, Integer> vars = new HashMap<Variable, Integer>();
 		for (Atom atom : body) {
 			Map<Variable, Integer> atomCount = atom.getVariableCount();
-			for (Variable var: atomCount.keySet()) {
+			for (Variable var : atomCount.keySet()) {
 				Integer count = vars.get(var);
 				if (count != null) {
 					vars.put(var, count + atomCount.get(var));
@@ -197,11 +221,11 @@ public class CQIEImpl implements CQIE, ListListener {
 					vars.put(var, new Integer(atomCount.get(var)));
 				}
 			}
-			
+
 		}
-		
+
 		Map<Variable, Integer> atomCount = head.getVariableCount();
-		for (Variable var: atomCount.keySet()) {
+		for (Variable var : atomCount.keySet()) {
 			Integer count = vars.get(var);
 			if (count != null) {
 				vars.put(var, count + atomCount.get(var));

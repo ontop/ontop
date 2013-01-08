@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -40,9 +40,9 @@ public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAx
 
 	/** A helper method to check a match */
 	public static boolean match(String keyword, Atom predicate) {
-		List<Term> queryTerms = predicate.getTerms();
+		List<NewLiteral> queryTerms = predicate.getTerms();
 		for (int j = 0; j < queryTerms.size(); j++) {
-			Term term = queryTerms.get(j);
+			NewLiteral term = queryTerms.get(j);
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl functionTerm = (FunctionalTermImpl) term;
 				if (functionTerm.getFunctionSymbol().toString().indexOf(keyword) != -1) { // match found!

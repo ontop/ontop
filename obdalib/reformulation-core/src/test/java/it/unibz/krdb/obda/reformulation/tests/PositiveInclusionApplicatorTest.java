@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 
@@ -37,40 +37,40 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	Predicate					s				= pfac.getPredicate(URI.create("S"), 2);
 	Predicate					q				= pfac.getPredicate(URI.create("q"), 1);
 
-	Term						x				= tfac.getVariable("x");
-	Term						y				= tfac.getVariable("y");
-	Term						z				= tfac.getVariable("z");
-	Term						m				= tfac.getVariable("m");
+	NewLiteral						x				= tfac.getVariable("x");
+	NewLiteral						y				= tfac.getVariable("y");
+	NewLiteral						z				= tfac.getVariable("z");
+	NewLiteral						m				= tfac.getVariable("m");
 
-	Term						u1				= tfac.getNondistinguishedVariable();
-	Term						u2				= tfac.getNondistinguishedVariable();
+	NewLiteral						u1				= tfac.getNondistinguishedVariable();
+	NewLiteral						u2				= tfac.getNondistinguishedVariable();
 
 	
 	public void setUp() throws Exception {
 
 		// q(y) :- R(x, y), R(x, z), S(y, m), S(z, m),
 
-		List<Term> terms1 = new LinkedList<Term>();
+		List<NewLiteral> terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(y);
 		Atom a1 = tfac.getAtom(r, terms1);
 
-		List<Term> terms2 = new LinkedList<Term>();
+		List<NewLiteral> terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(z);
 		Atom a2 = tfac.getAtom(r, terms2);
 
-		List<Term> terms3 = new LinkedList<Term>();
+		List<NewLiteral> terms3 = new LinkedList<NewLiteral>();
 		terms3.add(y);
 		terms3.add(m);
 		Atom a3 = tfac.getAtom(s, terms3);
 
-		List<Term> terms4 = new LinkedList<Term>();
+		List<NewLiteral> terms4 = new LinkedList<NewLiteral>();
 		terms4.add(z);
 		terms4.add(m);
 		Atom a4 = tfac.getAtom(s, terms4);
 
-		List<Term> termshead = new LinkedList<Term>();
+		List<NewLiteral> termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
 		Atom head = tfac.getAtom(q, termshead);
 
@@ -82,12 +82,12 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		initialquery1 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<Term>();
+		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(u1);
 		a1 = tfac.getAtom(r, terms1);
 
-		terms2 = new LinkedList<Term>();
+		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(u2);
 		a2 = tfac.getAtom(r, terms2);
@@ -96,18 +96,18 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<Term>();
+		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
 		head = tfac.getAtom(q, termshead);
 
 		initialquery2 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<Term>();
+		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(u1);
 		terms1.add(x);
 		a1 = tfac.getAtom(r, terms1);
 
-		terms2 = new LinkedList<Term>();
+		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(u2);
 		terms2.add(x);
 		a2 = tfac.getAtom(r, terms2);
@@ -116,18 +116,18 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<Term>();
+		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
 		head = tfac.getAtom(q, termshead);
 
 		initialquery3 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<Term>();
+		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(u1);
 		a1 = tfac.getAtom(r, terms1);
 
-		terms2 = new LinkedList<Term>();
+		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(y);
 		a2 = tfac.getAtom(r, terms2);
@@ -136,18 +136,18 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<Term>();
+		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
 		head = tfac.getAtom(q, termshead);
 
 		initialquery4 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<Term>();
+		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(u1);
 		terms1.add(x);
 		a1 = tfac.getAtom(r, terms1);
 
-		terms2 = new LinkedList<Term>();
+		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(y);
 		terms2.add(x);
 		a2 = tfac.getAtom(r, terms2);
@@ -156,7 +156,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<Term>();
+		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
 		head = tfac.getAtom(q, termshead);
 

@@ -82,6 +82,8 @@
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
 					<testExcludes>
+						<exclude>**/BasicUnfoldingTests*.java</exclude>
+						<exclude>**/QueryTranslatorTest*.java</exclude>
 						<exclude>**/MappingToRuleTester.java</exclude>
 						<exclude>**/PartialEvaluationTest.java</exclude>
 					</testExcludes>

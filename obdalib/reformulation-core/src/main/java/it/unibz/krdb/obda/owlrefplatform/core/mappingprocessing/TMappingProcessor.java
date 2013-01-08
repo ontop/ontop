@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -194,8 +194,8 @@ public class TMappingProcessor implements Serializable {
 				 */
 				Atom newconditions = mergeConditions(strippedNewConditions);
 				Atom existingconditions = mergeConditions(strippedExistingConditions);
-				Term newconditionsTerm = fac.getFunctionalTerm(newconditions.getPredicate(), newconditions.getTerms());
-				Term existingconditionsTerm = fac.getFunctionalTerm(existingconditions.getPredicate(), existingconditions.getTerms());
+				NewLiteral newconditionsTerm = fac.getFunctionalTerm(newconditions.getPredicate(), newconditions.getTerms());
+				NewLiteral existingconditionsTerm = fac.getFunctionalTerm(existingconditions.getPredicate(), existingconditions.getTerms());
 				Atom orAtom = fac.getORAtom(existingconditionsTerm, newconditionsTerm);
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
@@ -219,14 +219,14 @@ public class TMappingProcessor implements Serializable {
 			return conditions.get(0);
 		Atom atom0 = conditions.remove(0);
 		Atom atom1 = conditions.remove(0);
-		Term f0 = fac.getFunctionalTerm(atom0.getPredicate(), atom0.getTerms());
-		Term f1 = fac.getFunctionalTerm(atom1.getPredicate(), atom1.getTerms());
+		NewLiteral f0 = fac.getFunctionalTerm(atom0.getPredicate(), atom0.getTerms());
+		NewLiteral f1 = fac.getFunctionalTerm(atom1.getPredicate(), atom1.getTerms());
 		Atom nestedAnd = fac.getANDAtom(f0, f1);
 		while (conditions.size() != 0) {
 			Atom condition = conditions.remove(0);
-			Term term0 = nestedAnd.getTerm(1);
-			Term term1 = fac.getFunctionalTerm(condition.getPredicate(), condition.getTerms());
-			Term newAND = fac.getANDFunction(term0, term1);
+			NewLiteral term0 = nestedAnd.getTerm(1);
+			NewLiteral term1 = fac.getFunctionalTerm(condition.getPredicate(), condition.getTerms());
+			NewLiteral newAND = fac.getANDFunction(term0, term1);
 			nestedAnd.setTerm(1, newAND);
 		}
 		return nestedAnd;
@@ -284,17 +284,18 @@ public class TMappingProcessor implements Serializable {
 	 *         described above.
 	 */
 	public DatalogProgram normalizeConstants(DatalogProgram originalMappings) {
-		int freshVarCount = 0;
 		DatalogProgram newProgram = fac.getDatalogProgram();
 		newProgram.setQueryModifiers(originalMappings.getQueryModifiers());
 		for (CQIE currentMapping : originalMappings.getRules()) {
+			int freshVarCount = 0;
+
 			Atom head = currentMapping.getHead().clone();
 			List<Atom> newBody = new LinkedList<Atom>();
 			for (Atom currentAtom : currentMapping.getBody()) {
 				if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
 					Atom clone = currentAtom.clone();
 					for (int i = 0; i < clone.getTerms().size(); i++) {
-						Term term = clone.getTerm(i);
+						NewLiteral term = clone.getTerm(i);
 						if (term instanceof Constant) {
 							/*
 							 * Found a constant, replacing with a fresh variable
@@ -378,8 +379,8 @@ public class TMappingProcessor implements Serializable {
 					if (!requiresInverse) {
 						newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
 					} else {
-						Term term0 = oldMappingHead.getTerms().get(1);
-						Term term1 = oldMappingHead.getTerms().get(0);
+						NewLiteral term0 = oldMappingHead.getTerms().get(1);
+						NewLiteral term1 = oldMappingHead.getTerms().get(0);
 						newMappingHead = fac.getAtom(currentPredicate, term0, term1);
 					}
 					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
@@ -410,8 +411,8 @@ public class TMappingProcessor implements Serializable {
 						mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
 						// equivalentPropertyMappings.add(newmapping);
 					} else {
-						Term term0 = currentNodeMapping.getHead().getTerms().get(1);
-						Term term1 = currentNodeMapping.getHead().getTerms().get(0);
+						NewLiteral term0 = currentNodeMapping.getHead().getTerms().get(1);
+						NewLiteral term1 = currentNodeMapping.getHead().getTerms().get(0);
 						Atom newhead = fac.getAtom(p, term0, term1);
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 						mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);

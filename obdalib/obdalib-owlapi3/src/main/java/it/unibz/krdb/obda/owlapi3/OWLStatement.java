@@ -1,5 +1,8 @@
 package it.unibz.krdb.obda.owlapi3;
 
+import java.util.List;
+
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 
 public interface OWLStatement {
@@ -11,6 +14,10 @@ public interface OWLStatement {
 	public void close() throws OWLException;
 
 	public OWLResultSet execute(String query) throws OWLException;
+
+	public List<OWLAxiom> executeConstruct(String query) throws OWLException;
+
+	public List<OWLAxiom> executeDescribe(String query) throws OWLException;
 
 	public int executeUpdate(String query) throws OWLException;
 

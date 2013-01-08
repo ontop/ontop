@@ -1,21 +1,39 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
+import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLConnection;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class QuestOWLStatement implements OWLStatement {
 
 	private QuestStatement st;
 	private QuestOWLConnection conn;
-
 
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
@@ -32,7 +50,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -45,7 +62,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -58,9 +74,28 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
+	@Override
+	public List<OWLAxiom> executeConstruct(String query) throws OWLException {
+		try {
+			GraphResultSet resultSet = st.executeConstruct(query);
+			return createOWLIndividualAxioms(resultSet);
+		} catch (Exception e) {
+			throw new OWLOntologyCreationException(e);
+		}
+	}
+
+	@Override
+	public List<OWLAxiom> executeDescribe(String query) throws OWLException {
+		try {
+			GraphResultSet resultSet = st.executeDescribe(query);
+			return createOWLIndividualAxioms(resultSet);
+		} catch (Exception e) {
+			throw new OWLOntologyCreationException(e);
+		}
+	}
+	
 	@Override
 	public int executeUpdate(String query) throws OWLException {
 		try {
@@ -71,7 +106,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -89,7 +123,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -102,7 +135,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -115,7 +147,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -128,7 +159,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -141,7 +171,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -154,7 +183,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -167,7 +195,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -180,7 +207,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -193,7 +219,6 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
-
 	}
 
 	@Override
@@ -228,5 +253,54 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
+	}
+		
+	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory();
+		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
+		while (resultSet.hasNext()) {
+			for (Assertion assertion : resultSet.next()) {
+				if (assertion instanceof ClassAssertion) {
+					String subjectIRI = ((ClassAssertion) assertion).getPredicate().toString();
+					String classIRI = ((ClassAssertion) assertion).getObject().getValue();
+					OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
+					axiomList.add(classAxiom);
+				} else if (assertion instanceof ObjectPropertyAssertion) {
+					String propertyIRI = ((ObjectPropertyAssertion) assertion).getPredicate().toString();
+					String subjectIRI = ((ObjectPropertyAssertion) assertion).getFirstObject().getValue();
+					String objectIRI = ((ObjectPropertyAssertion) assertion).getSecondObject().getValue();
+					OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
+					axiomList.add(objectPropertyAxiom);
+				}  else if (assertion instanceof DataPropertyAssertion) {
+					String propertyIRI = ((DataPropertyAssertion) assertion).getPredicate().toString();
+					String subjectIRI = ((DataPropertyAssertion) assertion).getObject().getValue();
+					String objectValue = ((DataPropertyAssertion) assertion).getValue().getValue();
+					OWLAxiom dataPropertyAxiom = createOWLDataPropertyAssertion(propertyIRI, subjectIRI, objectValue, factory);
+					axiomList.add(dataPropertyAxiom);
+				}
+			}
+		}		
+		return axiomList;
+	}
+	
+	private OWLClassAssertionAxiom createOWLClassAssertion(String classIRI, String subjectIRI, OWLDataFactory factory) {
+		OWLClass classExpression = factory.getOWLClass(IRI.create(classIRI));
+		OWLIndividual individual = factory.getOWLNamedIndividual(IRI.create(subjectIRI));
+		return factory.getOWLClassAssertionAxiom(classExpression, individual);
+	}
+	
+	private OWLObjectPropertyAssertionAxiom createOWLObjectPropertyAssertion(String propertyIRI, String subjectIRI, String objectIRI, OWLDataFactory factory) {
+		OWLObjectProperty propertyExpression = factory.getOWLObjectProperty(IRI.create(propertyIRI));
+		OWLIndividual individual1 = factory.getOWLNamedIndividual(IRI.create(subjectIRI));
+		OWLIndividual individual2 = factory.getOWLNamedIndividual(IRI.create(objectIRI));
+		return factory.getOWLObjectPropertyAssertionAxiom(propertyExpression, individual1, individual2);
+	}
+	
+	private OWLDataPropertyAssertionAxiom createOWLDataPropertyAssertion(String propertyIRI, String subjectIRI, String objectValue, OWLDataFactory factory) {
+		OWLDataProperty propertyExpression = factory.getOWLDataProperty(IRI.create(propertyIRI));
+		OWLIndividual individual1 = factory.getOWLNamedIndividual(IRI.create(subjectIRI));
+		OWLLiteral individual2 = factory.getOWLLiteral(objectValue);
+		return factory.getOWLDataPropertyAssertionAxiom(propertyExpression, individual1, individual2);
 	}
 }

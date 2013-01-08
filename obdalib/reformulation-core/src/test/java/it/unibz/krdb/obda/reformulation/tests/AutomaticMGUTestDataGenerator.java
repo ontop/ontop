@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
@@ -122,7 +122,7 @@ public class AutomaticMGUTestDataGenerator {
 
 	public Atom getAtom(String atomstr) {
 		String termstr = atomstr.substring(2, atomstr.length() - 1);
-		List<Term> terms = new ArrayList<Term>();
+		List<NewLiteral> terms = new ArrayList<NewLiteral>();
 
 		String[] termstra = termstr.split(" ");
 		for (int i = 0; i < termstra.length; i++) {
@@ -132,7 +132,7 @@ public class AutomaticMGUTestDataGenerator {
 		return atom;
 	}
 
-	public Term getTerm(String termstrs) {
+	public NewLiteral getTerm(String termstrs) {
 		// List<Term> terms = new ArrayList<Term>();
 		// String[] termstra = termstrs.split(",");
 		// for (int i = 0; i < termstra.length; i++) {
@@ -141,7 +141,7 @@ public class AutomaticMGUTestDataGenerator {
 
 		if (termstr.indexOf('(') != -1) {
 			String[] subtermstr = termstr.substring(2, termstrs.length() - 1).split(",");
-			List<Term> fuctTerms = new ArrayList<Term>();
+			List<NewLiteral> fuctTerms = new ArrayList<NewLiteral>();
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}

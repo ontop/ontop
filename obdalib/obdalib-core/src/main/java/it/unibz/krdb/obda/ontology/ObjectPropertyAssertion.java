@@ -1,14 +1,20 @@
 package it.unibz.krdb.obda.ontology;
 
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 
 public interface ObjectPropertyAssertion extends Assertion {
 
-	public URIConstant getFirstObject();
+	public ObjectConstant getFirstObject();
 
-	public URIConstant getSecondObject();
+	public ObjectConstant getSecondObject();
 
+	/***
+	 * Use get predicate instead
+	 * 
+	 * @return
+	 */
+	@Deprecated
 	public Predicate getRole();
 
 }

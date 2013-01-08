@@ -13,6 +13,7 @@
  */
 package it.unibz.krdb.obda.gui.swing.utils;
 
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.Color;
@@ -280,7 +281,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 
 								if (p instanceof Node_URI) {
 									Node_URI predicate = (Node_URI) p;
-									if (predicate.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+									if (predicate.getURI().equals(OBDAVocabulary.RDF_TYPE)) {
 										if (o instanceof Node_Literal) {
 											Node_Literal lit = (Node_Literal) o;
 											concepts.add(lit.getLiteralValue().toString());

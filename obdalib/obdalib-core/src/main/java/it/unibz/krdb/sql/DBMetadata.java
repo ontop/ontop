@@ -1,11 +1,20 @@
 package it.unibz.krdb.sql;
 
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.BooleanOperationPredicate;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.sql.api.Attribute;
+
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class DBMetadata implements Serializable {
 
@@ -196,7 +205,8 @@ public class DBMetadata implements Serializable {
 	
 	/**
 	 * Returns the attribute full-qualified name using the table/view ALIAS name.
-	 * [ALIAS_NAME].[ATTRIBUTE_NAME]
+	 * [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the method will
+	 * use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME]. 
 	 * 
 	 * @param name
 	 *            Can be a table name or a view name.
@@ -207,8 +217,11 @@ public class DBMetadata implements Serializable {
 	 * @return
 	 */
 	public String getFullQualifiedAttributeName(String name, String alias, int pos) {
-		String value = String.format("%s.%s", alias, getAttributeName(name, pos));
-		return value;
+		if (alias != null && !alias.isEmpty()) {
+			return String.format("%s.%s", alias, getAttributeName(name, pos));
+		} else {
+			return getFullQualifiedAttributeName(name, pos);
+		}
 	}
 
 	public void setDriverName(String driverName) {
@@ -285,5 +298,42 @@ public class DBMetadata implements Serializable {
 			bf.append("\n");
 		}
 		return bf.toString();
+	}
+
+	/***
+	 * Generates a map for each predicate in the body of the rules in 'program'
+	 * that contains the Primary Key data for the predicates obtained from the info in 
+	 * the metadata.
+	 * 
+	 * @param metadata
+	 * @param pkeys
+	 * @param program
+	 */
+	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata, DatalogProgram program) {
+		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
+
+		for (CQIE mapping : program.getRules()) {
+			for (Atom newatom : mapping.getBody()) {
+				Predicate newAtomPredicate = newatom.getPredicate();
+				if (newAtomPredicate instanceof BooleanOperationPredicate) {
+					continue;
+				}
+				String newAtomName = newAtomPredicate.toString();
+				DataDefinition def = metadata.getDefinition(newAtomName);
+				List<Integer> pkeyIdx = new LinkedList<Integer>();
+				for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
+					Attribute column = def.getAttribute(columnidx);
+					if (column.isPrimaryKey()) {
+						pkeyIdx.add(columnidx);
+					}
+	
+				}
+				if (!pkeyIdx.isEmpty()) {
+					pkeys.put(newatom.getPredicate(), pkeyIdx);
+				}
+	
+			}
+		}
+		return pkeys;
 	}
 }

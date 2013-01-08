@@ -273,7 +273,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			@Override
 			public void run() {
 				OBDADataQueryAction action = QueryInterfacePanel.this.getRetrieveUCQExpansionAction();
-				action.run(queryTextPane.getText(), null);
+				action.run(queryTextPane.getText());
 			}
 		});
 		queryRunnerThread.start();
@@ -284,7 +284,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			@Override
 			public void run() {
 				OBDADataQueryAction action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
-				action.run(queryTextPane.getText(), null);
+				action.run(queryTextPane.getText());
 			}
 		});
 		queryRunnerThread.start();
@@ -296,7 +296,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 
 	private void cmdExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonExecuteActionPerformed
-		final QueryInterfacePanel copyInstance = this;
 		try {
 			// TODO Handle this such that there is a listener checking the
 			// progress of the execution
@@ -304,7 +303,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 				@Override
 				public void run() {
 					OBDADataQueryAction action = QueryInterfacePanel.this.getExecuteUCQAction();
-					action.run(queryTextPane.getText(), copyInstance);
+					action.run(queryTextPane.getText());
 
 					execTime = action.getExecutionTime();
 					int rows = action.getNumberOfRows();
