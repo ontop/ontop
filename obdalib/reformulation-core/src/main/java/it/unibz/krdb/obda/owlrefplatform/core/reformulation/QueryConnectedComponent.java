@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ import java.util.Set;
 
 public class QueryConnectedComponent {
 
-	private List<Term> variables; 	
+	private List<NewLiteral> variables; 	
 	private List<Loop> quantifiedVariables;   
-	private List<Term> freeVariables;
+	private List<NewLiteral> freeVariables;
 	
 	private final List<Edge> edges;  // a connect component contains a list of edges 
 	private final Loop loop;  //                                   or a loop if it is degenerate 
@@ -45,7 +45,6 @@ public class QueryConnectedComponent {
 	 * 
 	 * @param edges: a list of edges in the connected component
 	 * @param terms: terms that are coveted by the edges
-	 * @param headTerms: terms of the head of the query, which is used to determine whether a variable is free of quantified
 	 */
 	
 	private QueryConnectedComponent(List<Edge> edges, Loop loop, List<Loop> terms) {
@@ -53,15 +52,15 @@ public class QueryConnectedComponent {
 		this.loop = loop;
 
 		quantifiedVariables = new ArrayList<Loop>(terms.size());
-		variables = new ArrayList<Term>(terms.size());
-		freeVariables = new ArrayList<Term>(terms.size());
+		variables = new ArrayList<NewLiteral>(terms.size());
+		freeVariables = new ArrayList<NewLiteral>(terms.size());
 		noFreeTerms = true;
 		
 		for (Loop l: terms) {
-			Term t = l.getTerm(); 
+			NewLiteral t = l.getTerm(); 
 			if (t instanceof Variable) {
 				variables.add(t);
-				//if (headTerms.contains(t))
+				//if (headNewLiterals.contains(t))
 				if (l.isExistentialVariable())
 					quantifiedVariables.add(l);
 				else 
@@ -75,7 +74,7 @@ public class QueryConnectedComponent {
 		}
 	}
 	
-	private static boolean isExistentialVariable(Term t, Set<Term> headTerms) {
+	private static boolean isExistentialVariable(NewLiteral t, Set<NewLiteral> headTerms) {
 		return ((t instanceof Variable) && !headTerms.contains(t));
 	}
 
@@ -89,19 +88,19 @@ public class QueryConnectedComponent {
 	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
 		List<QueryConnectedComponent> ccs = new ArrayList<QueryConnectedComponent>();
 
-		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
+		Set<NewLiteral> headTerms = new HashSet<NewLiteral>(cqie.getHead().getTerms());
 
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		Map<TermPair, Edge> pairs = new HashMap<TermPair, Edge>();
-		Map<Term, Loop> allLoops = new HashMap<Term, Loop>();
+		Map<NewLiteral, Loop> allLoops = new HashMap<NewLiteral, Loop>();
 		
 		for (Atom a: cqie.getBody()) {
-			Term t0 = a.getTerm(0);				
+			NewLiteral t0 = a.getTerm(0);				
 			if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
-				Term t1 = a.getTerm(1);
+				NewLiteral t1 = a.getTerm(1);
 				TermPair pair = new TermPair(t0, t1);
 				Edge edge =  pairs.get(pair); 
 				if (edge == null) {
@@ -133,7 +132,7 @@ public class QueryConnectedComponent {
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
 			List<Edge> ccEdges = new ArrayList<Edge>(pairs.size());
-			Set<Term> ccTerms = new HashSet<Term>((allLoops.size() * 2) / 3);
+			Set<NewLiteral> ccTerms = new HashSet<NewLiteral>((allLoops.size() * 2) / 3);
 			Iterator<Entry<TermPair, Edge>> i = pairs.entrySet().iterator();
 			List<Loop> ccLoops = new ArrayList<Loop>(allLoops.size());
 			
@@ -148,23 +147,23 @@ public class QueryConnectedComponent {
 			allLoops.remove(edge0.getTerm1());
 			i.remove();
 			
-			// expand the current CC by adding all edges that are have at least one of the terms in them
+			// expand the current CC by adding all edges that are have at least one of the NewLiterals in them
 			boolean expanded = true;
 			while (expanded) {
 				expanded = false;
 				i = pairs.entrySet().iterator();
 				while (i.hasNext()) {
 					Edge edge = i.next().getValue();
-					Term t0 = edge.getTerm0();
-					Term t1 = edge.getTerm1();
+					NewLiteral t0 = edge.getTerm0();
+					NewLiteral t1 = edge.getTerm1();
 					if (ccTerms.contains(t0)) {
-						if (ccTerms.add(t1))  { // the other term is already there
+						if (ccTerms.add(t1))  { // the other NewLiteral is already there
 							ccLoops.add(edge.getLoop1());
 							allLoops.remove(t1); // remove the loops that are covered by the edges in CC
 						}
 					}
 					else if (ccTerms.contains(t1)) {
-						if (ccTerms.add(t0))  {// the other term is already there
+						if (ccTerms.add(t0))  {// the other NewLiteral is already there
 							ccLoops.add(edge.getLoop0()); 
 							allLoops.remove(t0); // remove the loops that are covered by the edges in CC
 						}
@@ -182,7 +181,7 @@ public class QueryConnectedComponent {
 		}
 		
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
-		for (Entry<Term, Loop> loop : allLoops.entrySet()) {
+		for (Entry<NewLiteral, Loop> loop : allLoops.entrySet()) {
 			ccs.add(new QueryConnectedComponent(Collections.EMPTY_LIST, loop.getValue(), Collections.singletonList(loop.getValue())));
 		}
 		
@@ -196,7 +195,7 @@ public class QueryConnectedComponent {
 	/**
 	 * boolean isDenenerate() 
 	 * 
-	 * @return true if the component is degenerate (has no proper edges with two distinct terms)
+	 * @return true if the component is degenerate (has no proper edges with two distinct NewLiterals)
 	 */
 	
 	public boolean isDegenerate() {
@@ -204,9 +203,9 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * boolean hasNoFreeTerms()
+	 * boolean hasNoFreeNewLiterals()
 	 * 
-	 * @return true if all terms of the connected component are existentially quantified variables
+	 * @return true if all NewLiterals of the connected component are existentially quantified variables
 	 */
 	
 	public boolean hasNoFreeTerms() {
@@ -224,12 +223,12 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * List<Term> getVariables()
+	 * List<NewLiteral> getVariables()
 	 * 
 	 * @return the list of variables in the connected components
 	 */
 	
-	public List<Term> getVariables() {
+	public List<NewLiteral> getVariables() {
 		return variables;		
 	}
 
@@ -244,44 +243,38 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * List<Term> getFreeVariables()
+	 * List<NewLiteral> getFreeVariables()
 	 * 
 	 * @return the list of free variables in the connected component
 	 */
 	
-	public List<Term> getFreeVariables() {
+	public List<NewLiteral> getFreeVariables() {
 		return freeVariables;
 	}
 
 	/**
 	 * Loop: class representing loops of connected components
 	 * 
-	 * a loop is characterized by a term and a set of atoms involving only that term
+	 * a loop is characterized by a NewLiteral and a set of atoms involving only that NewLiteral
 	 * 
 	 * @author Roman Kontchakov
 	 *
 	 */
 	
 	static class Loop {
-		private final Term term;
+		private final NewLiteral term;
 		private Collection<Atom> atoms;
-//		private Collection<Edge> adjacentEdges;
 		private final boolean isExistentialVariable;
 		
-		public Loop(Term term, boolean isExistentialVariable) {
+		public Loop(NewLiteral term, boolean isExistentialVariable) {
 			this.term = term;
 			this.isExistentialVariable = isExistentialVariable;
 			this.atoms = new ArrayList<Atom>(10);
-//			this.adjacentEdges = new ArrayList<Edge>(10);
 		}
 		
-		public Term getTerm() {
+		public NewLiteral getTerm() {
 			return term;
 		}
-		
-//		public Collection<Edge> getAdjacentEdges() {
-//			return adjacentEdges;
-//		}
 		
 		public Collection<Atom> getAtoms() {
 			return atoms;
@@ -313,7 +306,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Edge: class representing edges of connected components
 	 * 
-	 * an edge is characterized by a pair of terms and a set of atoms involving only those terms
+	 * an edge is characterized by a pair of NewLiterals and a set of atoms involving only those NewLiterals
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -326,9 +319,7 @@ public class QueryConnectedComponent {
 		public Edge(Loop l0, Loop l1) {
 			this.bAtoms = new ArrayList<Atom>(10);
 			this.l0 = l0;
-//			l0.adjacentEdges.add(this);
 			this.l1 = l1;
-//			l1.adjacentEdges.add(this);
 		}
 
 		public Loop getLoop0() {
@@ -339,11 +330,11 @@ public class QueryConnectedComponent {
 			return l1;
 		}
 		
-		public Term getTerm0() {
+		public NewLiteral getTerm0() {
 			return l0.term;
 		}
 		
-		public Term getTerm1() {
+		public NewLiteral getTerm1() {
 			return l1.term;
 		}
 		
@@ -359,8 +350,12 @@ public class QueryConnectedComponent {
 			return bAtoms;
 		}
 		
-		public int size() {
-			return bAtoms.size() + l0.atoms.size() + l1.atoms.size();
+		public List<Atom> getAtoms() {
+			List<Atom> extAtoms = new ArrayList<Atom>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
+			extAtoms.addAll(bAtoms);
+			extAtoms.addAll(l0.atoms);
+			extAtoms.addAll(l1.atoms);
+			return extAtoms;
 		}
 		
 		@Override
@@ -370,17 +365,17 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * TermPair: a simple abstraction of *unordered* pair of terms (i.e., {t1, t2} and {t2, t1} are equal)
+	 * TermPair: a simple abstraction of *unordered* pair of NewLiterals (i.e., {t1, t2} and {t2, t1} are equal)
 	 * 
 	 * @author Roman Kontchakov
 	 *
 	 */
 	
 	private static class TermPair {
-		private final Term t0, t1;
+		private final NewLiteral t0, t1;
 		private final int hashCode;
 
-		public TermPair(Term t0, Term t1) {
+		public TermPair(NewLiteral t0, NewLiteral t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ t1.hashCode();
@@ -400,7 +395,7 @@ public class QueryConnectedComponent {
 
 		@Override
 		public String toString() {
-			return "term pair: {" + t0 + ", " + t1 + "}";
+			return "NewLiteral pair: {" + t0 + ", " + t1 + "}";
 		}
 		
 		@Override

@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
@@ -26,10 +26,10 @@ public class QueryFolding {
 	private IntersectionOfProperties properties; 
 	private Set<Loop> roots; 
 	private IntersectionOfConceptSets internalRootConcepts;
-	private Set<Term> internalRoots;
-	private Set<Term> internalDomain;
+	private Set<NewLiteral> internalRoots;
+	private Set<NewLiteral> internalDomain;
 	private List<TreeWitness> interior;
-	private TreeWitness.TermCover terms;
+	private TreeWitness.NewLiteralCover NewLiterals;
 	private boolean status;
 
 	private static final Logger log = LoggerFactory.getLogger(QueryFolding.class);
@@ -39,8 +39,8 @@ public class QueryFolding {
 		properties = new IntersectionOfProperties(); 
 		roots = new HashSet<Loop>(); 
 		internalRootConcepts = new IntersectionOfConceptSets(); 
-		internalRoots = new HashSet<Term>();
-		internalDomain = new HashSet<Term>();
+		internalRoots = new HashSet<NewLiteral>();
+		internalDomain = new HashSet<NewLiteral>();
 		interior = Collections.EMPTY_LIST; // in-place QueryFolding for one-step TreeWitnesses, 
 		                                   //             which have no interior TreeWitnesses
 		status = true;
@@ -52,8 +52,8 @@ public class QueryFolding {
 		properties = new IntersectionOfProperties(qf.properties.get()); 
 		roots = new HashSet<Loop>(qf.roots); 
 		internalRootConcepts = new IntersectionOfConceptSets(qf.internalRootConcepts.get()); 
-		internalRoots = new HashSet<Term>(qf.internalRoots);
-		internalDomain = new HashSet<Term>(qf.internalDomain);
+		internalRoots = new HashSet<NewLiteral>(qf.internalRoots);
+		internalDomain = new HashSet<NewLiteral>(qf.internalDomain);
 		interior = new LinkedList<TreeWitness>(qf.interior);
 		status = qf.status;
 	}
@@ -83,12 +83,12 @@ public class QueryFolding {
 		return false;
 	}
 	
-	public void newOneStepFolding(Term t) {
+	public void newOneStepFolding(NewLiteral t) {
 		properties.clear();
 		roots.clear();
 		internalRootConcepts.clear(); 
 		internalDomain = Collections.singleton(t);
-		terms = null;
+		NewLiterals = null;
 		status = true;		
 	}
 
@@ -96,11 +96,11 @@ public class QueryFolding {
 		properties.clear(); 
 		roots.clear(); 
 		internalRootConcepts = new IntersectionOfConceptSets(tw.getRootConcepts()); 
-		internalRoots = new HashSet<Term>(tw.getRoots());
-		internalDomain = new HashSet<Term>(tw.getDomain());
+		internalRoots = new HashSet<NewLiteral>(tw.getRoots());
+		internalDomain = new HashSet<NewLiteral>(tw.getDomain());
 		interior = new LinkedList<TreeWitness>();
 		interior.add(tw);
-		terms = null;
+		NewLiterals = null;
 		status = true;		
 	}
 
@@ -129,16 +129,16 @@ public class QueryFolding {
 		return interior;
 	}
 	
-	public TreeWitness.TermCover getTerms() {
-		if (terms == null) {
-			Set<Term> domain = new HashSet<Term>(internalDomain);
-			Set<Term> rootTerms = new HashSet<Term>();
+	public TreeWitness.NewLiteralCover getTerms() {
+		if (NewLiterals == null) {
+			Set<NewLiteral> domain = new HashSet<NewLiteral>(internalDomain);
+			Set<NewLiteral> rootNewLiterals = new HashSet<NewLiteral>();
 			for (Loop l : roots)
-				rootTerms.add(l.getTerm());
-			domain.addAll(rootTerms);
-			terms = new TreeWitness.TermCover(domain, rootTerms);
+				rootNewLiterals.add(l.getTerm());
+			domain.addAll(rootNewLiterals);
+			NewLiterals = new TreeWitness.NewLiteralCover(domain, rootNewLiterals);
 		}
-		return terms;
+		return NewLiterals;
 	}
 	
 	public TreeWitness getTreeWitness(Collection<TreeWitnessGenerator> twg, Collection<Edge> edges) {

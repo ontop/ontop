@@ -3,17 +3,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.PredicateAtomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.PriorityQueue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +31,23 @@ public class DatalogQueryServices {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
+
+	// to be taken from it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder
+	
+	private static Atom getFreshAtom(Atom a, String suffix) {
+		List<NewLiteral> termscopy = new ArrayList<NewLiteral>(a.getArity());
+		
+		for (NewLiteral t : a.getTerms()) {
+			if ((t instanceof Variable) && !(t instanceof AnonymousVariable)) {
+				Variable v = (Variable)t;
+				termscopy.add(fac.getVariable(v.getName() + suffix));
+			}
+			else
+				termscopy.add(t.clone());
+		}
+		return fac.getAtom(a.getPredicate(), termscopy);
+		
+	}
 	
 	public static DatalogProgram plugInDefinitions(DatalogProgram dp, DatalogProgram defs) {
 		
@@ -67,12 +84,31 @@ public class DatalogQueryServices {
 
 			boolean replaced = false;
 			if (chosenDefinitions != null) {
-				for (CQIE rule : chosenDefinitions) {
-					CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);
-					if (newquery != null) {
+				int maxlen = 0;
+				for (Variable v : query.getReferencedVariables())
+					maxlen = Math.max(maxlen, v.getName().length());
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < maxlen; i++)
+					sb.append("t");
+				String suffix = sb.toString();
+				
+				for (CQIE rule : chosenDefinitions) {				
+					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
+					Map<Variable, NewLiteral> mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
+																	query.getBody().get(chosenAtomIdx));
+					if (mgu != null) {
+						CQIE newquery = query.clone();
+						List<Atom> newbody = newquery.getBody();
+						newbody.remove(chosenAtomIdx);
+						for (Atom a : rule.getBody())   
+							newbody.add(getFreshAtom(a, suffix));
+												
+						// newquery contains only cloned atoms, so it is safe to unify "in-place"
+						Unifier.applyUnifier(newquery, mgu, false);
 						queue.add(reduce(newquery));
 						replaced = true;
 					}
+
 				}						
 			}
 			if (!replaced) {
@@ -118,19 +154,19 @@ public class DatalogQueryServices {
 			while (i.hasNext()) { 
 				Atom a = i.next();
 				if (a.getPredicate().equals(OBDAVocabulary.EQ)) {
-					Map<Variable, Term> substituition = new HashMap<Variable, Term>(1);
-					Term t0 = a.getTerm(0); 
-					Term t1 = a.getTerm(1); 					
-					if (t0 instanceof Variable)
-						substituition.put((Variable)t0, t1);
-					else if (t1 instanceof Variable)
+					Map<Variable, NewLiteral> substituition = new HashMap<Variable, NewLiteral>(1);
+					NewLiteral t0 = a.getTerm(0); 
+					NewLiteral t1 = a.getTerm(1); 					
+					if (t1 instanceof Variable)
 						substituition.put((Variable)t1, t0);
+					else if (t0 instanceof Variable)
+						substituition.put((Variable)t0, t1);
 					else
 						substituition = null;
 					if (substituition != null) {
 						//log.debug("REMOVE " + a + " IN " + q);
 						i.remove();
-						Unifier.applyUnifierInPlace(q, substituition);
+						Unifier.applyUnifier(q, substituition, false);
 						//log.debug(" RESULT: " + q);
 						replacedEQ = true;
 						break;
@@ -153,25 +189,25 @@ public class DatalogQueryServices {
 	// replace all existentially quantified variables that occur once with _
 	//
 	
-	private static void makeSingleOccurrencesAnonymous(List<Atom> body, List<Term> freeVariables) {
-		Map<Term, Atom> occurrences = new HashMap<Term, Atom>();
+	private static void makeSingleOccurrencesAnonymous(List<Atom> body, List<NewLiteral> freeVariables) {
+		Map<NewLiteral, Atom> occurrences = new HashMap<NewLiteral, Atom>();
 		for (Atom a : body)
-			for (Term t : a.getTerms())
+			for (NewLiteral t : a.getTerms())
 				if ((t instanceof Variable) && !freeVariables.contains(t))
 					if (occurrences.containsKey(t))
 						occurrences.put(t, null);
 					else
 						occurrences.put(t, a);
 		
-		for (Map.Entry<Term, Atom> e : occurrences.entrySet()) 
+		for (Map.Entry<NewLiteral, Atom> e : occurrences.entrySet()) 
 			if (e.getValue() != null) {
-				ListIterator<Term> i = e.getValue().getTerms().listIterator();
+				ListIterator<NewLiteral> i = e.getValue().getTerms().listIterator();
 				while (i.hasNext()) {
-					Term t = i.next();
+					NewLiteral t = i.next();
 					if (t.equals(e.getKey()))
 						i.set(fac.getNondistinguishedVariable());
 				}
-				((PredicateAtomImpl)e.getValue()).listChanged();
+//				((PredicateAtomImpl)e.getValue()).listChanged();
 		}
 		
 		Iterator<Atom> i = body.iterator();
@@ -195,6 +231,4 @@ public class DatalogQueryServices {
 			}
 		}		
 	}
-	
-
 }

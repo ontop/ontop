@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
@@ -36,7 +36,7 @@ public class TreeWitnessSet {
 	// working lists (may all be nulls)
 	private List<TreeWitness> mergeable;
 	private Queue<TreeWitness> delta;
-	private Map<TreeWitness.TermCover, TreeWitness> twsCache;
+	private Map<TreeWitness.NewLiteralCover, TreeWitness> twsCache;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	
@@ -67,7 +67,7 @@ public class TreeWitnessSet {
 		QueryFolding qf = new QueryFolding(propertiesCache); // in-place query folding, so copying is required when creating a tree witness
 		
 		for (Loop loop : cc.getQuantifiedVariables()) {
-			Term v = loop.getTerm();
+			NewLiteral v = loop.getTerm();
 			log.debug("QUANTIFIED VARIABLE " + v); 
 			qf.newOneStepFolding(v);
 			
@@ -86,7 +86,7 @@ public class TreeWitnessSet {
 				// tws cannot contain duplicates by construction, so no caching (even negative)
 				Collection<TreeWitnessGenerator> twg = getTreeWitnessGenerators(qf); 
 				if (twg != null) { 
-					// no need to copy the query folding: it creates all temporary objects anyway (including terms)
+					// no need to copy the query folding: it creates all temporary objects anyway (including NewLiterals)
 					addTWS(qf.getTreeWitness(twg, cc.getEdges()));
 				}
 			}
@@ -105,7 +105,7 @@ public class TreeWitnessSet {
 			}
 		
 		delta = new LinkedList<TreeWitness>();
-		twsCache = new HashMap<TreeWitness.TermCover, TreeWitness>();
+		twsCache = new HashMap<TreeWitness.NewLiteralCover, TreeWitness>();
 
 		while (!working.isEmpty()) {
 			while (!working.isEmpty()) {
@@ -158,10 +158,10 @@ public class TreeWitnessSet {
 
 			saturated = false; 
 
-			Term rootTerm = rootLoop.getTerm();
-			Term internalTerm = internalLoop.getTerm();
+			NewLiteral rootNewLiteral = rootLoop.getTerm();
+			NewLiteral internalNewLiteral = internalLoop.getTerm();
 			for (TreeWitness tw : mergeable)  
-				if (tw.getRoots().contains(rootTerm) && tw.getDomain().contains(internalTerm)) {
+				if (tw.getRoots().contains(rootNewLiteral) && tw.getDomain().contains(internalNewLiteral)) {
 					log.debug("    ATTACHING A TREE WITNESS " + tw);
 					saturateTreeWitnesses(qf.extend(tw)); 
 				} 
@@ -332,8 +332,8 @@ public class TreeWitnessSet {
 	
 	
 	static class PropertiesCache {
-		private Map<TermOrderedPair, Set<Property>> propertiesCache = new HashMap<TermOrderedPair, Set<Property>>();
-		private Map<Term, IntersectionOfConceptSets> conceptsCache = new HashMap<Term, IntersectionOfConceptSets>();
+		private Map<NewLiteralOrderedPair, Set<Property>> propertiesCache = new HashMap<NewLiteralOrderedPair, Set<Property>>();
+		private Map<NewLiteral, IntersectionOfConceptSets> conceptsCache = new HashMap<NewLiteral, IntersectionOfConceptSets>();
 
 		private final TreeWitnessReasonerLite reasoner;
 		
@@ -342,7 +342,7 @@ public class TreeWitnessSet {
 		}
 		
 		public IntersectionOfConceptSets getLoopConcepts(Loop loop) {
-			Term t = loop.getTerm();
+			NewLiteral t = loop.getTerm();
 			IntersectionOfConceptSets subconcepts = conceptsCache.get(t); 
 			if (subconcepts == null) {				
 				subconcepts = reasoner.getSubConcepts(loop.getAtoms());
@@ -352,8 +352,8 @@ public class TreeWitnessSet {
 		}
 		
 		
-		public Set<Property> getEdgeProperties(Edge edge, Term root, Term nonroot) {
-			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
+		public Set<Property> getEdgeProperties(Edge edge, NewLiteral root, NewLiteral nonroot) {
+			NewLiteralOrderedPair idx = new NewLiteralOrderedPair(root, nonroot);
 			Set<Property> properties = propertiesCache.get(idx);			
 			if (properties == null) {
 				for (Atom a : edge.getBAtoms()) {
@@ -378,11 +378,11 @@ public class TreeWitnessSet {
 		}
 	}
 	
-	private static class TermOrderedPair {
-		private final Term t0, t1;
+	private static class NewLiteralOrderedPair {
+		private final NewLiteral t0, t1;
 		private final int hashCode;
 
-		public TermOrderedPair(Term t0, Term t1) {
+		public NewLiteralOrderedPair(NewLiteral t0, NewLiteral t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ (t1.hashCode() << 4);
@@ -390,8 +390,8 @@ public class TreeWitnessSet {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof TermOrderedPair) {
-				TermOrderedPair other = (TermOrderedPair) o;
+			if (o instanceof NewLiteralOrderedPair) {
+				NewLiteralOrderedPair other = (NewLiteralOrderedPair) o;
 				return (this.t0.equals(other.t0) && this.t1.equals(other.t1));
 			}
 			return false;
@@ -399,7 +399,7 @@ public class TreeWitnessSet {
 
 		@Override
 		public String toString() {
-			return "term pair: (" + t0 + ", " + t1 + ")";
+			return "NewLiteral pair: (" + t0 + ", " + t1 + ")";
 		}
 		
 		@Override
@@ -457,10 +457,7 @@ public class TreeWitnessSet {
 							saturated = false;
 					}		 		
 			} 									
-		}
-		
+		}	
 		return generators;
 	}
-	
-	
 }

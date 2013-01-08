@@ -59,6 +59,10 @@ public class TreeWitnessReasonerLite {
 
 	public static final OClass owlThing = ontFactory.createClass("http://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing");	
 	
+	public OntologyFactory getOntologyFactory() {
+		return ontFactory;
+	}
+	
 	public void setTBox(Ontology ontology) {
 
 		this.tbox = ontology;
@@ -390,6 +394,5 @@ public class TreeWitnessReasonerLite {
 		public void clear() {
 			set = null;
 		}
-	}
-	
+	}	
 }

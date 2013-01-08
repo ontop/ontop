@@ -17,7 +17,13 @@ public class TypeMapper {
 
 	static {
 		typeMapper = new TypeMapper();
-		typeMapper.put(Types.VARCHAR, dfac.getDataTypePredicateString());
+		typeMapper.put(Types.VARCHAR, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.CHAR, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.LONGNVARCHAR, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.LONGVARCHAR, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.LONGVARCHAR, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.NVARCHAR, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.NCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.INTEGER, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.BIGINT, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.SMALLINT, dfac.getDataTypePredicateInteger());
@@ -29,7 +35,6 @@ public class TypeMapper {
 		typeMapper.put(Types.DATE, dfac.getDataTypePredicateDateTime());
 		typeMapper.put(Types.TIMESTAMP, dfac.getDataTypePredicateDateTime());
 		typeMapper.put(Types.BOOLEAN, dfac.getDataTypePredicateBoolean());
-		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBoolean());
 		typeMapper.put(Types.BIT, dfac.getDataTypePredicateBoolean());
 	}
 

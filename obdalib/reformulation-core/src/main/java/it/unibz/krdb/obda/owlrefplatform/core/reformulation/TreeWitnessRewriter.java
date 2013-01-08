@@ -548,6 +548,5 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				log.debug("SIMPLIFIED DP FOR " + extAtom + " IS " + dp);
 			}
 		}
-	}
-	
+	}	
 }
