@@ -765,7 +765,7 @@ public class OWLAPI3Translator {
 			URI uri = propExp.getNamedProperty().getIRI().toURI();
 			Predicate role = dfac.getObjectPropertyPredicate(uri);
 
-			if (propExp instanceof OWLInverseObjectPropertiesAxiom) {
+			if (propExp instanceof OWLObjectInverseOf) {
 				cd = ofac.getPropertySomeRestriction(role, true);
 			} else {
 				cd = ofac.getPropertySomeRestriction(role, false);
