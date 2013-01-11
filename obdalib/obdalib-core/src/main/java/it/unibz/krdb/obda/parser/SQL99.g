@@ -569,15 +569,19 @@ boolean_term
   : boolean_factor (AND { booleanExp.putSpecification(new AndOperator()); } boolean_factor)*
   ;
 
-// Limitation: No support for parenthesis!
 boolean_factor
   : predicate { booleanExp.putSpecification($predicate.value); }
+  | parenthesized_boolean_value_expression
   ;
  
 predicate returns [IPredicate value]
   : comparison_predicate { $value = $comparison_predicate.value; }
   | null_predicate { $value = $null_predicate.value; }
 //  | in_predicate
+  ;
+
+parenthesized_boolean_value_expression
+  : LPAREN boolean_value_expression RPAREN
   ;
   
 comparison_predicate returns [ComparisonPredicate value]
