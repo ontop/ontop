@@ -96,7 +96,7 @@ source		select DATE, STOCKID from STOCKBOOKLIST
 
 mappingId	mapping-dealer
 target		:getPersonObj($CLIENTID) a :Dealer . 
-source		select CLIENTID from BROKER,CLIENT,BROKERWORKSFOR where CLIENT.ID = BROKER.ID and BROKERID=BROKER.ID and CLIENT.ID=CLIENTID
+source		select CLIENTID from BROKER,CLIENT,BROKERWORKSFOR where ( ( CLIENT.ID = BROKER.ID and BROKERID=BROKER.ID ) and CLIENT.ID=CLIENTID )
 
 mappingId	mapping-offers
 target		:getTransactionObj($ID) a :Offer . 
