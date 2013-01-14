@@ -9,7 +9,6 @@
 	</parent>
 	<artifactId>quest-sparql-compliance</artifactId>
 
-
 	<dependencies>
 
 		<dependency>
