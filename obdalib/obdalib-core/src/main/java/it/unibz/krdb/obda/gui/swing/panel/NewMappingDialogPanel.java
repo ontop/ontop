@@ -519,7 +519,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		releaseResultset();
 
 		final String targetQueryString = makePlainText(txtTargetQuery.getText());
-		final String sourceQueryString = makePlainText(txtSourceQuery.getText());
+		final String sourceQueryString = txtSourceQuery.getText();
 
 		if (txtMappingID.getText().trim().length() == 0) {
 			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);

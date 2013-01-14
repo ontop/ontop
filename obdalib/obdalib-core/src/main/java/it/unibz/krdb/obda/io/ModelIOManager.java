@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
@@ -290,13 +291,18 @@ public class ModelIOManager {
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
             writer.write(Label.target.name() + "\t\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
-            writer.write(Label.source.name() + "\t\t" + mapping.getSourceQuery() + "\n");
+            writer.write(Label.source.name() + "\t\t" + printSourceQuery(mapping.getSourceQuery()) + "\n");
             needLineBreak = true;
         }
         writer.write(END_COLLECTION_SYMBOL);
         writer.write("\n\n");
     }
 
+    private String printSourceQuery(OBDAQuery query) {
+    	String str = convertTabToSpaces(query.toString());
+    	return str.replaceAll("\n", "\n\t\t\t");
+    }
+    
     /*
      * Helper methods related to load file.
      */
@@ -413,22 +419,48 @@ public class ModelIOManager {
     private void readMappingDeclaration(LineNumberReader reader, URI dataSourceUri) throws IOException {
         String line = "";
         String mappingId = "";
-        String sourceQuery = "";
+        String currentLabel = ""; // the reader is working on which label
+        StringBuffer sourceQuery = null;
         CQIE targetQuery = null;
+        int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
+        
         while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
             int lineNumber = reader.getLineNumber();
             if (line.isEmpty()) {
-                continue; // ignore blank line
+            	if (!mappingId.isEmpty()) {
+	            	// Save the mapping to the model (if valid) at this point
+	                if (isMappingValid) {
+	                    saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);
+	                    mappingId = "";
+	                    sourceQuery = null;
+	                    targetQuery = null;
+	                } else {
+	                	isMappingValid = true;
+	                }
+            	}
+            	continue;
             }
-            String[] tokens = line.split("[\t| ]+", 2); // split the input line to two parts
-            if (tokens[0].equals(Label.mappingId.name())) {
+            
+            String[] tokens = line.split("[\t| ]+", 2);
+            if (!tokens[0].trim().isEmpty()) {
+            	currentLabel = tokens[0];
+            	wsCount = getSeparatorLength(line, currentLabel.length());
+            } else {
+            	if (currentLabel.equals(Label.source.name())) {
+            		int beginIndex = wsCount + 1; // add one tab to replace the "source" label
+            		String value = line.substring(beginIndex, line.length());
+            		tokens = new String[]{ tokens[0], convertTabToSpaces(value) };
+            	}       	
+            }
+            
+            if (currentLabel.equals(Label.mappingId.name())) {
                 mappingId = tokens[1];
                 if (mappingId.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, Label.mappingId, InvalidMappingException.MAPPING_ID_IS_BLANK));
                     isMappingValid = false;
                 }
-            } else if (tokens[0].equals(Label.target.name())) {
+            } else if (currentLabel.equals(Label.target.name())) {
                 String targetString = tokens[1];
                 if (targetString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.TARGET_QUERY_IS_BLANK));
@@ -455,26 +487,43 @@ public class ModelIOManager {
                         isMappingValid = false;
                     }
                 }
-            } else if (tokens[0].equals(Label.source.name())) {
-                sourceQuery = tokens[1];
-                if (sourceQuery.isEmpty()) { // empty or not
+            } else if (currentLabel.equals(Label.source.name())) {
+                String sourceString = tokens[1];
+                if (sourceString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.SOURCE_QUERY_IS_BLANK));
                     isMappingValid = false;
                 }
-                
-                // Save the mapping to the model (if valid) at this point
-                if (isMappingValid) {
-                    saveMapping(dataSourceUri, mappingId, sourceQuery, targetQuery);
+                // Build the source query string.
+                if (sourceQuery == null) {
+                	sourceQuery = new StringBuffer();
+                	sourceQuery.append(sourceString);
+                } else {
+                	sourceQuery.append("\n");
+                	sourceQuery.append(sourceString);
                 }
-                isMappingValid = true; // reset the flag
             } else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);
                 throw new IOException(msg);
             }
         }
     }
-    
-    private void register(List<Indicator> list, Indicator indicator) {
+
+	private int getSeparatorLength(String input, int beginIndex) {
+		int count = 0;
+		for (int i = beginIndex; i < input.length(); i++) {
+			if (input.charAt(i) != '\u0009' || input.charAt(i) != '\t') { // a tab
+				break;
+			}
+			count++;
+		}
+		return count;
+	}
+	
+	private String convertTabToSpaces(String input) {
+		return input.replaceAll("\t", "   ");
+	}
+
+	private void register(List<Indicator> list, Indicator indicator) {
         list.add(indicator);
     }
 
