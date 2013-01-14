@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDAException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
@@ -18,15 +19,19 @@ public class QuestConnection implements OBDAConnection {
 	protected Connection conn;
 
 	private Quest questinstance;
+	
+	private boolean isClosed;
 
 	public QuestConnection(Quest questisntance, Connection connection) {
 		this.questinstance = questisntance;
 		this.conn = connection;
+		isClosed = false;
 	}
 
 	@Override
 	public void close() throws OBDAException {
 		try {
+			isClosed = true;
 			this.conn.close();
 		} catch (Exception e) {
 			OBDAException obdaException = new OBDAException(e.getMessage());
@@ -39,13 +44,35 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public QuestStatement createStatement() throws OBDAException {
 		try {
-			QuestStatement st = new QuestStatement(this.questinstance, this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-					java.sql.ResultSet.CONCUR_READ_ONLY));
-			return st;
-		} catch (Exception e) {
-			OBDAException obdaException = new OBDAException(e.getMessage());
-			obdaException.setStackTrace(e.getStackTrace());
-			throw obdaException;
+			if (!isClosed) {
+				QuestStatement st = new QuestStatement(this.questinstance,
+						this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+								java.sql.ResultSet.CONCUR_READ_ONLY));
+				return st;
+			} else
+				throw new OBDAException("Connection was closed.");
+		} catch (SQLException e) {
+			// statement was closed, connection broken, recreate
+			try {
+				if (conn.isClosed()) {
+					//recreate sql connection
+					conn = questinstance.getSQLConnection();
+					isClosed = false;
+					//create statement again once
+					QuestStatement st = new QuestStatement(this.questinstance,
+							this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+									java.sql.ResultSet.CONCUR_READ_ONLY));
+					return st;
+				} else {
+					OBDAException obdaException = new OBDAException(e.getMessage());
+					obdaException.setStackTrace(e.getStackTrace());
+					throw obdaException;
+				}
+			} catch (SQLException e1) {
+				OBDAException obdaException = new OBDAException(e1.getMessage());
+				obdaException.setStackTrace(e1.getStackTrace());
+				throw obdaException;
+			}
 		}
 
 	}
@@ -87,7 +114,8 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public boolean isClosed() throws OBDAException {
 		try {
-			return conn.isClosed();
+			isClosed = conn.isClosed();
+			return isClosed;
 		} catch (Exception e) {
 			OBDAException obdaException = new OBDAException(e.getMessage());
 			obdaException.setStackTrace(e.getStackTrace());

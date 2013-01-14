@@ -973,8 +973,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @return
 	 * @throws OBDAException
 	 */
-	public QuestConnection getConnection() throws OBDAException {
-
+	protected Connection getSQLConnection() throws OBDAException{
 		Connection conn;
 
 		String url = obdaSource
@@ -999,7 +998,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			throw new OBDAException(e.getMessage());
 		}
 
-		return new QuestConnection(this, conn);
+		return conn;
+	}
+	
+	public QuestConnection getConnection() throws OBDAException {
+	
+		return new QuestConnection(this, getSQLConnection());
 	}
 
 	public void setABox(Iterator<Assertion> owlapi3aBoxIterator) {

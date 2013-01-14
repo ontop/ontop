@@ -188,8 +188,26 @@ public class QuestStatement implements OBDAStatement {
 						}
 						// Execute the SQL query string
 						executingSQL = true;
-						ResultSet set = sqlstatement.executeQuery(sql);
-
+						ResultSet set = null;
+						try{
+						set = sqlstatement.executeQuery(sql);
+						}
+						catch(SQLException e)
+						{
+							//bring back operation
+							//statement was created, but in the meantime connection broke down
+							//recover connection
+							if (e.getMessage().startsWith("This statement"))
+							{
+								conn = questInstance.getConnection();
+								log.debug("Query execution interrupted. Recovering connection to db: "+!conn.isClosed());
+								sqlstatement = conn.createStatement().sqlstatement;
+								set  = sqlstatement.executeQuery(sql);
+								log.debug("Recovery finished successfully: "+!set.isClosed());
+							}
+							else
+								throw e;
+						}
 						// Store the SQL result to application result set.
 						if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set,
