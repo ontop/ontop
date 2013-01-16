@@ -506,6 +506,10 @@ public class ModelIOManager {
                 throw new IOException(msg);
             }
         }
+        // Save the last mapping entry to the model
+        if (!mappingId.isEmpty() && isMappingValid) {
+            saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);
+        }
     }
 
 	private int getSeparatorLength(String input, int beginIndex) {
