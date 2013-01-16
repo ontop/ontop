@@ -13,10 +13,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.utils.IDGenerator;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -33,8 +34,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static final long serialVersionUID = 1851116693137470887L;
 	private static OBDADataFactory instance = null;
 	
-	private static int mappingIDCounter = 0;
-
 	protected OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
@@ -210,10 +209,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql,
-			OBDAQuery targetQuery) {
-		String id = new String("MAPID" + mappingIDCounter);
-		mappingIDCounter += 1;
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery) {
+		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
 
