@@ -985,27 +985,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * CONCAT
 			 */
 			ValueConstant c = (ValueConstant) t;
+			
+			if (c.getValue().equals("{}")) {
+				return getSQLString(ov.getTerms().get(1), index, false);
+			}
+
 			StringTokenizer tokenizer = new StringTokenizer(c.getValue(), "{}");
-			String functionString = jdbcutil.getSQLLexicalForm(tokenizer
-					.nextToken());
+			
+			String nextToken = tokenizer.nextToken();
+			String functionString = jdbcutil.getSQLLexicalForm(nextToken);
 			List<String> vex = new LinkedList<String>();
-			int termIndex = 1;
 			
 			/*
 			 * New we concat the rest of the function, note that if there is only 1 element
 			 * there is nothing to concatenate
 			 */
-			if (ov.getTerms().size() > 1)
-				do {
+			if (ov.getTerms().size() > 1) {
+				for (int termIndex = 1; termIndex < ov.getTerms().size(); termIndex++) {
 					NewLiteral currentTerm = ov.getTerms().get(termIndex);
 					vex.add(getSQLString(currentTerm, index, false));
 					if (tokenizer.hasMoreTokens()) {
-						vex.add(jdbcutil.getSQLLexicalForm(tokenizer
-								.nextToken()));
+						vex.add(jdbcutil.getSQLLexicalForm(nextToken));
 					}
 					termIndex += 1;
-				} while (tokenizer.hasMoreElements()
-						|| termIndex < ov.getTerms().size());
+				}
+			}
 			String[] params = new String[vex.size() + 1];
 			int i = 0;
 			params[i] = functionString;
