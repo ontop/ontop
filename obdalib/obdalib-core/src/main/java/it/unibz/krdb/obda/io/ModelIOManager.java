@@ -427,6 +427,9 @@ public class ModelIOManager {
         
         while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
             int lineNumber = reader.getLineNumber();
+            if (isCommentLine(line)) {
+            	continue; // skip the comment line
+            }
             if (line.isEmpty()) {
             	if (!mappingId.isEmpty()) {
 	            	// Save the mapping to the model (if valid) at this point
