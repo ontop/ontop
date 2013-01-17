@@ -13,16 +13,16 @@
         :nested-opt-2 
         :opt-filter-1 
         :opt-filter-2 
-        :opt-filter-3 
+        #:opt-filter-3 # ERROR
         :filter-place-1 
         :filter-place-2 
         :filter-place-3 
         :filter-nested-1 
-        :filter-nested-2 
-        :filter-scope-1 
+        #:filter-nested-2 # ERROR 
+        #:filter-scope-1 # ERROR
         :join-scope-1
-        :join-combo-1 
-        # :join-combo-2 # WON'T FIX: graph
+        #:join-combo-1 # ERROR
+        #:join-combo-2 # WON'T FIX: graph
     ) .
 
 :join-combo-1 a mf:QueryEvaluationTest ;

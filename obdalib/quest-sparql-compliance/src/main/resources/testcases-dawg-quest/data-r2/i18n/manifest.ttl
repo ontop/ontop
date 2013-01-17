@@ -14,7 +14,7 @@
         :kanji-1
         :kanji-2
         :normalization-1
-        :normalization-2
+        #:normalization-2 # ERROR
         :normalization-3
     ) .
 

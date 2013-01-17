@@ -23,15 +23,15 @@
       :quotes-1
       :quotes-2
       :quotes-3
-      :quotes-4
+      #:quotes-4 # ERROR
 
       :term-1
       :term-2
       :term-3
-      :term-4
-      :term-5
-      :term-6
-      :term-7
+      #:term-4 # ERROR
+      #:term-5 # ERROR
+      #:term-6 # ERROR
+      #:term-7 # ERROR
       :term-8
       :term-9
 

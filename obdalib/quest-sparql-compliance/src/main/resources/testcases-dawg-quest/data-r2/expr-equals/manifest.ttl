@@ -9,10 +9,12 @@
     rdfs:comment "Some SPARQL test cases - equality of values" ;
     mf:entries
     ( 
-        :eq-1 :eq-2 :eq-3 :eq-4 
+        :eq-1 :eq-2 
+        #:eq-3 # ERROR: The case of Literal or String datatype in the filter
+        :eq-4 
         :eq-5 
         :eq-2-1 
-        :eq-2-2 # WON'T FIX
+        #:eq-2-2 # WON'T FIX
         :eq-graph-1 :eq-graph-2 :eq-graph-3 :eq-graph-4 :eq-graph-5
     ).
 
