@@ -5,10 +5,10 @@ import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -327,7 +327,12 @@ public class TMappingProcessor implements Serializable {
 //		System.out.println(originalMappings.toString());
 
 		Map<Predicate, Set<CQIE>> mappingIndex = getMappingIndex(originalMappings);
-
+		
+		/*
+		 * Merge original mappings that have similar source query.
+		 */
+		optimizeMappingProgram(mappingIndex);
+		
 		/*
 		 * Processing mappings for all Properties
 		 */
@@ -354,7 +359,7 @@ public class TMappingProcessor implements Serializable {
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = currentProperty.getPredicate();
-			Set<CQIE> currentNodeMappings = mappingIndex.get(currentPredicate);
+			Set<CQIE> currentNodeMappings = mappingIndex.get(currentPredicate);	
 			if (currentNodeMappings == null) {
 				currentNodeMappings = new LinkedHashSet<CQIE>();
 				mappingIndex.put(currentPredicate, currentNodeMappings);
@@ -573,6 +578,20 @@ public class TMappingProcessor implements Serializable {
 
 //		System.out.println(tmappingsProgram);
 		return tmappingsProgram;
+	}
+
+	private void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
+		for (Predicate p : mappingIndex.keySet()) {
+			Set<CQIE> similarMappings = mappingIndex.get(p);
+			Set<CQIE> result = new HashSet<CQIE>();
+			Iterator<CQIE> iterSimilarMappings = similarMappings.iterator();
+			while (iterSimilarMappings.hasNext()) {
+				CQIE candidate = iterSimilarMappings.next();
+				iterSimilarMappings.remove();
+				mergeMappingsWithCQC(result, candidate);
+			}
+			mappingIndex.put(p, result);
+		}
 	}
 
 	private List<DAGNode> getLeafs(Collection<DAGNode> nodes) {
