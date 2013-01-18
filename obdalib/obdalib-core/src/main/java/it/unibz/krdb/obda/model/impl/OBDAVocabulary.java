@@ -6,7 +6,11 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class OBDAVocabulary {
+	
+	private static IRIFactory fact = OBDADataFactoryImpl.getIRIFactory();
 
 	/* Constants */
 
@@ -32,16 +36,16 @@ public class OBDAVocabulary {
 	/* Numeric operation predicates */
 	
 	public static final Predicate MINUS = new NumericalOperationPredicateImpl(
-			URI.create(MINUS_STR), 1);
+			fact.construct(MINUS_STR), 1);
 	
 	public static final Predicate ADD = new NumericalOperationPredicateImpl(
-			URI.create(ADD_STR), 2);
+			fact.construct(ADD_STR), 2);
 	
 	public static final Predicate SUBSTRACT = new NumericalOperationPredicateImpl(
-			URI.create(SUBSTRACT_STR), 2);
+			fact.construct(SUBSTRACT_STR), 2);
 	
 	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl(
-			URI.create(MULTIPLY_STR), 2);
+			fact.construct(MULTIPLY_STR), 2);
 	
 	/* Boolean predicate URIs */
 
@@ -72,40 +76,40 @@ public class OBDAVocabulary {
 	/* Boolean predicates */
 
 	public static final Predicate AND = new BooleanOperationPredicateImpl(
-			URI.create(strAND), 2);
+			fact.construct(strAND), 2);
 
 	public static final Predicate EQ = new BooleanOperationPredicateImpl(
-			URI.create(strEQ), 2);
+			fact.construct(strEQ), 2);
 
 	public static final Predicate GTE = new BooleanOperationPredicateImpl(
-			URI.create(strGTE), 2);
+			fact.construct(strGTE), 2);
 
 	public static final Predicate GT = new BooleanOperationPredicateImpl(
-			URI.create(strGT), 2);
+			fact.construct(strGT), 2);
 
 	public static final Predicate LTE = new BooleanOperationPredicateImpl(
-			URI.create(strLTE), 2);
+			fact.construct(strLTE), 2);
 
 	public static final Predicate LT = new BooleanOperationPredicateImpl(
-			URI.create(strLT), 2);
+			fact.construct(strLT), 2);
 
 	public static final Predicate NEQ = new BooleanOperationPredicateImpl(
-			URI.create(strNEQ), 2);
+			fact.construct(strNEQ), 2);
 
 	public static final Predicate NOT = new BooleanOperationPredicateImpl(
-			URI.create(strNOT), 1);
+			fact.construct(strNOT), 1);
 
 	public static final Predicate OR = new BooleanOperationPredicateImpl(
-			URI.create(strOR), 2);
+			fact.construct(strOR), 2);
 
 	public static final Predicate IS_NULL = new BooleanOperationPredicateImpl(
-			URI.create(strIS_NULL), 1);
+			fact.construct(strIS_NULL), 1);
 
 	public static final Predicate IS_NOT_NULL = new BooleanOperationPredicateImpl(
-			URI.create(strIS_NOT_NULL), 1);
+			fact.construct(strIS_NOT_NULL), 1);
 	
 	public static final Predicate IS_TRUE = new BooleanOperationPredicateImpl(
-			URI.create(strIS_TRUE), 1);
+			fact.construct(strIS_TRUE), 1);
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
@@ -132,29 +136,29 @@ public class OBDAVocabulary {
 	/* Data type predicates */
 
 	public static final Predicate RDFS_LITERAL = new DataTypePredicateImpl(
-			URI.create(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL });
+			fact.construct(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL });
 
 	public static final Predicate RDFS_LITERAL_LANG = new DataTypePredicateImpl(
-			URI.create(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL,
+			fact.construct(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL,
 					COL_TYPE.LITERAL });
 
 	public static final Predicate XSD_STRING = new DataTypePredicateImpl(
-			URI.create(XSD_STRING_URI), COL_TYPE.STRING);
+			fact.construct(XSD_STRING_URI), COL_TYPE.STRING);
 
 	public static final Predicate XSD_INTEGER = new DataTypePredicateImpl(
-			URI.create(XSD_INTEGER_URI), COL_TYPE.INTEGER);
+			fact.construct(XSD_INTEGER_URI), COL_TYPE.INTEGER);
 
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
-			URI.create(XSD_DECIMAL_URI), COL_TYPE.DECIMAL);
+			fact.construct(XSD_DECIMAL_URI), COL_TYPE.DECIMAL);
 
 	public static final Predicate XSD_DOUBLE = new DataTypePredicateImpl(
-			URI.create(XSD_DOUBLE_URI), COL_TYPE.DOUBLE);
+			fact.construct(XSD_DOUBLE_URI), COL_TYPE.DOUBLE);
 
 	public static final Predicate XSD_DATETIME = new DataTypePredicateImpl(
-			URI.create(XSD_DATETIME_URI), COL_TYPE.DATETIME);
+			fact.construct(XSD_DATETIME_URI), COL_TYPE.DATETIME);
 
 	public static final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(
-			URI.create(XSD_BOOLEAN_URI), COL_TYPE.BOOLEAN);
+			fact.construct(XSD_BOOLEAN_URI), COL_TYPE.BOOLEAN);
 
 	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
 			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE,
@@ -198,12 +202,12 @@ public class OBDAVocabulary {
 	public static final String QUEST_TRIPLE_STR = "triple";
 
 	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl(
-			URI.create(QUEST_TRIPLE_STR), 3, new COL_TYPE[3]);
+			fact.construct(QUEST_TRIPLE_STR), 3, new COL_TYPE[3]);
 
 	public static final String QUEST_CAST_STR = "cast";
 
 	public static final Predicate QUEST_CAST = new PredicateImpl(
-			URI.create(QUEST_CAST_STR), 2, new COL_TYPE[2]);
+			fact.construct(QUEST_CAST_STR), 2, new COL_TYPE[2]);
 
 	/* SPARQL Algebra vocabulary */
 
@@ -232,35 +236,35 @@ public class OBDAVocabulary {
 	/* SPARQL Algebra predicate */
 
 	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl(
-			URI.create(SPARQL_JOIN_URI), COL_TYPE.STRING);
+			fact.create(SPARQL_JOIN_URI), COL_TYPE.STRING);
 
 	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl(
-			URI.create(SPARQL_LEFTJOIN_URI), COL_TYPE.STRING);
+			fact.construct(SPARQL_LEFTJOIN_URI), COL_TYPE.STRING);
 
 	public static final Predicate SPARQL_IS_LITERAL = new BooleanOperationPredicateImpl(
-			URI.create(SPARQL_IS_LITERAL_URI));
+			fact.construct(SPARQL_IS_LITERAL_URI));
 
 	public static final Predicate SPARQL_IS_URI = new BooleanOperationPredicateImpl(
-			URI.create(SPARQL_IS_URI_URI));
+			fact.construct(SPARQL_IS_URI_URI));
 
 	public static final Predicate SPARQL_IS_IRI = new BooleanOperationPredicateImpl(
-			URI.create(SPARQL_IS_IRI_URI));
+			fact.construct(SPARQL_IS_IRI_URI));
 
 	public static final Predicate SPARQL_IS_BLANK = new BooleanOperationPredicateImpl(
-			URI.create(SPARQL_IS_BLANK_URI));
+			fact.construct(SPARQL_IS_BLANK_URI));
 
 	public static final Predicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl(
-			URI.create(SPARQL_LANGMATCHES_URI), 2);
+			fact.construct(SPARQL_LANGMATCHES_URI), 2);
 
 	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl(
-			URI.create(SPARQL_STR_URI));
+			fact.construct(SPARQL_STR_URI));
 
 	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl(
-			URI.create(SPARQL_DATATYPE_URI));
+			fact.construct(SPARQL_DATATYPE_URI));
 
 	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl(
-			URI.create(SPARQL_LANG_URI));
+			fact.construct(SPARQL_LANG_URI));
 
 	public static final Predicate SPARQL_REGEX = new BooleanOperationPredicateImpl(
-			URI.create(SPARQL_REGEX_URI), 3);
+			fact.construct(SPARQL_REGEX_URI), 3);
 }

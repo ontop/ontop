@@ -23,6 +23,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 /**
  * Prune Ontology for redundant assertions based on dependencies
  */
@@ -63,7 +65,7 @@ public class SigmaTBoxOptimizer {
 	}
 
 	public Ontology getReducedOntology() {
-		Ontology reformulationOntology = descFactory.createOntology(URI.create("http://it.unibz.krdb/obda/auxontology"));
+		Ontology reformulationOntology = descFactory.createOntology(OBDADataFactoryImpl.getIRI("http://it.unibz.krdb/obda/auxontology"));
 		reformulationOntology.addEntities(originalOntology.getVocabulary());
 
 		reformulationOntology.addAssertions(reduce());

@@ -77,6 +77,8 @@ import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 /**
  * Store ABox assertions in the DB
  * 
@@ -404,6 +406,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 	private static final OntologyFactory ofac = OntologyFactoryImpl
 			.getInstance();
 
+	private static final IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
+	
 	private HashMap<Predicate, Integer> indexes;
 
 	private Properties config;
@@ -677,8 +681,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 					Predicate.COL_TYPE attributeType = attributeABoxAssertion
 							.getValue().getType();
 
-					Predicate propPred = dfac.getDataPropertyPredicate(URI
-							.create(prop));
+					Predicate propPred = dfac.getDataPropertyPredicate(ifac.construct(prop));
 					Property propDesc = ofac.createProperty(propPred);
 					DAGNode node = pureIsa.getRoleNode(propDesc);
 					int idx = node.getIndex();
@@ -747,8 +750,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 					 * value positions.
 					 */
 
-					Predicate propPred = dfac.getObjectPropertyPredicate(URI
-							.create(prop));
+					Predicate propPred = dfac.getObjectPropertyPredicate(ifac.construct(prop));
 					Property propDesc = ofac.createProperty(propPred);
 
 					if (dag.equi_mappings.containsKey(propDesc)) {
@@ -1370,7 +1372,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 			}
 
 			Function fpredicate = dfac.getFunctionalTerm(typeObject,
-					dfac.getURIConstant(URI.create(OBDAVocabulary.RDF_TYPE)));
+					dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
 			Function fobject = dfac.getFunctionalTerm(typePredicate,
 					dfac.getURIConstant(p.getName()));
 
@@ -1425,7 +1427,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 			headDL = dfac.getFunctionalTerm(predicate, fsubject);
 
 			fpredicate = dfac.getFunctionalTerm(typeObject,
-					dfac.getURIConstant(URI.create(OBDAVocabulary.RDF_TYPE)));
+					dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
 			fobject = dfac.getFunctionalTerm(typePredicate,
 					dfac.getURIConstant(predicate.getName()));
 
@@ -1442,7 +1444,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 			Predicate predicate = className.getPredicate();
 
 			fpredicate = dfac.getFunctionalTerm(typeObject,
-					dfac.getURIConstant(URI.create(predicate.toString())));
+					dfac.getURIConstant(ifac.construct(predicate.toString())));
 			fobject = dfac.getFunctionalTerm(typePredicate,
 					dfac.getVariable("X2"));
 
@@ -1472,7 +1474,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 					dfac.getVariable("X2"));
 
 			fpredicate = dfac.getFunctionalTerm(typeObject,
-					dfac.getURIConstant(URI.create(predicate.toString())));
+					dfac.getURIConstant(ifac.construct(predicate.toString())));
 			fobject = dfac.getFunctionalTerm(typePredicate,
 					dfac.getVariable("X2"));
 
@@ -1702,10 +1704,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 				ClassDescription description;
 
 				if (exists) {
-					p = dfac.getPredicate(URI.create(uri), 2);
+					p = dfac.getPredicate(ifac.construct(uri), 2);
 					description = ofac.getPropertySomeRestriction(p, inverse);
 				} else {
-					p = dfac.getClassPredicate(URI.create(uri));
+					p = dfac.getClassPredicate(ifac.construct(uri));
 					description = ofac.createClass(p);
 				}
 
@@ -1730,7 +1732,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 					uri = uri.substring(0, uri.length() - 2);
 					inverse = true;
 				}
-				p = dfac.getObjectPropertyPredicate(URI.create(uri));
+				p = dfac.getObjectPropertyPredicate(ifac.construct(uri));
 				description = ofac.createProperty(p, inverse);
 
 				if (res_roles.containsKey(description)) {
@@ -2235,7 +2237,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 
 			// Mapping head
 
-			Atom head = dfac.getAtom(dfac.getPredicate(URI.create("m"), 1),
+			Atom head = dfac.getAtom(dfac.getPredicate(ifac.construct("m"), 1),
 					dfac.getVariable("X"));
 			Atom body1 = dfac.getAtom(classuri, dfac.getFunctionalTerm(
 					dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
@@ -2509,7 +2511,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 
 		List<Atom> bodyAtoms = new LinkedList<Atom>();
 
-		headPredicate = dfac.getPredicate(URI.create("m"), 2, new COL_TYPE[] {
+		headPredicate = dfac.getPredicate(ifac.construct("m"), 2, new COL_TYPE[] {
 				COL_TYPE.STRING, COL_TYPE.OBJECT });
 		headTerms.add(dfac.getVariable("X"));
 		headTerms.add(dfac.getVariable("Y"));

@@ -3,6 +3,8 @@ package it.unibz.krdb.obda.model;
 import java.io.Serializable;
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRI;
+
 /**
  * A predicate is a property that the elements of the set have in common.
  * <p>
@@ -23,7 +25,7 @@ public interface Predicate extends Cloneable, Serializable {
 	 * 
 	 * @return the resource identifier (URI).
 	 */
-	public URI getName();
+	public IRI getName();
 
 	/**
 	 * Get the number of elements of the predicate.

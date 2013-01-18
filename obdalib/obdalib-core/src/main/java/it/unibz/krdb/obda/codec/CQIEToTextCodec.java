@@ -14,6 +14,8 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
+import com.hp.hpl.jena.iri.IRI;
+
 
 /**
  * A class that transforms a CQIE into a string
@@ -74,7 +76,7 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 	
 	private StringBuffer renderAtom(Atom a, PrefixManager pm) {
 		StringBuffer atomString = new StringBuffer();
-		URI atomuri = a.getPredicate().getName();
+		IRI atomuri = a.getPredicate().getName();
 		
 		atomString.append(pm.getShortForm(atomuri.toString()));
 		atomString.append("(");

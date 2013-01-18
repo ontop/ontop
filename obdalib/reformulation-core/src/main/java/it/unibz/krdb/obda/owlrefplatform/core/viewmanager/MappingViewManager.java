@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+
 /**
  * The mapping view manager is the module which allows us to translate CQIEs
  * into sql queries using the provided mappings.
@@ -44,9 +47,9 @@ public class MappingViewManager implements ViewManager {
 	private Map<String, Vector<OBDAMappingAxiom>>	mappingswithsambodyIndex	= null;
 	private Map<String, Predicate>					mappingToNarysetMap			= null;
 	private Map<String, Integer>					globalAliases				= null;
-	private Map<URI, AuxSQLMapping>					predicateAuxMappingMap		= null;
+	private Map<IRI, AuxSQLMapping>					predicateAuxMappingMap		= null;
 	private static final OBDADataFactory							predFactory					= OBDADataFactoryImpl.getInstance();
-	private Map<URI, String>						predicateToSQLMap			= null;
+	private Map<IRI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
 	private Atom							head						= null;
 
@@ -55,8 +58,8 @@ public class MappingViewManager implements ViewManager {
 		mappingswithsambodyIndex = new HashMap<String, Vector<OBDAMappingAxiom>>();
 		mappingToNarysetMap = new HashMap<String, Predicate>();
 		globalAliases = new HashMap<String, Integer>();
-		predicateAuxMappingMap = new HashMap<URI, AuxSQLMapping>();
-		predicateToSQLMap = new HashMap<URI, String>();
+		predicateAuxMappingMap = new HashMap<IRI, AuxSQLMapping>();
+		predicateToSQLMap = new HashMap<IRI, String>();
 		try {
 			prepareIndexes();
 		} catch (Exception e) {
@@ -137,7 +140,7 @@ public class MappingViewManager implements ViewManager {
 				String[] vars = new String[sqlVars.size()];
 				vars = sqlVars.toArray(vars);
 				AuxSQLMapping auxmap = new AuxSQLMapping(vars);
-				URI preduri = URI.create(name);
+				IRI preduri = OBDADataFactoryImpl.getIRI(name);
 				Predicate p = predFactory.getPredicate(preduri, vars.length);
 				mappingToNarysetMap.put(sql, p);
 				predicateAuxMappingMap.put(preduri, auxmap);

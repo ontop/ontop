@@ -29,6 +29,7 @@ import com.hp.hpl.jena.graph.Node_Literal;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.sparql.syntax.Template;
 
 public class ConstructGraphResultSet implements GraphResultSet {
@@ -102,7 +103,8 @@ public class ConstructGraphResultSet implements GraphResultSet {
 			constant = tupleResultSet.getConstant(columnName);
 		} else if (node instanceof Node_URI) {
 			String uriString = ((Node_URI) node).getURI();
-			constant = dfac.getURIConstant(URI.create(uriString));
+			constant = dfac.getURIConstant(OBDADataFactoryImpl.getIRI(uriString));
+					//URI.create(uriString));
 		} else if (node instanceof Node_Literal) {
 			String value = ((Node_Literal) node).getLiteralValue().toString();
 			constant = dfac.getValueConstant(value);

@@ -35,6 +35,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 
 import org.antlr.runtime.*;
+
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -137,7 +141,6 @@ public class DatalogParser extends Parser {
     public HashMap<String, String> getDirectives() {
         return directives;
     }
-
 
 
     // $ANTLR start "parse"
@@ -283,7 +286,7 @@ public class DatalogParser extends Parser {
             	             
             	            // Get the head atom
             	            Atom head = rule.getHead();
-            	            URI name = head.getPredicate().getName();
+            	            IRI name = head.getPredicate().getName();
             	            int size = variableList.size(); 
             	            
             	            // Get the predicate atom
@@ -1199,7 +1202,7 @@ public class DatalogParser extends Parser {
             match(input,RPAREN,FOLLOW_RPAREN_in_atom438); if (state.failed) return value;
 
             if ( state.backtracking==0 ) {
-                  URI uri = URI.create(predicate19);
+                  IRI uri = OBDADataFactoryImpl.getIRI(predicate19);
                   
                   Vector<NewLiteral> elements = terms20;
                   if (elements == null)
@@ -1737,7 +1740,7 @@ public class DatalogParser extends Parser {
                   } else if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
                     functionSymbol = dfac.getUriTemplatePredicate(arity);
                   } else {
-                    functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
+                    functionSymbol = dfac.getPredicate(OBDADataFactoryImpl.getIRI(functionName), arity);
                   }
                   value = dfac.getFunctionalTerm(functionSymbol, terms31);
                 }
@@ -1783,8 +1786,7 @@ public class DatalogParser extends Parser {
 
             if ( state.backtracking==0 ) { 
                   uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);      
-                  URI uri = URI.create(uriText);
-                  value = dfac.getURIConstant(uri);
+                  value = dfac.getURIConstant(OBDADataFactoryImpl.getIRI(uriText));
                 }
 
             }

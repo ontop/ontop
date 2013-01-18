@@ -15,6 +15,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 import junit.framework.TestCase;
 
 public class DAGChainTest extends TestCase {
@@ -22,14 +24,15 @@ public class DAGChainTest extends TestCase {
 	SemanticIndexHelper						helper				= new SemanticIndexHelper();
 
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
+	private static final IRIFactory 		iriFactory			= OBDADataFactoryImpl.getIRIFactory();
 	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
 	public void test_simple_isa() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
 
-		Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
-		Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
-		Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
+		Predicate a = predicateFactory.getPredicate(iriFactory.construct("a"), 1);
+		Predicate b = predicateFactory.getPredicate(iriFactory.construct("b"), 1);
+		Predicate c = predicateFactory.getPredicate(iriFactory.construct("c"), 1);
 
 		OClass ac = descFactory.createClass(a);
 		OClass bc = descFactory.createClass(b);
@@ -57,11 +60,11 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void test_exists_simple() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
 
-		Predicate a = predicateFactory.getClassPredicate(URI.create("a"));
-		Predicate r = predicateFactory.getObjectPropertyPredicate(URI.create("r"));
-		Predicate c = predicateFactory.getClassPredicate(URI.create("c"));
+		Predicate a = predicateFactory.getClassPredicate(iriFactory.construct("a"));
+		Predicate r = predicateFactory.getObjectPropertyPredicate(iriFactory.construct("r"));
+		Predicate c = predicateFactory.getClassPredicate(iriFactory.construct("c"));
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
@@ -109,13 +112,13 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_complex() {
 
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
 
-		Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
-		Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
-		Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
-		Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
-		Predicate d = predicateFactory.getPredicate(URI.create("d"), 1);
+		Predicate a = predicateFactory.getPredicate(iriFactory.construct("a"), 1);
+		Predicate r = predicateFactory.getPredicate(iriFactory.construct("r"), 2);
+		Predicate c = predicateFactory.getPredicate(iriFactory.construct("c"), 1);
+		Predicate b = predicateFactory.getPredicate(iriFactory.construct("b"), 1);
+		Predicate d = predicateFactory.getPredicate(iriFactory.construct("d"), 1);
 
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
@@ -169,10 +172,10 @@ public class DAGChainTest extends TestCase {
 
 	public void disbledtest_exists_complex_2() {
 
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
 
-		Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
-		Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
+		Predicate a = predicateFactory.getPredicate(iriFactory.construct("a"), 1);
+		Predicate r = predicateFactory.getPredicate(iriFactory.construct("r"), 2);
 
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);

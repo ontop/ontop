@@ -7,6 +7,8 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public interface Ontology extends Cloneable, Serializable {
 
 	public void addAssertion(Axiom assertion);
@@ -65,7 +67,7 @@ public interface Ontology extends Cloneable, Serializable {
 	//
 	// public Set<PositiveInclusion> getByIncludedNoExist(Predicate pred);
 
-	public URI getUri();
+	public IRI getUri();
 
 	/***
 	 * This will saturate the ontology, i.e. it will make sure that all axioms

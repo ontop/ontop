@@ -128,7 +128,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Atom atom = this.predFac.getAtom(predFac.getPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
+		Atom atom = this.predFac.getAtom(predFac.getPredicate(OBDADataFactoryImpl.getIRI(atomstr.substring(0, 1)), terms.size()), terms);
 		return atom;
 	}
 
@@ -145,12 +145,12 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = predFac.getPredicate(URI.create(termstr.substring(0, 1)), fuctTerms.size());
+			Predicate fs = predFac.getPredicate(OBDADataFactoryImpl.getIRI(termstr.substring(0, 1)), fuctTerms.size());
 			return termFac.getFunctionalTerm(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
 			return termFac.getValueConstant(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return termFac.getURIConstant(URI.create(termstr.substring(1, termstr.length() - 1)));
+			return termFac.getURIConstant(OBDADataFactoryImpl.getIRI(termstr.substring(1, termstr.length() - 1)));
 		} else if (termstr.equals("#")) {
 			return termFac.getNondistinguishedVariable();
 		} else {

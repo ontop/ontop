@@ -2,6 +2,8 @@ package it.unibz.krdb.obda.model.impl;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 
 public class URITemplatePredicateImpl extends PredicateImpl implements URITemplatePredicate {
@@ -12,7 +14,7 @@ public class URITemplatePredicateImpl extends PredicateImpl implements URITempla
 		/**
 		 * TODO: BAD CODE! Predicate shouldn't store the arity and the type.
 		 */
-		super(URI.create(OBDAVocabulary.QUEST_URI), arity, null);
+		super(OBDADataFactoryImpl.getIRI(OBDAVocabulary.QUEST_URI), arity, null);
 	}
 	
 	@Override

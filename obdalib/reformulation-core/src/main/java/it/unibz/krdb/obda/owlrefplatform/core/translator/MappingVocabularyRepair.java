@@ -26,6 +26,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRI;
+
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
  * include predicates that have not been properly typed.
@@ -69,7 +71,7 @@ public class MappingVocabularyRepair {
 	 */
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
 		log.debug("Reparing/validating {} mappings", originalMappings.size());
-		HashMap<URI, Predicate> urimap = new HashMap<URI, Predicate>();
+		HashMap<IRI, Predicate> urimap = new HashMap<IRI, Predicate>();
 		for (Predicate p : vocabulary) {
 			urimap.put(p.getName(), p);
 		}

@@ -36,7 +36,7 @@ public class OWLAPI3IndividualTranslator {
 
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-			IRI conceptIRI = IRI.create(ca.getConcept().getName());
+			IRI conceptIRI = IRI.create(ca.getConcept().getName().toString());
 
 			OWLClass description = dataFactory.getOWLClass(conceptIRI);
 			OWLIndividual object = (OWLNamedIndividual) translate(ca
@@ -46,7 +46,7 @@ public class OWLAPI3IndividualTranslator {
 
 		} else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			IRI roleIRI = IRI.create(opa.getRole().getName());
+			IRI roleIRI = IRI.create(opa.getRole().getName().toString());
 
 			OWLObjectProperty property = dataFactory
 					.getOWLObjectProperty(roleIRI);
@@ -60,7 +60,7 @@ public class OWLAPI3IndividualTranslator {
 
 		} else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
-			IRI attributeIRI = IRI.create(dpa.getAttribute().getName());
+			IRI attributeIRI = IRI.create(dpa.getAttribute().getName().toString());
 
 			OWLDataProperty property = dataFactory
 					.getOWLDataProperty(attributeIRI);
@@ -86,7 +86,7 @@ public class OWLAPI3IndividualTranslator {
 		if (constant instanceof URIConstant) {
 
 			result = dataFactory.getOWLNamedIndividual(IRI
-					.create(((URIConstant) constant).getURI()));
+					.create(((URIConstant) constant).getURI().toString()));
 		} else if (constant instanceof BNode) {
 			result = dataFactory.getOWLAnonymousIndividual(((BNode) constant)
 					.getName());

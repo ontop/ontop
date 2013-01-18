@@ -71,7 +71,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	{
 		this.repository = rep;
 		this.questConn = connection;
-		this.isOpen = !connection.isClosed();
+		this.isOpen = true;//!connection.isClosed();
 		this.autoCommit = connection.getAutoCommit();
 	
 	}
@@ -655,13 +655,16 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 		
-		try {
-			this.questStm = questConn.createStatement();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		}
-		return new SesameBooleanQuery(queryString, baseURI, questStm);
-		
+	//	if (this.isOpen) {
+			try {
+				this.questStm = questConn.createStatement();
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+			return new SesameBooleanQuery(queryString, baseURI, questStm);
+	//	} else
+	//		throw new RepositoryException("Repository was closed by user.");
+
 	}
 
 	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString)
@@ -678,12 +681,16 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 	
-		try {
-			this.questStm = questConn.createStatement();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		}
-		return new SesameGraphQuery(queryString, baseURI, questStm);
+		//if (this.isOpen) {
+			try {
+				this.questStm = questConn.createStatement();
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+			return new SesameGraphQuery(queryString, baseURI, questStm);
+	//	} else
+	//		throw new RepositoryException("Repository was closed by user.");
+
 	}
 
 	public Query prepareQuery(QueryLanguage ql, String query)
@@ -726,14 +733,17 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		//Prepares a query that produces sets of value tuples. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
-		
-		try {
-			this.questStm = questConn.createStatement();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		}
-		return new SesameTupleQuery(queryString, baseURI, questStm);
-		
+
+		//if (this.isOpen) {
+			try {
+				this.questStm = questConn.createStatement();
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+			return new SesameTupleQuery(queryString, baseURI, questStm);
+		//} else
+		//	throw new RepositoryException("Repository was closed by user.");
+
 	}
 
 	public Update prepareUpdate(QueryLanguage arg0, String arg1)

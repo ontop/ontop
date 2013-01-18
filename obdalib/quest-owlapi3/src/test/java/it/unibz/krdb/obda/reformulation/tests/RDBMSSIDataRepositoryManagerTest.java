@@ -409,12 +409,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 			Assertion assertion = null;
 
 			if (pred.getArity() == 1) {
-				assertion = ofac.createClassAssertion(pred, fac.getURIConstant(URI.create("1")));
+				assertion = ofac.createClassAssertion(pred, fac.getURIConstant(OBDADataFactoryImpl.getIRI("1")));
 			} else if (pred.getType(1) == COL_TYPE.OBJECT) {
-				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")),
-						fac.getURIConstant(URI.create("2")));
+				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(OBDADataFactoryImpl.getIRI("1")),
+						fac.getURIConstant(OBDADataFactoryImpl.getIRI("2")));
 			} else {
-				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("22", COL_TYPE.INTEGER));
+				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(OBDADataFactoryImpl.getIRI("1")), fac.getValueConstant("22", COL_TYPE.INTEGER));
 			}
 			return assertion;
 		}

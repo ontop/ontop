@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public class UriTemplateMatcher {
 
 	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
@@ -38,7 +40,7 @@ public class UriTemplateMatcher {
 	 * have a corresponding function, and the paramters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
-	public Function generateURIFunction(URI subjectUri) {
+	public Function generateURIFunction(IRI subjectUri) {
 		Function functionURI = null;
 		String uriString = subjectUri.toString();
 		for (Pattern pattern : uriTemplateMatcher.keySet()) {

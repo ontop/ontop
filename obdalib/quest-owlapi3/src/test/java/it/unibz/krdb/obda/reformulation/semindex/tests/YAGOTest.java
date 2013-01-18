@@ -23,12 +23,15 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class YAGOTest {
     private final static String dataFile = "yago2core_20110315.n3";
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final IRIFactory iriFactory = OBDADataFactoryImpl.getIRIFactory();
 
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -52,7 +55,7 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        Ontology onto = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
+        Ontology onto = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
 
         while ((line = triples.readLine()) != null) {
 //            String result = URLDecoder.decode(line, "UTF-8");

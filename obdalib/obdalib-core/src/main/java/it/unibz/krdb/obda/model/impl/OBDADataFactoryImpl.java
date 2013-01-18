@@ -13,11 +13,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.utils.IDGenerator;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -27,13 +26,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
 	private static OBDADataFactory instance = null;
-	
+	private static IRIFactory irifactory = null;
+
 	protected OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
@@ -44,13 +46,23 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return instance;
 	}
+	
+	public static IRIFactory getIRIFactory() {
+		if (irifactory == null)
+			irifactory = new IRIFactory();
+		return irifactory;
+	}
 
+	public IRI getIRI(String s){
+		return irifactory.construct(s);
+	}
+	
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
 
 	@Deprecated
-	public PredicateImpl getPredicate(URI name, int arity) {
+	public PredicateImpl getPredicate(IRI name, int arity) {
 		if (arity == 1) {
 			return new PredicateImpl(name, arity,
 					new COL_TYPE[] { COL_TYPE.OBJECT });
@@ -59,26 +71,31 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 	}
 
-	public PredicateImpl getPredicate(URI name, int arity, COL_TYPE[] types) {
+	public PredicateImpl getPredicate(IRI name, int arity, COL_TYPE[] types) {
 		return new PredicateImpl(name, arity, types);
 	}
 
-	public Predicate getObjectPropertyPredicate(URI name) {
+	public Predicate getObjectPropertyPredicate(IRI name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT,
 				COL_TYPE.OBJECT });
 	}
 
-	public Predicate getDataPropertyPredicate(URI name) {
+	public Predicate getDataPropertyPredicate(IRI name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT,
 				COL_TYPE.LITERAL });
 	}
 
-	public Predicate getClassPredicate(URI name) {
+	public Predicate getClassPredicate(IRI name) {
 		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
 	}
 
+//	@Override
+//	public URIConstant getURIConstant(URI uri) {
+//		return new URIConstantImpl(uri);
+//	}
+	
 	@Override
-	public URIConstant getURIConstant(URI uri) {
+	public URIConstant getURIConstant(IRI uri) {
 		return new URIConstantImpl(uri);
 	}
 
@@ -335,17 +352,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Predicate getObjectPropertyPredicate(String name) {
-		return getObjectPropertyPredicate(URI.create(name));
+		return getObjectPropertyPredicate(getIRI(name));
 	}
 
 	@Override
 	public Predicate getDataPropertyPredicate(String name) {
-		return getDataPropertyPredicate(URI.create(name));
+		return getDataPropertyPredicate(getIRI(name));
 	}
 
 	@Override
 	public Predicate getClassPredicate(String name) {
-		return getClassPredicate(URI.create(name));
+		return getClassPredicate(getIRI(name));
 	}
 
 	@Override
@@ -569,7 +586,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity) {
-		return getPredicate(URI.create(uri), arity);
+		return getPredicate(getIRI(uri), arity);
 	}
 
 	@Override
@@ -591,7 +608,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		} else if (uri == OBDAVocabulary.strNEQ) {
 			return OBDAVocabulary.NEQ;
 		}
-		return getPredicate(URI.create(uri), arity, types);
+		return getPredicate(getIRI(uri), arity, types);
 	}
 
 	@Override
@@ -616,12 +633,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Predicate getDataTypePredicateUnsupported(String uri) {
-		return getDataTypePredicateUnsupported(URI.create(uri));
+		return getDataTypePredicateUnsupported(getIRI(uri));
 
 	}
 
 	@Override
-	public Predicate getDataTypePredicateUnsupported(URI uri) {
+	public Predicate getDataTypePredicateUnsupported(IRI uri) {
 		return new DataTypePredicateImpl(uri, COL_TYPE.UNSUPPORTED);
 
 	}
@@ -653,4 +670,5 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
 		}
 	}
+
 }

@@ -3,6 +3,8 @@ package it.unibz.krdb.obda.model;
 import java.net.URI;
 import java.util.List;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public interface OBDAResultSet {
 
 	// //////////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +34,8 @@ public interface OBDAResultSet {
 	public Constant getConstant(int column) throws OBDAException;
 
 	public URI getURI(int column) throws OBDAException;
+	
+	public IRI getIRI(int column) throws OBDAException;
 
 	public ValueConstant getLiteral(int column) throws OBDAException;
 
@@ -40,6 +44,8 @@ public interface OBDAResultSet {
 	public Constant getConstant(String name) throws OBDAException;
 
 	public URI getURI(String name) throws OBDAException;
+	
+	public IRI getIRI(String name) throws OBDAException;
 
 	public ValueConstant getLiteral(String name) throws OBDAException;
 
@@ -58,5 +64,7 @@ public interface OBDAResultSet {
 	public double getDouble(int column) throws OBDAException;
 
 	public Object getObject(int column) throws OBDAException;
+
+	
 
 }

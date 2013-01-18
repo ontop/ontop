@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 import junit.framework.TestCase;
 
 public class PrefixRendererTest extends TestCase {
@@ -36,15 +38,17 @@ public class PrefixRendererTest extends TestCase {
 
 		LinkedList<NewLiteral> innerterms = new LinkedList<NewLiteral>();
 		innerterms.add(tfac.getVariable("id"));
+		
+		IRIFactory fact = new IRIFactory();
 
 		List<NewLiteral> terms = new LinkedList<NewLiteral>();
-		terms.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("http://obda.org/onto.owl#person-individual"), 1), innerterms));
+		terms.add(tfac.getFunctionalTerm(pfac.getPredicate(fact.construct("http://obda.org/onto.owl#person-individual"), 1), innerterms));
 
-		Atom body = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/onto.owl#Person"), 1), terms);
+		Atom body = tfac.getAtom(pfac.getPredicate(fact.construct("http://obda.org/onto.owl#Person"), 1), terms);
 
 		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("id"));
-		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
+		Atom head = tfac.getAtom(pfac.getPredicate(fact.construct("http://obda.org/predicates#q"), 1), terms);
 
 		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);

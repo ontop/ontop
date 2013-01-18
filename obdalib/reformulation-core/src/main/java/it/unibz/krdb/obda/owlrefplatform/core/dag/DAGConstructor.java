@@ -21,6 +21,8 @@ import java.util.Map;
 
 
 
+
+
 public class DAGConstructor {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
@@ -32,7 +34,7 @@ public class DAGConstructor {
 
 	public static DAG getSigma(Ontology ontology) {
 
-		Ontology sigma = descFactory.createOntology(URI.create(""));
+		Ontology sigma = descFactory.createOntology(OBDADataFactoryImpl.getIRI(""));
 		sigma.addConcepts(ontology.getConcepts());
 		sigma.addRoles(ontology.getRoles());
 		for (Axiom assertion : ontology.getAssertions()) {
@@ -62,7 +64,7 @@ public class DAGConstructor {
 	@Deprecated
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
-		Ontology sigma = descFactory.createOntology(URI.create("sigma"));
+		Ontology sigma = descFactory.createOntology(OBDADataFactoryImpl.getIRI("sigma"));
 		sigma.addConcepts(ontology.getConcepts());
 		sigma.addRoles(ontology.getRoles());
 
@@ -83,7 +85,7 @@ public class DAGConstructor {
 
 	public static Ontology getSigmaOntology(DAG dag) {
 
-		Ontology sigma = descFactory.createOntology(URI.create("sigma"));
+		Ontology sigma = descFactory.createOntology(OBDADataFactoryImpl.getIRI("sigma"));
 
 		DAGEdgeIterator edgeiterator = new DAGEdgeIterator(dag);
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();

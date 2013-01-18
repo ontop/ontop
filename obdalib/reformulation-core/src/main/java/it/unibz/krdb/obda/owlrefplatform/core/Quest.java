@@ -71,6 +71,9 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class Quest implements Serializable, RepositoryChangedListener {
 	/**
 	 * 
@@ -121,6 +124,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/* The input OBDA model */
 	protected OBDAModel inputOBDAModel = null;
+	
 
 	/*
 	 * The equivalence map for the classes/properties that have been simplified
@@ -937,11 +941,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 				Function rdfTypeConstant = fac
 						.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac
-								.getURIConstant(URI
-										.create(OBDAVocabulary.RDF_TYPE)));
+								.getURIConstant(OBDADataFactoryImpl.getIRI(OBDAVocabulary.RDF_TYPE)));
+										//URI.create(OBDAVocabulary.RDF_TYPE)));
 				terms.add(rdfTypeConstant);
 
-				URI classname = currenthead.getPredicate().getName();
+				IRI classname = currenthead.getPredicate().getName();
 				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
 						fac.getURIConstant(classname)));
 				newhead = fac.getAtom(pred, terms);
@@ -953,7 +957,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				terms.add(currenthead.getTerm(0));
 
-				URI propname = currenthead.getPredicate().getName();
+				IRI propname = currenthead.getPredicate().getName();
 				Function propconstant = fac.getFunctionalTerm(
 						fac.getUriTemplatePredicate(1),
 						fac.getURIConstant(propname));

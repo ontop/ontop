@@ -39,6 +39,8 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -112,6 +114,7 @@ import com.hp.hpl.jena.sparql.syntax.Template;
 public class SparqlAlgebraToDatalogTranslator {
 
 	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private IRIFactory irifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private NewLiteralComparator comparator = new NewLiteralComparator();
 
@@ -676,9 +679,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		LinkedList<Atom> result = new LinkedList<Atom>();
 
 		// Instantiate the subject and object URI
-		URI subjectUri = null;
-		URI objectUri = null;
-		URI propertyUri = null;
+		IRI subjectUri = null;
+		IRI objectUri = null;
+		IRI propertyUri = null;
 
 		// Instantiate the subject and object data type
 		COL_TYPE subjectType = null;
@@ -706,9 +709,10 @@ public class SparqlAlgebraToDatalogTranslator {
 
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
-				subjectUri = URI.create(subject.getURI());
+				subjectUri = irifac.construct(subject.getURI());
 
 				Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
+				functionURI.getTerms();
 				terms.add(functionURI);
 
 				// Function functionURI = ofac.getFunctionalTerm(
@@ -728,8 +732,8 @@ public class SparqlAlgebraToDatalogTranslator {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 
 				Function rdfTypeConstant = ofac.getFunctionalTerm(ofac
-						.getUriTemplatePredicate(1), ofac.getURIConstant(URI
-						.create(OBDAVocabulary.RDF_TYPE)));
+						.getUriTemplatePredicate(1), ofac.getURIConstant(irifac.construct(OBDAVocabulary.RDF_TYPE)));
+						//ofac.getURIConstant(URI.create(OBDAVocabulary.RDF_TYPE)));
 				terms.add(rdfTypeConstant);
 				terms.add(ofac.getVariable(((Var) o).getVarName()));
 
@@ -737,11 +741,11 @@ public class SparqlAlgebraToDatalogTranslator {
 				throw new QueryException("Unsupported query syntax");
 			} else if (o instanceof Node_URI) {
 				Node_URI object = (Node_URI) o;
-				objectUri = URI.create(object.getURI());
+				objectUri = irifac.construct(object.getURI());
 			}
 
 			// Construct the predicate
-			URI predicateUri = objectUri;
+			IRI predicateUri = objectUri;
 			if (predicateUri == null) {
 				// NO OP, already assigned
 			} else if (predicateUri.toString().equals(
@@ -794,7 +798,18 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (s instanceof Node_URI) {
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
-				subjectUri = URI.create(subject.getURI());
+				String subject_URI = subject.getURI().replaceAll("%20", " ")
+				.replaceAll("%21", "!").replaceAll("%40", "@")
+				.replaceAll("%23", "#").replaceAll("%24", "$")
+				.replaceAll("%26", "&").replaceAll("%42", "*")
+				.replaceAll("%28", "(").replaceAll("%29", ")")
+				.replaceAll("%5B", "[").replaceAll("%5C", "]")
+				.replaceAll("%2C", ",").replaceAll("%3B", ";")
+				.replaceAll("%3A", ":").replaceAll("%3F", "?")
+				.replaceAll("%3D", "=").replaceAll("%2B", "+")
+				.replaceAll("%22", "'").replaceAll("%2F", "/")
+				;
+				subjectUri = irifac.construct(subject_URI);
 
 				Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
 				terms.add(functionURI);
@@ -851,9 +866,22 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (o instanceof Node_URI) {
 				Node_URI object = (Node_URI) o;
 				objectType = COL_TYPE.OBJECT;
-				objectUri = URI.create(object.getURI());
 
-				Function functionURI = uriTemplateMatcher.generateURIFunction(objectUri);
+				String object_URI = object.getURI().replaceAll("%20", " ")
+						.replaceAll("%21", "!").replaceAll("%40", "@")
+						.replaceAll("%23", "#").replaceAll("%24", "$")
+						.replaceAll("%26", "&").replaceAll("%42", "*")
+						.replaceAll("%28", "(").replaceAll("%29", ")")
+						.replaceAll("%5B", "[").replaceAll("%5C", "]")
+						.replaceAll("%2C", ",").replaceAll("%3B", ";")
+						.replaceAll("%3A", ":").replaceAll("%3F", "?")
+						.replaceAll("%3D", "=").replaceAll("%2B", "+")
+						.replaceAll("%22", "'").replaceAll("%2F", "/");
+				objectUri = irifac.construct(object_URI);
+
+
+				Function functionURI = uriTemplateMatcher
+						.generateURIFunction(objectUri);
 				terms.add(functionURI);
 
 				// Function functionURI = ofac.getFunctionalTerm(
@@ -869,7 +897,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			// Construct the predicate
 
 			if (p instanceof Node_URI) {
-				URI predicateUri = URI.create(p.getURI());
+				IRI predicateUri = irifac.construct(p.getURI());
 				predicate = ofac.getPredicate(predicateUri, 2, new COL_TYPE[] {
 						subjectType, objectType });
 			} else if (p instanceof Var) {

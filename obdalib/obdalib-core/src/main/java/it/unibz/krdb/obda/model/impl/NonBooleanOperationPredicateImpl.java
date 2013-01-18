@@ -2,6 +2,8 @@ package it.unibz.krdb.obda.model.impl;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRI;
+
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
 
 public class NonBooleanOperationPredicateImpl extends PredicateImpl implements
@@ -9,11 +11,11 @@ public class NonBooleanOperationPredicateImpl extends PredicateImpl implements
 
 	private static final long serialVersionUID = 1L;
 
-	public NonBooleanOperationPredicateImpl(URI name) {
+	public NonBooleanOperationPredicateImpl(IRI name) {
 		super(name, 1, null);
 	}
 
-	public NonBooleanOperationPredicateImpl(URI name, int arity, COL_TYPE[] types) {
+	public NonBooleanOperationPredicateImpl(IRI name, int arity, COL_TYPE[] types) {
 		super(name, arity, types);
 	}
 

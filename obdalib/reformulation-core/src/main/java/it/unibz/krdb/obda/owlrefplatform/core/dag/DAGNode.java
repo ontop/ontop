@@ -68,7 +68,7 @@ public class DAGNode implements Serializable {
 		if (description instanceof PropertySomeRestriction) {
 			bf.append("E");
 			Predicate p = ((PropertySomeRestriction) description).getPredicate();
-			String fragment = p.getName().getFragment();
+			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
@@ -78,7 +78,7 @@ public class DAGNode implements Serializable {
 		} else if (description instanceof OClass) {
 			
 			Predicate p = ((OClass) description).getPredicate();
-			String fragment = p.getName().getFragment();
+			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
@@ -87,7 +87,7 @@ public class DAGNode implements Serializable {
 		} else if (description instanceof Property) {
 			
 			Predicate p = ((Property) description).getPredicate();
-			String fragment = p.getName().getFragment();
+			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else

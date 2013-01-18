@@ -33,9 +33,9 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	OBDADataFactory				pfac			= OBDADataFactoryImpl.getInstance();
 	OBDADataFactory				tfac			= OBDADataFactoryImpl.getInstance();
 
-	Predicate					r				= pfac.getPredicate(URI.create("R"), 2);
-	Predicate					s				= pfac.getPredicate(URI.create("S"), 2);
-	Predicate					q				= pfac.getPredicate(URI.create("q"), 1);
+	Predicate					r				= pfac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
+	Predicate					s				= pfac.getPredicate(OBDADataFactoryImpl.getIRI("S"), 2);
+	Predicate					q				= pfac.getPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
 
 	NewLiteral						x				= tfac.getVariable("x");
 	NewLiteral						y				= tfac.getVariable("y");

@@ -8,6 +8,8 @@ import it.unibz.krdb.obda.model.Predicate;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public class PredicateImpl implements Predicate {
 
 	/**
@@ -15,13 +17,13 @@ public class PredicateImpl implements Predicate {
 	 */
 	private static final long serialVersionUID = -7096056207721170465L;
 	private int arity = -1;
-	private URI name = null;
+	private IRI name = null;
 	private int identifier = -1;
 	private COL_TYPE[] types = null;
 
-	protected PredicateImpl(URI name, int arity, COL_TYPE[] types) {
-		this.name = name;
-		this.identifier = name.toString().hashCode();
+	protected PredicateImpl(IRI name2, int arity, COL_TYPE[] types) {
+		this.name = name2;
+		this.identifier = name2.toString().hashCode();
 		this.arity = arity;
 		this.types = types;
 
@@ -37,7 +39,7 @@ public class PredicateImpl implements Predicate {
 	}
 
 	@Override
-	public URI getName() {
+	public IRI getName() {
 		return name;
 	}
 

@@ -16,6 +16,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+import com.hp.hpl.jena.iri.impl.IRIFactoryImpl;
+
 /**
  * The boolean result set returned by an OBDA statement.
  * 
@@ -120,6 +124,18 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet {
 			return URI.create("false");
 		}
 	}
+	
+	/**
+	 * returns the true value as URI
+	 */
+	@Override
+	public IRI getIRI(int column) throws OBDAException {
+		if (isTrue) {
+			return OBDADataFactoryImpl.getIRI("true");
+		} else {
+			return OBDADataFactoryImpl.getIRI("false");
+		}
+	}
 
 	/**
 	 * returns always 1
@@ -196,6 +212,11 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet {
 
 	@Override
 	public URI getURI(String name) throws OBDAException {
+		return null;
+	}
+	
+	@Override
+	public IRI getIRI(String name) throws OBDAException {
 		return null;
 	}
 

@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -18,6 +19,8 @@ import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import com.hp.hpl.jena.iri.IRIFactory;
 
 public class DAGHierarchyTest extends TestCase {
 	/**
@@ -48,11 +51,12 @@ public class DAGHierarchyTest extends TestCase {
 		DAGOperations.buildDescendants(pureIsa);
 			
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 		/** 
 		 * The initial node is Node A.
 		 */
-		DAGNode initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "A")));
+		DAGNode initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "A")));
 		Set<DAGNode> descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 0);
@@ -60,12 +64,12 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node B.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "B")));
+		initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "B")));
 		descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 1);
 		
-		DAGNode A = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "A")));
+		DAGNode A = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "A")));
 		assertTrue(descendants.contains(A));
 		
 		/**
@@ -77,12 +81,12 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node D.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "D")));
+		initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "D")));
 		descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 1);
 		
-		DAGNode C = new DAGNode(ofac.createClass(URI.create(ontoURI + "C")));
+		DAGNode C = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "C")));
 		assertTrue(descendants.contains(C));
 		
 		/** 
@@ -94,20 +98,20 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node F.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "F")));
+		initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "F")));
 		descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 5);
 		
-		A = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "A")));
+		A = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "A")));
 		assertTrue(descendants.contains(A));
-		DAGNode B = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "B")));
+		DAGNode B = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "B")));
 		assertTrue(descendants.contains(B));
-		C = new DAGNode(ofac.createClass(URI.create(ontoURI + "C"))); // equivalent class
+		C = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "C"))); // equivalent class
 		assertTrue(descendants.contains(C));
-		DAGNode D = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "D")));
+		DAGNode D = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "D")));
 		assertTrue(descendants.contains(D));
-		DAGNode E = new DAGNode(ofac.createClass(URI.create(ontoURI + "E"))); // equivalent class
+		DAGNode E = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "E"))); // equivalent class
 		assertTrue(descendants.contains(E));
 	}
 
@@ -129,33 +133,34 @@ public class DAGHierarchyTest extends TestCase {
 		DAGOperations.buildAncestors(pureIsa);
 		
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 		/** 
 		 * The initial node is Node A.
 		 */
-		DAGNode initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "A")));
+		DAGNode initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "A")));
 		Set<DAGNode> ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 3);
 		
-		DAGNode B = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "B")));
+		DAGNode B = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "B")));
 		assertTrue(ancestors.contains(B));
-		DAGNode E = new DAGNode(ofac.createClass(URI.create(ontoURI + "E"))); // equivalent class
+		DAGNode E = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "E"))); // equivalent class
 		assertTrue(ancestors.contains(E));
-		DAGNode F = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "F")));
+		DAGNode F = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "F")));
 		assertTrue(ancestors.contains(F));		
 		
 		/** 
 		 * The initial node is Node B.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "B")));
+		initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "B")));
 		ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 2);
 		
-		F = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "F")));
+		F = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "F")));
 		assertTrue(ancestors.contains(F));		
-		E = new DAGNode(ofac.createClass(URI.create(ontoURI + "E"))); // equivalent class
+		E = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "E"))); // equivalent class
 		assertTrue(ancestors.contains(E));
 		
 		/**
@@ -167,16 +172,16 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node D.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "D")));
+		initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "D")));
 		ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 3);
 		
-		DAGNode C = new DAGNode(ofac.createClass(URI.create(ontoURI + "C"))); // equivalent class
+		DAGNode C = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "C"))); // equivalent class
 		assertTrue(ancestors.contains(C));
-		E = new DAGNode(ofac.createClass(URI.create(ontoURI + "E"))); // equivalent class
+		E = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "E"))); // equivalent class
 		assertTrue(ancestors.contains(E));
-		F = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "F")));
+		F = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "F")));
 		assertTrue(ancestors.contains(F));
 		
 		/** 
@@ -188,12 +193,12 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node F.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(URI.create(ontoURI + "F")));
+		initialNode = pureIsa.getClassNode(ofac.createClass(ifac.construct(ontoURI + "F")));
 		ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 1);
 		
-		E = new DAGNode(ofac.createClass(URI.create(ontoURI + "E"))); // equivalent class
+		E = new DAGNode(ofac.createClass(ifac.construct(ontoURI + "E"))); // equivalent class
 		assertTrue(ancestors.contains(E));
 	}
 	
@@ -215,11 +220,12 @@ public class DAGHierarchyTest extends TestCase {
 		DAGOperations.buildDescendants(pureIsa);
 			
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 		/** 
 		 * The initial node is Node P.
 		 */
-		DAGNode initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "P")));
+		DAGNode initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "P")));
 		Set<DAGNode> descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 0);
@@ -227,12 +233,12 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node Q.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "Q")));
+		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "Q")));
 		descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 1);
 		
-		DAGNode P = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "P")));
+		DAGNode P = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "P")));
 		assertTrue(descendants.contains(P));
 		
 		/**
@@ -244,12 +250,12 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node S.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "S")));
+		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "S")));
 		descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 1);
 		
-		DAGNode R = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "R")));
+		DAGNode R = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "R")));
 		assertTrue(descendants.contains(R));
 		
 		/** 
@@ -261,20 +267,20 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node U.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "U")));
+		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "U")));
 		descendants = initialNode.getDescendants();
 		
 		assertEquals(descendants.size(), 5);
 		
-		P = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "P")));
+		P = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "P")));
 		assertTrue(descendants.contains(P));
-		DAGNode Q = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "Q")));
+		DAGNode Q = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "Q")));
 		assertTrue(descendants.contains(Q));
-		R = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "R"))); // equivalent role
+		R = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "R"))); // equivalent role
 		assertTrue(descendants.contains(R));
-		DAGNode S = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "S")));
+		DAGNode S = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "S")));
 		assertTrue(descendants.contains(S));
-		DAGNode T = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "T"))); // equivalent role
+		DAGNode T = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "T"))); // equivalent role
 		assertTrue(descendants.contains(T));
 	}
 
@@ -296,33 +302,34 @@ public class DAGHierarchyTest extends TestCase {
 		DAGOperations.buildAncestors(pureIsa);
 		
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 		/** 
 		 * The initial node is Node P.
 		 */
-		DAGNode initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "P")));
+		DAGNode initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "P")));
 		Set<DAGNode> ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 3);
 		
-		DAGNode Q = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "Q")));
+		DAGNode Q = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "Q")));
 		assertTrue(ancestors.contains(Q));
-		DAGNode T = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "T"))); // equivalent role
+		DAGNode T = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "T"))); // equivalent role
 		assertTrue(ancestors.contains(T));
-		DAGNode U = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "U")));
+		DAGNode U = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "U")));
 		assertTrue(ancestors.contains(U));		
 		
 		/** 
 		 * The initial node is Node Q.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "Q")));
+		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "Q")));
 		ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 2);
 		
-		T = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "T"))); // equivalent role
+		T = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "T"))); // equivalent role
 		assertTrue(ancestors.contains(T));
-		U = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "U")));
+		U = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "U")));
 		assertTrue(ancestors.contains(U));		
 		
 		/**
@@ -334,16 +341,16 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node S.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "S")));
+		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "S")));
 		ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 3);
 		
-		DAGNode R = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "R"))); // equivalent role
+		DAGNode R = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "R"))); // equivalent role
 		assertTrue(ancestors.contains(R));
-		T = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "T"))); // equivalent role
+		T = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "T"))); // equivalent role
 		assertTrue(ancestors.contains(T));
-		U = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "U")));
+		U = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "U")));
 		assertTrue(ancestors.contains(U));
 		
 		/** 
@@ -355,12 +362,12 @@ public class DAGHierarchyTest extends TestCase {
 		/** 
 		 * The initial node is Node U.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(ontoURI + "U")));
+		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ifac.construct(ontoURI + "U")));
 		ancestors = initialNode.getAncestors();
 		
 		assertEquals(ancestors.size(), 1);
 		
-		T = new DAGNode(ofac.createObjectProperty(URI.create(ontoURI + "T"))); // equivalent role
+		T = new DAGNode(ofac.createObjectProperty(ifac.construct(ontoURI + "T"))); // equivalent role
 		assertTrue(ancestors.contains(T));
 	}
 }

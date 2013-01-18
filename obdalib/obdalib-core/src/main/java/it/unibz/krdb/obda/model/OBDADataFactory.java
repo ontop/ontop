@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
+import com.hp.hpl.jena.iri.IRI;
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 public interface OBDADataFactory extends Serializable {
@@ -41,26 +42,26 @@ public interface OBDADataFactory extends Serializable {
 	 * @return a predicate object.
 	 */
 	@Deprecated
-	public Predicate getPredicate(URI name, int arity);
+	public Predicate getPredicate(IRI name, int arity);
 
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
-	public Predicate getPredicate(URI name, int arity, COL_TYPE[] types);
+	public Predicate getPredicate(IRI name, int arity, COL_TYPE[] types);
 
 	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types);
 
-	public Predicate getObjectPropertyPredicate(URI name);
+	public Predicate getObjectPropertyPredicate(IRI name);
 
 	public Predicate getObjectPropertyPredicate(String name);
 
-	public Predicate getDataPropertyPredicate(URI name);
+	public Predicate getDataPropertyPredicate(IRI name);
 
 	public Predicate getDataPropertyPredicate(String name);
 
 	public Predicate getClassPredicate(String name);
 
-	public Predicate getClassPredicate(URI name);
+	public Predicate getClassPredicate(IRI name);
 
 	/*
 	 * Data types
@@ -68,7 +69,7 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getDataTypePredicateUnsupported(String uri);
 
-	public Predicate getDataTypePredicateUnsupported(URI uri);
+	public Predicate getDataTypePredicateUnsupported(IRI uri);
 
 	public Predicate getDataTypePredicateLiteral();
 
@@ -211,7 +212,9 @@ public interface OBDADataFactory extends Serializable {
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public URIConstant getURIConstant(URI uri);
+//	public URIConstant getURIConstant(URI uri);
+	
+	public URIConstant getURIConstant(IRI uri);
 
 	public BNode getBNodeConstant(String name);
 
@@ -334,5 +337,6 @@ public interface OBDADataFactory extends Serializable {
 	public OBDASQLQuery getSQLQuery(String query);
 
 	public Predicate getTypePredicate(Predicate.COL_TYPE type);
+
 
 }

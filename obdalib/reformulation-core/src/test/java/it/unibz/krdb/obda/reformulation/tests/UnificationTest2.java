@@ -42,10 +42,10 @@ public class UnificationTest2 extends TestCase {
 		NewLiteral t2 = factory.getVariable("y");
 		NewLiteral t3 = factory.getVariable("x");
 
-		Predicate r1 = predFac.getPredicate(URI.create("R"), 2);
-		Predicate r2 = predFac.getPredicate(URI.create("R"), 2);
-		Predicate s = predFac.getPredicate(URI.create("S"), 2);
-		Predicate p = predFac.getPredicate(URI.create("p"), 2);
+		Predicate r1 = predFac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
+		Predicate r2 = predFac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
+		Predicate s = predFac.getPredicate(OBDADataFactoryImpl.getIRI("S"), 2);
+		Predicate p = predFac.getPredicate(OBDADataFactoryImpl.getIRI("p"), 2);
 
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t1);

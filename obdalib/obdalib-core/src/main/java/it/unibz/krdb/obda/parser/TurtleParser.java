@@ -37,6 +37,10 @@ import org.antlr.runtime.TokenStream;
 
 
 import org.antlr.runtime.*;
+
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -143,7 +147,7 @@ public class TurtleParser extends Parser {
 
     /** Constants */
     private static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-    private static final URI RDF_TYPE_URI = URI.create(RDF_TYPE);
+    private static final IRI RDF_TYPE_URI = OBDADataFactoryImpl.getIRI(RDF_TYPE);
 
     /** Map of directives */
     private HashMap<String, String> directives = new HashMap<String, String>();
@@ -674,11 +678,11 @@ public class TurtleParser extends Parser {
         List<Atom> value = null;
 
 
-        URI v1 =null;
+        IRI v1 =null;
 
         List<NewLiteral> l1 =null;
 
-        URI v2 =null;
+        IRI v2 =null;
 
         List<NewLiteral> l2 =null;
 
@@ -789,11 +793,11 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "verb"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:255:1: verb returns [URI value] : ( predicate | 'a' );
-    public final URI verb() throws RecognitionException {
-        URI value = null;
+    public final IRI verb() throws RecognitionException {
+        IRI value = null;
 
 
-        URI predicate7 =null;
+        IRI predicate7 =null;
 
 
         try {
@@ -937,7 +941,7 @@ public class TurtleParser extends Parser {
         NewLiteral value = null;
 
 
-        URI resource8 =null;
+        IRI resource8 =null;
 
         Variable variable9 =null;
 
@@ -1101,11 +1105,11 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "predicate"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:275:1: predicate returns [URI value] : resource ;
-    public final URI predicate() throws RecognitionException {
-        URI value = null;
+    public final IRI predicate() throws RecognitionException {
+        IRI value = null;
 
 
-        URI resource12 =null;
+        IRI resource12 =null;
 
 
         try {
@@ -1143,7 +1147,7 @@ public class TurtleParser extends Parser {
         NewLiteral value = null;
 
 
-        URI resource13 =null;
+        IRI resource13 =null;
 
         Function function14 =null;
 
@@ -1378,8 +1382,8 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "resource"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:289:1: resource returns [URI value] : ( uriref | qname );
-    public final URI resource() throws RecognitionException {
-        URI value = null;
+    public final IRI resource() throws RecognitionException {
+        IRI value = null;
 
 
         String uriref19 =null;
@@ -1415,7 +1419,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = URI.create(uriref19); 
+                     value = OBDADataFactoryImpl.getIRI(uriref19); 
 
                     }
                     break;
@@ -1428,7 +1432,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = URI.create(qname20); 
+                     value = OBDADataFactoryImpl.getIRI(qname20); 
 
                     }
                     break;
@@ -1642,7 +1646,7 @@ public class TurtleParser extends Parser {
         Function value = null;
 
 
-        URI resource24 =null;
+        IRI resource24 =null;
 
         Vector<NewLiteral> terms25 =null;
 
@@ -1670,7 +1674,7 @@ public class TurtleParser extends Parser {
 
                   String functionName = resource24.toString();
                   int arity = terms25.size();
-                  Predicate functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
+                  Predicate functionSymbol = dfac.getPredicate(OBDADataFactoryImpl.getIRI(functionName), arity);
                   value = dfac.getFunctionalTerm(functionSymbol, terms25);
                 
 
@@ -1703,7 +1707,7 @@ public class TurtleParser extends Parser {
 
         Variable variable28 =null;
 
-        URI resource29 =null;
+        IRI resource29 =null;
 
 
         try {
@@ -2401,7 +2405,7 @@ public class TurtleParser extends Parser {
 
         ValueConstant stringLiteral42 =null;
 
-        URI resource43 =null;
+        IRI resource43 =null;
 
 
         try {

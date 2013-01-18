@@ -25,6 +25,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class OntologyImpl implements Ontology {
 
 	/**
@@ -40,7 +43,7 @@ public class OntologyImpl implements Ontology {
 
 	private Set<Predicate> reserved = null;
 
-	private URI ontouri = null;
+	private IRI ontouri = null;
 
 	private Set<Axiom> originalassertions = null;
 
@@ -61,6 +64,7 @@ public class OntologyImpl implements Ontology {
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	
 
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
 
@@ -80,7 +84,7 @@ public class OntologyImpl implements Ontology {
 		}
 	}
 
-	OntologyImpl(URI uri) {
+	OntologyImpl(IRI uri) {
 		ontouri = uri;
 		originalassertions = new LinkedHashSet<Axiom>();
 		concepts = new HashSet<Predicate>();
@@ -92,7 +96,7 @@ public class OntologyImpl implements Ontology {
 	public OntologyImpl clone() {
 		OntologyImpl clone = null;
 		if (ontouri != null)
-			clone = (OntologyImpl) ofac.createOntology(URI.create(ontouri.toString()));
+			clone = (OntologyImpl) ofac.createOntology(OBDADataFactoryImpl.getIRI(ontouri.toString()));
 		else
 			clone = (OntologyImpl) ofac.createOntology();
 
@@ -252,7 +256,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public URI getUri() {
+	public IRI getUri() {
 		return ontouri;
 	}
 

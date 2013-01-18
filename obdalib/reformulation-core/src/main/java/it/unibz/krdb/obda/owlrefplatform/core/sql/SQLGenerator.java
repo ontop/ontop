@@ -990,20 +990,43 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return getSQLString(ov.getTerms().get(1), index, false);
 			} else {
 				StringTokenizer tokenizer = new StringTokenizer(c.getValue(), "{}");
-				
+			
 				String functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
 				List<String> vex = new LinkedList<String>();
-				
-				/*
-				 * New we concat the rest of the function, note that if there is only 1 element
-				 * there is nothing to concatenate
-				 */
+			
+			   /*
+			 	* New we concat the rest of the function, note that if there is only 1 element
+			 	* there is nothing to concatenate
+			 	*/
 				if (ov.getTerms().size() > 1) {
 					for (int termIndex = 1; termIndex < ov.getTerms().size(); termIndex++) {
 						NewLiteral currentTerm = ov.getTerms().get(termIndex);
-						vex.add(getSQLString(currentTerm, index, false));
+						String repl = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+								"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" 
+								+ getSQLString(currentTerm, index, false)
+								+ ",' ', '%20')," +
+								  "'!', '%21')," +
+								  "'@', '%40'),"+
+								  "'#', '%23')," +
+								  "'$', '%24'),"+
+								  "'&', '%26'),"+
+								  "'*', '%42'), "+
+								  "'(', '%28'), "+
+								  "')', '%29'), "+
+								  "'[', '%5B'), "+
+								  "']', '%5D'), "+
+								  "',', '%2C'), "+
+								  "';', '%3B'), "+
+								  "':', '%3A'), "+
+								  "'?', '%3F'), "+
+								  "'=', '%3D'), "+
+								  "'+', '%2B'), "+
+								  "'''', '%22'), "+
+								  "'/', '%2F')";
+								  
+						vex.add(repl);
 						if (tokenizer.hasMoreTokens()) {
-							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
+							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
 						}
 						termIndex += 1;
 					}

@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class ExpressionEvaluator {
 
 	private UriTemplateMatcher uriTemplateMatcher;
@@ -926,8 +928,7 @@ public class ExpressionEvaluator {
 
 	private Function getUriFunctionWithParameters(Function uriFunction) {
 		ValueConstant uriString = (ValueConstant) uriFunction.getTerm(0);
-		URI uri = URI.create(uriString.getValue());
-		return uriTemplateMatcher.generateURIFunction(uri);
+		return uriTemplateMatcher.generateURIFunction(OBDADataFactoryImpl.getIRI(uriString.getValue()));
 	}
 	
 	public Function createEqNeqFilter(Variable var, NewLiteral value, boolean isEqual) {

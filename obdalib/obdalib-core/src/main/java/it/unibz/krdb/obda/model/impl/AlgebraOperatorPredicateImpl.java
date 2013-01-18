@@ -4,6 +4,8 @@ import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public class AlgebraOperatorPredicateImpl extends PredicateImpl implements
 		AlgebraOperatorPredicate {
 
@@ -21,7 +23,7 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements
 	 * @param type
 	 *            The datatype that the term holds.
 	 */
-	public AlgebraOperatorPredicateImpl(URI name, COL_TYPE type) {
+	public AlgebraOperatorPredicateImpl(IRI name, COL_TYPE type) {
 		super(name, 2, new COL_TYPE[] { type });
 	}
 
@@ -36,7 +38,7 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements
 	 * @param types
 	 *            The datatypes that each term holds.
 	 */
-	public AlgebraOperatorPredicateImpl(URI name, COL_TYPE[] types) {
+	public AlgebraOperatorPredicateImpl(IRI name, COL_TYPE[] types) {
 		super(name, types.length, types);
 	}
 

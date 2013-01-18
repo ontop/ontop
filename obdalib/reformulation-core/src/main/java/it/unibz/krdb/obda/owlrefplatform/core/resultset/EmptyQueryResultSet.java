@@ -10,6 +10,8 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import java.net.URI;
 import java.util.List;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public class EmptyQueryResultSet implements OBDAResultSet {
 
 	List<String> head = null;
@@ -46,6 +48,11 @@ public class EmptyQueryResultSet implements OBDAResultSet {
 
 	@Override
 	public URI getURI(int column) throws OBDAException {
+		return null;
+	}
+	
+	@Override
+	public IRI getIRI(int column) throws OBDAException {
 		return null;
 	}
 
@@ -96,6 +103,11 @@ public class EmptyQueryResultSet implements OBDAResultSet {
 
 	@Override
 	public URI getURI(String name) throws OBDAException {
+		return null;
+	}
+	
+	@Override
+	public IRI getIRI(String name) throws OBDAException {
 		return null;
 	}
 

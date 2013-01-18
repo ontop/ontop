@@ -7,13 +7,15 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public interface OntologyFactory {
 
 	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
 	
 	public OClass createClass(Predicate p);
 	
-	public OClass createClass(URI uri);
+	public OClass createClass(IRI uri);
 	
 	public OClass createClass(String uri);
 
@@ -21,21 +23,21 @@ public interface OntologyFactory {
 
 	public Property createProperty(Predicate p);
 	
-	public Property createObjectProperty(URI uri, boolean inverse);
+	public Property createObjectProperty(IRI uri, boolean inverse);
 	
 	public Property createObjectProperty(String uri, boolean inverse);
 	
-	public Property createObjectProperty(URI uri);
+	public Property createObjectProperty(IRI uri);
 	
 	public Property createObjectProperty(String uri);
 	
-	public Property createDataProperty(URI uri);
+	public Property createDataProperty(IRI uri);
 	
 	public Property createDataProperty(String uri);
 	
 	public DataType createDataType(Predicate p);
 	
-	public Ontology createOntology(URI uri);
+	public Ontology createOntology(IRI uri);
 	
 	public Ontology createOntology();
 

@@ -22,11 +22,11 @@ public class SigmaTest extends TestCase {
     private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     public void test_exists_simple() {
-        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(OBDADataFactoryImpl.getIRI(""));
 
-        Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
-        Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
-        Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
+        Predicate a = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI("a"), 1);
+        Predicate c = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI("c"), 1);
+        Predicate r = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI("r"), 2);
         OClass ac = descFactory.createClass(a);
         OClass cc = descFactory.createClass(c);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);

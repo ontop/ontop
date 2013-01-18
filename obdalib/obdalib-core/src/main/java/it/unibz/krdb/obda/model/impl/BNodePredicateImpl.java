@@ -4,6 +4,8 @@ import it.unibz.krdb.obda.model.BNodePredicate;
 
 import java.net.URI;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate {
 
 
@@ -16,7 +18,7 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 		/**
 		 * TODO: BAD CODE! Predicate shouldn't store the arity and the type.
 		 */
-		super(URI.create(OBDAVocabulary.QUEST_BNODE), arity, null);
+		super(OBDADataFactoryImpl.getIRI(OBDAVocabulary.QUEST_BNODE), arity, null);
 	}
 
 	@Override

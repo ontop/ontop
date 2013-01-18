@@ -26,6 +26,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class SesameRDFIterator extends RDFHandlerBase implements
 		Iterator<Assertion> {
 
@@ -153,7 +155,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 		Resource currSubject = st.getSubject();
 		ObjectConstant c;
 		if (currSubject instanceof URI)
-			c = obdafac.getURIConstant(java.net.URI.create(currSubject
+			c = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currSubject
 					.stringValue()));
 		else if (currSubject instanceof BNode) {
 			c = obdafac.getBNodeConstant(currSubject.stringValue());
@@ -194,7 +196,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 
 			Constant c2;
 			if (currObject instanceof URI)
-				c2 = obdafac.getURIConstant(java.net.URI.create(currObject
+				c2 = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currObject
 						.stringValue()));
 			else if (currObject instanceof BNode) {
 				c2 = obdafac.getBNodeConstant(currObject.stringValue());

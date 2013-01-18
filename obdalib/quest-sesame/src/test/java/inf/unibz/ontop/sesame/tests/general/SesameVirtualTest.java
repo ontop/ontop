@@ -1,8 +1,14 @@
 package inf.unibz.ontop.sesame.tests.general;
+import java.io.PrintStream;
+import java.util.List;
+
 import junit.framework.TestCase;
 
+import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.GraphQuery;
+import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -26,8 +32,8 @@ public class SesameVirtualTest extends TestCase {
 		
 		try {
 			
-			String owlfile = "../quest-owlapi3/src/test/resources/test/bsbm.owl";
-			String obdafile = "../quest-owlapi3/src/test/resources/test/bsbm.obda";
+			String owlfile = "C:/Project/Test Cases/Book.owl";
+			String obdafile = "C:/Project/Test Cases/Book.obda";
 				//"/home/timi/ontologies/helloworld/helloworld.owl";
 			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
 	
@@ -37,29 +43,41 @@ public class SesameVirtualTest extends TestCase {
 			
 			///query repo
 			 try {
-			      String queryString = "SELECT ?x ?y WHERE {?x ?p ?y}";
+			      String queryString = "select * where {<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#book/History%20of%20Art>  ?z ?y }";
+			      		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
 			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 			      TupleQueryResult result = tupleQuery.evaluate();
 			      try {
+			    	  List<String> bindings = result.getBindingNames();
 			    	  while (result.hasNext()) {
 			    		   BindingSet bindingSet = result.next();
-			    		   Value valueOfX = bindingSet.getValue("x");
-			    		   Value valueOfY = bindingSet.getValue("y");
-			    		   System.out.println("x="+valueOfX.toString()+", y="+valueOfY.toString());
+			    		   for (String b : bindings)
+			    			   System.out.println(bindingSet.getBinding(b));
 			    	  }
 			      }
 			      finally {
 			         result.close();
 			      }
-				  System.out.println("Closing..,");
-			      con.close();
+			      
+			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
+			      GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+			      GraphQueryResult gresult = graphQuery.evaluate();
+			      while(gresult.hasNext())
+			      {
+			    	  Statement s = gresult.next();
+			    	  System.out.println(s.toString());
+			      }
+			      
+				  System.out.println("Closing...");
+				 
+			     con.close();
+			    	  
 			   }
 			 catch(Exception e)
 			 {
 				 e.printStackTrace();
 			 }
 			
-			con.close();
 			
 			
 		} catch (Exception e1) {

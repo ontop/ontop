@@ -99,16 +99,16 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
-		Predicate person = fac.getPredicate(URI.create("Person"), 1);
-		Predicate fn = fac.getPredicate(URI.create("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(URI.create("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(URI.create("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(URI.create("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(URI.create("School"), 1);
+		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
+		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -199,16 +199,16 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
-		Predicate person = fac.getPredicate(URI.create("Person"), 1);
-		Predicate fn = fac.getPredicate(URI.create("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(URI.create("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(URI.create("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(URI.create("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(URI.create("School"), 1);
+		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
+		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -307,16 +307,16 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
-		Predicate person = fac.getPredicate(URI.create("Person"), 1);
-		Predicate fn = fac.getPredicate(URI.create("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(URI.create("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(URI.create("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(URI.create("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(URI.create("School"), 1);
+		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
+		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -487,16 +487,16 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
-		Predicate person = fac.getPredicate(URI.create("Person"), 1);
-		Predicate fn = fac.getPredicate(URI.create("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(URI.create("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(URI.create("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(URI.create("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(URI.create("School"), 1);
+		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
+		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -577,16 +577,16 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Atom head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 //		List<Atom> body = new LinkedList<Atom>();
-		Predicate person = fac.getPredicate(URI.create("Person"), 1);
-		Predicate fn = fac.getPredicate(URI.create("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(URI.create("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(URI.create("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(URI.create("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(URI.create("School"), 1);
+		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
+		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
 //		body.add(fac.getAtom(person, objectTerm));
 //		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 //		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));

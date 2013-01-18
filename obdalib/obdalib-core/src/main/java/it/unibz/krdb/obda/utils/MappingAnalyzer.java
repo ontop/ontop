@@ -43,6 +43,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class MappingAnalyzer {
 
 	private ArrayList<OBDAMappingAxiom> mappingList;
@@ -91,7 +94,7 @@ public class MappingAnalyzer {
 				for (Relation table : tableList) {
 					// Construct the URI from the table name
 					String tableName = table.getName();
-					URI predicateName = URI.create(tableName);
+					IRI predicateName = OBDADataFactoryImpl.getIRI(tableName);
 
 					// Construct the predicate using the table name
 					int arity = dbMetaData.getDefinition(tableName).countAttribute();

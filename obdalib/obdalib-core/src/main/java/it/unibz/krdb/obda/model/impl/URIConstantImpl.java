@@ -5,11 +5,16 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
 
 /**
  * Provides a storage to put the URI constant.
@@ -21,11 +26,11 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	 */
 	private static final long serialVersionUID = -1263974895010238519L;
 
-	private final URI uri;
+	private final IRI iri;
 
 	private final int identifier;
 
-	private final String uristr;
+	private final String iristr;
 
 	/**
 	 * The default constructor.
@@ -33,12 +38,18 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	 * @param uri
 	 *            URI from a term.
 	 */
-	protected URIConstantImpl(URI uri) {
-		this.uri = uri;
-		this.uristr = uri.toString();
+	protected URIConstantImpl(IRI uri) {
+		this.iri = uri;
+		this.iristr = uri.toString();
 		this.identifier = uri.hashCode();
 	}
 
+	protected URIConstantImpl(String uri) {
+		this.iri = OBDADataFactoryImpl.getIRI(uri);
+		this.iristr = uri.toString();
+		this.identifier = uri.hashCode();
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 
@@ -55,8 +66,8 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	}
 
 	@Override
-	public URI getURI() {
-		return uri;
+	public IRI getURI() {
+		return iri;
 	}
 
 	// @Override
@@ -74,7 +85,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String toString() {
-		return uristr;
+		return iristr;
 	}
 
 	@Override
@@ -100,7 +111,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String getValue() {
-		return uristr;
+		return iristr;
 	}
 
 	@Override

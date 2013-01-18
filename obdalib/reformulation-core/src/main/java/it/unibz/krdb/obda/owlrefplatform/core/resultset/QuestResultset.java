@@ -10,8 +10,12 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -22,6 +26,8 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.util.URIref;
 
 public class QuestResultset implements OBDAResultSet {
@@ -152,6 +158,10 @@ public class QuestResultset implements OBDAResultSet {
 	public URI getURI(int column) throws OBDAException {
 		return getURI(signature.get(column - 1));
 	}
+	
+	public IRI getIRI(int column) throws OBDAException {
+		return getIRI(signature.get(column - 1));
+	}
 
 	public int getColumCount() throws OBDAException {
 		return signature.size();
@@ -216,8 +226,11 @@ public class QuestResultset implements OBDAResultSet {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
-					URI value = getURI(name);
-					result = fac.getURIConstant(value);
+				//	URI value = getURI(name);
+					IRI irivalue = getIRI(name);
+				//	result = fac.getURIConstant(value);
+					result = fac.getURIConstant(irivalue);
+					
 				} else if (type == COL_TYPE.BNODE) {
 					String rawLabel = set.getString(name);
 					String scopedLabel = this.bnodeMap.get(rawLabel);
@@ -303,11 +316,24 @@ public class QuestResultset implements OBDAResultSet {
 		String result = "";
 		try {
 			result = set.getString(name);
+		      
+			return URI.create(result);//.replace(' ', '_'));
 			
-//			result
-//			String encoded = URIref.encode(result);
-			
-			return URI.create(result.replace(' ', '_'));
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
+	}
+	
+	@Override
+	public IRI getIRI(String name) throws OBDAException {
+		String result = "";
+		try {
+			result = set.getString(name);
+
+			IRIFactory irif = new IRIFactory();
+			IRI iri = irif.create(result);
+			//System.out.println("URI:"+iri.toString());//toURL().toURI());
+			return iri;
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		}

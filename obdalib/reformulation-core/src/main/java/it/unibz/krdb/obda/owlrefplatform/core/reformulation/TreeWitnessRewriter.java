@@ -35,6 +35,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRI;
+
 /**
  * 
  */
@@ -139,14 +141,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private static Atom getHeadAtom(URI basis, String fragment, List<NewLiteral> arguments) {
-		URI uri = null;
-		try {
-			uri = new URI(basis.getScheme(), basis.getSchemeSpecificPart(), fragment);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private static Atom getHeadAtom(IRI headURI, String fragment, List<NewLiteral> arguments) {
+		IRI uri = null;
+		uri = OBDADataFactoryImpl.getIRI(headURI.toString() + fragment);
 		return fac.getAtom(fac.getPredicate(uri, arguments.size()), arguments);
 	}
 	
@@ -155,7 +152,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 	
 	private void rewriteCC(QueryConnectedComponent cc, Atom headAtom, DatalogProgram output, Set<Predicate> usedExts, DatalogProgram edgeDP) {
-		URI headURI = headAtom.getPredicate().getName();
+		IRI headURI = headAtom.getPredicate().getName();
 		
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
@@ -248,9 +245,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					for (TreeWitness tw : tws.getTWs())
 						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
 							if (edgeAtom == null) {
-								URI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
+								IRI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
 								edgeAtom = getHeadAtom(headURI, 
-										"EDGE_" + (edgeDP.getRules().size() + 1) + "_" + atomURI.getFragment(), cc.getVariables());
+										"EDGE_" + (edgeDP.getRules().size() + 1) + "_" + atomURI.getRawFragment(), cc.getVariables());
 								mainbody.addNoCheck(edgeAtom);				
 								edgeDP.appendRule(fac.getCQIE(edgeAtom, getExtAtoms(edgeAtoms, usedExts)));													
 							}
@@ -299,7 +296,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				rewriteCC(cc, cqieAtom, output, exts, edgeDP); 				
 			}
 			else {
-				URI cqieURI = cqieAtom.getPredicate().getName();
+				IRI cqieURI = cqieAtom.getPredicate().getName();
 				List<Atom> ccBody = new ArrayList<Atom>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
 					log.debug("CONNECTED COMPONENT (" + cc.getFreeVariables() + ")" + " EXISTS " + cc.getQuantifiedVariables() + " WITH EDGES " + cc.getEdges());
@@ -433,17 +430,13 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			
 		}
 		
-		private URI getExtURI(URI pURI, String prefix) {
-			try {
-				return new URI(pURI.getScheme(), pURI.getSchemeSpecificPart(), prefix + pURI.getFragment());
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-			return null;
+		private IRI getExtURI(IRI iri, String prefix) {
+			return OBDADataFactoryImpl.getIRI(iri.toString()+ prefix);
+			//return null;
 		}
 		
 		private ExtDatalogProgramDef getConceptDP(BasicClassDescription b) {
-			URI extURI;
+			IRI extURI;
 			if (b instanceof OClass) 
 				extURI = getExtURI(((OClass)b).getPredicate().getName(), "EXT_");
 			else {
@@ -467,7 +460,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				dp = getConceptDP(reasoner.getOntologyFactory().createClass(p));
 			}
 			else  {
-				URI extURI = getExtURI(p.getName(), "EXT_");
+				IRI extURI = getExtURI(p.getName(), "EXT_");
 				dp = new ExtDatalogProgramDef(fac.getAtom(fac.getObjectPropertyPredicate(extURI), x, y), 
 											fac.getAtom(p, x, y));
 				for (Property sub: reasoner.getSubProperties(p, false))
