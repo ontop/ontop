@@ -988,37 +988,36 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 			if (c.getValue().equals("{}")) {
 				return getSQLString(ov.getTerms().get(1), index, false);
-			}
-
-			StringTokenizer tokenizer = new StringTokenizer(c.getValue(), "{}");
-			
-			String nextToken = tokenizer.nextToken();
-			String functionString = jdbcutil.getSQLLexicalForm(nextToken);
-			List<String> vex = new LinkedList<String>();
-			
-			/*
-			 * New we concat the rest of the function, note that if there is only 1 element
-			 * there is nothing to concatenate
-			 */
-			if (ov.getTerms().size() > 1) {
-				for (int termIndex = 1; termIndex < ov.getTerms().size(); termIndex++) {
-					NewLiteral currentTerm = ov.getTerms().get(termIndex);
-					vex.add(getSQLString(currentTerm, index, false));
-					if (tokenizer.hasMoreTokens()) {
-						vex.add(jdbcutil.getSQLLexicalForm(nextToken));
+			} else {
+				StringTokenizer tokenizer = new StringTokenizer(c.getValue(), "{}");
+				
+				String functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+				List<String> vex = new LinkedList<String>();
+				
+				/*
+				 * New we concat the rest of the function, note that if there is only 1 element
+				 * there is nothing to concatenate
+				 */
+				if (ov.getTerms().size() > 1) {
+					for (int termIndex = 1; termIndex < ov.getTerms().size(); termIndex++) {
+						NewLiteral currentTerm = ov.getTerms().get(termIndex);
+						vex.add(getSQLString(currentTerm, index, false));
+						if (tokenizer.hasMoreTokens()) {
+							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
+						}
+						termIndex += 1;
 					}
-					termIndex += 1;
 				}
-			}
-			String[] params = new String[vex.size() + 1];
-			int i = 0;
-			params[i] = functionString;
-			i += 1;
-			for (String param : vex) {
-				params[i] = param;
+				String[] params = new String[vex.size() + 1];
+				int i = 0;
+				params[i] = functionString;
 				i += 1;
+				for (String param : vex) {
+					params[i] = param;
+					i += 1;
+				}
+				return sqladapter.strconcat(params);
 			}
-			return sqladapter.strconcat(params);
 		} else if (t instanceof Variable) {
 			/*
 			 * The function is of the form uri(x), we need to simply return the
