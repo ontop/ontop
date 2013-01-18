@@ -1026,7 +1026,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 								  
 						vex.add(repl);
 						if (tokenizer.hasMoreTokens()) {
-							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
 						}
 						termIndex += 1;
 					}

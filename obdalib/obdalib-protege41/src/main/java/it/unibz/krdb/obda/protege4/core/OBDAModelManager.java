@@ -164,15 +164,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							Predicate c = dfac.getClassPredicate(oc.getIRI().toURI());
+							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
 							activeOBDAModel.declareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toURI());
+							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toString());
 							activeOBDAModel.declareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toURI());
+							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toString());
 							activeOBDAModel.declareDataProperty(p);
 						}
 					}
@@ -184,15 +184,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							Predicate c = dfac.getClassPredicate(oc.getIRI().toURI());
+							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
 							activeOBDAModel.unDeclareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toURI());
+							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toString());
 							activeOBDAModel.unDeclareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toURI());
+							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toString());
 							activeOBDAModel.unDeclareDataProperty(p);
 						}
 					}

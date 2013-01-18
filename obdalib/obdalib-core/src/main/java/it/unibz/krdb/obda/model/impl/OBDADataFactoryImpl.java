@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.utils.IDGenerator;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -53,7 +54,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return irifactory;
 	}
 
-	public IRI getIRI(String s){
+	public static IRI getIRI(String s){
 		return irifactory.construct(s);
 	}
 	
