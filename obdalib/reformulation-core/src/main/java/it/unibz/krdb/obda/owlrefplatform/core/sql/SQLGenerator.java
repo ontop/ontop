@@ -1003,7 +1003,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						NewLiteral currentTerm = ov.getTerms().get(termIndex);
 						String repl = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
 								"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" 
-								+ getSQLString(currentTerm, index, false)
+								+ sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
 								+ ",' ', '%20')," +
 								  "'!', '%21')," +
 								  "'@', '%40'),"+
