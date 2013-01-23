@@ -85,7 +85,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			Predicate ext = cache.getExtPredicateClass(a.getPredicate(), usedExts);
 			return fac.getAtom(ext, a.getTerm(0));
 		}
-		else {
+		else if (a.getArity() == 2){
 			NewLiteral t0 = a.getTerm(0);
 			NewLiteral t1 = a.getTerm(1);
 			if (t0 instanceof AnonymousVariable) {
@@ -100,6 +100,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				Predicate ext = cache.getExtPredicateProperty(a.getPredicate(), usedExts);
 				return fac.getAtom(ext, t0, t1);					
 			}
+		}
+		else {
+			return a.clone();
 		}
 	}
 	
