@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -684,16 +685,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Eliminating redundancy from the unfolding program
 			 */
-			unfoldingProgram = DatalogNormalizer
-					.pushEqualities(unfoldingProgram);
-
-			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
-
+			unfoldingProgram = DatalogNormalizer.pushEqualities(unfoldingProgram);
+			
+			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
+				
+//			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
+			
 			/*
 			 * Adding data typing on the mapping axioms.
 			 */
-			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(
-					metadata);
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
 			typeRepair.insertDataTyping(unfoldingProgram);
 
 			/*

@@ -143,8 +143,9 @@ public class TMappingProcessor implements Serializable {
 	public void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
 		List<Atom> strippedNewConditions = new LinkedList<Atom>();
 		CQIE strippedNewMapping = getStrippedMapping(newmapping, strippedNewConditions);
-
-		CQCUtilities cqc1 = new CQCUtilities(strippedNewMapping);
+		Ontology sigma = null;
+		
+		CQCUtilities cqc1 = new CQCUtilities(strippedNewMapping, sigma);
 
 		Iterator<CQIE> mappingIterator = currentMappings.iterator();
 		
@@ -160,7 +161,7 @@ public class TMappingProcessor implements Serializable {
 			if (!cqc1.isContainedIn(strippedCurrentMapping))
 				continue;
 
-			CQCUtilities cqc = new CQCUtilities(strippedCurrentMapping);
+			CQCUtilities cqc = new CQCUtilities(strippedCurrentMapping, sigma);
 			if (!cqc.isContainedIn(strippedNewMapping))
 				continue;
 

@@ -4,15 +4,13 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.DataType;
@@ -24,6 +22,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeDataTypeRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,18 +69,10 @@ public class CQCUtilities {
 	static Logger log = LoggerFactory.getLogger(CQCUtilities.class);
 
 	private Ontology sigma = null;
+	
+	private List<CQIE> rules = null;
 
 	final private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
-	/***
-	 * Constructs a CQC utility using the given query.
-	 * 
-	 * @param query
-	 *            A conjunctive query
-	 */
-	public CQCUtilities(CQIE query) {
-		this(query, null);
-	}
 
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
@@ -115,6 +106,30 @@ public class CQCUtilities {
 				factMap.put(predicate, facts);
 			}
 			facts.add(fact);
+		}
+	}
+
+	public CQCUtilities(CQIE query, List<CQIE> rules) {
+		for (Atom b : query.getBody())
+			if (b.isBooleanFunction())
+				return;
+		
+		this.rules = rules;
+		if (rules != null && !rules.isEmpty()) {
+			factMap = new HashMap<Predicate, List<Atom>>();
+			List<Atom> generatedFacts = chaseQuery(query, rules);
+			
+			// Map the facts
+			for (Atom fact : generatedFacts) {
+				Predicate p = fact.getPredicate();
+				canonicalpredicates.add(p);
+				List<Atom> facts = factMap.get(p);
+				if (facts == null) {
+					facts = new LinkedList<Atom>();
+					factMap.put(p, facts);
+				}
+				facts.add(fact);
+			}
 		}
 	}
 
@@ -286,6 +301,37 @@ public class CQCUtilities {
 		return newquery;
 	}
 
+	/**
+	 * This method is used to chase foreign key constraint rule in which the rule
+	 * has only one atom in the body.
+	 * 
+	 * @param query
+	 * @param rules
+	 * @return
+	 */
+	public List<Atom> chaseQuery(CQIE query, List<CQIE> rules) {
+		List<Atom> facts = new ArrayList<Atom>();
+
+		CQIE canonicalQuery = getCanonicalQuery(query);
+		canonicalhead = canonicalQuery.getHead();
+		canonicalbody = canonicalQuery.getBody();
+		
+		for (Atom fact : canonicalbody) {
+			facts.add(fact);
+			for (CQIE rule : rules) {
+				Atom ruleBody = rule.getBody().get(0);
+				Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, fact);
+				if (theta != null && !theta.isEmpty()) {
+					Atom ruleHead = rule.getHead();
+					Atom newFact = ruleHead.clone();
+					Unifier.applyUnifierToGetFact(newFact, theta);
+					facts.add(newFact);
+				}
+			}
+		}
+		return facts;
+	}
+	
 	/***
 	 * Computes a query in which all variables have been replaced by
 	 * ValueConstants that have the no type and have the same 'name' as the
@@ -687,6 +733,7 @@ public class CQCUtilities {
 		for (int i = 0; i < queries.size(); i++) {
 			for (int j = queries.size() - 1; j > i; j--) {
 				if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
+					log.debug("REMOVE: " + queries.get(i));
 					queries.remove(i);
 					i = -1;
 					break;
@@ -698,6 +745,7 @@ public class CQCUtilities {
 			for (int i = queries.size() - 1; i > 0; i--) {
 				for (int j = 0; j < i; j++) {
 					if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
+						log.debug("REMOVE: " + queries.get(i));
 						queries.remove(i);
 						i = +1;
 						break;
@@ -742,17 +790,12 @@ public class CQCUtilities {
 		return true;
 	}
 
-	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
-		removeContainedQueriesSorted(queries, twopasses, null);
-
-	}
-
 	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses) {
 		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
 		result.setQueryModifiers(program.getQueryModifiers());
 		List<CQIE> rules = new LinkedList<CQIE>();
 		rules.addAll(program.getRules());
-		rules = removeContainedQueriesSorted(rules, twopasses, null);
+		rules = removeContainedQueries(rules, twopasses, null, null, true);
 		result.appendRule(rules);
 		return result;
 	}
@@ -763,6 +806,16 @@ public class CQCUtilities {
 		List<CQIE> rules = removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
 		result.appendRule(rules);
 		return result; 
+	}
+	
+	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, List<CQIE> foreignKeyRules) {
+		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
+		result.setQueryModifiers(program.getQueryModifiers());
+		List<CQIE> rules = new LinkedList<CQIE>();
+		rules.addAll(program.getRules());
+		rules = removeContainedQueriesSorted(rules, twopasses, foreignKeyRules);
+		result.appendRule(rules);
+		return result;
 	}
 
 	/***
@@ -776,10 +829,33 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, List<CQIE> rules) {
+		return removeContainedQueries(queries, twopasses, null, rules, true);
+	}
+	
+	/***
+	 * Removes queries that are contained syntactically, using the method
+	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
+	 * efficient, we first sort the list of queries as to have longer queries
+	 * first and shorter queries last.
+	 * 
+	 * Removal of queries is done in two main double scans. The first scan goes
+	 * top-down/down-top, the second scan goes down-top/top-down
+	 * 
+	 * @param queries
+	 */
 	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, Ontology sigma) {
-		return removeContainedQueries(queries, twopasses, sigma, true);
+		return removeContainedQueries(queries, twopasses, sigma, null, true);
 	}
 
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules) {
+		return removeContainedQueries(queriesInput, twopasses, null, rules, false);
+	}
+	
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma) {
+		return removeContainedQueries(queriesInput, twopasses, sigma, null, false);
+	}
+	
 	/***
 	 * Removes queries that are contained syntactically, using the method
 	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
@@ -791,7 +867,7 @@ public class CQCUtilities {
 	 * 
 	 * @param querieslist
 	 */
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, boolean sort) {
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, List<CQIE> rules, boolean sort) {
 
 		// queries = new LinkedList<CQIE>(queries);
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
@@ -815,61 +891,66 @@ public class CQCUtilities {
 			Collections.sort(queries, lenghtComparator);
 		}
 
-		// Iterator<CQIE> forwardIt = queries.iterator();
-		// while (forwardIt.hasNext()) {
-		// CQCUtilities cqc = new CQCUtilities(forwardIt.next(), sigma);
-		// Iterator<CQIE> backwardIt =
-		// ((LinkedList)queries).descendingIterator();
-		// while (backwardIt.hasNext()) {
-		// if (cqc.isContainedIn(backwardIt.next())) {
-		// forwardIt.remove();
-		// break;
-		// }
-		// }
-		// }
-		//
-		// if (twopasses) {
-		// Iterator<CQIE> backwardIterator =
-		// ((LinkedList)queries).descendingIterator();
-		// while (backwardIterator.hasNext()) {
-		// CQCUtilities cqc = new CQCUtilities(backwardIterator.next(), sigma);
-		// forwardIt = queries.iterator();
-		// while (forwardIt.hasNext()) {
-		// if (cqc.isContainedIn(forwardIt.next())) {
-		// backwardIterator.remove();
-		// break;
-		// }
-		// }
-		// }
-		// }
-
-		for (int i = 0; i < queries.size(); i++) {
-			CQIE query = queries.get(i);
-			CQCUtilities cqc = new CQCUtilities(query, sigma);
-			for (int j = queries.size() - 1; j > i; j--) {
-				CQIE query2 = queries.get(j);
-				if (cqc.isContainedIn(query2)) {
-					queries.remove(i);
-					i -= 1;
-					break;
-				}
-			}
-		}
-
-		if (twopasses) {
-			for (int i = (queries.size() - 1); i >= 0; i--) {
-				CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
-				for (int j = 0; j < i; j++) {
-					if (cqc.isContainedIn(queries.get(j))) {
+		if (sigma != null) {
+			for (int i = 0; i < queries.size(); i++) {
+				CQIE query = queries.get(i);
+				CQCUtilities cqc = new CQCUtilities(query, sigma);
+				for (int j = queries.size() - 1; j > i; j--) {
+					CQIE query2 = queries.get(j);
+					if (cqc.isContainedIn(query2)) {
+						log.debug("REMOVE (SIGMA): " + queries.get(i));
 						queries.remove(i);
+						i -= 1;
 						break;
 					}
 				}
 			}
+	
+			if (twopasses) {
+				for (int i = (queries.size() - 1); i >= 0; i--) {
+					CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
+					for (int j = 0; j < i; j++) {
+						if (cqc.isContainedIn(queries.get(j))) {
+							log.debug("REMOVE (SIGMA): " + queries.get(i));
+							queries.remove(i);
+							break;
+						}
+					}
+				}
+			}
 		}
+		
+		if (rules != null && !rules.isEmpty()) {
+			for (int i = 0; i < queries.size(); i++) {
+				CQIE query = queries.get(i);
+				CQCUtilities cqc = new CQCUtilities(query, rules);
+				if (cqc.rules != null)
+				for (int j = queries.size() - 1; j > i; j--) {
+					CQIE query2 = queries.get(j);
+					if (cqc.isContainedIn(query2)) {
+						log.debug("REMOVE (FK): " + queries.get(i));
+						queries.remove(i);
+						i -= 1;
+						break;
+					}
+				}
+			}
 
+			if (twopasses) {
+				for (int i = (queries.size() - 1); i >= 0; i--) {
+					CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
+					if (cqc.rules != null)
+					for (int j = 0; j < i; j++) {
+						if (cqc.isContainedIn(queries.get(j))) {
+							log.debug("REMOVE (FK): " + queries.get(i));
+							queries.remove(i);
+							break;
+						}
+					}
+				}
+			}
+		}
 		int newsize = queries.size();
-		// int queriesremoved = initialsize - newsize;
 
 		double endtime = System.currentTimeMillis();
 		double time = (endtime - startime) / 1000;
@@ -878,5 +959,4 @@ public class CQCUtilities {
 		
 		return queries;
 	}
-
 }

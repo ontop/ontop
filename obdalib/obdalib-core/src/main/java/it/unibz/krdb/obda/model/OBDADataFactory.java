@@ -269,6 +269,14 @@ public interface OBDADataFactory extends Serializable {
 	public ValueConstant getValueConstant(String value, String language);
 
 	/**
+	 * Construct a {@link ValueConstant} object with a system-assigned name
+	 * that is automatically generated.
+	 * 
+	 * @return the value constant.
+	 */
+	public ValueConstant getFreshValueConstant();
+	
+	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
 	 * dollar sign ('$') or a question mark sign ('?'), e.g.:
 	 * <p>

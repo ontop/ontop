@@ -537,7 +537,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		public void minimise() {
 			dp.add(mainQuery);
 			if (dp.size() > 1) {
-				dp = CQCUtilities.removeContainedQueries(dp, true, sigma, false);
+				dp = CQCUtilities.removeContainedQueries(dp, true, sigma);
 				log.debug("SIMPLIFIED DP FOR " + extAtom + " IS " + dp);
 			}
 		}

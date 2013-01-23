@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -21,6 +22,7 @@ import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -39,6 +41,8 @@ import java.util.Map;
  */
 public class Unifier {
 
+	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+		
 	public static Map<Variable, NewLiteral> getMGU(CQIE q, int position1,
 			int position2) throws Exception {
 		return getMGU(q.getBody().get(position1), q.getBody().get(position2));
@@ -164,6 +168,12 @@ public class Unifier {
 		List<NewLiteral> terms = term.getTerms();
 		applyUnifier(terms, unifier);
 	}
+	
+	public static void applyUnifierToGetFact(Function term,
+			Map<Variable, NewLiteral> unifier) {
+		List<NewLiteral> terms = term.getTerms();
+		applyUnifierToGetFact(terms, unifier);
+	}
 
 	// public static void applyUnifier(List<Function> terms,
 	// Map<Variable, NewLiteral> unifier) {
@@ -179,7 +189,7 @@ public class Unifier {
 	 * @param terms
 	 * @param unifier
 	 */
-	public static void applyUnifier(List<NewLiteral> terms,
+	public static void applyUnifier(List<NewLiteral> terms, 
 			Map<Variable, NewLiteral> unifier) {
 		for (int i = 0; i < terms.size(); i++) {
 			NewLiteral t = terms.get(i);
@@ -195,6 +205,33 @@ public class Unifier {
 				Function t2 = (Function) t;
 				applyUnifier(t2, unifier);
 
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param terms
+	 * @param unifier
+	 */
+	public static void applyUnifierToGetFact(List<NewLiteral> terms,
+			Map<Variable, NewLiteral> unifier) {
+		for (int i = 0; i < terms.size(); i++) {
+			NewLiteral t = terms.get(i);
+			/*
+			 * unifiers only apply to variables, simple or inside functional
+			 * terms
+			 */
+			if (t instanceof VariableImpl) {
+				NewLiteral replacement = unifier.get(t);
+				if (replacement != null) {
+					terms.set(i, replacement);
+				} else {
+					terms.set(i, ofac.getFreshValueConstant());
+				}
+			} else if (t instanceof Function) {
+				Function t2 = (Function) t;
+				applyUnifier(t2, unifier);
 			}
 		}
 	}

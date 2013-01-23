@@ -86,7 +86,8 @@ public class CQCUtilitiesTest extends TestCase {
 	}
 
 	public void testGrounding() {
-		CQCUtilities cqcutil = new CQCUtilities(initialquery1);
+		Ontology sigma = null;
+		CQCUtilities cqcutil = new CQCUtilities(initialquery1, sigma);
 		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
 
 		List<NewLiteral> head = groundedcq.getHead().getTerms();
@@ -253,60 +254,61 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(pfac.getAtom(pfac.getObjectPropertyPredicate("T"), pfac.getVariable("k"), pfac.getVariable("i")));
 
 		CQIE q10 = pfac.getCQIE(head, body);
+		Ontology sigma = null;
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQCUtilities cqcu = new CQCUtilities(q6);
+		CQCUtilities cqcu = new CQCUtilities(q6, sigma);
 		assertTrue(cqcu.isContainedIn(q5));
 
-		cqcu = new CQCUtilities(q5);
+		cqcu = new CQCUtilities(q5, sigma);
 		assertTrue(cqcu.isContainedIn(q6));
 
 		// checking containment of 7 in 8
-		cqcu = new CQCUtilities(q7);
+		cqcu = new CQCUtilities(q7, sigma);
 		assertTrue(cqcu.isContainedIn(q8));
 
 		// checking non-containment of 8 in 7
-		cqcu = new CQCUtilities(q8);
+		cqcu = new CQCUtilities(q8, sigma);
 		assertFalse(cqcu.isContainedIn(q7));
 
 		// Checking contaiment q2 <= q1
 
-		cqcu = new CQCUtilities(q2);
+		cqcu = new CQCUtilities(q2, sigma);
 		assertTrue(cqcu.isContainedIn(q1));
 
 		// Checking contaiment q1 <= q2
 
-		cqcu = new CQCUtilities(q1);
+		cqcu = new CQCUtilities(q1, sigma);
 		assertFalse(cqcu.isContainedIn(q2));
 
 		// Checking contaiment q1 <= q3
 
-		cqcu = new CQCUtilities(q1);
+		cqcu = new CQCUtilities(q1, sigma);
 		assertTrue(cqcu.isContainedIn(q3));
 
 		// Checking contaiment q3 <= q1
 
-		cqcu = new CQCUtilities(q3);
+		cqcu = new CQCUtilities(q3, sigma);
 		assertFalse(cqcu.isContainedIn(q1));
 
 		// Checking contaiment q1 <= q4
 
-		cqcu = new CQCUtilities(q1);
+		cqcu = new CQCUtilities(q1, sigma);
 		assertFalse(cqcu.isContainedIn(q4));
 
 		// Checking contaiment q4 <= q1
 
-		cqcu = new CQCUtilities(q4);
+		cqcu = new CQCUtilities(q4, sigma);
 		assertFalse(cqcu.isContainedIn(q1));
 		
 		
 		// Checking containment q9 <= q10 true
-		cqcu = new CQCUtilities(q9);
+		cqcu = new CQCUtilities(q9, sigma);
 		assertTrue(cqcu.isContainedIn(q10));
 		
 		// Checking containment q10 <= q9 true
-		cqcu = new CQCUtilities(q10);
+		cqcu = new CQCUtilities(q10, sigma);
 		assertTrue(cqcu.isContainedIn(q9));
 	}
 

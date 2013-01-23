@@ -37,6 +37,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static IRIFactory irifactory = null;
 
+	private static int counter = 0;
+	
 	protected OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
@@ -113,6 +115,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public ValueConstant getValueConstant(String value, String language) {
 		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
+	}
+	
+	@Override
+	public ValueConstant getFreshValueConstant() {
+		return new ValueConstantImpl("fresh" + (counter++), COL_TYPE.LITERAL);
 	}
 
 	@Override
