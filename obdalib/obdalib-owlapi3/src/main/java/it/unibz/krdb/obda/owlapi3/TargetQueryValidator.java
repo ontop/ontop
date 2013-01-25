@@ -25,9 +25,6 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	/** List of invalid predicates */
 	private Vector<String> invalidPredicates = new Vector<String>();
 
-	/** Logger */
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	public TargetQueryValidator(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 	}
@@ -64,10 +61,8 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 				}
 				Predicate predicate = dataFactory.getPredicate(p.getName(), atom.getArity(), colType);
 				atom.setPredicate(predicate); // TODO Fix the API!
-				log.debug(debugMsg);
 			} else {
 				invalidPredicates.add(p.getName().toString());
-//				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
 			}
 		}
 		boolean isValid = true;
