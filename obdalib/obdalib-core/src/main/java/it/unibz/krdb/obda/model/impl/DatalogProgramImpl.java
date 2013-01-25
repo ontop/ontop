@@ -92,6 +92,11 @@ public class DatalogProgramImpl implements DatalogProgram {
 			removeRule(rule);
 		}
 	}
+	
+	@Override
+	public void removeAllRules() {
+		rules.clear();
+	}
 
 	public boolean isUCQ() {
 
@@ -150,5 +155,4 @@ public class DatalogProgramImpl implements DatalogProgram {
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
 	}
-
 }

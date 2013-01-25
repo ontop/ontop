@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -58,6 +59,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,7 +75,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class Quest implements Serializable, RepositoryChangedListener {
 	/**
@@ -110,6 +111,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/* The active ABox dependencies */
 	protected Ontology sigma = null;
+	
+	/* TBox axioms translated into rules */
+	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
 
 	/* The TBox used for query reformulation */
 	protected Ontology reformulationOntology = null;
@@ -890,6 +894,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			rewriter.setTBox(reformulationOntology);
 			rewriter.setCBox(sigma);
+			
+			Ontology saturatedSigma = sigma.clone();
+			saturatedSigma.saturate();
+			
+			List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
+			sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
@@ -925,6 +935,35 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				disconnect();
 			}
 		}
+	}
+	
+	private List<CQIE> createSigmaRules(Ontology ontology) {
+		List<CQIE> rules = new ArrayList<CQIE>();
+		Set<Axiom> assertions = ontology.getAssertions();
+		for (Axiom assertion : assertions) {
+			try {
+				CQIE rule = AxiomToRuleTranslator.translate(assertion);
+				rules.add(rule);
+			} catch (UnsupportedOperationException e) {
+				log.warn(e.getMessage());
+			}
+		}
+		return rules;
+	}
+	
+	private Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
+		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
+		for (CQIE rule : sigmaRules) {
+			Atom atom = rule.getBody().get(0); // The rule always has one body atom
+			Predicate predicate = atom.getPredicate();
+			List<CQIE> rules = sigmaRulesMap.get(predicate);
+			if (rules == null) {
+				rules = new LinkedList<CQIE>();
+				sigmaRulesMap.put(predicate, rules);
+			}
+			rules.add(rule);
+		}
+		return sigmaRulesMap;
 	}
 
 	private void generateTripleMappings(OBDADataFactory fac,

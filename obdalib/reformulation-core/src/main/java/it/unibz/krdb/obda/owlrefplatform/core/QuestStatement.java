@@ -1,21 +1,27 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.GraphResultSet;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAConnection;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.ConstructGraphResultSet;
@@ -33,10 +39,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
@@ -79,6 +87,8 @@ public class QuestStatement implements OBDAStatement {
 	protected Quest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
+	
+	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	Thread runningThread = null;
 
@@ -470,6 +480,7 @@ public class QuestStatement implements OBDAStatement {
 	public String getUnfolding(String strquery) throws Exception {
 		String sql = "";
 		List<String> signature;
+		Map<Predicate, List<CQIE>> rulesIndex = questInstance.sigmaRulesIndex;
 
 		// Check the cache first if the system has processed the query string before
 		if (querycache.containsKey(strquery)) {
@@ -489,13 +500,18 @@ public class QuestStatement implements OBDAStatement {
 
 				log.debug("Normalized program: \n{}", program);
 
-				/**
+				/*
 				 * Empty unfolding, constructing an empty result set
 				 */
 				if (program.getRules().size() < 1) {
 					throw new OBDAException("Error, invalid query");
 				}
 
+				/*
+				 * Query optimization w.r.t Sigma rules 
+				 */
+				optimizeQueryWithSigmaRules(program, rulesIndex);
+				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(e1);
@@ -508,6 +524,11 @@ public class QuestStatement implements OBDAStatement {
 			DatalogProgram rewriting;
 			try {
 				rewriting = getRewriting(program);
+				/*
+				 * Query optimization w.r.t Sigma rules 
+				 */
+				optimizeQueryWithSigmaRules(program, rulesIndex);
+
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 
@@ -544,6 +565,67 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 		return sql;
+	}
+
+	/**
+	 * 
+	 * @param program
+	 * @param rules
+	 */
+	private void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
+		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
+		//for each rule in the query
+		for (int qi = 0; qi < unionOfQueries.size() ; qi++) {
+			CQIE query = unionOfQueries.get(qi);
+			//get query head, body
+			Atom queryHead = query.getHead();
+			List<Atom> queryBody = query.getBody();
+			//for each atom in query body
+			for (int i = 0; i < queryBody.size(); i++) {
+				Set<Atom> removedAtom = new HashSet<Atom>();
+				Atom atomQuery = queryBody.get(i);
+				Predicate predicate = atomQuery.getPredicate();
+				
+				//for each tbox rule
+				List<CQIE> rules = rulesIndex.get(predicate);
+				if (rules == null || rules.isEmpty()) {
+					continue;
+				}
+				for (CQIE rule : rules) {
+					//try to unify current query body atom with tbox rule body atom
+					Atom ruleBody = rule.getBody().get(0);
+					Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, atomQuery); // TODO optimize index
+					if (theta == null || theta.isEmpty()) {
+						continue;
+					}
+					// if unifiable, apply to head of tbox rule
+					Atom ruleHead = rule.getHead();
+					Atom copyRuleHead = ruleHead.clone();
+					Unifier.applyUnifier(copyRuleHead, theta);
+					
+					removedAtom.add(copyRuleHead);
+				}
+				
+				for (int j = 0; j < queryBody.size(); j++) {
+					if (j == i) {
+						continue;
+					}
+					Atom toRemove = queryBody.get(j);
+					if (removedAtom.contains(toRemove)) {
+						queryBody.remove(j);
+						j -= 1;
+						if (j < i) {
+							i -= 1;
+						}
+					}
+				}
+			}
+			//update query datalog program
+			unionOfQueries.remove(qi);
+			unionOfQueries.add(qi, ofac.getCQIE(queryHead, queryBody));
+		}
+		program.removeAllRules();
+		program.appendRule(unionOfQueries);
 	}
 
 	private void cacheQueryAndProperties(String sparqlQuery, String sqlQuery) {
