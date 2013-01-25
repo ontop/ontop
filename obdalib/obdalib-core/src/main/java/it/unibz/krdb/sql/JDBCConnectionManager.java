@@ -411,10 +411,11 @@ public class JDBCConnectionManager {
 		Map<String, Reference> fk = new HashMap<String, Reference>();
 		ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table);
 		while (rsForeignKeys.next()) {
+			String fkName = rsForeignKeys.getString("FK_NAME");
 			String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
 			String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
 			String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
-			fk.put(colName, new Reference(pkTableName, pkColumnName));
+			fk.put(colName, new Reference(fkName, pkTableName, pkColumnName));
 		}
 		return fk;
 	}

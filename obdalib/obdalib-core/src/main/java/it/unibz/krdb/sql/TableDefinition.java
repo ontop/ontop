@@ -3,7 +3,9 @@ package it.unibz.krdb.sql;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TableDefinition extends DataDefinition {
 
@@ -23,11 +25,17 @@ public class TableDefinition extends DataDefinition {
 		return primaryKeys;
 	}
 	
-	public List<Attribute> getForeignKeys() {
-		List<Attribute> foreignKeys = new ArrayList<Attribute>();
+	public Map<String, List<Attribute>> getForeignKeys() {
+		Map<String, List<Attribute>> foreignKeys = new HashMap<String, List<Attribute>>();
 		for (Attribute attr : attributes.values()) {
 			if (attr.isForeignKey()) {
-				foreignKeys.add(attr);
+				String fkName = attr.getReference().getReferenceName();
+				List<Attribute> fkAttributes = foreignKeys.get(fkName);
+				if (fkAttributes == null) {
+					fkAttributes = new ArrayList<Attribute>();
+					foreignKeys.put(fkName, fkAttributes);
+				}
+				fkAttributes.add(attr);
 			}
 		}
 		return foreignKeys;

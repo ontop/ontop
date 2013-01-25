@@ -1,11 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.hp.hpl.jena.graph.Factory;
-import com.hp.hpl.jena.iri.IRIFactory;
-
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -17,16 +11,17 @@ import it.unibz.krdb.sql.Reference;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.hp.hpl.jena.iri.IRIFactory;
+
 public class DBMetadataUtil {
 
-	private final DBMetadata metadata;
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
-	
-	public  DBMetadataUtil(DBMetadata metadata)
-	{
-		this.metadata = metadata;
-	}
 	
 	/*
 	 * genereate CQIE rules from foreign key info of db metadata
@@ -40,24 +35,30 @@ public class DBMetadataUtil {
 		List<TableDefinition> tableDefs = metadata.getTableList();
 		for (TableDefinition def : tableDefs)
 		{
-			
-			List<Attribute> foreignKeys = def.getForeignKeys();
-			for (Attribute foreignKey : foreignKeys)
-			{
-				//get current table and column (1)
+			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
+			for (String fkName : foreignKeys.keySet()) {
+				List<Attribute> fkAttributes = foreignKeys.get(fkName);
+				
 				String table1 = def.getName();
-				String column1 = foreignKey.getName();
-				//get referenced table and column (2)
-				Reference reference = foreignKey.getReference();
-				String table2 = reference.getTableReference();
-				String column2 = reference.getColumnReference();				
-				//get table definition for referenced table
-				TableDefinition def2 = (TableDefinition) metadata.getDefinition(table2);
-				
-				//get positions of referenced attribute
-				int pos1 = def.getAttributePosition(column1);
-				int pos2 = def2.getAttributePosition(column2);
-				
+				String table2 = "";
+				TableDefinition def2 = null;
+				Map<Integer, Integer> positionMatch = new HashMap<Integer, Integer>();
+				for (Attribute attr : fkAttributes) {
+					//get current table and column (1)
+					String column1 = attr.getName();
+					//get referenced table and column (2)
+					Reference reference = attr.getReference();
+					table2 = reference.getTableReference();
+					String column2 = reference.getColumnReference();				
+					//get table definition for referenced table
+					def2 = (TableDefinition) metadata.getDefinition(table2);
+					
+					//get positions of referenced attribute
+					int pos1 = def.getAttributePosition(column1);
+					int pos2 = def2.getAttributePosition(column2);
+					
+					positionMatch.put(pos1, pos2);
+				}
 				//construct CQIE
 				Predicate p1 = fac.getPredicate(ifac.construct(table1), def.countAttribute());
 				Predicate p2 = fac.getPredicate(ifac.construct(table2), def2.countAttribute());
@@ -72,7 +73,11 @@ public class DBMetadataUtil {
 				{
 					 terms2.add(fac.getVariable("p"+(i+1)));
 				}
-				terms1.set(pos1, terms2.get(pos2));
+				// Do the swapping
+				for (Integer pos1 : positionMatch.keySet()) {
+					Integer pos2 = positionMatch.get(pos1);
+					terms1.set(pos1, terms2.get(pos2));
+				}
 				
 				Atom head = fac.getAtom(p2, terms2);
 				Atom body1 = fac.getAtom(p1, terms1);
@@ -83,9 +88,7 @@ public class DBMetadataUtil {
 				System.out.println(rule.toString());
 				rules.add(rule);
 			}
-		}
-		
-		
+		}		
 		return rules;
 	}
 }
