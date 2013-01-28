@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
@@ -193,6 +194,11 @@ public class TMappingProcessor implements Serializable {
 				 * Here we can merge conditions of the new query with the one we
 				 * just found.
 				 */
+				
+				Map<Variable,NewLiteral> mgu = null;
+				if (strippedCurrentMapping.getBody().size() == 1) {
+					mgu = Unifier.getMGU(strippedCurrentMapping.getBody().get(0), strippedNewMapping.getBody().get(0));
+				}			
 				Atom newconditions = mergeConditions(strippedNewConditions);
 				Atom existingconditions = mergeConditions(strippedExistingConditions);
 				NewLiteral newconditionsTerm = fac.getFunctionalTerm(newconditions.getPredicate(), newconditions.getTerms());
@@ -201,6 +207,10 @@ public class TMappingProcessor implements Serializable {
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
 				newmapping = strippedCurrentMapping;
+				
+				if (mgu != null) {
+					newmapping = Unifier.applyUnifier(newmapping, mgu);
+				}
 				break;
 			}
 		}
