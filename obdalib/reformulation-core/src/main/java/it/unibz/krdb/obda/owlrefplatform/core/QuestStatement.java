@@ -171,9 +171,15 @@ public class QuestStatement implements OBDAStatement {
 
 		@Override
 		public void run() {
+			
 			try {
 				if (!querycache.containsKey(strquery)) {
+					final long startTime = System.currentTimeMillis();
 					String sqlQuery = getUnfolding(strquery);
+					final long endTime = System.currentTimeMillis();
+					log.debug("Query processing time: " + (endTime - startTime) + " ms\n");
+					log.debug("SQL size: " + sqlQuery.split("UNION").length);
+
 					cacheQueryAndProperties(strquery, sqlQuery);
 				}
 				String sql = querycache.get(strquery);
@@ -541,8 +547,7 @@ public class QuestStatement implements OBDAStatement {
 			DatalogProgram unfolding;
 			try {
 				unfolding = getUnfolding(rewriting);
-
-				// unfolding = getUnfolding(program);
+				log.debug("UCQ size: " + rewriting.getRules().size());
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(
