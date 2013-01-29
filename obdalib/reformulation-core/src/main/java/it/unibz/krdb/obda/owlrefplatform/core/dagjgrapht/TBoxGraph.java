@@ -15,14 +15,6 @@ import org.jgrapht.graph.DefaultEdge;
 public interface TBoxGraph {
 
 
-
-
-	//obtain the node
-	public void getNode();
-
-	//obtain the edge
-	public void getEdge();
-
 	//obtain the graph built
 	public GraphImpl<Description, DefaultEdge> getGraph();
 
