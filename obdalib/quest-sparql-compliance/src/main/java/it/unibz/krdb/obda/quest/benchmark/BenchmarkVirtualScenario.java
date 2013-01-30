@@ -38,14 +38,15 @@ public class BenchmarkVirtualScenario {
 		String obdaFile = args[1];
 		String queryFile = args[2];
 		String outputFile = args[3];
+		String useRewriting = args[4];
 		try {
-			executeQueries(owlFile, obdaFile, queryFile, outputFile);
+			executeQueries(owlFile, obdaFile, queryFile, outputFile, useRewriting);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static void executeQueries(String owlFile, String obdaFile, String queryFile, String outputFile)
+	public static void executeQueries(String owlFile, String obdaFile, String queryFile, String outputFile, String useRewriting)
 			throws OWLException, IOException, InvalidMappingException,
 			OBDAException, InvalidPredicateDeclarationException {
 		/*
@@ -68,7 +69,7 @@ public class BenchmarkVirtualScenario {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+		p.setCurrentValueOf(QuestPreferences.REWRITE, useRewriting);
 
 		/*
 		 * Creating the instance of the reasoner using the factory.
@@ -111,6 +112,7 @@ public class BenchmarkVirtualScenario {
 					out.flush();
 				}
 			}
+			System.out.println("Finish.");
 		} catch (OWLException e) {
 			throw e;
 		} finally {
