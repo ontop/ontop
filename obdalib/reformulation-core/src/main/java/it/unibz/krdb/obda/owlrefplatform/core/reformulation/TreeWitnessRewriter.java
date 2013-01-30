@@ -334,7 +334,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		
+		log.debug("Final rewriting: {}", output);
 		return output;
 	}
 	
