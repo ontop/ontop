@@ -85,7 +85,7 @@ public class DBMetadataUtil {
 				body.add(body1);
 				
 				CQIE rule = fac.getCQIE(head, body);
-				System.out.println(rule.toString());
+				//System.out.println(rule.toString());
 				rules.add(rule);
 			}
 		}		
