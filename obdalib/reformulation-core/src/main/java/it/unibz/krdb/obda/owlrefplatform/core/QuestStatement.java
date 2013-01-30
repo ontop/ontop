@@ -198,7 +198,6 @@ public class QuestStatement implements OBDAStatement {
 				boolean isConstruct = isconstructcache.get(strquery);
 				boolean isDescribe = isdescribecache.get(strquery);
 
-				sql = "";
 				log.debug("Executing the query and get the result...");
 				if (sql.equals("") && !isBoolean) {
 					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
