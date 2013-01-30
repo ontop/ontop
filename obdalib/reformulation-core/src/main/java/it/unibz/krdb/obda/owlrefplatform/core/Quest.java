@@ -111,7 +111,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/* The active ABox dependencies */
 	protected Ontology sigma = null;
-	
+
 	/* TBox axioms translated into rules */
 	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
 
@@ -129,7 +129,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/* The input OBDA model */
 	protected OBDAModel inputOBDAModel = null;
-	
 
 	/*
 	 * The equivalence map for the classes/properties that have been simplified
@@ -617,9 +616,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			DBMetadata metadata = JDBCConnectionManager
 					.getMetaData(localConnection);
-			MappingAnalyzer analyzer = new MappingAnalyzer(
-					unfoldingOBDAModel.getMappings(sourceId), metadata);
+			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel
+					.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
+			log.debug("Original mapping size: {}",
+					 unfoldingProgram.getRules().size());
 
 			/*
 			 * Normalizing language tags. Making all LOWER CASE
@@ -634,8 +635,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					Predicate type = typedTerm.getFunctionSymbol();
 
 					if (typedTerm.getTerms().size() != 2
-							|| !type.getName().toString()
-									.equals(OBDAVocabulary.RDFS_LITERAL_URI))
+							|| !type.getName().toString().equals(
+									OBDAVocabulary.RDFS_LITERAL_URI))
 						continue;
 					/*
 					 * changing the language, its always the second inner term
@@ -667,8 +668,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					.pushEqualities(unfoldingProgram);
 
 			/***
-			 * Adding ABox as facts in the unfolding program
-			 * This feature is disabled for the current release
+			 * Adding ABox as facts in the unfolding program This feature is
+			 * disabled for the current release
 			 */
 			if (false && unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 				ABoxToFactConverter.addFacts(this.aboxIterator,
@@ -678,9 +679,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * T-mappings implementation
 			 */
 			// log.debug("Setting up T-Mappings");
+
+			boolean optimizeMap = true;
+
+			final long startTime = System.currentTimeMillis();
+
 			TMappingProcessor tmappingProc = new TMappingProcessor(
-					reformulationOntology);
+					reformulationOntology, optimizeMap);
 			unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram);
+
 			sigma.addEntities(tmappingProc.getABoxDependencies()
 					.getVocabulary());
 			sigma.addAssertions(tmappingProc.getABoxDependencies()
@@ -689,17 +696,30 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Eliminating redundancy from the unfolding program
 			 */
-			unfoldingProgram = DatalogNormalizer.pushEqualities(unfoldingProgram);
-			
-			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
-				
-//			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
-			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
-			
+			unfoldingProgram = DatalogNormalizer
+					.pushEqualities(unfoldingProgram);
+			List<CQIE> foreignKeyRules = DBMetadataUtil
+					.generateFKRules(metadata);
+
+			if (optimizeMap) {
+				CQCUtilities.removeContainedQueriesSorted(unfoldingProgram,
+						true);
+				unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(
+						unfoldingProgram, true, foreignKeyRules);
+			}
+
+			final long endTime = System.currentTimeMillis();
+
+			System.out.println("TMapping size: "
+					+ unfoldingProgram.getRules().size());
+			System.out.println("TMapping processing time: "
+					+ (endTime - startTime) + " ms");
+
 			/*
 			 * Adding data typing on the mapping axioms.
 			 */
-			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(
+					metadata);
 			typeRepair.insertDataTyping(unfoldingProgram);
 
 			/*
@@ -758,9 +778,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						 */
 						if (templateStrings.contains("(.+)"))
 							continue;
-						Function templateFunction = fac.getFunctionalTerm(
-								fac.getUriTemplatePredicate(1),
-								fac.getVariable("x"));
+						Function templateFunction = fac.getFunctionalTerm(fac
+								.getUriTemplatePredicate(1), fac
+								.getVariable("x"));
 						Pattern matcher = Pattern.compile("(.+)");
 						getUriTemplateMatcher().put(matcher, templateFunction);
 						templateStrings.add("(.+)");
@@ -791,16 +811,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/* Looking for mappings with exactly 2 data atoms */
 				CQIE mapping = currentMappingRules.get(i);
 				int dataAtoms = 0;
-				
+
 				LinkedList dataAtomsList = new LinkedList();
 				LinkedList otherAtomsList = new LinkedList();
-				
+
 				for (Atom subAtom : mapping.getBody()) {
 					if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
 						dataAtoms += 1;
 						dataAtomsList.add(subAtom);
 					} else {
-					otherAtomsList.add(subAtom);
+						otherAtomsList.add(subAtom);
 					}
 				}
 				if (dataAtoms == 1) {
@@ -812,18 +832,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * conditions. Doing so.
 				 */
 				Function foldedJoinAtom = null;
-				
+
 				while (dataAtomsList.size() > 1) {
 					foldedJoinAtom = fac.getFunctionalTerm(
-							OBDAVocabulary.SPARQL_JOIN, (NewLiteral)dataAtomsList.remove(0), (NewLiteral) dataAtomsList.remove(0));
-					dataAtomsList.add(0,foldedJoinAtom);
+							OBDAVocabulary.SPARQL_JOIN,
+							(NewLiteral) dataAtomsList.remove(0),
+							(NewLiteral) dataAtomsList.remove(0));
+					dataAtomsList.add(0, foldedJoinAtom);
 				}
-						
+
 				List<Atom> newBodyMapping = new LinkedList<Atom>();
 				newBodyMapping.add(foldedJoinAtom.asAtom());
 				newBodyMapping.addAll(otherAtomsList);
-				
-				CQIE newmapping = fac.getCQIE(mapping.getHead(), newBodyMapping);
+
+				CQIE newmapping = fac
+						.getCQIE(mapping.getHead(), newBodyMapping);
 
 				unfoldingProgram.removeRule(mapping);
 				unfoldingProgram.appendRule(newmapping);
@@ -855,9 +878,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			else
 				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
-			JDBCUtility jdbcutil = new JDBCUtility(
-					datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			JDBCUtility jdbcutil = new JDBCUtility(datasource
+					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
@@ -894,10 +916,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			rewriter.setTBox(reformulationOntology);
 			rewriter.setCBox(sigma);
-			
+
 			Ontology saturatedSigma = sigma.clone();
 			saturatedSigma.saturate();
-			
+
 			List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
 			sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
 
@@ -936,7 +958,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 		}
 	}
-	
+
 	private List<CQIE> createSigmaRules(Ontology ontology) {
 		List<CQIE> rules = new ArrayList<CQIE>();
 		Set<Axiom> assertions = ontology.getAssertions();
@@ -950,11 +972,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 		return rules;
 	}
-	
-	private Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
+
+	private Map<Predicate, List<CQIE>> createSigmaRulesIndex(
+			List<CQIE> sigmaRules) {
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
 		for (CQIE rule : sigmaRules) {
-			Atom atom = rule.getBody().get(0); // The rule always has one body atom
+			Atom atom = rule.getBody().get(0); // The rule always has one body
+												// atom
 			Predicate predicate = atom.getPredicate();
 			List<CQIE> rules = sigmaRulesMap.get(predicate);
 			if (rules == null) {
@@ -980,10 +1004,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * uri(Class))
 				 */
 				terms.add(currenthead.getTerm(0));
-				Function rdfTypeConstant = fac
-						.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac
-								.getURIConstant(OBDADataFactoryImpl.getIRI(OBDAVocabulary.RDF_TYPE)));
-										//URI.create(OBDAVocabulary.RDF_TYPE)));
+				Function rdfTypeConstant = fac.getFunctionalTerm(fac
+						.getUriTemplatePredicate(1), fac
+						.getURIConstant(OBDADataFactoryImpl
+								.getIRI(OBDAVocabulary.RDF_TYPE)));
+				// URI.create(OBDAVocabulary.RDF_TYPE)));
 				terms.add(rdfTypeConstant);
 
 				IRI classname = currenthead.getPredicate().getName();
@@ -999,9 +1024,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 
 				IRI propname = currenthead.getPredicate().getName();
-				Function propconstant = fac.getFunctionalTerm(
-						fac.getUriTemplatePredicate(1),
-						fac.getURIConstant(propname));
+				Function propconstant = fac.getFunctionalTerm(fac
+						.getUriTemplatePredicate(1), fac
+						.getURIConstant(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 
@@ -1018,7 +1043,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @return
 	 * @throws OBDAException
 	 */
-	protected Connection getSQLConnection() throws OBDAException{
+	protected Connection getSQLConnection() throws OBDAException {
 		Connection conn;
 
 		String url = obdaSource
@@ -1045,9 +1070,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		return conn;
 	}
-	
+
 	public QuestConnection getConnection() throws OBDAException {
-	
+
 		return new QuestConnection(this, getSQLConnection());
 	}
 
