@@ -2,8 +2,10 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
 import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAConnection;
@@ -57,11 +59,8 @@ import com.hp.hpl.jena.sparql.syntax.Template;
 
 /**
  * The obda statement provides the implementations necessary to query the
- * reformulation platform reasoner from outside, i.e. protege
- * 
- * 
+ * reformulation platform reasoner from outside, i.e. Protege
  */
-
 public class QuestStatement implements OBDAStatement {
 
 	private QueryRewriter rewriter = null;
@@ -75,8 +74,6 @@ public class QuestStatement implements OBDAStatement {
 	private OBDAModel unfoldingOBDAModel = null;
 
 	private boolean canceled = false;
-
-	private DatalogProgram unfoldingProgram;
 
 	private Statement sqlstatement;
 
@@ -93,6 +90,10 @@ public class QuestStatement implements OBDAStatement {
 	Thread runningThread = null;
 
 	private QueryExecutionThread executionthread;
+	
+	private DatalogProgram programAfterRewriting;
+	
+	private DatalogProgram programAfterUnfolding;
 
 	final Map<String, String> querycache;
 
@@ -105,7 +106,16 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, Boolean> isdescribecache;
 
 	final SparqlAlgebraToDatalogTranslator translator;
+	
+	/*
+	 * For benchmark purpose
+	 */
+	private long queryProcessingTime = 0;
 
+	private long rewritingTime = 0;
+	
+	private long unfoldingTime = 0;
+		
 	public QuestStatement(Quest questinstance, QuestConnection conn,
 			Statement st) {
 
@@ -177,9 +187,9 @@ public class QuestStatement implements OBDAStatement {
 					final long startTime = System.currentTimeMillis();
 					String sqlQuery = getUnfolding(strquery);
 					final long endTime = System.currentTimeMillis();
-					log.debug("Query processing time: " + (endTime - startTime) + " ms\n");
-					log.debug("SQL size: " + sqlQuery.split("UNION").length);
-
+					queryProcessingTime = endTime - startTime;
+					
+					// Cache the sql for better performance
 					cacheQueryAndProperties(strquery, sqlQuery);
 				}
 				String sql = querycache.get(strquery);
@@ -188,13 +198,12 @@ public class QuestStatement implements OBDAStatement {
 				boolean isConstruct = isconstructcache.get(strquery);
 				boolean isDescribe = isdescribecache.get(strquery);
 
+				sql = "";
 				log.debug("Executing the query and get the result...");
 				if (sql.equals("") && !isBoolean) {
-					tupleResult = new EmptyQueryResultSet(signature,
-							QuestStatement.this);
+					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
 				} else if (sql.equals("")) {
-					tupleResult = new BooleanOWLOBDARefResultSet(false,
-							QuestStatement.this);
+					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
 				} else {
 					try {
 						// Check pre-condition for DESCRIBE
@@ -205,24 +214,24 @@ public class QuestStatement implements OBDAStatement {
 						// Execute the SQL query string
 						executingSQL = true;
 						ResultSet set = null;
-						try{
-						set = sqlstatement.executeQuery(sql);
+						try {
+							set = sqlstatement.executeQuery(sql);
 						}
 						catch(SQLException e)
 						{
 							//bring back operation
 							//statement was created, but in the meantime connection broke down
 							//recover connection
-							if (e.getMessage().startsWith("This statement"))
-							{
+							if (e.getMessage().startsWith("This statement")) {
 								conn = questInstance.getConnection();
 								log.debug("Query execution interrupted. Recovering connection to db: "+!conn.isClosed());
 								sqlstatement = conn.createStatement().sqlstatement;
 								set  = sqlstatement.executeQuery(sql);
 								log.debug("Recovery finished successfully: "+!set.isClosed());
 							}
-							else
+							else {
 								throw e;
+							}
 						}
 						// Store the SQL result to application result set.
 						if (isBoolean) {
@@ -526,28 +535,27 @@ public class QuestStatement implements OBDAStatement {
 			}
 
 			log.debug("Start the rewriting process...");
-			// DatalogProgram rewriting = program;
-			DatalogProgram rewriting;
 			try {
-				rewriting = getRewriting(program);
-				/*
-				 * Query optimization w.r.t Sigma rules 
-				 */
+				final long startTime = System.currentTimeMillis();
+				programAfterRewriting = getRewriting(program);
+				final long endTime = System.currentTimeMillis();
+				rewritingTime = endTime - startTime;
+
 				optimizeQueryWithSigmaRules(program, rulesIndex);
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
-
 				OBDAException obdaException = new OBDAException(
 						"Error rewriting query. \n" + e1.getMessage());
 				obdaException.setStackTrace(e1.getStackTrace());
 				throw obdaException;
 			}
 
-			DatalogProgram unfolding;
 			try {
-				unfolding = getUnfolding(rewriting);
-				log.debug("UCQ size: " + rewriting.getRules().size());
+				final long startTime = System.currentTimeMillis();
+				programAfterUnfolding = getUnfolding(programAfterRewriting);
+				final long endTime = System.currentTimeMillis();
+				unfoldingTime = endTime - startTime;
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(
@@ -558,7 +566,7 @@ public class QuestStatement implements OBDAStatement {
 
 			try {
 				signature = getSignature(query);
-				sql = getSQL(unfolding, signature);
+				sql = getSQL(programAfterUnfolding, signature);
 				cacheQueryAndProperties(strquery, sql);
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -803,11 +811,6 @@ public class QuestStatement implements OBDAStatement {
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		}
-
-	}
-
-	public void setUnfoldingProgram(DatalogProgram unfoldingProgram) {
-		this.unfoldingProgram = unfoldingProgram;
 	}
 
 	@Override
@@ -918,5 +921,87 @@ public class QuestStatement implements OBDAStatement {
 
 	public void analyze() throws Exception {
 		repository.collectStatistics(conn.conn);
+	}
+	
+	/*
+	 * Methods for getting the benchmark parameters
+	 */
+	public long getQueryProcessingTime() {
+		return queryProcessingTime;
+	}
+	
+	public long getRewritingTime() {
+		return rewritingTime;
+	}
+	
+	public long getUnfoldingTime() {
+		return unfoldingTime;
+	}
+	
+	public int getUCQSizeAfterRewriting() {
+		return programAfterRewriting.getRules().size();
+	}
+	
+	public int getMinQuerySizeAfterRewriting() {
+		int toReturn = Integer.MAX_VALUE;
+		List<CQIE> rules = programAfterRewriting.getRules();
+		for (CQIE rule : rules) {
+			int querySize = getBodySize(rule.getBody());
+			if (querySize < toReturn) {
+				toReturn = querySize;
+			}
+		}
+		return toReturn;
+	}
+
+	public int getMaxQuerySizeAfterRewriting() {
+		int toReturn = Integer.MIN_VALUE;
+		List<CQIE> rules = programAfterRewriting.getRules();
+		for (CQIE rule : rules) {
+			int querySize = getBodySize(rule.getBody());
+			if (querySize > toReturn) {
+				toReturn = querySize;
+			}
+		}
+		return toReturn;
+	}
+	
+	public int getUCQSizeAfterUnfolding() {
+		return programAfterUnfolding.getRules().size();
+	}
+	
+	public int getMinQuerySizeAfterUnfolding() {
+		int toReturn = Integer.MAX_VALUE;
+		List<CQIE> rules = programAfterUnfolding.getRules();
+		for (CQIE rule : rules) {
+			int querySize = getBodySize(rule.getBody());
+			if (querySize < toReturn) {
+				toReturn = querySize;
+			}
+		}
+		return (toReturn == Integer.MAX_VALUE) ? 0 : toReturn;
+	}
+
+	public int getMaxQuerySizeAfterUnfolding() {
+		int toReturn = Integer.MIN_VALUE;
+		List<CQIE> rules = programAfterUnfolding.getRules();
+		for (CQIE rule : rules) {
+			int querySize = getBodySize(rule.getBody());
+			if (querySize > toReturn) {
+				toReturn = querySize;
+			}
+		}
+		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
+	}
+	
+	private int getBodySize(List<? extends Function> atoms) {
+		int counter = 0;
+		for (Function atom : atoms) {
+			Predicate predicate = atom.getPredicate();
+			if (!(predicate instanceof BuiltinPredicate)) {
+				counter++;
+			}
+		}
+		return counter;
 	}
 }

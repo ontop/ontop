@@ -39,6 +39,10 @@ public class QuestOWLStatement implements OWLStatement {
 		this.conn = conn;
 		this.st = st;
 	}
+	
+	public QuestStatement getQuestStatement() {
+		return st;
+	}
 
 	@Override
 	public void cancel() throws OWLException {

@@ -619,8 +619,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel
 					.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
-			log.debug("Original mapping size: {}",
-					 unfoldingProgram.getRules().size());
+			
+			// TODO Remove later
+//			System.out.println("Original mapping size: " + unfoldingProgram.getRules().size());
 
 			/*
 			 * Normalizing language tags. Making all LOWER CASE
@@ -710,10 +711,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			final long endTime = System.currentTimeMillis();
 
-			System.out.println("TMapping size: "
-					+ unfoldingProgram.getRules().size());
-			System.out.println("TMapping processing time: "
-					+ (endTime - startTime) + " ms");
+			// TODO Remove later
+//			System.out.println("TMapping size: "
+//					+ unfoldingProgram.getRules().size());
+//			System.out.println("TMapping processing time: "
+//					+ (endTime - startTime) + " ms");
 
 			/*
 			 * Adding data typing on the mapping axioms.
