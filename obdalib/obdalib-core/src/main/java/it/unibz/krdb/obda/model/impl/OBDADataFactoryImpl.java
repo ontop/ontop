@@ -57,7 +57,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	public static IRI getIRI(String s){
-		return irifactory.construct(s);
+		return getIRIFactory().construct(s);
 	}
 	
 	public OBDAModel getOBDAModel() {
