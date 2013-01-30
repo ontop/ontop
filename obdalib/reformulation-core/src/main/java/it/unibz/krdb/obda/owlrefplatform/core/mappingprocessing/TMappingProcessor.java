@@ -52,8 +52,11 @@ public class TMappingProcessor implements Serializable {
 	private final DAG pureIsa;
 
 	private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
+	
+	boolean optimize = true;
 
-	public TMappingProcessor(Ontology tbox) {
+	public TMappingProcessor(Ontology tbox, boolean optmize) {
+		this.optimize = optmize;
 		dag = DAGConstructor.getISADAG(tbox);
 		dag.clean();
 		pureIsa = DAGConstructor.filterPureISA(dag);
@@ -147,13 +150,8 @@ public class TMappingProcessor implements Serializable {
 		Ontology sigma = null;
 		
 		CQCUtilities cqc1 = new CQCUtilities(strippedNewMapping, sigma);
-
 		Iterator<CQIE> mappingIterator = currentMappings.iterator();
 		
-		Atom head = newmapping.getHead();
-//		System.out.println(newmapping.getHead().getPredicate().getName());
-//		if (head.getPredicate().getName().toString().equals("http://www.semanticweb.org/ontologies/2011/3/LUCADAOntology.owl#hasPreHistology"))
-//			System.out.println("Here");
 		while (mappingIterator.hasNext()) {
 			CQIE currentMapping = mappingIterator.next();
 			List<Atom> strippedExistingConditions = new LinkedList<Atom>();
@@ -335,13 +333,12 @@ public class TMappingProcessor implements Serializable {
 		 * Normalizing constants
 		 */
 		originalMappings = normalizeConstants(originalMappings);
-//		System.out.println(originalMappings.toString());
-
 		Map<Predicate, Set<CQIE>> mappingIndex = getMappingIndex(originalMappings);
 		
 		/*
 		 * Merge original mappings that have similar source query.
 		 */
+		if (optimize)
 		optimizeMappingProgram(mappingIndex);
 		
 		/*
@@ -401,8 +398,10 @@ public class TMappingProcessor implements Serializable {
 					}
 					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
 
-					mergeMappingsWithCQC(currentNodeMappings, newmapping);
-					// currentNodeMappings.add(newmapping);
+					if (optimize)
+					  mergeMappingsWithCQC(currentNodeMappings, newmapping);
+					else 
+						currentNodeMappings.add(newmapping);
 				}
 
 			}
@@ -424,18 +423,21 @@ public class TMappingProcessor implements Serializable {
 					if (equivProperty.isInverse() == currentProperty.isInverse()) {
 						Atom newhead = fac.getAtom(p, currentNodeMapping.getHead().getTerms());
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
+
+						if (optimize)
 						mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
-						// equivalentPropertyMappings.add(newmapping);
+						else 
+							equivalentPropertyMappings.add(newmapping);
 					} else {
 						NewLiteral term0 = currentNodeMapping.getHead().getTerms().get(1);
 						NewLiteral term1 = currentNodeMapping.getHead().getTerms().get(0);
 						Atom newhead = fac.getAtom(p, term0, term1);
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-						mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
-						// equivalentPropertyMappings.add(newmapping);
-					}
+						if (optimize)
+							mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
+							else 
+								equivalentPropertyMappings.add(newmapping);					}
 				}
-
 			}
 		} // Properties loop ended
 
@@ -499,8 +501,10 @@ public class TMappingProcessor implements Serializable {
 					}
 					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
 					
+					if (optimize)
 					mergeMappingsWithCQC(currentNodeMappings, newmapping);
-//					currentNodeMappings.add(newmapping);
+					else
+						currentNodeMappings.add(newmapping);
 
 				}
 
@@ -548,11 +552,10 @@ public class TMappingProcessor implements Serializable {
 								}
 							}
 							newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-							mergeMappingsWithCQC(currentNodeMappings, newmapping);
-//							currentNodeMappings.add(newmapping);
-							
-
-						}
+							if (optimize)
+								mergeMappingsWithCQC(currentNodeMappings, newmapping);
+								else
+									currentNodeMappings.add(newmapping);						}
 					}
 				}
 
@@ -572,13 +575,14 @@ public class TMappingProcessor implements Serializable {
 				for (CQIE currentNodeMapping : currentNodeMappings) {
 					Atom newhead = fac.getAtom(p, currentNodeMapping.getHead().getTerms());
 					CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-					mergeMappingsWithCQC(equivalentClassMappings, newmapping);
-//					equivalentClassMappings.add(newmapping);
+					
+					if (optimize)
+						mergeMappingsWithCQC(equivalentClassMappings, newmapping);
+						else
+							equivalentClassMappings.add(newmapping);
 					
 				}
-
 			}
-
 		}
 		DatalogProgram tmappingsProgram = fac.getDatalogProgram();
 		for (Predicate key : mappingIndex.keySet()) {
@@ -586,8 +590,6 @@ public class TMappingProcessor implements Serializable {
 				tmappingsProgram.appendRule(mapping);
 			}
 		}
-
-//		System.out.println(tmappingsProgram);
 		return tmappingsProgram;
 	}
 
