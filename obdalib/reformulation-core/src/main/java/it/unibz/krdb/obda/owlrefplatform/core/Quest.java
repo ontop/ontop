@@ -22,7 +22,6 @@ import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
@@ -41,7 +40,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
@@ -577,16 +575,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					/* Setting up the OBDA model */
 
 					obdaSource = sources.iterator().next();
-
-					String url = obdaSource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-					String username = obdaSource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-					String password = obdaSource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-					String driver = obdaSource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
+					
 					log.debug("Testing DB connection...");
 					connect();
 
@@ -620,8 +609,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
-			// TODO Remove later
-//			 System.out.println("Original mapping size: " + unfoldingProgram.getRules().size());
+			log.debug("Original mapping size: {}", unfoldingProgram.getRules().size());
 
 			/*
 			 * Normalizing language tags. Making all LOWER CASE
@@ -672,14 +660,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Adding ABox as facts in the unfolding program This feature is
 			 * disabled for the current release
 			 */
-			if (false && unfoldingMode.equals(QuestConstants.VIRTUAL)) {
-				ABoxToFactConverter.addFacts(this.aboxIterator,
-						unfoldingProgram, this.equivalenceMaps);
-			}
+			
+//			if (false && unfoldingMode.equals(QuestConstants.VIRTUAL)) {
+//				ABoxToFactConverter.addFacts(this.aboxIterator,
+//						unfoldingProgram, this.equivalenceMaps);
+//			}
+			
 			/*
 			 * T-mappings implementation
 			 */
-			// log.debug("Setting up T-Mappings");
 
 			boolean optimizeMap = true;
 
@@ -689,37 +678,30 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					reformulationOntology, optimizeMap);
 			unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram);
 
-			sigma.addEntities(tmappingProc.getABoxDependencies()
-					.getVocabulary());
-			sigma.addAssertions(tmappingProc.getABoxDependencies()
-					.getAssertions());
+			sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
+			sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
 
 			/*
 			 * Eliminating redundancy from the unfolding program
 			 */
-			unfoldingProgram = DatalogNormalizer
-					.pushEqualities(unfoldingProgram);
-			List<CQIE> foreignKeyRules = DBMetadataUtil
-					.generateFKRules(metadata);
+			unfoldingProgram = DatalogNormalizer.pushEqualities(unfoldingProgram);
+			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 
 			if (optimizeMap) {
-				CQCUtilities.removeContainedQueriesSorted(unfoldingProgram,
-						true);
+				CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
 				unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(
 						unfoldingProgram, true, foreignKeyRules);
 			}
 
 			final long endTime = System.currentTimeMillis();
 
-			// TODO Remove later
-//			System.out.println("TMapping size: " + unfoldingProgram.getRules().size());
-//			System.out.println("TMapping processing time: " + (endTime - startTime) + " ms");
+			log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
+			log.debug("TMapping processing time: {} ms", (endTime - startTime));
 
 			/*
 			 * Adding data typing on the mapping axioms.
 			 */
-			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(
-					metadata);
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
 			typeRepair.insertDataTyping(unfoldingProgram);
 
 			/*
@@ -728,9 +710,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 			List<CQIE> currentMappingRules = unfoldingProgram.getRules();
 			for (CQIE mapping : currentMappingRules) {
-				Set<Variable> headvars = mapping.getHead()
-						.getReferencedVariables();
-
+				Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 				for (Variable var : headvars) {
 					Atom notnull = fac.getIsNotNullAtom(var);
 					mapping.getBody().add(notnull);
@@ -740,8 +720,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Collecting primary key data
 			 */
-			Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(
-					metadata, unfoldingProgram);
+			
+			Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
 			/*
 			 * Collecting URI templates
@@ -757,12 +737,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 
 				for (NewLiteral term : head.getTerms()) {
-					if (!(term instanceof Function))
+					if (!(term instanceof Function)) {
 						continue;
+					}
 					Function fun = (Function) term;
-					if (!(fun.getFunctionSymbol().toString()
-							.equals(OBDAVocabulary.QUEST_URI)))
+					if (!(fun.getFunctionSymbol().toString().equals(OBDAVocabulary.QUEST_URI))) {
 						continue;
+					}
 					/*
 					 * This is a URI function, so it can generate pattern
 					 * matchers for the URIS. We have two cases, one where the
@@ -797,11 +778,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						getUriTemplateMatcher().put(mattcher, fun);
 
 						templateStrings.add(templateString);
-
 					}
-
 				}
-
 			}
 
 			/*
@@ -851,7 +829,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfoldingProgram.removeRule(mapping);
 				unfoldingProgram.appendRule(newmapping);
 				i -= 1;
-
 			}
 
 			/*
@@ -872,12 +849,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Setting up the unfolder and SQL generation
 			 */
 
-			if (dbType.equals(QuestConstants.SEMANTIC))
-				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys,
-						dataRepository);
-			else
+			if (dbType.equals(QuestConstants.SEMANTIC)) {
+				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, dataRepository);
+			}
+			else {
 				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
-
+			}
 			JDBCUtility jdbcutil = new JDBCUtility(datasource
 					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
@@ -890,8 +867,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Setting up the TBox we will use for the reformulation
 			 */
 			if (bOptimizeTBoxSigma) {
-				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(
-						reformulationOntology, sigma);
+				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationOntology, sigma);
 				reformulationOntology = reducer.getReducedOntology();
 			}
 
