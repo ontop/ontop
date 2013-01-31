@@ -196,7 +196,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	private void writeHintMessage() {
 		String msg = "--";
 		if (querypanel.isFetchAllSelect()) {
-			msg = "Continue scrolling down to retrieve more results.";
+			msg = "Try to continue scrolling down the table to retrieve more results.";
 		}
 		lblComment.setText(msg);
 	}
