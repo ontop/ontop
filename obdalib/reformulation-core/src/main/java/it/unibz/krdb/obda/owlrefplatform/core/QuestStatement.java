@@ -540,7 +540,7 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
-				optimizeQueryWithSigmaRules(program, rulesIndex);
+				optimizeQueryWithSigmaRules(programAfterRewriting, rulesIndex);
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
