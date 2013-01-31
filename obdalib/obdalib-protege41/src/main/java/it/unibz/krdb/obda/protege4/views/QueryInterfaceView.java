@@ -23,7 +23,10 @@ import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -55,7 +58,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 	private OBDAModelManager obdaController;
 	
-	private List<String[]> resultSetTabularData = new ArrayList<String[]>(); // for caching
+	private OWLResultSetTableModel currentTableModel;
 
 	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
 	
@@ -240,7 +243,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public void run(String query) {
 				OBDAProgessMonitor monitor = null;
-
 				try {
 					monitor = new OBDAProgessMonitor("Unfolding queries...");
 					CountDownLatch latch = new CountDownLatch(1);
@@ -274,8 +276,18 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		resultTablePanel.setOBDASaveQueryToFileAction(new OBDASaveQueryResultToFileAction() {
 			@Override
 			public void run(String fileLocation) {
+				OBDAProgessMonitor monitor = null;
 				try {
-					OWLResultSetWriter.writeCSV(resultSetTabularData, fileLocation);
+					monitor = new OBDAProgessMonitor("Writing output files...");
+					monitor.start();
+					CountDownLatch latch = new CountDownLatch(1);
+					File output = new File(fileLocation);
+					BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
+					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, currentTableModel.getTabularData(), writer);
+					monitor.addProgressListener(action);
+					action.run();
+					latch.await();
+					monitor.stop();
 				} catch (Exception e) {
 					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
 				}
@@ -309,12 +321,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		if (result == null) {
 			return 0;
 		}
-		OWLResultSetTableModel model = 
-				new OWLResultSetTableModel(result, obdaController.getActiveOBDAModel().getPrefixManager(), 
-						queryEditorPanel.isShortURISelect());
+		OWLResultSetTableModel model = new OWLResultSetTableModel(result, 
+				obdaController.getActiveOBDAModel().getPrefixManager(), 
+				queryEditorPanel.isShortURISelect(),
+				queryEditorPanel.getFetchSize());
 		model.addTableModelListener(queryEditorPanel);
 		resultTablePanel.setTableModel(model);
-		resultSetTabularData = model.getTabularData(); // cache the result data for exporting
+		currentTableModel = model;
 		return model.getRowCount();
 	}
 
@@ -652,6 +665,50 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 	}
 
+	private class SaveQueryToFileAction implements OBDAProgressListener {
+
+		private CountDownLatch latch;
+		private Thread thread;
+		private List<String[]> rawData;
+		private Writer writer;
+		
+		private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
+			this.latch = latch;
+			this.rawData = rawData;
+			this.writer = writer;
+		}
+		
+		public void run() {
+			thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						OWLResultSetWriter.writeCSV(rawData, writer);
+						latch.countDown();
+					} catch (Exception e) {
+						latch.countDown();
+						log.error(e.getMessage());
+						DialogUtils.showQuickErrorDialog(null, e, "Error while writing output file.");
+					}
+				}
+			};
+			thread.start();
+		}
+		
+		@Override
+		public void actionCanceled() throws Exception {
+			try {
+				writer.flush();
+				writer.close();
+				latch.countDown();
+				log.info("Writing operation cancelled by users.");
+			} catch (Exception e) {
+				latch.countDown();
+				DialogUtils.showQuickErrorDialog(null, e, "Error during cancel action.");
+			}
+		}
+	}
+	
 	@Override
 	public void activeOntologyChanged() {
 		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModel());

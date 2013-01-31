@@ -18,7 +18,6 @@ import it.unibz.krdb.obda.gui.swing.OBDADataQueryAction;
 import it.unibz.krdb.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -58,10 +57,13 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         scrQueryResult = new javax.swing.JScrollPane();
         tblQueryResult = new javax.swing.JTable();
         pnlCommandButton = new javax.swing.JPanel();
+        pnlComment = new javax.swing.JPanel();
+        lblHint = new javax.swing.JLabel();
+        lblComment = new javax.swing.JLabel();
         cmdExportResult = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(400, 480));
-        setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.BorderLayout(0, 5));
 
         tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -77,7 +79,18 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
         pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
         pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
-        pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        pnlCommandButton.setLayout(new java.awt.BorderLayout(0, 5));
+
+        pnlComment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 7, 5));
+
+        lblHint.setFont(new java.awt.Font("Tahoma", 1, 11));
+        lblHint.setText("Hint:");
+        pnlComment.add(lblHint);
+
+        lblComment.setText("--");
+        pnlComment.add(lblComment);
+
+        pnlCommandButton.add(pnlComment, java.awt.BorderLayout.CENTER);
 
         cmdExportResult.setIcon(IconLoader.getImageIcon("images/export.png"));
         cmdExportResult.setText("Export to CSV...");
@@ -87,13 +100,13 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         cmdExportResult.setIconTextGap(5);
         cmdExportResult.setMaximumSize(new java.awt.Dimension(125, 25));
         cmdExportResult.setMinimumSize(new java.awt.Dimension(125, 25));
-        cmdExportResult.setPreferredSize(new java.awt.Dimension(125, 25));
+        cmdExportResult.setPreferredSize(new java.awt.Dimension(125, 20));
         cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdExportResultActionPerformed(evt);
             }
         });
-        pnlCommandButton.add(cmdExportResult);
+        pnlCommandButton.add(cmdExportResult, java.awt.BorderLayout.EAST);
 
         add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
@@ -105,13 +118,14 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		int response = fileChooser.showSaveDialog(this);
 		if (response == JFileChooser.APPROVE_OPTION) {
 			File targetFile = fileChooser.getSelectedFile();
+			final String fileLocation = targetFile.getPath();
 			if (canWrite(targetFile)) {
-				final String fileLocation = targetFile.getPath();
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						saveToFileAction.run(fileLocation);
+				Thread thread = new Thread() {
+					public void run() {						
+						getOBDASaveQueryToFileAction().run(fileLocation);
 					}
-				});
+				};
+				thread.start();
 			}
 		}
 	}// GEN-LAST:event_buttonSaveResultsActionPerformed
@@ -141,7 +155,10 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExportResult;
+    private javax.swing.JLabel lblComment;
+    private javax.swing.JLabel lblHint;
     private javax.swing.JPanel pnlCommandButton;
+    private javax.swing.JPanel pnlComment;
     private javax.swing.JScrollPane scrQueryResult;
     private javax.swing.JTable tblQueryResult;
     // End of variables declaration//GEN-END:variables
@@ -171,8 +188,19 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 			}
 		};
 		SwingUtilities.invokeLater(updateModel);
+		
+		// Write a hint in the comment panel for user information
+		writeHintMessage();
 	}
 	
+	private void writeHintMessage() {
+		String msg = "--";
+		if (querypanel.isFetchAllSelect()) {
+			msg = "Continue scrolling down to retrieve more results.";
+		}
+		lblComment.setText(msg);
+	}
+
 	private void addPopUpMenu(){
 		JPopupMenu menu = new JPopupMenu();
 		JMenuItem countAll = new JMenuItem(); 
@@ -211,5 +239,9 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	
 	public void setOBDASaveQueryToFileAction(OBDASaveQueryResultToFileAction action){
 		this.saveToFileAction = action;
-	}		
+	}
+	
+	public OBDASaveQueryResultToFileAction getOBDASaveQueryToFileAction(){
+		return saveToFileAction;
+	}
 }

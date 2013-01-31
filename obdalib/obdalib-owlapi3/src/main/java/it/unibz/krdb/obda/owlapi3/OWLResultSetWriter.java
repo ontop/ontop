@@ -1,22 +1,13 @@
 package it.unibz.krdb.obda.owlapi3;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 public class OWLResultSetWriter {
 
-	public static void writeCSV(List<String[]> tabularData, String fileLocation) throws IOException {
+	public static void writeCSV(List<String[]> tabularData, Writer writer) throws IOException {
 
-		File output = new File(fileLocation);
-		if (fileLocation.lastIndexOf(".") == -1) { // without extension
-			output = new File(fileLocation + ".csv");
-		}
-		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-		
 		// Print the CSV content
 		for (String[] rows : tabularData) {
 			StringBuffer line = new StringBuffer();
@@ -29,8 +20,8 @@ public class OWLResultSetWriter {
 				needComma = true;
 			}			
 			writer.write(line + "\n");
+			writer.flush();
 		}
-		writer.flush();
 		writer.close();
 	}
 }

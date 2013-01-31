@@ -31,6 +31,8 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.text.StyleContext;
 
+import com.hp.hpl.jena.vocabulary.OWLResults;
+
 /**
  * Creates a new panel to execute queries. Remember to execute the
  * setResultsPanel function to indicate where to display the results.
@@ -65,7 +67,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	 * Creates new form QueryInterfacePanel
 	 */
 	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
-		
 		this.qc = qc;
 		this.apic = apic;
 		
@@ -122,6 +123,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         pnlQueryButtons = new javax.swing.JPanel();
         pnlExecutionInfo = new javax.swing.JPanel();
         lblExecutionInfo = new javax.swing.JLabel();
+        lblShow = new javax.swing.JLabel();
+        txtFetchSize = new javax.swing.JTextField();
+        chkShowAll = new javax.swing.JCheckBox();
         chkShowShortURI = new javax.swing.JCheckBox();
         cmdAttachPrefix = new javax.swing.JButton();
         cmdExecuteQuery = new javax.swing.JButton();
@@ -172,8 +176,22 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         pnlExecutionInfo.add(lblExecutionInfo, gridBagConstraints);
 
-        chkShowShortURI.setText("show short URIs");
-        chkShowShortURI.setPreferredSize(new java.awt.Dimension(120, 23));
+        lblShow.setText("Show: ");
+        pnlExecutionInfo.add(lblShow, new java.awt.GridBagConstraints());
+
+        txtFetchSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtFetchSize.setText("100");
+        txtFetchSize.setPreferredSize(new java.awt.Dimension(40, 20));
+        pnlExecutionInfo.add(txtFetchSize, new java.awt.GridBagConstraints());
+
+        chkShowAll.setText("All");
+        chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
+        pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
+
+        chkShowShortURI.setText("Hide URI");
+        chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -188,6 +206,8 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         cmdAttachPrefix.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdAttachPrefix.setContentAreaFilled(false);
         cmdAttachPrefix.setIconTextGap(5);
+        cmdAttachPrefix.setMaximumSize(new java.awt.Dimension(112, 26));
+        cmdAttachPrefix.setMinimumSize(new java.awt.Dimension(112, 26));
         cmdAttachPrefix.setPreferredSize(new java.awt.Dimension(112, 26));
         cmdAttachPrefix.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -205,6 +225,8 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         cmdExecuteQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdExecuteQuery.setContentAreaFilled(false);
         cmdExecuteQuery.setIconTextGap(5);
+        cmdExecuteQuery.setMaximumSize(new java.awt.Dimension(82, 26));
+        cmdExecuteQuery.setMinimumSize(new java.awt.Dimension(82, 26));
         cmdExecuteQuery.setPreferredSize(new java.awt.Dimension(82, 26));
         cmdExecuteQuery.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -221,6 +243,8 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         cmdSaveChanges.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdSaveChanges.setContentAreaFilled(false);
         cmdSaveChanges.setIconTextGap(5);
+        cmdSaveChanges.setMaximumSize(new java.awt.Dimension(112, 26));
+        cmdSaveChanges.setMinimumSize(new java.awt.Dimension(112, 26));
         cmdSaveChanges.setPreferredSize(new java.awt.Dimension(112, 26));
         cmdSaveChanges.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -242,7 +266,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         pnlQueryEditor.setLayout(new java.awt.BorderLayout());
 
-        jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11));
         jLabelHeader.setForeground(new java.awt.Color(153, 153, 153));
         jLabelHeader.setText("  Query Editor");
         jLabelHeader.setMaximumSize(new java.awt.Dimension(68, 18));
@@ -250,7 +274,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         jLabelHeader.setPreferredSize(new java.awt.Dimension(68, 18));
         pnlQueryEditor.add(jLabelHeader, java.awt.BorderLayout.NORTH);
 
-        queryTextPane.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+        queryTextPane.setFont(new java.awt.Font("Lucida Grande", 0, 14));
         queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
         jScrollQueryPane.setViewportView(queryTextPane);
 
@@ -297,8 +321,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
 	private void cmdExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonExecuteActionPerformed
 		try {
-			// TODO Handle this such that there is a listener checking the
-			// progress of the execution
+			// TODO Handle this such that there is a listener checking the progress of the execution
 			Thread queryRunnerThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -379,12 +402,13 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}
 
 	public void updateStatus(int rows) {
-		Double d = Double.valueOf(execTime / 1000);
-		String s = "Execution time: " + d + " sec     Number of tuples retrieved: " + rows;
+		Double time = Double.valueOf(execTime / 1000);
+		String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, rows);
 		lblExecutionInfo.setText(s);
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkShowAll;
     private javax.swing.JCheckBox chkShowShortURI;
     private javax.swing.JButton cmdAttachPrefix;
     private javax.swing.JButton cmdExecuteQuery;
@@ -396,26 +420,38 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
     private javax.swing.JLabel jLabelHeader;
     private javax.swing.JScrollPane jScrollQueryPane;
     private javax.swing.JLabel lblExecutionInfo;
+    private javax.swing.JLabel lblShow;
     private javax.swing.JPanel pnlExecutionInfo;
     private javax.swing.JPanel pnlQueryButtons;
     private javax.swing.JPanel pnlQueryEditor;
     private javax.swing.JTextPane queryTextPane;
     private javax.swing.JPopupMenu sparqlPopupMenu;
+    private javax.swing.JTextField txtFetchSize;
     // End of variables declaration//GEN-END:variables
 
 	public void tableChanged(TableModelEvent e) {
-		Double d = Double.valueOf(execTime / 1000);
 		int rows = ((TableModel) e.getSource()).getRowCount();
-		String s = "Execution time: " + d + " sec     Number of tuples retrieved: " + rows;
-		lblExecutionInfo.setText(s);
+		updateStatus(rows);
 	}
 
 	public boolean isShortURISelect() {
 		return chkShowShortURI.isSelected();
 	}
+	
+	public boolean isFetchAllSelect() {
+		return chkShowAll.isSelected();
+	}
 
 	public String getQuery() {
 		return queryTextPane.getText();
+	}
+	
+	public int getFetchSize() {
+		int fetchSize = -1; // Flag for fetching all the tuples
+		if (!isFetchAllSelect()) {
+			fetchSize = Integer.parseInt(txtFetchSize.getText());
+		}
+		return fetchSize;
 	}
 
 	@Override
