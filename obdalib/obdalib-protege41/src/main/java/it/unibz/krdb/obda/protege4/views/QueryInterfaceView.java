@@ -58,7 +58,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 	private OBDAModelManager obdaController;
 	
-	private OWLResultSetTableModel currentTableModel;
+	private PrefixManager prefixManager;
+	
+	private OWLResultSetTableModel tableModel;
 
 	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
 	
@@ -86,6 +88,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
+		
+		prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
 		
 		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
 		queryEditorPanel.setPreferredSize(new Dimension(400, 250));
@@ -173,16 +177,21 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						OWLResultSet result = action.getResult();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
-						rows = showTupleResultInTablePanel(result);
+						createTableModelFromResultSet(result);
+						rows = showTupleResultInTablePanel();
 					} else if (internalQuery.isConstructQuery()) {
 						List<OWLAxiom> result = action.getGraphResult();
-						showGraphResultInTextPanel(result);
+						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
+						populateResultUsingVisitor(result, owlVisitor);
+						showGraphResultInTextPanel(owlVisitor);
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 						rows = result.size();
 					} else if (internalQuery.isDescribeQuery()) {
 						List<OWLAxiom> result = action.getGraphResult();
-						showGraphResultInImportTextPanel(result);
+						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
+						populateResultUsingVisitor(result, owlVisitor);
+						showGraphResultInTextPanel(owlVisitor);
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 						rows = result.size();
@@ -283,7 +292,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					CountDownLatch latch = new CountDownLatch(1);
 					File output = new File(fileLocation);
 					BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, currentTableModel.getTabularData(), writer);
+					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, tableModel.getTabularData(), writer);
 					monitor.addProgressListener(action);
 					action.run();
 					latch.await();
@@ -317,52 +326,46 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}		
 	}
 
-	private int showTupleResultInTablePanel(OWLResultSet result) throws OWLException {
-		if (result == null) {
-			return 0;
-		}
-		OWLResultSetTableModel model = new OWLResultSetTableModel(result, 
-				obdaController.getActiveOBDAModel().getPrefixManager(), 
-				queryEditorPanel.isShortURISelect(),
-				queryEditorPanel.getFetchSize());
-		model.addTableModelListener(queryEditorPanel);
-		resultTablePanel.setTableModel(model);
-		currentTableModel = model;
-		return model.getRowCount();
+	private int showTupleResultInTablePanel() throws OWLException {
+		OWLResultSetTableModel currentTableModel = getTableModel();
+		resultTablePanel.setTableModel(currentTableModel);
+		return currentTableModel.getRowCount();
 	}
 
-	private void showGraphResultInTextPanel(List<OWLAxiom> result) {
-		if (result == null) {
-			return;
+	private void createTableModelFromResultSet(OWLResultSet result) throws OWLException {
+		if (result != null) {
+			tableModel = new OWLResultSetTableModel(result, prefixManager, 
+					queryEditorPanel.isShortURISelect(),
+					queryEditorPanel.isFetchAllSelect(),
+					queryEditorPanel.getFetchSize());
+			tableModel.addTableModelListener(queryEditorPanel);
 		}
-		TextMessageFrame panel = new TextMessageFrame("Query Result");
-		JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-		DialogUtils.centerDialogWRTParent(protegeFrame, panel);
-		DialogUtils.installEscapeCloseOperation(panel);
-		PrefixManager prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
-		OWLAxiomToTurtleVisitor codecVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
-		for (OWLAxiom axiom : result) {
-			axiom.accept(codecVisitor);
-		}
-		panel.setTextMessage(codecVisitor.getString());
-		panel.setVisible(true);
 	}
 	
-	private void showGraphResultInImportTextPanel(List<OWLAxiom> result) {
-		if (result == null) {
-			return;
+	private OWLResultSetTableModel getTableModel() {
+		return tableModel;
+	}
+	
+	private void showGraphResultInTextPanel(OWLAxiomToTurtleVisitor visitor) {
+		try {
+			TextMessageFrame panel = new TextMessageFrame("Query Result");
+			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
+			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
+			DialogUtils.installEscapeCloseOperation(panel);
+			panel.setTextMessage(visitor.getString());
+			panel.setVisible(true);
+		} catch (Exception e) {
+			DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
 		}
-		TextMessageFrame panel = new TextMessageFrame("Query Result");
-		JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-		DialogUtils.centerDialogWRTParent(protegeFrame, panel);
-		DialogUtils.installEscapeCloseOperation(panel);
-		PrefixManager prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
-		OWLAxiomToTurtleVisitor codecVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
-		for (OWLAxiom axiom : result) {
-			axiom.accept(codecVisitor);
+		
+	}
+	
+	private void populateResultUsingVisitor(List<OWLAxiom> result, OWLAxiomToTurtleVisitor visitor) {
+		if (result != null) {
+			for (OWLAxiom axiom : result) {
+				axiom.accept(visitor);
+			}
 		}
-		panel.setTextMessage(codecVisitor.getString());
-		panel.setVisible(true);
 	}
 
 	public void selectedQuerychanged(String new_group, String new_query, String new_id) {

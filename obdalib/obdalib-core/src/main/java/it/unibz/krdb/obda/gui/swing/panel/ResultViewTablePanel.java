@@ -193,9 +193,10 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		writeHintMessage();
 	}
 	
+	// TODO Change the implementation of checking the table model after refactoring the code.
 	private void writeHintMessage() {
 		String msg = "--";
-		if (querypanel.isFetchAllSelect()) {
+        if (querypanel.isFetchAllSelect() || querypanel.canGetMoreTuples()) {
 			msg = "Try to continue scrolling down the table to retrieve more results.";
 		}
 		lblComment.setText(msg);

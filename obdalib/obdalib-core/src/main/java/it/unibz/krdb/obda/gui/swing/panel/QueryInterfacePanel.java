@@ -31,8 +31,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.text.StyleContext;
 
-import com.hp.hpl.jena.vocabulary.OWLResults;
-
 /**
  * Creates a new panel to execute queries. Remember to execute the
  * setResultsPanel function to indicate where to display the results.
@@ -59,6 +57,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	private QueryController qc;
 	
 	private double execTime = 0;
+	private int fetchSizeCache = 100;
 	
 	private String currentGroup = "";  // default value
 	private String currentId = "";  // default value
@@ -115,8 +114,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        eqlPopupMenu = new javax.swing.JPopupMenu();
-        getEQLSQLExpansion = new javax.swing.JMenuItem();
         sparqlPopupMenu = new javax.swing.JPopupMenu();
         getSPARQLExpansion = new javax.swing.JMenuItem();
         getSPARQLSQLExpansion = new javax.swing.JMenuItem();
@@ -134,15 +131,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         jLabelHeader = new javax.swing.JLabel();
         jScrollQueryPane = new javax.swing.JScrollPane();
         queryTextPane = new javax.swing.JTextPane();
-
-        getEQLSQLExpansion.setText("Get SQL for EQL query...");
-        getEQLSQLExpansion.setEnabled(false);
-        getEQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getEQLSQLExpansionActionPerformed(evt);
-            }
-        });
-        eqlPopupMenu.add(getEQLSQLExpansion);
 
         sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
 
@@ -187,6 +175,11 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         chkShowAll.setText("All");
         chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
+        chkShowAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkShowAllActionPerformed(evt);
+            }
+        });
         pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
 
         chkShowShortURI.setText("Hide URI");
@@ -288,9 +281,16 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         add(pnlQueryEditor, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-	private void getEQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getEQLSQLExpansionActionPerformed
-		// TODO add your handling code here:
-	}// GEN-LAST:event_getEQLSQLExpansionActionPerformed
+    private void chkShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowAllActionPerformed
+    	if (chkShowAll.isSelected()) {
+    		fetchSizeCache = getFetchSize();
+    		txtFetchSize.setText(0+"");
+    		txtFetchSize.setEditable(false);
+    	} else {
+    		txtFetchSize.setText(fetchSizeCache+"");
+    		txtFetchSize.setEditable(true);
+    	}
+    }//GEN-LAST:event_chkShowAllActionPerformed
 
 	private void getSPARQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
 		Thread queryRunnerThread = new Thread(new Runnable() {
@@ -413,8 +413,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
     private javax.swing.JButton cmdAttachPrefix;
     private javax.swing.JButton cmdExecuteQuery;
     private javax.swing.JButton cmdSaveChanges;
-    private javax.swing.JPopupMenu eqlPopupMenu;
-    private javax.swing.JMenuItem getEQLSQLExpansion;
     private javax.swing.JMenuItem getSPARQLExpansion;
     private javax.swing.JMenuItem getSPARQLSQLExpansion;
     private javax.swing.JLabel jLabelHeader;
@@ -442,14 +440,23 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		return chkShowAll.isSelected();
 	}
 
+	// TODO Remove this method after moving the GUI package to protege41 module.
+	// The constant 100 is the same as the NEXT_FETCH_SIZE in OWLResultSetTableModel
+	public boolean canGetMoreTuples() {
+		return getFetchSize() > 100;
+	}
+	
 	public String getQuery() {
 		return queryTextPane.getText();
 	}
 	
 	public int getFetchSize() {
-		int fetchSize = -1; // Flag for fetching all the tuples
-		if (!isFetchAllSelect()) {
+		int fetchSize = 0;
+		try {
 			fetchSize = Integer.parseInt(txtFetchSize.getText());
+		} catch (NumberFormatException e) {
+			DialogUtils.showQuickErrorDialog(this, 
+					new Exception("Invalid input: " + txtFetchSize.getText()), e.toString());
 		}
 		return fetchSize;
 	}

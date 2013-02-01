@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -20,7 +19,8 @@ public class OWLResultSetTableModel implements TableModel {
 	private int numcols;
 	private int numrows;
 	private int fetchSizeLimit;
-	boolean hideUri;
+	private boolean isHideUri;
+	private boolean isFetchAll;
 
 	// Tabular data for exporting result
 	private Vector<String[]> tabularData;
@@ -31,7 +31,6 @@ public class OWLResultSetTableModel implements TableModel {
 
 	private PrefixManager prefixman;
 
-	private final int FETCH_ALL = -1;
 	private final int INITIAL_FETCH_SIZE = 100;
 	private final int NEXT_FETCH_SIZE = 100;
 
@@ -42,10 +41,11 @@ public class OWLResultSetTableModel implements TableModel {
 	 * ResultSetTableModel
 	 */
 	public OWLResultSetTableModel(OWLResultSet results, PrefixManager prefixman, 
-			boolean hideUri, int fetchSizeLimit) throws OWLException {
+			boolean hideUri, boolean fetchAll, int fetchSizeLimit) throws OWLException {
 		this.results = results;
 		this.prefixman = prefixman;
-		this.hideUri = hideUri;
+		this.isHideUri = hideUri;
+		this.isFetchAll = fetchAll;
 		this.fetchSizeLimit = fetchSizeLimit;
 
 		numcols = results.getColumCount();
@@ -55,7 +55,7 @@ public class OWLResultSetTableModel implements TableModel {
 		listener = new Vector<TableModelListener>();
 		
 		int fetchSize = fetchSizeLimit;
-		if (fetchSizeLimit == FETCH_ALL || fetchSizeLimit > INITIAL_FETCH_SIZE) {
+		if (needFetchMore()) {
 			fetchSize = INITIAL_FETCH_SIZE;
 		}
 		fetchRows(fetchSize);
@@ -81,18 +81,18 @@ public class OWLResultSetTableModel implements TableModel {
 				}
 				resultsTable.add(crow);
 				counter++;
+				updateRowCount();
 				
 				// Determine if the loop should stop now
 				if (counter == size) {
 					break;
 				}
 			}
-			updateRowCount(counter);
 		}
 	}
 
-	private void updateRowCount(int counter) {
-		numrows += counter;
+	private void updateRowCount() {
+		numrows++;
 	}
 
 	/**
@@ -182,25 +182,46 @@ public class OWLResultSetTableModel implements TableModel {
 	 * numbers start at 0.
 	 */
 	public Object getValueAt(int row, int column) {
-		if (fetchSizeLimit == FETCH_ALL) {
+		if (needFetchMore()) {
 			checkNextRowAvailability(row);
 		}
 		String value = resultsTable.get(row)[column];
 		if (value == null) {
 			return "";
 		}
-		else if (hideUri) {
+		else if (isHideUri) {
 			return prefixman.getShortForm(value);
 		} else {
 			return value;
 		}
 	}
 
+	/**
+	 * Determine if the table need to fetch more tuples.
+	 */
+	public boolean needFetchMore() {
+		return isFetchingAll() || fetchSizeLimit > INITIAL_FETCH_SIZE;
+	}
+	
+	private boolean isFetchingAll() {
+		return isFetchAll;
+	}
+	
 	private void checkNextRowAvailability(int currentRowNumber) {
 		try {
 			int nextRowNumber = currentRowNumber + getRowCount() / 4;
 			if (nextRowNumber >= getRowCount()) {
-				fetchRows(NEXT_FETCH_SIZE);
+				if (isFetchingAll()) {
+					fetchRows(NEXT_FETCH_SIZE);
+				} else {
+					int remainder = fetchSizeLimit - getRowCount();
+					int c = remainder / NEXT_FETCH_SIZE;
+					if (c != 0) {
+						fetchRows(NEXT_FETCH_SIZE);
+					} else {
+						fetchRows(remainder);
+					}
+				}				
 				fireModelChangedEvent();
 			}
 		} catch (OWLException e) {
