@@ -11,13 +11,13 @@
     ( 
       :slice-test
       :limit-test
-      :offset-test
-      :limit0-offsetn
+      #:offset-test
+      #:limit0-offsetn
       :limitn-offset0
       :orderby-test
       :orderbydesc-test
       :orderbycombined-test
-      :slice-orderby
+      #:slice-orderby
       :orderbyliteral-test
     ) .
 
