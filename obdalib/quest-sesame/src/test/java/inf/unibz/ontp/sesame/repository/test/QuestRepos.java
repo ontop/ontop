@@ -1,24 +1,10 @@
 package inf.unibz.ontp.sesame.repository.test;
 
-import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.querymanager.QueryController;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.Set;
 
 import org.junit.Test;
 import org.openrdf.model.Resource;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -29,18 +15,10 @@ import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryRegistry;
 import org.openrdf.repository.manager.RemoteRepositoryManager;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.helpers.RDFHandlerBase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import sesameWrapper.RepositoryConnection;
-import sesameWrapper.SesameClassicJDBCRepo;
 import sesameWrapper.SesameRepositoryConfig;
 import sesameWrapper.SesameRepositoryFactory;
-import sesameWrapper.StartJetty;
 
 public class QuestRepos {
 
