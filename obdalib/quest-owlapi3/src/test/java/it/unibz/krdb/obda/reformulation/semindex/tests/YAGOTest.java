@@ -74,8 +74,8 @@ public class YAGOTest {
 
                 if ("rdfs:range".equals(predicate)) {
                     tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(new URI(subject), 2);
-                    Predicate po = predicateFactory.getPredicate(new URI(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 2);
+                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
 
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
                     ClassDescription co = descFactory.createClass(po);
@@ -84,8 +84,8 @@ public class YAGOTest {
 
                 } else if ("rdfs:domain".equals(predicate)) {
                     tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(new URI(subject), 2);
-                    Predicate po = predicateFactory.getPredicate(new URI(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 2);
+                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
 
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
                     ClassDescription co = descFactory.createClass(po);
@@ -94,7 +94,7 @@ public class YAGOTest {
 
                 } else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
-                    Predicate po = predicateFactory.getPredicate(new URI(object), 1);
+                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
                     ClassDescription co = descFactory.createClass(po);
 
                     onto.addConcept(po);
@@ -102,8 +102,8 @@ public class YAGOTest {
                 } else if ("rdfs:subClassOf".equals(predicate)) {
                     tbox_count++;
 //                    log.debug("{} {}", subject, object);
-                    Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
-                    Predicate po = predicateFactory.getPredicate(new URI(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 1);
+                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
                     ClassDescription cs = descFactory.createClass(ps);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cs, co));
@@ -111,8 +111,8 @@ public class YAGOTest {
                 } else if ("rdfs:subPropertyOf".equals(predicate)) {
                     tbox_count++;
 //                    log.debug("{} {}", subject, object);
-                    Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
-                    Predicate po = predicateFactory.getPredicate(new URI(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 1);
+                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
                     Property rs = descFactory.createProperty(ps);
                     Property ro = descFactory.createProperty(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));
