@@ -605,8 +605,9 @@ public class QuestStatement implements OBDAStatement {
 				}
 				for (CQIE rule : rules) {
 					//try to unify current query body atom with tbox rule body atom
+					rule = DatalogUnfolder.getFreshRule(rule, 4022013);  // Random suffix number
 					Atom ruleBody = rule.getBody().get(0);
-					Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, atomQuery); // TODO optimize index
+					Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, atomQuery);
 					if (theta == null || theta.isEmpty()) {
 						continue;
 					}

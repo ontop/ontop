@@ -1061,7 +1061,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param suffix
 	 * @return
 	 */
-	public CQIE getFreshRule(CQIE rule, int suffix) {
+	public static CQIE getFreshRule(CQIE rule, int suffix) {
 		// This method doesn't support nested functional terms
 		CQIE freshRule = rule.clone();
 		Atom head = freshRule.getHead();
@@ -1088,7 +1088,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	}
 
-	public NewLiteral getFreshTerm(NewLiteral term, int suffix) {
+	public static NewLiteral getFreshTerm(NewLiteral term, int suffix) {
 		NewLiteral newTerm = null;
 		if (term instanceof VariableImpl) {
 			VariableImpl variable = (VariableImpl) term;
