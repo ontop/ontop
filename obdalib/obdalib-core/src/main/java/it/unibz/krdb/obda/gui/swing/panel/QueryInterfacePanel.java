@@ -182,8 +182,10 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         });
         pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
 
-        chkShowShortURI.setText("Hide URI");
+        chkShowShortURI.setText("Short IRI");
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
+        chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
         chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 

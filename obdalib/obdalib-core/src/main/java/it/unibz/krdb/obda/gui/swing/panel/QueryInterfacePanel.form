@@ -120,8 +120,14 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="chkShowShortURI">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Hide URI"/>
+                <Property name="text" type="java.lang.String" value="Short IRI"/>
                 <Property name="horizontalAlignment" type="int" value="2"/>
+                <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[75, 23]"/>
+                </Property>
+                <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[75, 23]"/>
+                </Property>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[75, 23]"/>
                 </Property>
