@@ -328,8 +328,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private int showTupleResultInTablePanel() throws OWLException {
 		OWLResultSetTableModel currentTableModel = getTableModel();
-		resultTablePanel.setTableModel(currentTableModel);
-		return currentTableModel.getRowCount();
+		if (currentTableModel != null) {
+			resultTablePanel.setTableModel(currentTableModel);
+			return currentTableModel.getRowCount();
+		} else {
+			return 0;
+		}
 	}
 
 	private void createTableModelFromResultSet(OWLResultSet result) throws OWLException {
