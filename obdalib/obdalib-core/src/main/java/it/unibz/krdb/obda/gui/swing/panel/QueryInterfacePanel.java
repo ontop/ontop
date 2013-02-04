@@ -134,13 +134,14 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
 
-        getSPARQLExpansion.setText("Get expansion this UCQ...");
-        getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getSPARQLExpansionActionPerformed(evt);
-            }
-        });
-        sparqlPopupMenu.add(getSPARQLExpansion);
+     // TODO Enable this after fixing the code in QuestStatement
+//        getSPARQLExpansion.setText("Get expansion this UCQ...");
+//        getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                getSPARQLExpansionActionPerformed(evt);
+//            }
+//        });
+//        sparqlPopupMenu.add(getSPARQLExpansion);
 
         getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
         getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
