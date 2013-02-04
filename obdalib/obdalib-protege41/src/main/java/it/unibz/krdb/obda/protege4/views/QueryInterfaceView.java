@@ -173,7 +173,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					action.run();
 					latch.await();
 					monitor.stop();
-					if (internalQuery.isSelectQuery()) {
+					if (internalQuery.isSelectQuery() || internalQuery.isAskQuery()) {
 						OWLResultSet result = action.getResult();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
@@ -564,7 +564,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							OWLQueryReasoner dqr = (OWLQueryReasoner) reasoner;
 							statement = dqr.getStatement();
 							String queryString = query.getQueryString();
-							if (query.isSelectQuery()) {
+							if (query.isSelectQuery() || query.isAskQuery()) {
 								result = statement.execute(queryString);
 							} else if (query.isConstructQuery()) {
 								graphResult = statement.executeConstruct(queryString);
@@ -728,6 +728,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		
 		private String query;
 		
+		private static final String ASK_KEYWORD = "ask";
 		private static final String SELECT_KEYWORD = "select";
 		private static final String CONSTRUCT_KEYWORD = "construct";
 		private static final String DESCRIBE_KEYWORD = "describe";
@@ -738,6 +739,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		
 		public String getQueryString() {
 			return query;
+		}
+		
+		public boolean isAskQuery() {
+			return query.toLowerCase().contains(ASK_KEYWORD);
 		}
 		
 		public boolean isSelectQuery() {
