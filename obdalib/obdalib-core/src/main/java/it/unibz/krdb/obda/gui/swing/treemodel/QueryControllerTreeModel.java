@@ -157,20 +157,22 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 */
 	public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group) {
 		QueryGroupTreeElement ele = new QueryGroupTreeElement(group.getID());
-		QueryTreeElement elemQ = new QueryTreeElement(query.getID(), query
-				.getQuery());
+		QueryTreeElement elemQ = new QueryTreeElement(query.getID(), query.getQuery());
 
 		Enumeration<TreeNode> groups = root.children();
 		while (groups.hasMoreElements()) {
-			QueryGroupTreeElement groupTElement = (QueryGroupTreeElement) groups.nextElement();
-			if (groupTElement.getID().equals(ele.getID())) {
-				Enumeration<TreeNode> queries = groupTElement.children();
-				while (queries.hasMoreElements()) {
-					QueryTreeElement queryTElement = (QueryTreeElement) queries.nextElement();
-					if (queryTElement.getID().equals(elemQ.getID())) {
-						removeNodeFromParent(queryTElement);
-						nodeStructureChanged(root);
-						break;
+			TreeNode node = groups.nextElement();
+			if (node instanceof QueryGroupTreeElement) {
+			QueryGroupTreeElement groupTElement = (QueryGroupTreeElement) node;
+				if (groupTElement.getID().equals(ele.getID())) {
+					Enumeration<TreeNode> queries = groupTElement.children();
+					while (queries.hasMoreElements()) {
+						QueryTreeElement queryTElement = (QueryTreeElement) queries.nextElement();
+						if (queryTElement.getID().equals(elemQ.getID())) {
+							removeNodeFromParent(queryTElement);
+							nodeStructureChanged(root);
+							break;
+						}
 					}
 				}
 			}
