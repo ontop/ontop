@@ -192,7 +192,7 @@ public class QuestStatement implements OBDAStatement {
 					// Cache the sql for better performance
 					cacheQueryAndProperties(strquery, sqlQuery);
 				}
-				String sql = querycache.get(strquery);
+				String sql = getSqlString(strquery);
 				List<String> signature = signaturecache.get(strquery);
 				boolean isBoolean = isbooleancache.get(strquery);
 				boolean isConstruct = isconstructcache.get(strquery);
@@ -991,6 +991,10 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
+	}
+	
+	public String getSqlString(String sparqlString) {
+		return querycache.get(sparqlString);
 	}
 	
 	private int getBodySize(List<? extends Function> atoms) {
