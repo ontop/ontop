@@ -86,7 +86,6 @@ public class QuestSesameCMD {
 			} catch (Exception e1) {
 
 			}
-			System.out.println("Done.");
 		}
 
 	}
