@@ -3,20 +3,12 @@ package sesameWrapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.List;
 
-import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
-import org.openrdf.query.TupleQueryResultHandlerBase;
-import org.openrdf.query.resultio.text.csv.SPARQLResultsCSVWriter;
 import org.openrdf.query.resultio.text.tsv.SPARQLResultsTSVWriter;
 import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.helpers.RDFHandlerBase;
 
 public class QuestSesameCMD {
 
@@ -24,7 +16,8 @@ public class QuestSesameCMD {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+		Repository repo = null;
+		org.openrdf.repository.RepositoryConnection conn = null; 
 		//check argument correctness
 		if (args.length != 3 && args.length !=4) {
 			   System.out.println("Usage:");
@@ -39,18 +32,18 @@ public class QuestSesameCMD {
 			  }
 		
 		//get parameter values
-		String owlfile = args[0];
-		String obdafile = args[1];
-		String qfile = args[2];
+		String owlfile = args[0].trim();
+		String obdafile = args[1].trim();
+		String qfile = args[2].trim();
 		String out = null;
 		if (args.length == 4)
-			out = args[3];
+			out = args[3].trim();
 		
 		try {
 			//create and initialize repo
-			Repository repo = new SesameVirtualRepo("test_repo", owlfile, obdafile, false, "TreeWitness");
+			repo = new SesameVirtualRepo("test_repo", owlfile, obdafile, false, "TreeWitness");
 			repo.initialize();
-			RepositoryConnection conn = repo.getConnection();
+			conn = repo.getConnection();
 			System.out.println("test_repo created and initialized...");
 			String query="";
 			//read query from file
@@ -81,12 +74,23 @@ public class QuestSesameCMD {
 			//evaluate the query
 			tupleQuery.evaluate(handler);
 			
-			conn.close();
-			repo.shutDown();
-			System.out.println("Done.");
+			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+			conn.close();
+			} catch (Exception e1) {
+				
+			}
+			
+			try {
+			repo.shutDown();
+			} catch (Exception e1) {
+				
+			}
+			System.out.println("Done.");
 		}
 		
 	}

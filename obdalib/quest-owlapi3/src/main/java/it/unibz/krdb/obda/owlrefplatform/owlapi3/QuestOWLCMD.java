@@ -44,13 +44,13 @@ public class QuestOWLCMD {
 			return;
 		}
 
-		String owlfile = args[0];
-		String obdafile = args[1];
-		String queryfie = args[2];
+		String owlfile = args[0].trim();
+		String obdafile = args[1].trim();
+		String queryfie = args[2].trim();
 		String outputfile = null;
 
 		if (args.length == 4) {
-			outputfile = args[3];
+			outputfile = args[3].trim();
 		}
 
 		try {
