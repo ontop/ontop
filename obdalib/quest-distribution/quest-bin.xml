@@ -21,7 +21,7 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../reformulation-core/src/main/resources/log
+			<directory>${project.basedir}/../quest-distribution/src/main/resources/log
 			</directory>
 			<outputDirectory>/log</outputDirectory>
 			<includes>
