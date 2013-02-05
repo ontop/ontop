@@ -21,19 +21,30 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../reformulation-core/src/main/resources</directory>
+			<directory>${project.basedir}/../reformulation-core/src/main/resources
+			</directory>
 			<outputDirectory>/log</outputDirectory>
 			<includes>
 				<include>logback.xml</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/samples</directory>
+			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/samples
+			</directory>
 			<outputDirectory>/samples</outputDirectory>
 			<includes>
 				<include>*</include>
 			</includes>
 		</fileSet>
+				<fileSet>
+			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/
+			</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+		
 	</fileSets>
 
 	<dependencySets>
