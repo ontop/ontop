@@ -463,7 +463,7 @@ throw new RuntimeException(e);
 			{
 				questStm.close();
 			}
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}
 	}
