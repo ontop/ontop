@@ -1,14 +1,24 @@
 package sesameWrapper;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.query.GraphQuery;
+import org.openrdf.query.Query;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.resultio.text.tsv.SPARQLResultsTSVWriter;
 import org.openrdf.repository.Repository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.Rio;
 
 public class QuestSesameCMD {
 
@@ -44,7 +54,7 @@ public class QuestSesameCMD {
 			repo = new SesameVirtualRepo("test_repo", owlfile, obdafile, false, "TreeWitness");
 			repo.initialize();
 			conn = repo.getConnection();
-			String query = "";
+			String querystr = "";
 			// read query from file
 			FileInputStream input = new FileInputStream(new File(qfile));
 			byte[] fileData = new byte[input.available()];
@@ -52,24 +62,51 @@ public class QuestSesameCMD {
 			input.read(fileData);
 			input.close();
 
-			query = new String(fileData, "UTF-8");
+			querystr = new String(fileData, "UTF-8");
 
 			// execute query
-			TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, query);
-			TupleQueryResultHandler handler = null;
+			Query query = conn.prepareQuery(QueryLanguage.SPARQL, querystr);
 
-			// set handler to output file or printout
-			if (out != null) {
+			if (query instanceof TupleQuery) {
+				TupleQuery tuplequery = (TupleQuery) query;
+				TupleQueryResultHandler handler = null;
 
-				FileOutputStream output = new FileOutputStream(new File(out));
-				handler = new SPARQLResultsTSVWriter(output);
+				// set handler to output file or printout
+				if (out != null) {
 
+					FileOutputStream output = new FileOutputStream(new File(out));
+					handler = new SPARQLResultsTSVWriter(output);
+
+				} else {
+
+					handler = new SPARQLResultsTSVWriter(System.out);
+				}
+				// evaluate the query
+				tuplequery.evaluate(handler);
+			} else if (query instanceof GraphQuery) {
+				GraphQuery tuplequery = (GraphQuery) query;
+				Writer writer = null;
+				// set handler to output file or printout
+				if (out != null) {
+					
+					writer = new BufferedWriter(new FileWriter(new File(out))); 
+					
+
+				} else {
+
+					writer = new BufferedWriter(new OutputStreamWriter(System.out));
+					
+				}
+				// evaluate the query
+				RDFHandler handler = Rio.createWriter(RDFFormat.TURTLE, writer);
+
+				
+				tuplequery.evaluate(handler);
+				
+				
 			} else {
-
-				handler = new SPARQLResultsTSVWriter(System.out);
+				System.out.println("Boolean queries are not supported in this script yet.");
 			}
-			// evaluate the query
-			tupleQuery.evaluate(handler);
 
 		} catch (Exception e) {
 			System.out.println("Error executing query:");

@@ -125,14 +125,12 @@ public class SesameGraphQuery implements GraphQuery {
 			return new GraphQueryResultImpl(namespaces, results.iterator());
 			
 		} catch (OBDAException e) {
-			e.printStackTrace();
-			throw new QueryEvaluationException(e.getMessage());
+			throw new QueryEvaluationException(e);
 		}
 		finally{
 			try {
 				stm.close();
 			} catch (OBDAException e) {
-				e.printStackTrace();
 			}
 		}
 	}
