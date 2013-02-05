@@ -685,8 +685,8 @@ public class QuestStatement implements OBDAStatement {
 	public void close() throws OBDAException {
 		try {
 			sqlstatement.close();
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		} catch (Exception e) {
+			throw new OBDAException(e);
 		}
 	}
 
@@ -741,10 +741,8 @@ public class QuestStatement implements OBDAStatement {
 	public void cancel() throws OBDAException {
 		try {
 			QuestStatement.this.executionthread.cancel();
-		} catch (SQLException e) {
-			OBDAException o = new OBDAException(e);
-			o.setStackTrace(e.getStackTrace());
-			throw o;
+		} catch (Exception e) {
+			throw new OBDAException(e);
 		}
 	}
 
@@ -758,8 +756,8 @@ public class QuestStatement implements OBDAStatement {
 	public int getFetchSize() throws OBDAException {
 		try {
 			return sqlstatement.getFetchSize();
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 
 	}
@@ -768,8 +766,8 @@ public class QuestStatement implements OBDAStatement {
 	public int getMaxRows() throws OBDAException {
 		try {
 			return sqlstatement.getMaxRows();
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 
 	}
@@ -778,8 +776,8 @@ public class QuestStatement implements OBDAStatement {
 	public void getMoreResults() throws OBDAException {
 		try {
 			sqlstatement.getMoreResults();
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 
 	}
@@ -788,8 +786,8 @@ public class QuestStatement implements OBDAStatement {
 	public void setFetchSize(int rows) throws OBDAException {
 		try {
 			sqlstatement.setFetchSize(rows);
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 
 	}
@@ -798,8 +796,8 @@ public class QuestStatement implements OBDAStatement {
 	public void setMaxRows(int max) throws OBDAException {
 		try {
 			sqlstatement.setMaxRows(max);
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 
 	}
@@ -808,8 +806,8 @@ public class QuestStatement implements OBDAStatement {
 	public void setQueryTimeout(int seconds) throws OBDAException {
 		try {
 			sqlstatement.setQueryTimeout(seconds);
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 	}
 
@@ -827,8 +825,8 @@ public class QuestStatement implements OBDAStatement {
 	public int getQueryTimeout() throws OBDAException {
 		try {
 			return sqlstatement.getQueryTimeout();
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 	}
 
@@ -836,8 +834,8 @@ public class QuestStatement implements OBDAStatement {
 	public boolean isClosed() throws OBDAException {
 		try {
 			return sqlstatement.isClosed();
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+		}  catch (Exception e) {
+			throw new OBDAException(e);
 		}
 	}
 
