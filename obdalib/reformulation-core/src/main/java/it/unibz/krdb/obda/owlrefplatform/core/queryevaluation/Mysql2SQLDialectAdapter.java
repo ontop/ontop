@@ -58,4 +58,16 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
+	
+	@Override
+	    public String sqlCast(String value, int type) {
+	        String strType = null;
+	        if (type == Types.VARCHAR) {
+	            strType = "CHAR(8000)";
+	        } else {
+	            throw new RuntimeException("Unsupported SQL type");
+	        }
+	        // for korean, chinese, etc characters we need to use utf8
+	        return "CAST(" + value + " AS " + strType + " CHARACTER SET utf8)";
+	    }
 }
