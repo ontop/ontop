@@ -53,7 +53,7 @@
 				<exclude>mysql*</exclude>
 				<exclude>com.h2database:h2*</exclude>
 				<exclude>log4j*</exclude>
-				<exclude>sl4j-log4j*</exclude>
+				<exclude>org.slf4j:slf4j-log4j12*</exclude>
 			</excludes>
 
 		</dependencySet>
