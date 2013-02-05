@@ -100,7 +100,7 @@ public class QuestOWLCMD {
 	}
 
 	public static void printResult(OutputStream out, OWLResultSet result) throws Exception {
-		BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out));
+		BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out,"utf8"));
 
 		/*
 		 * Printing the header
