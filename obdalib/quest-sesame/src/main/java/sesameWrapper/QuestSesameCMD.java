@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.Query;
@@ -64,6 +65,7 @@ public class QuestSesameCMD {
 
 			querystr = new String(fileData, "UTF-8");
 
+			
 			// execute query
 			Query query = conn.prepareQuery(QueryLanguage.SPARQL, querystr);
 
@@ -97,8 +99,11 @@ public class QuestSesameCMD {
 					writer = new BufferedWriter(new OutputStreamWriter(System.out));
 					
 				}
+				
+
 				// evaluate the query
 				RDFHandler handler = Rio.createWriter(RDFFormat.TURTLE, writer);
+//				conn.exportStatements(ValueFactoryImpl.getInstance().createURI("http://meraka/moss/exampleBooks.owl#author/내용/"), null, null, true, handler, null);
 
 				
 				tuplequery.evaluate(handler);

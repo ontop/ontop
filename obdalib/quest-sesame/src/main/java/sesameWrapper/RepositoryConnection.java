@@ -27,6 +27,7 @@ import org.openrdf.OpenRDFUtil;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.NamespaceImpl;
@@ -558,16 +559,26 @@ throw new RuntimeException(e);
 		String s="", p="", o="";
 		if (subj == null)
 			s = "?s ";
-		else
-			s = subj.stringValue();
+		else {		
+			s = subj.toString();
+			if (subj instanceof URI) {
+				s = "<" + s + ">";
+			}
+		}
+		
 		if (pred == null)
 			p = "?p ";
 		else 
-			p = pred.stringValue();
+			p = "<" + pred.stringValue()  + ">";
 		if (obj == null)
 			o = "?o ";
-		else
-			o = obj.stringValue();
+		else {
+			if (obj instanceof URI) {
+				o = "<" + obj.stringValue() + ">";
+			} else {
+				o = obj.stringValue();
+			}
+		}
 		queryString+= s+p+o+"} WHERE {"+s+p+o+"}";
 			
 		//execute construct query
