@@ -75,6 +75,16 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
+		</dependency>     
+		
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryresultio-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryresultio-text</artifactId>
 		</dependency>
 
 

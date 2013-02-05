@@ -279,8 +279,20 @@
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-api</artifactId>
 				<version>2.6.9</version>
-			</dependency>
+			</dependency> 
+			
+			<dependency>
+    			<groupId>org.openrdf.sesame</groupId>
+    			<artifactId>sesame-queryresultio-api</artifactId>
+    			<version>2.6.9</version>
+    		</dependency>
 
+			<dependency>
+    			<groupId>org.openrdf.sesame</groupId>
+    			<artifactId>sesame-queryresultio-text</artifactId>
+    			<version>2.6.9</version>
+    		</dependency>   
+                            
 			<!-- JDBC Drivers -->
 
 			<dependency>
