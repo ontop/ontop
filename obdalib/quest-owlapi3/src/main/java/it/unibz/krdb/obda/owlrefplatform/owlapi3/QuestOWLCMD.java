@@ -111,7 +111,7 @@ public class QuestOWLCMD {
 			String value = result.getSignature().get(c);
 			wr.append(value);
 			if (c + 1 < columns)
-				wr.append(",");
+				wr.append("\t");
 		}
 		wr.newLine();
 		/*
