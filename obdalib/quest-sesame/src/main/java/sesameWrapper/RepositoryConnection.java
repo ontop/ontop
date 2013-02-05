@@ -94,7 +94,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			l=null;
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
 		} finally{
         autoCommit();
 		}
@@ -122,7 +122,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
              }
              throw e;
          } catch (Exception e) {
-			e.printStackTrace();
+        	 throw new RepositoryException(e);
 		} finally {
              setAutoCommit(autoCommit);
              autoCommit();
@@ -153,7 +153,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
               }
               throw e;
           } catch (Exception e) {
-			e.printStackTrace();
+        	  throw new RepositoryException(e);
 		} finally {
               setAutoCommit(autoCommit);
               autoCommit();
@@ -310,23 +310,25 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
      
         } catch (RuntimeException e) {
         	//System.out.println("exception, rolling back!");
-        	e.printStackTrace();
+        	
         	
             if (autoCommit) {
                 rollback();
             }
-            throw e;
+            throw new RepositoryException(e);
         } catch (OBDAException e)
         {
-        	e.printStackTrace();
+        	
         	 if (autoCommit) {
                  rollback();
              }
+        	 throw new RepositoryException(e);
         } catch (InterruptedException e) {
-			e.printStackTrace();
 			 if (autoCommit) {
 	                rollback();
 	            }
+			 
+			 throw new RepositoryException(e);
 		} finally {
             setAutoCommit(autoCommit);
             autoCommit();
@@ -349,12 +351,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
         	  {
         		  try {
 					rdfParser.parse((InputStream) inputStreamOrReader, baseURI);
-				} catch (RDFParseException e) {
-					e.printStackTrace();
-				} catch (RDFHandlerException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+throw new RuntimeException(e);
 				}
         	  }
         	  
@@ -375,7 +373,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 						questStmt.add(iterator, boolToInt(autoCommit), 5000);
         		    	
 					} catch (SQLException e) {
-						e.printStackTrace();
+						throw new RuntimeException(e);
 					}
         	  }
           }
@@ -402,7 +400,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     		questStm = questConn.createStatement();
 			questStm.add(it);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
 		}
     	finally{
     		questStm.close();
@@ -466,7 +464,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 				questStm.close();
 			}
 		} catch (OBDAException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
 		}
 	}
 
@@ -476,7 +474,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			//System.out.println("QuestConn commit..");
 			questConn.commit();
 		} catch (OBDAException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
 		}
 	}
 
@@ -590,11 +588,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 
 			return repoResult;
 		} catch (MalformedQueryException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
+
 		} catch (QueryEvaluationException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
+
 		}
-		return null;
 	}
 
 	public ValueFactory getValueFactory() {
@@ -659,7 +658,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			try {
 				this.questStm = questConn.createStatement();
 			} catch (OBDAException e) {
-				e.printStackTrace();
+				throw new RepositoryException(e);
+
 			}
 			return new SesameBooleanQuery(queryString, baseURI, questStm);
 	//	} else
@@ -685,7 +685,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			try {
 				this.questStm = questConn.createStatement();
 			} catch (OBDAException e) {
-				e.printStackTrace();
+				throw new RepositoryException(e);
+
 			}
 			return new SesameGraphQuery(queryString, baseURI, questStm);
 	//	} else
@@ -738,7 +739,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			try {
 				this.questStm = questConn.createStatement();
 			} catch (OBDAException e) {
-				e.printStackTrace();
+				throw new RepositoryException(e);
+
 			}
 			return new SesameTupleQuery(queryString, baseURI, questStm);
 		//} else
@@ -846,7 +848,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		try {
 			this.questConn.rollBack();
 		} catch (OBDAException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
+
 		}
 	}
 
@@ -865,7 +868,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
          try {
 			this.questConn.setAutoCommit(autoCommit);
 		} catch (OBDAException e) {
-			e.printStackTrace();
+			throw new RepositoryException(e);
+
 		}
          
          // if we are switching from non-autocommit to autocommit mode, commit any
