@@ -21,22 +21,15 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../reformulation-core/src/main/resources
+			<directory>${project.basedir}/../reformulation-core/src/main/resources/log
 			</directory>
 			<outputDirectory>/log</outputDirectory>
 			<includes>
 				<include>logback.xml</include>
 			</includes>
 		</fileSet>
+
 		<fileSet>
-			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/samples
-			</directory>
-			<outputDirectory>/samples</outputDirectory>
-			<includes>
-				<include>*</include>
-			</includes>
-		</fileSet>
-				<fileSet>
 			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/
 			</directory>
 			<outputDirectory>/</outputDirectory>
@@ -44,7 +37,7 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
-		
+
 	</fileSets>
 
 	<dependencySets>
@@ -60,6 +53,7 @@
 				<exclude>mysql*</exclude>
 				<exclude>com.h2database:h2*</exclude>
 				<exclude>log4j*</exclude>
+				<exclude>sl4j-log4j*</exclude>
 			</excludes>
 
 		</dependencySet>
