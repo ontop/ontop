@@ -5,7 +5,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>obdalib-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.7-alpha</version>
+	<version>1.7-alpha2</version>
 	<name>obdalib-parent</name>
 	<url>http://obda.inf.unibz.it/</url>
 
@@ -34,9 +34,6 @@
 		<profile>
 			<id>all</id>
 			<modules>
-				<module>obdalib-owlapi</module>
-				<module>obdalib-protege4</module>
-				<module>quest-owlapi2</module>
 				<module>quest-benchmarks</module>
 			</modules>
 		</profile>
