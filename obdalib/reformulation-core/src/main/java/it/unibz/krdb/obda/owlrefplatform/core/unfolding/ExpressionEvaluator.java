@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BNodePredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
@@ -58,7 +58,7 @@ public class ExpressionEvaluator {
 
 	public boolean evaluateExpressions(CQIE q) {
 		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
-			Atom atom = q.getBody().get(atomidx);
+			Function atom = q.getBody().get(atomidx);
 			NewLiteral newatom = eval(atom);
 			if (newatom == fac.getTrue()) {
 				q.getBody().remove(atomidx);

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -356,7 +356,7 @@ public class TreeWitnessSet {
 			NewLiteralOrderedPair idx = new NewLiteralOrderedPair(root, nonroot);
 			Set<Property> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				for (Atom a : edge.getBAtoms()) {
+				for (Function a : edge.getBAtoms()) {
 					if (a.getPredicate() instanceof BooleanOperationPredicateImpl) {
 						log.debug("EDGE " + edge + " HAS PROPERTY " + a + " NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES ");
 						properties = Collections.EMPTY_SET;
@@ -365,7 +365,7 @@ public class TreeWitnessSet {
 				}
 				if (properties == null) {
 					IntersectionOfProperties set = new IntersectionOfProperties();
-					for (Atom a : edge.getBAtoms()) {
+					for (Function a : edge.getBAtoms()) {
 						log.debug("EDGE " + edge + " HAS PROPERTY " + a);
 						if (!set.intersect(reasoner.getSubProperties(a.getPredicate(), !root.equals(a.getTerm(0)))))
 							break;

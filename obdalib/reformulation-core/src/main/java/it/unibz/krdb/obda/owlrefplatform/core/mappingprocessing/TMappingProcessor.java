@@ -145,7 +145,7 @@ public class TMappingProcessor implements Serializable {
 	 *            The new mapping for A/P
 	 */
 	public void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
-		List<Atom> strippedNewConditions = new LinkedList<Atom>();
+		List<Function> strippedNewConditions = new LinkedList<Function>();
 		CQIE strippedNewMapping = getStrippedMapping(newmapping, strippedNewConditions);
 		Ontology sigma = null;
 		
@@ -154,7 +154,7 @@ public class TMappingProcessor implements Serializable {
 		
 		while (mappingIterator.hasNext()) {
 			CQIE currentMapping = mappingIterator.next();
-			List<Atom> strippedExistingConditions = new LinkedList<Atom>();
+			List<Function> strippedExistingConditions = new LinkedList<Function>();
 			CQIE strippedCurrentMapping = getStrippedMapping(currentMapping, strippedExistingConditions);
 
 			if (!cqc1.isContainedIn(strippedCurrentMapping))
@@ -197,11 +197,11 @@ public class TMappingProcessor implements Serializable {
 				if (strippedCurrentMapping.getBody().size() == 1) {
 					mgu = Unifier.getMGU(strippedCurrentMapping.getBody().get(0), strippedNewMapping.getBody().get(0));
 				}			
-				Atom newconditions = mergeConditions(strippedNewConditions);
-				Atom existingconditions = mergeConditions(strippedExistingConditions);
+				Function newconditions = mergeConditions(strippedNewConditions);
+				Function existingconditions = mergeConditions(strippedExistingConditions);
 				NewLiteral newconditionsTerm = fac.getFunctionalTerm(newconditions.getPredicate(), newconditions.getTerms());
 				NewLiteral existingconditionsTerm = fac.getFunctionalTerm(existingconditions.getPredicate(), existingconditions.getTerms());
-				Atom orAtom = fac.getORAtom(existingconditionsTerm, newconditionsTerm);
+				Function orAtom = fac.getORAtom(existingconditionsTerm, newconditionsTerm);
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
 				newmapping = strippedCurrentMapping;
@@ -223,16 +223,16 @@ public class TMappingProcessor implements Serializable {
 	 * @param conditions
 	 * @return
 	 */
-	private Atom mergeConditions(List<Atom> conditions) {
+	private Function mergeConditions(List<Function> conditions) {
 		if (conditions.size() == 1)
 			return conditions.get(0);
-		Atom atom0 = conditions.remove(0);
-		Atom atom1 = conditions.remove(0);
+		Function atom0 = conditions.remove(0);
+		Function atom1 = conditions.remove(0);
 		NewLiteral f0 = fac.getFunctionalTerm(atom0.getPredicate(), atom0.getTerms());
 		NewLiteral f1 = fac.getFunctionalTerm(atom1.getPredicate(), atom1.getTerms());
-		Atom nestedAnd = fac.getANDAtom(f0, f1);
+		Function nestedAnd = fac.getANDAtom(f0, f1);
 		while (conditions.size() != 0) {
-			Atom condition = conditions.remove(0);
+			Function condition = conditions.remove(0);
 			NewLiteral term0 = nestedAnd.getTerm(1);
 			NewLiteral term1 = fac.getFunctionalTerm(condition.getPredicate(), condition.getTerms());
 			NewLiteral newAND = fac.getANDFunction(term0, term1);
@@ -254,14 +254,14 @@ public class TMappingProcessor implements Serializable {
 	 * @param strippedConditionsHolder
 	 * @return
 	 */
-	private CQIE getStrippedMapping(CQIE mapping, List<Atom> strippedConditionsHolder) {
+	private CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
 		strippedConditionsHolder.clear();
-		Atom head = mapping.getHead().clone();
-		List<Atom> body = mapping.getBody();
-		List<Atom> newbody = new LinkedList<Atom>();
+		Function head = mapping.getHead().clone();
+		List<Function> body = mapping.getBody();
+		List<Function> newbody = new LinkedList<Function>();
 		for (int i = 0; i < body.size(); i++) {
-			Atom atom = body.get(i);
-			Atom clone = atom.clone();
+			Function atom = body.get(i);
+			Function clone = atom.clone();
 			if (clone.getPredicate() instanceof BuiltinPredicate) {
 				strippedConditionsHolder.add(clone);
 			} else {
@@ -298,11 +298,11 @@ public class TMappingProcessor implements Serializable {
 		for (CQIE currentMapping : originalMappings.getRules()) {
 			int freshVarCount = 0;
 
-			Atom head = currentMapping.getHead().clone();
-			List<Atom> newBody = new LinkedList<Atom>();
-			for (Atom currentAtom : currentMapping.getBody()) {
+			Function head = currentMapping.getHead().clone();
+			List<Function> newBody = new LinkedList<Function>();
+			for (Function currentAtom : currentMapping.getBody()) {
 				if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
-					Atom clone = currentAtom.clone();
+					Function clone = currentAtom.clone();
 					for (int i = 0; i < clone.getTerms().size(); i++) {
 						NewLiteral term = clone.getTerm(i);
 						if (term instanceof Constant) {
@@ -387,8 +387,8 @@ public class TMappingProcessor implements Serializable {
 
 				for (CQIE childmapping : childMappings) {
 					CQIE newmapping = null;
-					Atom newMappingHead = null;
-					Atom oldMappingHead = childmapping.getHead();
+					Function newMappingHead = null;
+					Function oldMappingHead = childmapping.getHead();
 					if (!requiresInverse) {
 						newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
 					} else {
@@ -421,7 +421,7 @@ public class TMappingProcessor implements Serializable {
 				for (CQIE currentNodeMapping : currentNodeMappings) {
 
 					if (equivProperty.isInverse() == currentProperty.isInverse()) {
-						Atom newhead = fac.getAtom(p, currentNodeMapping.getHead().getTerms());
+						Function newhead = fac.getAtom(p, currentNodeMapping.getHead().getTerms());
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 
 						if (optimize)
@@ -431,7 +431,7 @@ public class TMappingProcessor implements Serializable {
 					} else {
 						NewLiteral term0 = currentNodeMapping.getHead().getTerms().get(1);
 						NewLiteral term1 = currentNodeMapping.getHead().getTerms().get(0);
-						Atom newhead = fac.getAtom(p, term0, term1);
+						Function newhead = fac.getAtom(p, term0, term1);
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 						if (optimize)
 							mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
@@ -487,8 +487,8 @@ public class TMappingProcessor implements Serializable {
 
 				for (CQIE childmapping : desendantMappings) {
 					CQIE newmapping = null;
-					Atom newMappingHead = null;
-					Atom oldMappingHead = childmapping.getHead();
+					Function newMappingHead = null;
+					Function oldMappingHead = childmapping.getHead();
 
 					if (isClass) {
 						newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
@@ -539,8 +539,8 @@ public class TMappingProcessor implements Serializable {
 
 						for (CQIE childmapping : desendantMappings) {
 							CQIE newmapping = null;
-							Atom newMappingHead = null;
-							Atom oldMappingHead = childmapping.getHead();
+							Function newMappingHead = null;
+							Function oldMappingHead = childmapping.getHead();
 
 							if (isClass) {
 								newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
@@ -573,7 +573,7 @@ public class TMappingProcessor implements Serializable {
 				}
 
 				for (CQIE currentNodeMapping : currentNodeMappings) {
-					Atom newhead = fac.getAtom(p, currentNodeMapping.getHead().getTerms());
+					Function newhead = fac.getAtom(p, currentNodeMapping.getHead().getTerms());
 					CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 					
 					if (optimize)

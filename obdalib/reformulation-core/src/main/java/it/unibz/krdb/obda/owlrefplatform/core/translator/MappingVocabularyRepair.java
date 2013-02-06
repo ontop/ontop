@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
@@ -79,12 +79,12 @@ public class MappingVocabularyRepair {
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
-			List<Atom> body = targetQuery.getBody();
-			List<Atom> newbody = new LinkedList<Atom>();
+			List<Function> body = targetQuery.getBody();
+			List<Function> newbody = new LinkedList<Function>();
 
-			for (Atom atom : body) {
+			for (Function atom : body) {
 				Predicate p = atom.getPredicate();
-				Atom newatom = null;
+				Function newatom = null;
 				Predicate predicate = urimap.get(p.getName());
 				if (predicate == null) {
 					throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());

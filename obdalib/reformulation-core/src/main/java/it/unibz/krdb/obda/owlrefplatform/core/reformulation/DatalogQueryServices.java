@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -34,7 +34,7 @@ public class DatalogQueryServices {
 
 	// to be taken from it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder
 	
-	private static Atom getFreshAtom(Atom a, String suffix) {
+	private static Function getFreshAtom(Function a, String suffix) {
 		List<NewLiteral> termscopy = new ArrayList<NewLiteral>(a.getArity());
 		
 		for (NewLiteral t : a.getTerms()) {
@@ -66,12 +66,12 @@ public class DatalogQueryServices {
 			CQIE query = queue.poll();
 			//log.debug("QUEUE SIZE: " + queue.size() + " QUERY " + query);
 				
-			List<Atom> body = query.getBody();
+			List<Function> body = query.getBody();
 			int chosenAtomIdx = 0;
 			List<CQIE> chosenDefinitions = null;
-			ListIterator<Atom> bodyIterator = body.listIterator();
+			ListIterator<Function> bodyIterator = body.listIterator();
 			while (bodyIterator.hasNext()) {
-				Atom currentAtom = bodyIterator.next(); // body.get(i);	
+				Function currentAtom = bodyIterator.next(); // body.get(i);	
 
 				List<CQIE> definitions = defs.getRules(currentAtom.getPredicate());
 				if ((definitions != null) && (definitions.size() != 0)) {
@@ -98,9 +98,9 @@ public class DatalogQueryServices {
 																	query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
-						List<Atom> newbody = newquery.getBody();
+						List<Function> newbody = newquery.getBody();
 						newbody.remove(chosenAtomIdx);
-						for (Atom a : rule.getBody())   
+						for (Function a : rule.getBody())   
 							newbody.add(getFreshAtom(a, suffix));
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
@@ -150,9 +150,9 @@ public class DatalogQueryServices {
 		do {
 			replacedEQ = false;
 		
-			Iterator<Atom> i = q.getBody().iterator(); 
+			Iterator<Function> i = q.getBody().iterator(); 
 			while (i.hasNext()) { 
-				Atom a = i.next();
+				Function a = i.next();
 				if (a.getPredicate().equals(OBDAVocabulary.EQ)) {
 					Map<Variable, NewLiteral> substituition = new HashMap<Variable, NewLiteral>(1);
 					NewLiteral t0 = a.getTerm(0); 
@@ -189,9 +189,9 @@ public class DatalogQueryServices {
 	// replace all existentially quantified variables that occur once with _
 	//
 	
-	private static void makeSingleOccurrencesAnonymous(List<Atom> body, List<NewLiteral> freeVariables) {
-		Map<NewLiteral, Atom> occurrences = new HashMap<NewLiteral, Atom>();
-		for (Atom a : body)
+	private static void makeSingleOccurrencesAnonymous(List<Function> body, List<NewLiteral> freeVariables) {
+		Map<NewLiteral, Function> occurrences = new HashMap<NewLiteral, Function>();
+		for (Function a : body)
 			for (NewLiteral t : a.getTerms())
 				if ((t instanceof Variable) && !freeVariables.contains(t))
 					if (occurrences.containsKey(t))
@@ -199,7 +199,7 @@ public class DatalogQueryServices {
 					else
 						occurrences.put(t, a);
 		
-		for (Map.Entry<NewLiteral, Atom> e : occurrences.entrySet()) 
+		for (Map.Entry<NewLiteral, Function> e : occurrences.entrySet()) 
 			if (e.getValue() != null) {
 				ListIterator<NewLiteral> i = e.getValue().getTerms().listIterator();
 				while (i.hasNext()) {
@@ -210,11 +210,11 @@ public class DatalogQueryServices {
 //				((PredicateAtomImpl)e.getValue()).listChanged();
 		}
 		
-		Iterator<Atom> i = body.iterator();
+		Iterator<Function> i = body.iterator();
 		while (i.hasNext()) {
-			Atom a = i.next();
+			Function a = i.next();
 			boolean found = false;
-			for (Atom aa : body)
+			for (Function aa : body)
 				if ((a != aa) && (a.getPredicate().equals(aa.getPredicate()))) {
 					// ************
 					// a.equals(aa) would be good but does not work, why?

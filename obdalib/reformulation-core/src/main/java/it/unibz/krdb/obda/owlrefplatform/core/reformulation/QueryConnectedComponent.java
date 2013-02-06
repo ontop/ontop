@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
@@ -97,7 +97,7 @@ public class QueryConnectedComponent {
 		Map<TermPair, Edge> pairs = new HashMap<TermPair, Edge>();
 		Map<NewLiteral, Loop> allLoops = new HashMap<NewLiteral, Loop>();
 		
-		for (Atom a: cqie.getBody()) {
+		for (Function a: cqie.getBody()) {
 			NewLiteral t0 = a.getTerm(0);				
 			if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 				NewLiteral t1 = a.getTerm(1);
@@ -263,20 +263,20 @@ public class QueryConnectedComponent {
 	
 	static class Loop {
 		private final NewLiteral term;
-		private Collection<Atom> atoms;
+		private Collection<Function> atoms;
 		private final boolean isExistentialVariable;
 		
 		public Loop(NewLiteral term, boolean isExistentialVariable) {
 			this.term = term;
 			this.isExistentialVariable = isExistentialVariable;
-			this.atoms = new ArrayList<Atom>(10);
+			this.atoms = new ArrayList<Function>(10);
 		}
 		
 		public NewLiteral getTerm() {
 			return term;
 		}
 		
-		public Collection<Atom> getAtoms() {
+		public Collection<Function> getAtoms() {
 			return atoms;
 		}
 		
@@ -314,10 +314,10 @@ public class QueryConnectedComponent {
 	
 	static class Edge {
 		private final Loop l0, l1;
-		private Collection<Atom> bAtoms;
+		private Collection<Function> bAtoms;
 		
 		public Edge(Loop l0, Loop l1) {
-			this.bAtoms = new ArrayList<Atom>(10);
+			this.bAtoms = new ArrayList<Function>(10);
 			this.l0 = l0;
 			this.l1 = l1;
 		}
@@ -338,20 +338,20 @@ public class QueryConnectedComponent {
 			return l1.term;
 		}
 		
-		public Collection<Atom> getAtoms0() {
+		public Collection<Function> getAtoms0() {
 			return l0.atoms;
 		}
 		
-		public Collection<Atom> getAtoms1() {
+		public Collection<Function> getAtoms1() {
 			return l1.atoms;
 		}
 
-		public Collection<Atom> getBAtoms() {
+		public Collection<Function> getBAtoms() {
 			return bAtoms;
 		}
 		
-		public List<Atom> getAtoms() {
-			List<Atom> extAtoms = new ArrayList<Atom>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
+		public List<Function> getAtoms() {
+			List<Function> extAtoms = new ArrayList<Function>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
 			extAtoms.addAll(bAtoms);
 			extAtoms.addAll(l0.atoms);
 			extAtoms.addAll(l1.atoms);

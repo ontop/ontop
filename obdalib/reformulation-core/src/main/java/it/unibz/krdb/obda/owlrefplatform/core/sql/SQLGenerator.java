@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.sql;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -711,7 +711,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 	
 	// private Set<Variable> getMandatoryColumnsOnJoinsAndLeftJoinsRecursively(
-	// Atom atom) {
+	// Function atom) {
 	// if (atom.isDataFunction()) {
 	// return atom.getReferencedVariables();
 	// } else if (atom.isBooleanFunction())
@@ -1361,11 +1361,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		boolean isEmpty = false;
 
 		public QueryAliasIndex(CQIE query) {
-			List<Atom> body = query.getBody();
+			List<Function> body = query.getBody();
 			generateViews(body);
 		}
 
-		private void generateViews(List<Atom> atoms) {
+		private void generateViews(List<Function> atoms) {
 			for (Function atom : atoms) {
 				/*
 				 * Thios wil call recursively if necessary

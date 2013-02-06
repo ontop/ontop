@@ -66,7 +66,7 @@ public class MappingDataTypeRepair {
 		List<CQIE> mappingRules = mappingDatalog.getRules();
 		for (CQIE rule : mappingRules) {
 			prepareIndex(rule);
-			Atom atom = rule.getHead();
+			Function atom = rule.getHead();
 			Predicate predicate = atom.getPredicate();
 			if (!isDataProperty(predicate)) {
 				continue;
@@ -117,7 +117,7 @@ public class MappingDataTypeRepair {
 			throw new OBDAException("Unknown term in head");
 		}
 		Object[] o = list.get(0);
-		Atom atom = (Atom) o[0];
+		Function atom = (Function) o[0];
 		Integer pos = (Integer) o[1];
 
 		Predicate functionSymbol = atom.getPredicate();
@@ -131,10 +131,10 @@ public class MappingDataTypeRepair {
 
 	private void prepareIndex(CQIE rule) {
 		termOccurenceIndex = new HashMap<String, List<Object[]>>();
-		List<Atom> body = rule.getBody();
-		Iterator<Atom> it = body.iterator();
+		List<Function> body = rule.getBody();
+		Iterator<Function> it = body.iterator();
 		while (it.hasNext()) {
-			Atom a = (Atom) it.next();
+			Function a = (Function) it.next();
 			List<NewLiteral> terms = a.getTerms();
 			int i = 1; // position index
 			for (NewLiteral t : terms) {

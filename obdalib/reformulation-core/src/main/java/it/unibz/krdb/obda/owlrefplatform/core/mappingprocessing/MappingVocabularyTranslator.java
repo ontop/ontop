@@ -51,12 +51,12 @@ public class MappingVocabularyTranslator {
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
-			List<Atom> body = targetQuery.getBody();
-			List<Atom> newbody = new LinkedList<Atom>();
+			List<Function> body = targetQuery.getBody();
+			List<Function> newbody = new LinkedList<Function>();
 
-			for (Atom atom : body) {
+			for (Function atom : body) {
 				Predicate p = atom.getPredicate();
-				Atom newatom = null;
+				Function newatom = null;
 				if (p.getArity() == 1) {
 //					Description description = fac.createClass(p);
 					Description equivalent = equivalencesMap.get(p);

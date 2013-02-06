@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -101,7 +101,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 		for (CQIE mappingrule : unfoldingProgram.getRules()) {
-			Atom head = mappingrule.getHead();
+			Function head = mappingrule.getHead();
 
 			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
 			if (rules == null) {
@@ -113,7 +113,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/*
 			 * Collecting the predicates that appear in the body of rules.
 			 */
-			for (Atom atom : mappingrule.getBody()) {
+			for (Function atom : mappingrule.getBody()) {
 				allPredicates.addAll(getPredicates(atom));
 			}
 
@@ -132,7 +132,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	// private void collectPrimaryKeyData() {
 	// for (CQIE mapping : unfoldingProgram.getRules()) {
-	// for (Atom newatom : mapping.getBody()) {
+	// for (Function newatom : mapping.getBody()) {
 	// Predicate newAtomPredicate = newatom.getPredicate();
 	// if (newAtomPredicate instanceof BooleanOperationPredicate) {
 	// continue;
@@ -272,7 +272,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private DatalogProgram unfoldToDatalog(DatalogProgram inputquery) {
 		HashSet<CQIE> relevantrules = new HashSet<CQIE>();
 		for (CQIE cq : inputquery.getRules()) {
-			for (Atom atom : cq.getBody()) {
+			for (Function atom : cq.getBody()) {
 				for (CQIE rule : unfoldingProgram.getRules(atom
 						.getFunctionSymbol())) {
 					/*
@@ -361,7 +361,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// return partialEvaluations;
 	//
 	// /* Do not unfold operator atoms */
-	// Atom atom = (Atom) currentQuery.getBody().get(pos);
+	// Function atom = (Function) currentQuery.getBody().get(pos);
 	//
 	// // if (atom.getPredicate() instanceof OperationPredicate) {
 	// // currentQuery.getBody().remove(pos);
@@ -406,12 +406,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// * non-distinct queries.
 	// */
 	//
-	// List<Atom> newbody = pev.getBody();
+	// List<Function> newbody = pev.getBody();
 	// int newatomcount = mappingRule.getBody().size();
 	// int oldatoms = newbody.size() - newatomcount - 1;
 	// for (int newatomidx = oldatoms + 1; newatomidx < newbody
 	// .size(); newatomidx++) {
-	// Atom newatom = newbody.get(newatomidx);
+	// Function newatom = newbody.get(newatomidx);
 	// if (newatom.getPredicate() instanceof BooleanOperationPredicate)
 	// continue;
 	//
@@ -445,11 +445,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// * guarantees there wont be any other redundant
 	// * atom.
 	// */
-	// Atom replacement = null;
+	// Function replacement = null;
 	//
 	// Map<Variable, NewLiteral> mgu = null;
 	// for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
-	// Atom tempatom = newbody.get(idx2);
+	// Function tempatom = newbody.get(idx2);
 	//
 	// if (tempatom.getPredicate().equals(
 	// newatom.getPredicate())) {
@@ -497,13 +497,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// * this atom. E.g.,
 	// */
 	//
-	// // Atom replacement = null;
+	// // Function replacement = null;
 	// // Map<Variable,Integer> variableCount =
 	// // pev.getVariableCount();
 	// //
 	// // Map<Variable, Term> mgu = null;
 	// // for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
-	// // Atom tempatom = newbody.get(idx2);
+	// // Function tempatom = newbody.get(idx2);
 	// //
 	// // if
 	// // (tempatom.getPredicate().equals(newatom.getPredicate()))
@@ -585,12 +585,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// */
 	//
 	// // boolean redundant = false;
-	// // List<Atom> body = pev.getBody();
+	// // List<Function> body = pev.getBody();
 	// // Map<Variable, Term> mgu = null;
 	// // for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
 	// //
-	// // Atom atom2 = body.get(idx2);
-	// // Atom frozenAtom = atom2.clone();
+	// // Function atom2 = body.get(idx2);
+	// // Function frozenAtom = atom2.clone();
 	// // CQCUtilities.getCanonicalAtom(frozenAtom, 1, new
 	// // HashMap<Variable, Term>());
 	// // if (Unifier.getMGU(frozenAtom, newatom) != null) {
@@ -631,7 +631,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	private void unfoldNestedJoin(CQIE currentQuery) {
 		for (int atomIdx = 0; atomIdx < currentQuery.getBody().size(); atomIdx++) {
-			Atom function = currentQuery.getBody().get(atomIdx);
+			Function function = currentQuery.getBody().get(atomIdx);
 			/*
 			 * Unfolding the Join atom
 			 */
@@ -642,7 +642,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				continue;
 
 			/* Found a join, removing the Join term and assimilating its terms */
-			List<Atom> body = currentQuery.getBody();
+			List<Function> body = currentQuery.getBody();
 			body.remove(atomIdx);
 			for (int subtermidx = function.getTerms().size() - 1; subtermidx >= 0; subtermidx--) {
 				NewLiteral atom = function.getTerm(subtermidx);
@@ -771,12 +771,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// * non-distinct queries.
 	// */
 	//
-	// List<Atom> newbody = pev.getBody();
+	// List<Function> newbody = pev.getBody();
 	// int newatomcount = mappingRule.getBody().size();
 	// int oldatoms = newbody.size() - newatomcount - 1;
 	// for (int newatomidx = oldatoms + 1; newatomidx < newbody
 	// .size(); newatomidx++) {
-	// Atom newatom = newbody.get(newatomidx);
+	// Function newatom = newbody.get(newatomidx);
 	// if (newatom.getPredicate() instanceof BooleanOperationPredicate)
 	// continue;
 	//
@@ -810,11 +810,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// * guarantees there wont be any other redundant
 	// * atom.
 	// */
-	// Atom replacement = null;
+	// Function replacement = null;
 	//
 	// Map<Variable, NewLiteral> mgu = null;
 	// for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
-	// Atom tempatom = newbody.get(idx2);
+	// Function tempatom = newbody.get(idx2);
 	//
 	// if (tempatom.getPredicate().equals(
 	// newatom.getPredicate())) {
@@ -862,13 +862,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// * this atom. E.g.,
 	// */
 	//
-	// // Atom replacement = null;
+	// // Function replacement = null;
 	// // Map<Variable,Integer> variableCount =
 	// // pev.getVariableCount();
 	// //
 	// // Map<Variable, Term> mgu = null;
 	// // for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
-	// // Atom tempatom = newbody.get(idx2);
+	// // Function tempatom = newbody.get(idx2);
 	// //
 	// // if
 	// // (tempatom.getPredicate().equals(newatom.getPredicate()))
@@ -950,12 +950,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// */
 	//
 	// // boolean redundant = false;
-	// // List<Atom> body = pev.getBody();
+	// // List<Function> body = pev.getBody();
 	// // Map<Variable, Term> mgu = null;
 	// // for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
 	// //
-	// // Atom atom2 = body.get(idx2);
-	// // Atom frozenAtom = atom2.clone();
+	// // Function atom2 = body.get(idx2);
+	// // Function frozenAtom = atom2.clone();
 	// // CQCUtilities.getCanonicalAtom(frozenAtom, 1, new
 	// // HashMap<Variable, Term>());
 	// // if (Unifier.getMGU(frozenAtom, newatom) != null) {
@@ -1064,7 +1064,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	public static CQIE getFreshRule(CQIE rule, int suffix) {
 		// This method doesn't support nested functional terms
 		CQIE freshRule = rule.clone();
-		Atom head = freshRule.getHead();
+		Function head = freshRule.getHead();
 		List<NewLiteral> headTerms = head.getTerms();
 		for (int i = 0; i < headTerms.size(); i++) {
 			NewLiteral term = headTerms.get(i);
@@ -1073,10 +1073,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				headTerms.set(i, newTerm);
 		}
 
-		List<Atom> body = freshRule.getBody();
-		for (Atom atom : body) {
+		List<Function> body = freshRule.getBody();
+		for (Function atom : body) {
 
-			List<NewLiteral> atomTerms = ((Atom) atom).getTerms();
+			List<NewLiteral> atomTerms = ((Function) atom).getTerms();
 			for (int i = 0; i < atomTerms.size(); i++) {
 				NewLiteral term = atomTerms.get(i);
 				NewLiteral newTerm = getFreshTerm(term, suffix);
@@ -1148,9 +1148,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			Stack<Integer> termidx = new Stack<Integer>();
 
-			List<Atom> currentTerms = rule.getBody();
+			List<Function> currentTerms = rule.getBody();
 			List<NewLiteral> tempList = new LinkedList<NewLiteral>();
-			for (Atom a : currentTerms) {
+			for (Function a : currentTerms) {
 				tempList.add(a);
 			}
 
@@ -1323,7 +1323,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			Iterator<CQIE> candiateIterator = candidateMatches.iterator();
 			while (candiateIterator.hasNext()) {
 				CQIE candidate = candiateIterator.next();
-				Atom head = candidate.getHead();
+				Function head = candidate.getHead();
 				if (emptynessIndex.isEmpty(head))
 					candiateIterator.remove();
 			}
@@ -1351,7 +1351,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			CQIE partialEvalution = rule.clone();
 			/*
-			 * locating the list that contains the current Atom (either body or
+			 * locating the list that contains the current Function (either body or
 			 * inner term) and replacing the current atom, with the body of the
 			 * matching rule.
 			 */

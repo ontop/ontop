@@ -7,7 +7,7 @@
   <dependencySets>
     <dependencySet>
       <unpack>false</unpack>
-      <scope>runtime</scope>
+      <scope>compile</scope>
     </dependencySet>
   </dependencySets>
   <fileSets>

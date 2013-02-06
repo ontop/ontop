@@ -51,7 +51,7 @@ public class MappingViewManager implements ViewManager {
 	private static final OBDADataFactory							predFactory					= OBDADataFactoryImpl.getInstance();
 	private Map<IRI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
-	private Atom							head						= null;
+	private Function							head						= null;
 
 	public MappingViewManager(Collection<OBDAMappingAxiom> mappings) {
 		this.mappings.addAll(mappings);
@@ -68,7 +68,7 @@ public class MappingViewManager implements ViewManager {
 	}
 
 	@Override
-	public String getTranslatedName(Atom atom) throws Exception {
+	public String getTranslatedName(Function atom) throws Exception {
 		throw new Exception("Method is not implemented for the MappingViewManager");
 	}
 
@@ -104,11 +104,11 @@ public class MappingViewManager implements ViewManager {
 			if (!usedSQL.contains(sql.trim())) {
 				String name = auxpreduri + "Aux" + i;
 				CQIE cq = (CQIEImpl) ax.getTargetQuery();
-				List<Atom> atoms = cq.getBody();
-				Iterator<Atom> ait = atoms.iterator();
+				List<Function> atoms = cq.getBody();
+				Iterator<Function> ait = atoms.iterator();
 				List<String> sqlVars = new Vector<String>();
 				while (ait.hasNext()) {
-					Atom a = (Atom) ait.next();
+					Function a = (Function) ait.next();
 					List<NewLiteral> terms = a.getTerms();
 					Iterator<NewLiteral> tit = terms.iterator();
 					while (tit.hasNext()) {
@@ -201,8 +201,8 @@ public class MappingViewManager implements ViewManager {
 	 * initial sparql query. E.g. if the user does "Select $a $b $c where ...."
 	 * we will name the columns in the answer also a, b, c.
 	 */
-	public void storeOrgQueryHead(Atom head) {
-		this.head = (Atom) head.clone();
+	public void storeOrgQueryHead(Function head) {
+		this.head = (Function) head.clone();
 	}
 
 	/**

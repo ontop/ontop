@@ -149,7 +149,7 @@ public class QueryFolding {
 
 		IntersectionOfConceptSets rootType = new IntersectionOfConceptSets();
 
-		Set<Atom> rootAtoms = new HashSet<Atom>();
+		Set<Function> rootAtoms = new HashSet<Function>();
 		for (Loop root : roots) {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable

@@ -609,6 +609,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel
 					.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
+			log.debug("Original mapping size: {}",
+					 unfoldingProgram.getRules().size());
 
 			log.debug("Original mapping size: {}", unfoldingProgram.getRules().size());
 
@@ -696,8 +698,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			final long endTime = System.currentTimeMillis();
 
+			System.out.println("TMapping size: "
+					+ unfoldingProgram.getRules().size());
+			System.out.println("TMapping processing time: "
+					+ (endTime - startTime) + " ms");
+
 			log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
 			log.debug("TMapping processing time: {} ms", (endTime - startTime));
+
 
 			/*
 			 * Adding data typing on the mapping axioms.
@@ -882,7 +890,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator();
 			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
-				rewriter = new TreeRedReformulator();
+				rewriter = new TreeWitnessRewriter();
 			} else if (QuestConstants.TW.equals(reformulationTechnique)) {
 				rewriter = new TreeWitnessRewriter();
 			} else {
@@ -898,10 +906,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			saturatedSigma.saturate();
 
 			List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
-			if (optimizeMap)
-				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
-			else
-				sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
+			sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
@@ -957,7 +962,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			List<CQIE> sigmaRules) {
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
 		for (CQIE rule : sigmaRules) {
-			Atom atom = rule.getBody().get(0); // The rule always has one body atom
+			Atom atom = rule.getBody().get(0); // The rule always has one body
+												// atom
 			Predicate predicate = atom.getPredicate();
 			List<CQIE> rules = sigmaRulesMap.get(predicate);
 			if (rules == null) {

@@ -131,10 +131,10 @@ public class TreeRedReformulator implements QueryRewriter {
 			for (CQIE oldquery : oldqueries) {
 
 				HashSet<SubDescriptionAxiom> relevantInclusions = new HashSet<SubDescriptionAxiom>(1000);
-				for (Atom atom : oldquery.getBody()) {
-					Set<SubDescriptionAxiom> inclusions = ontology.getByIncludingNoExist(((Atom) atom).getPredicate());
+				for (Function atom : oldquery.getBody()) {
+					Set<SubDescriptionAxiom> inclusions = ontology.getByIncludingNoExist(((Function) atom).getPredicate());
 					if (inclusions != null)
-						relevantInclusions.addAll(ontology.getByIncludingNoExist(((Atom) atom).getPredicate()));
+						relevantInclusions.addAll(ontology.getByIncludingNoExist(((Function) atom).getPredicate()));
 				}
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
@@ -164,14 +164,14 @@ public class TreeRedReformulator implements QueryRewriter {
 
 			HashSet<Predicate> predicates = new HashSet<Predicate>(1000);
 			for (CQIE oldquery : oldqueries) {
-				for (Atom atom : oldquery.getBody()) {
-					predicates.add(((Atom) atom).getPredicate());
+				for (Function atom : oldquery.getBody()) {
+					predicates.add(((Function) atom).getPredicate());
 				}
 			}
 
 			for (CQIE oldquery : newqueriesbyPI) {
-				for (Atom atom : oldquery.getBody()) {
-					predicates.add(((Atom) atom).getPredicate());
+				for (Function atom : oldquery.getBody()) {
+					predicates.add(((Function) atom).getPredicate());
 				}
 			}
 
@@ -299,8 +299,8 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	private boolean containsPredicate(CQIE q, Predicate predicate) {
-		for (Atom atom : q.getBody()) {
-			if (((Atom) atom).getPredicate().equals(predicate))
+		for (Function atom : q.getBody()) {
+			if (((Function) atom).getPredicate().equals(predicate))
 				return true;
 		}
 		return q.getHead().getPredicate().equals(predicate);
@@ -318,9 +318,9 @@ public class TreeRedReformulator implements QueryRewriter {
 	private List<CQIE> cleanAuxiliaryQueries(List<CQIE> originalQueries) {
 		List<CQIE> newQueries = new ArrayList<CQIE>((int) (originalQueries.size() * 1.5));
 		for (CQIE query : originalQueries) {
-			List<Atom> body = query.getBody();
+			List<Function> body = query.getBody();
 			boolean auxiliary = false;
-			for (Atom atom : body) {
+			for (Function atom : body) {
 				String name = atom.getPredicate().getName().toString();
 				if (name.length() < OntologyImpl.AUXROLEURI.length())
 					continue;
@@ -347,9 +347,9 @@ public class TreeRedReformulator implements QueryRewriter {
 	private List<CQIE> cleanEmptyQueries(List<CQIE> originalQueries) {
 		List<CQIE> newQueries = new ArrayList<CQIE>((int) (originalQueries.size() * 1.5));
 		for (CQIE query : originalQueries) {
-			List<Atom> body = query.getBody();
+			List<Function> body = query.getBody();
 			boolean empty = false;
-			for (Atom atom : body) {
+			for (Function atom : body) {
 				Predicate predicate = atom.getPredicate();
 				for (Predicate datatype : OBDAVocabulary.QUEST_DATATYPE_PREDICATES) {
 					if (predicate == datatype) {
