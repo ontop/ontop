@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.partialEvaluation.test;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -60,8 +60,8 @@ public class ThetaApplicationTest extends TestCase {
 		terms1.add(t3);
 		terms1.add(ot);
 		terms1.add(ot2);
-		Atom atom1 = predFactory.getAtom(pred1, terms1);
-		List<Atom> body = new Vector<Atom>();
+		Function atom1 = predFactory.getAtom(pred1, terms1);
+		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
 		NewLiteral t7 = termFactory.getVariable("x");
@@ -79,7 +79,7 @@ public class ThetaApplicationTest extends TestCase {
 		Predicate head = predFactory.getPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(t10);
-		Atom h = predFactory.getAtom(head, terms2);
+		Function h = predFactory.getAtom(head, terms2);
 
 		CQIE query = predFactory.getCQIE(h, body);
 
@@ -95,10 +95,10 @@ public class ThetaApplicationTest extends TestCase {
 		Unifier unifier = new Unifier();
 		CQIE newquery = unifier.applyUnifier(query, mgu);
 
-		List<Atom> newbody = newquery.getBody();
+		List<Function> newbody = newquery.getBody();
 		assertEquals(1, newbody.size());
 
-		Atom a = (Atom) newbody.get(0);
+		Function a = (Function) newbody.get(0);
 		List<NewLiteral> terms = a.getTerms();
 		assertEquals(5, terms.size());
 
@@ -148,7 +148,7 @@ public class ThetaApplicationTest extends TestCase {
 		// terms3.add(qt3);
 		// AtomImpl a3 = new AtomImpl(pred3, terms3);
 		//
-		// LinkedList<Atom> body = new LinkedList<Atom>();
+		// LinkedList<Function> body = new LinkedList<Function>();
 		//
 		// Predicate predh = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
 		// List<Term> termsh = new Vector<Term>();
@@ -182,12 +182,12 @@ public class ThetaApplicationTest extends TestCase {
 		// List<Term> terms3 = new Vector<Term>();
 		// terms3.add(ht);
 		// AtomImpl head = new AtomImpl(pred3, terms3);
-		// Vector<Atom> body = new Vector<Atom>();
+		// Vector<Function> body = new Vector<Function>();
 		// body.add(atom1);
 		// body.add(atom2);
 		// CQIE q = new CQIEImpl(head, body, false);
 		//
-		// Atom fresh = cmu.getFreshAuxPredicatAtom(ax, q, 1);
+		// Function fresh = cmu.getFreshAuxPredicatAtom(ax, q, 1);
 		// List<Term> terms = fresh.getTerms();
 		// assertEquals(3, terms.size());
 		//
@@ -202,7 +202,7 @@ public class ThetaApplicationTest extends TestCase {
 		// body.remove(0);
 		// body.add(0,fresh);
 		//
-		// Atom fresh2 = cmu.getFreshAuxPredicatAtom(ax, q, 2);
+		// Function fresh2 = cmu.getFreshAuxPredicatAtom(ax, q, 2);
 		// List<Term> termsk = fresh2.getTerms();
 		// assertEquals(3, terms.size());
 		//

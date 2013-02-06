@@ -1,5 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -59,12 +59,12 @@ public class UnificationTest2 extends TestCase {
 		terms4.add(t3.clone());
 		terms4.add(t2.clone());
 
-		Atom a1 = tfac.getAtom(r1, terms1);
-		Atom a2 = tfac.getAtom(r2, terms2);
-		Atom a3 = tfac.getAtom(s, terms3);
-		Atom head = tfac.getAtom(p, terms4);
+		Function a1 = tfac.getAtom(r1, terms1);
+		Function a2 = tfac.getAtom(r2, terms2);
+		Function a3 = tfac.getAtom(s, terms3);
+		Function head = tfac.getAtom(p, terms4);
 
-		List<Atom> body = new Vector<Atom>();
+		List<Function> body = new Vector<Function>();
 		body.add(a1);
 		body.add(a2);
 		body.add(a3);
@@ -79,16 +79,16 @@ public class UnificationTest2 extends TestCase {
 		assertEquals(2, aux.getRules().size());
 		// note: aux.getRules().get(0) should be the original one
 		CQIE cq = aux.getRules().get(1);
-		List<Atom> newbody = cq.getBody();
+		List<Function> newbody = cq.getBody();
 
 		assertEquals(2, newbody.size());
-		Atom at1 = newbody.get(0);
-		Atom at2 = newbody.get(1);
+		Function at1 = newbody.get(0);
+		Function at2 = newbody.get(1);
 
-		NewLiteral term1 = ((Atom) at1).getTerms().get(0);
-		NewLiteral term2 = ((Atom) at1).getTerms().get(1);
-		NewLiteral term3 = ((Atom) at2).getTerms().get(0);
-		NewLiteral term4 = ((Atom) at2).getTerms().get(1);
+		NewLiteral term1 = ((Function) at1).getTerms().get(0);
+		NewLiteral term2 = ((Function) at1).getTerms().get(1);
+		NewLiteral term3 = ((Function) at2).getTerms().get(0);
+		NewLiteral term4 = ((Function) at2).getTerms().get(1);
 
 		assertEquals("x", ((Variable) term1).getName());
 		assertEquals("y", ((Variable) term2).getName());

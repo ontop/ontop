@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -53,28 +53,28 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		List<NewLiteral> terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(y);
-		Atom a1 = tfac.getAtom(r, terms1);
+		Function a1 = tfac.getAtom(r, terms1);
 
 		List<NewLiteral> terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(z);
-		Atom a2 = tfac.getAtom(r, terms2);
+		Function a2 = tfac.getAtom(r, terms2);
 
 		List<NewLiteral> terms3 = new LinkedList<NewLiteral>();
 		terms3.add(y);
 		terms3.add(m);
-		Atom a3 = tfac.getAtom(s, terms3);
+		Function a3 = tfac.getAtom(s, terms3);
 
 		List<NewLiteral> terms4 = new LinkedList<NewLiteral>();
 		terms4.add(z);
 		terms4.add(m);
-		Atom a4 = tfac.getAtom(s, terms4);
+		Function a4 = tfac.getAtom(s, terms4);
 
 		List<NewLiteral> termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
-		Atom head = tfac.getAtom(q, termshead);
+		Function head = tfac.getAtom(q, termshead);
 
-		LinkedList<Atom> body = new LinkedList<Atom>();
+		LinkedList<Function> body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 		body.add(a3);
@@ -92,7 +92,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		terms2.add(u2);
 		a2 = tfac.getAtom(r, terms2);
 
-		body = new LinkedList<Atom>();
+		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
@@ -112,7 +112,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		terms2.add(x);
 		a2 = tfac.getAtom(r, terms2);
 
-		body = new LinkedList<Atom>();
+		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
@@ -132,7 +132,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		terms2.add(y);
 		a2 = tfac.getAtom(r, terms2);
 
-		body = new LinkedList<Atom>();
+		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
@@ -152,7 +152,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		terms2.add(x);
 		a2 = tfac.getAtom(r, terms2);
 
-		body = new LinkedList<Atom>();
+		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 

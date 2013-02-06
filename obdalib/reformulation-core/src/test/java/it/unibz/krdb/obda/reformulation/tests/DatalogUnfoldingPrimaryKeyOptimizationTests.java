@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -47,13 +47,13 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 		unfoldingProgram = fac.getDatalogProgram();
 
-		Atom head = fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
+		Function head = fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
 		List<NewLiteral> bodyTerms = new LinkedList<NewLiteral>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
 		bodyTerms.add(fac.getVariable("m"));
-		Atom body = fac.getAtom(fac.getPredicate("TABLE", 4), bodyTerms);
+		Function body = fac.getAtom(fac.getPredicate("TABLE", 4), bodyTerms);
 		CQIE rule = fac.getCQIE(head, body);
 		unfoldingProgram.appendRule(rule);
 
@@ -118,8 +118,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		headterms.add(fac.getVariable("o"));
 		headterms.add(fac.getVariable("p"));
 
-		Atom head = fac.getAtom(fac.getPredicate("q", 4), headterms);
-		List<Atom> body = new LinkedList<Atom>();
+		Function head = fac.getAtom(fac.getPredicate("q", 4), headterms);
+		List<Function> body = new LinkedList<Function>();
 		body.add(fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("m"), fac.getVariable("n")));
 		body.add(fac.getAtom(fac.getDataPropertyPredicate("lastname"), fac.getVariable("m"), fac.getVariable("o")));
 		body.add(fac.getAtom(fac.getDataPropertyPredicate("id"), fac.getVariable("m"), fac.getVariable("p")));
@@ -131,7 +131,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 		int atomcount = 0;
 		for (CQIE result: output.getRules()) {
-			for (Atom atom: result.getBody()) {
+			for (Function atom: result.getBody()) {
 				atomcount +=1;
 			}
 		}
@@ -147,7 +147,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		headterms.add(fac.getVariable("o"));
 
 		head = fac.getAtom(fac.getPredicate("q", 4), headterms);
-		body = new LinkedList<Atom>();
+		body = new LinkedList<Function>();
 		body.add(fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("s1"), fac.getVariable("x")));
 		body.add(fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("s2"), fac.getVariable("m")));
 		body.add(fac.getAtom(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s1"), fac.getVariable("y")));
@@ -160,7 +160,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 		atomcount = 0;
 		for (CQIE result: output.getRules()) {
-			for (Atom atom: result.getBody()) {
+			for (Function atom: result.getBody()) {
 				atomcount +=1;
 			}
 		}

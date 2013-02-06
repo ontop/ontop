@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDALibConstants;
@@ -97,12 +97,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Atom head = fac.getAtom(q, headTerms);
+		Function head = fac.getAtom(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
-		List<Atom> body = new LinkedList<Atom>();
+		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
 		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
@@ -197,12 +197,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Atom head = fac.getAtom(q, headTerms);
+		Function head = fac.getAtom(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
-		List<Atom> body = new LinkedList<Atom>();
+		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
 		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
@@ -305,12 +305,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Atom head = fac.getAtom(q, headTerms);
+		Function head = fac.getAtom(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
-		List<Atom> body = new LinkedList<Atom>();
+		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
 		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
@@ -485,12 +485,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Atom head = fac.getAtom(q, headTerms);
+		Function head = fac.getAtom(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
-		List<Atom> body = new LinkedList<Atom>();
+		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
 		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
@@ -575,12 +575,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Atom head = fac.getAtom(q, headTerms);
+		Function head = fac.getAtom(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
-//		List<Atom> body = new LinkedList<Atom>();
+//		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
 		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
