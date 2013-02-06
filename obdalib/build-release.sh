@@ -1,21 +1,21 @@
 #!/bin/sh
 
-export JDBC_PLUGINS_PATH=/Applications/Protege_4.1-obdalib-1.7-alpha2/plugins
-#export PROTEGE_COPY_PATH=
-#export PROTEGE_COPY_FILENAME=
-#export JETTY_COPY_PATH=
-#export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
-#export OPENRDF_SESAME_PATH=
-#export OPENRDF_SESAME_FILENAME=openrdf-sesame
-#export OPENRDF_WORKBENCH_PATH=
-#export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
+export JDBC_PLUGINS_PATH=/home/professors/mislusnys/Downloads/Protege_4.2/plugins
+export PROTEGE_COPY_PATH=/tmp/resources
+export PROTEGE_COPY_FILENAME=Protege_4.2
+export JETTY_COPY_PATH=/tmp/resources
+export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
+export OPENRDF_SESAME_PATH=/tmp/resources
+export OPENRDF_SESAME_FILENAME=openrdf-sesame
+export OPENRDF_WORKBENCH_PATH=/tmp/resources
+export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
 
 export PROTEGE_DIST=ontopPro
 export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export REVISION=2039
+export REVISION=2171
 
 svn update
 mvn clean
@@ -40,6 +40,7 @@ cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.jar $PROTEGE_COPY_FILENAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.prefs.jar $PROTEGE_COPY_FILENAME/plugins/
 
 zip $PROTEGE_COPY_FILENAME.zip $PROTEGE_COPY_FILENAME/plugins/*
+mv $PROTEGE_COPY_FILENAME.zip $PROTEGE_COPY_FILENAME-ontop-1.7-alpha2-b$REVISION.zip
 
 rm -fr $PROTEGE_COPY_FILENAME
 
