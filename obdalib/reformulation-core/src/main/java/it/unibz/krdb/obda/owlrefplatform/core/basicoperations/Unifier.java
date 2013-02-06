@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * variables ie. A(#1,#2)
  */
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -72,9 +72,9 @@ public class Unifier {
 		unifiedQ.getBody().remove(i);
 		unifiedQ.getBody().remove(j - 1);
 
-		Atom atom1 = q.getBody().get(i);
-		Atom atom2 = q.getBody().get(j);
-		Atom newatom = unify((Atom) atom1, (Atom) atom2, mgu);
+		Function atom1 = q.getBody().get(i);
+		Function atom2 = q.getBody().get(j);
+		Function newatom = unify((Function) atom1, (Function) atom2, mgu);
 		unifiedQ.getBody().add(i, newatom);
 
 		return unifiedQ;
@@ -82,7 +82,7 @@ public class Unifier {
 	}
 
 	/***
-	 * Returns a new Atom a, resulting the unification of atoms atom1 and atom2
+	 * Returns a new Function a, resulting the unification of atoms atom1 and atom2
 	 * after with the given unifier. Note that this method takes into account
 	 * that a unifier doesn't include substitutions for instances of
 	 * UndistinguishedVariables.
@@ -97,9 +97,9 @@ public class Unifier {
 	 * @param unifier
 	 * @return
 	 */
-	private static Atom unify(Function atom1, Atom atom2,
+	private static Function unify(Function atom1, Function atom2,
 			Map<Variable, NewLiteral> unifier) {
-		Atom newatom = (Atom) atom1.clone();
+		Function newatom = (Function) atom1.clone();
 		for (int i = 0; i < atom1.getTerms().size(); i++) {
 			NewLiteral t1 = atom1.getTerms().get(i);
 			NewLiteral t2 = atom2.getTerms().get(i);
@@ -131,7 +131,7 @@ public class Unifier {
 			newq = q;
 
 		/* applying the unifier to every term in the head */
-		Atom head = newq.getHead();
+		Function head = newq.getHead();
 		applyUnifier(head, unifier);
 		for (Function bodyatom : newq.getBody()) {
 			applyUnifier(bodyatom, unifier);
@@ -158,7 +158,7 @@ public class Unifier {
 	// * @param atom
 	// * @param unifier
 	// */
-	// public static void applyUnifier(Atom atom, Map<Variable, NewLiteral>
+	// public static void applyUnifier(Function atom, Map<Variable, NewLiteral>
 	// unifier) {
 	// applyUnifier(atom.getTerms(), unifier);
 	// }

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -55,16 +55,16 @@ public class CQCUtilities {
 
 	private static OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-	List<Atom> canonicalbody = null;
+	List<Function> canonicalbody = null;
 
-	Atom canonicalhead = null;
+	Function canonicalhead = null;
 
 	Set<Predicate> canonicalpredicates = new HashSet<Predicate>(50);
 
 	/***
 	 * An index of all the facts obtained by freezing this query.
 	 */
-	private Map<Predicate, List<Atom>> factMap = new HashMap<Predicate, List<Atom>>();
+	private Map<Predicate, List<Function>> factMap = new HashMap<Predicate, List<Function>>();
 
 	static Logger log = LoggerFactory.getLogger(CQCUtilities.class);
 
@@ -92,17 +92,17 @@ public class CQCUtilities {
 		this.canonicalQuery = getCanonicalQuery(query);
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
-		factMap = new HashMap<Predicate, List<Atom>>(canonicalbody.size() * 2);
-		for (Atom atom : canonicalbody) {
-			Atom fact = (Atom) atom;
+		factMap = new HashMap<Predicate, List<Function>>(canonicalbody.size() * 2);
+		for (Function atom : canonicalbody) {
+			Function fact = (Function) atom;
 			if (!fact.isDataFunction())
 				continue;
 			
 			Predicate predicate = fact.getPredicate();
 			canonicalpredicates.add(predicate);
-			List<Atom> facts = factMap.get(predicate);
+			List<Function> facts = factMap.get(predicate);
 			if (facts == null) {
-				facts = new LinkedList<Atom>();
+				facts = new LinkedList<Function>();
 				factMap.put(predicate, facts);
 			}
 			facts.add(fact);
@@ -110,22 +110,22 @@ public class CQCUtilities {
 	}
 
 	public CQCUtilities(CQIE query, List<CQIE> rules) {
-		for (Atom b : query.getBody())
+		for (Function b : query.getBody())
 			if (b.isBooleanFunction())
 				return;
 		
 		this.rules = rules;
 		if (rules != null && !rules.isEmpty()) {
-			factMap = new HashMap<Predicate, List<Atom>>();
-			List<Atom> generatedFacts = chaseQuery(query, rules);
+			factMap = new HashMap<Predicate, List<Function>>();
+			List<Function> generatedFacts = chaseQuery(query, rules);
 			
 			// Map the facts
-			for (Atom fact : generatedFacts) {
+			for (Function fact : generatedFacts) {
 				Predicate p = fact.getPredicate();
 				canonicalpredicates.add(p);
-				List<Atom> facts = factMap.get(p);
+				List<Function> facts = factMap.get(p);
 				if (facts == null) {
-					facts = new LinkedList<Atom>();
+					facts = new LinkedList<Function>();
 					factMap.put(p, facts);
 				}
 				facts.add(fact);
@@ -149,23 +149,23 @@ public class CQCUtilities {
 	 */
 	public CQIE chaseQuery(CQIE query, Ontology sigma) {
 		sigma.saturate();
-		Atom head = (Atom) query.getHead();
+		Function head = (Function) query.getHead();
 
-		LinkedHashSet<Atom> body = new LinkedHashSet<Atom>();
+		LinkedHashSet<Function> body = new LinkedHashSet<Function>();
 		body.addAll(query.getBody());
 
-		LinkedHashSet<Atom> newbody = new LinkedHashSet<Atom>();
+		LinkedHashSet<Function> newbody = new LinkedHashSet<Function>();
 		newbody.addAll(query.getBody());
 
 		boolean loop = true;
 		while (loop) {
 			loop = false;
-			for (Atom atom : body) {
+			for (Function atom : body) {
 				if (atom == null) {
 					continue;
 				}
 
-				Atom patom = (Atom) atom;
+				Function patom = (Function) atom;
 				Predicate predicate = atom.getPredicate();
 
 				NewLiteral oldTerm1 = null;
@@ -219,7 +219,7 @@ public class CQCUtilities {
 					NewLiteral newTerm1 = null;
 					NewLiteral newTerm2 = null;
 					Predicate newPredicate = null;
-					Atom newAtom = null;
+					Function newAtom = null;
 
 					if (right instanceof Property) {
 						Property rightRoleDescription = (Property) right;
@@ -288,12 +288,12 @@ public class CQCUtilities {
 			if (body.size() != newbody.size()) {
 				loop = true;
 				body = newbody;
-				newbody = new LinkedHashSet<Atom>();
+				newbody = new LinkedHashSet<Function>();
 				newbody.addAll(body);
 			}
 		}
 
-		LinkedList<Atom> bodylist = new LinkedList<Atom>();
+		LinkedList<Function> bodylist = new LinkedList<Function>();
 		bodylist.addAll(body);
 		CQIE newquery = fac.getCQIE(head, bodylist);
 		newquery.setQueryModifiers(query.getQueryModifiers());
@@ -309,21 +309,21 @@ public class CQCUtilities {
 	 * @param rules
 	 * @return
 	 */
-	public List<Atom> chaseQuery(CQIE query, List<CQIE> rules) {
-		List<Atom> facts = new ArrayList<Atom>();
+	public List<Function> chaseQuery(CQIE query, List<CQIE> rules) {
+		List<Function> facts = new ArrayList<Function>();
 
 		CQIE canonicalQuery = getCanonicalQuery(query);
 		canonicalhead = canonicalQuery.getHead();
 		canonicalbody = canonicalQuery.getBody();
 		
-		for (Atom fact : canonicalbody) {
+		for (Function fact : canonicalbody) {
 			facts.add(fact);
 			for (CQIE rule : rules) {
-				Atom ruleBody = rule.getBody().get(0);
+				Function ruleBody = rule.getBody().get(0);
 				Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
-					Atom ruleHead = rule.getHead();
-					Atom newFact = ruleHead.clone();
+					Function ruleHead = rule.getHead();
+					Function newFact = (Function)ruleHead.clone();
 					Unifier.applyUnifierToGetFact(newFact, theta);
 					facts.add(newFact);
 				}
@@ -347,10 +347,10 @@ public class CQCUtilities {
 		int constantcounter = 1;
 
 		Map<Variable, NewLiteral> substitution = new HashMap<Variable, NewLiteral>(50);
-		Atom head = canonicalquery.getHead();
+		Function head = canonicalquery.getHead();
 		constantcounter = getCanonicalAtom(head, constantcounter, substitution);
 
-		for (Atom atom : canonicalquery.getBody()) {
+		for (Function atom : canonicalquery.getBody()) {
 			constantcounter = getCanonicalAtom(atom, constantcounter, substitution);
 		}
 		return canonicalquery;
@@ -367,8 +367,8 @@ public class CQCUtilities {
 	 *            is needed to provide a numbering to each of the new constants
 	 * @return
 	 */
-	public static int getCanonicalAtom(Atom atom, int constantcounter, Map<Variable, NewLiteral> currentMap) {
-		List<NewLiteral> headterms = ((Atom) atom).getTerms();
+	public static int getCanonicalAtom(Function atom, int constantcounter, Map<Variable, NewLiteral> currentMap) {
+		List<NewLiteral> headterms = ((Function) atom).getTerms();
 		for (int i = 0; i < headterms.size(); i++) {
 			NewLiteral term = headterms.get(i);
 			if (term instanceof Variable) {
@@ -435,8 +435,8 @@ public class CQCUtilities {
 		if (!query.getHead().getFunctionSymbol().equals(canonicalhead.getFunctionSymbol()))
 			return false;
 
-		for (Atom queryatom : query.getBody()) {
-			if (!canonicalpredicates.contains(((Atom) queryatom).getFunctionSymbol())) {
+		for (Function queryatom : query.getBody()) {
+			if (!canonicalpredicates.contains(((Function) queryatom).getFunctionSymbol())) {
 				return false;
 			}
 		}
@@ -453,16 +453,16 @@ public class CQCUtilities {
 	 */
 	private boolean hasAnswerRecursive(CQIE query) {
 
-		List<Atom> body = query.getBody();
+		List<Function> body = query.getBody();
 
 		int atomidx = -1;
-		for (Atom currentAtomTry : body) {
+		for (Function currentAtomTry : body) {
 			atomidx += 1;
-			List<Atom> relevantFacts = factMap.get(currentAtomTry.getPredicate());
+			List<Function> relevantFacts = factMap.get(currentAtomTry.getPredicate());
 			if (relevantFacts == null)
 				return false;
 
-			for (Atom currentGroundAtom : relevantFacts) {
+			for (Function currentGroundAtom : relevantFacts) {
 
 				Map<Variable, NewLiteral> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu == null)
@@ -507,12 +507,12 @@ public class CQCUtilities {
 		while (!querystack.isEmpty()) {
 
 			CQIE currentquery = querystack.pop();
-			List<Atom> body = currentquery.getBody();
+			List<Function> body = currentquery.getBody();
 			int atomidx = lastAttemptIndexStack.pop();
-			Atom currentAtomTry = body.get(atomidx);
+			Function currentAtomTry = body.get(atomidx);
 
 			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
-				Atom currentGroundAtom = (Atom) canonicalbody.get(groundatomidx);
+				Function currentGroundAtom = (Function) canonicalbody.get(groundatomidx);
 
 				Map<Variable, NewLiteral> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu != null) {
@@ -542,11 +542,11 @@ public class CQCUtilities {
 		int maxIdxReached = -1;
 		Stack<CQIE> queryStack = new Stack<CQIE>();
 		CQIE currentQuery = query;
-		List<Atom> currentBody = currentQuery.getBody();
-		Atom currentAtom = null;
+		List<Function> currentBody = currentQuery.getBody();
+		Function currentAtom = null;
 		queryStack.push(null);
 
-		HashMap<Integer, Stack<Atom>> choicesMap = new HashMap<Integer, Stack<Atom>>(bodysize * 2);
+		HashMap<Integer, Stack<Function>> choicesMap = new HashMap<Integer, Stack<Function>>(bodysize * 2);
 
 		if (currentBody.size() == 0)
 			return true;
@@ -563,13 +563,13 @@ public class CQCUtilities {
 			Predicate currentPredicate = currentAtom.getPredicate();
 
 			/* Looking for options for this atom */
-			Stack<Atom> factChoices = choicesMap.get(currentAtomIdx);
+			Stack<Function> factChoices = choicesMap.get(currentAtomIdx);
 			if (factChoices == null) {
 				/*
 				 * we have never reached this atom, setting up the initial list
 				 * of choices from the original fact list.
 				 */
-				factChoices = new Stack<Atom>();
+				factChoices = new Stack<Function>();
 				factChoices.addAll(factMap.get(currentPredicate));
 				choicesMap.put(currentAtomIdx, factChoices);
 			}
@@ -646,11 +646,11 @@ public class CQCUtilities {
 	public static HashSet<CQIE> removeDuplicateAtoms(Collection<CQIE> queries) {
 		HashSet<CQIE> newqueries = new HashSet<CQIE>(queries.size() * 2);
 		for (CQIE cq : queries) {
-			List<Atom> body = cq.getBody();
+			List<Function> body = cq.getBody();
 			for (int i = 0; i < body.size(); i++) {
-				Atom currentAtom = (Atom) body.get(i);
+				Function currentAtom = (Function) body.get(i);
 				for (int j = i + 1; j < body.size(); j++) {
-					Atom comparisonAtom = (Atom) body.get(j);
+					Function comparisonAtom = (Function) body.get(j);
 					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
 						if (currentAtom.equals(comparisonAtom)) {
 							body.remove(j);
@@ -675,9 +675,9 @@ public class CQCUtilities {
 	public static CQIE removeRundantAtoms(CQIE q) {
 		CQIE result = q;
 		for (int i = 0; i < result.getBody().size(); i++) {
-			Atom currentAtom = result.getBody().get(i);
+			Function currentAtom = result.getBody().get(i);
 			for (int j = i + 1; j < result.getBody().size(); j++) {
-				Atom nextAtom = result.getBody().get(j);
+				Function nextAtom = result.getBody().get(j);
 				Map<Variable, NewLiteral> map = Unifier.getMGU(currentAtom, nextAtom);
 				if (map != null && map.isEmpty()) {
 					result = Unifier.unify(result, i, j);
@@ -778,10 +778,10 @@ public class CQCUtilities {
 			return false;
 		}
 
-		// HashSet<Atom> body1 = new HashSet<Atom>(cq1.getBody().size());
+		// HashSet<Function> body1 = new HashSet<Function>(cq1.getBody().size());
 		// body1.addAll(cq1.getBody());
 
-		for (Atom atom : cq2.getBody()) {
+		for (Function atom : cq2.getBody()) {
 			// if (!body1.contains(atom))
 			// return false;
 			if (!cq1.getBody().contains(atom))

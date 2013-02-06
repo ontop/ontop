@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -67,10 +67,10 @@ public class DatalogNormalizer {
 	 */
 	public static CQIE unfoldANDTrees(CQIE query) {
 		CQIE result = query.clone();
-		List<Atom> body = result.getBody();
+		List<Function> body = result.getBody();
 		/* Collecting all necessary conditions */
 		for (int i = 0; i < body.size(); i++) {
-			Atom currentAtom = body.get(i);
+			Function currentAtom = body.get(i);
 			if (currentAtom.getPredicate() == OBDAVocabulary.AND) {
 				body.remove(i);
 				body.addAll(getUnfolderAtomList(currentAtom));
@@ -134,7 +134,7 @@ public class DatalogNormalizer {
 					body.remove(i);
 					for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
 						NewLiteral term = currentAtom.getTerm(j);
-						Atom asAtom = term.asAtom();
+						Function asAtom = term.asAtom();
 						if (!body.contains(asAtom))
 							body.add(i, asAtom);
 					}
@@ -544,9 +544,9 @@ public class DatalogNormalizer {
 		if (clone)
 			query = query.clone();
 
-		List<Atom> body = query.getBody();
+		List<Function> body = query.getBody();
 
-		Atom head = query.getHead();
+		Function head = query.getHead();
 		/*
 		 * This set is only for reference
 		 */
@@ -575,7 +575,7 @@ public class DatalogNormalizer {
 	}
 
 	private static void pullUpNestedReferences(List currentLevelAtoms,
-			Atom head, Set<Variable> problemVariables,
+			Function head, Set<Variable> problemVariables,
 			Set<Function> booleanConditions, int[] freshVariableCount) {
 
 		/*
@@ -728,7 +728,7 @@ public class DatalogNormalizer {
 	 * @param atom
 	 * @return
 	 */
-	public static List<Atom> getUnfolderAtomList(Atom atom) {
+	public static List<Function> getUnfolderAtomList(Function atom) {
 		if (atom.getPredicate() != OBDAVocabulary.AND) {
 			throw new InvalidParameterException();
 		}
@@ -736,10 +736,10 @@ public class DatalogNormalizer {
 		for (NewLiteral term : atom.getTerms()) {
 			innerFunctionalTerms.addAll(getUnfolderTermList((Function) term));
 		}
-		List<Atom> newatoms = new LinkedList<Atom>();
+		List<Function> newatoms = new LinkedList<Function>();
 		for (NewLiteral innerterm : innerFunctionalTerms) {
 			Function f = (Function) innerterm;
-			Atom newatom = fac.getAtom(f.getFunctionSymbol(), f.getTerms());
+			Function newatom = fac.getAtom(f.getFunctionSymbol(), f.getTerms());
 			newatoms.add(newatom);
 		}
 		return newatoms;
@@ -822,7 +822,7 @@ public class DatalogNormalizer {
 
 			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
 				// if an atom is a Join then go inside, otherwise its
-				// Data Atom
+				// Data Function
 				if (atom.isAlgebraFunction()) {
 					if (i != 0)
 						is2 = true;

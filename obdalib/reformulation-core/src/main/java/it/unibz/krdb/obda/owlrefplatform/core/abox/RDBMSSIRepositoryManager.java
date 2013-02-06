@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -2184,11 +2184,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 			// continue;
 			// }
 			//
-			// Atom headequi = dfac.getAtom(
+			// Function headequi = dfac.getAtom(
 			// dfac.getPredicate(URI.create("m"), 2),
 			// dfac.getVariable("X"), dfac.getVariable("Y"));
 			//
-			// Atom bodyequi = null;
+			// Function bodyequi = null;
 			// if (!equiproperty.isInverse()) {
 			// bodyequi = dfac.getAtom(
 			// equiproperty.getPredicate(),
@@ -2237,12 +2237,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 
 			// Mapping head
 
-			Atom head = dfac.getAtom(dfac.getPredicate(ifac.construct("m"), 1),
+			Function head = dfac.getAtom(dfac.getPredicate(ifac.construct("m"), 1),
 					dfac.getVariable("X"));
-			Atom body1 = dfac.getAtom(classuri, dfac.getFunctionalTerm(
+			Function body1 = dfac.getAtom(classuri, dfac.getFunctionalTerm(
 					dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
-			Atom body2 = dfac.getAtom(classuri, dfac.getFunctionalTerm(
+			Function body2 = dfac.getAtom(classuri, dfac.getFunctionalTerm(
 					dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 
 			/*
@@ -2434,10 +2434,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 			// continue;
 			// }
 			// OClass equiclass = (OClass) equivalent.getDescription();
-			// Atom headequi = dfac.getAtom(
+			// Function headequi = dfac.getAtom(
 			// dfac.getPredicate(URI.create("m"), 1),
 			// dfac.getVariable("X"));
-			// Atom bodyequi = dfac.getAtom(equiclass.getPredicate(), dfac
+			// Function bodyequi = dfac.getAtom(equiclass.getPredicate(), dfac
 			// .getFunctionalTerm(dfac.getUriTemplatePredicate(1),
 			// dfac.getVariable("X")));
 			//
@@ -2509,7 +2509,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 		List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
 		List<NewLiteral> bodyTerms = new ArrayList<NewLiteral>();
 
-		List<Atom> bodyAtoms = new LinkedList<Atom>();
+		List<Function> bodyAtoms = new LinkedList<Function>();
 
 		headPredicate = dfac.getPredicate(ifac.construct("m"), 2, new COL_TYPE[] {
 				COL_TYPE.STRING, COL_TYPE.OBJECT });
@@ -2592,8 +2592,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager,
 		}
 		bodyTerms.add(objectTerm);
 
-		Atom head = dfac.getAtom(headPredicate, headTerms);
-		Atom body = dfac.getAtom(bodyPredicate, bodyTerms);
+		Function head = dfac.getAtom(headPredicate, headTerms);
+		Function body = dfac.getAtom(bodyPredicate, bodyTerms);
 		bodyAtoms.add(0, body);
 		return dfac.getCQIE(head, bodyAtoms);
 	}

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -52,7 +52,7 @@ public class PositiveInclusionApplicator {
 	 * @return true if the positive inclusion is applicable to the atom, false
 	 *         otherwise
 	 */
-	public boolean isPIApplicable(SubDescriptionAxiom pi, Atom atom) {
+	public boolean isPIApplicable(SubDescriptionAxiom pi, Function atom) {
 		/*
 		 * checks: (3) I is a role inclusion assertion and its right-hand side
 		 * is either P or P-
@@ -141,8 +141,8 @@ public class PositiveInclusionApplicator {
 			
 			HashSet<CQIE> currentatomresults = new HashSet<CQIE>(bodysize * pis.size() * 2);
 			for (CQIE cq : newqueries) {
-				List<Atom> body = cq.getBody();
-				Atom atom = (Atom) body.get(atomindex);
+				List<Function> body = cq.getBody();
+				Function atom = (Function) body.get(atomindex);
 
 				for (SubDescriptionAxiom pi : pis) {
 					if (isPIApplicable(pi, atom)) {
@@ -203,9 +203,9 @@ public class PositiveInclusionApplicator {
 //			MemoryUtils.checkAvailableMemory();
 			
 			for (CQIE query : saturatedset) {
-				List<Atom> body = query.getBody();
+				List<Function> body = query.getBody();
 				for (int i = 0; i < body.size(); i++) {
-					if (isPIApplicable(pi, (Atom) body.get(i))) {
+					if (isPIApplicable(pi, (Function) body.get(i))) {
 						if (sqoOptimizer != null) {
 							results.add(anonymizer.anonymize(sqoOptimizer.optimizeBySQO(applyPI(query, pi, i))));
 						} else {
@@ -261,10 +261,10 @@ public class PositiveInclusionApplicator {
 			loop = false;
 			newset = new HashSet<CQIE>();
 			for (CQIE currentcq : saturatedset) {
-				List<Atom> body = currentcq.getBody();
+				List<Function> body = currentcq.getBody();
 				for (int i = 0; i < body.size(); i++) {
 					/* Predicates are diferent, dont even try to unify */
-					if (!((Atom) body.get(i)).getPredicate().equals(predicate))
+					if (!((Function) body.get(i)).getPredicate().equals(predicate))
 						continue;
 					/*
 					 * We found an atom with the correct predicate, try to unify
@@ -272,11 +272,11 @@ public class PositiveInclusionApplicator {
 					 */
 					for (int j = i + 1; j < body.size(); j++) {
 
-						if (!((Atom) body.get(j)).getPredicate().equals(predicate))
+						if (!((Function) body.get(j)).getPredicate().equals(predicate))
 							continue;
 
-						Atom a1 = (Atom) body.get(i);
-						Atom a2 = (Atom) body.get(j);
+						Function a1 = (Function) body.get(i);
+						Function a2 = (Function) body.get(j);
 
 						NewLiteral ta10 = a1.getTerms().get(0);
 						NewLiteral ta11 = a1.getTerms().get(1);
@@ -346,13 +346,13 @@ public class PositiveInclusionApplicator {
 	// * @return
 	// */
 	// private boolean matchingAtoms(CQIE q, Term t1, Term t2) {
-	// for (Atom a1 : q.getBody()) {
+	// for (Function a1 : q.getBody()) {
 	// int t1idx = a1.getFirstOcurrance(t1, 0);
 	// if (t1idx == -1)
 	// continue;
 	// /* this atom conatains the focus term, t1 */
 	//
-	// for (Atom a2 : q.getBody()) {
+	// for (Function a2 : q.getBody()) {
 	//
 	// /*
 	// * we dont want to compare against the same atom, not
@@ -441,7 +441,7 @@ public class PositiveInclusionApplicator {
 	// /* Now we try to apoly the inclusions and collect only the results */
 	//
 	// for (CQIE query : saturatedset) {
-	// List<Atom> body = query.getBody();
+	// List<Function> body = query.getBody();
 	// for (int i = 0; i < body.size(); i++) {
 	// if (isPIApplicable(pi, body.get(i))) {
 	// results.add(applyPI(query, pi, i));
@@ -456,8 +456,8 @@ public class PositiveInclusionApplicator {
 
 		CQIE newquery = q.clone();
 
-		List<Atom> body = newquery.getBody();
-		Atom a = (Atom) body.get(atomindex);
+		List<Function> body = newquery.getBody();
+		Function a = (Function) body.get(atomindex);
 
 		if (a.getArity() == 1) {
 
@@ -489,7 +489,7 @@ public class PositiveInclusionApplicator {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 
-					Atom newatom = termFactory.getAtom(predicate.clone(), v);
+					Function newatom = termFactory.getAtom(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
@@ -501,7 +501,7 @@ public class PositiveInclusionApplicator {
 					 */
 					NewLiteral t = a.getTerms().get(0);
 					NewLiteral anonym = termFactory.getNondistinguishedVariable();
-					Atom newatom = null;
+					Function newatom = null;
 
 					if (((PropertySomeRestrictionImpl) lefthandside).isInverse()) {
 						LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
@@ -552,7 +552,7 @@ public class PositiveInclusionApplicator {
 			NewLiteral t1 = a.getTerms().get(0);
 			NewLiteral t2 = a.getTerms().get(1);
 
-			Atom newatom = null;
+			Function newatom = null;
 
 			if (t2 instanceof AnonymousVariable && !righthandside.isInverse()) {
 
@@ -661,7 +661,7 @@ public class PositiveInclusionApplicator {
 			Property lefthandside = inc.getSub();
 			Property righthandside = inc.getSuper();
 
-			Atom newatom = null;
+			Function newatom = null;
 
 			NewLiteral t1 = a.getTerms().get(0);
 			NewLiteral t2 = a.getTerms().get(1);

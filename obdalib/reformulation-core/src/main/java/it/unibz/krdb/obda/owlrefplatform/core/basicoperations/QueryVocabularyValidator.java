@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -76,13 +76,13 @@ public class QueryVocabularyValidator implements Serializable {
 		// }
 
 		// Get the predicates in the target query.
-		Iterator<Atom> iterAtom = query.getBody().iterator();
+		Iterator<Function> iterAtom = query.getBody().iterator();
 		while (iterAtom.hasNext()) {
-			Atom a1 = iterAtom.next();
-			if (!(a1 instanceof Atom)) {
+			Function a1 = iterAtom.next();
+			if (!(a1 instanceof Function)) {
 				continue;
 			}
-			Atom atom = (Atom) a1;
+			Function atom = (Function) a1;
 
 			Predicate predicate = atom.getPredicate();
 
@@ -173,7 +173,7 @@ public class QueryVocabularyValidator implements Serializable {
 				/* Nothing to replace */
 				continue;
 			}
-			Atom newatom = null;
+			Function newatom = null;
 
 			if (equivalent instanceof OClass) {
 				newatom = fac.getAtom(((OClass) equivalent).getPredicate(),

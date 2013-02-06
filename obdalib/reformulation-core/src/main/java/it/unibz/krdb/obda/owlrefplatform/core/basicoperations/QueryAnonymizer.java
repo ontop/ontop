@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -50,8 +50,8 @@ public class QueryAnonymizer {
 	 */
 	public void anonymize(CQIE q, int focusatomIndex) {
 
-		List<Atom> body = q.getBody();
-		Atom atom = (Atom) body.get(focusatomIndex);
+		List<Function> body = q.getBody();
+		Function atom = (Function) body.get(focusatomIndex);
 		int bodysize = body.size();
 		int arity = atom.getPredicate().getArity();
 
@@ -66,7 +66,7 @@ public class QueryAnonymizer {
 				 */
 				boolean isSharedTerm = false;
 				for (int atomindex = 0; atomindex < bodysize; atomindex++) {
-					Atom currentAtom = (Atom) body.get(atomindex);
+					Function currentAtom = (Function) body.get(atomindex);
 					int currentarity = currentAtom.getArity();
 					List<NewLiteral> currentTerms = currentAtom.getTerms();
 					for (int termidx = 0; termidx < currentarity; termidx++) {
@@ -117,13 +117,13 @@ public class QueryAnonymizer {
 		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
 
 		/*
-		 * Collecting all variables and the places where they appear (Atom and
+		 * Collecting all variables and the places where they appear (Function and
 		 * position)
 		 */
-		List<Atom> body = q.getBody();
-		Iterator<Atom> it = body.iterator();
+		List<Function> body = q.getBody();
+		Iterator<Function> it = body.iterator();
 		while (it.hasNext()) {
-			Atom atom = (Atom) it.next();
+			Function atom = (Function) it.next();
 			List<NewLiteral> terms = atom.getTerms();
 			int pos = 0;
 			for (NewLiteral t : terms) {
@@ -132,10 +132,10 @@ public class QueryAnonymizer {
 			pos++;
 		}
 
-		Iterator<Atom> it2 = body.iterator();
-		LinkedList<Atom> newBody = new LinkedList<Atom>();
+		Iterator<Function> it2 = body.iterator();
+		LinkedList<Function> newBody = new LinkedList<Function>();
 		while (it2.hasNext()) {
-			Atom atom = (Atom) it2.next();
+			Function atom = (Function) it2.next();
 			List<NewLiteral> terms = atom.getTerms();
 			Iterator<NewLiteral> term_it = terms.iterator();
 			LinkedList<NewLiteral> vex = new LinkedList<NewLiteral>();
@@ -151,7 +151,7 @@ public class QueryAnonymizer {
 					vex.add(t);
 				}
 			}
-			Atom newatom = termFactory
+			Function newatom = termFactory
 					.getAtom(atom.getPredicate().clone(), vex);
 			newBody.add(newatom);
 		}
@@ -159,7 +159,7 @@ public class QueryAnonymizer {
 		return query;
 	}
 
-	private void collectAuxiliaries(NewLiteral term, Atom atom, int pos,
+	private void collectAuxiliaries(NewLiteral term, Function atom, int pos,
 			HashMap<String, List<Object[]>> auxmap) {
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
@@ -187,7 +187,7 @@ public class QueryAnonymizer {
 		if (t instanceof AnonymousVariable)
 			return false;
 
-		Atom head = q.getHead();
+		Function head = q.getHead();
 		List<NewLiteral> headterms = head.getTerms();
 		for (NewLiteral headterm : headterms) {
 			if (headterm instanceof FunctionalTermImpl) {
@@ -222,7 +222,7 @@ public class QueryAnonymizer {
 
 	public static CQIE deAnonymize(CQIE query) {
 		// query = query.clone();
-		Atom head = query.getHead();
+		Function head = query.getHead();
 		Iterator<NewLiteral> hit = head.getTerms().iterator();
 		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 		int coutner = 1;
@@ -242,9 +242,9 @@ public class QueryAnonymizer {
 		}
 		head.updateTerms(newTerms);
 
-		Iterator<Atom> bit = query.getBody().iterator();
+		Iterator<Function> bit = query.getBody().iterator();
 		while (bit.hasNext()) {
-			Atom a = (Atom) bit.next();
+			Function a = (Function) bit.next();
 			Iterator<NewLiteral> hit2 = a.getTerms().iterator();
 			i = 0;
 			LinkedList<NewLiteral> vec = new LinkedList<NewLiteral>();

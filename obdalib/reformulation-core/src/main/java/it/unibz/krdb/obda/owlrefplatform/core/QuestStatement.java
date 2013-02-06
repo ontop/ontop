@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -590,12 +590,12 @@ public class QuestStatement implements OBDAStatement {
 		for (int qi = 0; qi < unionOfQueries.size() ; qi++) {
 			CQIE query = unionOfQueries.get(qi);
 			//get query head, body
-			Atom queryHead = query.getHead();
-			List<Atom> queryBody = query.getBody();
+			Function queryHead = query.getHead();
+			List<Function> queryBody = query.getBody();
 			//for each atom in query body
 			for (int i = 0; i < queryBody.size(); i++) {
-				Set<Atom> removedAtom = new HashSet<Atom>();
-				Atom atomQuery = queryBody.get(i);
+				Set<Function> removedAtom = new HashSet<Function>();
+				Function atomQuery = queryBody.get(i);
 				Predicate predicate = atomQuery.getPredicate();
 				
 				//for each tbox rule
@@ -606,14 +606,14 @@ public class QuestStatement implements OBDAStatement {
 				for (CQIE rule : rules) {
 					//try to unify current query body atom with tbox rule body atom
 					rule = DatalogUnfolder.getFreshRule(rule, 4022013);  // Random suffix number
-					Atom ruleBody = rule.getBody().get(0);
+					Function ruleBody = rule.getBody().get(0);
 					Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, atomQuery);
 					if (theta == null || theta.isEmpty()) {
 						continue;
 					}
 					// if unifiable, apply to head of tbox rule
-					Atom ruleHead = rule.getHead();
-					Atom copyRuleHead = ruleHead.clone();
+					Function ruleHead = rule.getHead();
+					Function copyRuleHead = (Function)ruleHead.clone();
 					Unifier.applyUnifier(copyRuleHead, theta);
 					
 					removedAtom.add(copyRuleHead);
@@ -623,7 +623,7 @@ public class QuestStatement implements OBDAStatement {
 					if (j == i) {
 						continue;
 					}
-					Atom toRemove = queryBody.get(j);
+					Function toRemove = queryBody.get(j);
 					if (removedAtom.contains(toRemove)) {
 						queryBody.remove(j);
 						j -= 1;

@@ -6,19 +6,19 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha</version>
+		<version>1.7-alpha2</version>
 	</parent>
 
 	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>reformulation-core</artifactId>
 	<!-- <version>1.7-alpha2</version> -->
-	<name>reformulation-core</name>
+	<name>quest-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha</version>
+			<version>1.7-alpha2</version>
 		</dependency>
 
 		<dependency>
@@ -76,7 +76,6 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-                                        <!--compilerId>eclipse</compilerId-->
 					<source>1.6</source>
 					<target>1.6</target>
 					<excludes>
@@ -89,13 +88,6 @@
 						<exclude>**/PartialEvaluationTest.java</exclude>
 					</testExcludes>
 				</configuration>
-				<dependencies>
-      				<dependency>
-         				<groupId>org.codehaus.plexus</groupId>
-         				<artifactId>plexus-compiler-eclipse</artifactId>
-         				<version>1.8.2</version>
-      				</dependency>
-   				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 
 import java.io.Serializable;
 
@@ -25,7 +25,7 @@ public interface ViewManager extends Serializable {
 	 * @return the alias of the atom
 	 * @throws Exception
 	 */
-	public String getTranslatedName(Atom atom) throws Exception;
+	public String getTranslatedName(Function atom) throws Exception;
 	
 	/**
 	 * Stores the original query head, so that also the source generator 
@@ -34,5 +34,5 @@ public interface ViewManager extends Serializable {
 	 * implement
 	 * @param head original head of the input query
 	 */
-	public void storeOrgQueryHead(Atom head);
+	public void storeOrgQueryHead(Function head);
 }

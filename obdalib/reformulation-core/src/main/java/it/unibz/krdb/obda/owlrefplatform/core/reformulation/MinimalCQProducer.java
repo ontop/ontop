@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 public class MinimalCQProducer {
 	private final TreeWitnessReasonerLite reasoner;
-	private List<Atom> atoms = new LinkedList<Atom>();
-	private List<Atom> noCheckAtoms = new LinkedList<Atom>();
+	private List<Function> atoms = new LinkedList<Function>();
+	private List<Function> noCheckAtoms = new LinkedList<Function>();
 	
 	private final OntologyFactory ontFactory;
 	private static final Logger log = LoggerFactory.getLogger(MinimalCQProducer.class);	
@@ -36,7 +36,7 @@ public class MinimalCQProducer {
 		this.noCheckAtoms.addAll(cqp.noCheckAtoms);
 	}
 
-	public boolean isMoreSpecific(Atom a1, Atom a2) {
+	public boolean isMoreSpecific(Function a1, Function a2) {
 		if (a1.equals(a2))
 			return true;
 
@@ -89,10 +89,10 @@ public class MinimalCQProducer {
 		return false;
 	}
 	
-	public void add(Atom atom) {
-		Iterator<Atom> i = atoms.iterator();
+	public void add(Function atom) {
+		Iterator<Function> i = atoms.iterator();
 		while (i.hasNext()) {
-			Atom a = i.next();
+			Function a = i.next();
 			if (isMoreSpecific(a, atom))
 				return;
 			if (isMoreSpecific(atom, a))
@@ -101,27 +101,27 @@ public class MinimalCQProducer {
 		atoms.add(atom);
 	}
 	
-	public void addAll(Collection<Atom> aa) {
-		for (Atom a : aa) 
+	public void addAll(Collection<Function> aa) {
+		for (Function a : aa) 
 			add(a);
 	}
 
-	public boolean wouldSubsume(Atom atom) {
-		for (Atom a : atoms) 
+	public boolean wouldSubsume(Function atom) {
+		for (Function a : atoms) 
 			if (isMoreSpecific(a, atom))
 				return true;
 		return false;
 	}
 	
-	public void addNoCheck(Atom atom) {
+	public void addNoCheck(Function atom) {
 		noCheckAtoms.add(atom);
 	}
 	
-	public List<Atom> getAtoms() {
+	public List<Function> getAtoms() {
 		return atoms;
 	}
 	
-	public List<Atom> getNoCheckAtoms() {
+	public List<Function> getNoCheckAtoms() {
 		return noCheckAtoms;
 	}
 }

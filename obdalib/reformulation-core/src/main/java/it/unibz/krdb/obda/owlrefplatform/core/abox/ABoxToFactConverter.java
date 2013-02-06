@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -33,7 +33,7 @@ public class ABoxToFactConverter {
 	}
 
 	private static CQIE getRule(Assertion assertion) {
-		Atom head = null;
+		Function head = null;
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			ObjectConstant c = ca.getObject();
@@ -47,6 +47,6 @@ public class ABoxToFactConverter {
 		/***
 		 * The rest is not supported yet
 		 */
-		return factory.getCQIE(head, new LinkedList<Atom>());
+		return factory.getCQIE(head, new LinkedList<Function>());
 	}
 }

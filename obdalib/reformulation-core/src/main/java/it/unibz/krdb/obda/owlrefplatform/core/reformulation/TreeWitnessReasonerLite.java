@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -234,9 +235,9 @@ public class TreeWitnessReasonerLite {
 		return s;
 	}
 
-	public IntersectionOfConceptSets getSubConcepts(Collection<Atom> atoms) {
+	public IntersectionOfConceptSets getSubConcepts(Collection<Function> atoms) {
 		IntersectionOfConceptSets subc = new IntersectionOfConceptSets();
-		for (Atom a : atoms) {
+		for (Function a : atoms) {
 			 if (a.getArity() != 1)
 				 return IntersectionOfConceptSets.EMPTY;   // binary predicates R(x,x) cannot be matched to the anonymous part
 

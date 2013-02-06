@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -79,9 +79,9 @@ public class DBMetadataUtil {
 					terms1.set(pos1, terms2.get(pos2));
 				}
 				
-				Atom head = fac.getAtom(p2, terms2);
-				Atom body1 = fac.getAtom(p1, terms1);
-				List<Atom> body = new ArrayList<Atom>();
+				Function head = fac.getAtom(p2, terms2);
+				Function body1 = fac.getAtom(p1, terms1);
+				List<Function> body = new ArrayList<Function>();
 				body.add(body1);
 				
 				CQIE rule = fac.getCQIE(head, body);

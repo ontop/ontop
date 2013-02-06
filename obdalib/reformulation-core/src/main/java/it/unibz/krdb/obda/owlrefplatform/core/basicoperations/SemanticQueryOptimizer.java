@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -64,11 +64,11 @@ public class SemanticQueryOptimizer {
 	public CQIE optimizeBySQO(CQIE query) {
 		QueryAnonymizer anonymizer = new QueryAnonymizer();
 		CQIE copy = anonymizer.anonymize(query.clone());
-		List<Atom> body = copy.getBody();
+		List<Function> body = copy.getBody();
 		for (int i = 0; i < body.size(); i++) {
 			int previoussize = body.size();
 			
-			Atom focusAtom = (Atom) body.get(i);
+			Function focusAtom = (Function) body.get(i);
 
 			/* redundancy of an atom without PIs */
 			if (focusAtom.getPredicate().getArity() == 1) {
@@ -78,7 +78,7 @@ public class SemanticQueryOptimizer {
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
 						continue;
-					Atom atom2 = (Atom) body.get(j);
+					Function atom2 = (Function) body.get(j);
 
 					if (atom2.getPredicate().equals(focusAtom.getPredicate())) {
 						body.remove(i);
@@ -100,7 +100,7 @@ public class SemanticQueryOptimizer {
 					if (j == i)
 						continue;
 
-					Atom atom2 = (Atom) body.get(j);
+					Function atom2 = (Function) body.get(j);
 
 					/* case R(_,_) */
 
@@ -142,7 +142,7 @@ public class SemanticQueryOptimizer {
 			}
 			for (SubDescriptionAxiom pi : pis) {
 				boolean breakPICycle = false;
-				Atom checkAtom = null;
+				Function checkAtom = null;
 				if (pi instanceof SubClassAxiomImpl) {
 					SubClassAxiomImpl ci = (SubClassAxiomImpl) pi;
 					ClassDescription including = ci.getSuper();
@@ -275,7 +275,7 @@ public class SemanticQueryOptimizer {
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
 						continue;
-					Atom atom2 = (Atom) body.get(j);
+					Function atom2 = (Function) body.get(j);
 
 					if (atom2.equals(checkAtom)) {
 						body.remove(i);

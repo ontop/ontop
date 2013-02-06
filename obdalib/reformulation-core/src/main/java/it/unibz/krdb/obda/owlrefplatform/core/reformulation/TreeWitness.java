@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
 
@@ -30,16 +30,16 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerL
 public class TreeWitness {
 	private final NewLiteralCover NewLiterals;
 	
-	private final Set<Atom> rootAtoms; // atoms of the query that contain only the roots of the tree witness
+	private final Set<Function> rootAtoms; // atoms of the query that contain only the roots of the tree witness
 	                            // these atoms must hold true for this tree witness to be realised
 	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
 	                                          // in the canonical model of the TBox
 	
 	private final IntersectionOfConceptSets rootConcepts; // store concept for merging tree witnesses
 	
-	private List<List<Atom>> twfs;  // tw-formula: disjunction of conjunctions of atoms
+	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
 
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, NewLiteralCover NewLiterals, Set<Atom> rootAtoms, IntersectionOfConceptSets rootConcepts) {
+	public TreeWitness(Collection<TreeWitnessGenerator> gens, NewLiteralCover NewLiterals, Set<Function> rootAtoms, IntersectionOfConceptSets rootConcepts) {
 		this.gens = gens;
 		this.NewLiterals = NewLiterals;
 		this.rootAtoms = rootAtoms;
@@ -47,11 +47,11 @@ public class TreeWitness {
 		//this.domain = domain; // new HashSet<NewLiteral>(roots); domain.addAll(nonroots);
 	}
 	
-	void setFormula(List<List<Atom>> twfs) {
+	void setFormula(List<List<Function>> twfs) {
 		this.twfs = twfs;
 	}
 	
-	public List<List<Atom>> getFormula() {
+	public List<List<Function>> getFormula() {
 		return twfs;
 	}
 	
@@ -103,12 +103,12 @@ public class TreeWitness {
 	
 	
 	/**
-	 * Set<Atom> getRootAtoms()
+	 * Set<Function> getRootAtoms()
 	 * 
 	 * @return query atoms with all NewLiterals among the roots of tree witness
 	 */
 	
-	public Set<Atom> getRootAtoms() {
+	public Set<Function> getRootAtoms() {
 		return rootAtoms;
 	}
 

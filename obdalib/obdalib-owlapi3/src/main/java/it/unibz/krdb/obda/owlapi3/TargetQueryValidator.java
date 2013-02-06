@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -35,7 +35,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 		invalidPredicates.clear();
 
 		// Get the predicates in the target query.
-		for (Atom atom : targetQuery.getBody()) {
+		for (Function atom : targetQuery.getBody()) {
 			Predicate p = atom.getPredicate();
 
 			boolean isClass = isClass(p);

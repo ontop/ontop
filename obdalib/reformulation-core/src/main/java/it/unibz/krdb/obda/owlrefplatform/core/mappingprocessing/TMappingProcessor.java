@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -256,12 +256,12 @@ public class TMappingProcessor implements Serializable {
 	 */
 	private CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
 		strippedConditionsHolder.clear();
-		Function head = mapping.getHead().clone();
+		Function head = (Function)mapping.getHead().clone();
 		List<Function> body = mapping.getBody();
 		List<Function> newbody = new LinkedList<Function>();
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			Function clone = atom.clone();
+			Function clone = (Function)atom.clone();
 			if (clone.getPredicate() instanceof BuiltinPredicate) {
 				strippedConditionsHolder.add(clone);
 			} else {
@@ -298,11 +298,11 @@ public class TMappingProcessor implements Serializable {
 		for (CQIE currentMapping : originalMappings.getRules()) {
 			int freshVarCount = 0;
 
-			Function head = currentMapping.getHead().clone();
+			Function head = (Function)currentMapping.getHead().clone();
 			List<Function> newBody = new LinkedList<Function>();
 			for (Function currentAtom : currentMapping.getBody()) {
 				if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
-					Function clone = currentAtom.clone();
+					Function clone = (Function)currentAtom.clone();
 					for (int i = 0; i < clone.getTerms().size(); i++) {
 						NewLiteral term = clone.getTerm(i);
 						if (term instanceof Constant) {
@@ -318,7 +318,7 @@ public class TMappingProcessor implements Serializable {
 					}
 					newBody.add(clone);
 				} else {
-					newBody.add(currentAtom.clone());
+					newBody.add((Function)currentAtom.clone());
 				}
 			}
 			CQIE normalizedMapping = fac.getCQIE(head, newBody);

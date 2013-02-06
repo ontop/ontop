@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.ontology.Ontology;
 
 import java.net.URI;
@@ -33,7 +33,7 @@ public class SimpleDirectViewManager implements ViewManager {
 	private Map<String, String> datapropertyMapper = null;
 	private Map<String, String> objectporpertyMapper = null;
 	private String baseuri = null;
-	private Atom orgHead = null;
+	private Function orgHead = null;
 	
 	public SimpleDirectViewManager(){
 		
@@ -64,7 +64,7 @@ public class SimpleDirectViewManager implements ViewManager {
 	 * translates the given atom name into its alias used when dumping
 	 * the abox. 
 	 */
-	public String getTranslatedName(Atom atom) throws Exception {
+	public String getTranslatedName(Function atom) throws Exception {
 		String aux = atom.getPredicate().getName().toString();
 		String frag = atom.getPredicate().getName().getFragment();
 		int i = aux.lastIndexOf("#");
@@ -103,7 +103,7 @@ public class SimpleDirectViewManager implements ViewManager {
 	 * columns in the answer also a, b, c. 
 	 */
 	@Override
-	public void storeOrgQueryHead(Atom head) {
+	public void storeOrgQueryHead(Function head) {
 		orgHead = head;		
 	}
 }
