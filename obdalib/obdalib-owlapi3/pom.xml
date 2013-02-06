@@ -8,6 +8,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-owlapi3</artifactId>
+	<name>obdalib-owlapi3</name>
 
 
 	<dependencies>
@@ -51,17 +52,17 @@
 				</configuration>
 				
 			</plugin>
-			<plugin>
+	<!-- 		<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>false</skip>
 				</configuration>
-			</plugin>
+			</plugin> -->
 
-			<plugin>
+	<!-- 		<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-			</plugin>
+			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -71,5 +72,4 @@
 		</plugins>
 	</build>
 
-	<name>obdalib-owlapi3</name>
 </project>

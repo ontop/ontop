@@ -284,7 +284,7 @@
 
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha2</Bundle-Version>
-						<Build-Number>2039</Build-Number>
+						<Build-Number>2157</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
 						<Import-Package>it.unibz.krdb.obda.protege4.*,!org.json, javax.xml.datatype, javax.swing.*,
@@ -332,7 +332,7 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
 				<executions>
@@ -343,21 +343,21 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 
-			<plugin>
+<!-- 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>false</skip>
 				</configuration>
-			</plugin>
+			</plugin> -->
 
 
 		</plugins>
 	</build>
-	<url>http://obda.inf.unibz.it/protege-plugin/</url>
-	<description>The OBDA plugin for Protege 4.1 and up</description>
+	<url>http://ontop.inf.unibz.it/</url>
+	<description>The -ontop- plugin for Protege</description>
 	<organization>
 		<name>KRDB Research Centre. Free University of Bozen Bolzano.</name>
 		<url>http://www.inf.unibz.it/krdb/</url>
