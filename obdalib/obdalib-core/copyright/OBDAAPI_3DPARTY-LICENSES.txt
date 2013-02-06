@@ -2,6 +2,7 @@
  
  - ANTLR 3.1. See ANTLR-LICENSE.txt for license information.
  - Jena 2.6.4. See JENA-LICENSE.txt for license information.
+ - OwlApi 3.2.3. See OWLAPI-LICENSE.txt for license information.
  - Slf4j 1.5.11. See SLF4J-LICENSE.txt for license information.
  - Logback 0.9.20. See LOGBACK-LICENSE.txt for license information.
  - Xsdlib 20030225. See XSDLIB-LICENSE.txt for license information.
