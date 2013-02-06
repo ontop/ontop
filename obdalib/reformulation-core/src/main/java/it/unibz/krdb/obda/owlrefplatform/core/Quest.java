@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -609,8 +609,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel
 					.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
-			log.debug("Original mapping size: {}",
-					 unfoldingProgram.getRules().size());
 
 			log.debug("Original mapping size: {}", unfoldingProgram.getRules().size());
 
@@ -698,14 +696,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			final long endTime = System.currentTimeMillis();
 
-			System.out.println("TMapping size: "
-					+ unfoldingProgram.getRules().size());
-			System.out.println("TMapping processing time: "
-					+ (endTime - startTime) + " ms");
-
 			log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
 			log.debug("TMapping processing time: {} ms", (endTime - startTime));
-
 
 			/*
 			 * Adding data typing on the mapping axioms.
@@ -721,7 +713,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			for (CQIE mapping : currentMappingRules) {
 				Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 				for (Variable var : headvars) {
-					Atom notnull = fac.getIsNotNullAtom(var);
+					Function notnull = fac.getIsNotNullAtom(var);
 					mapping.getBody().add(notnull);
 				}
 			}
@@ -739,7 +731,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
 				/* Looking for mappings with exactly 2 data atoms */
 				CQIE mapping = currentMappingRules.get(i);
-				Atom head = mapping.getHead();
+				Function head = mapping.getHead();
 				/*
 				 * Collecting URI templates and making pattern matchers for
 				 * them.
@@ -802,7 +794,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				LinkedList dataAtomsList = new LinkedList();
 				LinkedList otherAtomsList = new LinkedList();
 
-				for (Atom subAtom : mapping.getBody()) {
+				for (Function subAtom : mapping.getBody()) {
 					if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
 						dataAtoms += 1;
 						dataAtomsList.add(subAtom);
@@ -828,7 +820,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					dataAtomsList.add(0, foldedJoinAtom);
 				}
 
-				List<Atom> newBodyMapping = new LinkedList<Atom>();
+				List<Function> newBodyMapping = new LinkedList<Function>();
 				newBodyMapping.add(foldedJoinAtom.asAtom());
 				newBodyMapping.addAll(otherAtomsList);
 
@@ -890,7 +882,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator();
 			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
-				rewriter = new TreeWitnessRewriter();
+				rewriter = new TreeRedReformulator();
 			} else if (QuestConstants.TW.equals(reformulationTechnique)) {
 				rewriter = new TreeWitnessRewriter();
 			} else {
@@ -906,7 +898,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			saturatedSigma.saturate();
 
 			List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
-			sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
+			if (optimizeMap)
+				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
+			else
+				sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
@@ -962,8 +957,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			List<CQIE> sigmaRules) {
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
 		for (CQIE rule : sigmaRules) {
-			Atom atom = rule.getBody().get(0); // The rule always has one body
-												// atom
+			Function atom = rule.getBody().get(0); // The rule always has one body atom
 			Predicate predicate = atom.getPredicate();
 			List<CQIE> rules = sigmaRulesMap.get(predicate);
 			if (rules == null) {
@@ -978,8 +972,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private void generateTripleMappings(OBDADataFactory fac,
 			List<CQIE> newmappings) {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
-			Atom newhead = null;
-			Atom currenthead = mapping.getHead();
+			Function newhead = null;
+			Function currenthead = mapping.getHead();
 			Predicate pred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 			LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
 			if (currenthead.getArity() == 1) {
