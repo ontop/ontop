@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -515,14 +515,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private CQIE prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
-		List<Atom> body = new ArrayList<Atom>();
+		List<Function> body = new ArrayList<Function>();
 		
 		// Store concept in the body, if any
 		String subjectTargetString = predicateSubjectMap.getTargetMapping();
 		String subjectUriTemplate = prefixManager.getExpandForm(subjectTargetString, true);
 		Function subjectTerm = getUriFunctionTerm(subjectUriTemplate);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Atom concept = dfac.getAtom(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			Function concept = dfac.getAtom(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
@@ -545,13 +545,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				if (predicateObjectMap.getDataType() != null) {
 					objectTerm = dfac.getFunctionalTerm(predicateObjectMap.getDataType(), var);
 				}
-				Atom attribute = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function attribute = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				String predicateTargetString = predicateObjectMap.getTargetMapping();
 				String objectUriTemplate = prefixManager.getExpandForm(predicateTargetString, true);
 				Function objectTerm = getUriFunctionTerm(objectUriTemplate);
-				Atom role = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function role = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(role);
 			}
 		}
@@ -559,7 +559,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Create the head
 		List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
 		int arity = distinguishVariables.size();
-		Atom head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
+		Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);
