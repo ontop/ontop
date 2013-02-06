@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha</version>
+		<version>1.7-alpha2</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-protege41</artifactId>
@@ -48,12 +48,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha</version>
+			<version>1.7-alpha2</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7-alpha</version>
+			<version>1.7-alpha2</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
@@ -63,13 +63,13 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha</version>
+			<version>1.7-alpha2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.7-alpha</version>
+			<version>1.7-alpha2</version>
 		</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 
@@ -283,7 +283,7 @@
 						<Implementation-Version>${project.version}.b2039</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.7-alpha</Bundle-Version>
+						<Bundle-Version>1.7-alpha2</Bundle-Version>
 						<Build-Number>2039</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>

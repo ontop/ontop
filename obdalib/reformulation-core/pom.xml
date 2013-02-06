@@ -6,19 +6,19 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha</version>
+		<version>1.7-alpha2</version>
 	</parent>
 
 	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>reformulation-core</artifactId>
-	<!-- <version>1.7-alpha</version> -->
+	<!-- <version>1.7-alpha2</version> -->
 	<name>quest-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha</version>
+			<version>1.7-alpha2</version>
 		</dependency>
 
 		<dependency>
