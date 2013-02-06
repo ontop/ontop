@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -23,12 +23,12 @@ public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAx
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
 		final CQIE headquery = (CQIEImpl) object.getTargetQuery();
-		final List<Atom> atoms = headquery.getBody();
+		final List<Function> atoms = headquery.getBody();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {
 			for (int i = 0; i < atoms.size(); i++) {
-				Atom predicate = (Atom) atoms.get(i);
+				Function predicate = (Function) atoms.get(i);
 				isMatch = isMatch || match(keyword.trim(), predicate);
 			}
 			if (isMatch) {
@@ -39,7 +39,7 @@ public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAx
 	}
 
 	/** A helper method to check a match */
-	public static boolean match(String keyword, Atom predicate) {
+	public static boolean match(String keyword, Function predicate) {
 		List<NewLiteral> queryTerms = predicate.getTerms();
 		for (int j = 0; j < queryTerms.size(); j++) {
 			NewLiteral term = queryTerms.get(j);

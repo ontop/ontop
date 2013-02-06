@@ -14,7 +14,7 @@ package it.unibz.krdb.obda.gui.swing.utils;
 
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -115,7 +115,6 @@ public class QueryPainter {
 		this.parent = parent;
 		textParser = new TurtleSyntaxParser(apic.getPrefixManager());
 
-
 		prepareStyles();
 		setupFont();
 
@@ -178,7 +177,7 @@ public class QueryPainter {
 	private void handleDocumentUpdated() {
 		timer.restart();
 		clearError();
-		
+
 		// performHighlighting();
 	}
 
@@ -262,13 +261,12 @@ public class QueryPainter {
 					String location = errorstring.substring(index + 15);
 					int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
 					String[] coordinates = location.split(":");
-					
+
 					int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
 					int errorcol = Integer.valueOf(coordinates[1]);
 					errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
 				}
-				
-				
+
 				parent.setToolTipText(getHTMLErrorMessage(errorstring));
 			}
 			setStateBorder(errorBorder);
@@ -324,10 +322,9 @@ public class QueryPainter {
 
 		invalidQuery = doc.addStyle("INVALID_STYLE", null);
 		StyleConstants.setForeground(invalidQuery, INVALID);
-		
-		foreground =  doc.addStyle("FOREGROUND", null);
+
+		foreground = doc.addStyle("FOREGROUND", null);
 		StyleConstants.setForeground(foreground, Color.black);
-		 
 
 		/****
 		 * Snippets
@@ -365,18 +362,16 @@ public class QueryPainter {
 	}
 
 	private void resetStyles() {
-//		doc.setParagraphAttributes(0, doc.getLength(), plainStyle, true);
-		
+		// doc.setParagraphAttributes(0, doc.getLength(), plainStyle, true);
+
 		StyleConstants.setFontSize(fontSizeStyle, getFontSize());
 		Font f = plainFont;
-		
-		
-		
+
 		StyleConstants.setFontFamily(fontSizeStyle, f.getFamily());
 		StyleConstants.setForeground(fontSizeStyle, Color.black);
 		fontSizeStyle.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
 		doc.setParagraphAttributes(0, doc.getLength(), fontSizeStyle, true);
-		
+
 		setupFont();
 
 	}
@@ -423,13 +418,13 @@ public class QueryPainter {
 			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
 
 		input = doc.getText(0, doc.getLength());
-		
+
 		resetStyles();
-		
-//		if (true)
-//			return;
-		
-//		doc.setCharacterAttributes(0, doc.getLength(), , false);
+
+		// if (true)
+		// return;
+
+		// doc.setCharacterAttributes(0, doc.getLength(), , false);
 
 		int pos = input.indexOf("(", 0);
 		while (pos != -1) {
@@ -457,7 +452,7 @@ public class QueryPainter {
 			pos = input.indexOf(":", pos + 1);
 		}
 
-		for (Atom atom : current_query.getBody()) {
+		for (Function atom : current_query.getBody()) {
 			Predicate predicate = atom.getPredicate();
 			String predicateName = man.getShortForm(atom.getPredicate().toString());
 
@@ -491,7 +486,6 @@ public class QueryPainter {
 
 		}
 
-		
 		ColorTask[] taskArray = order(tasks);
 		for (int i = 0; i < taskArray.length; i++) {
 			if (taskArray[i].text != null) {

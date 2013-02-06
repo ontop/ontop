@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Variable;
@@ -16,7 +16,7 @@ public class QueryValidator {
 
 		for (Variable v : headVariables) {
 			boolean safe = false;
-			for (Atom atom : cq.getBody()) {
+			for (Function atom : cq.getBody()) {
 				safe = safe || atom.getVariables().contains(v);
 				if (safe)
 					break;

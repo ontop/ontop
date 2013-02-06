@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -90,7 +90,7 @@ public class MappingAnalyzer {
 				ArrayList<Relation> tableList = queryTree.getTableSet();
 
 				// Construct the body from the source query
-				ArrayList<Atom> atoms = new ArrayList<Atom>();
+				ArrayList<Function> atoms = new ArrayList<Function>();
 				for (Relation table : tableList) {
 					// Construct the URI from the table name
 					String tableName = table.getName();
@@ -112,7 +112,7 @@ public class MappingAnalyzer {
 						terms.add(term);
 					}
 					// Create an atom for a particular table
-					Atom atom = dfac.getAtom(predicate, terms);
+					Function atom = dfac.getAtom(predicate, terms);
 					atoms.add(atom);
 				}
 
@@ -132,7 +132,7 @@ public class MappingAnalyzer {
 					NewLiteral t1 = dfac.getVariable(lookup1);
 					NewLiteral t2 = dfac.getVariable(lookup2);
 
-					Atom atom = dfac.getEQAtom(t1, t2);
+					Function atom = dfac.getEQAtom(t1, t2);
 					atoms.add(atom);
 				}
 
@@ -194,19 +194,19 @@ public class MappingAnalyzer {
 						stack.push(orAtom);
 					}
 					Function f = stack.pop();
-					Atom atom = dfac.getAtom(f.getFunctionSymbol(), f.getTerms());
+					Function atom = dfac.getAtom(f.getFunctionSymbol(), f.getTerms());
 					atoms.add(atom);
 				}
 
 				// Construct the head from the target query.
-				List<Atom> atomList = targetQuery.getBody();
-				for (Atom atom : atomList) {
+				List<Function> atomList = targetQuery.getBody();
+				for (Function atom : atomList) {
 					List<NewLiteral> terms = atom.getTerms();
 					List<NewLiteral> newterms = new LinkedList<NewLiteral>();
 					for (NewLiteral term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
-					Atom newhead = dfac.getAtom(atom.getPredicate(), newterms);
+					Function newhead = dfac.getAtom(atom.getPredicate(), newterms);
 					CQIE rule = dfac.getCQIE(newhead, atoms);
 					datalog.appendRule(rule);
 				}

@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.codec;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -46,8 +46,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			return "";
 		}
 		TurtleContainer turtle = new TurtleContainer();
-		List<Atom> body = ((CQIE) input).getBody();
-		for (Atom atom : body) {
+		List<Function> body = ((CQIE) input).getBody();
+		for (Function atom : body) {
 			String subject, predicate, object = "";
 			String originalString = atom.getPredicate().toString();
 			if (isUnary(atom)) {
@@ -72,7 +72,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	/**
 	 * Checks if the atom is unary or not.
 	 */
-	private boolean isUnary(Atom atom) {
+	private boolean isUnary(Function atom) {
 		return atom.getArity() == 1 ? true : false;
 	}
 
@@ -290,11 +290,11 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		 * container.
 		 * 
 		 * @param subject
-		 *            The subject term of the Atom.
+		 *            The subject term of the Function.
 		 * @param predicate
-		 *            The Atom predicate.
+		 *            The Function predicate.
 		 * @param object
-		 *            The object term of the Atom.
+		 *            The object term of the Function.
 		 */
 		void put(String subject, String predicate, String object) {
 			// Subject to Predicates map

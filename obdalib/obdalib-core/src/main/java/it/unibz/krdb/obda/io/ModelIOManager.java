@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.Indicator;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -475,7 +475,7 @@ public class ModelIOManager {
                         
                         // Check if the predicates in the atoms are declared
                         List<Predicate> undeclaredPredicates = new ArrayList<Predicate>();
-                        for (Atom atom : targetQuery.getBody()) {
+                        for (Function atom : targetQuery.getBody()) {
                             boolean isDeclared = predicateDeclarations.contains(atom.getPredicate());
                             if (!isDeclared) {
                                 undeclaredPredicates.add(atom.getPredicate());

@@ -2,7 +2,7 @@
 
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -208,9 +208,9 @@ public class TurtleParser extends Parser {
         CQIE value = null;
 
 
-        List<Atom> t1 =null;
+        List<Function> t1 =null;
 
-        List<Atom> t2 =null;
+        List<Function> t2 =null;
 
 
         try {
@@ -256,10 +256,10 @@ public class TurtleParser extends Parser {
 
                   int arity = variableSet.size();
                   List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
-                  Atom head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
+                  Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
                   
                   // Create a new rule
-                  List<Atom> triples = t1;
+                  List<Function> triples = t1;
                   value = dfac.getCQIE(head, triples);
                 
 
@@ -296,10 +296,10 @@ public class TurtleParser extends Parser {
             match(input,EOF,FOLLOW_EOF_in_parse75); 
 
 
-                  List<Atom> additionalTriples = t2;
+                  List<Function> additionalTriples = t2;
                   if (additionalTriples != null) {
                     // If there are additional triple statements then just add to the existing body
-                    List<Atom> existingBody = value.getBody();
+                    List<Function> existingBody = value.getBody();
                     existingBody.addAll(additionalTriples);
                   }
                 
@@ -354,12 +354,12 @@ public class TurtleParser extends Parser {
 
 
     // $ANTLR start "triplesStatement"
-    // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:192:1: triplesStatement returns [List<Atom> value] : triples ( WS )* PERIOD ;
-    public final List<Atom> triplesStatement() throws RecognitionException {
-        List<Atom> value = null;
+    // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:192:1: triplesStatement returns [List<Function> value] : triples ( WS )* PERIOD ;
+    public final List<Function> triplesStatement() throws RecognitionException {
+        List<Function> value = null;
 
 
-        List<Atom> triples1 =null;
+        List<Function> triples1 =null;
 
 
         try {
@@ -623,14 +623,14 @@ public class TurtleParser extends Parser {
 
 
     // $ANTLR start "triples"
-    // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:215:1: triples returns [List<Atom> value] : subject predicateObjectList ;
-    public final List<Atom> triples() throws RecognitionException {
-        List<Atom> value = null;
+    // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:215:1: triples returns [List<Function> value] : subject predicateObjectList ;
+    public final List<Function> triples() throws RecognitionException {
+        List<Function> value = null;
 
 
         NewLiteral subject5 =null;
 
-        List<Atom> predicateObjectList6 =null;
+        List<Function> predicateObjectList6 =null;
 
 
         try {
@@ -673,9 +673,9 @@ public class TurtleParser extends Parser {
 
 
     // $ANTLR start "predicateObjectList"
-    // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:221:1: predicateObjectList returns [List<Atom> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
-    public final List<Atom> predicateObjectList() throws RecognitionException {
-        List<Atom> value = null;
+    // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:221:1: predicateObjectList returns [List<Function> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
+    public final List<Function> predicateObjectList() throws RecognitionException {
+        List<Function> value = null;
 
 
         IRI v1 =null;
@@ -688,7 +688,7 @@ public class TurtleParser extends Parser {
 
 
 
-           value = new LinkedList<Atom>();
+           value = new LinkedList<Function>();
 
         try {
             // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:225:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
@@ -708,7 +708,7 @@ public class TurtleParser extends Parser {
 
 
                   for (NewLiteral object : l1) {
-                    Atom atom = null;
+                    Function atom = null;
                     if (v1.equals(RDF_TYPE_URI)) {
                       URIConstant c = (URIConstant) object;  // it has to be a URI constant
                       Predicate predicate = dfac.getClassPredicate(c.getURI());
@@ -752,7 +752,7 @@ public class TurtleParser extends Parser {
 
 
             	          for (NewLiteral object : l2) {
-            	            Atom atom = null;
+            	            Function atom = null;
             	            if (v2.equals(RDF_TYPE_URI)) {
             	              URIConstant c = (URIConstant) object;  // it has to be a URI constant
             	              Predicate predicate = dfac.getClassPredicate(c.getURI());

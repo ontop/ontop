@@ -188,12 +188,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public CQIE getCQIE(Atom head, List<Atom> body) {
+	public CQIE getCQIE(Function head, List<Function> body) {
 		return new CQIEImpl(head, body);
 	}
 
 	@Override
-	public CQIE getCQIE(Atom head, Atom body) {
+	public CQIE getCQIE(Function head, Function body) {
 		return new CQIEImpl(head, Collections.singletonList(body));
 	}
 

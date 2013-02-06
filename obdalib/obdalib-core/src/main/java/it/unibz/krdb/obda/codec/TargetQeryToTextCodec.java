@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.codec;
 
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -93,15 +93,15 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 
 		StringBuffer sb = new StringBuffer();
 		if (input instanceof CQIE) {
-			List<Atom> list = ((CQIE) input).getBody();
-			Iterator<Atom> it = list.iterator();
+			List<Function> list = ((CQIE) input).getBody();
+			Iterator<Function> it = list.iterator();
 			boolean atomComma = false;
 			while (it.hasNext()) {
 				if (atomComma == true) {
 					sb.append(", ");
 				}
 				
-				Atom at = (Atom) it.next();
+				Function at = (Function) it.next();
 				String name = at.getPredicate().toString();
 				sb.append(name);
 				sb.append("(");

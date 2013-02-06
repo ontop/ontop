@@ -6,13 +6,13 @@ import java.util.Set;
 
 public interface CQIE extends OBDAQuery {
 
-	public Atom getHead();
+	public Function getHead();
 
-	public List<Atom> getBody();
+	public List<Function> getBody();
 
-	public void updateHead(Atom head);
+	public void updateHead(Function head);
 
-	public void updateBody(List<Atom> body);
+	public void updateBody(List<Function> body);
 
 	public CQIE clone();
 	

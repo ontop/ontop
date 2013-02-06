@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -436,9 +437,9 @@ public class OBDAModelImpl implements OBDAModel {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
 			for (OBDAMappingAxiom mapping : mp) {
 				CQIE cq = (CQIE) mapping.getTargetQuery();
-				List<Atom> body = cq.getBody();
+				List<Function> body = cq.getBody();
 				for (int idx = 0; idx < body.size(); idx++) {
-					Atom oldatom = body.get(idx);
+					Function oldatom = body.get(idx);
 					if (!oldatom.getPredicate().equals(oldname))
 						continue;
 					modifiedCount += 1;
@@ -458,9 +459,9 @@ public class OBDAModelImpl implements OBDAModel {
 			List<OBDAMappingAxiom> mp = new ArrayList<OBDAMappingAxiom>(mappings.get(source.getSourceID()));
 			for (OBDAMappingAxiom mapping : mp) {
 				CQIE cq = (CQIE) mapping.getTargetQuery();
-				List<Atom> body = cq.getBody();
+				List<Function> body = cq.getBody();
 				for (int idx = 0; idx < body.size(); idx++) {
-					Atom oldatom = body.get(idx);
+					Function oldatom = body.get(idx);
 					if (!oldatom.getPredicate().equals(predicate))
 						continue;
 					modifiedCount += 1;

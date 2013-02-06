@@ -20,9 +20,9 @@ public interface OBDADataFactory extends Serializable {
 
 	public Atom getAtom(Predicate predicate, NewLiteral term1, NewLiteral term2);
 
-	public CQIE getCQIE(Atom head, List<Atom> body);
+	public CQIE getCQIE(Function head, List<Function> body);
 
-	public CQIE getCQIE(Atom head, Atom body);
+	public CQIE getCQIE(Function head, Function body);
 
 	public OBDADataSource getDataSource(URI id);
 

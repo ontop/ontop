@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Predicate;
 
@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 
 public class DatalogProgramImpl implements DatalogProgram {
 
@@ -55,7 +56,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 		rules.add(rule);
 
-		Atom head = rule.getHead();
+		Function head = rule.getHead();
 		if (head != null) {
 			Predicate predicate = rule.getHead().getPredicate();
 			List<CQIE> indexedRules = predicateIndex.get(predicate);
@@ -103,11 +104,11 @@ public class DatalogProgramImpl implements DatalogProgram {
 		if (rules.size() > 1) {
 			boolean isucq = true;
 			CQIE rule0 = rules.get(0);
-			Atom head0 = rule0.getHead();
+			Function head0 = rule0.getHead();
 			for (int i = 1; i < rules.size() && isucq; i++) {
 
 				CQIE ruleI = rules.get(i);
-				Atom headI = ruleI.getHead();
+				Function headI = ruleI.getHead();
 				if (head0.getArity() != headI.getArity()
 						|| !(head0.getPredicate().equals(headI.getPredicate()))) {
 					isucq = false;

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
@@ -31,9 +31,9 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 
 			// Check in the Mapping Target Query
 			final CQIE headquery = (CQIEImpl) object.getTargetQuery();
-			final List<Atom> atoms = headquery.getBody();
+			final List<Function> atoms = headquery.getBody();
 			for (int i = 0; i < atoms.size(); i++) {
-				Atom predicate = (Atom) atoms.get(i);
+				Function predicate = (Function) atoms.get(i);
 				isMatch = isMatch || MappingHeadVariableTreeModelFilter.match(keyword.trim(), predicate);
 			}
 			if (isMatch) {

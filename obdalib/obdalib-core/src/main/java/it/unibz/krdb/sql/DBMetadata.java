@@ -1,6 +1,6 @@
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -313,7 +313,7 @@ public class DBMetadata implements Serializable {
 		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
 
 		for (CQIE mapping : program.getRules()) {
-			for (Atom newatom : mapping.getBody()) {
+			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getPredicate();
 				if (newAtomPredicate instanceof BooleanOperationPredicate) {
 					continue;
