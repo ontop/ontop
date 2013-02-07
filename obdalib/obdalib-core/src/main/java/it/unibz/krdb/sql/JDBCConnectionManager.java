@@ -275,21 +275,17 @@ public class JDBCConnectionManager {
 	 *            The database id.
 	 * @return The database meta data object.
 	 */
-	public static DBMetadata getMetaData(Connection conn) {
+	public static DBMetadata getMetaData(Connection conn) throws SQLException {
 		DBMetadata metadata = null;
-		try {
-			final DatabaseMetaData md = conn.getMetaData();
-			if (md.getDatabaseProductName().equals("Oracle")) {
-				// If the database engine is Oracle
-				metadata = getOracleMetaData(md, conn);
-			} else {
-				// For other database engines
-				metadata = getOtherMetaData(md);
-			}
-			return metadata;
-		} catch (Exception e) {
-			throw new RuntimeException("Errors on collecting database metadata: " + e.getMessage());
+		final DatabaseMetaData md = conn.getMetaData();
+		if (md.getDatabaseProductName().equals("Oracle")) {
+			// If the database engine is Oracle
+			metadata = getOracleMetaData(md, conn);
+		} else {
+			// For other database engines
+			metadata = getOtherMetaData(md);
 		}
+		return metadata;
 	}
 
 	/**
@@ -316,6 +312,9 @@ public class JDBCConnectionManager {
 				ResultSet rsColumns = null;
 				try {
 					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
+					if (rsColumns == null) {
+						continue;
+					}
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
@@ -333,7 +332,9 @@ public class JDBCConnectionManager {
 					// Add this information to the DBMetadata
 					metadata.add(td);
 				} finally {
-					rsColumns.close(); // close existing open cursor
+					if (rsColumns != null) {
+						rsColumns.close(); // close existing open cursor
+					}
 				}
 			}
 		} finally {

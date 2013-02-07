@@ -911,13 +911,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			log.debug("... Quest has been initialized.");
 			isClassified = true;
-
-		} catch (Exception e) {
-
-			// log.error(e.getMessage(), e);
-			OBDAException ex = new OBDAException(e.getMessage());
-			ex.setStackTrace(e.getStackTrace());
-
+		}
+		catch (Exception e) {
+			OBDAException ex = new OBDAException(e);
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
 				SQLException e1 = sqle.getNextException();
