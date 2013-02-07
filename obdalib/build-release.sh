@@ -1,15 +1,27 @@
 #!/bin/sh
 
-export JDBC_PLUGINS_PATH=/home/professors/mislusnys/Downloads/Protege_4.2/plugins
-export PROTEGE_COPY_PATH=/tmp/resources
-export PROTEGE_COPY_FILENAME=Protege_4.2
-export JETTY_COPY_PATH=/tmp/resources
-export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
-export OPENRDF_SESAME_PATH=/tmp/resources
-export OPENRDF_SESAME_FILENAME=openrdf-sesame
-export OPENRDF_WORKBENCH_PATH=/tmp/resources
-export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
+#location for the JDBC plugin jars
+export JDBC_PLUGINS_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
 
+# location for protege clean folder (Protege 4.2)
+export PROTEGE_COPY_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
+export PROTEGE_COPY_FILENAME=protege-4.2-beta.284
+export PROTEGE_MAIN_FOLDER_NAME=Protege_4.2
+
+# location and name for jetty distribution (should be ZIP)
+export JETTY_COPY_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
+export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
+export JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9.v20130131
+
+#location for sesame and workbench WEB-APP jars
+export OPENRDF_WORKBENCH_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
+export OPENRDF_SESAME_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies      
+
+# name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
+export OPENRDF_SESAME_FILENAME=openrdf-sesame
+export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
+                
+# folder names of the output
 export PROTEGE_DIST=ontopPro
 export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
@@ -28,9 +40,9 @@ echo " Making -ontopPro- distribution package"
 echo "-----------------------------------------"
 echo "pluginVersion=1.7-alpha2.b$REVISION" >  obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
 rm -fr obdalib-protege41/dist
-mvn install -DskipTests
+mvn -o install -DskipTests
 cd obdalib-protege41/
-mvn bundle:bundle -DskipTests
+mvn -o bundle:bundle -DskipTests
 
 rm -fr ../quest-distribution/$PROTEGE_DIST
 mkdir ../quest-distribution/$PROTEGE_DIST
@@ -39,12 +51,12 @@ cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip ../quest-distribution/$PROTEGE_
 
 cd ../quest-distribution/$PROTEGE_DIST/
 
-mkdir -p $PROTEGE_COPY_FILENAME/plugins
-cp it.unibz.inf.obda.p4plugin-1.7-alpha2-b$REVISION.jar $PROTEGE_COPY_FILENAME/plugins/
-cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.jar $PROTEGE_COPY_FILENAME/plugins/
-cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.prefs.jar $PROTEGE_COPY_FILENAME/plugins/
+mkdir -p $PROTEGE_MAIN_FOLDER_NAME/plugins
+cp it.unibz.inf.obda.p4plugin-1.7-alpha2-b$REVISION.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
+cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
+cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.prefs.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 
-zip $PROTEGE_COPY_FILENAME.zip $PROTEGE_COPY_FILENAME/plugins/*
+zip $PROTEGE_COPY_FILENAME.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*
 mv $PROTEGE_COPY_FILENAME.zip $PROTEGE_COPY_FILENAME-ontop-1.7-alpha2-b$REVISION.zip
 
 rm -fr $PROTEGE_COPY_FILENAME
@@ -58,7 +70,7 @@ echo " Making Sesame distribution package"
 echo "-----------------------------------------"
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
-mvn assembly:assembly -DskipTests
+mvn -o assembly:assembly -DskipTests
 cp target/quest-distribution-1.7-alpha2-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/quest-distribution-1.7-alpha2-sesame-b$REVISION.jar
 unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-1.7-alpha2-dependencies.zip
 cp $OPENRDF_SESAME_PATH/$OPENRDF_SESAME_FILENAME.war $QUEST_SESAME_DIST/
@@ -85,9 +97,9 @@ rm -fr $QUEST_JETTY_DIST
 mkdir $QUEST_JETTY_DIST
 cp $JETTY_COPY_PATH/$JETTY_COPY_FILENAME.zip $QUEST_JETTY_DIST/
 
-export JETTY_FOLDER=$JETTY_COPY_FILENAME
+export JETTY_FOLDER=$JETTY_INNER_FOLDERNAME
 cd $QUEST_JETTY_DIST
-mkdir -p $JETTY_FOLDER/webapps
+mkdir -p $JETTY_INNER_FOLDERNAME/webapps
 cp ../$QUEST_SESAME_DIST/$OPENRDF_SESAME_FILENAME.war $JETTY_FOLDER/webapps
 cp ../$QUEST_SESAME_DIST/$OPENRDF_WORKBENCH_FILENAME.war $JETTY_FOLDER/webapps
 
