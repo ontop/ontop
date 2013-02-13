@@ -5,7 +5,6 @@ import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.Indicator;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -14,7 +13,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.parser.TargetQueryParser;
+import it.unibz.krdb.obda.parser.TargetQueryParserException;
+import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
+import it.unibz.krdb.obda.parser.UnparsableTargetQueryException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,6 +28,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,16 +58,16 @@ public class ModelIOManager {
     private static final String COMMENT_SYMBOL = ";";
 
     private static final int MAX_ENTITIES_PER_ROW = 10;
-
+    
     private OBDAModel model;
     private PrefixManager prefixManager;
     private OBDADataFactory dataFactory;
-    private TurtleSyntaxParser conjunctiveQueryParser;
 
     private List<Predicate> predicateDeclarations = new ArrayList<Predicate>();
     
-//    private List<Indicator> invalidPredicateIndicators = new ArrayList<Indicator>();
     private List<Indicator> invalidMappingIndicators = new ArrayList<Indicator>();
+    
+    private List<TargetQueryParser> listOfParsers = new ArrayList<TargetQueryParser>();
     
     private TargetQueryToTurtleCodec turtleRenderer;
 
@@ -78,12 +82,22 @@ public class ModelIOManager {
     public ModelIOManager(OBDAModel model) {
         this.model = model;
         turtleRenderer = new TargetQueryToTurtleCodec(model);
-
         prefixManager = model.getPrefixManager();
         dataFactory = model.getDataFactory();
-        conjunctiveQueryParser = new TurtleSyntaxParser(model.getPrefixManager());
+
+        // Register available parsers for target query
+        register(new TurtleOBDASyntaxParser(prefixManager));
+        register(new TurtleSyntaxParser(prefixManager));
+    }
+    
+    private void register(TargetQueryParser parser) {
+    	listOfParsers.add(parser);
     }
 
+    private List<TargetQueryParser> getParsers() {
+    	return listOfParsers;
+    }
+    
     /**
      * The save/write operation.
      * 
@@ -446,52 +460,33 @@ public class ModelIOManager {
             }
             
             String[] tokens = line.split("[\t| ]+", 2);
-            if (!tokens[0].trim().isEmpty()) {
+            String label = tokens[0].trim();
+            String value = tokens[1].trim();
+            if (!label.isEmpty()) {
             	currentLabel = tokens[0];
             	wsCount = getSeparatorLength(line, currentLabel.length());
             } else {
             	if (currentLabel.equals(Label.source.name())) {
             		int beginIndex = wsCount + 1; // add one tab to replace the "source" label
-            		String value = line.substring(beginIndex, line.length());
-            		tokens = new String[]{ tokens[0], convertTabToSpaces(value) };
+            		value = line.substring(beginIndex, line.length());
             	}       	
             }
             
             if (currentLabel.equals(Label.mappingId.name())) {
-                mappingId = tokens[1];
+                mappingId = value;
                 if (mappingId.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, Label.mappingId, InvalidMappingException.MAPPING_ID_IS_BLANK));
                     isMappingValid = false;
                 }
             } else if (currentLabel.equals(Label.target.name())) {
-                String targetString = tokens[1];
+                String targetString = value;
                 if (targetString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.TARGET_QUERY_IS_BLANK));
                     isMappingValid = false;
-                } else {
-                    try { 
-                        // Parse the string if it's not empty
-                        targetQuery = conjunctiveQueryParser.parse(targetString);
-                        
-                        // Check if the predicates in the atoms are declared
-                        List<Predicate> undeclaredPredicates = new ArrayList<Predicate>();
-                        for (Function atom : targetQuery.getBody()) {
-                            boolean isDeclared = predicateDeclarations.contains(atom.getPredicate());
-                            if (!isDeclared) {
-                                undeclaredPredicates.add(atom.getPredicate());
-                            }
-                        }
-                        if (!undeclaredPredicates.isEmpty()) {
-                            register(invalidMappingIndicators, new Indicator(lineNumber, new Object[] { mappingId, undeclaredPredicates }, InvalidMappingException.UNKNOWN_PREDICATE_IN_TARGET_QUERY));
-                            isMappingValid = false;
-                        }
-                    } catch (Exception e) { // Catch the exception from parsing the string
-                        register(invalidMappingIndicators, new Indicator(lineNumber, new String[] { mappingId, targetString }, InvalidMappingException.ERROR_PARSING_TARGET_QUERY));
-                        isMappingValid = false;
-                    }
                 }
+                targetQuery = loadTargetQuery(targetString);
             } else if (currentLabel.equals(Label.source.name())) {
-                String sourceString = tokens[1];
+                String sourceString = value;
                 if (sourceString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.SOURCE_QUERY_IS_BLANK));
                     isMappingValid = false;
@@ -513,6 +508,18 @@ public class ModelIOManager {
         if (!mappingId.isEmpty() && isMappingValid) {
             saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);
         }
+    }
+
+	private CQIE loadTargetQuery(String targetString) throws UnparsableTargetQueryException {
+        Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<TargetQueryParser, TargetQueryParserException>();
+		for (TargetQueryParser parser : getParsers()) {
+            try {
+            	return parser.parse(targetString);
+            } catch (TargetQueryParserException e) {
+            	exceptions.put(parser, e);
+            }     
+    	}
+		throw new UnparsableTargetQueryException(exceptions);
     }
 
 	private int getSeparatorLength(String input, int beginIndex) {

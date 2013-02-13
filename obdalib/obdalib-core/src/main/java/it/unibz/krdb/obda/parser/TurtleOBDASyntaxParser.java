@@ -10,14 +10,14 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 
-public class TurtleSyntaxParser implements TargetQueryParser {
+public class TurtleOBDASyntaxParser implements TargetQueryParser {
 
 	private PrefixManager prefMan;
 
 	/**
 	 * Default constructor;
 	 */
-	public TurtleSyntaxParser() {
+	public TurtleOBDASyntaxParser() {
 		this(null);
 	}
 
@@ -29,7 +29,7 @@ public class TurtleSyntaxParser implements TargetQueryParser {
 	 * @param manager
 	 *            The prefix manager.
 	 */
-	public TurtleSyntaxParser(PrefixManager manager) {
+	public TurtleOBDASyntaxParser(PrefixManager manager) {
 		setPrefixManager(manager);
 	}
 
@@ -63,12 +63,12 @@ public class TurtleSyntaxParser implements TargetQueryParser {
 		if (prefMan != null) {
 			// Update the input by appending the directives
 			appendDirectives(bf);
-		}
+		}		
 		try {
 			ANTLRStringStream inputStream = new ANTLRStringStream(bf.toString());
-			TurtleLexer lexer = new TurtleLexer(inputStream);
+			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-			TurtleParser parser = new TurtleParser(tokenStream);
+			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
 			return parser.parse();
 		} catch (RecognitionException e) {
 			throw new TargetQueryParserException(e);

@@ -20,8 +20,8 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
+import it.unibz.krdb.obda.parser.TargetQueryParserException;
+import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.awt.Component;
@@ -45,7 +45,6 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -572,11 +571,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAMappingAxiom mapping;
 
 	private CQIE parse(String query) {
-		TurtleSyntaxParser textParser = new TurtleSyntaxParser(controller.getPrefixManager());
+		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(controller.getPrefixManager());
 		try {
 			return textParser.parse(query);
-		} catch (RecognitionException e) {
-			// log.warn(e.getMessage());
+		} catch (TargetQueryParserException e) {
 			return null;
 		} catch (Exception e) {
 			return null;

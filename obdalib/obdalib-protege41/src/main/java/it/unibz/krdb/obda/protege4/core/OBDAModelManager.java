@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
-import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
@@ -14,7 +13,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlapi3.OBDAModelRefactorer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -23,7 +21,6 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.obda.utils.VersionInfo;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
@@ -64,7 +61,6 @@ import org.semanticweb.owlapi.model.SetOntologyID;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 public class OBDAModelManager implements Disposable {
 
@@ -447,30 +443,21 @@ public class OBDAModelManager implements Disposable {
 					activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, ontologyIRI.toString());
 					if (obdaFile.exists()) {
 						try {
-							/***
-							 * Trying to read the old format.
-							 */
-							DataManager ioManager = new DataManager(activeOBDAModel, queryController);
-							URI obdaDocumentUri = obdaFile.toURI();
-							ioManager.loadOBDADataFromURI(obdaDocumentUri, ontologyIRI.toURI(), activeOBDAModel.getPrefixManager());
-						} catch (SAXException e) { // Migration Plan: Use the new IO manager if the the old one fails to load
-							try {
-								// Load the OBDA model
-								ModelIOManager modelIO = new ModelIOManager(activeOBDAModel);
-								modelIO.load(obdaFile);
-							} catch (Exception ex) {
-								activeOBDAModel.reset();
-								throw new Exception(ex.getMessage() + " (at " + obdaFile + ")");
-							}
-							try {
-								// Load the saved queries
-								QueryIOManager queryIO = new QueryIOManager(queryController);
-								queryIO.load(queryFile);
-							} catch (Exception ex) {
-								queryController.reset();
-								throw new Exception(ex.getMessage() + " (at " + queryFile + ")");
-							}
+							// Load the OBDA model
+							ModelIOManager modelIO = new ModelIOManager(activeOBDAModel);
+							modelIO.load(obdaFile);
+						} catch (Exception ex) {
+							activeOBDAModel.reset();
+							throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
 						}
+						try {
+							// Load the saved queries
+							QueryIOManager queryIO = new QueryIOManager(queryController);
+							queryIO.load(queryFile);
+						} catch (Exception ex) {
+							queryController.reset();
+							throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
+						}						
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
