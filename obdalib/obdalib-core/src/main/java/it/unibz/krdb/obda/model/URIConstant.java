@@ -1,7 +1,5 @@
 package it.unibz.krdb.obda.model;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRI;
 
 /**

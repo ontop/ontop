@@ -98,6 +98,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 	
 	@Override
+	public URIConstant getURIConstant(String uriString) {
+		return new URIConstantImpl(getIRI(uriString));
+	}
+	
+	@Override
 	public URIConstant getURIConstant(IRI uri) {
 		return new URIConstantImpl(uri);
 	}
