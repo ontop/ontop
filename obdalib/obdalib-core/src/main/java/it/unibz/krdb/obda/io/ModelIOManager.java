@@ -11,7 +11,6 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.parser.TargetQueryParser;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +54,10 @@ public class ModelIOManager {
     private static final String START_COLLECTION_SYMBOL = "@collection [[";
     private static final String END_COLLECTION_SYMBOL = "]]";
     private static final String COMMENT_SYMBOL = ";";
-
-    private static final int MAX_ENTITIES_PER_ROW = 10;
     
     private OBDAModel model;
     private PrefixManager prefixManager;
     private OBDADataFactory dataFactory;
-
-    private List<Predicate> predicateDeclarations = new ArrayList<Predicate>();
     
     private List<Indicator> invalidMappingIndicators = new ArrayList<Indicator>();
     
@@ -120,9 +114,6 @@ public class ModelIOManager {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             writePrefixDeclaration(writer);
-            writeClassEntityDeclaration(writer);
-            writeObjectPropertyDeclaration(writer);
-            writeDataPropertyDeclaration(writer);
             for (OBDADataSource source : model.getSources()) {
                 writeSourceDeclaration(source, writer);
                 writeMappingDeclaration(source, writer);
@@ -220,65 +211,6 @@ public class ModelIOManager {
         }
         writer.write("\n");
     }
-
-    private void writeClassEntityDeclaration(BufferedWriter writer) throws IOException {
-        writer.write(CLASS_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
-        writer.write("\n");
-        Set<Predicate> declaredClasses = model.getDeclaredClasses();
-        if (!declaredClasses.isEmpty()) {
-            writeEntities(declaredClasses, writer);
-        }
-        writer.write(END_COLLECTION_SYMBOL);
-        writer.write("\n\n");
-    }
-
-    private void writeObjectPropertyDeclaration(BufferedWriter writer) throws IOException {
-        writer.write(OBJECT_PROPERTY_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
-        writer.write("\n");
-        Set<Predicate> declaredRoles = model.getDeclaredObjectProperties();
-        if (!declaredRoles.isEmpty()) {
-            writeEntities(declaredRoles, writer);
-        }
-        writer.write(END_COLLECTION_SYMBOL);
-        writer.write("\n\n");
-    }
-
-    private void writeDataPropertyDeclaration(BufferedWriter writer) throws IOException {
-        writer.write(DATA_PROPERTY_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
-        writer.write("\n");
-        Set<Predicate> declaredAttributes = model.getDeclaredDataProperties();
-        if (!declaredAttributes.isEmpty()) {
-            writeEntities(declaredAttributes, writer);
-        }
-        writer.write(END_COLLECTION_SYMBOL);
-        writer.write("\n\n");
-    }
-
-    private void writeEntities(Set<? extends Predicate> predicates, BufferedWriter writer) throws IOException {
-        int count = 1;
-        boolean needComma = false;
-        for (Predicate p : predicates) {
-            if (count > MAX_ENTITIES_PER_ROW) {
-                writer.write("\n");
-                count = 1;
-                needComma = false;
-            }
-            if (needComma) {
-                writer.write(", ");
-            }
-            String prefixedName = prefixManager.getShortForm(p.toString());
-            
-            if (prefixedName.equals(p.toString())) { // if the name doesn't get shortened (i.e., still in full URI)
-                writer.write("<" + p.toString() + ">");
-            }
-            else {
-                writer.write(prefixedName);
-            }
-            needComma = true;
-            count++;
-        }
-        writer.write("\n");
-    }
     
     private void writeSourceDeclaration(OBDADataSource source, BufferedWriter writer) throws IOException {
         writer.write(SOURCE_DECLARATION_TAG);
@@ -331,74 +263,24 @@ public class ModelIOManager {
     }
 
     private void readClassDeclaration(LineNumberReader reader) throws IOException {
-        String line = "";
-        while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
-            String[] tokens = line.split(",");
-            for (int i = 0; i < tokens.length; i++) {
-                String declaration = tokens[i].trim();
-                String className = "";
-                if (declaration.contains("<") && declaration.contains(">")) { // if the class declaration is written in full URI
-                    className = declaration.substring(1, declaration.length()-1);
-                } else {
-                   className = expand(declaration);
-                }
-                Predicate predicate = dataFactory.getClassPredicate(className);
-                predicateDeclarations.add(predicate);
-               
-                model.declareClass(predicate);
-            }
-        }
+    	String line;
+        do {
+        	line = reader.readLine(); // Does nothing just iterate the lines
+        } while(!line.equals(END_COLLECTION_SYMBOL));
     }
     
     private void readObjectPropertyDeclaration(LineNumberReader reader) throws IOException {
-        String line = "";
-        while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
-            String[] tokens = line.split(",");
-            for (int i = 0; i < tokens.length; i++) {
-                String declaration = tokens[i].trim();
-                String propertyName = "";
-                if (declaration.contains("<") && declaration.contains(">")) { // if the object property declaration is written in full URI
-                    propertyName = declaration.substring(1, declaration.length()-1);
-                } else {
-                    propertyName = expand(declaration);
-                }
-                Predicate predicate = dataFactory.getObjectPropertyPredicate(propertyName);
-                predicateDeclarations.add(predicate);
-               
-                model.declareObjectProperty(predicate);
-            }
-        }
+    	String line;
+        do {
+        	line = reader.readLine(); // Does nothing just iterate the lines
+        } while(!line.equals(END_COLLECTION_SYMBOL));
     }
     
     private void readDataPropertyDeclaration(LineNumberReader reader) throws IOException {
-        String line = "";
-        while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
-            String[] tokens = line.split(",");
-            for (int i = 0; i < tokens.length; i++) {
-                String declaration = tokens[i].trim();
-                String propertyName = "";
-                if (declaration.contains("<") && declaration.contains(">")) { // if the object property declaration is written in full URI
-                    propertyName = declaration.substring(1, declaration.length()-1);
-                } else {
-                    propertyName = expand(declaration);
-                }
-                Predicate predicate = dataFactory.getDataPropertyPredicate(propertyName);
-                predicateDeclarations.add(predicate);
-               
-                model.declareDataProperty(predicate);
-            }
-        }
-    }
-
-    private String expand(String prefixedName) throws IOException {
-       int index = prefixedName.indexOf(":");
-       if (index == -1) {
-          throw new IOException("Invalid entity name declaration: " + prefixedName);
-       }
-       String prefix = prefixedName.substring(0, index+1);
-       String uri = prefixManager.getURIDefinition(prefix);
-       String fullName = prefixedName.replace(prefix, uri);
-       return fullName;
+    	String line;
+        do {
+        	line = reader.readLine(); // Does nothing just iterate the lines
+        } while(!line.equals(END_COLLECTION_SYMBOL));
     }
     
     private URI readSourceDeclaration(LineNumberReader reader) throws IOException {
