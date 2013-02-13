@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import junit.framework.TestCase;
 
-import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,12 +167,12 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 	
 	private boolean parse(String input) {
-		TurtleSyntaxParser parser = new TurtleSyntaxParser();
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
 		parser.setPrefixManager(getPrefixManager());
 		
 		try {
 	    	parser.parse(input);
-	    } catch (RecognitionException e) {
+	    } catch (TargetQueryParserException e) {
 	      log.debug(e.getMessage());
 	      return false;
 	    } catch (Exception e) {
