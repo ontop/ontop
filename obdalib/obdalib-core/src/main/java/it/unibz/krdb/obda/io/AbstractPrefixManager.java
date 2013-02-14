@@ -82,7 +82,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				prefixPlaceHolder = prefixedName.substring(0, index);
 				
 				// extract the prefix name
-				prefix = prefixPlaceHolder;
+				prefix = prefixPlaceHolder + ":";
 			}
 		} catch (StringIndexOutOfBoundsException e) {
 			throw new InvalidPrefixWritingException();
@@ -92,7 +92,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		if (uri == null) {
 			throw new InvalidPrefixWritingException("The prefix name is unknown: " + prefix); // the prefix is unknown.
 		}
-		return prefixedName.replaceFirst(prefixPlaceHolder, uri);
+		return prefixedName.replaceFirst(prefix, uri);
 	}
 	
 	@Override

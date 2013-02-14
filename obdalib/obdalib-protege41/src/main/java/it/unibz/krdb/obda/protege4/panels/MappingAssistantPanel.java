@@ -46,11 +46,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.DefaultComboBoxModel;
@@ -79,7 +79,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private MapItem predicateSubjectMap;
 	
 	private List<MapItem> predicateObjectMapsList = new ArrayList<MapItem>();
-	
+		
 	private boolean isSubjectClassValid = false;
 	
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -428,8 +428,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			public void run() {
 				String uriTemplate = txtClassUriTemplate.getText();
 				int pos = 0;
-				if (uriTemplate.contains(";")) {
-					pos = uriTemplate.indexOf(";") + 1;
+				if (uriTemplate.contains(":")) {
+					pos = uriTemplate.indexOf(":") + 1;
 				} else {
 					pos = uriTemplate.length();
 				}
@@ -513,107 +513,98 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			return;
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
-
+	
 	private CQIE prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
 		List<Function> body = new ArrayList<Function>();
 		
 		// Store concept in the body, if any
-		String subjectTargetString = predicateSubjectMap.getTargetMapping();
-		String subjectUriTemplate = prefixManager.getExpandForm(subjectTargetString, true);
-		Function subjectTerm = getUriFunctionTerm(subjectUriTemplate);
+		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
 			Function concept = dfac.getAtom(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
 		// Store attributes and roles in the body
-		Set<Variable> variableSet = new HashSet<Variable>();
+		List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
-				String columnName = predicateObjectMap.getTargetMapping();
-				if (columnName.isEmpty()) {
-					throw new RuntimeException("Property mapping should not be empty: " + predicateObjectMap.getName());
-				}
-				if (columnName.startsWith("$") || columnName.startsWith("?")) {
-					columnName = columnName.substring(1, columnName.length());
-				}
-				Variable var = dfac.getVariable(columnName);
-				variableSet.add(var);
-				
-				// Check if the variable has a data type definition
-				NewLiteral objectTerm = var;
-				if (predicateObjectMap.getDataType() != null) {
-					objectTerm = dfac.getFunctionalTerm(predicateObjectMap.getDataType(), var);
-				}
+				NewLiteral objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
 				Function attribute = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
+				distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
-				String predicateTargetString = predicateObjectMap.getTargetMapping();
-				String objectUriTemplate = prefixManager.getExpandForm(predicateTargetString, true);
-				Function objectTerm = getUriFunctionTerm(objectUriTemplate);
-				Function role = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
+				Function role = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				body.add(role);
 			}
 		}
-		
 		// Create the head
-		List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
 		int arity = distinguishVariables.size();
 		Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);
 	}
-
-	private Function getUriFunctionTerm(String template) {
-		// To store the variables contained in the template string
-		List<NewLiteral> terms = new ArrayList<NewLiteral>();
-		
-		// Input = http://www.example.org/person/{$var1}/{$var2}
-		while (template.contains("{") && template.contains("}")) {
-			// register the position for symbol "{" and "}"
-			int start = template.indexOf("{");
-			int end = template.indexOf("}");
-
-			// extract the whole placeholder, i.e., "{$var1}"
-			String placeHolder = Pattern.quote(template.substring(start, end + 1));
-			
-			// change the placeholder string temporarly, i.e., http://www.example.org/person/[]/{$var2}
-			template = template.replaceFirst(placeHolder, "[]");
-
-			// extract the variable name only, e.g., "{$var1}" --> "var1"
-			try {
-				String variableName = placeHolder.substring(4, placeHolder.length() - 3);
-				if (variableName.equals(EMPTY_TEXT)) {
-					throw new RuntimeException("Variable name must have at least 1 character");
-				}
-				terms.add(dfac.getVariable(variableName));
-			} catch (IndexOutOfBoundsException e) {
-				throw new RuntimeException("Variable name must have at least 1 character");
-			}
-			// and repeat!
+	
+	private Function createSubjectTerm(MapItem predicateSubjectMap) {
+		String subjectTargetString = predicateSubjectMap.getTargetMapping();
+		String subjectUriTemplate = "";
+		if (writtenInFullUri(subjectTargetString)) {
+			subjectUriTemplate = subjectTargetString.substring(1, subjectTargetString.length()-1);
+		} else {
+			subjectUriTemplate = prefixManager.getExpandForm(subjectTargetString, false);
 		}
-		// replace the temporal placeholder to the original, i.e., http://www.example.org/person/{}/{}
-		template = template.replace("[]", "{}");
-		ValueConstant uriTemplate = dfac.getValueConstant(template);
-
-		// the URI template is always on the first position in the term list
-		terms.add(0, uriTemplate);
-
-		return dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+		return getUriFunctionTerm(subjectUriTemplate);
 	}
 
+	private NewLiteral createObjectTerm(String column, Predicate datatype) {
+		List<FormatString> columnStrings = parse(column);
+		if (columnStrings.size() > 1) {
+			throw new RuntimeException("Invalid column mapping: " + column);
+		}
+		String columnName = columnStrings.get(0).toString();
+		Variable var = dfac.getVariable(columnName);
+		if (datatype == null) {
+			return var;
+		} else {
+			return dfac.getFunctionalTerm(datatype, var);
+		}
+	}
+	
+	private Function createRefObjectTerm(MapItem predicateObjectMap) {
+		String predicateTargetString = predicateObjectMap.getTargetMapping();
+		String objectUriTemplate = "";
+		if (writtenInFullUri(predicateTargetString)) {
+			objectUriTemplate = predicateTargetString.substring(1, predicateTargetString.length()-1);
+		} else {
+			objectUriTemplate = prefixManager.getExpandForm(predicateTargetString, false);
+		}
+		return  getUriFunctionTerm(objectUriTemplate);
+	}
+	
+	private boolean writtenInFullUri(String input) {
+		return input.startsWith("<") && input.endsWith(">");
+	}
+	
+	private String getColumnName(MapItem predicateObjectMap) {
+		String columnName = predicateObjectMap.getTargetMapping();
+		if (columnName.isEmpty()) {
+			throw new RuntimeException("Property mapping should not be empty: " + predicateObjectMap.getName());
+		}
+		return columnName;
+	}
+	
 	private String getDefaultNamespace(boolean usePrefix) {
 		String defaultNamespace = prefixManager.getDefaultPrefix();
 		if (usePrefix) {
-			defaultNamespace = prefixManager.getShortForm(defaultNamespace, true);
+			defaultNamespace = prefixManager.getShortForm(defaultNamespace, false);
 		}
 		return defaultNamespace;
 	}
 
 	private String defaultUriTemplate() {
-		return String.format("<\"%s\">", getDefaultNamespace(true));
+		return String.format("%s", getDefaultNamespace(true));
 	}
 
 	private MapItem createPredicateSubjectMap() {
@@ -621,6 +612,68 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return new MapItem(new PredicateItem(dfac.getClassPredicate("owl:Thing"), prefixManager));
 	}
 
+	private Function getUriFunctionTerm(String text) {
+		final String PLACEHOLDER = "{}";
+		List<NewLiteral> terms = new LinkedList<NewLiteral>();
+		List<FormatString> tokens = parse(text);
+		StringBuffer sb = new StringBuffer();
+		for (FormatString token : tokens) {
+			if (token instanceof FixedString) { // if part of URI template
+				sb.append(token.toString());
+			} else if (token instanceof ColumnString) {
+				sb.append(PLACEHOLDER);
+				Variable column = dfac.getVariable(token.toString());
+				terms.add(column);
+			}
+		}
+		ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
+		terms.add(0, uriTemplate);
+		return dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+	}
+
+	// Column placeholder pattern
+	private static final String formatSpecifier = "\\{([\\w.]+)?\\}";
+	private static Pattern chPattern = Pattern.compile(formatSpecifier);
+
+	private List<FormatString> parse(String text) {
+		List<FormatString> toReturn = new ArrayList<FormatString>();
+		Matcher m = chPattern.matcher(text);
+		int i = 0;
+		while (i < text.length()) {
+			if (m.find(i)) {
+				if (m.start() != i) {
+					toReturn.add(new FixedString(text.substring(i, m.start())));
+				}
+				String value = m.group(1);
+				toReturn.add(new ColumnString(value));
+				i = m.end();
+			} else {
+				toReturn.add(new FixedString(text.substring(i)));
+				break;
+			}
+		}
+		return toReturn;
+	}
+
+	private interface FormatString {
+		int index();
+		String toString();
+	}
+
+	private class FixedString implements FormatString {
+		private String s;
+		FixedString(String s) { this.s = s; }
+		@Override public int index() { return -1; } // flag code for fixed string
+		@Override public String toString() { return s; }
+	}
+
+	private class ColumnString implements FormatString {
+		private String s;
+		ColumnString(String s) { this.s = s; }
+		@Override public int index() { return 0; } // flag code for column string
+		@Override public String toString() { return s;}
+	}
+	
 	private void clearForm() {
 		cboDataSet.setSelectedIndex(-1);
 		txtQueryEditor.setText(EMPTY_TEXT);

@@ -18,8 +18,8 @@ import javax.swing.table.JTableHeader;
 
 public class SQLResultTable extends JTable {
 
-	private static final long serialVersionUID = 1L;
-	
+	private static final long serialVersionUID = -7327949276473574914L;
+
 	private int selectedColumn;
 	
 	public SQLResultTable() {
@@ -75,46 +75,33 @@ public class SQLResultTable extends JTable {
 					textFieldOnFocus = (JTextField) compOnFocus;
 					String existingText = getExistingText();
 					if (existingText.isEmpty()) {
-						String text = String.format("$%s", table.getColumnName(index));
+						String text = String.format("{%s}", table.getColumnName(index));
 						textFieldOnFocus.setText(text);
 					} else {
-						if (containsPrefix(existingText) || containsIRI(existingText)) {
+						if (hasPrefix(existingText) || writtenInFullUri(existingText)) {
 							int caretPosition = textFieldOnFocus.getCaretPosition();
 							String firstPortion = existingText.substring(0, caretPosition);
 							String secondPortion = existingText.substring(caretPosition, existingText.length());
 							String columnName = table.getColumnName(index);
 							
 							// Append all the texts
-							String text = String.format("%s{$%s}%s", firstPortion, columnName, secondPortion);
+							String text = String.format("%s{%s}%s", firstPortion, columnName, secondPortion);
 							textFieldOnFocus.setText(text);
-							textFieldOnFocus.setCaretPosition(firstPortion.length() + columnName.length() + 3);
+							textFieldOnFocus.setCaretPosition(text.length());
 						}
 					}
 				}
 			}
 		}
 
-		private boolean containsPrefix(String existingText) {
+		private boolean hasPrefix(String input) {
 			// If contains prefix string, e.g., &example;person#
-			String prefix = existingText.substring(0, existingText.indexOf(";") + 1);
-			if (!prefix.isEmpty()) {
-				return true;
-			}
-			return false;
+			String prefix = input.substring(0, input.indexOf(":") + 1);
+			return (prefix.isEmpty()) ? false : true;
 		}
 
-		private boolean containsIRI(String existingText) {
-			// If contains IRI ends with slash, e.g., "http://www.example.org/person/"
-			String uri = existingText.substring(0, existingText.indexOf("/") + 1);
-			if (!uri.isEmpty()) {
-				return true;
-			}
-			// If contains IRI ends with hash, e.g., "http://www.example.org/person#"
-			uri = existingText.substring(0, existingText.indexOf("#") + 1);
-			if (!uri.isEmpty()) {
-				return true;
-			}
-			return false;
+		private boolean writtenInFullUri(String input) {
+			return input.startsWith("<") || input.endsWith(">");
 		}
 
 		private String getExistingText() {

@@ -25,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -295,15 +294,12 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 	}
 
 	private String defaultUriTemplate() {
-		return String.format("<\"%s\">", getDefaultNamespace(true));
+		return String.format("%s", getDefaultNamespace());
 	}
 
-	private String getDefaultNamespace(boolean usePrefix) {
+	private String getDefaultNamespace() {
 		String defaultNamespace = prefixManager.getDefaultPrefix();
-		if (usePrefix) {
-			defaultNamespace = prefixManager.getShortForm(defaultNamespace, true);
-		}
-		return defaultNamespace;
+		return prefixManager.getShortForm(defaultNamespace, false);
 	}
 
 	//
