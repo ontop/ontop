@@ -321,7 +321,10 @@ public class R2RMLParser {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
 				objectString = trim(parsedString);
-				objectAtom = fac.getValueConstant(objectString);
+				if (objectString.contains("^^"))
+					objectAtom = getExplicitTypedObject(objectString);
+				else
+					objectAtom = fac.getValueConstant(objectString);
 			}
 
 			// look for template declaration
@@ -375,6 +378,25 @@ public class R2RMLParser {
 	}
 	
 	
+	private NewLiteral getExplicitTypedObject(String string) {
+		
+		NewLiteral typedObject = null;
+		String[] strings = string.split("<");
+		if (strings.length > 1) {
+			String consts = strings[0];
+			consts = consts.substring(0, consts.length()-2);
+			consts = trim(consts);
+			String type = strings[1];
+			if (type.endsWith(">"))
+				type = type.substring(0, type.length() - 1);
+
+			Predicate predicate = fac.getPredicate(OBDADataFactoryImpl.getIRI(type), 1);
+			NewLiteral constant = fac.getValueConstant(consts);
+			typedObject = fac.getAtom(predicate, constant);
+		}
+		return typedObject;
+	}
+
 	public List<Resource> getJoinNodes(Graph myGraph, Resource termMap)
 	{
 		List<Resource> joinPredObjNodes = new ArrayList<Resource>();
