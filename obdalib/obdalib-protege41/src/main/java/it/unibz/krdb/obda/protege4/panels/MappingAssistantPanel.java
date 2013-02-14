@@ -7,7 +7,6 @@ import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -24,9 +23,11 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.protege4.gui.MapItem;
 import it.unibz.krdb.obda.protege4.gui.PredicateItem;
+import it.unibz.krdb.obda.protege4.gui.SQLResultSetTableModel;
 import it.unibz.krdb.obda.protege4.gui.component.AutoSuggestComboBox;
 import it.unibz.krdb.obda.protege4.gui.component.PropertyMappingPanel;
 import it.unibz.krdb.obda.protege4.gui.component.SQLResultTable;
@@ -661,15 +662,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			action.run();
 			latch.await();
 			progMonitor.stop();
-			ResultSet set = action.getResult();
-			if (set != null) {
-				IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
+			ResultSet rs = action.getResult();
+			if (rs != null) {
+				SQLResultSetTableModel model = new SQLResultSetTableModel(rs, fetchSize());
 				tblQueryResult.setModel(model);
-				set.close();
 			}
 		} catch (Exception e) {
 			DialogUtils.showQuickErrorDialog(null, e);
 		}
+	}
+
+	private int fetchSize() {
+		return Integer.parseInt(txtRowCount.getText());
 	}
 
 	private void releaseResultset() {
@@ -881,19 +885,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					// Execute the sql query
 					try {
 						// Construct the sql query
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType);
 						StringBuffer sb = new StringBuffer(txtQueryEditor.getText());
-						long rowCount = Long.parseLong(txtRowCount.getText());
-						if (rowCount > 0) { // add the limit filter
-							sb.append(" ");
+						int rowCount = fetchSize();
+						if (rowCount >= 0) { // add the limit filter
+							sb.append("\n");
+							if (sqlDialect instanceof SQLServerSQLDialectAdapter) {
+								sb.append(SqlServerSliceHack());
+							}
 							sb.append(sqlDialect.sqlSlice(rowCount, 0));
 						} else {
 							throw new RuntimeException("Invalid limit number.");
-						}
-						TableModel oldmodel = tblQueryResult.getModel();
-						if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
-							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
-							rstm.close();
 						}
 						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 						Connection c = man.getConnection(selectedSource);
@@ -908,5 +911,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			};
 			thread.start();
 		}
+	}
+	
+	public String SqlServerSliceHack() {
+		// SQL Server requires 'Order By' clause before executing the slice operation
+		return "ORDER BY 1\n";
 	}
 }
