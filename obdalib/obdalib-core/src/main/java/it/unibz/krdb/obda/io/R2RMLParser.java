@@ -6,6 +6,9 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -213,13 +216,6 @@ public class R2RMLParser {
 			subjectAtom = getTermTypeAtom(parsedString, subjectString);
 		}
 		
-		iterator = myGraph.match(object, inverseExpression, null,
-				(Resource) null);
-		if (iterator.hasNext()) {
-			parsedString = iterator.next().getObject().toString();
-			// System.out.println(parsedString);
-		}
-		
 		// process class declaration
 		iterator = myGraph.match(object, classUri, null, (Resource) null);
 		while (iterator.hasNext()) {
@@ -290,7 +286,18 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			objectAtom = fac.getURIConstant(OBDADataFactoryImpl.getIRI(parsedString));
+			//uriconstant
+			if(parsedString.startsWith("http://"))
+				objectAtom = fac.getURIConstant(OBDADataFactoryImpl.getIRI(parsedString));
+			else
+			{
+				//valueconstant
+				Predicate pred = fac.getUriTemplatePredicate(1);
+				NewLiteral newlit = fac.getValueConstant(trim(parsedString));
+				objectAtom = fac.getFunctionalTerm(pred, newlit);
+			}
+				
+			
 		}
 
 		// process OBJECTMAP
@@ -302,22 +309,23 @@ public class R2RMLParser {
 			newiterator = myGraph.match(object, column, null, (Resource) null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
+				objectString = trim(parsedString);
 				// System.out.println(parsedString);
-				objectAtom = fac.getVariable(trim(parsedString));
+				objectAtom = fac.getVariable(objectString);
 			}
+			
 
 			// look for constant declaration
-			newiterator = myGraph
-					.match(object, constant, null, (Resource) null);
+			newiterator = myGraph.match(object, constant, null, (Resource) null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
-				objectAtom = fac.getValueConstant(trim(parsedString));
+				objectString = trim(parsedString);
+				objectAtom = fac.getValueConstant(objectString);
 			}
 
 			// look for template declaration
-			newiterator = myGraph
-					.match(object, template, null, (Resource) null);
+			newiterator = myGraph.match(object, template, null, (Resource) null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 
@@ -327,14 +335,38 @@ public class R2RMLParser {
 
 			}
 			// process termType declaration
-			newiterator = myGraph
-					.match(object, termType, null, (Resource) null);
+			newiterator = myGraph.match(object, termType, null, (Resource) null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
 				objectAtom = getTermTypeAtom(parsedString, objectString);
 
 			}
+			
+			// look for language declaration
+			newiterator = myGraph.match(object, language, null, (Resource) null);
+			if (newiterator.hasNext()) {
+				parsedString = newiterator.next().getObject().toString();
+				// System.out.println(parsedString);
+				NewLiteral lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
+				//create literal(object, lang) atom
+				Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
+				NewLiteral langAtom = fac.getAtom(literal, objectAtom, lang);
+				objectAtom = langAtom;
+			}
+			
+			// look for datatype declaration
+			newiterator = myGraph.match(object, datatype, null, (Resource) null);
+			if (newiterator.hasNext()) {
+				parsedString = newiterator.next().getObject().toString();
+				// System.out.println(parsedString);
+				
+				//create datatype(object) atom
+				Predicate dtype = fac.getPredicate(OBDADataFactoryImpl.getIRI(parsedString), 1);
+				NewLiteral langAtom = fac.getAtom(dtype, objectAtom);
+				objectAtom = langAtom;
+			}
+
 
 			
 		}

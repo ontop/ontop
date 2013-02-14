@@ -313,9 +313,11 @@ public class R2RMLManager {
 				//check if predicate = rdf:type
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE))
 				{
-					
-					Predicate newpred = fac.getClassPredicate(objectAtom.toString());
-					body.add(fac.getFunctionalTerm(newpred, subjectAtom.asAtom()));
+					if(objectAtom.getReferencedVariables().size()<1)
+					{
+						Predicate newpred = fac.getClassPredicate(objectAtom.toString());
+						body.add(fac.getFunctionalTerm(newpred, subjectAtom.asAtom()));
+					}
 				}
 				else 
 				{
