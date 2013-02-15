@@ -7,9 +7,9 @@ import java.util.List;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -30,7 +30,7 @@ public class DirectMappingAxiom {
 		this.table = dd;
 		this.SQLString = new String();
 		this.obda_md = obda_md;
-		this.baseuri = new String("http://example.org#");
+		this.baseuri = new String("http://example.org/");
 	}
 	
 	public DirectMappingAxiom(DirectMappingAxiom dmab){
@@ -51,7 +51,7 @@ public class DirectMappingAxiom {
 	}
 	
 	public CQIE getCQ(OBDADataFactory df){
-		Term sub = generateSubject(df, (TableDefinition)table);
+		NewLiteral sub = generateSubject(df, (TableDefinition)table);
 		List<Atom> atoms = new ArrayList<Atom>();
 		
 		//Class Atom
@@ -76,14 +76,14 @@ public class DirectMappingAxiom {
 				Reference ref = att.getReference();
 				String pkTableReference = ref.getTableReference();
 				TableDefinition tdRef = (TableDefinition)obda_md.getDefinition(pkTableReference);
-				Term obj = generateSubject(df, tdRef);
+				NewLiteral obj = generateSubject(df, tdRef);
 				
 				atoms.add(df.getAtom(df.getObjectPropertyPredicate(generateOPURI(table.getName(), att.getName())), sub, obj));
 			}
 		}
 		
 		//To construct the head, there is no static field about this predicate
-		List<Term> headTerms = new ArrayList<Term>();
+		List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
 		for(int i=0;i<table.countAttribute();i++){
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
@@ -104,9 +104,7 @@ public class DirectMappingAxiom {
 	
 	/*
 	 * Generate an URI for datatype property from a string(name of column)
-	 * The style should be baseuri#tablename#columnname as required in Direct Mapping Definition
-	 * But Class URI does not accept two "#" in URI construction, since # "means" ending in URI
-	 * "-" is used to constructed the URI at the position of the second "#"
+	 * The style should be "baseuri/tablename#columnname" as required in Direct Mapping Definition
 	 */
 	private URI generateDPURI(String table, String column){
 		String temple = new String(baseuri+"%s"+"#"+"%s");	
@@ -129,10 +127,10 @@ public class DirectMappingAxiom {
 	 * 		in the following method after 'else'
 	 */
 	
-	private Term generateSubject(OBDADataFactory df, TableDefinition td){
+	private NewLiteral generateSubject(OBDADataFactory df, TableDefinition td){
 		if(td.getPrimaryKeys().size()>0){
 			Predicate uritemple = df.getUriTemplatePredicate(td.getPrimaryKeys().size()+1);
-			List<Term> terms = new ArrayList<Term>();
+			List<NewLiteral> terms = new ArrayList<NewLiteral>();
 			terms.add(df.getValueConstant(subjectTemple(td,td.getPrimaryKeys().size())));
 			for(int i=0;i<td.getPrimaryKeys().size();i++){
 				terms.add(df.getVariable(td.getPrimaryKeys().get(i).getName()));

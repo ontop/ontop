@@ -11,31 +11,21 @@ public class OntoExpansion {
 	private String baseURI;
 	
 	public OntoExpansion(){
-		this.baseURI=new String(":");
+		this.baseURI=new String("http://example.org/");
 	}
 	
 	public void setURI(String uri){
 		this.baseURI = new String(uri);
 	}
+
 	
 	public void enrichOntology(DBMetadata md, OWLOntology rootOntology) throws OWLOntologyStorageException{
 		for(int i=0;i<md.getTableList().size();i++){
-			if(existPK(md.getTableList().get(i))){
-				OntoSchema os = new OntoSchema(md.getTableList().get(i));
-				os.setBaseURI(this.baseURI);
-				os.enrichOntology(rootOntology);
-			}
+			OntoSchema os = new OntoSchema(md.getTableList().get(i));
+			os.setBaseURI(this.baseURI);
+			os.enrichOntology(rootOntology);
+			
 		}
-	}
-	
-	private boolean existPK(DataDefinition dd){
-		boolean existPK =false;
-		for(int i=0;i<dd.getAttributes().size();i++){
-			if(dd.getAttribute(i).bPrimaryKey){
-				existPK=true;
-			}
-		}
-		return existPK;
 	}
 
 }
