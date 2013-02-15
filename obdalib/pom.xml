@@ -28,6 +28,7 @@
 		<module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
 		<module>quest-db</module>
+		<module>quest-rdb2rdf-compliance</module>
 	</modules>
 
 	<profiles>
