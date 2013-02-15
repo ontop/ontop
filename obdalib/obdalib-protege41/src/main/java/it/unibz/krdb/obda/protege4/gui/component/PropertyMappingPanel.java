@@ -542,6 +542,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 		public Object getCellEditorValue() {
 			if (editedItem != null) {
 				editedItem.setTargetMapping(txtPropertyTargetMap.getText());
+				editedItem.setDataType((Predicate) cboDataTypes.getSelectedItem());
 			}
 			return editedItem;
 		}
@@ -563,6 +564,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 		public boolean stopCellEditing() {
 			try { // handling unknown array out of bound exception (?)
 				editedItem.setTargetMapping(txtPropertyTargetMap.getText());
+				editedItem.setDataType((Predicate) cboDataTypes.getSelectedItem());
 				if (editedItem.isValid()) { // Validate the entry
 					setNormalBackground(txtPropertyTargetMap);
 				} else {
