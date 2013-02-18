@@ -17,6 +17,11 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	private QuestDBVirtualStore virtualStore;
 	private QuestDBConnection questDBConn;
 
+	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
+			throws Exception {
+		this(name, null, obdaFile, existential, rewriting);
+	}
+	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		super();
@@ -32,12 +37,14 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		else if (rewriting.equals("Default"))
 			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		
-		URI obdaURI = (new File(obdaFile)).toURI(); 
-		URI tboxURI = (new File(tboxFile)).toURI(); 
-		this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, pref);
-		questDBConn = virtualStore.getConnection();
+		createRepo(name, tboxFile, obdaFile, pref);
 	}
-
+	
+	public SesameVirtualRepo(String name, String obdaFile, String configFileName) throws Exception {
+		
+		this(name, null, obdaFile, configFileName);
+	}
+	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
 		super();
 		QuestPreferences pref = new QuestPreferences();
@@ -47,9 +54,22 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		} else {
 			pref.readDefaultPropertiesFile();
 		}
-		URI obdaURI = URI.create(obdaFile);
-		URI tboxURI = URI.create(tboxFile);
-		this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, pref);
+		
+		createRepo(name, tboxFile, obdaFile, pref);
+	}
+	
+	
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref) throws Exception
+	{
+		URI obdaURI = URI.create(mappingFile);
+		
+		if (tboxFile == null)
+			this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);
+		else
+			{
+				URI tboxURI = URI.create(tboxFile);
+				this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, pref);
+			}
 		questDBConn = virtualStore.getConnection();
 	}
 	
