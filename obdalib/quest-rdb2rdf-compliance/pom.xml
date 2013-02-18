@@ -9,4 +9,63 @@
   <artifactId>quest-rdb2rdf-compliance</artifactId>
   <version>1.7-alpha2</version>
   <name>quest-rdb2rdf-compliance</name>
+  
+  <dependencies>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-core</artifactId>
+			<version>1.7-alpha2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>reformulation-core</artifactId>
+			<version>1.7-alpha2</version>
+		</dependency> 
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>quest-sesame</artifactId>
+			<version>1.7-alpha2</version>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-runtime</artifactId>
+		</dependency>
+       
+       
+	</dependencies>
+                          
+	<repositories>
+		<repository>
+			<id>sesame-official-repository</id>
+			<url>http://repo.aduna-software.org/maven2/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases> 
+			 <snapshots>
+    				<enabled>true</enabled>
+    			</snapshots>
+		</repository>
+		<repository>
+			<id>bolzano-nexus-public</id>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	
 </project>
