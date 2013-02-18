@@ -426,7 +426,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		// log.debug("Fixing vocabulary typing");
 
-		if (inputOBDAModel != null) {
+		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
 			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
 			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
 		}
