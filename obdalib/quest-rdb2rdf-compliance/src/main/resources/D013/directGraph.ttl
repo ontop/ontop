@@ -1,0 +1,9 @@
+@base <http://example.com/base/> .
+
+<Person/ID=1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Person> .
+<Person/ID=1> <Person#ID> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<Person/ID=1> <Person#Name> "Alice" .
+<Person/ID=2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Person> .
+<Person/ID=2> <Person#ID> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<Person/ID=2> <Person#Name> "Bob" .
+<Person/ID=2> <Person#DateOfBirth> "September, 2010" .

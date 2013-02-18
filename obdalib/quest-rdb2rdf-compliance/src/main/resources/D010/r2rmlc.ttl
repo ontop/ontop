@@ -1,0 +1,19 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap1>
+    a rr:TriplesMap;
+        
+	rr:logicalTable [ rr:tableName "\"Country Info\""; ] ;
+	
+	rr:subjectMap [ rr:template "http://example.com/{\"Country Code\"}/{\"Name\"}" ]; 
+	
+	rr:predicateObjectMap
+	[ 
+		rr:predicate	ex:code ; 
+		rr:objectMap    [ rr:template "\\{\\{\\{ {\"ISO 3166\"} \\}\\}\\}"; rr:termType rr:Literal; ]
+	]
+    .

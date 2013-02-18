@@ -1,0 +1,46 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d015> a rdb2rdftest:DataBase;
+	dcterms:title "One table, three columns, one composite primary key, three rows, two languages" ;
+	dcterms:identifier "D015-1table3columns1composityeprimarykey3rows2languages" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0015>, <tc0015a>, <tc0015b> ;
+.
+
+<dg0015> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of direct graph from multi-column primary keys"; 
+	dcterms:identifier "DirectGraphTC0015" ;
+	test:purpose "Tests the generation of direct graph from multi-column primary keys" ;
+	test:specificationReference "#multi-key" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d015> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0015a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of language tags from a table with language information" ; 
+	dcterms:identifier "R2RMLTC0015a" ;
+	test:purpose "Generation of language tags from a table with language information" ;
+	test:specificationReference "#language-tags" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d015> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0015b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of language tags from a table with language information, and a term map with invalid rr:language value" ; 
+	dcterms:identifier "R2RMLTC0015b" ;
+	test:purpose "Tests a term map with an invalid rr:language value, which is an error" ;
+	test:specificationReference "#language-tags" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d015> ;
+	rdb2rdftest:hasExpectedOutput false ;
+	rdb2rdftest:failMessage "non-conforming R2RML mapping";		
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.

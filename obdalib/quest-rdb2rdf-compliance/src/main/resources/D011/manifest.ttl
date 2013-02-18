@@ -1,0 +1,46 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d011> a rdb2rdftest:DataBase;
+	dcterms:title "Database with many to many relations" ;
+	dcterms:identifier "D011-M2MRelations" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0011>, <tc0011a>, <tc0011b>;
+.
+
+<dg0011> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Many to Many relations"; 
+	dcterms:identifier "DirectGraphTC0011" ;
+	test:purpose "Tests the generation of triples from tables M to M relations" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d011> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0011a> a rdb2rdftest:R2RML ;	
+	dcterms:title "M to M relation, by using a SQL query" ; 
+	dcterms:identifier "R2RMLTC0011a" ;
+	test:purpose "Tests, M to M relations, by using a SQL query" ;
+	test:specificationReference "#r2rml-views" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d011> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0011b> a rdb2rdftest:R2RML ;	
+	dcterms:title "M to M relation, by using an additional Triples Map" ; 
+	dcterms:identifier "R2RMLTC0011b" ;
+	test:purpose "Tests, M to M relations, by using an additional Triples Map" ;
+	test:specificationReference "#physical-tables" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d011> ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.

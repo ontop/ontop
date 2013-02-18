@@ -1,0 +1,71 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . 
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d014> a rdb2rdftest:DataBase;
+	dcterms:title "3 tables, one primary key, one foreign key" ;
+	dcterms:identifier "D014-3tables1primarykey1foreignkey" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0014>, <tc0014a>, <tc0014b>, <tc0014c>, <tc0014d> ;
+.
+
+<dg0014> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of direct graph from a database with primary key referencing candidate key"; 
+	dcterms:identifier "DirectGraphTC0014" ;
+	test:purpose "Test the generation of direct graph from a database with primary key referencing candidate key";
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d014> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0014a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Subjectmap with rr:inverseExpression" ; 
+	dcterms:identifier "R2RMLTC0014a" ;
+	test:purpose "Tests a rr:subjectMap with rr:inverseExpression" ;
+	test:specificationReference "#inverse" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d014> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0014b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Triplesmaps with rr:inverseExpression and rr:joinCondition" ; 
+	dcterms:identifier "R2RMLTC0014b" ;
+	test:purpose "Test two triplesmaps, one with a rr:inverseExpression and the other with a rr:joinCondition for foerign key relations" ;
+	test:specificationReference "#dfn-join-condition" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d014> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0014c> a rdb2rdftest:R2RML ;	
+	dcterms:title "Triplesmaps with rr:inverseExpression, rr:joinCondition, and referencing object maps" ; 
+	dcterms:identifier "R2RMLTC0014c" ;
+	test:purpose "Triplesmaps with rr:inverseExpression, rr:joinCondition, and referencing object maps" ;
+	test:specificationReference "#foreign-key" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d014> ;
+	rdb2rdftest:output "mappedc.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.
+
+<tc0014d> a rdb2rdftest:R2RML ;	
+	dcterms:title "three tables, one primary key, one foreign key" ; 
+	dcterms:identifier "R2RMLTC0014d" ;
+	test:purpose "Test the translation of database type codes to IRIs" ;
+	test:specificationReference "#example-translationtable" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d014> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedd.nq" ;	
+	rdb2rdftest:mappingDocument "r2rmld.ttl" ;
+.

@@ -1,0 +1,46 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d005> a rdb2rdftest:DataBase;
+	dcterms:title "One table, three columns, three rows, two duplicate tuples, no primary key" ;
+	dcterms:identifier "D005-1table3columns3rows2duplicates" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0005>, <tc0005a>,  <tc0005b> ;
+.
+
+<dg0005> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of BlankNodes from duplicate tuples"; 
+	dcterms:identifier "DirectGraphTC0005" ;
+	test:purpose "Tests the generation of Blank Nodes for duplicate tuples" ;
+	test:specificationReference "#no-pk" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d005> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0005a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Typing of resources" ; 
+	dcterms:identifier "R2RMLTC0005a" ;
+	test:purpose "Tests the typing of resources" ;
+	test:specificationReference "#typing" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d005> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0005b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Default mapping" ; 
+	dcterms:identifier "R2RMLTC0005b" ;
+	test:purpose "Tests the generation of a default mapping for tables without a primary key" ;
+	test:specificationReference "#default-mappings" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d005> ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.

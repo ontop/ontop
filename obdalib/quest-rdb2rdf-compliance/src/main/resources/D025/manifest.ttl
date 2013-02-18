@@ -1,0 +1,22 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d025> a rdb2rdftest:DataBase;
+	dcterms:title "Three tables, three primary keys, three foreign keys" ;
+	dcterms:identifier "D025-3tables3primarykeys3foreignkeys" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0025>;
+.
+
+<dg0025> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of triples from three tables, three primary keys, three foreign keys"; 
+	dcterms:identifier "DirectGraphTC0025" ;
+	test:purpose "Generation of triples from three tables, three primary keys, three foreign keys" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d025> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.

@@ -1,0 +1,25 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix dept: <http://example.com/dept#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap1>
+    a rr:TriplesMap;
+    rr:logicalTable [ rr:sqlQuery """
+       SELECT ('Department' || "deptno") AS "deptId"
+            , "deptno"
+            , "dname"
+            , "loc"
+       FROM "DEPT"
+       """ ];
+
+    rr:subjectMap [ rr:column "\"deptId\""; rr:termType rr:BlankNode;
+                    rr:inverseExpression "{\"deptno\"} = substr({\"deptId\"},length('Department')+1)"];
+
+    rr:predicateObjectMap 
+    [ 
+      rr:predicate	dept:location ; 
+      rr:objectMap	[ rr:column "\"loc\"" ]
+    ];
+ 
+.

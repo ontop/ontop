@@ -1,0 +1,22 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d017> a rdb2rdftest:DataBase;
+	dcterms:title "I18N No Special Chars" ;
+	dcterms:identifier "D017-I18NnoSpecialChars" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg017> ;
+.
+
+<dg0017> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "I18N No Special Chars" ; 
+	dcterms:identifier "DirectGraphTC0017" ;
+	test:purpose "Test de generation of a direct graph from a I18N No Special Chars database" ;
+	test:specificationReference "#no-pk" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d017> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.

@@ -1,0 +1,34 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d000> a rdb2rdftest:DataBase;
+	dcterms:title "One table, a column, zero rows, no primary key" ;
+	dcterms:identifier "D000-1table1column0rows" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0000>, <tc0000>;
+.
+
+<dg0000> a rdb2rdftest:DirectMapping;	
+	dcterms:title "Direct mapping of an empty table"; 
+	dcterms:identifier "DirectGraphTC0000" ;
+	test:purpose "Tests if an empty table produces an empty RDF graph" ;
+	test:specificationReference "#no-pk" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:database <d000> ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0000> a rdb2rdftest:R2RML ;	
+	dcterms:title "one table, one column, zero rows" ; 
+	dcterms:identifier "R2RMLTC0000" ;
+	test:purpose "Tests if an empty table produces an empty RDF graph" ;
+	test:specificationReference "#physical-tables" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:database <d000> ;
+	rdb2rdftest:output "mapped.nq" ;
+	rdb2rdftest:mappingDocument "r2rml.ttl" ;
+.

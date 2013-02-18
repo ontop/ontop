@@ -1,0 +1,34 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d018> a rdb2rdftest:DataBase;
+	dcterms:title "One table, one primary key, two columns, three rows" ;
+	dcterms:identifier "D018-1table1primarykey2columns3rows" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0018>, <tc0018a> ;
+.
+
+<dg0018> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of triples by using CHAR datatype column"; 
+	dcterms:identifier "DirectGraphTC0018" ;
+	test:purpose "Generation of triples by using CHAR datatype column, resulting RDF literal is space-padded." ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d018> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0018a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples by using CHAR datatype column" ; 
+	dcterms:identifier "R2RMLTC0018a" ;
+	test:purpose "Generation of triples by using CHAR datatype column, resulting RDF literal is space-padded." ;
+	test:specificationReference "#from-template" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d018> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.

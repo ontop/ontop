@@ -1,0 +1,66 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap1>
+    a rr:TriplesMap;
+
+    rr:logicalTable [ rr:sqlQuery """
+       SELECT "Student"."ID" as ID,
+              "Student"."FirstName" as FirstName,
+              "Student"."LastName" as LastName,
+              "Sport"."Description" as Description,
+              "Sport"."ID" as Sport_ID
+       FROM "Student","Sport","Student_Sport"
+       WHERE "Student"."ID" = "Student_Sport"."ID_Student"
+       AND "Sport"."ID" = "Student_Sport"."ID_Sport";
+       """; ];
+
+    rr:subjectMap [ rr:template "http://example.com/{ID}/{FirstName};{LastName}" ];
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:id ; 
+      rr:objectMap	[ rr:column "ID"; ]
+    ];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:firstName ; 
+      rr:objectMap	[ rr:column "FirstName" ]
+    ];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:lastName ; 
+      rr:objectMap	[ rr:column "LastName" ]
+    ];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:plays ; 
+      rr:objectMap	[ rr:template "http://example.com/{Sport_ID}/{Description}" ]
+    ]
+    .
+
+<TriplesMap2>
+    a rr:TriplesMap;
+
+	rr:logicalTable [ rr:tableName  "\"Sport\"" ];
+	
+    rr:subjectMap [ rr:template "http://example.com/{\"ID\"}/{\"Description\"}"; ];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:id ; 
+      rr:objectMap	[ rr:column "\"ID\""; ]
+    ];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:description ; 
+      rr:objectMap	[ rr:column "\"Description\"" ]
+    ]
+    .

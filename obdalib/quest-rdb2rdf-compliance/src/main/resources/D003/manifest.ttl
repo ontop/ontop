@@ -1,0 +1,59 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d003> a rdb2rdftest:DataBase;
+	dcterms:title "One table, three columns, one row, no primary key" ;
+	dcterms:identifier "D003-1table3columns1row" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0003>, <tc0003a>, <tc0003b>, <tc0003c> ;
+.
+
+<dg0003> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Three columns mapping, generation of a BlankNode" ; 
+	dcterms:identifier "DirectGraphTC0003" ;
+	test:purpose "Tests: (1) three columns mapping; (2) generation of a \"BlankNode\" subject; (3) one column to one property" ;
+	test:specificationReference "#no-pk" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d003> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0003a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Three columns mapping, undefined SQL Version identifier" ; 
+	dcterms:identifier "R2RMLTC0003a" ;
+	test:purpose "Tests the presence of an undefined SQL Version identifier" ;
+	test:specificationReference "#dfn-sql-version-identifier" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d003> ;
+	rdb2rdftest:hasExpectedOutput false ;	
+	rdb2rdftest:failMessage "non-conforming R2RML mapping";
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0003b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Three columns mapping, concatenation of columns, by using a rr:sqlQuery to produce literal" ; 
+	dcterms:identifier "R2RMLTC0003b" ;
+	test:purpose "Tests: (1) three column mapping; and (2) concatenation of columns to produce literal, by using a rr:sqlQuery" ;
+	test:specificationReference "#dfn-sql-query"  ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d003> ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0003c> a rdb2rdftest:R2RML ;	
+	dcterms:title "Three columns mapping, by using a rr:template to produce literal" ; 
+	dcterms:identifier "R2RMLTC0003c" ;
+	test:purpose "Tests: (1) three column mapping; and (2) the use of rr:template to produce literal" ;
+	test:specificationReference "#from-template"  ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d003> ;
+	rdb2rdftest:output "mappedc.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.
+

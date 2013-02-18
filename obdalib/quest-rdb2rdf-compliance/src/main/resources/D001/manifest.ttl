@@ -1,0 +1,46 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d001> a rdb2rdftest:DataBase;
+	dcterms:title "One table, one column, one row, no primary key" ;
+	dcterms:identifier "D001-1table1column1row" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0001>, <tc0001a>, <tc0001b> ;
+.
+
+<dg0001> a rdb2rdftest:DirectMapping;	
+	dcterms:title "Direct mapping that generates a BlankNode"; 
+	dcterms:identifier "DirectGraphTC0001" ;
+	test:purpose "Tests: (1) one column mapping, no primary key; (2) generation of a \"BlankNode\" subject; (3) one column to one property" ;
+	test:specificationReference "#no-pk" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d001> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0001a> a rdb2rdftest:R2RML ;	
+	dcterms:title "One column mapping, subject URI generation by using rr:template" ; 
+	dcterms:identifier "R2RMLTC0001a" ;
+	test:purpose "Tests: (1) one column mapping; (2) subject URI generation by using rr:tmplate; (3) one column to one property" ;
+	test:specificationReference "#dfn-template-valued-term-map" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d001> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0001b> a rdb2rdftest:R2RML ;	
+	dcterms:title "One column mapping, generation of a BlankNode subject by using rr:termType" ; 
+	dcterms:identifier "R2RMLTC0001b" ;
+	test:purpose "Tests: (1) one column mapping; (2) generation of a BlankNode subject by using rr:termType; (3) one column to one property" ;
+	test:specificationReference "#termtype" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d001> ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.

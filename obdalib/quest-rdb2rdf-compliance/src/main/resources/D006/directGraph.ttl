@@ -1,0 +1,5 @@
+@base <http://example.com/base/> .
+
+<Student/Name=Venus> <Student#Name> "Venus" .
+<Student/Name=Venus> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Student> .
+

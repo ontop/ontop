@@ -1,0 +1,58 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d008> a rdb2rdftest:DataBase;
+	dcterms:title "One table, a composite primary key, three columns, one row" ;
+	dcterms:identifier "D008-1table1compositeprimarykey3columns1row" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0008>, <tc0008a>, <tc0008b>, <tc0008c>  ;
+.
+
+<dg0008> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of direct graph from a table with composite primary key"; 
+	dcterms:identifier "DirectGraphTC0008" ;
+	test:purpose "Tests the generation of a direct graph from a table with a composite primary key" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d008> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0008a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples to a target graph by using rr:graphMap and rr:template" ; 
+	dcterms:identifier "R2RMLTC0008a" ;
+	test:purpose "Test that results of the mapping can be directed to a target graph by using rr:graphMap and rr:template" ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d008> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0008b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples referencing object map" ; 
+	dcterms:identifier "R2RMLTC0008b" ;
+	test:purpose "Tests the mapping specification referencing object map without join" ;
+	test:specificationReference "#dfn-referencing-object-map" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d008> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0008c> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples by using multiple predicateMaps within a rr:predicateObjectMap" ; 
+	dcterms:identifier "R2RMLTC0008c" ;
+	test:purpose "Tests the generation of triples by using multiple predicateMaps within a rr:predicateObjectMap" ;
+	test:specificationReference "#physical-tables" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d008> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedc.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.

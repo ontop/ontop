@@ -1,0 +1,118 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d007> a rdb2rdftest:DataBase;
+	dcterms:title "One table, one primary key, two columns, one row" ;
+	dcterms:identifier "D007-1table1primarykey2columns1row" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0007>, <tc0007a>, <tc0007b>, <tc0007c>, <tc0007d>, <tc0007e>, <tc0007f>, <tc0007g>, <tc0007h> ;
+.
+
+<dg0007> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of a subject"; 
+	dcterms:identifier "DirectGraphTC0007" ;
+	test:purpose "Tests the generation of a subject" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0007a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Typing resources by relying on rdf:type predicate" ; 
+	dcterms:identifier "R2RMLTC0007a" ;
+	test:purpose "Tests the typing resources by relying on rdf:type predicate" ;
+	test:specificationReference "#typing" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0007b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Assigning triples to Named Graphs" ; 
+	dcterms:identifier "R2RMLTC0007b" ;
+	test:purpose "Tests the generation of triples to a named graph" ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0007c> a rdb2rdftest:R2RML ;	
+	dcterms:title "One column mapping, using rr:class" ; 
+	dcterms:identifier "R2RMLTC0007c" ;
+	test:purpose "Tests subjectmap with more than one class IRIs, rr:class" ;
+	test:specificationReference "#typing" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappedc.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.
+
+<tc0007d> a rdb2rdftest:R2RML ;	
+	dcterms:title "One column mapping, specifying an rr:predicateObjectMap with rdf:type" ; 
+	dcterms:identifier "R2RMLTC0007d" ;
+	test:purpose " Tests subjectmap with an alternative of having rr:class, i.e., by specifying an rr:predicateObjectMap with predicate rdf:type" ;
+	test:specificationReference "#typing" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappedd.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmld.ttl" ;
+.
+
+<tc0007e> a rdb2rdftest:R2RML ;	
+	dcterms:title "One column mapping, using rr:graphMap and rr:class" ; 
+	dcterms:identifier "R2RMLTC0007e" ;
+	test:purpose "Tests subjectmap with rr:graphMap and rr:class" ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappede.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmle.ttl" ;
+.
+
+<tc0007f> a rdb2rdftest:R2RML ;	
+	dcterms:title "One column mapping, using rr:graphMap and specifying an rr:predicateObjectMap with rdf:type" ; 
+	dcterms:identifier "R2RMLTC0007f" ;
+	test:purpose "Tests subjectmap with rr:graphMap and specifying an rr:predicateObjectMap with predicate rdf:type" ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappedf.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlf.ttl" ;
+.
+
+<tc0007g> a rdb2rdftest:R2RML ;	
+	dcterms:title "Assigning triples to the default graph" ; 
+	dcterms:identifier "R2RMLTC0007g" ;
+	test:purpose "Tests the generation of triples to the default graph" ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:output "mappedg.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlg.ttl" ;
+.
+
+<tc0007h> a rdb2rdftest:R2RML ;	
+	dcterms:title "Assigning triples to a non-IRI named graph" ; 
+	dcterms:identifier "R2RMLTC0007h" ;
+	test:purpose "Tests the generation of triples to a non-IRI named graph, which is an error" ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d007> ;
+	rdb2rdftest:failMessage "non-conforming R2RML mapping";
+	rdb2rdftest:hasExpectedOutput false ;
+	rdb2rdftest:mappingDocument "r2rmlh.ttl" ;
+.

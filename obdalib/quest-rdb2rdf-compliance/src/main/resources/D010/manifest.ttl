@@ -1,0 +1,60 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d010> a rdb2rdftest:DataBase;
+	dcterms:title "One table, a primary key, three columns, three rows" ;
+	dcterms:identifier "D010-1table1primarykey3colums3rows" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0010>, <tc0010a>, <tc0010b>, <tc0010c>  ;
+.
+
+<dg0010> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of direct graph for table names with spaces"; 
+	dcterms:identifier "DirectGraphTC0010" ;
+	test:purpose "Tests the generation of the direct graph for table names with spaces" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d010> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0010a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Template with table column with special chars" ; 
+	dcterms:identifier "R2RMLTC0010a" ;
+	test:purpose "Tests a template with blank space in column value" ;
+	test:specificationReference "#dfn-template-valued-term-map" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d010> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0010b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Template with table columns with special chars" ; 
+	dcterms:identifier "R2RMLTC0010b" ;
+	test:purpose "Tests a template with special chars in column value" ;
+	test:specificationReference "#dfn-template-valued-term-map" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d010> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0010c> a rdb2rdftest:R2RML ;	
+	dcterms:title "Template with table columns with special chars and backslashes" ; 
+	dcterms:identifier "R2RMLTC0010c" ;
+	test:purpose "Tests a template with special chars in column value and backslash escapes in string templates" ;
+	test:specificationReference "#dfn-template-valued-term-map" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d010> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedc.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.
+
+

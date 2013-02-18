@@ -1,0 +1,35 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d020> a rdb2rdftest:DataBase;
+	dcterms:title "One table, one column, five rows" ;
+	dcterms:identifier "D020-1table1column5rows" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <tc0020a>, <tc0020b> ;
+.
+
+<tc0020a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples by using IRI value in columns" ; 
+	dcterms:identifier "R2RMLTC0020a" ;
+	test:purpose "Test the generation of triples by using IRI value in columns" ;
+	test:specificationReference "#from-template" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d020> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0020b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples by using IRI value in columns, with data errors" ; 
+	dcterms:identifier "R2RMLTC0020b" ;
+	test:purpose "Test the generation of triples by using IRI value in columns, conforming R2RML mapping with data error (and no result)" ;
+	test:specificationReference "#from-column" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d020> ;
+	rdb2rdftest:hasExpectedOutput false ;
+	rdb2rdftest:failMessage "Conforming R2RML mapping with data error";	
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;	
+.

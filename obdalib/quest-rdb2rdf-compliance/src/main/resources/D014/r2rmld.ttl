@@ -1,0 +1,27 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.com/ns#> .
+@prefix emp: <http://example.com/emp#> .
+@prefix dept: <http://example.com/dept#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap4>
+	a rr:TriplesMap;
+    rr:logicalTable [ rr:sqlQuery """
+
+        SELECT "EMP".*, (CASE "job"
+            WHEN 'CLERK' THEN 'general-office'
+            WHEN 'NIGHTGUARD' THEN 'security'
+            WHEN 'ENGINEER' THEN 'engineering'
+        END) AS ROLE FROM "EMP"
+
+        """ ];
+    rr:subjectMap [
+        rr:template "http://data.example.com/employee/{\"empno\"}";
+    ];
+    rr:predicateObjectMap [
+        rr:predicate ex:role;
+        rr:objectMap [ rr:template "http://data.example.com/roles/{ROLE}" ];
+    ].
+    

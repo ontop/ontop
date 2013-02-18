@@ -1,0 +1,34 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d006> a rdb2rdftest:DataBase;
+	dcterms:title "One table, one primary key, one column, one row" ;
+	dcterms:identifier "D006-1table1primarykey1column1row" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0006>, <tc0006a> ;
+.
+
+<dg0006> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of subjects"; 
+	dcterms:identifier "DirectGraphTC0006" ;
+	test:purpose "Tests the generation of subjects" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d006> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0006a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Long form of R2RML by using rr:constant in rr:subjectMap, rr:predicateMap, rr:objectMap and rr:graphMap" ; 
+	dcterms:identifier "R2RMLTC0006a" ;
+	test:purpose "Tests the use of rr:constant in rr:subjectMap, rr:predicateMap, rr:objectMap and rr:graphMap" ;
+	test:specificationReference "#constant" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d006> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.

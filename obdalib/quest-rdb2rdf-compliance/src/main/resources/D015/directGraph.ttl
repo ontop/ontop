@@ -1,0 +1,18 @@
+@base <http://example.com/base/> .
+
+<Country/Code=BO;Lan=EN> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Country> .
+<Country/Code=BO;Lan=EN> <Country#Code> "BO" .
+<Country/Code=BO;Lan=EN> <Country#Lan> "EN" .
+<Country/Code=BO;Lan=EN> <Country#Name> "Bolivia, Plurinational State of" .
+<Country/Code=BO;Lan=ES> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Country> .
+<Country/Code=BO;Lan=ES> <Country#Code> "BO" .
+<Country/Code=BO;Lan=ES> <Country#Lan> "ES" .
+<Country/Code=BO;Lan=ES> <Country#Name> "Estado Plurinacional de Bolivia" . 
+<Country/Code=IE;Lan=EN> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Country> .
+<Country/Code=IE;Lan=EN> <Country#Code> "IE" .
+<Country/Code=IE;Lan=EN> <Country#Lan> "EN" .
+<Country/Code=IE;Lan=EN> <Country#Name> "Ireland" .
+<Country/Code=IE;Lan=ES> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Country> .
+<Country/Code=IE;Lan=ES> <Country#Code> "IE" .
+<Country/Code=IE;Lan=ES> <Country#Lan> "ES" .
+<Country/Code=IE;Lan=ES> <Country#Name> "Irlanda" .

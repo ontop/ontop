@@ -1,0 +1,26 @@
+@base <http://example.com/base/> .
+
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <IOUs> .
+_:a <IOUs#fname> "Bob" .
+_:a <IOUs#lname> "Smith" .
+_:a <IOUs#amount> "3.0E1"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <IOUs> .
+_:b <IOUs#fname> "Sue" .
+_:b <IOUs#lname> "Jones" .
+_:b <IOUs#amount> "2.0E1"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <IOUs> .
+_:c <IOUs#fname> "Bob" .
+_:c <IOUs#lname> "Smith" .
+_:c <IOUs#amount> "3.0E1"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:d <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Lives> .
+_:d <Lives#fname> "Bob" .
+_:d <Lives#lname> "Smith" .
+_:d <Lives#city> "London" .
+_:e <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Lives> .
+_:e <Lives#fname> "Sue" .
+_:e <Lives#lname> "Jones" .
+_:e <Lives#city> "Madrid" .
+_:f <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Lives> .
+_:f <Lives#fname> "Bob" .
+_:f <Lives#lname> "Smith" .
+_:f <Lives#city> "London" .

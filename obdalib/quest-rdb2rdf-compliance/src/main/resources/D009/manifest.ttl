@@ -1,0 +1,70 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d009> a rdb2rdftest:DataBase;
+	dcterms:title "Two tables, a primary key, a foreign key" ;
+	dcterms:identifier "D009-2tables1primarykey1foreignkey" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0009>, <tc0009a>, <tc0009b>, <tc0009c>, <tc0009d> ; 
+.
+
+<dg0009> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Two tables 1 primary key 1 foreign key"; 
+	dcterms:identifier "DirectGraphTC0009" ;
+	test:purpose "Tests two tables with a primary key and a foreign key" ;
+	test:specificationReference "#fk-candidate" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d009> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+<tc0009a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples from foreign key relations" ; 
+	dcterms:identifier "R2RMLTC0009a" ;
+	test:purpose "Test foreign key relationships among logical tables" ;
+	test:specificationReference "#foreign-key" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d009> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0009b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples to multiple graphs" ; 
+	dcterms:identifier "R2RMLTC0009b" ;
+	test:purpose "Test that results from distinct parts of the mapping can be directed to different target graphs." ;
+	test:specificationReference "#named-graphs" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d009> ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0009c> a rdb2rdftest:R2RML ;	
+	dcterms:title "Unnamed column in a logical table" ; 
+	dcterms:identifier "R2RMLTC0009c" ;
+	test:purpose "Test a logical table with unnamed column." ;
+	test:specificationReference "#dfn-sql-query" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d009> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedc.nq" ;	
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.
+
+<tc0009d> a rdb2rdftest:R2RML ;	
+	dcterms:title "Named column in logical table" ; 
+	dcterms:identifier "R2RMLTC0009d" ;
+	test:purpose "Test a logical table named column." ;
+	test:specificationReference "#dfn-sql-query" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d009> ;
+	rdb2rdftest:output "mappedd.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmld.ttl" ;
+.

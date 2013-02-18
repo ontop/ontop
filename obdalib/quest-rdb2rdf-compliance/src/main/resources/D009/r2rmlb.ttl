@@ -1,0 +1,59 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap1>
+    a rr:TriplesMap;
+        
+	rr:logicalTable [ rr:tableName  "\"Student\"" ];
+	
+    rr:subjectMap 
+    [ 
+        rr:template	"http://example.com/resource/student_{\"ID\"}";
+        rr:class	<http://example.com/ontology/Student>;
+        rr:graph	<http://example.com/graph/students> ;
+    ]; 
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	foaf:name ; 
+      rr:objectMap	[ rr:column "\"Name\""; ];
+      rr:graph		<http://example.com/graph/students> ;
+    ];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	<http://example.com/ontology/practises> ; 
+      rr:objectMap	[ 
+           a rr:RefObjectMap ;
+           rr:parentTriplesMap <TriplesMap2>;
+           rr:joinCondition [
+				rr:child "\"Sport\"" ;
+				rr:parent "\"ID\"" ;
+		   ]
+      ];
+      rr:graph	<http://example.com/graph/practise> ;
+    ];
+    .
+
+<TriplesMap2>
+    a rr:TriplesMap;
+
+	rr:logicalTable [ rr:tableName  "\"Sport\"" ];
+
+    rr:subjectMap 
+    [ 
+        rr:template "http://example.com/resource/sport_{\"ID\"}";
+        rr:class <http://example.com/ontology/Sport>;
+        rr:graph <http://example.com/graph/sports> ;
+    ]; 
+	
+    rr:predicateObjectMap
+    [ 
+		rr:predicate	rdfs:label ; 
+		rr:objectMap	[ rr:column "\"Name\""; ];
+    ];
+	.

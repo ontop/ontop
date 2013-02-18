@@ -1,0 +1,41 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap1>
+    a rr:TriplesMap;
+
+	rr:logicalTable [ rr:tableName  "\"IOUs\"" ]; 
+	
+    rr:subjectMap [
+            rr:template "{\"fname\"}_{\"lname\"}"; 
+            rr:termType rr:BlankNode ;
+      ];
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicate		foaf:name ; 
+      rr:objectMap    [ 
+            rr:template "{\"fname\"} {\"lname\"}";
+            rr:termType rr:Literal ;
+      ]
+    ];
+    .
+<TriplesMap2>
+    a rr:TriplesMap;
+	
+	rr:logicalTable [ rr:tableName  "\"Lives\"" ]; 
+
+    rr:subjectMap [
+            rr:template "{\"fname\"}_{\"lname\"}"; 
+            rr:termType rr:BlankNode;
+      ];
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	ex:city ; 
+      rr:objectMap	[ rr:column "\"city\""; ]
+    ];
+	.

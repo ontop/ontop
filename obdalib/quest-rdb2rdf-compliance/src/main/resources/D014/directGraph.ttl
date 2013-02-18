@@ -1,0 +1,23 @@
+@base <http://example.com/base/> .
+
+<EMP/empno=7369> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <EMP> .
+<EMP/empno=7369> <EMP#empno> "7369"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+<EMP/empno=7369> <EMP#deptno> "10"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+<EMP/empno=7369> <EMP#ref-deptno> _:c  .
+<EMP/empno=7369> <EMP#ename> "SMITH" .
+<EMP/empno=7369> <EMP#job> "CLERK" .
+<EMP/empno=7369> <EMP#etype> "PART_TIME" .
+_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <LIKES> .
+_:a <LIKES#id> "7369"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+_:a <LIKES#likeType> "Playing" .
+_:a <LIKES#likedObj> "Soccer" .
+_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <LIKES> .
+_:b <LIKES#id> "7369"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+_:b <LIKES#likeType> "Watching" .
+_:b <LIKES#likedObj> "Basketball" .
+_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <DEPT> .
+_:c <DEPT#deptno> "10"^^<http://www.w3.org/2001/XMLSchema#integer>  .
+_:c <DEPT#dname> "APPSERVER" .
+_:c <DEPT#loc> "NEW YORK" .
+
+

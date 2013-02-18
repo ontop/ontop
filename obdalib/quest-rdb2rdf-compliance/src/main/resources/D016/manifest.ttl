@@ -1,0 +1,84 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d016> a rdb2rdftest:DataBase;
+	dcterms:title "One table, one primary key, ten columns, three rows with sql datatypes" ;
+	dcterms:identifier "D016-1table1primarykey10columns3rowsSQLdatatypes" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <dg0016>, <tc0016a>, <tc0016b>, <tc0016c>, <tc0016d>, <tc0016e> ;
+.
+
+<dg0016> a rdb2rdftest:DirectMapping ;	
+	dcterms:title "Generation of direct graph from a database with sql datatypes"; 
+	dcterms:identifier "DirectGraphTC0016" ;
+	test:purpose "Tests the generation of direct graph from a database with sql datatypes" ;
+	test:specificationReference "#lead-ex" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;	
+	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+
+<tc0016a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Table with datatypes: string and integer" ; 
+	dcterms:identifier "R2RMLTC0016a" ;
+	test:purpose "Tests the rr:termtype  and datatype conversions: string and integer" ;
+	test:specificationReference "#datatype-conversions" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
+
+<tc0016b> a rdb2rdftest:R2RML ;	
+	dcterms:title "Table with datatypes: real and float" ; 
+	dcterms:identifier "R2RMLTC0016b" ;
+	test:purpose "Tests the rr:termtype and datatype conversions: real and float" ;
+	test:specificationReference "#datatype-conversions" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedb.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
+<tc0016c> a rdb2rdftest:R2RML ;	
+	dcterms:title "Table with datatypes: date and timestamp" ; 
+	dcterms:identifier "R2RMLTC0016c" ;
+	test:purpose "Tests the rr:termtype and datatype conversions: date and timestamp" ;
+	test:specificationReference "#datatype-conversions" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedc.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlc.ttl" ;
+.
+
+<tc0016d> a rdb2rdftest:R2RML ;	
+	dcterms:title "Table with datatypes, boolean conversions" ; 
+	dcterms:identifier "R2RMLTC0016d" ;
+	test:purpose "Tests the rr:termtype and datatype conversions: boolean" ;
+	test:specificationReference "#datatype-conversions" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedd.nq" ;
+	rdb2rdftest:mappingDocument "r2rmld.ttl" ;
+.
+
+<tc0016e> a rdb2rdftest:R2RML ;	
+	dcterms:title "Table with datatypes, binary column" ; 
+	dcterms:identifier "R2RMLTC0016e" ;
+	test:purpose "Tests the rr:termtype and datatype conversions: binary" ;
+	test:specificationReference "#datatype-conversions" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappede.nq" ;
+	rdb2rdftest:mappingDocument "r2rmle.ttl" ;
+.
+
