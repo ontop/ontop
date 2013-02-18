@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.io;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -23,8 +24,12 @@ public class R2RMLReader {
 	
 	private Graph graph ;
 	
-	
 	public R2RMLReader(String file)
+	{
+		this(new File(file));
+	}
+	
+	public R2RMLReader(File file)
 	{
 	
 		manager = new R2RMLManager(file);

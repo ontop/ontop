@@ -49,9 +49,6 @@ import org.openrdf.rio.helpers.StatementCollector;
 
 
 public class R2RMLManager {
-	
-	
-	
 
 	
 	private GraphUtil util = new GraphUtil();
@@ -66,10 +63,15 @@ public class R2RMLManager {
 	
 	public R2RMLManager(String file)
 	{
+		this(new File(file));
+	}
+	
+	public R2RMLManager(File file)
+	{
 		try{
 			r2rmlParser = new R2RMLParser();
 		RDFParser parser = new org.openrdf.rio.turtle.TurtleParser();
-		InputStream in = new FileInputStream(new File(file));
+		InputStream in = new FileInputStream(file);
 		URL documentUrl = new URL("file://"+file);
 		myGraph = new org.openrdf.model.impl.GraphImpl();
 		StatementCollector collector = new StatementCollector(myGraph);

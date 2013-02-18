@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -152,7 +153,7 @@ public class R2RMLParser {
 		if (newiterator.hasNext()) {
 			String sqlString = newiterator.next().getObject().toString();
 			// System.out.println(sqlString);
-			return trim(sqlString);
+			return trimTo1(sqlString);
 		}
 		return "";
 	}
@@ -195,7 +196,7 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			subjectString = trim(parsedString);
+			subjectString = trimTo1(parsedString);
 			subjectAtom = getURIFunction(subjectString);
 		}
 		
@@ -309,7 +310,7 @@ public class R2RMLParser {
 			newiterator = myGraph.match(object, column, null, (Resource) null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
-				objectString = trim(parsedString);
+				objectString = trimTo1(parsedString);
 				// System.out.println(parsedString);
 				objectAtom = fac.getVariable(objectString);
 			}
@@ -333,7 +334,7 @@ public class R2RMLParser {
 				parsedString = newiterator.next().getObject().toString();
 
 				// craete uri("...",var)
-				objectString = trim(parsedString);
+				objectString = trimTo1(parsedString);
 				objectAtom = getURIFunction(objectString);
 
 			}
@@ -460,7 +461,7 @@ public class R2RMLParser {
 			int begin = string.indexOf("{");
 			int end = string.indexOf("}");
 			String var = string.substring(begin + 1, end);
-			terms.add(fac.getVariable(trim(var)));
+			terms.add(fac.getVariable((var)));
 			string = string.replace("{" + var + "}", "[]");
 		}
 		string = string.replace("[]", "{}");
@@ -494,6 +495,15 @@ public class R2RMLParser {
 	private String trim(String string) {
 		
 		while (string.startsWith("\"") && string.endsWith("\"")) {
+			
+			string = string.substring(1, string.length() - 1);
+		}
+		return string;
+	}
+	
+	private String trimTo1(String string) {
+		
+		while (string.startsWith("\"\"") && string.endsWith("\"\"")) {
 			
 			string = string.substring(1, string.length() - 1);
 		}
@@ -558,5 +568,7 @@ public class R2RMLParser {
 		}
 		return null;
 	}
+
+	
 
 }
