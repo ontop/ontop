@@ -45,7 +45,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	public String sqlCast(String value, int type) {
 		String strType = null;
 		if (type == Types.VARCHAR) {
-			strType = "VARCHAR(1142)";
+			strType = "VARCHAR(500)";
 		} else {
 			throw new RuntimeException("Unsupported SQL type");
 		}
