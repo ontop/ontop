@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -57,7 +56,9 @@ import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -606,6 +607,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			DBMetadata metadata = JDBCConnectionManager
 					.getMetaData(localConnection);
+			SQLDialectAdapter sqladapter = SQLAdapterFactory
+					.getSQLDialectAdapter(datasource
+					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			preprocessProjection(unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel
 					.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
@@ -856,13 +861,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			else {
 				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 			}
-			JDBCUtility jdbcutil = new JDBCUtility(datasource
-					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			SQLDialectAdapter sqladapter = SQLAdapterFactory
-					.getSQLDialectAdapter(datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
-					sqladapter);
+			JDBCUtility jdbcutil = new JDBCUtility(
+					datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
 
 			/*
 			 * Setting up the TBox we will use for the reformulation
@@ -931,6 +932,45 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * the house-keeping connection, it has already been used.
 				 */
 				disconnect();
+			}
+		}
+	}
+
+	private void preprocessProjection(ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory, 
+			SQLDialectAdapter adapter) throws SQLException {
+		Statement st = null;
+		try {
+			st = localConnection.createStatement();
+			for (OBDAMappingAxiom axiom : mappings) {
+				String sourceString = axiom.getSourceQuery().toString();
+				String orderBy = "order by 1"; // necessary for SQL Server
+				String slice = adapter.sqlSlice(0, Long.MIN_VALUE);
+				String copySourceQuery = String.format("select * from (%s) as view20130219 %s %s", sourceString, orderBy, slice);
+				if (st.execute(copySourceQuery)) {
+					StringBuffer sb = new StringBuffer();
+					ResultSetMetaData rsm = st.getResultSet().getMetaData();
+					boolean needComma = false;
+					for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+						if (needComma) {
+							sb.append(", ");
+						}
+						sb.append(rsm.getColumnName(pos));
+						needComma = true;
+					}
+					String columnProjection = sb.toString();
+					
+					String tmp = axiom.getSourceQuery().toString();
+					int fromPosition = tmp.toLowerCase().indexOf("from");
+					int asteriskPosition = tmp.indexOf('*');
+					if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
+						String str = sourceString.replaceFirst("\\*", columnProjection);
+						axiom.setSourceQuery(factory.getSQLQuery(str));
+					}
+				}
+			}
+		} finally {
+			if (st != null) {
+				st.close();
 			}
 		}
 	}

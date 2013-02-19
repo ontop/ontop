@@ -25,8 +25,11 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit == Long.MIN_VALUE || limit == 0) {
-			// if the limit is not specified
-			return String.format("OFFSET %d ROWS", offset);
+			if (offset == Long.MIN_VALUE) {
+				return "OFFSET 0 ROWS";
+			} else {
+				return String.format("OFFSET %d ROWS", offset);
+			}
 		} else {
 			if (offset == Long.MIN_VALUE) {
 				// If the offset is not specified
