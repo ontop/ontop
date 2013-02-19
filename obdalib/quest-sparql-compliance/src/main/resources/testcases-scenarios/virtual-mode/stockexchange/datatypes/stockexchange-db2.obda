@@ -24,7 +24,7 @@ owl:Thing, :Offer, :PhysicalPerson, :Transaction, :Investor, :StockTrader, :Lega
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl jdbc:db2://10.10.160.28:50000/sample
+connectionUrl jdbc:db2://10.10.160.28:50000/stockex
 username	db2inst1
 password	fish
 driverClass	com.ibm.db2.jcc.DB2Driver
