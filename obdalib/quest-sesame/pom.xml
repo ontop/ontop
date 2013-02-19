@@ -53,17 +53,10 @@
 		</dependency>
 
 		<dependency>
-			<artifactId>obdalib-core</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7-alpha2</version>
-		</dependency>
-
-		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha2</version>
 		</dependency>
-
 
 		<dependency>
 			<!-- this includes ALL seasame -->
@@ -87,10 +80,10 @@
 			<artifactId>sesame-queryresultio-text</artifactId>
 		</dependency>
 
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-			</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.directory.studio</groupId>
