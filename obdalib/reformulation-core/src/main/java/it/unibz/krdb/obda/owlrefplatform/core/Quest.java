@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
@@ -943,9 +944,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			st = localConnection.createStatement();
 			for (OBDAMappingAxiom axiom : mappings) {
 				String sourceString = axiom.getSourceQuery().toString();
-				String orderBy = "order by 1"; // necessary for SQL Server
-				String slice = adapter.sqlSlice(0, Long.MIN_VALUE);
-				String copySourceQuery = String.format("select * from (%s) as view20130219 %s %s", sourceString, orderBy, slice);
+				String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
 				if (st.execute(copySourceQuery)) {
 					StringBuffer sb = new StringBuffer();
 					ResultSetMetaData rsm = st.getResultSet().getMetaData();
@@ -973,6 +972,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				st.close();
 			}
 		}
+	}
+
+	private String createDummyQueryToFetchColumns(String originalQuery, SQLDialectAdapter adapter) {
+		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
+		if (adapter instanceof SQLServerSQLDialectAdapter) {
+			toReturn += "ORDER BY 1 "; // necessary for SQL Server
+		}
+		toReturn += adapter.sqlSlice(0, Long.MIN_VALUE);
+		return toReturn;
 	}
 
 	private List<CQIE> createSigmaRules(Ontology ontology) {
