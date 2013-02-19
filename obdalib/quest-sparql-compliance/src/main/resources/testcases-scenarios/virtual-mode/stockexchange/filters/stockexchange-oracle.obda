@@ -26,13 +26,13 @@ owl:Thing, :Offer, :PhysicalPerson, :Transaction, :Investor, :StockTrader, :Lega
 sourceUri	RandBStockExchange
 connectionUrl	jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe
 username	system
-password	obda09
+password	obdaps83
 driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
 target		:getAddressObj($ID) a :Address; :addressID $ID; :inStreet $STREET; :hasNumber $NUMBER^^xsd:integer; :inCity $CITY; :inState $STATE; :inCountry $COUNTRY . 
-source		select ID, STREET, NUMBER, CITY, STATE, COUNTRY from ADDRESS
+source		select ID, STREET, "NUMBER", CITY, STATE, COUNTRY from ADDRESS
 
 mappingId	mapping-brokers
 target		:getPersonObj($ID) a :StockBroker; :firstName $NAME; :lastName $LASTNAME; :dateOfBirth $DATEOFBIRTH; :ssn $SSN . 
@@ -64,7 +64,7 @@ source		select ID, NUMBEROFSHARES, SHARETYPE, DESCRIPTION from STOCKINFORMATION
 
 mappingId	mapping-stockbooks
 target		:getStockBookObj($DATE) a :StockExchangeList; :listdate $DATE . 
-source		select distinct DATE from STOCKBOOKLIST 
+source		select distinct "DATE" from STOCKBOOKLIST 
 
 mappingId	mapping-tradesOnBehalfOf-physical
 target		:getPersonObj($BROKERID) :tradesOnBehalfOf :getPersonObj($CLIENTID) . 
@@ -76,7 +76,7 @@ source		select BROKERID, COMPANYID from BROKERWORKSFOR where COMPANYID IS NOT NU
 
 mappingId	mapping-transactions
 target		:getTransactionObj($ID) a :Transaction; :transactionID $ID; :transactionDate $DATE; :amountOfTransaction $AMOUNT . 
-source		select ID, DATE, AMOUNT from TRANSACTION
+source		select ID, "DATE", AMOUNT from TRANSACTION
 
 mappingId	mapping-transaction-roles-persons
 target		:getTransactionObj($ID) :isExecutedBy :getPersonObj($BROKERID); :isExecutedFor :getPersonObj($FORCLIENTID); :involvesInstrument :getStockObj($STOCKID) . 
@@ -92,7 +92,7 @@ source		select ID, COMPANYID from STOCKINFORMATION
 
 mappingId	mapping-stock-listedin
 target		:getStockBookObj($DATE) :listsStock :getStockObj($STOCKID) . 
-source		select DATE, STOCKID from STOCKBOOKLIST
+source		select "DATE", STOCKID from STOCKBOOKLIST
 
 mappingId	mapping-dealer
 target		:getPersonObj($CLIENTID) a :Dealer . 
