@@ -76,15 +76,15 @@ source		select brokerid, companyid from brokerworksfor where companyid IS NOT NU
 
 mappingId	mapping-transactions
 target		:getTransactionObj($id) a :Transaction; :transactionID $id; :transactionDate $date; :amountOfTransaction $amount . 
-source		select id, date, amount from transaction
+source		select id, date, amount from transactions
 
 mappingId	mapping-transaction-roles-persons
 target		:getTransactionObj($id) :isExecutedBy :getPersonObj($brokerid); :isExecutedFor :getPersonObj($forclientid); :involvesInstrument :getStockObj($stockid) . 
-source		select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL
+source		select id, brokerid, forclientid, stockid from transactions where forclientid IS NOT NULL
 
 mappingId	mapping-transaction-roles-companies
 target		:getTransactionObj($id) :isExecutedBy :getPersonObj($brokerid); :isExecutedFor :getCompanyObj($forcompanyid); :involvesInstrument :getStockObj($stockid) . 
-source		select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL
+source		select id, brokerid, forcompanyid, stockid from transactions where forcompanyid IS NOT NULL
 
 mappingId	mapping-stock-company
 target		:getStockObj($id) :belongsToCompany :getCompanyObj($companyid) . 
@@ -100,6 +100,6 @@ source		select clientid from broker,client,brokerworksfor where ( ( client.id = 
 
 mappingId	mapping-offers
 target		:getTransactionObj($id) a :Offer . 
-source		SELECT id FROM transaction WHERE type=true
+source		SELECT id FROM transactions WHERE type=1
 ]]
 

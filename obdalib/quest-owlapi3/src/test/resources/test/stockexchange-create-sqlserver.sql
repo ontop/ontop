@@ -60,7 +60,7 @@ CREATE TABLE stockinformation (
 	CONSTRAINT stockinformation_pkey PRIMARY KEY NONCLUSTERED (id)
 );
 
-CREATE TABLE "transaction" (
+CREATE TABLE transactions (
     id integer NOT NULL,
     date datetime,
     stockid integer,
@@ -124,7 +124,7 @@ INSERT INTO stockinformation VALUES (667, 100, 1, 211, 'Testo di descrizione 3')
 INSERT INTO stockinformation VALUES (669, 100, 1, 211, 'Testo di descrizione 4');
 INSERT INTO stockinformation VALUES (668, 100, 1, 211, 'Testo di descrizione 5');
 
-INSERT INTO "transaction" VALUES (3331, '2008-04-01 00:00:00', 661, 1, 112, 111, NULL, 12.6);
-INSERT INTO "transaction" VALUES (3332, '2008-04-02 00:00:00', 662, 1, 112, 111, NULL, 108.34);
-INSERT INTO "transaction" VALUES (3333, '2008-04-03 00:00:00', 663, 1, 112, NULL, 212, -2.349);
-INSERT INTO "transaction" VALUES (3334, '2008-04-14 00:00:00', 663, 1, 113, NULL, NULL, 1667.0092);
+INSERT INTO transactions VALUES (3331, '2008-04-01 00:00:00', 661, 1, 112, 111, NULL, 12.6);
+INSERT INTO transactions VALUES (3332, '2008-04-02 00:00:00', 662, 1, 112, 111, NULL, 108.34);
+INSERT INTO transactions VALUES (3333, '2008-04-03 00:00:00', 663, 1, 112, NULL, 212, -2.349);
+INSERT INTO transactions VALUES (3334, '2008-04-14 00:00:00', 663, 1, 113, NULL, NULL, 1667.0092);
