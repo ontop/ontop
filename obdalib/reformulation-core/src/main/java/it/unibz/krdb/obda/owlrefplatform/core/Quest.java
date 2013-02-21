@@ -953,6 +953,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						if (needComma) {
 							sb.append(", ");
 						}
+						if (!rsm.getSchemaName(pos).isEmpty()) {
+							sb.append(rsm.getSchemaName(pos));
+							sb.append(".");
+						}
 						sb.append(rsm.getColumnName(pos));
 						needComma = true;
 					}
