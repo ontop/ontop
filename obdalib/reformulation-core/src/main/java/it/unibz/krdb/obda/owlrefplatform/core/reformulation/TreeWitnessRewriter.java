@@ -76,27 +76,27 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		
 	}
 	
 	private Function getExtAtom(Function a, Set<Predicate> usedExts) {
 		if (a.getArity() == 1) {
-			Predicate ext = cache.getExtPredicateClass(a.getPredicate(), usedExts);
+			Predicate ext = cache.getExtPredicateClass(a.getFunctionSymbol(), usedExts);
 			return fac.getAtom(ext, a.getTerm(0));
 		}
 		else if (a.getArity() == 2){
 			NewLiteral t0 = a.getTerm(0);
 			NewLiteral t1 = a.getTerm(1);
 			if (t0 instanceof AnonymousVariable) {
-				Predicate ext = cache.getExtPredicatePropertySome(a.getPredicate(), true, usedExts);
+				Predicate ext = cache.getExtPredicatePropertySome(a.getFunctionSymbol(), true, usedExts);
 				return fac.getAtom(ext, t1);					
 			} 
 			else if (t1 instanceof AnonymousVariable) {
-				Predicate ext = cache.getExtPredicatePropertySome(a.getPredicate(), false, usedExts);
+				Predicate ext = cache.getExtPredicatePropertySome(a.getFunctionSymbol(), false, usedExts);
 				return fac.getAtom(ext, t0);					
 			} 
 			else {
-				Predicate ext = cache.getExtPredicateProperty(a.getPredicate(), usedExts);
+				Predicate ext = cache.getExtPredicateProperty(a.getFunctionSymbol(), usedExts);
 				return fac.getAtom(ext, t0, t1);					
 			}
 		}
@@ -143,18 +143,22 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private static Function getHeadAtom(IRI headURI, String fragment, List<NewLiteral> arguments) {
-		IRI uri = null;
-		uri = OBDADataFactoryImpl.getIRI(headURI.toString() + fragment);
-		return fac.getAtom(fac.getPredicate(uri, arguments.size()), arguments);
+	private static Function getHeadAtom(IRI base, String suffix, List<NewLiteral> arguments) {
+		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
+		return fac.getAtom(predicate, arguments);
 	}
+	
+	private static IRI getIRI(IRI base, String suffix) {
+		return OBDADataFactoryImpl.getIRI(base.toString() + suffix);
+	}
+	
 	
 	/*
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
 	private void rewriteCC(QueryConnectedComponent cc, Function headAtom, DatalogProgram output, Set<Predicate> usedExts, DatalogProgram edgeDP) {
-		IRI headURI = headAtom.getPredicate().getName();
+		IRI headURI = headAtom.getFunctionSymbol().getName();
 		
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
@@ -176,8 +180,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				twf.addNoCheck(fac.getEQAtom(i.next(), r0));
 			
 			// root atoms
-			for (Function a : tw.getRootAtoms()) 
-				twf.add((a.getArity() == 1) ? fac.getAtom(a.getPredicate(), r0) : fac.getAtom(a.getPredicate(), r0, r0));
+			for (Function a : tw.getRootAtoms()) {
+				Predicate predicate = a.getFunctionSymbol();
+				twf.add((predicate.getArity() == 1) ? fac.getAtom(predicate, r0) : fac.getAtom(predicate, r0, r0));
+			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
 			boolean subsumes = false;
@@ -247,9 +253,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					for (TreeWitness tw : tws.getTWs())
 						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
 							if (edgeAtom == null) {
-								IRI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
+								//IRI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
 								edgeAtom = getHeadAtom(headURI, 
-										"EDGE_" + (edgeDP.getRules().size() + 1) + "_" + atomURI.getRawFragment(), cc.getVariables());
+										"EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.addNoCheck(edgeAtom);				
 								edgeDP.appendRule(fac.getCQIE(edgeAtom, getExtAtoms(edgeAtoms, usedExts)));													
 							}
@@ -298,7 +304,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				rewriteCC(cc, cqieAtom, output, exts, edgeDP); 				
 			}
 			else {
-				IRI cqieURI = cqieAtom.getPredicate().getName();
+				IRI cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<Function>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
 					log.debug("CONNECTED COMPONENT (" + cc.getFreeVariables() + ")" + " EXISTS " + cc.getQuantifiedVariables() + " WITH EDGES " + cc.getEdges());
@@ -432,18 +438,13 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			
 		}
 		
-		private IRI getExtURI(IRI iri, String prefix) {
-			return OBDADataFactoryImpl.getIRI(iri.toString()+ prefix);
-			//return null;
-		}
-		
 		private ExtDatalogProgramDef getConceptDP(BasicClassDescription b) {
 			IRI extURI;
 			if (b instanceof OClass) 
-				extURI = getExtURI(((OClass)b).getPredicate().getName(), "EXT_");
+				extURI = getIRI(((OClass)b).getPredicate().getName(), "EXT_");
 			else {
 				PropertySomeRestriction some = (PropertySomeRestriction)b;
-				extURI = getExtURI(some.getPredicate().getName(),  "EXT_E_" + ((!some.isInverse()) ? "" : "INV_"));
+				extURI = getIRI(some.getPredicate().getName(),  "EXT_E_" + ((!some.isInverse()) ? "" : "INV_"));
 			}
 			
 			ExtDatalogProgramDef dp = new ExtDatalogProgramDef(fac.getAtom(fac.getClassPredicate(extURI), x), getAtom(b));
@@ -462,7 +463,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				dp = getConceptDP(reasoner.getOntologyFactory().createClass(p));
 			}
 			else  {
-				IRI extURI = getExtURI(p.getName(), "EXT_");
+				IRI extURI = getIRI(p.getName(), "EXT_");
 				dp = new ExtDatalogProgramDef(fac.getAtom(fac.getObjectPropertyPredicate(extURI), x, y), 
 											fac.getAtom(p, x, y));
 				for (Property sub: reasoner.getSubProperties(p, false))
@@ -477,7 +478,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 			Predicate ext = null;
 			if (dp != null) {
-				ext = dp.extAtom.getPredicate();
+				ext = dp.extAtom.getFunctionSymbol();
 				extDPs.put(ext, dp.dp);
 			}
 				
@@ -496,7 +497,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("DP FOR " + p + " IS " + dp.dp);
 			dp.minimise();			
 
-			Predicate ext = dp.extAtom.getPredicate();
+			Predicate ext = dp.extAtom.getFunctionSymbol();
 			extDPs.put(ext, dp.dp);
 				
 			extMap.put(p, ext);
@@ -520,12 +521,12 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 		public ExtDatalogProgramDef(Function extAtom, Function mainAtom) {
 			this.extAtom = extAtom;
-			this.mainPredicate = mainAtom.getPredicate();
+			this.mainPredicate = mainAtom.getFunctionSymbol();
 			this.mainQuery = fac.getCQIE(extAtom, mainAtom);
 		}
 		
 		public void add(Function body) {
-			if (body.getPredicate().equals(mainPredicate))
+			if (body.getFunctionSymbol().equals(mainPredicate))
 				return;
 			
 			CQIE query = fac.getCQIE(extAtom, body);
