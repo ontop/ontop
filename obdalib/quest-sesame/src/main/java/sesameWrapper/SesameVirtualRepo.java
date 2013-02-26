@@ -61,13 +61,13 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	
 	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref) throws Exception
 	{
-		URI obdaURI = URI.create(mappingFile);
+		URI obdaURI = new File(mappingFile).toURI();
 		
 		if (tboxFile == null)
 			this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);
 		else
 			{
-				URI tboxURI = URI.create(tboxFile);
+				URI tboxURI = new File(tboxFile).toURI();
 				this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, pref);
 			}
 		questDBConn = virtualStore.getConnection();
