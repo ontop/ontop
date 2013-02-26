@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.sql;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
+import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
@@ -39,6 +40,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.rdf.model.Literal;
 
 public class SQLGenerator implements SQLQueryGenerator {
 
@@ -824,13 +827,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
 				 */
-				NewLiteral term = ov.getTerms().get(0);
-
 				String termStr = null;
-				if (term instanceof ValueConstant) {
-					termStr = jdbcutil.getSQLLexicalForm((ValueConstant) term);
-				} else {
-					termStr = getSQLString(term, index, false);
+				int size = ov.getTerms().size();
+				if ((function instanceof Literal) || size > 2 )
+				{
+					termStr = getSQLStringForTemplateFunction(ov, index);
+				}
+				else {
+					NewLiteral term = ov.getTerms().get(0);
+					if (term instanceof ValueConstant) {
+						termStr = jdbcutil.getSQLLexicalForm((ValueConstant) term);
+					} else {
+						termStr = getSQLString(term, index, false);
+					}
 				}
 				mainColumn = termStr;
 
@@ -839,11 +848,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * New template based URI building functions
 				 */
 
-				mainColumn = getSQLStringForURIFunction(ov, index);
+				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
 				/***
-				 * New template based URI building functions
+				 * New template based BNODE building functions
 				 */
 
 				mainColumn = getSQLStringForBNodeFunction(ov, index);
@@ -878,8 +887,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
 
-			if (function == OBDAVocabulary.RDFS_LITERAL
-					&& ov.getTerms().size() > 1) {
+			if (function == OBDAVocabulary.RDFS_LITERAL || function == OBDAVocabulary.RDFS_LITERAL_LANG)
+				if (ov.getTerms().size() > 1) {
 
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
@@ -892,7 +901,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 
 				String lang = null;
-				NewLiteral langTerm = ov.getTerms().get(1);
+				int last = ov.getTerms().size()-1;
+				NewLiteral langTerm = ov.getTerms().get(last);
 				if (langTerm == OBDAVocabulary.NULL)
 					lang = "NULL";
 				if (langTerm instanceof ValueConstant) {
@@ -961,16 +971,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
-	/***
-	 * Returns the SQL that builds a URI String out of an atom of the form
-	 * uri("htttp:...", x, y,...)
-	 * 
-	 * @param ov
-	 * @param index
-	 * @return
-	 */
-	public String getSQLStringForURIFunction(Function ov, QueryAliasIndex index) {
-
+	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
 		/*
 		 * The first inner term determines the form of the result
 		 */
@@ -979,19 +980,30 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (t instanceof ValueConstant) {
 			/*
 			 * The function is actually a template. The first parameter is a
-			 * string of the form http://.../.../ with place holders of the form
+			 * string of the form http://.../.../ or empty "{}" with place holders of the form
 			 * {}. The rest are variables or constants that should be put in
 			 * place of the palce holders. We need to tokenize and form the
 			 * CONCAT
 			 */
 			ValueConstant c = (ValueConstant) t;
+			Predicate pred = ov.getFunctionSymbol();
 			
-			if (c.getValue().equals("{}")) {
-				return getSQLString(ov.getTerms().get(1), index, false);
-			} else {
-				StringTokenizer tokenizer = new StringTokenizer(c.getValue(), "{}");
-			
-				String functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+			//if (c.getValue().equals("{}")) {
+			//	return getSQLString(ov.getTerms().get(1), index, false);
+		//	} else 
+			{
+				String functionString = "";
+//				String[] split = c.getValue().split("\\{\\}");
+//				if (split.length>1)
+//					 functionString = jdbcutil.getSQLLexicalForm(split[0]);
+//				
+				String template = c.getValue();
+				StringTokenizer tokenizer = new StringTokenizer(template, "{}");
+				
+				if (tokenizer.countTokens() > 0)
+					 functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+		
+				
 				List<String> vex = new LinkedList<String>();
 			
 			   /*
@@ -999,7 +1011,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 	* there is nothing to concatenate
 			 	*/
 				if (ov.getTerms().size() > 1) {
-					for (int termIndex = 1; termIndex < ov.getTerms().size(); termIndex++) {
+					int size = ov.getTerms().size();
+					if (pred == OBDAVocabulary.RDFS_LITERAL || pred == OBDAVocabulary.RDFS_LITERAL_LANG)
+						size--;
+					for (int termIndex = 1; termIndex < size; termIndex++) {
 						NewLiteral currentTerm = ov.getTerms().get(termIndex);
 						String repl = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
 								"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" 
@@ -1023,18 +1038,34 @@ public class SQLGenerator implements SQLQueryGenerator {
 								  "'+', '%2B'), "+
 								  "'''', '%22'), "+
 								  "'/', '%2F')";
-								  
-						vex.add(repl);
+						if (termIndex == 1)
+						{	
+							if (template.startsWith("{}"))
+							{	vex.add(repl);
+								if (!functionString.isEmpty())
+									vex.add(functionString);
+								continue;
+							}
+							else {
+								vex.add(functionString);
+								vex.add(repl);
+							}
+						}
+						else
+							vex.add(repl);
 						if (tokenizer.hasMoreTokens()) {
 							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
 						}
 //						termIndex += 1;
 					}
 				}
-				String[] params = new String[vex.size() + 1];
+			
+				
+				if (vex.size()==1) 
+					return vex.get(0);
+				 
+				String[] params = new String[vex.size()];
 				int i = 0;
-				params[i] = functionString;
-				i += 1;
 				for (String param : vex) {
 					params[i] = param;
 					i += 1;
@@ -1065,10 +1096,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 						+ ov.toString());
 
 	}
+	
+
 
 	/***
 	 * Returns the SQL that builds a URI String out of an atom of the form
-	 * uri("http:...", x, y,...)
+	 * bnode("http:...", x, y,...)
 	 * 
 	 * @param ov
 	 * @param index
@@ -1082,7 +1115,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		NewLiteral t = ov.getTerms().get(0);
 
-		if (t instanceof ValueConstant) {
+		if (t instanceof BNode) {
 			/*
 			 * The function is actually a template. The first parameter is a
 			 * string of the form http://.../.../ with place holders of the form
@@ -1090,30 +1123,84 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * place of the palce holders. We need to tokenize and form the
 			 * CONCAT
 			 */
-			ValueConstant c = (ValueConstant) t;
-			StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
-			String functionString = jdbcutil.getSQLLexicalForm(tokenizer
-					.nextToken());
-			List<String> vex = new LinkedList<String>();
-			int termIndex = 1;
-			do {
-				NewLiteral currentTerm = ov.getTerms().get(termIndex);
-				vex.add(getSQLString(currentTerm, index, false));
-				if (tokenizer.hasMoreTokens()) {
-					vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
+			BNode c = (BNode) t;
+			
+			{
+				String functionString = "";
+				String template = c.getValue();
+				template = template.substring(1, template.length()-1);
+				StringTokenizer tokenizer = new StringTokenizer(template, "{}");
+				
+				if (tokenizer.countTokens() > 0)
+					 functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+		
+				
+				List<String> vex = new LinkedList<String>();
+			
+			   /*
+			 	* New we concat the rest of the function, note that if there is only 1 element
+			 	* there is nothing to concatenate
+			 	*/
+				if (ov.getTerms().size() > 1) {
+					int size = ov.getTerms().size();
+					for (int termIndex = 1; termIndex < size; termIndex++) {
+						NewLiteral currentTerm = ov.getTerms().get(termIndex);
+						String repl = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+								"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" 
+								+ sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
+								+ ",' ', '%20')," +
+								  "'!', '%21')," +
+								  "'@', '%40'),"+
+								  "'#', '%23')," +
+								  "'$', '%24'),"+
+								  "'&', '%26'),"+
+								  "'*', '%42'), "+
+								  "'(', '%28'), "+
+								  "')', '%29'), "+
+								  "'[', '%5B'), "+
+								  "']', '%5D'), "+
+								  "',', '%2C'), "+
+								  "';', '%3B'), "+
+								  "':', '%3A'), "+
+								  "'?', '%3F'), "+
+								  "'=', '%3D'), "+
+								  "'+', '%2B'), "+
+								  "'''', '%22'), "+
+								  "'/', '%2F')";
+						if (termIndex == 1)
+						{	
+							if (template.startsWith("{}"))
+							{	vex.add(repl);
+								if (!functionString.isEmpty())
+									vex.add(functionString);
+								continue;
+							}
+							else {
+								vex.add(functionString);
+								vex.add(repl);
+							}
+						}
+						else
+							vex.add(repl);
+						if (tokenizer.hasMoreTokens()) {
+							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
+						}
+//						termIndex += 1;
+					}
 				}
-				termIndex += 1;
-			} while (tokenizer.hasMoreElements()
-					|| termIndex < ov.getTerms().size());
-			String[] params = new String[vex.size() + 1];
-			int i = 0;
-			params[i] = functionString;
-			i += 1;
-			for (String param : vex) {
-				params[i] = param;
-				i += 1;
-			}
+			
+				
+				if (vex.size()==1) 
+					return vex.get(0);
+				 
+				String[] params = new String[vex.size()];
+				int i = 0;
+				for (String param : vex) {
+					params[i] = param;
+					i += 1;
+				}
 			return sqladapter.strconcat(params);
+			}
 		} else if (t instanceof Variable) {
 			/*
 			 * The function is of the form uri(x), we need to simply return the
@@ -1201,14 +1288,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function function = (Function) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
 		NewLiteral term1 = function.getTerms().get(0);
+		int size = function.getTerms().size();
 
 		if (functionSymbol instanceof DataTypePredicate) {
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: "
 						+ function);
 			}
-			/* atoms of the form integer(x) */
-			return getSQLString(term1, index, false);
+			if (size == 1)
+			{
+				/* atoms of the form integer(x) */
+				return getSQLString(term1, index, false);
+			}
+			else
+			{
+				//datatype(template, vars)
+				return getSQLStringForTemplateFunction(function, index);
+			}
 		} else if (functionSymbol instanceof BooleanOperationPredicate) {
 			/* atoms of the form EQ(x,y) */
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
@@ -1279,7 +1375,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String functionName = function.getFunctionSymbol().toString();
 		if (functionName.equals(OBDAVocabulary.QUEST_URI)
 				|| functionName.equals(OBDAVocabulary.QUEST_BNODE)) {
-			return getSQLStringForURIFunction(function, index);
+			return getSQLStringForTemplateFunction(function, index);
 		} else {
 			throw new RuntimeException("Unexpected function in the query: "
 					+ functionSymbol);
