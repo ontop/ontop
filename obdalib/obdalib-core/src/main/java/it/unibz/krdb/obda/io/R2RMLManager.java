@@ -104,7 +104,7 @@ public class R2RMLManager {
 		ArrayList<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 		
 		//retrieve the TriplesMap nodes
-		Set<Resource> tripleMaps = getMappingNodes(myGraph);
+		Set<Resource> tripleMaps = r2rmlParser.getMappingNodes(myGraph);
 
 		for (Resource tripleMap : tripleMaps) {
 
@@ -172,6 +172,8 @@ public class R2RMLManager {
 		//get subject sql string and newliteral of given node
 		String sourceQuery1 = r2rmlParser.getSQLQuery(myGraph, tripleMap);
 		NewLiteral joinSubject1 = r2rmlParser.getSubjectAtom(myGraph, tripleMap);
+		NewLiteral joinSubject1Child = r2rmlParser.getSubjectAtom(myGraph, tripleMap, "CHILD_");
+		
 		
 		//for each predicateobject map that contains a join
 		for (Resource joinPredObjNode : joinNodes)
@@ -185,26 +187,33 @@ public class R2RMLManager {
 			//get the referenced triple map sql query and subject atom
 			String sourceQuery2 = r2rmlParser.getSQLQuery(myGraph, referencedTripleMap);
 			NewLiteral joinSubject2 = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap);
+			NewLiteral joinSubject2Parent = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap, "PARENT_");
 			
 			//get join condition
 			String childCol = r2rmlParser.getChildColumn(myGraph, joinPredObjNode);
 			String parentCol = r2rmlParser.getParentColumn(myGraph, joinPredObjNode);
 			
-			//if join condition is empty, the two sql queries are the same
-			if (childCol == null || parentCol == null)
-				sourceQuery = sourceQuery1;
-			else
-			{
-				sourceQuery = "SELECT * FROM ("+sourceQuery1 + ") as child, ("+ sourceQuery2 +") as parent " +
-						"WHERE child."+childCol+" = parent."+parentCol;
-			}
-			
 			
 			List<Function> body = new ArrayList<Function>();
 			// construct the atom from subject 1 and 2
 			List<NewLiteral> terms = new ArrayList<NewLiteral>();
-			terms.add(joinSubject1);
-			terms.add(joinSubject2);
+			
+			
+			//if join condition is empty, the two sql queries are the same
+			if (childCol == null || parentCol == null)
+			{
+				sourceQuery = sourceQuery1;
+				terms.add(joinSubject1);
+				terms.add(joinSubject2);
+			}
+			else
+			{
+				sourceQuery = "SELECT * FROM ("+sourceQuery1 + ") as CHILD, ("+ sourceQuery2 +") as PARENT " +
+						"WHERE CHILD."+childCol+" = PARENT."+parentCol;
+				terms.add(joinSubject1Child);
+				terms.add(joinSubject2Parent);
+			}
+			
 			
 			//for each predicate construct an atom and add to body
 			for (Predicate pred : joinPredicates)
@@ -234,21 +243,7 @@ public class R2RMLManager {
 	}
 	
 	
-	/*
-	 * method to get the Resource nodes (TripleMaps) from the given Graph
-	 */
-	private Set<Resource> getMappingNodes(Graph myGraph)
-	{
-		Set<Resource> resources = util.getSubjects(myGraph, null, null, (Resource) null);
-		Set<Resource> nodes = new HashSet<Resource>();
-		for (Resource subj : resources) {
-			//add resource if it's not a triplesMap declaration
-			if (subj.stringValue().contains("TriplesMap")) {
-				nodes.add(subj);
-			}
-		}
-		return nodes;
-	}
+	
 	
 	/*
 	 * construct head of mapping q(variables) from the body

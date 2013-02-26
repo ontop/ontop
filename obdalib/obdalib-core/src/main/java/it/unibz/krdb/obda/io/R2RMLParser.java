@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.io;
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -32,6 +33,8 @@ public class R2RMLParser {
 	private GraphUtil util = new GraphUtil();
 
 	public static final ValueFactory fact = new ValueFactoryImpl();
+	public final URI TriplesMap = fact.createURI("http://www.w3.org/ns/r2rml#TriplesMap");
+	
 	public final URI logicalTable = fact.createURI("http://www.w3.org/ns/r2rml#logicalTable");
 	public final URI tableName = fact.createURI("http://www.w3.org/ns/r2rml#tableName");
 	public final URI baseTableOrView = fact.createURI("http://www.w3.org/ns/r2rml#baseTableOrView");
@@ -81,6 +84,24 @@ public class R2RMLParser {
 	public R2RMLParser() {
 
 	}
+	
+	/*
+	 * method to get the Resource nodes (TripleMaps) from the given Graph
+	 */
+	public Set<Resource> getMappingNodes(Graph myGraph)
+	{
+		Set<Resource> resources = util.getSubjects(myGraph, null, null, (Resource) null);
+		Set<Resource> nodes = new HashSet<Resource>();
+		for (Resource subj : resources) {
+			//add resource if it's not a triplesMap declaration
+			iterator = myGraph.match(subj, fact.createURI(OBDAVocabulary.RDF_TYPE), TriplesMap, (Resource) null);
+			if (iterator.hasNext()) {
+				nodes.add(subj);
+			}
+		}
+		return nodes;
+	}
+		
 
 	/*
 	 * method to return an sql string from a given Resource node in the Graph
@@ -141,7 +162,10 @@ public class R2RMLParser {
 		if (tableit.hasNext()) {
 			String sqlString = tableit.next().getObject().toString();
 			// System.out.println(sqlString);
-			return trim(sqlString);
+			sqlString = trim(sqlString).trim();
+			if (sqlString.endsWith(";"))
+				sqlString = sqlString.substring(0, sqlString.length()-1);
+			return (sqlString);
 		}
 		return "";
 	}
@@ -159,7 +183,11 @@ public class R2RMLParser {
 	}
 
 	public List<Predicate> getClassPredicates() {
-		return classPredicates;
+		 List<Predicate> classes = new ArrayList<Predicate>();
+		 for (Predicate p: classPredicates)
+			 classes.add(p);
+		 classPredicates.clear();
+		 return classes;
 	}
 
 	public Set<Resource> getPredicateObjects(Graph myGraph, Resource subj) {
@@ -172,8 +200,12 @@ public class R2RMLParser {
 		}
 		return predobjs;
 	}
-
 	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj)
+			throws Exception {
+		return getSubjectAtom(myGraph, subj, "");
+	}
+	
+	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj, String joinCond)
 			throws Exception {
 		NewLiteral subjectAtom = null;
 
@@ -186,9 +218,9 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			subjectString = trim(parsedString);
+			subjectString = trimTo1(parsedString);
 			// craete uri("...",var)
-			subjectAtom = getURIFunction(subjectString);
+			subjectAtom = getURIFunction(trim(subjectString), joinCond);
 		}
 
 		// process column declaration
@@ -197,7 +229,7 @@ public class R2RMLParser {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
 			subjectString = trimTo1(parsedString);
-			subjectAtom = getURIFunction(subjectString);
+			subjectAtom = getURIFunction(subjectString, joinCond);
 		}
 		
 		// process constant declaration
@@ -206,7 +238,7 @@ public class R2RMLParser {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
 			subjectString = trim(parsedString);
-			subjectAtom = getURIFunction(subjectString);
+			subjectAtom = getURIFunction((subjectString), joinCond);
 		}
 		
 		// process termType declaration
@@ -276,8 +308,12 @@ public class R2RMLParser {
 	}
 	
 	
-
 	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt)
+			throws Exception {
+		return getObjectAtom(myGraph, objectt, "");
+	}
+	
+	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt, String joinCond)
 			throws Exception {
 		NewLiteral objectAtom = null;
 
@@ -312,6 +348,8 @@ public class R2RMLParser {
 				parsedString = newiterator.next().getObject().toString();
 				objectString = trimTo1(parsedString);
 				// System.out.println(parsedString);
+				if (!joinCond.isEmpty())
+					objectString = joinCond+trim(objectString);
 				objectAtom = fac.getVariable(objectString);
 			}
 			
@@ -325,7 +363,7 @@ public class R2RMLParser {
 				if (objectString.contains("^^"))
 					objectAtom = getExplicitTypedObject(objectString);
 				else
-					objectAtom = fac.getValueConstant(objectString);
+					objectAtom = getConstantObject(objectString);
 			}
 
 			// look for template declaration
@@ -335,7 +373,7 @@ public class R2RMLParser {
 
 				// craete uri("...",var)
 				objectString = trimTo1(parsedString);
-				objectAtom = getURIFunction(objectString);
+				objectAtom = getURIFunction(trim(objectString), joinCond);
 
 			}
 			// process termType declaration
@@ -343,7 +381,7 @@ public class R2RMLParser {
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
-				objectAtom = getTermTypeAtom(parsedString, objectString);
+				objectAtom = getTermTypeAtom(parsedString, (objectString));
 
 			}
 			
@@ -367,8 +405,8 @@ public class R2RMLParser {
 				
 				//create datatype(object) atom
 				Predicate dtype = fac.getPredicate(OBDADataFactoryImpl.getIRI(parsedString), 1);
-				NewLiteral langAtom = fac.getAtom(dtype, objectAtom);
-				objectAtom = langAtom;
+				NewLiteral dtAtom = fac.getAtom(dtype, objectAtom);
+				objectAtom = dtAtom;
 			}
 
 
@@ -379,6 +417,18 @@ public class R2RMLParser {
 	}
 	
 	
+	private NewLiteral getConstantObject(String objectString) {
+		if (objectString.startsWith("http:"))
+			return getURIFunction(objectString);
+		else
+		{	//literal
+			Constant constt = fac.getValueConstant(objectString);
+			Predicate pred = fac.getDataTypePredicateLiteral();
+			return fac.getAtom(pred, constt);
+		
+		}
+	}
+
 	private NewLiteral getExplicitTypedObject(String string) {
 		
 		NewLiteral typedObject = null;
@@ -436,32 +486,47 @@ public class R2RMLParser {
 			
 		} else if (type.contentEquals(literal.stringValue())) {
 			
-			return getTypedFunction(string, 3);
+			return getTypedFunction(trim(string), 3);
 		}
 		return null;
 	}
 
+	private Function getURIFunction(String string, String joinCond) {
+		return getTypedFunction(string, 1, joinCond);
+	}
 	
 	private Function getURIFunction(String string) {
 		
 		return getTypedFunction(string, 1);
 	}
 
-	
 	public Function getTypedFunction(String parsedString, int type) {
+		return getTypedFunction(parsedString, type, "");
+	}
+	
+	public Function getTypedFunction(String parsedString, int type, String joinCond) {
 
 		List<NewLiteral> terms = new ArrayList<NewLiteral>();
 		String string = (parsedString);
-		if (!string.contains("{") && !string.startsWith("http://")) {
-			string = "{" + string + "}";
-			if (type == 2)
-				string = "\"" + string + "\"";
-		}
+		if (!string.contains("{"))
+			if (!string.startsWith("http://")) 
+			{	string = "{" + string + "}";
+				if (type == 2)
+					string = "\"" + string + "\"";
+			}
+			else
+			{
+				type = 0;
+			}
 		while (string.contains("{")) {
 			int begin = string.indexOf("{");
 			int end = string.indexOf("}");
+			
 			String var = string.substring(begin + 1, end);
-			terms.add(fac.getVariable((var)));
+			if (joinCond.isEmpty())
+				terms.add(fac.getVariable(joinCond+var));
+			else
+				terms.add(fac.getVariable(joinCond+trim(var)));
 			string = string.replace("{" + var + "}", "[]");
 		}
 		string = string.replace("[]", "{}");
@@ -469,6 +534,11 @@ public class R2RMLParser {
 		NewLiteral uriTemplate = null;
 		Predicate pred = null;
 		switch (type) {
+		//constant uri
+		case 0:
+			uriTemplate = fac.getURIConstant(string);
+			pred = fac.getUriTemplatePredicate(terms.size());
+			break;
 		// URI or IRI
 		case 1:
 			uriTemplate = fac.getValueConstant(string);
@@ -482,7 +552,8 @@ public class R2RMLParser {
 		// LITERAL
 		case 3:
 			uriTemplate = fac.getValueConstant(string);
-			pred = fac.getTypePredicate(COL_TYPE.LITERAL);
+			pred = OBDAVocabulary.RDFS_LITERAL;//lang?
+			terms.add(OBDAVocabulary.NULL);
 			break;
 		}
 
@@ -541,7 +612,7 @@ public class R2RMLParser {
 				// look for child declaration
 				Iterator<Statement> newiterator2 = myGraph.match(objectt, child, null, (Resource) null);
 				if (newiterator2.hasNext()) {
-					return trim(newiterator2.next().getObject().stringValue());
+					return trimTo1(newiterator2.next().getObject().stringValue());
 				}
 			}
 		}
@@ -562,12 +633,13 @@ public class R2RMLParser {
 				// look for parent declaration
 				Iterator<Statement> newiterator2 = myGraph.match(objectt, parent, null, (Resource) null);
 				if (newiterator2.hasNext()) {
-					return trim(newiterator2.next().getObject().stringValue());
+					return trimTo1(newiterator2.next().getObject().stringValue());
 				}
 			}
 		}
 		return null;
 	}
+
 
 	
 
