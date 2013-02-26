@@ -49,7 +49,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 	protected final String testURI;
 	protected final String name;
 	protected Repository dataRep;
-	private OutputStream output;
+	private OutputStream output = null;
 	private Connection sqlConnection;
 	static final Logger logger = LoggerFactory.getLogger(RDB2RDFScenarioTest.class);
 
@@ -72,7 +72,8 @@ public class RDB2RDFScenarioTest extends TestCase{
 		this.sqlFileURL = sqlFile;
 		this.mappingFileURL = mappingFile;
 		this.outputFileURL =  outputFile;
-		output = new FileOutputStream(new File(outputFile));
+		if (outputFileURL != null)
+			output = new FileOutputStream(new File(outputFile));
 	}
 	
 	@Override
@@ -81,7 +82,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 			try {
 				 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:questrepository","sa", "");
 				    java.sql.Statement s = sqlConnection.createStatement();
-				   
+				  
 				    try {
 				    	String text = new Scanner( new File(sqlFileURL) ).useDelimiter("\\A").next();
 				    	s.execute(text);
@@ -95,12 +96,16 @@ public class RDB2RDFScenarioTest extends TestCase{
 				dataRep = createRepository();
 			} catch (Exception exc) {
 				try {
-					dataRep.shutDown();
-					dataRep = null;
+					if (dataRep != null)
+					{	
+						dataRep.shutDown();
+						dataRep = null;
+					}
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
-				throw exc;
+				if (output!=null)
+					throw exc;
 			}
 		}
 		
@@ -114,7 +119,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 			return repo;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			throw e;
 		}
 	}
 	
@@ -126,7 +131,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 		}
 		java.sql.Statement s = sqlConnection.createStatement();
 	    try {
-	    	s.execute("DROP TABLE ?");
+	    	s.execute("DROP ALL OBJECTS DELETE FILES");
 	    } catch(SQLException sqle) {
 	        System.out.println("Table not found, not dropping");
 	    }
@@ -137,27 +142,31 @@ public class RDB2RDFScenarioTest extends TestCase{
 
 	@Override
 	protected void runTest() throws Exception {
-		RepositoryConnection con = dataRep.getConnection();
+		RepositoryConnection con =null;
 		try {
-			String queryString = "SELECT * WHERE {?s ?p ?o}";
-			TupleQuery query = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-			TupleQueryResultWriter handler = new SPARQLResultsCSVWriter(output);
-			 query.evaluate(handler);
-			 output.flush();
-			
-			
+			con = dataRep.getConnection();
 			String graphq = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, graphq);
-			RDFWriter writer = new NTriplesWriter(output);
-			gquery.evaluate(writer);
-			
-			output.close();
+			if (output!= null)
+			{
+				RDFWriter writer = new NTriplesWriter(output);
+				gquery.evaluate(writer);
+			}
+			else
+			{
+				RDFWriter writer = new NTriplesWriter(System.out);
+				gquery.evaluate(writer);
+			}
 				
+			con.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+			if (output!= null)
+				throw e;
 		}
 		finally {
-			con.close();
+			if (output!= null)
+				output.close();
 		}
 	}
 	
@@ -269,10 +278,15 @@ public class RDB2RDFScenarioTest extends TestCase{
 
 				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
 				String path = pathUri.substring(8);
-				if (outputFile == null)
-					outputFile = "mapped"+testURI+".nq";
-				RDB2RDFScenarioTest test2 = factory.createRDB2RDFScenarioTest(testURI, testName, path+sqlFile,
-							pathUri+mappingFile, path+outputFile);
+				RDB2RDFScenarioTest test2 = null;
+				if (outputFile == null) {
+					test2 = factory.createRDB2RDFScenarioTest(testURI,
+							testName, path + sqlFile, path + mappingFile, null);
+				} else {
+					test2 = factory.createRDB2RDFScenarioTest(testURI,
+							testName, path + sqlFile, path + mappingFile, path
+									+ outputFile);
+				}
 				if (test2 != null) {
 					suite.addTest(test2);
 				}
