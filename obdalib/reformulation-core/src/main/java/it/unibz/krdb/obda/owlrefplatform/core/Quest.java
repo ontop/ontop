@@ -944,21 +944,46 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			st = localConnection.createStatement();
 			for (OBDAMappingAxiom axiom : mappings) {
 				String sourceString = axiom.getSourceQuery().toString();
-				String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-				if (st.execute(copySourceQuery)) {
+				if (sourceString.contains("as CHILD"))
+				{
+					int childquery1 = sourceString.indexOf("(");
+					int childquery2 = sourceString.indexOf(") as CHILD");
+					String childquery = sourceString.substring(childquery1+1, childquery2);
+					
 					StringBuffer sb = new StringBuffer();
-					ResultSetMetaData rsm = st.getResultSet().getMetaData();
-					boolean needComma = false;
-					for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-						if (needComma) {
-							sb.append(", ");
+					
+					String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
+					if (st.execute(copySourceQuery)) {
+						ResultSetMetaData rsm = st.getResultSet().getMetaData();
+						boolean needComma = false;
+						for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+							if (needComma) {
+								sb.append(", ");
+							}
+							String col = rsm.getColumnName(pos);
+							sb.append("CHILD.\""+col+"\" as CHILD_"+(col));
+							needComma = true;
 						}
-						if (!rsm.getSchemaName(pos).isEmpty()) {
-							sb.append(rsm.getSchemaName(pos));
-							sb.append(".");
+					}
+					sb.append(", ");
+					
+					int parentquery1 = sourceString.indexOf(", (", childquery2);
+					int parentquery2 = sourceString.indexOf(") as PARENT");
+					String parentquery = sourceString.substring(parentquery1+3, parentquery2);
+					
+					 copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
+					if (st.execute(copySourceQuery)) {
+						
+						ResultSetMetaData rsm = st.getResultSet().getMetaData();
+						boolean needComma = false;
+						for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+							if (needComma) {
+								sb.append(", ");
+							}
+							String col = rsm.getColumnName(pos);
+							sb.append("PARENT.\""+col+"\" as PARENT_"+(col));
+							needComma = true;
 						}
-						sb.append(rsm.getColumnName(pos));
-						needComma = true;
 					}
 					String columnProjection = sb.toString();
 					
@@ -969,6 +994,35 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						String str = sourceString.replaceFirst("\\*", columnProjection);
 						axiom.setSourceQuery(factory.getSQLQuery(str));
 					}
+				}
+				
+				
+				
+				else 
+				{
+				String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
+				if (st.execute(copySourceQuery)) {
+					StringBuffer sb = new StringBuffer();
+					ResultSetMetaData rsm = st.getResultSet().getMetaData();
+					boolean needComma = false;
+					for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+						if (needComma) {
+							sb.append(", ");
+						}
+						
+						sb.append("\""+rsm.getColumnName(pos)+"\"");
+						needComma = true;
+					}
+					String columnProjection = sb.toString();
+				
+					String tmp = axiom.getSourceQuery().toString();
+					int fromPosition = tmp.toLowerCase().indexOf("from");
+					int asteriskPosition = tmp.indexOf('*');
+					if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
+						String str = sourceString.replaceFirst("\\*", columnProjection);
+						axiom.setSourceQuery(factory.getSQLQuery(str));
+					}
+				}
 				}
 			}
 		} finally {
