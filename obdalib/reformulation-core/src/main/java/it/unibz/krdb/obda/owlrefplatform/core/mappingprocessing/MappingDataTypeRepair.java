@@ -106,8 +106,8 @@ public class MappingDataTypeRepair {
 	}
 
 	private boolean isDataProperty(Predicate predicate) {
-		return predicate.getArity() == 2
-				&& predicate.getType(1) == COL_TYPE.LITERAL;
+		return predicate.getArity() == 2;
+				//&& predicate.getType(1) == COL_TYPE.LITERAL;
 	}
 
 	private Predicate getDataTypeFunctor(Variable variable)
