@@ -7,7 +7,8 @@
 	dcterms:title "One table, two columns, one row, no primary key" ;
 	dcterms:identifier "D002-1table2columns1row" ;
 	rdb2rdftest:sqlScriptFile "create.sql";
-	rdb2rdftest:relatedTestCase <dg0002>, <tc0002a>, <tc0002b>, <tc0002c>, <tc0002d>, <tc0002e>, <tc0002f>, <tc0002g>, <tc0002h>, <tc0002i>, <tc0002j> ;
+	rdb2rdftest:relatedTestCase <dg0002>, <tc0002a>, <tc0002b>, <tc0002c>, 
+	<tc0002d>, <tc0002e>, <tc0002f>, <tc0002g>, <tc0002h>, <tc0002i>, <tc0002j> ;
 .
 
 <dg0002> a rdb2rdftest:DirectMapping ;	

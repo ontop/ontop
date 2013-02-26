@@ -34,7 +34,7 @@
 .
 
 <tc0005b> a rdb2rdftest:R2RML ;	
-	dcterms:title "Default mapping" ; 
+	dcterms:title "Default mapping tc5" ; 
 	dcterms:identifier "R2RMLTC0005b" ;
 	test:purpose "Tests the generation of a default mapping for tables without a primary key" ;
 	test:specificationReference "#default-mappings" ;

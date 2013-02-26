@@ -6,6 +6,7 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "Quest R2RML scenario tests" ;
     mf:include (
+		<D000/manifest.ttl>
         <D001/manifest.ttl>
 		<D002/manifest.ttl>
 		<D003/manifest.ttl>
@@ -22,14 +23,14 @@
 		<D014/manifest.ttl>
 		<D015/manifest.ttl>
 		<D016/manifest.ttl>
-		<D017/manifest.ttl>
+		#<D017/manifest.ttl>
 		<D018/manifest.ttl>
 		<D019/manifest.ttl>
 		<D020/manifest.ttl>
-		<D021/manifest.ttl>
-		<D022/manifest.ttl>
-		<D023/manifest.ttl>
-		<D024/manifest.ttl>
-		<D025/manifest.ttl>
+		#<D021/manifest.ttl>
+		#<D022/manifest.ttl>
+		#<D023/manifest.ttl>
+		#<D024/manifest.ttl>
+		#<D025/manifest.ttl>
     ).
 
