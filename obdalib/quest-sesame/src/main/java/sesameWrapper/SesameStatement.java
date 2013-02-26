@@ -99,6 +99,11 @@ public class SesameStatement implements Statement {
 					.createURI(OBDAVocabulary.XSD_INTEGER_URI);
 		else if (literal.getType() == COL_TYPE.LITERAL)
 			datatype = null;
+		else if (literal.getType() == COL_TYPE.LITERAL_LANG)
+			{
+				datatype = null;
+				return fact.createLiteral(literal.getValue(), literal.getLanguage());
+			}
 		else if (literal.getType() == COL_TYPE.OBJECT)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_STRING_URI);
