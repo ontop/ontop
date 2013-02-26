@@ -189,9 +189,17 @@ public class LookupTable {
 	 */
 	private boolean exist(String entry) {
 		final String sourceEntry = entry.toLowerCase();
-		return log.containsKey(sourceEntry);
+		return (log.containsKey(trim(sourceEntry)) || log.containsKey(sourceEntry));
 	}
 
+	private String trim(String string) {
+		
+		while (string.startsWith("\"") && string.endsWith("\"")) {
+			
+			string = string.substring(1, string.length() - 1);
+		}
+		return string;
+	}
 	/*
 	 * Utility method to add an entry in the lookup table. Input string will be
 	 * written in lower case.
@@ -256,7 +264,7 @@ public class LookupTable {
 	 * be written in lower case.
 	 */
 	private Integer getEntry(String entry) {
-		return log.get(entry.toLowerCase());
+		return log.get(trim(entry.toLowerCase()));
 	}
 
 	/*
