@@ -3,6 +3,7 @@ package sesameWrapper;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 
 import java.util.HashMap;
@@ -29,18 +30,20 @@ public class SesameGraphQuery implements GraphQuery {
 	private static final long serialVersionUID = 1L;
 
 	private String queryString, baseURI;
-	private QuestDBStatement stm;
+	//private QuestDBStatement stm;
+	private QuestDBConnection conn;
+	private SesameAbstractRepo repo;
 
 	public SesameGraphQuery(String queryString, String baseURI,
-			QuestDBStatement statement) throws MalformedQueryException {
+			QuestDBConnection conn) throws MalformedQueryException {
 		if (queryString.toLowerCase().contains("construct") || queryString.toLowerCase().contains("describe")) {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
-			this.stm = statement;
+			this.conn = conn;
 		} else
 			throw new MalformedQueryException("Graph query expected!");
 	}
-
+	
 	public void setMaxQueryTime(int maxQueryTime) {
 	}
 
@@ -97,10 +100,11 @@ public class SesameGraphQuery implements GraphQuery {
 	}
 
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
-
+		GraphResultSet res = null;
+		QuestDBStatement stm = null;
 		try {
-			// execute query and return new type of result
-			GraphResultSet res = null;
+			stm = conn.createStatement();
+	
 			if (isConstruct()) {
 				res = stm.executeConstruct(queryString);
 			} else if (isDescribe()) {
@@ -121,7 +125,7 @@ public class SesameGraphQuery implements GraphQuery {
 					}
 				}
 			}
-
+			
 			return new GraphQueryResultImpl(namespaces, results.iterator());
 			
 		} catch (OBDAException e) {
@@ -129,8 +133,16 @@ public class SesameGraphQuery implements GraphQuery {
 		}
 		finally{
 			try {
+				if (res != null)
+				res.close();
+			} catch (OBDAException e1) {
+				e1.printStackTrace();
+			}
+			try {
+				if (stm != null)
 				stm.close();
 			} catch (OBDAException e) {
+				e.printStackTrace();
 			}
 		}
 	}

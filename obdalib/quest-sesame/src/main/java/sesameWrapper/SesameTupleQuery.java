@@ -1,21 +1,12 @@
 package sesameWrapper;
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
-
 import java.util.LinkedList;
 import java.util.List;
 
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -28,8 +19,6 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.impl.BindingImpl;
-import org.openrdf.query.impl.ListBindingSet;
 import org.openrdf.query.impl.MapBindingSet;
 import org.openrdf.query.impl.TupleQueryResultImpl;
 
@@ -38,29 +27,33 @@ public class SesameTupleQuery implements TupleQuery {
 	private static final long serialVersionUID = 1L;
 
 	private String queryString, baseURI;
-	private QuestDBStatement stm;
-
+	//private QuestDBStatement stm;
+	private QuestDBConnection conn;
 	private ValueFactory fact = new ValueFactoryImpl();
-
+	private SesameAbstractRepo repo;
+	
 	public SesameTupleQuery(String queryString, String baseURI,
-			QuestDBStatement statement) throws MalformedQueryException {
+			QuestDBConnection conn) throws MalformedQueryException {
 		if (queryString.toLowerCase().contains("select")) {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
-			this.stm = statement;
+			this.conn = conn;
 		} else
 			throw new MalformedQueryException("Tuple query expected!");
 	}
-
+	
 	// needed by TupleQuery interface
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
-
+		OBDAResultSet res = null;
+		QuestDBStatement stm = null;
 		try {
-			// execute query and return new type of result
-			OBDAResultSet res = stm.execute(queryString);
+		
+			stm = conn.createStatement();
+			res = stm.execute(queryString);
+			
 			List<String> signature = res.getSignature();
-
 			List<BindingSet> results = new LinkedList<BindingSet>();
+
 			while (res.nextRow()) {
 				MapBindingSet set = new MapBindingSet(signature.size() * 2);
 				for (String name : signature) {
@@ -71,15 +64,23 @@ public class SesameTupleQuery implements TupleQuery {
 				}
 				results.add(set);
 			}
-
+			
+			
 			return new TupleQueryResultImpl(signature, results);
 
 		} catch (OBDAException e) {
 			e.printStackTrace();
-			throw new QueryEvaluationException(e.getMessage());
+			throw new QueryEvaluationException(e);
 		}
 		finally{
 			try {
+				if (res != null)
+				res.close();
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+			try {
+				if (stm != null)
 				stm.close();
 			} catch (OBDAException e) {
 				e.printStackTrace();

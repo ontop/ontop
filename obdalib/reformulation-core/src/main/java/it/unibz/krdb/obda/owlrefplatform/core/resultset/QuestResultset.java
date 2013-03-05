@@ -120,7 +120,7 @@ public class QuestResultset implements OBDAResultSet {
 		try {
 			return set.next();
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+			throw new OBDAException(e);
 		}
 	}
 
@@ -128,7 +128,7 @@ public class QuestResultset implements OBDAResultSet {
 		try {
 			set.close();
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+			throw new OBDAException(e);
 		}
 	}
 
@@ -217,7 +217,7 @@ public class QuestResultset implements OBDAResultSet {
 			}
 			throw e;
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+			throw new OBDAException(e);
 		}
 		return result;
 	}
@@ -257,7 +257,7 @@ public class QuestResultset implements OBDAResultSet {
 			return URI.create(result);//.replace(' ', '_'));
 			
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+			throw new OBDAException(e);
 		}
 	}
 	
@@ -271,7 +271,7 @@ public class QuestResultset implements OBDAResultSet {
 			IRI iri = irif.create(result);
 			return iri;
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+			throw new OBDAException(e);
 		}
 	}
 

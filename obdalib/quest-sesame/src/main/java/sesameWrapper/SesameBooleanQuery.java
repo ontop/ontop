@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
@@ -19,50 +20,67 @@ import org.openrdf.query.QueryEvaluationException;
 public class SesameBooleanQuery implements BooleanQuery {
 
 	private String queryString, baseURI;
-	private QuestDBStatement stm;
-
-	public SesameBooleanQuery(String queryString, String baseURI, QuestDBStatement questDBStatement) throws MalformedQueryException {
+	private QuestDBConnection conn;
+	private SesameAbstractRepo repo; 
+	
+	public SesameBooleanQuery(String queryString, String baseURI, QuestDBConnection conn) throws MalformedQueryException {
 		// check if valid query string
 		if (queryString.contains("ASK")) {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
-			this.stm = questDBStatement;
+			this.conn = conn;
 
 		} else
 			throw new MalformedQueryException("Boolean Query expected!");
 	}
 
 	public boolean evaluate() throws QueryEvaluationException {
-
+		OBDAResultSet rs = null;
+		QuestDBStatement stm = null;
 		try {
-			OBDAResultSet rs = stm.execute(queryString);
+			stm = conn.createStatement();
+			rs = stm.execute(queryString);
 			boolean next = rs.nextRow();
-			if (next)
-				return (rs.getInt(1) == 1);
-
+			if (next){
+				if (rs.getInt(1) == 1) {
+				return true;
+				}
+			}
 			return false;
-			
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new QueryEvaluationException(e.getMessage());
+			throw new QueryEvaluationException(e);
+		} finally {
+			try {
+				if (rs != null)
+				rs.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				if (stm != null)
+				stm.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public int getMaxQueryTime() {
-		try {
-			return stm.getQueryTimeout();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			return stm.getQueryTimeout();
+//		} catch (OBDAException e) {
+//			e.printStackTrace();
+//		}
 		return -1;
 	}
 
 	public void setMaxQueryTime(int maxQueryTime) {
-		try {
-			stm.setQueryTimeout(maxQueryTime);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			stm.setQueryTimeout(maxQueryTime);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
 	}
 

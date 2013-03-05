@@ -2,8 +2,6 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,17 +22,15 @@ public abstract class SesameAbstractRepo implements
 	}
 
 	public RepositoryConnection getConnection() throws RepositoryException {
-		//System.out.println("store getconn repoconn..");
-			if(repoConnection==null)
-			{
-				try {
-					this.repoConnection =  new RepositoryConnection(this, getQuestConnection());
-							//this.repoConnection;
-				} catch (OBDAException e) {
-					e.printStackTrace();
-				}
-			}
-			return repoConnection;
+		try {
+			this.repoConnection = new RepositoryConnection(this,
+					getQuestConnection());
+		} catch (OBDAException e) {
+			System.out.println("Error creating repo connecion!");
+			e.printStackTrace();
+		}
+		return repoConnection;
+
 	}
 
 	public File getDataDir() {

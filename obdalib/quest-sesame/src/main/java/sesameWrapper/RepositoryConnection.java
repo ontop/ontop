@@ -72,9 +72,9 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	{
 		this.repository = rep;
 		this.questConn = connection;
-		this.isOpen = true;//!connection.isClosed();
+		this.isOpen = true;
 		this.autoCommit = connection.getAutoCommit();
-	
+		
 	}
 
 	
@@ -458,16 +458,13 @@ throw new RuntimeException(e);
 		//Closes the connection, freeing resources. 
 		//If the connection is not in autoCommit mode, 
 		//all non-committed operations will be lost. 
-		this.isOpen = false;
-		try {
-			if(questStm!=null && !questStm.isClosed())
-			{
-				questStm.close();
+			try {
+				questConn.close();
+			} catch (Exception e) {
+				throw new RepositoryException(e);
 			}
-		} catch (Exception e) {
-			throw new RepositoryException(e);
-		}
-	}
+	} 
+	
 
 	public void commit() throws RepositoryException {
 		//Commits all updates that have been performed as part of this connection sofar. 
@@ -664,18 +661,9 @@ throw new RuntimeException(e);
 		//Prepares true/false queries. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
+
+		return new SesameBooleanQuery(queryString, baseURI, questConn);
 		
-	//	if (this.isOpen) {
-			try {
-				this.questStm = questConn.createStatement();
-			} catch (OBDAException e) {
-				throw new RepositoryException(e);
-
-			}
-			return new SesameBooleanQuery(queryString, baseURI, questStm);
-	//	} else
-	//		throw new RepositoryException("Repository was closed by user.");
-
 	}
 
 	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString)
@@ -691,18 +679,9 @@ throw new RuntimeException(e);
 		//Prepares queries that produce RDF graphs. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
-	
-		//if (this.isOpen) {
-			try {
-				this.questStm = questConn.createStatement();
-			} catch (OBDAException e) {
-				throw new RepositoryException(e);
 
-			}
-			return new SesameGraphQuery(queryString, baseURI, questStm);
-	//	} else
-	//		throw new RepositoryException("Repository was closed by user.");
-
+		return new SesameGraphQuery(queryString, baseURI, questConn);
+			
 	}
 
 	public Query prepareQuery(QueryLanguage ql, String query)
@@ -746,16 +725,7 @@ throw new RuntimeException(e);
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		//if (this.isOpen) {
-			try {
-				this.questStm = questConn.createStatement();
-			} catch (OBDAException e) {
-				throw new RepositoryException(e);
-
-			}
-			return new SesameTupleQuery(queryString, baseURI, questStm);
-		//} else
-		//	throw new RepositoryException("Repository was closed by user.");
+			return new SesameTupleQuery(queryString, baseURI, questConn);
 
 	}
 

@@ -35,7 +35,7 @@ public class SesameBindingSet implements BindingSet {
 		try {
 			this.count = set.getColumCount();
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}

@@ -5,7 +5,6 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAConnection;
@@ -183,21 +182,24 @@ public class QuestStatement implements OBDAStatement {
 		public void run() {
 			
 			try {
+				
 				if (!querycache.containsKey(strquery)) {
-					final long startTime = System.currentTimeMillis();
+					//final long startTime = System.currentTimeMillis();
 					String sqlQuery = getUnfolding(strquery);
-					final long endTime = System.currentTimeMillis();
-					queryProcessingTime = endTime - startTime;
+					//final long endTime = System.currentTimeMillis();
+					//queryProcessingTime = endTime - startTime;
 					
 					// Cache the sql for better performance
 					cacheQueryAndProperties(strquery, sqlQuery);
 				}
 				String sql = getSqlString(strquery);
+				
 				List<String> signature = signaturecache.get(strquery);
 				boolean isBoolean = isbooleancache.get(strquery);
 				boolean isConstruct = isconstructcache.get(strquery);
 				boolean isDescribe = isdescribecache.get(strquery);
-
+				
+				
 				log.debug("Executing the query and get the result...");
 				if (sql.equals("") && !isBoolean) {
 					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
@@ -213,25 +215,13 @@ public class QuestStatement implements OBDAStatement {
 						// Execute the SQL query string
 						executingSQL = true;
 						ResultSet set = null;
-						try {
+//						try {
+
 							set = sqlstatement.executeQuery(sql);
-						}
-						catch(SQLException e)
-						{
-							//bring back operation
-							//statement was created, but in the meantime connection broke down
-							//recover connection
-							if (e.getMessage().startsWith("This statement")) {
-								conn = questInstance.getConnection();
-								log.debug("Query execution interrupted. Recovering connection to db: "+!conn.isClosed());
-								sqlstatement = conn.createStatement().sqlstatement;
-								set  = sqlstatement.executeQuery(sql);
-								log.debug("Recovery finished successfully: "+!set.isClosed());
-							}
-							else {
-								throw e;
-							}
-						}
+//						}
+//						catch(SQLException e)
+//						{
+//
 						// Store the SQL result to application result set.
 						if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set,
@@ -254,14 +244,20 @@ public class QuestStatement implements OBDAStatement {
 									QuestStatement.this);
 						}
 					} catch (SQLException e) {
+						exception = e;
+						error = true;
+						log.error(e.getMessage(), e);
+						
 						throw new OBDAException("Error executing SQL query: \n"
-								+ e.getMessage() + "\nSQL query:\n " + sql);
+								+ e.getMessage() + "\nSQL query:\n " + sql, e);
 					}
 				}
 				log.debug("Finish.\n");
 			} catch (Exception e) {
+				e.printStackTrace();
 				exception = e;
 				error = true;
+				log.error(e.getMessage(), e);
 			} finally {
 				monitor.countDown();
 			}
@@ -273,6 +269,8 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	@Override
 	public OBDAResultSet execute(String strquery) throws OBDAException {
+		
+		
 		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
@@ -390,10 +388,10 @@ public class QuestStatement implements OBDAStatement {
 		executionthread.start();
 		try {
 			monitor.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+
 		if (executionthread.errorStatus()) {
 			throw new RuntimeException(executionthread.getException());
 			// OBDAException ex = new
@@ -684,7 +682,8 @@ public class QuestStatement implements OBDAStatement {
 	@Override
 	public void close() throws OBDAException {
 		try {
-			sqlstatement.close();
+			if (sqlstatement != null)
+				sqlstatement.close();
 		} catch (Exception e) {
 			throw new OBDAException(e);
 		}

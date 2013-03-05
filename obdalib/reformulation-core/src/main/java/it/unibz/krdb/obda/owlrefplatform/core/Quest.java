@@ -70,8 +70,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +86,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private static final long serialVersionUID = -6074403119825754295L;
 
+	private static PoolProperties poolProperties = null;
+	private static DataSource tomcatPool = null;
+
+	// Tomcat pool default properties
+	// These can be changed in the properties file
+	protected int maxPoolSize = 10;
+	protected int startPoolSize = 2;
+	protected boolean removeAbandoned = true;
+	protected int abandonedTimeout = 60; // 60 seconds
+	
+	
 	/***
 	 * Internal components
 	 */
@@ -194,15 +208,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private Iterator<Assertion> aboxIterator;
 
-	Map<String, String> querycache = new HashMap<String, String>();
+	Map<String, String> querycache = new ConcurrentHashMap<String, String>();
 
-	Map<String, List<String>> signaturecache = new HashMap<String, List<String>>();
+	Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
 
-	Map<String, Boolean> isbooleancache = new HashMap<String, Boolean>();
+	Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
 
-	Map<String, Boolean> isconstructcache = new HashMap<String, Boolean>();
+	Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
 
-	Map<String, Boolean> isdescribecache = new HashMap<String, Boolean>();
+	Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
 	protected Map<String, String> getSQLCache() {
 		return querycache;
@@ -313,6 +327,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public void setPreferences(Properties preferences) {
 		this.preferences = preferences;
 
+		removeAbandoned = Boolean.valueOf((String) preferences
+				.get(QuestPreferences.REMOVE_ABANDONED));
+		abandonedTimeout = Integer.valueOf((String) preferences
+				.get(QuestPreferences.ABANDONED_TIMEOUT));
+		startPoolSize = Integer.valueOf((String) preferences
+				.get(QuestPreferences.INIT_POOL_SIZE));
+		maxPoolSize = Integer.valueOf((String) preferences
+				.get(QuestPreferences.MAX_POOL_SIZE));
+		
 		reformulate = Boolean.valueOf((String) preferences
 				.get(QuestPreferences.REWRITE));
 		reformulationTechnique = (String) preferences
@@ -353,9 +376,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					bObtainFromOntology);
 		}
 
-		// for (Object key : preferences.keySet()) {
-		// log.info("{} = {}", key, preferences.get(key));
-		// }
 	}
 
 	/***
@@ -399,12 +419,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			log.debug(e.getMessage());
 		}
 	}
-
-	// public boolean isConnected() throws SQLException {
-	// if (conn == null || conn.isClosed())
-	// return false;
-	// return true;
-	// }
 
 	public void setupRepository() throws Exception {
 
@@ -528,6 +542,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				}
 
 				connect();
+				
+				// setup connection pool
+				setupConnectionPool();
 
 				if (dbType.equals(QuestConstants.SEMANTIC)) {
 					dataRepository = new RDBMSSIRepositoryManager(
@@ -581,6 +598,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 					log.debug("Testing DB connection...");
 					connect();
+					
+					// setup connection pool
+					setupConnectionPool();
 
 					unfoldingOBDAModel.addSource(obdaSource);
 
@@ -937,6 +957,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
+
 	private void preprocessProjection(ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory, 
 			SQLDialectAdapter adapter) throws SQLException {
 		Statement st = null;
@@ -1118,6 +1139,185 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
+//	private void setupConnectionPool() {
+//	String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+//	String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+//	String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+//	String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+//	
+//	if (driver.contains("mysql")) {
+//		url = url + "?relaxAutoCommit=true";
+//	}
+//	
+//	System.out.println();
+//	System.out.println("Setting up connection pool:");
+//	System.out.println(url);
+//	System.out.println(username);
+//	System.out.println(password);
+//	System.out.println(driver);
+//	try {
+//		Class.forName(driver);
+//	} catch (ClassNotFoundException e) {
+//		e.printStackTrace();
+//	} 
+//	
+//	BoneCPConfig config = new BoneCPConfig();
+//	config.setJdbcUrl(url); 
+//	config.setUsername(username); 
+//	config.setPassword(password);
+//	config.setMinConnectionsPerPartition(5);
+//	config.setMaxConnectionsPerPartition(10);
+//	config.setPartitionCount(2);
+//	config.setCloseConnectionWatch(true);
+//	config.setDetectUnclosedStatements(true);
+//	config.setIdleMaxAgeInSeconds(10);
+//	
+//	//config.setPreparedStatementsCacheSize(0);
+//	//config.setStatementCacheSize(0);
+//	//config.setReleaseHelperThreads(4);
+//	
+//	//config.setDefaultAutoCommit(false);
+//	try {
+//		connectionPool = new BoneCP(config);
+//	} catch (SQLException e) {
+//		e.printStackTrace();
+//	} 
+//	System.out.println("Done");
+//}
+	
+	
+//	private void setupConnectionPool() {
+//		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+//		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+//		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+//		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+//		
+//		if (driver.contains("mysql")) {
+//			url = url + "?relaxAutoCommit=true";
+//		}
+//		c3poPool = new ComboPooledDataSource();
+//		try {
+//			c3poPool.setDriverClass(driver );
+//		} catch (PropertyVetoException e) {
+//			e.printStackTrace();
+//		}         
+//		c3poPool.setJdbcUrl(url);
+//		c3poPool.setUser(username);                                  
+//		c3poPool.setPassword(password);
+//		c3poPool.setMinPoolSize(3);
+//		c3poPool.setMaxPoolSize(20);
+//		c3poPool.setAcquireIncrement(1);
+//		c3poPool.setDebugUnreturnedConnectionStackTraces(true);
+//		c3poPool.setNumHelperThreads(5);
+//		c3poPool.setCheckoutTimeout(0);
+//	
+//	}
+
+	private void setupConnectionPool() {
+		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		
+		if (driver.contains("mysql")) {
+			url = url + "?relaxAutoCommit=true";
+		}		
+        poolProperties = new PoolProperties();
+        poolProperties.setUrl(url);
+        poolProperties.setDriverClassName(driver);
+        poolProperties.setUsername(username);
+        poolProperties.setPassword(password);
+        poolProperties.setJmxEnabled(true);
+        poolProperties.setTestOnBorrow(false);
+        poolProperties.setTestOnReturn(false);
+        poolProperties.setMaxActive(maxPoolSize);
+        poolProperties.setMaxIdle(maxPoolSize);
+        poolProperties.setInitialSize(startPoolSize);
+        poolProperties.setMaxWait(10000);
+        poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
+        poolProperties.setMinEvictableIdleTimeMillis(30000);
+        poolProperties.setLogAbandoned(removeAbandoned);
+        poolProperties.setRemoveAbandoned(removeAbandoned);
+        poolProperties.setJdbcInterceptors(
+          "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
+          "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+        tomcatPool = new DataSource();
+        tomcatPool.setPoolProperties(poolProperties);
+    	
+        System.out.println("Connection Pool Properties:");
+        System.out.println("Start size: " + startPoolSize);
+        System.out.println("Max size: " + maxPoolSize);
+        System.out.println("Remove abandoned connections: " + removeAbandoned);
+         
+	}
+	
+	public static void releaseSQLPoolConnection (Connection co) {
+		try {
+				co.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+//	public Connection getSQLPoolConnection() throws OBDAException {
+//	Connection conn = null;
+//	System.out.println();
+//	System.out.println("Getting SQL Pool Connection...");
+//	int free = connectionPool.getTotalFree();
+//	int used = connectionPool.getTotalLeased();
+//	
+//	System.out.println("Used connections: " + used);
+//	System.out.println("Free connections: " + free);
+//	System.out.println();
+//	try {
+//		conn = connectionPool.getConnection();		
+//		//conn.setAutoCommit(false);
+//		//System.out.println(conn.toString());
+//	} catch (SQLException e) {
+//		throw new OBDAException(e.getMessage());
+//	}
+//	return conn;
+//}
+	
+//	public Connection getSQLPoolConnection() throws OBDAException {
+//		Connection conn = null;
+//		int busy = 0;
+//		int free = 0;
+//		
+//		try {
+//			free = c3poPool.getNumIdleConnections();
+//		} catch (SQLException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		try {
+//			busy = c3poPool.getNumBusyConnections();
+//		} catch (SQLException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		
+//		System.out.println("Busy: " + busy);
+//		System.out.println("Free: " + free);
+//		try {
+//			conn = c3poPool.getConnection();
+//		} catch (SQLException e) {
+//			System.out.println("Error Getting a Connection!!!");
+//			throw new OBDAException(e.getMessage());
+//		}
+//		return conn;
+//	}
+	
+	public static synchronized Connection getSQLPoolConnection() throws OBDAException {
+		Connection conn = null;
+		try {
+			conn = tomcatPool.getConnection();
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		}
+		return conn;
+	}
+	
 	/***
 	 * Establishes a new connection to the data source.
 	 * 
@@ -1136,6 +1336,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String driver = obdaSource
 				.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
+		if (driver.contains("mysql")) {
+			url = url + "?relaxAutoCommit=true";
+		}
+		System.out.println("Get SQL Connection:");
+		System.out.println("URL:" + url);
+		
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
@@ -1143,18 +1349,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 		try {
 			conn = DriverManager.getConnection(url, username, password);
+			System.out.println(conn.toString());
+			//conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		} catch (Exception e) {
 			throw new OBDAException(e.getMessage());
 		}
-
 		return conn;
 	}
 
+	
 	public QuestConnection getConnection() throws OBDAException {
 
-		return new QuestConnection(this, getSQLConnection());
+		return new QuestConnection(this, getSQLPoolConnection());
 	}
 
 	public void setABox(Iterator<Assertion> owlapi3aBoxIterator) {

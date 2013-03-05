@@ -70,11 +70,11 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 				URI tboxURI = new File(tboxFile).toURI();
 				this.virtualStore = new QuestDBVirtualStore(name, tboxURI, obdaURI, pref);
 			}
-		questDBConn = virtualStore.getConnection();
 	}
 	
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
+		questDBConn = this.virtualStore.getConnection();
 		return questDBConn;
 	}
 
