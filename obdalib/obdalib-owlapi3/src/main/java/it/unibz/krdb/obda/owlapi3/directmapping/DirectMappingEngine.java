@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -113,7 +114,7 @@ public class DirectMappingEngine {
 		
 		//Add all the classes
 		for(Iterator<Predicate> it = classset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName()));
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 			manager.saveOntology(ontology);
@@ -121,7 +122,7 @@ public class DirectMappingEngine {
 		
 		//Add all the object properties
 		for(Iterator<Predicate> it = objectset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName()));
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 			manager.saveOntology(ontology);
@@ -129,7 +130,7 @@ public class DirectMappingEngine {
 		
 		//Add all the data properties
 		for(Iterator<Predicate> it = dataset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName()));
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 			manager.saveOntology(ontology);
@@ -167,12 +168,14 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 */
 	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
-		this.baseuri =  model.getPrefixManager().getDefaultPrefix();
+		if (baseuri == null || baseuri.isEmpty())
+			this.baseuri =  model.getPrefixManager().getDefaultPrefix();
 		model.addSource(source);
 		for(int i=0;i<conMan.getMetaData(source).getTableList().size();i++){
 			TableDefinition td = conMan.getMetaData(source).getTableList().get(i);
-			model.addMapping(source.getSourceID(), getMapping(td, source));
-		}		
+			model.addMappings(source.getSourceID(), getMapping(td, source));
+		}	
+		System.out.println(model.getMappings().toString());
 	}
 	
 	
@@ -185,12 +188,20 @@ public class DirectMappingEngine {
 	 * 
 	 *  @return a new OBDAMappingAxiom 
 	 */
-	public OBDAMappingAxiom getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
-		DirectMappingAxiom dma = new DirectMappingAxiom(table, conMan.getMetaData(source));
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
+		DirectMappingAxiom dma = new DirectMappingAxiom(baseuri, table, conMan.getMetaData(source));
 		dma.setbaseuri(this.baseuri);
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 		
-		return dfac.getRDBMSMappingAxiom(dma.getSQL(), dma.getCQ(dfac));
+		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
+		axioms.add(dfac.getRDBMSMappingAxiom(dma.getSQL(), dma.getCQ(dfac)));
+		
+		List<String> refSqls = dma.getRefSQLs();
+		List<CQIE> refCQs = dma.getRefCQs(dfac);
+		for (int i=0; i< refSqls.size(); i++)
+			axioms.add(dfac.getRDBMSMappingAxiom(refSqls.get(i), refCQs.get(i)));
+		
+		return axioms;
 	}
 	
 
