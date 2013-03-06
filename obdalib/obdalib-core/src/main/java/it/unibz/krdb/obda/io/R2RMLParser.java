@@ -32,6 +32,8 @@ public class R2RMLParser {
 
 	private GraphUtil util = new GraphUtil();
 
+	private final String baseuri = "http://example.com/base/";
+	
 	public static final ValueFactory fact = new ValueFactoryImpl();
 	public final URI TriplesMap = fact.createURI("http://www.w3.org/ns/r2rml#TriplesMap");
 	
@@ -80,6 +82,7 @@ public class R2RMLParser {
 	String parsedString = "";
 	String subjectString = "";
 	String objectString = "";
+	String basePrefix = "";
 
 	public R2RMLParser() {
 
@@ -219,8 +222,11 @@ public class R2RMLParser {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
 			subjectString = trimTo1(parsedString);
+			String subjString = trim(subjectString);
+			if (!subjString.startsWith("http://"))
+				subjString = basePrefix + subjString;
 			// craete uri("...",var)
-			subjectAtom = getURIFunction(trim(subjectString), joinCond);
+			subjectAtom = getURIFunction(subjString, joinCond);
 		}
 
 		// process column declaration
@@ -246,7 +252,7 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			subjectAtom = getTermTypeAtom(parsedString, subjectString);
+			subjectAtom = getTermTypeAtom(parsedString, trim(subjectString));
 		}
 		
 		// process class declaration
@@ -373,7 +379,7 @@ public class R2RMLParser {
 
 				// craete uri("...",var)
 				objectString = trimTo1(parsedString);
-				objectAtom = getURIFunction(trim(objectString), joinCond);
+				objectAtom = getTypedFunction(trim(objectString), 3, joinCond);
 
 			}
 			// process termType declaration
@@ -536,11 +542,15 @@ public class R2RMLParser {
 		switch (type) {
 		//constant uri
 		case 0:
+			if (!string.startsWith("http:"))
+				string = baseuri + string;
 			uriTemplate = fac.getURIConstant(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// URI or IRI
 		case 1:
+			if (!string.startsWith("http:"))
+				string = baseuri + string;
 			uriTemplate = fac.getValueConstant(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
