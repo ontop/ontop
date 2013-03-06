@@ -15,8 +15,11 @@ import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import com.hp.hpl.jena.iri.IRI;
@@ -197,6 +200,16 @@ public class QuestResultset implements OBDAResultSet {
 						} else {
 							result = fac.getValueConstant("false", type);
 						}
+					} else if (type == COL_TYPE.DOUBLE) {
+						double d = set.getDouble(name);
+						//format name into correct double representation
+						DecimalFormat formatter = new DecimalFormat("0.0###E0");
+						DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
+						symbol.setDecimalSeparator('.');
+						formatter.setDecimalFormatSymbols(symbol);
+						String s = formatter.format(d);   
+						result = fac.getValueConstant(s, type);
+						
 					} else if (type == COL_TYPE.DATETIME) {
 						Timestamp value = set.getTimestamp(name);
 						result = fac.getValueConstant(
