@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.ModelIOManager;
@@ -14,6 +15,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -23,6 +25,7 @@ import it.unibz.krdb.obda.querymanager.QueryController;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -117,6 +120,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			config = new QuestPreferences();
 		}
 		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		
+		
 		OWLOntology owlontology = null; 
 		Ontology tbox;
 		if (tboxFile != null)
@@ -132,37 +137,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 		}
 		else
-		{	
+		{	//create empty ontology
 			owlontology = man.createOntology();//createOntology(OBDADataFactoryImpl.getIRI(name));
 			tbox = OntologyFactoryImpl.getInstance().createOntology();
-			OBDADataSource obdaSource = OBDADataFactoryImpl.getInstance().getDataSource(URI.create("H2Mem"));
-			
-			String driver = "org.h2.Driver";
-			String url = "jdbc:h2:mem:questrepository";
-			String username = "sa";
-			String password = "";
-
-			obdaSource = fac.getDataSource(URI
-					.create("http://www.obda.org/ABOXDUMP"
-							+ System.currentTimeMillis()));
-			obdaSource.setParameter(
-					RDBMSourceParameterConstants.DATABASE_DRIVER,
-					driver);
-			obdaSource.setParameter(
-					RDBMSourceParameterConstants.DATABASE_PASSWORD,
-					password);
-			obdaSource.setParameter(
-					RDBMSourceParameterConstants.DATABASE_URL, url);
-			obdaSource.setParameter(
-					RDBMSourceParameterConstants.DATABASE_USERNAME,
-					username);
-			obdaSource.setParameter(
-					RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-			obdaSource
-					.setParameter(
-							RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP,
-							"true");
-			obdaModel.addSource(obdaSource);
 		}
 		
 
@@ -171,6 +148,55 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		questInstance.loadTBox(tbox);
 		questInstance.loadOBDAModel(obdaModel);
 		questInstance.setupRepository();
+	}
+	
+	public QuestDBVirtualStore(String name, QuestPreferences pref) throws Exception {
+		//direct mapping : no tbox, no obda file, repo in-mem h2
+		this(name, null, getOBDAModelDM(), pref);
+	}
+	
+	
+	private static OBDADataSource getMemOBDADataSource(String name) {
+
+		OBDADataSource obdaSource = OBDADataFactoryImpl.getInstance().getDataSource(URI.create(name));
+
+		String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:questrepository";
+		String username = "sa";
+		String password = "";
+
+		obdaSource = fac.getDataSource(URI
+				.create("http://www.obda.org/ABOXDUMP"
+						+ System.currentTimeMillis()));
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER,
+				driver);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD,
+				password);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME,
+				username);
+		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY,
+				"true");
+		obdaSource.setParameter(
+				RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP,
+				"true");
+		return (obdaSource);
+		
+	}
+	
+	private static OBDAModel  getOBDAModelDM() {
+		
+		DirectMappingEngine dm = new DirectMappingEngine();
+		dm.setBaseURI("http://example.com/base");
+		try {
+			 OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
+			 return model;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (DuplicateMappingException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public QuestConnection getQuestConnection() {
