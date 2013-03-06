@@ -1019,7 +1019,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				
 				
 				
-				else 
+				else if (sourceString.contains("*"))
 				{
 				String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
 				if (st.execute(copySourceQuery)) {
