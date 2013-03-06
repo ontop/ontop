@@ -905,7 +905,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				NewLiteral langTerm = ov.getTerms().get(last);
 				if (langTerm == OBDAVocabulary.NULL)
 					lang = "NULL";
-				if (langTerm instanceof ValueConstant) {
+				else if (langTerm instanceof ValueConstant) {
 					lang = jdbcutil.getSQLLexicalForm((ValueConstant) langTerm);
 				} else {
 					lang = getSQLString(langTerm, index, false);
@@ -1019,7 +1019,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			{
 				String functionString = "";
 				
-				String template = c.toString().substring(1, c.toString().length()-1);
+				String template = trim(c.toString());//.substring(1, c.toString().length()-1);
 				StringTokenizer tokenizer = new StringTokenizer(template, "{}");
 				
 				if (tokenizer.countTokens() > 0)
@@ -1095,6 +1095,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 				"Error, cannot generate URI constructor clause for a term. Contact the authors. Term: "
 						+ ov.toString());
 
+	}
+	
+	private String trim(String string) {
+		
+		while (string.startsWith("\"") && string.endsWith("\"")) {
+			
+			string = string.substring(1, string.length() - 1);
+		}
+		return string;
 	}
 	
 	/**
