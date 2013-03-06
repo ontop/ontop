@@ -222,11 +222,8 @@ public class R2RMLParser {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
 			subjectString = trimTo1(parsedString);
-			String subjString = trim(subjectString);
-			if (!subjString.startsWith("http://"))
-				subjString = basePrefix + subjString;
 			// craete uri("...",var)
-			subjectAtom = getURIFunction(subjString, joinCond);
+			subjectAtom = getURIFunction(subjectString, joinCond);
 		}
 
 		// process column declaration
@@ -516,7 +513,7 @@ public class R2RMLParser {
 		String string = (parsedString);
 		if (!string.contains("{"))
 			if (!string.startsWith("http://")) 
-			{	string = "{" + string + "}";
+			{	string = baseuri + "{" + string + "}";
 				if (type == 2)
 					string = "\"" + string + "\"";
 			}
@@ -524,6 +521,9 @@ public class R2RMLParser {
 			{
 				type = 0;
 			}
+		if (type == 1 && !string.startsWith("http://"))
+			string = baseuri + string;
+		
 		while (string.contains("{")) {
 			int begin = string.indexOf("{");
 			int end = string.indexOf("}");
@@ -542,15 +542,11 @@ public class R2RMLParser {
 		switch (type) {
 		//constant uri
 		case 0:
-			if (!string.startsWith("http:"))
-				string = baseuri + string;
 			uriTemplate = fac.getURIConstant(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// URI or IRI
 		case 1:
-			if (!string.startsWith("http:"))
-				string = baseuri + string;
 			uriTemplate = fac.getValueConstant(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
