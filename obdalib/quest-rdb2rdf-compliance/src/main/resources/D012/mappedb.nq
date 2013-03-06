@@ -1,6 +1,0 @@
-_:b0 <http://example.com/city> "London" .
-_:b1 <http://example.com/city> "Madrid" .
-_:b0 <http://example.com/city> "London" .
-_:b0 <http://xmlns.com/foaf/0.1/name> "Bob Smith"@null .
-_:b1 <http://xmlns.com/foaf/0.1/name> "Sue Jones"@null .
-_:b0 <http://xmlns.com/foaf/0.1/name> "Bob Smith"@null .

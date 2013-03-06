@@ -1,11 +1,9 @@
-@base <http://example.com/base/> .
-
-_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Student> .
-_:a <Student#ID> "10"^^<http://www.w3.org/2001/XMLSchema#integer> .
-_:a <Student#Name> "Venus          " .
-_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Student> .
-_:b <Student#ID> "20"^^<http://www.w3.org/2001/XMLSchema#integer> .
-_:b <Student#Name> "Fernando       " .
-_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Student> .
-_:c <Student#ID> "30"^^<http://www.w3.org/2001/XMLSchema#integer> .
-_:c <Student#Name> "David          " .
+_:b0 <http://example.com/base/Student#ID> "10"^^<http://www.w3.org/2001/XMLSchema#integer> .
+_:b1 <http://example.com/base/Student#ID> "20"^^<http://www.w3.org/2001/XMLSchema#integer> .
+_:b2 <http://example.com/base/Student#ID> "30"^^<http://www.w3.org/2001/XMLSchema#integer> .
+_:b0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Student> .
+_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Student> .
+_:b2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Student> .
+_:b0 <http://example.com/base/Student#Name> "Venus" .
+_:b1 <http://example.com/base/Student#Name> "Fernando" .
+_:b2 <http://example.com/base/Student#Name> "David" .

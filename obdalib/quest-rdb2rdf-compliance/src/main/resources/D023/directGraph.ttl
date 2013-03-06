@@ -1,16 +1,11 @@
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@base <http://example.com/base/> .
-
-<Target/PK=1010> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Target> .
-<Target/PK=1010> <Target#PK> 1010 .
-<Target/PK=1010> <Target#key1attr1> "K1A1" .
-<Target/PK=1010> <Target#key1attr2> "K1A2" .
-<Target/PK=1010> <Target#key2attr1> "K2A1" .
-<Target/PK=1010> <Target#key2attr2> "K2A2" .
-
-<Source/ID=1100> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Source> .
-<Source/ID=1100> <Source#ID> 1100 .
-<Source/ID=1100> <Source#attrA> "K2A2" .
-<Source/ID=1100> <Source#attrB> "K2A1" .
-<Source/ID=1100> <Source#ref-attrA;attrB> <Target/PK=1010> .
-
+<http://example.com/base/Source/ID=1100> <http://example.com/base/Source#ref-attrA;attrB> <http://example.com/base/Target/PK=1010> .
+<http://example.com/base/Source/ID=1100> <http://example.com/base/Source#attrA> "K2A2" .
+<http://example.com/base/Source/ID=1100> <http://example.com/base/Source#attrB> "K2A1" .
+<http://example.com/base/Target/PK=1010> <http://example.com/base/Target#key2attr2> "K2A2" .
+<http://example.com/base/Target/PK=1010> <http://example.com/base/Target#key1attr1> "K1A1" .
+<http://example.com/base/Target/PK=1010> <http://example.com/base/Target#key2attr1> "K2A1" .
+<http://example.com/base/Target/PK=1010> <http://example.com/base/Target#key1attr2> "K1A2" .
+<http://example.com/base/Target/PK=1010> <http://example.com/base/Target#PK> "1010"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/base/Source/ID=1100> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Source> .
+<http://example.com/base/Source/ID=1100> <http://example.com/base/Source#ID> "1100"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/base/Target/PK=1010> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Target> .

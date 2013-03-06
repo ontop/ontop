@@ -1,6 +1,0 @@
-_:b0 <http://xmlns.com/foaf/0.1/name> "Bob Smith"@null .
-_:b1 <http://xmlns.com/foaf/0.1/name> "Sue Jones"@null .
-_:b0 <http://xmlns.com/foaf/0.1/name> "Bob Smith"@null .
-_:b0 <http://example.com/amount> "30.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-_:b1 <http://example.com/amount> "20.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-_:b0 <http://example.com/amount> "30.0"^^<http://www.w3.org/2001/XMLSchema#double> .

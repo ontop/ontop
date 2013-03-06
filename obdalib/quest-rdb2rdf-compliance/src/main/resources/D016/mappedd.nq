@@ -1,6 +1,0 @@
-<http://example.com/Patient10> <http://example.com/paid> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .
-<http://example.com/Patient11> <http://example.com/paid> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
-<http://example.com/Patient12> <http://example.com/paid> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
-<http://example.com/Patient10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
-<http://example.com/Patient11> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
-<http://example.com/Patient12> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .

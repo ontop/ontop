@@ -1,23 +1,19 @@
-@base <http://example.com/base/> .
-
-<EMP/empno=7369> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <EMP> .
-<EMP/empno=7369> <EMP#empno> "7369"^^<http://www.w3.org/2001/XMLSchema#integer>  .
-<EMP/empno=7369> <EMP#deptno> "10"^^<http://www.w3.org/2001/XMLSchema#integer>  .
-<EMP/empno=7369> <EMP#ref-deptno> _:c  .
-<EMP/empno=7369> <EMP#ename> "SMITH" .
-<EMP/empno=7369> <EMP#job> "CLERK" .
-<EMP/empno=7369> <EMP#etype> "PART_TIME" .
-_:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <LIKES> .
-_:a <LIKES#id> "7369"^^<http://www.w3.org/2001/XMLSchema#integer>  .
-_:a <LIKES#likeType> "Playing" .
-_:a <LIKES#likedObj> "Soccer" .
-_:b <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <LIKES> .
-_:b <LIKES#id> "7369"^^<http://www.w3.org/2001/XMLSchema#integer>  .
-_:b <LIKES#likeType> "Watching" .
-_:b <LIKES#likedObj> "Basketball" .
-_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <DEPT> .
-_:c <DEPT#deptno> "10"^^<http://www.w3.org/2001/XMLSchema#integer>  .
-_:c <DEPT#dname> "APPSERVER" .
-_:c <DEPT#loc> "NEW YORK" .
-
-
+<http://example.com/base/EMP/empno=7369> <http://example.com/base/EMP#ref-deptno> _:b0 .
+_:b1 <http://example.com/base/LIKES#likedObj> "Soccer" .
+_:b1 <http://example.com/base/LIKES#likedObj> "Basketball" .
+_:b0 <http://example.com/base/DEPT#dname> "APPSERVER" .
+_:b0 <http://example.com/base/DEPT#loc> "NEW YORK" .
+_:b0 <http://example.com/base/DEPT#deptno> "10"^^<http://www.w3.org/2001/XMLSchema#integer> .
+_:b1 <http://example.com/base/LIKES#id> "7369"^^<http://www.w3.org/2001/XMLSchema#integer> .
+_:b1 <http://example.com/base/LIKES#id> "7369"^^<http://www.w3.org/2001/XMLSchema#integer> .
+_:b0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/DEPT> .
+_:b1 <http://example.com/base/LIKES#likeType> "Playing" .
+_:b1 <http://example.com/base/LIKES#likeType> "Watching" .
+_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/LIKES> .
+_:b1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/LIKES> .
+<http://example.com/base/EMP/empno=7369> <http://example.com/base/EMP#ename> "SMITH" .
+<http://example.com/base/EMP/empno=7369> <http://example.com/base/EMP#etype> "PART_TIME" .
+<http://example.com/base/EMP/empno=7369> <http://example.com/base/EMP#deptno> "10"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/base/EMP/empno=7369> <http://example.com/base/EMP#job> "CLERK" .
+<http://example.com/base/EMP/empno=7369> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/EMP> .
+<http://example.com/base/EMP/empno=7369> <http://example.com/base/EMP#empno> "7369"^^<http://www.w3.org/2001/XMLSchema#integer> .
