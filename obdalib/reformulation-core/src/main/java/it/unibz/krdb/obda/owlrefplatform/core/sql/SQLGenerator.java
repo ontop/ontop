@@ -855,7 +855,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * New template based BNODE building functions
 				 */
 
-				mainColumn = getSQLStringForBNodeFunction(ov, index);
+				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			} else {
 				throw new IllegalArgumentException(
@@ -976,8 +976,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * The first inner term determines the form of the result
 		 */
 		NewLiteral t = ov.getTerms().get(0);
-
-		if (t instanceof ValueConstant) {
+		NewLiteral c;
+	
+		if (t instanceof ValueConstant || t instanceof BNode) {
 			/*
 			 * The function is actually a template. The first parameter is a
 			 * string of the form http://.../.../ or empty "{}" with place holders of the form
@@ -985,24 +986,44 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * place of the palce holders. We need to tokenize and form the
 			 * CONCAT
 			 */
-			ValueConstant c = (ValueConstant) t;
+			if (t instanceof BNode)
+				c = (BNode) t;
+			else
+				c = (ValueConstant) t;
+		
+		
+		
 			Predicate pred = ov.getFunctionSymbol();
+			String replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+					"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" ;
+			String replace2 = ",' ', '%20')," +
+					  "'!', '%21')," +
+					  "'@', '%40'),"+
+					  "'#', '%23')," +
+					  "'$', '%24'),"+
+					  "'&', '%26'),"+
+					  "'*', '%42'), "+
+					  "'(', '%28'), "+
+					  "')', '%29'), "+
+					  "'[', '%5B'), "+
+					  "']', '%5D'), "+
+					  "',', '%2C'), "+
+					  "';', '%3B'), "+
+					  "':', '%3A'), "+
+					  "'?', '%3F'), "+
+					  "'=', '%3D'), "+
+					  "'+', '%2B'), "+
+					  "'''', '%22'), "+
+					  "'/', '%2F')";
 			
-			//if (c.getValue().equals("{}")) {
-			//	return getSQLString(ov.getTerms().get(1), index, false);
-		//	} else 
 			{
 				String functionString = "";
-//				String[] split = c.getValue().split("\\{\\}");
-//				if (split.length>1)
-//					 functionString = jdbcutil.getSQLLexicalForm(split[0]);
-//				
-				String template = c.getValue();
+				
+				String template = c.toString().substring(1, c.toString().length()-1);
 				StringTokenizer tokenizer = new StringTokenizer(template, "{}");
 				
 				if (tokenizer.countTokens() > 0)
 					 functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
-		
 				
 				List<String> vex = new LinkedList<String>();
 			
@@ -1016,28 +1037,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 						size--;
 					for (int termIndex = 1; termIndex < size; termIndex++) {
 						NewLiteral currentTerm = ov.getTerms().get(termIndex);
-						String repl = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-								"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" 
-								+ sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
-								+ ",' ', '%20')," +
-								  "'!', '%21')," +
-								  "'@', '%40'),"+
-								  "'#', '%23')," +
-								  "'$', '%24'),"+
-								  "'&', '%26'),"+
-								  "'*', '%42'), "+
-								  "'(', '%28'), "+
-								  "')', '%29'), "+
-								  "'[', '%5B'), "+
-								  "']', '%5D'), "+
-								  "',', '%2C'), "+
-								  "';', '%3B'), "+
-								  "':', '%3A'), "+
-								  "'?', '%3F'), "+
-								  "'=', '%3D'), "+
-								  "'+', '%2B'), "+
-								  "'''', '%22'), "+
-								  "'/', '%2F')";
+						String repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
+								+ replace2;
 						if (termIndex == 1)
 						{	
 							if (template.startsWith("{}"))
@@ -1056,7 +1057,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 						if (tokenizer.hasMoreTokens()) {
 							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
 						}
-//						termIndex += 1;
 					}
 				}
 			
@@ -1097,135 +1097,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 	
-
-
-	/***
-	 * Returns the SQL that builds a URI String out of an atom of the form
-	 * bnode("http:...", x, y,...)
-	 * 
-	 * @param ov
-	 * @param index
-	 * @return
-	 */
-	public String getSQLStringForBNodeFunction(Function ov,
-			QueryAliasIndex index) {
-
-		/*
-		 * The first inner term determines the form of the result
-		 */
-		NewLiteral t = ov.getTerms().get(0);
-
-		if (t instanceof BNode) {
-			/*
-			 * The function is actually a template. The first parameter is a
-			 * string of the form http://.../.../ with place holders of the form
-			 * {}. The rest are variables or constants that should be put in
-			 * place of the palce holders. We need to tokenize and form the
-			 * CONCAT
-			 */
-			BNode c = (BNode) t;
-			
-			{
-				String functionString = "";
-				String template = c.getValue();
-				template = template.substring(1, template.length()-1);
-				StringTokenizer tokenizer = new StringTokenizer(template, "{}");
-				
-				if (tokenizer.countTokens() > 0)
-					 functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
-		
-				
-				List<String> vex = new LinkedList<String>();
-			
-			   /*
-			 	* New we concat the rest of the function, note that if there is only 1 element
-			 	* there is nothing to concatenate
-			 	*/
-				if (ov.getTerms().size() > 1) {
-					int size = ov.getTerms().size();
-					for (int termIndex = 1; termIndex < size; termIndex++) {
-						NewLiteral currentTerm = ov.getTerms().get(termIndex);
-						String repl = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-								"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" 
-								+ sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
-								+ ",' ', '%20')," +
-								  "'!', '%21')," +
-								  "'@', '%40'),"+
-								  "'#', '%23')," +
-								  "'$', '%24'),"+
-								  "'&', '%26'),"+
-								  "'*', '%42'), "+
-								  "'(', '%28'), "+
-								  "')', '%29'), "+
-								  "'[', '%5B'), "+
-								  "']', '%5D'), "+
-								  "',', '%2C'), "+
-								  "';', '%3B'), "+
-								  "':', '%3A'), "+
-								  "'?', '%3F'), "+
-								  "'=', '%3D'), "+
-								  "'+', '%2B'), "+
-								  "'''', '%22'), "+
-								  "'/', '%2F')";
-						if (termIndex == 1)
-						{	
-							if (template.startsWith("{}"))
-							{	vex.add(repl);
-								if (!functionString.isEmpty())
-									vex.add(functionString);
-								continue;
-							}
-							else {
-								vex.add(functionString);
-								vex.add(repl);
-							}
-						}
-						else
-							vex.add(repl);
-						if (tokenizer.hasMoreTokens()) {
-							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
-						}
-//						termIndex += 1;
-					}
-				}
-			
-				
-				if (vex.size()==1) 
-					return vex.get(0);
-				 
-				String[] params = new String[vex.size()];
-				int i = 0;
-				for (String param : vex) {
-					params[i] = param;
-					i += 1;
-				}
-			return sqladapter.strconcat(params);
-			}
-		} else if (t instanceof Variable) {
-			/*
-			 * The function is of the form uri(x), we need to simply return the
-			 * value of X
-			 */
-
-			return getSQLString(((Variable) t), index, false);
-		} else if (t instanceof URIConstant) {
-			URIConstant uc = (URIConstant) t;
-			/*
-			 * The function is of the form uri("http://some.uri/"), i.e., a
-			 * concrete URI, we return the string representing that URI.
-			 */
-			return jdbcutil.getSQLLexicalForm(uc.getURI().toString());
-		}
-
-		/*
-		 * Unsupported case
-		 */
-		throw new IllegalArgumentException(
-				"Error, cannot generate URI constructor clause for a term. Contact the authors. Term: "
-						+ ov.toString());
-
-	}
-
 	/**
 	 * Determines if it is a unary function.
 	 */
