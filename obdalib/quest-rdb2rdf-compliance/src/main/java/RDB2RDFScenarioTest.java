@@ -78,7 +78,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 	
 	@Override
 	protected void setUp() throws Exception {
-		if (!mappingFileURL.isEmpty()) {
+		//if (!mappingFileURL.isEmpty()) {
 			try {
 				 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:questrepository","sa", "");
 				    java.sql.Statement s = sqlConnection.createStatement();
@@ -106,9 +106,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 				}
 				if (output!=null)
 					throw exc;
-			}
-		}
-		
+			}		
 	    
 	}
 
@@ -217,7 +215,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 			String query2 = "PREFIX  rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#>\n" +
 					"PREFIX dcterms: <http://purl.org/dc/elements/1.1/> \n" +
 					"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-					"SELECT ?title ?id ?output WHERE {" +
+						"SELECT ?title ?id ?output WHERE {" +
 					"   <"+relTestCase+"> rdf:type rdb2rdftest:DirectMapping; "+
 					"   dcterms:title ?title;" +
 					"   dcterms:identifier ?id;" +
@@ -230,14 +228,17 @@ public class RDB2RDFScenarioTest extends TestCase{
 				 testURI = bset.getValue("id").stringValue();
 				 testName = bset.getValue("title").toString();
 				String outputFile = bset.getValue("output").toString();
+				outputFile = outputFile.substring(1, outputFile.length()-1);
 				
 				logger.debug("Found test case: {}", testName);
 
-				/*RDB2RDFScenarioTest test = factory.createRDB2RDFScenarioTest(testURI, testName, sqlFile,
-						  null. outputFile);
+				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
+				String path = pathUri.substring(8);
+				RDB2RDFScenarioTest test = factory.createRDB2RDFScenarioTest(testURI, testName, path + sqlFile,
+						  null, path + outputFile);
 				if (test != null) {
 					suite.addTest(test);
-				}*/
+				}
 			}
 			dmres.close();
 				
@@ -280,12 +281,12 @@ public class RDB2RDFScenarioTest extends TestCase{
 				String path = pathUri.substring(8);
 				RDB2RDFScenarioTest test2 = null;
 				if (outputFile == null) {
-					test2 = factory.createRDB2RDFScenarioTest(testURI,
-							testName, path + sqlFile, path + mappingFile, null);
+				//	test2 = factory.createRDB2RDFScenarioTest(testURI,
+				//			testName, path + sqlFile, path + mappingFile, null);
 				} else {
-					test2 = factory.createRDB2RDFScenarioTest(testURI,
-							testName, path + sqlFile, path + mappingFile, path
-									+ outputFile);
+				//	test2 = factory.createRDB2RDFScenarioTest(testURI,
+				//			testName, path + sqlFile, path + mappingFile, path
+				//					+ outputFile);
 				}
 				if (test2 != null) {
 					suite.addTest(test2);
