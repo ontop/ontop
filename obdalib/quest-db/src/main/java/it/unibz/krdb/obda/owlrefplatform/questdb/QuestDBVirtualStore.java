@@ -140,6 +140,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		{	//create empty ontology
 			owlontology = man.createOntology();//createOntology(OBDADataFactoryImpl.getIRI(name));
 			tbox = OntologyFactoryImpl.getInstance().createOntology();
+			if (obdaModel.getSources().size() == 0)
+				obdaModel.addSource(getMemOBDADataSource("MemH2"));
 		}
 		
 
