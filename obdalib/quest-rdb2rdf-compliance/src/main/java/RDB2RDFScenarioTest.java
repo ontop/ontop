@@ -96,17 +96,14 @@ public class RDB2RDFScenarioTest extends TestCase{
 				dataRep = createRepository();
 			} catch (Exception exc) {
 				try {
-					if (dataRep != null)
-					{	
-						dataRep.shutDown();
-						dataRep = null;
-					}
+					tearDown();
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 				if (output!=null)
 					throw exc;
-			}		
+			}	
+			
 	    
 	}
 
@@ -127,15 +124,17 @@ public class RDB2RDFScenarioTest extends TestCase{
 			dataRep.shutDown();
 			dataRep = null;
 		}
-		java.sql.Statement s = sqlConnection.createStatement();
-	    try {
-	    	s.execute("DROP ALL OBJECTS DELETE FILES");
-	    } catch(SQLException sqle) {
-	        System.out.println("Table not found, not dropping");
-	    }
-	   
-	    s.close();
-		sqlConnection.close();
+		if (!sqlConnection.isClosed()) {
+			java.sql.Statement s = sqlConnection.createStatement();
+			try {
+				s.execute("DROP ALL OBJECTS DELETE FILES");
+			} catch (SQLException sqle) {
+				System.out.println("Table not found, not dropping");
+			} finally {
+				s.close();
+				sqlConnection.close();
+			}
+		}
 	}
 
 	@Override
@@ -281,12 +280,12 @@ public class RDB2RDFScenarioTest extends TestCase{
 				String path = pathUri.substring(8);
 				RDB2RDFScenarioTest test2 = null;
 				if (outputFile == null) {
-				//	test2 = factory.createRDB2RDFScenarioTest(testURI,
-				//			testName, path + sqlFile, path + mappingFile, null);
+					test2 = factory.createRDB2RDFScenarioTest(testURI,
+							testName, path + sqlFile, path + mappingFile, null);
 				} else {
-				//	test2 = factory.createRDB2RDFScenarioTest(testURI,
-				//			testName, path + sqlFile, path + mappingFile, path
-				//					+ outputFile);
+					test2 = factory.createRDB2RDFScenarioTest(testURI,
+							testName, path + sqlFile, path + mappingFile, path
+								+ outputFile);
 				}
 				if (test2 != null) {
 					suite.addTest(test2);
