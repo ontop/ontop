@@ -313,7 +313,7 @@
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
 						<Import-Package>it.unibz.krdb.obda.protege4.*,!org.json, javax.xml.datatype, javax.swing.*,
-							javax.accessibility, javax.naming.*,javax.management.*,
+							javax.accessibility, javax.naming.*,javax.management.*,javax.sql.*,
 							javax.xml.parsers.*,org.xml.sax.*,
 							it.unibz.krdb.obda.*,
 							org.protege.osgi.jdbc, org.protege.osgi.*,
@@ -324,6 +324,7 @@
 							org.openrdf.model.*,
 							org.openrdf.rio.*,
 							info.aduna.io.*,
+							org.apache.tomcat.*,
 							!com.touchgraph*,
 							!org.codehaus.janino, org.codehaus.*
 							!org.w3c.dom*,
