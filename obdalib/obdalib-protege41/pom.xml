@@ -80,13 +80,10 @@
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgrapht</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgraph</artifactId>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
@@ -111,6 +108,36 @@
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>json-jena</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-model</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-util</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-api</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-turtle</artifactId>
+			<version>2.6.9</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<version>7.0.37</version>
+		</dependency>
+		<dependency>
+	        <groupId>org.apache.tomcat</groupId>
+	        <artifactId>juli</artifactId>
+	        <version>6.0.29</version>
+      	</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
@@ -140,9 +167,7 @@
 			<artifactId>xercesImpl</artifactId>
 		</dependency>
 
-
 		<!-- JDBC Drivers -->
-
 
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -212,7 +237,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-1.7a1</finalName>
+		<finalName>it.unibz.inf.obda.p4plugin-1.7-alpha2</finalName>
 
 		<plugins>
 			<plugin>
@@ -296,6 +321,9 @@
 							org.protege.*,
 							org.semanticweb.*,
 							com.hp.hpl.jena.query.*,
+							org.openrdf.model.*,
+							org.openrdf.rio.*,
+							info.aduna.io.*,
 							!com.touchgraph*,
 							!org.codehaus.janino, org.codehaus.*
 							!org.w3c.dom*,
