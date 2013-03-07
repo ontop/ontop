@@ -1339,9 +1339,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		if (driver.contains("mysql")) {
 			url = url + "?relaxAutoCommit=true";
 		}
-		System.out.println("Get SQL Connection:");
-		System.out.println("URL:" + url);
-		
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
@@ -1349,8 +1346,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 		try {
 			conn = DriverManager.getConnection(url, username, password);
-			System.out.println(conn.toString());
-			//conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		} catch (Exception e) {
@@ -1359,6 +1354,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return conn;
 	}
 
+	// get a real (non pool) connection - used for protege plugin 
+	public QuestConnection getNonPoolConnection() throws OBDAException {
+
+		return new QuestConnection(this, getSQLConnection());
+	}
 	
 	public QuestConnection getConnection() throws OBDAException {
 

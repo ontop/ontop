@@ -246,7 +246,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			// pm.reasonerTaskProgressChanged(2, 4);
 
 			// Retrives the connection from Quest
-			conn = questInstance.getConnection();
+			//conn = questInstance.getConnection();
+			conn = questInstance.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
 			// pm.reasonerTaskProgressChanged(3, 4);
 
