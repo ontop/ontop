@@ -28,6 +28,7 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 
+import java.io.IOException;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1017,15 +1018,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 					  "'/', '%2F')";
 			
 			{
-				String functionString = "";
 				
-				String template = trim(c.toString());//.substring(1, c.toString().length()-1);
-				StringTokenizer tokenizer = new StringTokenizer(template, "{}");
-				
-				if (tokenizer.countTokens() > 0)
-					 functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
+				String template = trim(c.toString());
+				String[] split = template.split("[{][}]");
 				
 				List<String> vex = new LinkedList<String>();
+				if (split.length > 0 && !split[0].isEmpty())
+					vex.add(jdbcutil.getSQLLexicalForm(split[0]));
 			
 			   /*
 			 	* New we concat the rest of the function, note that if there is only 1 element
@@ -1039,24 +1038,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 						NewLiteral currentTerm = ov.getTerms().get(termIndex);
 						String repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
 								+ replace2;
-						if (termIndex == 1)
-						{	
-							if (template.startsWith("{}"))
-							{	vex.add(repl);
-								if (!functionString.isEmpty())
-									vex.add(functionString);
-								continue;
-							}
-							else {
-								vex.add(functionString);
-								vex.add(repl);
-							}
-						}
-						else
-							vex.add(repl);
-						if (tokenizer.hasMoreTokens()) {
-							vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
-						}
+						vex.add(repl);
+						if (termIndex < split.length )
+							vex.add(jdbcutil.getSQLLexicalForm(split[termIndex]));
 					}
 				}
 			
