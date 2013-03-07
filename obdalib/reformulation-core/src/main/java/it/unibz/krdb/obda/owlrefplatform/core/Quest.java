@@ -1251,7 +1251,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
          
 	}
 	
-	public static void releaseSQLPoolConnection (Connection co) {
+	public void releaseSQLPoolConnection (Connection co) {
 		try {
 				co.close();
 		} catch (SQLException e) {
@@ -1308,7 +1308,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 //		return conn;
 //	}
 	
-	public static synchronized Connection getSQLPoolConnection() throws OBDAException {
+	public synchronized Connection getSQLPoolConnection() throws OBDAException {
 		Connection conn = null;
 		try {
 			conn = tomcatPool.getConnection();
