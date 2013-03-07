@@ -221,9 +221,9 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			subjectString = trimTo1(parsedString);
+			subjectString = trim(parsedString);
 			// craete uri("...",var)
-			subjectAtom = getURIFunction(subjectString, joinCond);
+			subjectAtom = getURIFunction((subjectString), joinCond);
 		}
 
 		// process column declaration
@@ -231,8 +231,8 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			subjectString = trimTo1(parsedString);
-			subjectAtom = getURIFunction(subjectString, joinCond);
+			subjectString = trim(parsedString);
+			subjectAtom = getURIFunction((subjectString), joinCond);
 		}
 		
 		// process constant declaration
@@ -249,7 +249,7 @@ public class R2RMLParser {
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
-			subjectAtom = getTermTypeAtom(parsedString, trim(subjectString));
+			subjectAtom = getTermTypeAtom(parsedString, (subjectString));
 		}
 		
 		// process class declaration
@@ -524,9 +524,12 @@ public class R2RMLParser {
 		if (type == 1 && !string.startsWith("http://"))
 			string = baseuri + string;
 		
-		while (string.contains("{")) {
-			int begin = string.indexOf("{");
+		string = string.replace("\\{", "[");
+		string = string.replace("\\}", "]");
+		
+		while (string.contains("{") ) {
 			int end = string.indexOf("}");
+			int begin = string.lastIndexOf("{", end);
 			
 			String var = string.substring(begin + 1, end);
 			if (joinCond.isEmpty())
@@ -535,7 +538,9 @@ public class R2RMLParser {
 				terms.add(fac.getVariable(joinCond+trim(var)));
 			string = string.replace("{" + var + "}", "[]");
 		}
-		string = string.replace("[]", "{}");
+		string = string.replace("[", "{");
+		string = string.replace("]", "}");
+	
 
 		NewLiteral uriTemplate = null;
 		Predicate pred = null;
