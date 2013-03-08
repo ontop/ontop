@@ -1056,9 +1056,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private String createDummyQueryToFetchColumns(String originalQuery, SQLDialectAdapter adapter) {
 		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
 		if (adapter instanceof SQLServerSQLDialectAdapter) {
-			toReturn += "ORDER BY 1 "; // necessary for SQL Server
+			SQLServerSQLDialectAdapter sqlServerAdapter = (SQLServerSQLDialectAdapter) adapter;
+			toReturn = sqlServerAdapter.sqlLimit(toReturn, 1);
+		} else {
+			toReturn += adapter.sqlSlice(0, Long.MIN_VALUE);
 		}
-		toReturn += adapter.sqlSlice(0, Long.MIN_VALUE);
 		return toReturn;
 	}
 

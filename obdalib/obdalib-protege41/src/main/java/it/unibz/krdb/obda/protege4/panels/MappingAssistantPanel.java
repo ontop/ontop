@@ -940,21 +940,22 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType);
-						StringBuffer sb = new StringBuffer(txtQueryEditor.getText());
+						String sqlString = txtQueryEditor.getText();
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter
-							sb.append("\n");
 							if (sqlDialect instanceof SQLServerSQLDialectAdapter) {
-								sb.append(SqlServerSliceHack());
+								SQLServerSQLDialectAdapter sqlServerDialect = (SQLServerSQLDialectAdapter) sqlDialect;
+								sqlString = sqlServerDialect.sqlLimit(sqlString, rowCount);
+							} else {
+								sqlString = String.format("%s %s", sqlString, sqlDialect.sqlSlice(rowCount, 0));
 							}
-							sb.append(sqlDialect.sqlSlice(rowCount, 0));
 						} else {
 							throw new RuntimeException("Invalid limit number.");
 						}
 						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 						Connection c = man.getConnection(selectedSource);
 						Statement s = c.createStatement();
-						result = s.executeQuery(sb.toString());
+						result = s.executeQuery(sqlString);
 						latch.countDown();
 					} catch (Exception e) {
 						latch.countDown();
@@ -964,10 +965,5 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			};
 			thread.start();
 		}
-	}
-	
-	public String SqlServerSliceHack() {
-		// SQL Server requires 'Order By' clause before executing the slice operation
-		return "ORDER BY 1\n";
 	}
 }

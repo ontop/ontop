@@ -50,4 +50,12 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		return "CAST(" + value + " AS " + strType + ")";
 	}
+	
+	public String sqlLimit(String originalString, long limit) {
+		final String limitStmt = String.format("TOP %d ", limit);
+		StringBuffer sb = new StringBuffer(originalString);
+		int insertPosition = originalString.indexOf(" ") + 1;
+		sb.insert(insertPosition, limitStmt);
+		return sb.toString();
+	}
 }
