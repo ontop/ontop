@@ -65,12 +65,20 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 			this.virtualStore = new QuestDBVirtualStore(name, pref);
 			
 		} else {
-			URI obdaURI = new File(mappingFile).toURI();
-
+			URI obdaURI;
+			if (mappingFile.startsWith("file:"))
+				obdaURI = URI.create(mappingFile);
+			else
+				 obdaURI = new File(mappingFile).toURI();
+		
 			if (tboxFile == null)
 				this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);
 			else {
-				URI tboxURI = new File(tboxFile).toURI();
+				URI tboxURI;
+				if (tboxFile.startsWith("file:"))
+					 tboxURI = URI.create(tboxFile);
+				else 
+					tboxURI = new File(tboxFile).toURI();
 				this.virtualStore = new QuestDBVirtualStore(name, tboxURI,
 						obdaURI, pref);
 			}
