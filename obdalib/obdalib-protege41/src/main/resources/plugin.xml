@@ -162,6 +162,22 @@
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
+	 <extension id="menu.obda.importr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Import R2RML mappings"/> 
+		<toolTip value="Import mappings from an R2RML mapping file"/>
+		<class value="it.unibz.krdb.obda.protege4.gui.action.R2RMLImportAction"/>
+		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotC-A"></path>
+		<editorKitId value="OWLEditorKit"/>
+	</extension>
+	
+	 <extension id="menu.obda.exportr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Export R2RML mappings"/> 
+		<toolTip value="Export mappings as an R2RML mapping file"/>
+		<class value="it.unibz.krdb.obda.protege4.gui.action.R2RMLExportAction"/>
+		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotC-B"></path>
+		<editorKitId value="OWLEditorKit"/>
+	</extension>
+	
   <!-- <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
     <name value="Load OWL individuals (ABox) to a DB..."/> 
     <toolTip value="Stores all ABox data in a database"/>
