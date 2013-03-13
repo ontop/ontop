@@ -349,10 +349,10 @@ public class R2RMLParser {
 			newiterator = myGraph.match(object, column, null, (Resource) null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
-				objectString = trimTo1(parsedString);
+				objectString = trim(parsedString);
 				// System.out.println(parsedString);
 				if (!joinCond.isEmpty())
-					objectString = joinCond+trim(objectString);
+					objectString = joinCond+(objectString);
 				objectAtom = fac.getVariable(objectString);
 			}
 			
@@ -396,7 +396,7 @@ public class R2RMLParser {
 				NewLiteral lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
 				//create literal(object, lang) atom
 				Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
-				NewLiteral langAtom = fac.getAtom(literal, objectAtom, lang);
+				NewLiteral langAtom = fac.getFunctionalTerm(literal, objectAtom, lang);
 				objectAtom = langAtom;
 			}
 			
@@ -427,7 +427,7 @@ public class R2RMLParser {
 		{	//literal
 			Constant constt = fac.getValueConstant(objectString);
 			Predicate pred = fac.getDataTypePredicateLiteral();
-			return fac.getAtom(pred, constt);
+			return fac.getFunctionalTerm(pred, constt);
 		
 		}
 	}
@@ -446,7 +446,7 @@ public class R2RMLParser {
 
 			Predicate predicate = fac.getPredicate(OBDADataFactoryImpl.getIRI(type), 1);
 			NewLiteral constant = fac.getValueConstant(consts);
-			typedObject = fac.getAtom(predicate, constant);
+			typedObject = fac.getFunctionalTerm(predicate, constant);
 		}
 		return typedObject;
 	}
@@ -531,11 +531,13 @@ public class R2RMLParser {
 			int end = string.indexOf("}");
 			int begin = string.lastIndexOf("{", end);
 			
-			String var = string.substring(begin + 1, end);
-			if (joinCond.isEmpty())
-				terms.add(fac.getVariable(joinCond+var));
-			else
-				terms.add(fac.getVariable(joinCond+trim(var)));
+			String var = trim(string.substring(begin + 1, end));
+			
+			//trim for making variable
+			terms.add(fac.getVariable(joinCond+(var)));
+			
+			
+			string = string.replace("{\"" + var + "\"}", "[]");
 			string = string.replace("{" + var + "}", "[]");
 		}
 		string = string.replace("[", "{");
@@ -563,7 +565,7 @@ public class R2RMLParser {
 		// LITERAL
 		case 3:
 			uriTemplate = fac.getValueConstant(string);
-			pred = OBDAVocabulary.RDFS_LITERAL;//lang?
+			pred = OBDAVocabulary.RDFS_LITERAL_LANG;//lang?
 			terms.add(OBDAVocabulary.NULL);
 			break;
 		}

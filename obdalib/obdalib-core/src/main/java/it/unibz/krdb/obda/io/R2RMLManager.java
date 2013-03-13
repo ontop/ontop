@@ -1,49 +1,28 @@
 package it.unibz.krdb.obda.io;
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.LineNumberReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryBase;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.GraphUtil;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.helpers.StatementCollector;
 
@@ -55,7 +34,6 @@ public class R2RMLManager {
 	
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private int i=0;
 	
 	private org.openrdf.model.Graph myGraph;
 	
@@ -148,8 +126,7 @@ public class R2RMLManager {
 		List<Function> body = getMappingTripleAtoms(myGraph, subj);
 		Function head = getHeadAtom(body);
 		CQIE targetQuery = fac.getCQIE(head, body);
-		i++;
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping"+i, sourceQuery, targetQuery);
+		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+subj.stringValue(), sourceQuery, targetQuery);
 		return mapping;
 			
 	}
@@ -218,7 +195,7 @@ public class R2RMLManager {
 			//for each predicate construct an atom and add to body
 			for (Predicate pred : joinPredicates)
 			{
-				Function bodyAtom = fac.getAtom(pred, terms);
+				Function bodyAtom = fac.getFunctionalTerm(pred, terms);
 				body.add(bodyAtom);
 			}
 			//get head and construct cqie
@@ -228,9 +205,8 @@ public class R2RMLManager {
 			if (sourceQuery.isEmpty())
 				throw new Exception("Could not create source query for join in "+tripleMap.stringValue());
 			
-			i++;
 			//finally, create mapping and add it to the list
-			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping"+i, sourceQuery, targetQuery);
+			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+tripleMap.stringValue(), sourceQuery, targetQuery);
 			
 			System.out.println("joinMapping: "+mapping.toString());
 			
@@ -279,7 +255,7 @@ public class R2RMLManager {
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates)
-			body.add(fac.getFunctionalTerm(classPred, subjectAtom.asAtom()));
+			body.add(fac.getFunctionalTerm(classPred, subjectAtom));
 		
 		
 		//get predicate-object nodes
@@ -313,13 +289,13 @@ public class R2RMLManager {
 					if(objectAtom.getReferencedVariables().size()<1)
 					{
 						Predicate newpred = fac.getClassPredicate(objectAtom.toString());
-						body.add(fac.getFunctionalTerm(newpred, subjectAtom.asAtom()));
+						body.add(fac.getFunctionalTerm(newpred, subjectAtom));
 					}
 				}
 				else 
 				{
 					// create predicate(subject, object) and add it to the body
-					Function bodyAtom = fac.getAtom(bodyPred, terms);
+					Function bodyAtom = fac.getFunctionalTerm(bodyPred, terms);
 					body.add(bodyAtom);
 				}
 			}

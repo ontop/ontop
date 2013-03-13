@@ -36,40 +36,44 @@ public class R2RMLReader {
 		graph = manager.getGraph();
 	}
 	
+	public R2RMLReader(File file, OBDAModel model)
+	{
+	
+		manager = new R2RMLManager(file);
+		graph = manager.getGraph();
+		obdaModel = model;
+	}
 	
 	
-	public OBDAModel readMapping(URI location){
+	public void setOBDAModel(OBDAModel model)
+	{
+		this.obdaModel = model;
+	}
+	
+	
+	public OBDAModel readModel(URI sourceUri){
 		try {
 			//add to the model the mappings retrieved from the manager
-			obdaModel.addMappings(location, manager.getMappings(graph));
+			obdaModel.addMappings(sourceUri, manager.getMappings(graph));
 		} catch (DuplicateMappingException e) {
 			e.printStackTrace();
 		}
 		return obdaModel;
 	}
 	
-	public OBDAModel readMapping(URI location, String JdbcUri, String user, String pwd, String driver){
-
-		ArrayList<OBDAMappingAxiom> mappings = manager.getMappings(graph);
-		try {
-			//add to the model the mappings retrieved from the manager
-			obdaModel.addMappings(location, mappings);
-		} catch (DuplicateMappingException e) {
-			e.printStackTrace();
-		}
-		return obdaModel;	
+	public ArrayList<OBDAMappingAxiom> readMappings(){
+		return manager.getMappings(graph);
 	}
 	
 
 	public static void main(String args[])
 	{
-		String file = "C:/Project/Test Cases/mapping.ttl";
+		String file = "C:/Project/Test Cases/mapping2.ttl";
+	//	"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D014/r2rmla.ttl";
+	//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl";
+	
 		R2RMLReader reader = new R2RMLReader(file);
-		try {
-			reader.readMapping(new URI("blah"));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
+			reader.readMappings();
 		
 	}
 
