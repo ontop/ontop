@@ -104,7 +104,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		else if (obdaURI.toString().endsWith(".ttl"))
 		{
 			R2RMLReader reader = new R2RMLReader(new File(obdaURI));
-			obdaModel = reader.readMapping(obdaURI);
+			obdaModel = reader.readModel(obdaURI);
 			
 		}
 		
