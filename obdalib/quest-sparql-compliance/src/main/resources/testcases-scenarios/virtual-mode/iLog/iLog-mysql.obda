@@ -25,7 +25,7 @@ owl:Thing, :TrainPassage, :TrainEvent, :RequestForWork, :ITU, :ScheduledStop, :C
 
 [SourceDeclaration]
 sourceUri	iLogDB
-connectionUrl	jdbc:mysql://obdalin.inf.unibz.it/ilogdb
+connectionUrl	jdbc:mysql://10.7.20.39/ilogdb
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver

@@ -1,105 +1,89 @@
 [PrefixDeclaration]
 xsd:		http://www.w3.org/2001/XMLSchema#
-owl:		http://www.w3.org/2002/07/owl#
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+owl:		http://www.w3.org/2002/07/owl#
 :		http://www.owl-ontologies.com/Ontology1207768242.owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[ClassDeclaration] @collection [[
-owl:Thing, :Offer, :PhysicalPerson, :Transaction, :Investor, :StockTrader, :LegalPerson, :FinantialInstrument, :Person, :Stock
-:Dealer, :StockExchangeMember, :StockBroker, :StockExchangeList, :Acquisition, :Company, :Address, :Trader
-]]
-
-[ObjectPropertyDeclaration] @collection [[
-:isTradedIn, :usesBroker, :inverse_test2, :isExecutedFor, :listsStock, :test1, :isExecutedBy, :isListedIn, :test2, :hasAddress
-:inverseofhasAddress, :inverse_of_test1, :involvesInstrument, :tradesOnBehalfOf, :belongsToCompany, :hasStock
-]]
-
-[DataPropertyDeclaration] @collection [[
-:inCity, :inCountry, :inStreet, :stockDescription, :amountOfShares, :amountOfTransaction, :hasNumber, :typeOfShares, :firstName, :marketShares
-:transactionID, :ssn, :personID, :companyName, :netWorth, :inState, :listdate, :financialInstrumentID, :addressID, :transactionDate
-:membershipDate, :dateOfBirth, :lastName
-]]
-
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:mysql://obdalin.inf.unibz.it/stockexchange
+connectionUrl	jdbc:mysql://10.7.20.39/stockexchange
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
-target		:getAddressObj($id) a :Address; :addressID $id; :inStreet $street; :hasNumber $number; :inCity $city; :inState $state; :inCountry $country . 
+target		:address-{id} a :Address; :addressID {id}; :inStreet {street}; :hasNumber {number}; :inCity {city}; :inState {state}; :inCountry {country} . 
 source		select id, street, number, city, state, country from address
 
 mappingId	mapping-brokers
-target		:getPersonObj($id) a :StockBroker; :firstName $name; :lastName $lastname; :dateOfBirth $dateofbirth; :ssn $ssn . 
+target		:person-{id} a :StockBroker; :firstName {name}; :lastName {lastname}; :dateOfBirth {dateofbirth}; :ssn {ssn} . 
 source		select id, name, lastname, dateofbirth, ssn from broker
 
 mappingId	mapping-broker-address
-target		:getPersonObj($id) :hasAddress :getAddressObj($addressid) . 
+target		:person-{id} :hasAddress :address-{addressid} . 
 source		select id, addressid from broker
 
 mappingId	mapping-investors
-target		:getPersonObj($id) a :Investor; :firstName $name; :lastName $lastname; :dateOfBirth $dateofbirth; :ssn $ssn . 
+target		:person-{id} a :Investor; :firstName {name}; :lastName {lastname}; :dateOfBirth {dateofbirth}; :ssn {ssn} . 
 source		select id, name, lastname, dateofbirth, ssn from client
 
 mappingId	mapping-investor-address
-target		:getPersonObj($id) :hasAddress :getAddressObj($addressid) . 
+target		:person-{id} :hasAddress :address-{addressid} . 
 source		select id, name, lastname, addressid from client
 
 mappingId	mapping-companies
-target		:getCompanyObj($id) a :Company; :companyName $name; :marketShares $marketshares; :netWorth $networth . 
+target		:company-{id} a :Company; :companyName {name}; :marketShares {marketshares}; :netWorth {networth} . 
 source		select id, name, marketshares, networth from company
 
 mappingId	mapping-company-addresses
-target		:getCompanyObj($id) :hasAddress :getAddressObj($addressid) . 
+target		:company-{id} :hasAddress :address-{addressid} . 
 source		select id, addressid from company
 
 mappingId	mapping-stocks
-target		:getStockObj($id) a :Stock; :financialInstrumentID $id; :amountOfShares $numberofshares; :typeOfShares $sharetype; :stockDescription $description@en-us . 
+target		:stock-{id} a :Stock; :financialInstrumentID {id}; :amountOfShares {numberofshares}; :typeOfShares {sharetype}; :stockDescription {description}@en-us . 
 source		select id, numberofshares, sharetype, description from stockinformation
 
 mappingId	mapping-stockbooks
-target		:getStockBookObj($date) a :StockExchangeList; :listdate $date . 
-source		select distinct date from stockbooklist 
+target		:stockbook-{date} a :StockExchangeList; :listdate {date} . 
+source		select distinct date from stockbooklist
 
 mappingId	mapping-tradesOnBehalfOf-physical
-target		:getPersonObj($brokerid) :tradesOnBehalfOf :getPersonObj($clientid) . 
+target		:person-{brokerid} :tradesOnBehalfOf :person-{clientid} . 
 source		select brokerid, clientid from brokerworksfor where clientid IS NOT NULL
 
 mappingId	mapping-tradesOnBehalfOf-legal
-target		:getPersonObj($brokerid) :tradesOnBehalfOf :getCompanyObj($companyid) . 
+target		:person-{brokerid} :tradesOnBehalfOf :company-{companyid} . 
 source		select brokerid, companyid from brokerworksfor where companyid IS NOT NULL
 
 mappingId	mapping-transactions
-target		:getTransactionObj($id) a :Transaction; :transactionID $id; :transactionDate $date; :amountOfTransaction $amount . 
+target		:transaction-{id} a :Transaction; :transactionID {id}; :transactionDate {date}; :amountOfTransaction {amount} . 
 source		select id, date, amount from transaction
 
 mappingId	mapping-transaction-roles-persons
-target		:getTransactionObj($id) :isExecutedBy :getPersonObj($brokerid); :isExecutedFor :getPersonObj($forclientid); :involvesInstrument :getStockObj($stockid) . 
+target		:transaction-{id} :isExecutedBy :person-{brokerid}; :isExecutedFor :person-{forclientid}; :involvesInstrument :stock-{stockid} . 
 source		select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL
 
 mappingId	mapping-transaction-roles-companies
-target		:getTransactionObj($id) :isExecutedBy :getPersonObj($brokerid); :isExecutedFor :getCompanyObj($forcompanyid); :involvesInstrument :getStockObj($stockid) . 
+target		:transaction-{id} :isExecutedBy :person-{brokerid}; :isExecutedFor :company-{forcompanyid}; :involvesInstrument :stock-{stockid} . 
 source		select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL
 
 mappingId	mapping-stock-company
-target		:getStockObj($id) :belongsToCompany :getCompanyObj($companyid) . 
+target		:stock-{id} :belongsToCompany :company-{companyid} . 
 source		select id, companyid from stockinformation
 
 mappingId	mapping-stock-listedin
-target		:getStockBookObj($date) :listsStock :getStockObj($stockid) . 
+target		:stockbook-{date} :listsStock :stock-{stockid} . 
 source		select date, stockid from stockbooklist
 
 mappingId	mapping-dealer
-target		:getPersonObj($clientid) a :Dealer . 
+target		:person-{clientid} a :Dealer . 
 source		select clientid from broker,client,brokerworksfor where ( ( client.id = broker.id and brokerid=broker.id ) and client.id=clientid )
 
 mappingId	mapping-offers
-target		:getTransactionObj($id) a :Offer . 
+target		:transaction-{id} a :Offer . 
 source		SELECT id FROM transaction WHERE type=true
 ]]
 

@@ -40,7 +40,7 @@
 
 [SourceDeclaration]
 sourceUri	fishdelish
-connectionUrl	jdbc:mysql://10.10.160.28/fbapp
+connectionUrl	jdbc:mysql://10.7.20.39/fbapp
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver

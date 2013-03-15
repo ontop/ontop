@@ -25,7 +25,7 @@ foaf:homepage, rdfs:comment, dc:title, bsbm:price, bsbm:rating1, bsbm:rating2, b
 
 [SourceDeclaration]
 sourceUri	BSBM-Benchmark
-connectionUrl	jdbc:mysql://obdalin.inf.unibz.it/benchmark
+connectionUrl	jdbc:mysql://10.7.20.39/bsbm250k
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
