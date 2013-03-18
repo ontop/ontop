@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -18,6 +17,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -27,8 +27,8 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.api.Attribute;
 
-import java.io.IOException;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +38,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.slf4j.LoggerFactory;
 
@@ -872,7 +871,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * If the we have a column we need to still CAST to VARCHAR
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(')
-			mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
+			if (!isStringColType(ht, index))
+				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 
 		return String.format(mainTemplate, mainColumn,
 				sqladapter.sqlQuote(signature.get(hpos)));
@@ -1036,8 +1036,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 						size--;
 					for (int termIndex = 1; termIndex < size; termIndex++) {
 						NewLiteral currentTerm = ov.getTerms().get(termIndex);
-						String repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
-								+ replace2;
+						String repl = "";
+						if(isStringColType(currentTerm, index))
+							repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						else
+							repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)
+							+ replace2;
 						vex.add(repl);
 						if (termIndex < split.length )
 							vex.add(jdbcutil.getSQLLexicalForm(split[termIndex]));
@@ -1081,6 +1085,60 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 	
+	private boolean isStringColType(NewLiteral currentTerm,
+			QueryAliasIndex index) {
+		if(currentTerm instanceof FunctionalTermImpl)
+		{
+			if (currentTerm.asAtom().getFunctionSymbol().getArity()==1)
+				 currentTerm = currentTerm.asAtom().getTerm(0);
+					
+		}
+		if (currentTerm instanceof Variable){
+		Set<String> viewdef = index.getColumnReferences((Variable) currentTerm);
+		System.out.println(viewdef.toString());
+		String def = viewdef.iterator().next();
+		String col = trim(def.split("\\.")[1]);
+		String table = def.split("\\.")[0];
+		if (def.startsWith("QVIEW"))
+		{
+			Map<Function, String> views = index.viewNames;
+			for (Function func : views.keySet())
+			{
+				String value = views.get(func);
+				if (value.equals(def.split("\\.")[0]))
+					{table = func.getFunctionSymbol().toString();
+					break;
+					}
+			}
+		}
+		List<TableDefinition> tables = metadata.getTableList();
+		for (TableDefinition tabledef: tables)
+		{
+			if (tabledef.getName().equals(table))
+			{
+				List<Attribute> attr = tabledef.getAttributes();
+				for (Attribute a : attr)
+					if (a.getName().equals(col)) {
+						switch (a.getType()) {
+						case Types.VARCHAR:
+						case Types.CHAR:
+						case Types.LONGNVARCHAR:
+						case Types.LONGVARCHAR:
+						case Types.NVARCHAR:
+						case Types.NCHAR:
+							return true;
+						default:
+							return false;
+						
+					}
+				}
+			}
+		}
+		}
+		return false;
+		
+	}
+
 	private String trim(String string) {
 		
 		while (string.startsWith("\"") && string.endsWith("\"")) {
@@ -1226,10 +1284,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 				if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
 					sqlDatatype = Types.VARCHAR;
 				}
-				return sqladapter.sqlCast(columnName, sqlDatatype);
+				if (isStringColType(function, index))
+					return columnName;
+				else
+					return sqladapter.sqlCast(columnName, sqlDatatype);
 			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR_URI)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
-				return sqladapter.sqlCast(columnName, Types.VARCHAR);
+				if (isStringColType(function, index))
+					return columnName;
+				else
+					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 			}
 		}
 
