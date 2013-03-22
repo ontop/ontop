@@ -15,9 +15,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactConverter;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer.VirtualTriplePredicateIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -269,7 +268,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
 						obdaModelForMaterialization.declarePredicate(p);
 					}
-					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModelForMaterialization);
+					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 					st.insertData(assertionIter, 5000, 500);
 					assertionIter.disconnect();

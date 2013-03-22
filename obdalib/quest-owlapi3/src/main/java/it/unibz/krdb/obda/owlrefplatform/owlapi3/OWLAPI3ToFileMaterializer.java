@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
  * @author mariano
  * 
  */
-public class NTripleOBDAMaterializer {
+public class OWLAPI3ToFileMaterializer {
 
 	static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
@@ -38,11 +38,11 @@ public class NTripleOBDAMaterializer {
 		OBDAModel newModel = ofac.getOBDAModel();
 		ModelIOManager io = new ModelIOManager(newModel);
 		io.load(inputFile);
-		return materialize(outputFile, newModel);
+		return materializeN3(outputFile, newModel);
 	}
 
-	public static int materialize(File outputFile, OBDAModel model) throws Exception {
-		OWLAPI3IndividualIterator individuals = new OWLAPI3IndividualIterator(model);
+	public static int materializeN3(File outputFile, OBDAModel model) throws Exception {
+		OWLAPI3Materializer individuals = new OWLAPI3Materializer(model);
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outputFile));
 
 		String rdftype = OBDAVocabulary.RDF_TYPE;
