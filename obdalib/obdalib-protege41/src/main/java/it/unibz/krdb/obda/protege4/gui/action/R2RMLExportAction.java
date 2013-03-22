@@ -29,7 +29,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	private OWLEditorKit editorKit = null;
 	private OBDAModel obdaModel = null;
 	
-	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
+	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
 	@Override
 	public void initialise() throws Exception {
