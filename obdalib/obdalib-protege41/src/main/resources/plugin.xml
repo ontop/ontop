@@ -147,8 +147,8 @@
    </extension>
 	
   <extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Generate OWL Individuals from OBDA mappings..."/> 
-		<toolTip value="Inserts OWL Individuals to the current ontology based on the data generated from the mappings"/>
+		<name value="Generate individuals using mappings"/> 
+		<toolTip value="Materialize OWL Individuals from the OBDA mappings, choose from several output options"/>
 		<class value="it.unibz.krdb.obda.protege4.gui.action.AboxMaterializationAction"/>
 		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotA-A"></path>
 		<editorKitId value="OWLEditorKit"/>
