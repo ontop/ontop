@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class VirtualABoxMaterializer {
+public class QuestMaterializer {
 
 	private OBDAModel model;
 
@@ -85,7 +85,7 @@ public class VirtualABoxMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public VirtualABoxMaterializer(OBDAModel model) throws Exception {
+	public QuestMaterializer(OBDAModel model) throws Exception {
 		this.model = model;
 		
 		for (Predicate p: model.getDeclaredPredicates()) {
