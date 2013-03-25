@@ -1,9 +1,9 @@
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.sql.api.Attribute;
 
@@ -311,7 +311,6 @@ public class DBMetadata implements Serializable {
 	 */
 	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata, DatalogProgram program) {
 		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
-
 		for (CQIE mapping : program.getRules()) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getPredicate();
@@ -326,12 +325,10 @@ public class DBMetadata implements Serializable {
 					if (column.isPrimaryKey()) {
 						pkeyIdx.add(columnidx);
 					}
-	
 				}
 				if (!pkeyIdx.isEmpty()) {
 					pkeys.put(newatom.getPredicate(), pkeyIdx);
 				}
-	
 			}
 		}
 		return pkeys;

@@ -25,4 +25,10 @@ public class Reference {
 	public String getColumnReference() {
 		return pkColumnReference;
 	}
+	
+	@Override
+	public String toString() {
+		String msg = String.format("%s : %s(%s)", fkReferenceName, pkTableReference, pkColumnReference);
+		return msg;
+	}
 }

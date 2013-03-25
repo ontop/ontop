@@ -297,7 +297,7 @@ public class JDBCConnectionManager {
 
 		ResultSet rsTables = null;
 		try {
-			rsTables = md.getTables(null, null, null, new String[] { "TABLE" });
+			rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" });
 			while (rsTables.next()) {
 				Set<String> tableColumns = new HashSet<String>();
 
@@ -338,7 +338,9 @@ public class JDBCConnectionManager {
 				}
 			}
 		} finally {
-			rsTables.close();
+			if (rsTables != null) {
+				rsTables.close();
+			}
 		}
 		return metadata;
 	}
@@ -348,24 +350,51 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
-
 		Statement stmt = null;
-		ResultSet rsTables = null;
+		ResultSet resultSet = null;
 		try {
+			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();
-			rsTables = stmt.executeQuery("select object_name from user_objects where object_type = 'TABLE' and (NOT object_name LIKE '%$%' and NOT object_name LIKE 'LOG%' and object_name != 'HELP' and object_name != 'SQLPLUS_PRODUCT_PROFILE')");
-			while (rsTables.next()) {
-				Set<String> tableColumns = new HashSet<String>();
-
-				final String tblName = rsTables.getString("object_name");
-				final ArrayList<String> primaryKeys = getPrimaryKey(md, null, null, tblName);
-				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
-				
-				TableDefinition td = new TableDefinition(tblName);
-
+			
+			/* Obtain the table owner (i.e., schema name) */
+			String tableOwner = "SYSTEM"; // by default
+			resultSet = stmt.executeQuery("SELECT user FROM dual");
+			if (resultSet.next()) {
+				tableOwner = resultSet.getString("user");
+			}
+			
+			/* Obtain the relational objects (i.e., tables and views) */
+			final String tableSelectQuery = "SELECT object_name FROM ( " +
+					"SELECT table_name as object_name FROM user_tables WHERE " +
+					"NOT table_name LIKE 'MVIEW$_%' AND " +
+					"NOT table_name LIKE 'LOGMNR_%' AND " +
+					"NOT table_name LIKE 'AQ$_%' AND " +
+					"NOT table_name LIKE 'DEF$_%' AND " +
+					"NOT table_name LIKE 'REPCAT$_%' AND " +
+					"NOT table_name LIKE 'LOGSTDBY$%' AND " +
+					"NOT table_name LIKE 'OL$%' " +
+					"UNION " +
+					"SELECT view_name as object_name FROM user_views WHERE " +
+					"NOT view_name LIKE 'MVIEW$_%' AND " +
+					"NOT view_name LIKE 'LOGMNR_%' AND " +
+					"NOT view_name LIKE 'AQ$_%' AND " +
+					"NOT view_name LIKE 'DEF$_%' AND " +
+					"NOT view_name LIKE 'REPCAT$_%' AND " +
+					"NOT view_name LIKE 'LOGSTDBY$%' AND " +
+					"NOT view_name LIKE 'OL$%')";
+			resultSet = stmt.executeQuery(tableSelectQuery);
+			
+			/* Obtain the column information for each relational object */
+			while (resultSet.next()) {
 				ResultSet rsColumns = null;
 				try {
-					rsColumns = md.getColumns(null, "SYSTEM", tblName, null);
+					final String tblName = resultSet.getString("object_name");
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
+					
+					TableDefinition td = new TableDefinition(tblName);
+					rsColumns = md.getColumns(null, tableOwner, tblName, null);
+					
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
@@ -373,22 +402,22 @@ public class JDBCConnectionManager {
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
-
-						// Check if the columns are unique regardless their letter cases
-						if (!tableColumns.add(columnName.toLowerCase())) {
-							// if exist
-							break;
-						}
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);
 				} finally {
-					rsColumns.close(); // close existing open cursor
+					if (rsColumns != null) {
+						rsColumns.close(); // close existing open cursor
+					}
 				}
 			}
 		} finally {
-			rsTables.close();
-			stmt.close();
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
 		}
 		return metadata;
 	}
@@ -396,12 +425,19 @@ public class JDBCConnectionManager {
 	/* Retrives the primary key(s) from a table */
 	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		ArrayList<String> pk = new ArrayList<String>();
-		ResultSet rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table);
-		while (rsPrimaryKeys.next()) {
-			String colName = rsPrimaryKeys.getString("COLUMN_NAME");
-			String pkName = rsPrimaryKeys.getString("PK_NAME");
-			if (pkName != null) {
-				pk.add(colName);
+		ResultSet rsPrimaryKeys = null;
+		try {
+			rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table);
+			while (rsPrimaryKeys.next()) {
+				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
+				String pkName = rsPrimaryKeys.getString("PK_NAME");
+				if (pkName != null) {
+					pk.add(colName);
+				}
+			}
+		} finally {
+			if (rsPrimaryKeys != null) {
+				rsPrimaryKeys.close();
 			}
 		}
 		return pk;
@@ -410,13 +446,20 @@ public class JDBCConnectionManager {
 	/* Retrives the foreign key(s) from a table */
 	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		Map<String, Reference> fk = new HashMap<String, Reference>();
-		ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table);
-		while (rsForeignKeys.next()) {
-			String fkName = rsForeignKeys.getString("FK_NAME");
-			String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
-			String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-			String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
-			fk.put(colName, new Reference(fkName, pkTableName, pkColumnName));
+		ResultSet rsForeignKeys = null;
+		try {
+			rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table);
+			while (rsForeignKeys.next()) {
+				String fkName = rsForeignKeys.getString("FK_NAME");
+				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
+				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
+				String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
+				fk.put(colName, new Reference(fkName, pkTableName, pkColumnName));
+			}
+		} finally {
+			if (rsForeignKeys != null) {
+				rsForeignKeys.close();
+			}
 		}
 		return fk;
 	}
