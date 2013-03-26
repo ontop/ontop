@@ -362,17 +362,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					.getProperty(QuestPreferences.JDBC_DRIVER);
 		}
 
-		log.info("Quest configuration:");
-		log.info("Reformulation technique: {}", reformulationTechnique);
-		log.info("Optimize equivalences: {}", bOptimizeEquivalences);
-		log.info("Optimize TBox: {}", bOptimizeTBoxSigma);
-		log.info("ABox mode: {}", unfoldingMode);
+		log.debug("Quest configuration:");
+		log.debug("Reformulation technique: {}", reformulationTechnique);
+		log.debug("Optimize equivalences: {}", bOptimizeEquivalences);
+		log.debug("Optimize TBox: {}", bOptimizeTBoxSigma);
+		log.debug("ABox mode: {}", unfoldingMode);
 		if (!unfoldingMode.equals("virtual")) {
-			log.info("Use in-memory database: {}", inmemory);
-			log.info("Schema configuration: {}", dbType);
-			log.info("Get ABox assertions from OBDA models: {}",
+			log.debug("Use in-memory database: {}", inmemory);
+			log.debug("Schema configuration: {}", dbType);
+			log.debug("Get ABox assertions from OBDA models: {}",
 					bObtainFromMappings);
-			log.info("Get ABox assertions from ontology: {}",
+			log.debug("Get ABox assertions from ontology: {}",
 					bObtainFromOntology);
 		}
 
@@ -1246,10 +1246,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
         tomcatPool = new DataSource();
         tomcatPool.setPoolProperties(poolProperties);
     	
-        System.out.println("Connection Pool Properties:");
-        System.out.println("Start size: " + startPoolSize);
-        System.out.println("Max size: " + maxPoolSize);
-        System.out.println("Remove abandoned connections: " + removeAbandoned);
+        log.debug("Connection Pool Properties:");
+        log.debug("Start size: " + startPoolSize);
+        log.debug("Max size: " + maxPoolSize);
+        log.debug("Remove abandoned connections: " + removeAbandoned);
          
 	}
 	
