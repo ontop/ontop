@@ -40,7 +40,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		 * Setting the database;
 		 */
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -122,7 +122,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -221,7 +221,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -330,7 +330,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source2.getSourceID(), map1);
 		model.addMapping(source3.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -401,7 +401,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source3.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source3);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -508,7 +508,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addMapping(source2.getSourceID(), map1);
 		
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 	
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -613,7 +613,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
