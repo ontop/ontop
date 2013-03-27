@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3ToFileMaterializer;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.BorderLayout;
@@ -24,22 +25,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.n3.N3Writer;
-import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
-import org.openrdf.rio.turtle.TurtleWriter;
+import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sesameWrapper.SesameMaterializer;
 import uk.ac.manchester.cs.owl.owlapi.OWLOntologyImpl;
 
 /***
@@ -138,26 +135,22 @@ public class AboxMaterializationAction extends ProtegeAction {
 		fc.showSaveDialog(workspace);
 		try {
 			File file = fc.getSelectedFile();
-			OutputStream out = new FileOutputStream(file);		
-			SesameMaterializer materializer = new SesameMaterializer(this.obdaModel);
-			RDFWriter writer = null;
+			OutputStream out = new FileOutputStream(file);	
+			
 			if (format == 0) // owl = rdfxml
 			{
-				 writer = new RDFXMLPrettyWriter(out);
+				OWLOntology onto = 	this.modelManager.getActiveOntology();
+				onto.getOWLOntologyManager().saveOntology(onto, new RDFXMLOntologyFormat(), out);	
 				
 			} else if (format == 1) // n3
 			{
-				 writer = new N3Writer(out);
-				
+				OWLAPI3ToFileMaterializer.materializeN3(file, obdaModel);
 
 			} else if (format == 2) // ttl
 			{
-				writer = new TurtleWriter(out);
+				OWLOntology onto = 	this.modelManager.getActiveOntology();
+				onto.getOWLOntologyManager().saveOntology(onto, new TurtleOntologyFormat(),  out);
 			}
-			writer.startRDF();
-			while(materializer.hasNext())
-				writer.handleStatement(materializer.next());
-			writer.endRDF();
 			out.close();
 		} catch (FileNotFoundException e) {
 			return;
