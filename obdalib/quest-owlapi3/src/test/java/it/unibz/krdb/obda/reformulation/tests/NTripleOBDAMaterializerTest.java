@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.NTripleOBDAMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3ToFileMaterializer;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.BufferedReader;
@@ -118,7 +118,7 @@ public class NTripleOBDAMaterializerTest extends TestCase {
 	}
 
 	public void disabledtestMaterialization() throws Exception {
-		System.out.println("Triples: " + NTripleOBDAMaterializer.materialize(new File("stockMaterialized.nt"), obdaModel));
+		System.out.println("Triples: " + OWLAPI3ToFileMaterializer.materializeN3(new File("stockMaterialized.nt"), obdaModel));
 	}
 
 }

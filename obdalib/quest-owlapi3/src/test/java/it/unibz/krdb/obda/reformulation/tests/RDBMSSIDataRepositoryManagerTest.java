@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -121,7 +121,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -196,7 +196,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -271,7 +271,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -348,7 +348,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
