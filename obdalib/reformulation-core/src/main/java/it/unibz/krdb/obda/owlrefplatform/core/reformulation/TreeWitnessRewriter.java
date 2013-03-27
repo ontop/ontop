@@ -23,6 +23,7 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -105,13 +106,15 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		}
 	}
 	
-	private List<Function> getExtAtoms(MinimalCQProducer atoms, Set<Predicate> usedExts) {
-		List<Function> extAtoms = new ArrayList<Function>(atoms.getAtoms().size() + atoms.getNoCheckAtoms().size());
+	private List<Function> getExtAtoms(MinimalCQProducer atoms, Set<Predicate> usedExts, List<Function> nonDLAtoms) {
+		List<Function> extAtoms = new ArrayList<Function>(atoms.getAtoms().size() + atoms.getNoCheckAtoms().size() + nonDLAtoms.size());
 		extAtoms.addAll(atoms.getNoCheckAtoms());
 
 		for (Function a : atoms.getAtoms()) 
 			extAtoms.add(getExtAtom(a, usedExts));
 
+		extAtoms.addAll(nonDLAtoms);
+		
 		return extAtoms;
 	}
 	
@@ -199,11 +202,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				for (Function a : genAtoms) {				
 					MinimalCQProducer twfa = new MinimalCQProducer(reasoner, twf);
 					twfa.add(a); // 
-					twfs.add(getExtAtoms(twfa, usedExts));
+					twfs.add(getExtAtoms(twfa, usedExts, Collections.EMPTY_LIST));
 				}
 			}
 			else
-				twfs.add(getExtAtoms(twf, usedExts));
+				twfs.add(getExtAtoms(twf, usedExts, Collections.EMPTY_LIST));
 			
 			tw.setFormula(twfs);
 		}
@@ -237,7 +240,8 @@ public class TreeWitnessRewriter implements QueryRewriter {
 						for (List<Function> twfa : tw.getFormula())
 							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
 					}	
-					output.appendRule(fac.getCQIE(headAtom, getExtAtoms(mainbody, usedExts))); 
+					
+					output.appendRule(fac.getCQIE(headAtom, getExtAtoms(mainbody, usedExts, cc.getNonDLAtoms()))); 
 				}
 			}
 			else {
@@ -257,7 +261,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 								edgeAtom = getHeadAtom(headURI, 
 										"EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.addNoCheck(edgeAtom);				
-								edgeDP.appendRule(fac.getCQIE(edgeAtom, getExtAtoms(edgeAtoms, usedExts)));													
+								edgeDP.appendRule(fac.getCQIE(edgeAtom, getExtAtoms(edgeAtoms, usedExts, cc.getNonDLAtoms())));													
 							}
 							
 							for (List<Function> twfa : tw.getFormula())
@@ -267,7 +271,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
 						mainbody.addAll(edgeAtoms.getAtoms());
 				}
-				output.appendRule(fac.getCQIE(headAtom, getExtAtoms(mainbody, usedExts))); 
+				output.appendRule(fac.getCQIE(headAtom, getExtAtoms(mainbody, usedExts, cc.getNonDLAtoms()))); 
 			}
 		}
 		else {
@@ -276,7 +280,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("LOOP " + loop);
 			MinimalCQProducer loopbody = new MinimalCQProducer(reasoner);
 			loopbody.addAll(loop.getAtoms());
-			output.appendRule(fac.getCQIE(headAtom, getExtAtoms(loopbody, usedExts))); 
+			output.appendRule(fac.getCQIE(headAtom, getExtAtoms(loopbody, usedExts, cc.getNonDLAtoms()))); 
 		}
 	}
 	
