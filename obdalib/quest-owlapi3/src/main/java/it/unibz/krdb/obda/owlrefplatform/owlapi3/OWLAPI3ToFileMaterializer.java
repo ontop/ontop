@@ -6,9 +6,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -40,10 +42,13 @@ public class OWLAPI3ToFileMaterializer {
 		io.load(inputFile);
 		return materializeN3(outputFile, newModel);
 	}
-
 	public static int materializeN3(File outputFile, OBDAModel model) throws Exception {
+		return materializeN3(new FileOutputStream(outputFile), model);
+	}
+
+	public static int materializeN3(OutputStream outputFile, OBDAModel model) throws Exception {
 		OWLAPI3Materializer individuals = new OWLAPI3Materializer(model);
-		BufferedWriter bf = new BufferedWriter(new FileWriter(outputFile));
+		Writer bf = new PrintWriter(outputFile);
 
 		String rdftype = OBDAVocabulary.RDF_TYPE;
 		int count = 0;
