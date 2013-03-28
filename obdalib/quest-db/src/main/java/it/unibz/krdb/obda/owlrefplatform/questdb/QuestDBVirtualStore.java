@@ -85,7 +85,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		this(name, tboxFile, getObdaModel(obdaURI), config);
 	}
 	
-	private static OBDAModel getObdaModel(URI obdaURI)
+	public static OBDAModel getObdaModel(URI obdaURI)
 	{
 		
 		OBDAModel obdaModel = fac.getOBDAModel();
