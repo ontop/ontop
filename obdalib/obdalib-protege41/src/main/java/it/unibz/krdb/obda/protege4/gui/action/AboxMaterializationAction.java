@@ -139,7 +139,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 			
 			if (format == 0) // owl = rdfxml
 			{
-				OWLOntology onto = 	this.modelManager.getActiveOntology();
+				OWLOntology onto = 	cloneOnto();
+				materializeOnto(onto);
 				onto.getOWLOntologyManager().saveOntology(onto, new RDFXMLOntologyFormat(), out);	
 				
 			} else if (format == 1) // n3
@@ -148,7 +149,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 			} else if (format == 2) // ttl
 			{
-				OWLOntology onto = 	this.modelManager.getActiveOntology();
+				OWLOntology onto = 	cloneOnto();
+				materializeOnto(onto);
 				onto.getOWLOntologyManager().saveOntology(onto, new TurtleOntologyFormat(),  out);
 			}
 			out.close();
