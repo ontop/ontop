@@ -517,27 +517,21 @@ public class QuestMaterializer {
 					// Ignore - NO-OP
 				}
 			} else {
-				COL_TYPE type = predicate.getType(1);
-				if (type == COL_TYPE.OBJECT) {
 					Constant value1 = currentResults.getConstant(1);
 					Constant value2 = currentResults.getConstant(2);
 					if (value1 instanceof URIConstant && value2 instanceof URIConstant) {
 						URIConstant o1 = (URIConstant) value1;
 						URIConstant o2 = (URIConstant) value2;
 						assertion = ofac.createObjectPropertyAssertion(predicate, o1, o2);
-					} else {
-						// Ignore - NO-OP
-					}
-				} else {
-					Constant value = currentResults.getConstant(1);
-					if (value instanceof URIConstant) {
-						URIConstant o = (URIConstant) value;
+					} else 	if (value1 instanceof URIConstant) {
+						URIConstant o = (URIConstant) value1;
+						System.out.println( currentResults.getConstant(2).toString());
 						ValueConstant c = (ValueConstant) currentResults.getConstant(2);
 						assertion = ofac.createDataPropertyAssertion(predicate, o, c);
 					} else {
 						// Ignore - NO-OP
 					}
-				}
+				
 			}
 			return assertion;
 		}
