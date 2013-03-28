@@ -1,0 +1,22 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@base <http://example.com/base/> .
+
+<mapping-http://example.com/base/TriplesMap1>
+
+	 a rr:TriplesMap;
+
+	rr:logicalTable [ rr:sqlQuery """
+SELECT ('Student' || "Student") AS StudentId,
+				"Student"
+         FROM "Student_Sport"
+	""" ];
+
+	rr:subjectMap [ rr:column "\"StudentId\""; rr:termType rr:Literal ;
+					 rr:class <http://example.com/Student>
+ 	];
+
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://xmlns.com/foaf/0.1/name> ;
+		 rr:objectMap [ rr:column "\"Student\"" ]
+	].
+

@@ -1,0 +1,16 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@base <http://example.com/base/> .
+
+<mapping-http://example.com/base/TriplesMap1>
+
+	 a rr:triplesMap;
+
+	rr: logicalTable [ rr:tableName "\"Student"\" ];
+
+	rr:subjectMap [ rr:template {\"Name\"};  rr:termType rr:BlankNode  	];
+
+	rr:PredicateObjectMap [
+		 rr:predicate 	http://xmlns.com/foaf/0.1/name ;
+		 rr:objectMap [ rr:column "\"Name"\" ]
+	].
+

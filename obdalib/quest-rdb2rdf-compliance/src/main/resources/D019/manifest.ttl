@@ -11,7 +11,7 @@
 .
 
 <tc0019a> a rdb2rdftest:R2RML ;	
-	dcterms:title "Generation of triples by using IRI value in columns" ; 
+	dcterms:title "Generation of triples by using IRI value in columns D019" ; 
 	dcterms:identifier "R2RMLTC0019a" ;
 	test:purpose "Test the generation of triples by using IRI value in columns" ;
 	test:specificationReference "#from-column" ;

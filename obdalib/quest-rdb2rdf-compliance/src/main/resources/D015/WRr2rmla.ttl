@@ -1,0 +1,37 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@base <http://example.com/base/> .
+
+<mapping-http://example.com/base/TriplesMap1>
+
+	 a rr:triplesMap;
+
+	rr: logicalTable [ rr:sqlQuery """
+SELECT "Code", "Name", "Lan"
+						FROM "Country"
+						WHERE "Lan" = 'EN'
+	""" ];
+
+	rr:subjectMap [ rr:template "http://example.com/{\"Code\"}" 	];
+
+	rr:PredicateObjectMap [
+		 rr:predicate 	http://www.w3.org/2000/01/rdf-schema#label ;
+		 rr:objectMap 	[  rr:column "\"Name\"";  rr:language "en" ]
+	];
+
+<mapping-http://example.com/base/TriplesMap2>
+
+	 a rr:triplesMap;
+
+	rr: logicalTable [ rr:sqlQuery """
+SELECT "Code", "Name", "Lan"
+                       FROM "Country"
+					   WHERE "Lan" = 'ES'
+	""" ];
+
+	rr:subjectMap [ rr:template "http://example.com/{\"Code\"}" 	];
+
+	rr:PredicateObjectMap [
+		 rr:predicate 	http://www.w3.org/2000/01/rdf-schema#label ;
+		 rr:objectMap 	[  rr:column "\"Name\"";  rr:language "es" ]
+	];
+
