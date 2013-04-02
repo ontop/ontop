@@ -1,0 +1,78 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Date-Time Type Tests" ;
+    mf:entries
+    ( 
+      :date
+      :time
+      :time_tz
+      :timestamp
+      #:timestamp_tz
+      #:interval
+    ) .
+
+:date rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - NO IMPLEMENTATION" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date.rq> ] ;
+    mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:time rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME - NO IMPLEMENTATION" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <time.rq> ] ;
+    mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:time_tz rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME WITH TIMEZONE - NO IMPLEMENTATION" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <time_tz.rq> ] ;
+    mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+ :timestamp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <timestamp.rq> ] ;
+    mf:result <timestamp.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+ :timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <timestamp_tz.rq> ] ;
+    mf:result <timestamp_tz.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+ :interval rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: INTERVAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <interval.rq> ] ;
+    mf:result <interval.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .

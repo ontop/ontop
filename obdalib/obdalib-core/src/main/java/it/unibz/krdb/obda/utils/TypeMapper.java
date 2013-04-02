@@ -21,21 +21,27 @@ public class TypeMapper {
 		typeMapper.put(Types.CHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.LONGNVARCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.LONGVARCHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.LONGVARCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.NVARCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.NCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.INTEGER, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.BIGINT, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.SMALLINT, dfac.getDataTypePredicateInteger());
+		typeMapper.put(Types.TINYINT, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.NUMERIC, dfac.getDataTypePredicateDecimal());
 		typeMapper.put(Types.DECIMAL, dfac.getDataTypePredicateDecimal());
 		typeMapper.put(Types.FLOAT, dfac.getDataTypePredicateDouble());
 		typeMapper.put(Types.DOUBLE, dfac.getDataTypePredicateDouble());
 		typeMapper.put(Types.REAL, dfac.getDataTypePredicateDouble());
-		typeMapper.put(Types.DATE, dfac.getDataTypePredicateDateTime());
+//		typeMapper.put(Types.DATE, dfac.getDataTypePredicateDate());
+//		typeMapper.put(Types.TIME, dfac.getDataTypePredicateTime());
 		typeMapper.put(Types.TIMESTAMP, dfac.getDataTypePredicateDateTime());
 		typeMapper.put(Types.BOOLEAN, dfac.getDataTypePredicateBoolean());
 		typeMapper.put(Types.BIT, dfac.getDataTypePredicateBoolean());
+//		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
+//		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
+//		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
+		typeMapper.put(Types.CLOB, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.OTHER, dfac.getDataTypePredicateLiteral());
 	}
 
 	public static TypeMapper getInstance() {

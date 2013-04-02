@@ -1,0 +1,34 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Date-Time Type Tests" ;
+    mf:entries
+    ( 
+      :date
+      :timestamp
+    ) .
+
+:date rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - NO IMPLEMENTATION" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date.rq> ] ;
+    mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+ :timestamp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <timestamp.rq> ] ;
+    mf:result <timestamp.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
