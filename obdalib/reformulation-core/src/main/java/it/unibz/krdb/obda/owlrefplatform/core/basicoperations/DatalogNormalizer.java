@@ -15,10 +15,13 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -469,9 +472,60 @@ public class DatalogNormalizer {
 
 				}
 			}
+			
 			currentTerms.addAll(i + 1, eqList);
 			i = i + eqList.size();
 			eqList.clear();
+		}
+	}
+
+	// Saturate equalities list to explicitly state JOIN conditions and therefore avoid having 
+	// to rely on DBMS for nested JOIN optimisations (PostgreSQL case for BSBM Q3)
+	private static void saturateEqualities(Set<Function> boolSet) {
+		List<Set> equalitySets = new ArrayList();
+		Iterator<Function> iter = boolSet.iterator();
+		while (iter.hasNext()) {
+			Function eq = iter.next();
+			if (eq.getFunctionSymbol() != OBDAVocabulary.EQ)
+				continue;
+			NewLiteral v1 = eq.getTerm(0);
+			NewLiteral v2 = eq.getTerm(1);
+			if (equalitySets.size() == 0) {
+				Set firstSet = new LinkedHashSet();
+				firstSet.add(v1);
+				firstSet.add(v2);
+				equalitySets.add(firstSet);
+				continue;
+			}
+			for (int k = 0; k < equalitySets.size(); k++) {
+				Set set = equalitySets.get(k);
+				if (set.contains(v1)) {
+					set.add(v2);
+					continue;
+				}
+				if (set.contains(v2)) {
+					set.add(v1);
+					continue;
+				}
+				if (k == equalitySets.size() - 1) {
+					Set newSet = new LinkedHashSet();
+					newSet.add(v1);
+					newSet.add(v2);
+					equalitySets.add(newSet);
+					break;
+				}
+			}
+
+		}
+
+		for (int k = 0; k < equalitySets.size(); k++){
+			List varList = new ArrayList(equalitySets.get(k));
+			for (int i = 0; i < varList.size() - 1; i++) {
+			for (int j = i+1; j < varList.size(); j++) {
+				Function equality = fac.getEQFunction((NewLiteral)varList.get(i), (NewLiteral)varList.get(j));
+				boolSet.add(equality);
+			}
+		}
 		}
 	}
 
@@ -603,6 +657,10 @@ public class DatalogNormalizer {
 					booleanConditions, freshVariableCount);
 		}
 
+		// Here we need to saturate Equalities 
+		saturateEqualities(booleanConditions);
+		
+		
 		/*
 		 * Add the resulting equalities that belong to the current level. An
 		 * equality belongs to this level if ALL its variables are defined at
