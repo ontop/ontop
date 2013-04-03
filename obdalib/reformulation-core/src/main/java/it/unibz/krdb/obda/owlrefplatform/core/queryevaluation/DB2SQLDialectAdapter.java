@@ -12,9 +12,9 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 			return strings[0];
 		StringBuffer sql = new StringBuffer();
 
-		sql.append(String.format("CONCAT(%s", strings[0]));
+		sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
-			sql.append(String.format(", %s", strings[i]));
+			sql.append(String.format(" || %s", strings[i]));
 		}
 		sql.append(")");
 		return sql.toString();
