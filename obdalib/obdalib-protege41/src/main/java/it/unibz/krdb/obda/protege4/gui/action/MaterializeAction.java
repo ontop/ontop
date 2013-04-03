@@ -26,9 +26,9 @@ public class MaterializeAction implements OBDAProgressListener {
 	private Container cont = null;
 	private boolean bCancel = false;
 
-	public MaterializeAction(OWLOntology currentOntology, OWLModelManager modelManager, OWLAPI3Materializer iterator, Container cont) {
+	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer iterator, Container cont) {
 		this.currentOntology = currentOntology;
-		ontologyManager = modelManager.getOWLOntologyManager();			
+		this.ontologyManager = ontologyManager;			
 		this.materializer = iterator;
 		this.cont = cont;  
 	}

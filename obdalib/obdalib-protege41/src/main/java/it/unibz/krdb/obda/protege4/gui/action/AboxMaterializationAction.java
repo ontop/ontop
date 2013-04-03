@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -25,18 +26,23 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
+import org.openrdf.rio.RDFWriter;
+import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sesameWrapper.SesameMaterializer;
 import uk.ac.manchester.cs.owl.owlapi.OWLOntologyImpl;
 
 /***
@@ -103,7 +109,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 			//add to current onto
 			if (b1.isSelected())
 			{
-				materializeOnto(modelManager.getActiveOntology());	
+				materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());	
 			}
 			//write to file
 			else if (b2.isSelected())
@@ -112,16 +118,33 @@ public class AboxMaterializationAction extends ProtegeAction {
 				try {
 					materializeToFile(outputFormat);
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.error(e.getMessage(), e);
+					JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
 				}
 			}
 			//create new onto, add
 			else if (b3.isSelected())
 			{
-				OWLOntology newOnto = cloneOnto();
-				materializeOnto(newOnto);
 				//open new onto in new window
-				
+				try {
+					String fileName = "";
+					final JFileChooser fc = new JFileChooser();
+					fc.setSelectedFile(new File(fileName));
+					fc.showSaveDialog(workspace);
+					File file = fc.getSelectedFile();
+					
+					OWLOntology newOnto = cloneOnto(file);
+					OWLOntologyManager newMan = newOnto.getOWLOntologyManager();
+					newMan.saveOntology(newOnto, new RDFXMLOntologyFormat(), new FileOutputStream(file));
+					OWLOntology o = newMan.loadOntologyFromOntologyDocument((file));
+					modelManager.setActiveOntology(o);
+					materializeOnto(o, modelManager.getOWLOntologyManager());
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					log.error(e.getMessage(), e);
+					JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
+				}
 			}
 		}
 		
@@ -139,9 +162,12 @@ public class AboxMaterializationAction extends ProtegeAction {
 			
 			if (format == 0) // owl = rdfxml
 			{
-				OWLOntology onto = 	cloneOnto();
-				materializeOnto(onto);
-				onto.getOWLOntologyManager().saveOntology(onto, new RDFXMLOntologyFormat(), out);	
+				SesameMaterializer materializer = new SesameMaterializer(obdaModel);
+				RDFWriter writer = new RDFXMLPrettyWriter(out);
+				writer.startRDF();
+				while(materializer.hasNext())
+					writer.handleStatement(materializer.next());
+				writer.endRDF();
 				
 			} else if (format == 1) // n3
 			{
@@ -149,29 +175,34 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 			} else if (format == 2) // ttl
 			{
-				OWLOntology onto = 	cloneOnto();
-				materializeOnto(onto);
-				onto.getOWLOntologyManager().saveOntology(onto, new TurtleOntologyFormat(),  out);
+				SesameMaterializer materializer = new SesameMaterializer(obdaModel);
+				RDFWriter writer = new TurtleWriter(out);
+				writer.startRDF();
+				while(materializer.hasNext())
+					writer.handleStatement(materializer.next());
+				writer.endRDF();
 			}
 			out.close();
+			JOptionPane.showMessageDialog(this.workspace, "Task is completed", "Done", JOptionPane.INFORMATION_MESSAGE);
 		} catch (FileNotFoundException e) {
-			return;
+			throw e;
 		}
 	}
 	
-	private OWLOntology cloneOnto()
+	private OWLOntology cloneOnto(File file)
 	{
 		//create new onto by cloning this one
 		OWLOntology currentOnto = modelManager.getActiveOntology();
-		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();			
-		OWLOntology newOnto = new OWLOntologyImpl(ontologyManager, currentOnto.getOntologyID());
+		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();	
+		OWLOntologyID id = new OWLOntologyID(IRI.create(file));
+		OWLOntology newOnto = new OWLOntologyImpl(ontologyManager, id);
 		Set<OWLAxiom> axioms = currentOnto.getAxioms();
 		for(OWLAxiom axiom: axioms)
 			ontologyManager.addAxiom(newOnto, axiom);
 		return newOnto;
 	}
 	
-	private void materializeOnto(OWLOntology onto)
+	private void materializeOnto(OWLOntology onto, OWLOntologyManager ontoManager)
 	{
 		String message = "The plugin will generate several triples and save them in this current ontology.\n" +
 				"The operation may take some time and may require a lot of memory if the data volume is too high.\n\n" +
@@ -184,7 +215,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 			
 				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel);
 				Container container = workspace.getRootPane().getParent();
-				final MaterializeAction action = new MaterializeAction(onto, modelManager, individuals, container);
+				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
 				
 				Thread th = new Thread(new Runnable() {
 					@Override
