@@ -39,8 +39,8 @@ public class SesameRemoteTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "../quest-owlapi3/src/test/resources/test/stockexchange-unittest.owl";
-	final String obdafile = "../quest-owlapi3/src/test/resources/test/stockexchange-h2-unittest.obda";
+	final String owlfile = "../quest-owlapi3/src/test/resources/test/stockexchange.owl";
+	final String obdafile = "../quest-owlapi3/src/test/resources/test/stockexchange-mysql.obda";
 	
 	public void setup() throws Exception
 	{
@@ -58,7 +58,7 @@ public class SesameRemoteTest extends TestCase {
 		
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("../quest-owlapi3/src/test/resources/test/stockexchange-create-h2.sql");
+		FileReader reader = new FileReader("../quest-owlapi3/src/test/resources/test/stockexchange-create-mysql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -78,7 +78,7 @@ public class SesameRemoteTest extends TestCase {
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(new File(obdafile));
+		ioManager.load(obdafile);
 
 		OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
