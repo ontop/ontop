@@ -525,7 +525,6 @@ public class QuestMaterializer {
 						assertion = ofac.createObjectPropertyAssertion(predicate, o1, o2);
 					} else 	if (value1 instanceof URIConstant) {
 						URIConstant o = (URIConstant) value1;
-						System.out.println( currentResults.getConstant(2).toString());
 						ValueConstant c = (ValueConstant) currentResults.getConstant(2);
 						assertion = ofac.createDataPropertyAssertion(predicate, o, c);
 					} else {
