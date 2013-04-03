@@ -1,6 +1,6 @@
 package inf.unibz.ontop.sesame.tests.general;
 
-import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -32,7 +32,6 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.resultio.TupleQueryResultWriter;
 import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
 import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriterFactory;
-import org.openrdf.query.resultio.text.csv.SPARQLResultsCSVWriterFactory;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -161,11 +160,8 @@ public class StockExchangeTestH2 extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		DataManager ioManager = new DataManager(obdaModel,
-				new QueryController());
-		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology
-				.getOntologyID().getOntologyIRI().toURI(),
-				obdaModel.getPrefixManager());
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(new File(obdafile));
 	}
 
 	@Override

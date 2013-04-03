@@ -1,11 +1,9 @@
 package inf.unibz.ontop.sesame.tests.general;
-import java.io.PrintStream;
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;

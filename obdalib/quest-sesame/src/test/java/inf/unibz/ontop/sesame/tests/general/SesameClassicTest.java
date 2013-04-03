@@ -1,31 +1,30 @@
 package inf.unibz.ontop.sesame.tests.general;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import junit.framework.TestCase;
 
 import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.IntegerLiteralImpl;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.*;
-import org.openrdf.repository.*;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.BooleanQuery;
+import org.openrdf.query.GraphQuery;
+import org.openrdf.query.GraphQueryResult;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 
 import sesameWrapper.RepositoryConnection;
 import sesameWrapper.SesameClassicInMemoryRepo;
-import sesameWrapper.SesameClassicJDBCRepo;
-import sesameWrapper.SesameClassicRepo;
-
-import junit.framework.TestCase;
 
 
 public class SesameClassicTest extends TestCase {

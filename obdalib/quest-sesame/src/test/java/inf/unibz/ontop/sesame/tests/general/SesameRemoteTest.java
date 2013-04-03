@@ -1,27 +1,20 @@
 package inf.unibz.ontop.sesame.tests.general;
-import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import junit.framework.TestCase;
 
-import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
@@ -30,13 +23,11 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SesameClassicJDBCRepo;
-import sesameWrapper.SesameVirtualRepo;
 
 
 public class SesameRemoteTest extends TestCase {
@@ -55,7 +46,7 @@ public class SesameRemoteTest extends TestCase {
 	{
 		/* * Initializing and H2 database with the stock exchange data
 		 */
-	    String driver = "org.h2.Driver";
+	  //  String driver = "org.h2.Driver";
 	//	String url = "jdbc:h2:tcp://localhost/quest";
 	    String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
@@ -86,9 +77,8 @@ public class SesameRemoteTest extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		DataManager ioManager = new DataManager(obdaModel, new QueryController());
-		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
-				obdaModel.getPrefixManager());
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(new File(obdafile));
 
 		OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
