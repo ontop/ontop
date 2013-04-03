@@ -1095,7 +1095,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		if (currentTerm instanceof Variable){
 		Set<String> viewdef = index.getColumnReferences((Variable) currentTerm);
-		System.out.println(viewdef.toString());
+		//System.out.println(viewdef.toString());
 		String def = viewdef.iterator().next();
 		String col = trim(def.split("\\.")[1]);
 		String table = def.split("\\.")[0];
