@@ -79,6 +79,26 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-text</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-api</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-turtle</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-rdfxml</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-n3</artifactId>
+			<version>2.6.9</version>
+		</dependency>
 
 		<dependency>
 			<groupId>mysql</groupId>
