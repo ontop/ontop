@@ -336,6 +336,7 @@
 						<exclude>**/TW*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
 						<exclude>**/directmapping/*.java</exclude>
+						<exclude>**/views/QueryHistoryView.java</exclude>
 						<exclude>**/views/RDBMSInspectorView.java</exclude>
 					</excludes>
 					<testExcludes>
