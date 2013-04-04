@@ -7,6 +7,8 @@ import java.io.Serializable;
  * representing a column in the SQL query.
  */
 public class ColumnReference implements Serializable{
+
+	private static final long serialVersionUID = -7614041850928541325L;
 	
 	private String schema;
 	private String table;
@@ -53,7 +55,6 @@ public class ColumnReference implements Serializable{
 	@Override
 	public String toString() {
 		String str = "";
-		
 		if (schema != "") {
 			str += schema + ".";
 		}
@@ -61,7 +62,6 @@ public class ColumnReference implements Serializable{
 			str += table + ".";
 		}
 		str += column;
-		
 		return str;
 	}
 }

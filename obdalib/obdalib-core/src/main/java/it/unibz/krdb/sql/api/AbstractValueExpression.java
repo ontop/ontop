@@ -9,6 +9,8 @@ import java.util.ArrayList;
  */
 public abstract class AbstractValueExpression implements IValueExpression {
 	
+	private static final long serialVersionUID = -7761700127601635879L;
+	
 	/**
 	 * Collection of listed columns in the SQL query.
 	 */

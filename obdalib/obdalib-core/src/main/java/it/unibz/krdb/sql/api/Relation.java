@@ -1,12 +1,13 @@
 package it.unibz.krdb.sql.api;
 
-
 /**
  * The Relation class is a wrapper class that make the
  * {@link TablePrimary} class compatible with the 
  * abstraction in the {@link QueryTree}.
  */
 public class Relation extends RelationalAlgebra {
+
+	private static final long serialVersionUID = 8464933976477745339L;
 	
 	private TablePrimary table;
 	

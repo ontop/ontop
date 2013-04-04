@@ -4,12 +4,9 @@ import it.unibz.krdb.obda.model.NewLiteral;
 
 public abstract class AbstractLiteral implements NewLiteral {
 
-	NewLiteral parent = null;
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 626920825158789773L;
+
+	private NewLiteral parent = null;
 
 	public void setParent(NewLiteral parent) {
 		this.parent = parent;
@@ -18,8 +15,6 @@ public abstract class AbstractLiteral implements NewLiteral {
 	public NewLiteral getParent() {
 		return parent;
 	}
-	
-	
-	public abstract NewLiteral clone();
 
+	public abstract NewLiteral clone();
 }

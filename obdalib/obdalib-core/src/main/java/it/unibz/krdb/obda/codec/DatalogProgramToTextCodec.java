@@ -48,8 +48,7 @@ public class DatalogProgramToTextCodec extends ObjectToTextCodec<DatalogProgram>
 			if(sb.length()>0){
 				sb.append("\n");
 			}
-			CQIEToTextCodec codec = new CQIEToTextCodec(apic);
-			sb.append(codec.encode(q));
+			sb.append(q);
 		}
 		return sb.toString();
 	}

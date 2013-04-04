@@ -1,36 +1,14 @@
-/***
- * Copyright (c) 2008, Mariano Rodriguez-Muro.
- * All rights reserved.
- *
- * The OBDA-API is licensed under the terms of the Lesser General Public
- * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
- * work include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
- *   file named OBDAAPI_3DPARTY-LICENSES.txt.
- */
 package it.unibz.krdb.obda.utils;
 
 import java.awt.Font;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class OBDAPreferences extends Properties{
 	
-	/**
-	 * serial id
-	 */
 	private static final long serialVersionUID = 8038468716158271480L;
-	
-	private static final String	DEFAULT_PROPERTIESFILE	= "default.properties";
 	
 	public static final String RESULTSET_OPTION = "resultset.option";
 	public static final String JODS_RESULTSET_FETCHSIZE = "resultset.fetchsize";
@@ -70,30 +48,16 @@ public class OBDAPreferences extends Properties{
 	public int head_minWight = 500;
 	public int head_minHeight = 30;
 		
-	private List<OBDAPreferenceChangeListener> listeners = null;
-	
+	private List<OBDAPreferenceChangeListener> listeners = new ArrayList<OBDAPreferenceChangeListener>();
+
 	private Properties preferences = null;
-	
-	private Logger				log						= LoggerFactory.getLogger(OBDAPreferences.class);
-	
+
 	public OBDAPreferences(){
 		super();
-		listeners = new ArrayList<OBDAPreferenceChangeListener>();
-//		setDefaultValues();
 	}
 	
 	public String getOBDAPreference(String key){
 		return preferences.getProperty(key);
-	}
-	
-	private void setDefaultValues(){
-		try {
-			InputStream in = OBDAPreferences.class.getResourceAsStream(DEFAULT_PROPERTIESFILE);
-			this.load(in);
-		} catch (Exception e) {
-			log.error("Error reading default properties for resoner.");
-			log.debug(e.getMessage(), e);
-		}			
 	}
 	
 	@Override
@@ -105,7 +69,6 @@ public class OBDAPreferences extends Properties{
 
 	@Override
 	public synchronized Object put(Object key, Object value) {
-		// TODO Auto-generated method stub
 		Object o =  super.put(key, value);
 		firePreferenceChanged();
 		return o;
@@ -113,13 +76,12 @@ public class OBDAPreferences extends Properties{
 
 	@Override
 	public synchronized void putAll(Map<? extends Object, ? extends Object> t) {
-		
 		super.putAll(t);
 		firePreferenceChanged();
 	}
 
 	public void registerPreferenceChangedListener(OBDAPreferenceChangeListener li){
-			listeners.add(li);
+		listeners.add(li);
 	}
 		
 	public void removePreferenceChangedListener(OBDAPreferenceChangeListener li){

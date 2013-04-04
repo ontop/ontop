@@ -6,6 +6,8 @@ import java.util.Queue;
 
 public class NumericValueExpression extends AbstractValueExpression {
 
+	private static final long serialVersionUID = -8877712308149412381L;
+	
 	/**
 	 * Collection of custom numerical expression.
 	 */

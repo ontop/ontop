@@ -5,5 +5,4 @@ public interface OBDASQLQuery extends OBDAQuery {
 	public OBDASQLQuery clone();
 
 	public OBDAQueryModifiers getQueryModifiers();
-
 }

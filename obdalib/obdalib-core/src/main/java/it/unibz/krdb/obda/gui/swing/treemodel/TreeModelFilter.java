@@ -31,5 +31,4 @@ public abstract class TreeModelFilter<T extends Object> {
 	 * @return true if the object matches the internal logic, false otherwise
 	 */
 	public abstract boolean match(T object);
-
 }

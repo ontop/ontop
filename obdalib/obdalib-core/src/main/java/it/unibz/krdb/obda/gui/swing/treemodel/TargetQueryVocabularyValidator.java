@@ -40,5 +40,4 @@ public interface TargetQueryVocabularyValidator {
 	 *         the input ontology, or false otherwise.
 	 */
 	public boolean isDataProperty(Predicate predicate);
-
 }

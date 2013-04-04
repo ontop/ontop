@@ -57,44 +57,6 @@ public class JDBCConnectionManager {
 		return instance;
 	}
 
-	// /**
-	// * Creates all the database connections that are defined in the OBDA
-	// model.
-	// * Call this method to start filling the connection pool.
-	// *
-	// * @param model
-	// * The OBDA model.
-	// */
-	// public void setupConnection(OBDAModel model) {
-	// List<OBDADataSource> sources = model.getSources();
-	// for (OBDADataSource ds : sources) {
-	// try {
-	// setConnection(ds);
-	// } catch (SQLException e) {
-	// String message =
-	// String.format("Fail to create a connection.\nReason: %s for data source %s",
-	// e.getMessage(),
-	// ds.getSourceID());
-	// log.error(message);
-	// }
-	// }
-	// }
-
-	// /**
-	// * Constructs a new database connection object and then registers it to
-	// the
-	// * connection pool.
-	// *
-	// * @param dataSource
-	// * The data source object.
-	// * @throws SQLException
-	// */
-	// public void setConnection(OBDADataSource dataSource) throws SQLException
-	// {
-	// Connection conn = createConnection(dataSource);
-	// registerConnection(dataSource.getSourceID(), conn);
-	// }
-
 	/**
 	 * Constructs a new database connection object from a data source and
 	 * retrieves the object.
@@ -119,35 +81,14 @@ public class JDBCConnectionManager {
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
+			// NO-OP
 		}
 
 		Connection conn = DriverManager.getConnection(url, username, password);
-
-		// if (driver.equals("com.mysql.jdbc.Driver"))
-		// conn.setAutoCommit(false);
-
-		// boolean bAutoCommit = ((Boolean)
-		// properties.get(JDBC_AUTOCOMMIT)).booleanValue();
-		// conn.setAutoCommit(bAutoCommit);
-
 		connectionPool.put(dataSource, conn);
-
 		return conn;
 	}
-
-	// /*
-	// * Store the connection object to the connection pool. Any existing
-	// * connection with the same ID will be replaced by the given connection.
-	// */
-	// private void registerConnection(URI sourceId, Connection conn) {
-	// boolean bRemoved = removeConnection(sourceId);
-	// if (bRemoved) {
-	// connectionPool.put(sourceId, conn);
-	// } else {
-	// log.error("Registration failed: Can't remove the existing connection.");
-	// }
-	// }
-
+	
 	/**
 	 * Retrieves the connection object from the connection pool. If the
 	 * connection doesnt exist or is dead, it will attempt to create a new
@@ -157,11 +98,10 @@ public class JDBCConnectionManager {
 	 *            The connection ID (usually the same as the data source URI).
 	 */
 	public Connection getConnection(OBDADataSource source) throws SQLException {
-
 		boolean alive = isConnectionAlive(source);
-		if (!alive)
+		if (!alive) {
 			createConnection(source);
-
+		}
 		Connection conn = connectionPool.get(source);
 		return conn;
 	}
@@ -189,7 +129,6 @@ public class JDBCConnectionManager {
 		} catch (SQLException e) {
 			log.error(e.getMessage());
 		}
-
 		return bStatus;
 	}
 
@@ -209,50 +148,6 @@ public class JDBCConnectionManager {
 		}
 		return !conn.isClosed();
 	}
-
-	// /**
-	// * Executes the query string using the given connection ID. If it is
-	// * successful, the method will return the result set.
-	// *
-	// * @param sourceId
-	// * The connection ID (usually the same as the data source URI).
-	// * @param query
-	// * The SQL query string.
-	// * @return The Result Set object.
-	// * @throws SQLException
-	// */
-	// public ResultSet executeQuery(URI sourceId, String query) throws
-	// SQLException {
-	// ResultSet rs = null;
-	// Statement st = null;
-	// try {
-	// Connection conn = getConnection(sourceId);
-	//
-	// int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
-	// int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
-	// int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
-	//
-	// st = conn.createStatement(type, concur);
-	// st.setFetchSize(fetchsize);
-	// rs = st.executeQuery(query);
-	// } catch (SQLException e) {
-	// log.error(e.getMessage());
-	// } finally {
-	// // TODO: For the purpose of displaying only the query result, it is
-	// // better
-	// // not to return the ResultSet object. Instead, store all the result
-	// // into
-	// // another object and return that object. In this way, we can close
-	// // both
-	// // the Statement and ResultSet in advanced.
-	// //
-	// // To reduce this memory leak, currently the solution is that we
-	// // close the
-	// // ResultSet manually in the caller side.
-	// // st.close();
-	// }
-	// return rs;
-	// }
 
 	/**
 	 * Retrieves the database meta data about the table schema given a
@@ -375,13 +270,9 @@ public class JDBCConnectionManager {
 					"NOT table_name LIKE 'OL$%' " +
 					"UNION " +
 					"SELECT view_name as object_name FROM user_views WHERE " +
-					"NOT view_name LIKE 'MVIEW$_%' AND " +
+					"NOT view_name LIKE 'MVIEW_%' AND " +
 					"NOT view_name LIKE 'LOGMNR_%' AND " +
-					"NOT view_name LIKE 'AQ$_%' AND " +
-					"NOT view_name LIKE 'DEF$_%' AND " +
-					"NOT view_name LIKE 'REPCAT$_%' AND " +
-					"NOT view_name LIKE 'LOGSTDBY$%' AND " +
-					"NOT view_name LIKE 'OL$%')";
+					"NOT view_name LIKE 'AQ$_%')";
 			resultSet = stmt.executeQuery(tableSelectQuery);
 			
 			/* Obtain the column information for each relational object */

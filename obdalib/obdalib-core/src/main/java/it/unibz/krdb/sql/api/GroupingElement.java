@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 public class GroupingElement implements Serializable {
 	
+	private static final long serialVersionUID = -6857110873541531968L;
+
 	/**
 	 * Collection of columns that is used for grouping.
 	 */

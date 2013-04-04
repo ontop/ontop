@@ -6,10 +6,12 @@ package it.unibz.krdb.sql.api;
  */
 public abstract class Operator extends RelationalAlgebra {
 	
+	private static final long serialVersionUID = -707166944279903524L;
+	
 	protected String alias;
 
 	public Operator() {
-		// Does nothing
+		// NO-OP
 	}
 
 	@Override

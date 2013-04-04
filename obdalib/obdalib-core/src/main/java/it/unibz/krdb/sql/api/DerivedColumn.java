@@ -8,6 +8,8 @@ import java.io.Serializable;
  */
 public class DerivedColumn implements Serializable {
 	
+	private static final long serialVersionUID = 5426403301125901562L;
+	
 	private AbstractValueExpression value;
 	private String alias = "";
 

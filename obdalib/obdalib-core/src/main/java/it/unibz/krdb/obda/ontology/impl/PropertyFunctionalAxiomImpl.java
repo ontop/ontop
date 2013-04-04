@@ -9,10 +9,8 @@ import java.util.Set;
 
 public class PropertyFunctionalAxiomImpl implements PropertyFunctionalAxiom{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6020134666314925589L;
+	
 	private Property role = null;
 	
 	PropertyFunctionalAxiomImpl(Property role) {
@@ -22,6 +20,5 @@ public class PropertyFunctionalAxiomImpl implements PropertyFunctionalAxiom{
 	@Override
 	public Set<Predicate> getReferencedEntities() {
 		return Collections.singleton(role.getPredicate());
-	}
-	
+	}	
 }

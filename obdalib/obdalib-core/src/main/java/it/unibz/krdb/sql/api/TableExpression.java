@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 public class TableExpression implements Serializable{
 
+	private static final long serialVersionUID = 8677327000060313472L;
+	
 	private ArrayList<TablePrimary> tableList;
 	private BooleanValueExpression booleanExp;
 	private ArrayList<GroupingElement> groupingList;

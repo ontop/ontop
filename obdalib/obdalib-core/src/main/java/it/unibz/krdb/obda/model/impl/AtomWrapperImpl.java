@@ -12,10 +12,8 @@ import java.util.Set;
 
 public class AtomWrapperImpl implements Atom {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1036381325035396595L;
+
 	final Function f;
 
 	public AtomWrapperImpl(Function f) {
@@ -34,7 +32,7 @@ public class AtomWrapperImpl implements Atom {
 
 	@Override
 	public Predicate getPredicate() {
-		return f.getPredicate();
+		return f.getFunctionSymbol();
 	}
 
 	@Override
@@ -65,13 +63,11 @@ public class AtomWrapperImpl implements Atom {
 	@Override
 	public void updateTerms(List<NewLiteral> literals) {
 		f.updateTerms(literals);
-
 	}
 
 	@Override
 	public void setPredicate(Predicate p) {
 		f.setPredicate(p);
-
 	}
 
 	@Override

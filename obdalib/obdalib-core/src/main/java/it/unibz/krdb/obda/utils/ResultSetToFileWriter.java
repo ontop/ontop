@@ -9,16 +9,13 @@ import java.util.List;
 
 public class ResultSetToFileWriter {
 
-	
 	public static void saveResultSet(OBDAResultSet result, File outputFile) throws Exception{
-		
-		if(outputFile.exists()){
+		if (outputFile.exists()) {
 			outputFile.delete();
 			outputFile.createNewFile();
-		}else{
+		} else {
 			outputFile.createNewFile();
 		}
-		
 		FileWriter fstream = new FileWriter(outputFile, true);
         BufferedWriter out = new BufferedWriter(fstream);
         

@@ -1,11 +1,10 @@
 package it.unibz.krdb.obda.io;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -29,7 +28,7 @@ public class TurtleFormatter extends CQFormatter {
         List<Function> body = query.getBody();
         for (Function atom : body) {
             String subject, predicate, object = "";
-            String predicateName = atom.getPredicate().toString();
+            String predicateName = atom.getFunctionSymbol().toString();
             if (isUnary(atom)) {
                 NewLiteral term = atom.getTerm(0);
                 subject = getDisplayString(term);

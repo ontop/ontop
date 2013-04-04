@@ -7,6 +7,8 @@ import java.io.Serializable;
  */
 public abstract class RelationalAlgebra implements Serializable, Cloneable {
 	
+	private static final long serialVersionUID = 6661455497184268723L;
+
 	/**
 	 * The SELECT statement.
 	 */

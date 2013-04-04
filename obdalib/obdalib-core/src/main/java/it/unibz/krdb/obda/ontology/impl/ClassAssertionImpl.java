@@ -11,14 +11,11 @@ import java.util.Set;
 
 public class ClassAssertionImpl implements ClassAssertion, UnaryAssertion {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5689712345023046811L;
 
-	ObjectConstant object = null;
+	private ObjectConstant object = null;
 
-	Predicate concept = null;
+	private Predicate concept = null;
 
 	ClassAssertionImpl(Predicate concept, ObjectConstant object) {
 		this.object = object;
@@ -28,7 +25,6 @@ public class ClassAssertionImpl implements ClassAssertion, UnaryAssertion {
 	@Override
 	public ObjectConstant getObject() {
 		return object;
-
 	}
 
 	@Override

@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public abstract class BinaryTree<T> implements Cloneable, Serializable {
 	
+	private static final long serialVersionUID = -1123469861254589828L;
+
 	/**
 	 * The value associated with this node.
 	 */

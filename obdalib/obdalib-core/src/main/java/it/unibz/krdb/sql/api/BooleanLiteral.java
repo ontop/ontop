@@ -5,6 +5,8 @@ package it.unibz.krdb.sql.api;
  */
 public class BooleanLiteral extends Literal {
 	
+	private static final long serialVersionUID = 8593416410506376356L;
+	
 	/**
 	 * The boolean value.
 	 */

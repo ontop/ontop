@@ -67,17 +67,15 @@ public class IncrementalResultSetTableModel implements TableModel {
 	 * Statement object used to create it.
 	 */
 	public void close() {
-		
 		try {
 			set.close();
 		} catch (SQLException e) {
-			
+			// NO-OP
 		}
-		
 		try {
 			set.getStatement().close();			
 		} catch (SQLException e) {
-			
+			// NO-OP
 		}
 	}
 

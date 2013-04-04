@@ -2,6 +2,8 @@ package it.unibz.krdb.sql;
 
 public class ViewDefinition extends DataDefinition {
 
+	private static final long serialVersionUID = 3312336193514797486L;
+
 	private String statement;
 
 	public void copy(String statement) {
@@ -29,6 +31,5 @@ public class ViewDefinition extends DataDefinition {
 
 		bf.append(String.format("   (%s)", statement));
 		return bf.toString();
-
 	}
 }

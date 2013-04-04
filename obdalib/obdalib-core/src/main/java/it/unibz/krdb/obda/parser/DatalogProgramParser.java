@@ -1,9 +1,3 @@
-/*
- * @(#)DatalogProgramParser 25/12/2010
- *
- * Copyright 2010 OBDA-API. All rights reserved.
- * Use is subject to license terms.
- */
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -13,11 +7,8 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 
-
 /**
  * Executes the parsing process with a reference to a Parser object.
- *
- * @author Josef Hardi <josef.hardi@gmail.com>
  */
 public class DatalogProgramParser {
 
@@ -45,12 +36,9 @@ public class DatalogProgramParser {
 		parser = new DatalogParser(tokenStream);
 
 		datalog = parser.parse();
-
 		if (parser.getNumberOfSyntaxErrors() != 0) {
 			throw new RecognitionException();
 		}
-		
-		
 		return datalog;
 	}
 

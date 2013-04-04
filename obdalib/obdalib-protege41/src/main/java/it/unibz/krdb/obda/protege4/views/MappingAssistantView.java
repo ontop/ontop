@@ -25,9 +25,9 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 
 	private static final long serialVersionUID = 1L;
 
-	DatasourceSelector datasourceSelector;
+	private DatasourceSelector datasourceSelector;
 
-	OBDAModelManager apic;
+	private OBDAModelManager apic;
 
 	private static final Logger log = Logger.getLogger(SQLQueryInterfaceView.class);
 	

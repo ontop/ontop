@@ -5,6 +5,8 @@ package it.unibz.krdb.sql.api;
  */
 public class DecimalLiteral extends NumericLiteral {
 
+	private static final long serialVersionUID = 6801280683568130405L;
+	
 	/**
 	 * The float value.
 	 */

@@ -6,6 +6,8 @@ package it.unibz.krdb.sql.api;
  */
 public class DerivedTable implements ITable {
 	
+	private static final long serialVersionUID = -8310536644014311978L;
+
 	private QueryTree subquery;
 
 	private String alias;

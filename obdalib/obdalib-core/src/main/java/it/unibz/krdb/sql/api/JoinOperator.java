@@ -8,6 +8,8 @@ import java.util.Queue;
  */
 public class JoinOperator extends Operator {
 
+	private static final long serialVersionUID = 144042107662518288L;
+	
 	public static final int JOIN = 0;
 	public static final int INNER_JOIN = 1;
 	public static final int LEFT_JOIN = 2;

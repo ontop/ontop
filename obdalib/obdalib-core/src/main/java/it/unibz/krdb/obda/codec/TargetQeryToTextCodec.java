@@ -1,12 +1,11 @@
 package it.unibz.krdb.obda.codec;
 
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -89,8 +88,6 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 	 */
 	@Override
 	public String encode(OBDAQuery input) {
-		PrefixManager man = apic.getPrefixManager();
-
 		StringBuffer sb = new StringBuffer();
 		if (input instanceof CQIE) {
 			List<Function> list = ((CQIE) input).getBody();
@@ -100,9 +97,8 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 				if (atomComma == true) {
 					sb.append(", ");
 				}
-				
 				Function at = (Function) it.next();
-				String name = at.getPredicate().toString();
+				String name = at.getFunctionSymbol().toString();
 				sb.append(name);
 				sb.append("(");
 				List<NewLiteral> t_list = at.getTerms();
@@ -116,21 +112,16 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 					}
 					term_sb.append(render(qt));
 					comma = true;
-
 				}
 				sb.append(term_sb);
 				sb.append(")");
 				atomComma = true;
 			}
-			
 		}
-
 		return sb.toString();
 	}
 
 	private String render(NewLiteral term) {
-		PrefixManager man = apic.getPrefixManager();
-
 		StringBuffer term_sb = new StringBuffer();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl ft = (FunctionalTermImpl) term;
@@ -144,7 +135,6 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 				if (comma == true) {
 					term_sb.append(",");
 				}
-
 				NewLiteral qt2 = tit2.next();
 				term_sb.append(render(qt2));
 				comma = true;
@@ -162,5 +152,4 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 		}
 		return term_sb.toString();
 	}
-
 }

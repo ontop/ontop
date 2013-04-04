@@ -65,7 +65,7 @@ public class ModelIOManager {
     
     private TargetQueryToTurtleCodec turtleRenderer;
 
-    private static final Logger log = LoggerFactory.getLogger(DataManager.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelIOManager.class);
     
     /**
      * Create an IO manager for saving/loading the OBDA model.

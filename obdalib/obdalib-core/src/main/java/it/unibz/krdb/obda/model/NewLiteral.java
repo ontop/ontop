@@ -18,13 +18,5 @@ public interface NewLiteral extends Serializable {
 
 	public Map<Variable, Integer> getVariableCount();
 
-//	/*
-//	 * If this literal is part of a nested literal, it returns the direct
-//	 * parent.
-//	 */
-//	public NewLiteral getParent();
-//
-//	public void setParent(NewLiteral parent);
-//
 	public Atom asAtom();
 }

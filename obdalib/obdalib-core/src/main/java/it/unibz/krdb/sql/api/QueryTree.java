@@ -10,7 +10,9 @@ import java.util.Stack;
  * A tree structure to represent SQL query string.
  */
 public class QueryTree extends BinaryTree<RelationalAlgebra> {
-	
+
+	private static final long serialVersionUID = -4590590361733833782L;
+
 	/**
 	 * Constructs an empty tree.
 	 */

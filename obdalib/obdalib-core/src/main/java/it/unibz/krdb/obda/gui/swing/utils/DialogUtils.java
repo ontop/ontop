@@ -11,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 
@@ -48,7 +47,6 @@ public class DialogUtils {
 	public static void showQuickErrorDialog(Component parent, Exception e, String message) {
 		// create and configure a text area - fill it with exception text.
 		final JTextArea textArea = new JTextArea();
-		// textArea.setLineWrap(true);
 		textArea.setBackground(Color.WHITE);
 		textArea.setFont(new Font("Monaco", Font.PLAIN, 11));
 		textArea.setEditable(false);
@@ -77,8 +75,8 @@ public class DialogUtils {
 	}
 
 	public static void centerDialogWRTParent(Component parent, Component dialog) {
-		int x;
-		int y;
+		int x = 0;
+		int y = 0;
 
 		// Find out our parent
 		Container myParent = (Container) parent;
@@ -86,18 +84,17 @@ public class DialogUtils {
 		Dimension parentSize = myParent.getSize();
 		Dimension mySize = dialog.getSize();
 
-		if (parentSize.width > mySize.width)
+		if (parentSize.width > mySize.width) {
 			x = ((parentSize.width - mySize.width) / 2) + topLeft.x;
-		else
+		} else {
 			x = topLeft.x;
-
-		if (parentSize.height > mySize.height)
+		}
+		if (parentSize.height > mySize.height) {
 			y = ((parentSize.height - mySize.height) / 2) + topLeft.y;
-		else
+		} else {
 			y = topLeft.y;
-
+		}
 		dialog.setLocation(x, y);
-
 	}
 
 	public static JDialog createDialogForPanel(JDialog parent, JPanel panel) {
@@ -114,61 +111,13 @@ public class DialogUtils {
 		return newdialog;
 	}
 
-	public static void setAntializaing(Component component, boolean value) {
-		// if (component instanceof JComponent) {
-		// ((JComponent)
-		// component).putClientProperty(com.sun.java.swing.SwingUtilities2.AA_TEXT_PROPERTY_KEY,
-		// value);
-		// Component[] children = ((JComponent)component).getComponents();
-		// for (int i = 0; i < children.length; i++) {
-		// if (children[i] instanceof JComponent) {
-		// setAntializaing((JComponent)children[i], value);
-		// }
-		// if (children[i] instanceof JTree) {
-		// TreeCellRenderer rend = ((JTree)children[i]).getCellRenderer();
-		// if (rend instanceof JComponent) {
-		// ((JComponent)rend).putClientProperty(com.sun.java.swing.SwingUtilities2.AA_TEXT_PROPERTY_KEY,
-		// true);
-		// }
-		// }
-		// if (children[i] instanceof JTable) {
-		// JTable table = (JTable)children[i];
-		// TableCellRenderer crenderer = table.getDefaultRenderer(Object.class);
-		// if (crenderer instanceof JComponent) {
-		// ((JComponent)crenderer).putClientProperty(com.sun.java.swing.SwingUtilities2.AA_TEXT_PROPERTY_KEY,
-		// true);
-		// }
-		// crenderer = table.getDefaultRenderer(Number.class);
-		// if (crenderer instanceof JComponent) {
-		// ((JComponent)crenderer).putClientProperty(com.sun.java.swing.SwingUtilities2.AA_TEXT_PROPERTY_KEY,
-		// true);
-		// }
-		// crenderer = table.getDefaultRenderer(Boolean.class);
-		// if (crenderer instanceof JComponent) {
-		// ((JComponent)crenderer).putClientProperty(com.sun.java.swing.SwingUtilities2.AA_TEXT_PROPERTY_KEY,
-		// true);
-		// }
-		//
-		//
-		// crenderer = table.getTableHeader().getDefaultRenderer();
-		// if (crenderer instanceof JComponent) {
-		// ((JComponent)crenderer).putClientProperty(com.sun.java.swing.SwingUtilities2.AA_TEXT_PROPERTY_KEY,
-		// true);
-		// }
-		// }
-		//
-		// }
-		// }
-
-	}
-
 	private static final KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 	public static final String dispatchWindowClosingActionMapKey = "com.spodding.tackline.dispatch:WINDOW_CLOSING";
 
 	public static void installEscapeCloseOperation(final JDialog dialog) {
 		Action dispatchClosing = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
-
+			@Override
 			public void actionPerformed(ActionEvent event) {
 				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING));
 			}
@@ -177,5 +126,4 @@ public class DialogUtils {
 		root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeStroke, dispatchWindowClosingActionMapKey);
 		root.getActionMap().put(dispatchWindowClosingActionMapKey, dispatchClosing);
 	}
-
 }

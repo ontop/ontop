@@ -1,33 +1,21 @@
-/***
- * Copyright (c) 2008, Mariano Rodriguez-Muro.
- * All rights reserved.
- *
- * The OBDA-API is licensed under the terms of the Lesser General Public
- * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
- * work include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
- *   file named OBDAAPI_3DPARTY-LICENSES.txt.
- */
 package it.unibz.krdb.obda.codec;
 
-//TODO: Refactor so that this is actually an instance of a codec
-/*import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryGroupTreeElement;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryTreeElement;*/
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+/**
+ * Note: This is a legacy code. Do not use instances of this class. This code
+ * is used by the old test cases which needed to be updated.
+ */
 public class QueryGroupXMLReader {
 	
-	
 	public QueryControllerQuery readQuery(Element dom_query) {
-		if (!dom_query.getNodeName().equals("Query"))
+		if (!dom_query.getNodeName().equals("Query")) {
 			return null;
+		}
 		String id = dom_query.getAttribute("id");
 		String text = dom_query.getAttribute("text");
 		QueryControllerQuery query = new QueryControllerQuery(id);
@@ -35,10 +23,10 @@ public class QueryGroupXMLReader {
 		return query;
 	}
 	
-
 	public QueryControllerGroup readQueryGroup(Element dom_group) {
-		if (!dom_group.getNodeName().equals("QueryGroup"))
+		if (!dom_group.getNodeName().equals("QueryGroup")) {
 			return null;
+		}
 		String id = dom_group.getAttribute("id");
 		QueryControllerGroup group = new QueryControllerGroup(id);
 		NodeList queries = dom_group.getElementsByTagName("Query");

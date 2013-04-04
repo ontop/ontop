@@ -18,15 +18,14 @@ public class QueryValidator {
 			boolean safe = false;
 			for (Function atom : cq.getBody()) {
 				safe = safe || atom.getVariables().contains(v);
-				if (safe)
+				if (safe) {
 					break;
+				}
 			}
-
 			if (!safe) {
 				missingVariables.add(v);
 			}
 		}
-
 		return missingVariables;
 	}
 
@@ -38,5 +37,4 @@ public class QueryValidator {
 		}
 		return missingVariables;
 	}
-
 }

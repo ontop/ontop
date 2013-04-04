@@ -1,15 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
- * The OBDA-API is licensed under the terms of the Lesser General Public License
- * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
- * include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
- * third-party components licensed under terms that may be different from those
- * of the LGPL. Information about such licenses can be found in the file named
- * OBDAAPI_3DPARTY-LICENSES.txt.
- */
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
@@ -72,9 +60,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private final LinkedHashSet<Predicate> declaredDataProperties = new LinkedHashSet<Predicate>();
 
-	/*
-	 * All other predicates (not classes or properties)
-	 */
+	// All other predicates (not classes or properties)
 	private final LinkedHashSet<Predicate> declaredPredicates = new LinkedHashSet<Predicate>();
 
 	/**
@@ -215,7 +201,6 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public void removeSource(URI id) {
-
 		OBDADataSource source = getSource(id);
 		datasources.remove(id);
 		fireSourceRemoved(source);
@@ -440,8 +425,9 @@ public class OBDAModelImpl implements OBDAModel {
 				List<Function> body = cq.getBody();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
-					if (!oldatom.getPredicate().equals(oldname))
+					if (!oldatom.getFunctionSymbol().equals(oldname)) {
 						continue;
+					}
 					modifiedCount += 1;
 					Atom newatom = dfac.getAtom(newName, oldatom.getTerms());
 					body.set(idx, newatom);
@@ -462,8 +448,9 @@ public class OBDAModelImpl implements OBDAModel {
 				List<Function> body = cq.getBody();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
-					if (!oldatom.getPredicate().equals(predicate))
+					if (!oldatom.getFunctionSymbol().equals(predicate)) {
 						continue;
+					}
 					modifiedCount += 1;
 					body.remove(idx);
 				}
@@ -480,7 +467,6 @@ public class OBDAModelImpl implements OBDAModel {
 	@Override
 	public void reset() {
 		log.debug("OBDA model is reset");
-
 		prefixManager.clear();
 		datasources.clear();
 		mappings.clear();
@@ -521,17 +507,13 @@ public class OBDAModelImpl implements OBDAModel {
 	public boolean declarePredicate(Predicate predicate) {
 		if (predicate.isClass()) {
 			return declaredClasses.add(predicate);
-		}
-		else if (predicate.isObjectProperty()) {
+		} else if (predicate.isObjectProperty()) {
 			return declaredObjectProperties.add(predicate);
-		}
-		else if (predicate.isDataProperty()) {
+		} else if (predicate.isDataProperty()) {
 			return declaredDataProperties.add(predicate);
-		}
-		else {
+		} else {
 			return declaredPredicates.add(predicate);
 		}
-
 	}
 
 	@Override
@@ -548,7 +530,6 @@ public class OBDAModelImpl implements OBDAModel {
 			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
 		}
 		return declaredObjectProperties.add(property);
-
 	}
 
 	@Override

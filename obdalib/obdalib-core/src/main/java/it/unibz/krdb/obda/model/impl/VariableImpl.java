@@ -12,31 +12,25 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class VariableImpl extends AbstractLiteral implements Variable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5723075311798541659L;
 
 	private final String name;
 
-	private final XSDatatype type;
-
 	private final int identifier;
 
-	protected VariableImpl(String name, XSDatatype type) {
-		if (name == null)
+	protected VariableImpl(String name) {
+		if (name == null) {
 			throw new RuntimeException("Variable name cannot be null");
+		}
 		this.name = name;
-		this.type = type;
 		this.identifier = name.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-
-		if (obj == null || !(obj instanceof VariableImpl))
+		if (obj == null || !(obj instanceof VariableImpl)) {
 			return false;
-
+		}
 		VariableImpl name2 = (VariableImpl) obj;
 		return this.identifier == name2.identifier;
 	}
@@ -45,11 +39,6 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 	public int hashCode() {
 		return identifier;
 	}
-
-	// @Override
-	// public void setName(String name) {
-	// this.name = name;
-	// }
 
 	@Override
 	public String getName() {
@@ -67,9 +56,6 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 	@Override
 	public Variable clone() {
 		return this;
-		// VariableImpl clone = new VariableImpl(new String(name), this.type);
-		// clone.identifier = identifier;
-		// return clone;
 	}
 
 	@Override
@@ -88,5 +74,4 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 	public Atom asAtom() {
 		throw new RuntimeException("Impossible to cast as atom: " + this.getClass()); 
 	}
-
 }

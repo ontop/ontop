@@ -7,5 +7,4 @@ public interface Property extends Description {
 	public boolean isInverse();
 
 	public Predicate getPredicate();
-
 }

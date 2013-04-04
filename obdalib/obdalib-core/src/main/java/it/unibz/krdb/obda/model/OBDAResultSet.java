@@ -7,11 +7,9 @@ import com.hp.hpl.jena.iri.IRI;
 
 public interface OBDAResultSet {
 
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//
-	// ResultSet management functions
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
+	/*
+	 * ResultSet management functions
+	 */
 
 	public int getColumCount() throws OBDAException;
 
@@ -25,11 +23,9 @@ public interface OBDAResultSet {
 
 	public boolean nextRow() throws OBDAException;
 
-	// ////////////////////////////////////////////////////////////////////////////////////
-	//
-	// Main data fetching functions
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
+	/*
+	 * Main data fetching functions
+	 */
 
 	public Constant getConstant(int column) throws OBDAException;
 
@@ -51,11 +47,9 @@ public interface OBDAResultSet {
 
 	public BNode getBNode(String name) throws OBDAException;
 
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//
-	// Convinience data fetching functions
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
+	/*
+	 * Convenient data fetching functions
+	 */
 
 	public String getString(int column) throws OBDAException;
 
@@ -64,7 +58,4 @@ public interface OBDAResultSet {
 	public double getDouble(int column) throws OBDAException;
 
 	public Object getObject(int column) throws OBDAException;
-
-	
-
 }

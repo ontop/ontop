@@ -15,19 +15,12 @@ import it.unibz.krdb.obda.model.Variable;
  */
 public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 214867118996974157L;
 
-	/**
-	 * 
-	 */
 	private final String name;
 
 	private final int identifier;
 
-	
 	/**
 	 * The default constructor.
 	 * 
@@ -41,10 +34,9 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 
 	@Override
 	public boolean equals(Object obj) {
-
-		if (obj == null || !(obj instanceof BNodeConstantImpl))
+		if (obj == null || !(obj instanceof BNodeConstantImpl)) {
 			return false;
-
+		}
 		BNodeConstantImpl uri2 = (BNodeConstantImpl) obj;
 		return this.identifier == uri2.identifier;
 	}
@@ -81,8 +73,7 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 
 	@Override
 	public Atom asAtom() {
-		throw new RuntimeException("Impossible to cast as atom: "
-				+ this.getClass());
+		throw new RuntimeException("Impossible to cast as atom: " + this.getClass());
 	}
 
 	@Override

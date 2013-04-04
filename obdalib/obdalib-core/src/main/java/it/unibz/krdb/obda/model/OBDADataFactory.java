@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.hp.hpl.jena.iri.IRI;
-import com.sun.msv.datatype.xsd.XSDatatype;
 
 public interface OBDADataFactory extends Serializable {
 
@@ -149,15 +148,13 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getANDFunction(NewLiteral term1, NewLiteral term2);
 
-	public Function getANDFunction(NewLiteral term1, NewLiteral term2,
-			NewLiteral term3);
+	public Function getANDFunction(NewLiteral term1, NewLiteral term2, NewLiteral term3);
 
 	public Function getANDFunction(List<NewLiteral> terms);
 
 	public Function getORFunction(NewLiteral term1, NewLiteral term2);
 
-	public Function getORFunction(NewLiteral term1, NewLiteral term2,
-			NewLiteral term3);
+	public Function getORFunction(NewLiteral term1, NewLiteral term2, NewLiteral term3);
 
 	public Function getORFunction(List<NewLiteral> terms);
 
@@ -292,22 +289,6 @@ public interface OBDADataFactory extends Serializable {
 	public Variable getVariable(String name);
 
 	/**
-	 * Construct a {@link Variable} object with a type definition. The variable
-	 * name is started by a dollar sign ('$') or a question mark sign ('?'),
-	 * e.g.:
-	 * <p>
-	 * <code>
-	 * pred($x) <br />
-	 * func(?x, ?y)
-	 * </code>
-	 * 
-	 * @param name
-	 *            the name of the variable.
-	 * @return the variable object.
-	 */
-	public Variable getVariable(String name, XSDatatype type);
-
-	/**
 	 * Construct a {@link Variable} object with empty name.
 	 * 
 	 * @return the variable object.
@@ -330,21 +311,15 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionalTerm(Predicate functor, NewLiteral term1);
 
-	public Function getFunctionalTerm(Predicate functor, NewLiteral term1,
-			NewLiteral term2);
+	public Function getFunctionalTerm(Predicate functor, NewLiteral term1, NewLiteral term2);
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id,
-			OBDAQuery sourceQuery, OBDAQuery targetQuery);
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql,
-			OBDAQuery targetQuery);
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery);
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql,
-			OBDAQuery targetQuery);
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
 
 	public Predicate getTypePredicate(Predicate.COL_TYPE type);
-
-
 }

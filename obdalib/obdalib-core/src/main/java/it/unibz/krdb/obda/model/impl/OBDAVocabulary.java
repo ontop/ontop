@@ -4,8 +4,6 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRIFactory;
 
 public class OBDAVocabulary {
@@ -14,14 +12,11 @@ public class OBDAVocabulary {
 
 	/* Constants */
 
-	public static final Constant NULL = new ValueConstantImpl("null", 
-			COL_TYPE.STRING);
+	public static final Constant NULL = new ValueConstantImpl("null", COL_TYPE.STRING);
 
-	public static final Constant TRUE = new ValueConstantImpl("t",
-			COL_TYPE.BOOLEAN);
+	public static final Constant TRUE = new ValueConstantImpl("t", COL_TYPE.BOOLEAN);
 
-	public static final Constant FALSE = new ValueConstantImpl("f",
-			COL_TYPE.BOOLEAN);
+	public static final Constant FALSE = new ValueConstantImpl("f", COL_TYPE.BOOLEAN);
 
 	/* Numeric operations */
 
@@ -139,8 +134,7 @@ public class OBDAVocabulary {
 			fact.construct(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL });
 
 	public static final Predicate RDFS_LITERAL_LANG = new DataTypePredicateImpl(
-			fact.construct(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL,
-					COL_TYPE.LITERAL });
+			fact.construct(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 
 	public static final Predicate XSD_STRING = new DataTypePredicateImpl(
 			fact.construct(XSD_STRING_URI), COL_TYPE.STRING);

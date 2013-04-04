@@ -5,8 +5,6 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRI;
 
 public interface OntologyFactory {

@@ -5,6 +5,8 @@ import java.util.Queue;
 
 public class BooleanValueExpression extends AbstractValueExpression {
 	
+	private static final long serialVersionUID = 8604408531111471739L;
+	
 	/**
 	 * Collection of custom boolean expressions.
 	 */

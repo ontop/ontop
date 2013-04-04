@@ -862,26 +862,29 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			if (list.getModel().getSize() == 0) {
+			final int tableSize = list.getModel().getSize();
+			if (tableSize == 0) {
 				label.setText("<No table found>");
+				return label;
 			} else {
 				if (index == -1) {
 					label.setText("<Select database table>");
-				}
-				if (value instanceof DataDefinition) {
-					DataDefinition relation = (DataDefinition) value;
-					if (relation instanceof TableDefinition) {
+					return label;
+				} else {				
+					if (value instanceof TableDefinition) {
+						TableDefinition td = (TableDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
-						label.setText(relation.getName());
-					} else if (relation instanceof ViewDefinition) {
+						label.setText(td.getName());
+					} else if (value instanceof ViewDefinition) {
+						ViewDefinition vd = (ViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);
-						label.setText(relation.getName());
+						label.setText(vd.getName());
 					}
+					return label;
 				}
 			}
-			return label;
 		}
 	}
 

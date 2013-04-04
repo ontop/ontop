@@ -11,18 +11,14 @@ import org.slf4j.LoggerFactory;
  * modified. This is a simple extension of LinkedList. All the actual
  * implementations of the methods are the original LinkedList methods. We just
  * wrap them to be able to rise the event.
- * 
- * @author Mariano Rodriguez Muro
- * 
- * @param <E>
  */
 public class EventGeneratingLinkedList<E> extends LinkedList<E> {
 
-	LinkedList<ListListener>	listeners			= new LinkedList<ListListener>();
+	private static final long serialVersionUID = 893780365770320662L;
+	
+	LinkedList<ListListener> listeners = new LinkedList<ListListener>();
 
-	private static Logger						log					= LoggerFactory.getLogger(EventGeneratingLinkedList.class);
-
-	private static final long	serialVersionUID	= 893780365770320662L;
+	private static Logger log = LoggerFactory.getLogger(EventGeneratingLinkedList.class);
 
 	public void addListener(ListListener listener) {
 		listeners.add(listener);
@@ -102,5 +98,4 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> {
 			}
 		}
 	}
-
 }

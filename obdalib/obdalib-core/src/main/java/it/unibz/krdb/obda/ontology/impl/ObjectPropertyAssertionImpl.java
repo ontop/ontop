@@ -9,19 +9,15 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion,
-		BinaryAssertion {
+public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion, BinaryAssertion {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8834975903851540150L;
+	
 	private Predicate role;
 	private ObjectConstant o2;
 	private ObjectConstant o1;
 
-	ObjectPropertyAssertionImpl(Predicate role, ObjectConstant o1,
-			ObjectConstant o2) {
+	ObjectPropertyAssertionImpl(Predicate role, ObjectConstant o1, ObjectConstant o2) {
 		this.role = role;
 		this.o1 = o1;
 		this.o2 = o2;
@@ -43,8 +39,7 @@ public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion,
 	}
 
 	public String toString() {
-		return role.toString() + "(" + o1.toString() + ", " + o2.toString()
-				+ ")";
+		return role.toString() + "(" + o1.toString() + ", " + o2.toString() + ")";
 	}
 
 	@Override

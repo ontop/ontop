@@ -17,5 +17,4 @@ public interface OBDAConnection {
 	public boolean isReadOnly() throws OBDAException;
 
 	public void rollBack() throws OBDAException;
-
 }

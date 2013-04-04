@@ -15,7 +15,10 @@ import org.w3c.dom.Element;
 
 /**
  * The DatalogConjunctiveQueryCodec can be used to encode a conjunctive query
- * into XML or to decode a conjunctive query from XML
+ * into XML or to decode a conjunctive query from XML.
+ * 
+ * Note: This is a legacy code. Do not use instances of this class. This code
+ * is used by the old test cases which needed to be updated.
  */
 public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 
@@ -39,7 +42,6 @@ public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 	public DatalogConjunctiveQueryXMLCodec(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		queryHelper = new DatalogQueryHelper(obdaModel.getPrefixManager());
-
 	}
 
 	/**
@@ -97,26 +99,15 @@ public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 	}
 
 	private String prepareQuery(String input) {
-		
 		StringBuffer bf = new StringBuffer();
 		bf.append(input);
-//		String query = input;
-
 		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1) // if no head
-		{
+		if (atoms.length == 1) { // if no head
 			bf.insert(0, OBDALibConstants.DATALOG_IMPLY_SYMBOL );
 			bf.insert(0, " ");
 			bf.insert(0, queryHelper.getDefaultHead());
-//			query = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + query;
 		}
-		
 		bf.insert(0, queryHelper.getPrefixes());
-
-		// Append the prefixes
-//		query = queryHelper.getPrefixes() + query;
-
 		return bf.toString();
-//		return query;
 	}
 }

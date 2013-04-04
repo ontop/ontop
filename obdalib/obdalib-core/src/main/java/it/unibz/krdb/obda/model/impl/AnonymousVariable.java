@@ -10,17 +10,13 @@ import java.util.Set;
 
 public class AnonymousVariable extends AbstractLiteral implements Variable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6099056787768897902L;
+
 	private static final String name = "_";
 	private static final int identifier = -4000;
 
-	// private static final XSDatatype type = null;
-
 	protected AnonymousVariable() {
-
+		// NO-OP
 	}
 
 	@Override
@@ -28,9 +24,6 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 		if (obj == null || !(obj instanceof AnonymousVariable)) {
 			return false;
 		}
-
-//		AnonymousVariable var2 = (AnonymousVariable) obj;
-//		return identifier == var2.hashCode();
 		return true;
 	}
 
@@ -38,11 +31,6 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 	public int hashCode() {
 		return identifier;
 	}
-
-	// @Override
-	// public void setName(String name){
-	// this.name = name;
-	// }
 
 	@Override
 	public String getName() {
@@ -52,7 +40,6 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 	@Override
 	public Variable clone() {
 		return this;
-//		return new AnonymousVariable();
 	}
 
 	@Override
@@ -67,7 +54,7 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 	
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
-		/* This is wrong but it shouldn't affect query containment */
+		// TODO This is wrong but it shouldn't affect query containment
 		Map<Variable,Integer> count =  new HashMap<Variable,Integer>();
 		count.put(this, 1);
 		return count;

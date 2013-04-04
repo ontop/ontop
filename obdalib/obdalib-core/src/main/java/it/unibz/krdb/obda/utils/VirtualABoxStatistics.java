@@ -146,9 +146,7 @@ public class VirtualABoxStatistics {
 		}
 	}
 
-	private int getTuplesCount(OBDADataSource sourceId, OBDASQLQuery query) throws NoDatasourceSelectedException, ClassNotFoundException,
-			SQLException {
-
+	private int getTuplesCount(OBDADataSource sourceId, OBDASQLQuery query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
 		Statement st = null;
 		ResultSet rs = null;
 		int count = -1;
@@ -169,16 +167,14 @@ public class VirtualABoxStatistics {
 			try {
 				rs.close();
 			} catch (Exception e) {
-
+				// NO-OP
 			}
-
 			try {
 				st.close();
 			} catch (Exception e) {
-
+				// NO-OP
 			}
 		}
-
 		return count;
 	}
 

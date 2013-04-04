@@ -18,35 +18,32 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * The mapping xml codec can be use to encode OBDA mapping axioms into XML
- * respectively decode them from XML
+ * The mapping XML codec can be use to encode OBDA mapping axioms into XML
+ * respectively decode them from XML.
  * 
- * @author Manfred Gerstgrasser
- * 
+ * Note: This is a legacy code. Do not use instances of this class. This code
+ * is used by the old test cases which needed to be updated.
  */
-
 public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 
 	/**
-	 * The xml tag used for representing obda mapping axioms
+	 * The XML tag used for representing OBDA mapping axioms
 	 */
-	private static final String		TAG		= "mapping";
+	private static final String TAG = "mapping";
 	/**
-	 * the current api controller
+	 * The current API controller
 	 */
-	OBDAModel						apic	= null;
+	OBDAModel apic = null;
 	/**
-	 * the datalog conjunctive quey codec used to encode respectively decode the
+	 * The Datalog conjunctive query codec used to encode respectively decode the
 	 * head of the mappings.
 	 */
-	DatalogConjunctiveQueryXMLCodec	cqcodec	= null;
+	DatalogConjunctiveQueryXMLCodec cqcodec = null;
 
-	OBDADataFactory					fac		= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
-	 * The contructor. Creates a new instance of the Codec
-	 * 
-	 * @param apic
+	 * The contructor. Creates a new instance of the codec.
 	 */
 	public MappingXMLCodec(OBDAModel apic) {
 		this.apic = apic;
@@ -54,16 +51,15 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 	}
 
 	/**
-	 * Decodes the given XML element into an OBDA mapping axiom
-	 * @throws RecognitionException 
+	 * Decodes the given XML element into an OBDA mapping axiom.
 	 */
 	@Override
 	public OBDAMappingAxiom decode(Element mapping) throws RecognitionException {
-
 		String id = mapping.getAttribute("id");
 		Element head = null;
 		Element body = null;
 		NodeList mappingchilds = mapping.getChildNodes();
+		
 		// Retrieving the child nodes avoiding empty nodes
 		for (int j = 0; j < mappingchilds.getLength(); j++) {
 			Node mappingchild = mappingchilds.item(j);
@@ -74,7 +70,6 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 				head = (Element) mappingchild;
 				continue;
 			}
-
 			if (body == null) {
 				body = (Element) mappingchild;
 				continue;
@@ -96,7 +91,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 	 */
 	@Override
 	public Element encode(OBDAMappingAxiom input) {
-
+		// the tag element
 		Element mappingelement = createElement(TAG);
 		// the new XML mapping
 		mappingelement.setAttribute("id", input.getId());
@@ -119,7 +114,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 	}
 
 	/**
-	 * return all attributes used in an obda mapping axiom XML element
+	 * @return all attributes used in an obda mapping axiom XML element
 	 */
 	@Override
 	public Collection<String> getAttributes() {
@@ -129,11 +124,10 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 	}
 
 	/**
-	 * Returns the tag used to represent an obda mapping axiom in XML
+	 * @return the tag used to represent an obda mapping axiom in XML
 	 */
 	@Override
 	public String getElementTag() {
 		return TAG;
 	}
-
 }

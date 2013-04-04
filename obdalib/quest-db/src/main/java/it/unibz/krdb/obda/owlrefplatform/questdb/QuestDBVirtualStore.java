@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
-import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.R2RMLReader;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -12,7 +11,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
@@ -20,13 +18,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -40,29 +36,18 @@ import org.slf4j.LoggerFactory;
 /***
  * A bean that holds all the data about a store, generates a store folder and
  * maintains this data.
- * 
- * @author mariano
- * 
  */
 public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2495624993519521937L;
 
-	private static Logger log = LoggerFactory
-			.getLogger(QuestDBVirtualStore.class);
+	private static Logger log = LoggerFactory.getLogger(QuestDBVirtualStore.class);
+	
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	protected transient OWLOntologyManager man = OWLManager
-			.createOWLOntologyManager();
+	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
-	
-	//constructors Strnig, URI, (Config)
-	public QuestDBVirtualStore(String name, URI obdaURI)
-			throws Exception {
-
+	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
 		this(name, null, getObdaModel(obdaURI), null);
 	}
 	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config)

@@ -1,9 +1,3 @@
-/*
- * @(#)DatalogQueryHelper 16/12/2010
- *
- * Copyright 2010 OBDA-API. All rights reserved.
- * Use is subject to license terms.
- */
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.io.PrefixManager;
@@ -38,17 +32,9 @@ public class DatalogQueryHelper {
 		Map<String, String> prefixMapping = prefixManager.getPrefixMap();
 		Set<String> prefixes = prefixMapping.keySet();
 		for (String prefix : prefixes) {
-			if (prefix.trim().equals(":"))
+			if (prefix.trim().equals(":")) {
 				continue;
-//			if (prefix.equals("version"))  continue;
-
-//			if (prefix.equals("xml:base"))
-//				baseString =
-//					"BASE <" + prefixMapping.get(prefix) + ">\n";
-//			else if (prefix.equals("xmlns"))
-//				prefixString +=
-//					"PREFIX : <" + prefixMapping.get(prefix) + ">\n";
-//			else
+			}
 			if (prefix.trim().endsWith(":")) {
 				prefixString +=
 					"PREFIX " + prefix + " <" + prefixMapping.get(prefix) + ">\n";

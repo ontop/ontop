@@ -14,37 +14,35 @@ import java.util.Set;
 
 public abstract class AbstractSubDescriptionAxiom implements SubDescriptionAxiom {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5901203153410196148L;
 
-	protected Description	including	= null; // righthand side
+	protected Description including = null; // righthand side
 
-	protected Description	included	= null;
+	protected Description included = null;
 
-	String					string		= null;
+	private String string = null;
 
-	int						hash		= 0;
+	private int hash = 0;
 
 	public AbstractSubDescriptionAxiom(Description subDesc, Description superDesc) {
-		if (subDesc == null || superDesc == null)
+		if (subDesc == null || superDesc == null) {
 			throw new RuntimeException("Recieved null in concept inclusion");
+		}
 		included = subDesc;
 		including = superDesc;
-
 		string = toString();
 		hash = string.hashCode();
-
 	}
 
 	@Override
 	public Set<Predicate> getReferencedEntities() {
 		Set<Predicate> res = new HashSet<Predicate>();
-		for (Predicate p : getPredicates(included))
+		for (Predicate p : getPredicates(included)) {
 			res.add(p);
-		for (Predicate p : getPredicates(including))
+		}
+		for (Predicate p : getPredicates(including)) {
 			res.add(p);
+		}
 		return res;
 	}
 
@@ -72,14 +70,13 @@ public abstract class AbstractSubDescriptionAxiom implements SubDescriptionAxiom
 	}
 
 	public String toString() {
-		if (string != null)
+		if (string != null) {
 			return string;
-
+		}
 		StringBuffer bf = new StringBuffer();
 		bf.append(included.toString());
 		bf.append(" ISA ");
 		bf.append(including.toString());
 		return bf.toString();
 	}
-
 }

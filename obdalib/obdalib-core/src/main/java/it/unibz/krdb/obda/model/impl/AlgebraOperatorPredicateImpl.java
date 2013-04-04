@@ -2,16 +2,10 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRI;
 
-public class AlgebraOperatorPredicateImpl extends PredicateImpl implements
-		AlgebraOperatorPredicate {
+public class AlgebraOperatorPredicateImpl extends PredicateImpl implements AlgebraOperatorPredicate {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 9152448029926695852L;
 
 	/**
@@ -46,5 +40,4 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements
 	public AlgebraOperatorPredicateImpl clone() {
 		return this;
 	}
-
 }

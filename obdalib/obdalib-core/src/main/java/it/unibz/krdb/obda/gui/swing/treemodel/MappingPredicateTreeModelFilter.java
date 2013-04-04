@@ -38,7 +38,7 @@ public class MappingPredicateTreeModelFilter extends TreeModelFilter<OBDAMapping
 
 	/** A helper method to check a match */
 	private boolean match(String keyword, Function predicate) {
-		if (predicate.getPredicate().getName().toString().indexOf(keyword) != -1) {
+		if (predicate.getFunctionSymbol().toString().indexOf(keyword) != -1) {
 			return true;
 		}
 		return false;

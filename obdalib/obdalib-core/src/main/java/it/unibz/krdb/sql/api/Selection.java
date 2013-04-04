@@ -7,6 +7,8 @@ import java.util.Queue;
 
 public class Selection implements Serializable{
 	
+	private static final long serialVersionUID = -8204850346562980466L;
+	
 	/**
 	 * Collection of boolean conditions and boolean operators.
 	 */
@@ -134,18 +136,6 @@ public class Selection implements Serializable{
 	public List<ICondition> getRawConditions() {
 		return conditions;
 	}
-	
-//	/**
-//	 * Returns the boolean operator in a specific order.
-//	 * The initial order starts at 0 index.
-//	 * 
-//	 * @param index
-//	 * 			The specific order.
-//	 */
-//	public String getLogicalOperator(int index) {
-//		index = (index * 2) + 1;
-//		return (String)conditions.get(index);
-//	}
 	
 	/**
 	 * Returns the object inside the condition expression list, 

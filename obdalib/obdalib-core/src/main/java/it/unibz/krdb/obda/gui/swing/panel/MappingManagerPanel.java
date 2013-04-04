@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAMappingListRenderer;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.SourceQueryValidator;
 
 import java.awt.event.ActionEvent;
@@ -732,22 +733,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}// GEN-LAST:event_addMappingButtonActionPerformed
 
 	private void addMapping() {
-
-		URI sourceID = this.selectedSource.getSourceID();
-
-		// Computing an ID for the new mapping
-		int index = 0;
-		for (int i = 0; i < 99999999; i++) {
-			index = this.mapc.indexOf(sourceID, "M:" + Integer.toHexString(i));
-			if (index == -1) {
-				index = i;
-				break;
-			}
-		}
-		String id = "M:" + Integer.toHexString(index);
+		String id = IDGenerator.getNextUniqueID("MAPID-");
 
 		JDialog dialog = new JDialog();
-
 		dialog.setTitle("New Mapping");
 		dialog.setModal(true);
 

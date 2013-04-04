@@ -2,8 +2,6 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.DataTypePredicate;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRI;
 
 public class DataTypePredicateImpl extends PredicateImpl implements DataTypePredicate {

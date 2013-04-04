@@ -38,5 +38,4 @@ public interface PrefixManager {
 	public boolean contains(String prefix);
 	
 	public void clear();
-
 }

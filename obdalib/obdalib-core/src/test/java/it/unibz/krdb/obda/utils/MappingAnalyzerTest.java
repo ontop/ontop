@@ -26,21 +26,21 @@ public class MappingAnalyzerTest extends TestCase {
 	public void setUp() {
 		// Database schema
 		TableDefinition table1 = new TableDefinition("Student");
-		table1.setAttribute(1, new Attribute("id", Types.INTEGER, true, false));
-		table1.setAttribute(2, new Attribute("first_name", Types.VARCHAR, false, false));
-		table1.setAttribute(3, new Attribute("last_name", Types.VARCHAR, false, false));
-		table1.setAttribute(4, new Attribute("year", Types.INTEGER, false, false));
-		table1.setAttribute(5, new Attribute("nationality", Types.VARCHAR, false, false));
+		table1.setAttribute(1, new Attribute("id", Types.INTEGER, true, null));
+		table1.setAttribute(2, new Attribute("first_name", Types.VARCHAR, false, null));
+		table1.setAttribute(3, new Attribute("last_name", Types.VARCHAR, false, null));
+		table1.setAttribute(4, new Attribute("year", Types.INTEGER, false, null));
+		table1.setAttribute(5, new Attribute("nationality", Types.VARCHAR, false, null));
 		
 		TableDefinition table2 = new TableDefinition("Course");
-		table2.setAttribute(1, new Attribute("cid", Types.VARCHAR, true, false));
-		table2.setAttribute(2, new Attribute("title", Types.VARCHAR, false, false));
-		table2.setAttribute(3, new Attribute("credits", Types.INTEGER, false, false));
-		table2.setAttribute(4, new Attribute("description", Types.VARCHAR, false, false));
+		table2.setAttribute(1, new Attribute("cid", Types.VARCHAR, true, null));
+		table2.setAttribute(2, new Attribute("title", Types.VARCHAR, false, null));
+		table2.setAttribute(3, new Attribute("credits", Types.INTEGER, false, null));
+		table2.setAttribute(4, new Attribute("description", Types.VARCHAR, false, null));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.setAttribute(1, new Attribute("student_id", Types.INTEGER, true, true));
-		table3.setAttribute(2, new Attribute("course_id", Types.VARCHAR, true, true));
+		table3.setAttribute(1, new Attribute("student_id", Types.INTEGER, true, null));
+		table3.setAttribute(2, new Attribute("course_id", Types.VARCHAR, true, null));
 		
 		md.add(table1);
 		md.add(table2);

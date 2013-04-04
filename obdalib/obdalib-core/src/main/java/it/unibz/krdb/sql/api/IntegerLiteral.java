@@ -5,6 +5,8 @@ package it.unibz.krdb.sql.api;
  */
 public class IntegerLiteral extends NumericLiteral {
 
+	private static final long serialVersionUID = 4363575050294176802L;
+	
 	/**
 	 * Integer value
 	 */

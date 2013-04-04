@@ -39,7 +39,7 @@ public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMapp
 
 	/** A helper method to check a match */
 	public static boolean match(String keyword, Function predicate) {
-		if (predicate.getPredicate().getName().toString().indexOf(keyword) != -1) { // match found!
+		if (predicate.getFunctionSymbol().toString().indexOf(keyword) != -1) { // match found!
 			return true;
 		}
 

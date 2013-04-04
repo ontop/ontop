@@ -1,15 +1,3 @@
-/***
- * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
- * The OBDA-API is licensed under the terms of the Lesser General Public License
- * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
- * include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
- * third-party components licensed under terms that may be different from those
- * of the LGPL. Information about such licenses can be found in the file named
- * OBDAAPI_3DPARTY-LICENSES.txt.
- */
 package it.unibz.krdb.obda.gui.swing.utils;
 
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
@@ -107,8 +95,11 @@ public class QueryPainter {
 
 	private void prepareTimer() {
 		timer = new Timer(200, new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) { handleTimer(); }
-		});		
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handleTimer();
+			}
+		});
 	}
 
 	public void addValidatorListener(ValidatorListener listener) {
@@ -129,8 +120,6 @@ public class QueryPainter {
 		/**
 		 * Called when the validator has just validated. Takes as input the
 		 * result of the validation.
-		 * 
-		 * @return
 		 */
 		public void validated(boolean result);
 	}
@@ -374,8 +363,8 @@ public class QueryPainter {
 			pos = input.indexOf(":", pos + 1);
 		}
 		for (Function atom : current_query.getBody()) {
-			Predicate predicate = atom.getPredicate();
-			String predicateName = man.getShortForm(atom.getPredicate().toString());
+			Predicate predicate = atom.getFunctionSymbol();
+			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());
 			if (validator.isClass(predicate)) {
 				ColorTask task = new ColorTask(predicateName, clazz);
 				tasks.add(task);

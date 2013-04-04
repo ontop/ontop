@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
@@ -25,21 +21,20 @@ import javax.swing.KeyStroke;
 
 public class SelectPrefixPanel extends javax.swing.JPanel {
 
+	private static final long serialVersionUID = -8277829841902027620L;
+
 	private Map<String, String> prefixMap = null;
 	private JDialog parent = null;
 	private JTextPane querypane = null;
 	private Vector<JCheckBox> checkboxes = null;
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -8277829841902027620L;
 
-	/** Creates new form SelectPrefixDialog */
+	/** 
+	 * Creates new form SelectPrefixDialog 
+	 */
 	public SelectPrefixPanel(PrefixManager manager, JTextPane parent) {
 		super();
 
-		/* cloning the existing manager */
-
+		// Cloning the existing manager
 		PrefixManager prefManClone = new SimplePrefixManager();
 		Map<String, String> currentMap = manager.getPrefixMap();
 		for (String prefix : currentMap.keySet()) {
@@ -48,10 +43,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		prefixMap = prefManClone.getPrefixMap();
 		querypane = parent;
 
-		/*
-		 * Adding predefined prefixes
-		 */
-
+		// Adding predefined prefixes
 		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
 		boolean containsRDFPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDF);
 		boolean containsRDFSPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDFS);
@@ -73,7 +65,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		if (!containsQUESTPrefix) {
 			prefManClone.addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
 		}
-
 		initComponents();
 		drawCheckBoxes();
 	}
@@ -97,7 +88,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	}
 
 	private void drawCheckBoxes() {
-
 		checkboxes = new Vector<JCheckBox>();
 		int gridYIndex = 1;
 		for (String key : prefixMap.keySet()) {
@@ -135,7 +125,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				} else {
 					checkboxes.add(jCheckBox1);
 				}
-
 				// Increase the index Y counter
 				gridYIndex++;
 			}
@@ -151,7 +140,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 
 		jButtonCancel.setToolTipText("Cancel the attachment of prefixes. (ESCAPE)");
 		jButtonCancel.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				cancel();
@@ -159,7 +147,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		});
 		jButtonSelectAll.setToolTipText("Select all shown prefixes. (CTRL+A)");
 		jButtonSelectAll.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				selectAll();
@@ -167,7 +154,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		});
 		jButtonSelectAll.setToolTipText("Unselect all shown prefixes. (CTRL+N)");
 		jButtonSelectNone.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				selectNone();
@@ -175,7 +161,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		});
 		jButtonAccept.setToolTipText("Add selected prefixes to query. (ENTER)");
 		jButtonAccept.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				accept();
@@ -353,5 +338,4 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	private javax.swing.JPanel jPanel2;
 	private javax.swing.JPanel jPanel3;
 	// End of variables declaration//GEN-END:variables
-
 }

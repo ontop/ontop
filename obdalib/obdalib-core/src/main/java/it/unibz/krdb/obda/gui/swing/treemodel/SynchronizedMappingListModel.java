@@ -12,24 +12,21 @@ import javax.swing.AbstractListModel;
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2317408823037931358L;
+	
 	private OBDAModel obdaModel;
 	private URI focusedSource;
-	private List<TreeModelFilter<OBDAMappingAxiom>> filters = new LinkedList<TreeModelFilter<OBDAMappingAxiom>>();
+	private List<TreeModelFilter<OBDAMappingAxiom>> filters;
 
 	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
-
+		filters = new LinkedList<TreeModelFilter<OBDAMappingAxiom>>();
 	}
 
 	public void setFocusedSource(URI source) {
 		focusedSource = source;
 		fireContentsChanged(this, 0, getSize());
-
 	}
 
 	@Override
@@ -42,14 +39,12 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	public void addFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
 		this.filters.addAll(filters);
 		fireContentsChanged(obdaModel, 0, getSize());
-
 	}
 
 	@Override
 	public void removeFilter(TreeModelFilter<OBDAMappingAxiom> filter) {
 		filters.remove(filter);
 		fireContentsChanged(obdaModel, 0, getSize());
-
 	}
 
 	@Override
@@ -104,30 +99,25 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	@Override
 	public void mappingInserted(URI srcid, String mapping_id) {
 		fireContentsChanged(obdaModel, 0, getSize());
-
 	}
 
 	@Override
 	public void mappingDeleted(URI srcid, String mapping_id) {
 		fireContentsChanged(obdaModel, 0, getSize());
-
 	}
 
 	@Override
 	public void mappingUpdated(URI srcid, String mapping_id, OBDAMappingAxiom mapping) {
 		fireContentsChanged(obdaModel, 0, getSize());
-
 	}
 
 	@Override
 	public void currentSourceChanged(URI oldsrcid, URI newsrcid) {
-		// do nothing
+		// NO-OP
 	}
 
 	@Override
 	public void allMappingsRemoved() {
 		fireContentsChanged(obdaModel, 0, getSize());
-
 	}
-
 }

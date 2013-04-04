@@ -2,6 +2,8 @@ package it.unibz.krdb.sql.api;
 
 public class NullPredicate implements IPredicate, ICondition {
 	
+	private static final long serialVersionUID = -5825503995391673078L;
+
 	private ReferenceValueExpression rowValueExpression;
 	
 	private boolean useIsNullOperator;

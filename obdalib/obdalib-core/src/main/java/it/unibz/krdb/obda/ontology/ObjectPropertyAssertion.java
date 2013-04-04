@@ -16,5 +16,4 @@ public interface ObjectPropertyAssertion extends Assertion {
 	 */
 	@Deprecated
 	public Predicate getRole();
-
 }

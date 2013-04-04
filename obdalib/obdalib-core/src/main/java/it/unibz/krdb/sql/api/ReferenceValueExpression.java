@@ -2,9 +2,11 @@ package it.unibz.krdb.sql.api;
 
 public class ReferenceValueExpression extends AbstractValueExpression {
 
+	private static final long serialVersionUID = -3324178278393020165L;
+
 	@Override
 	public void putSpecification(Object obj) {
-		// Do nothing
+		// NO-OP
 	}
 
 	@Override

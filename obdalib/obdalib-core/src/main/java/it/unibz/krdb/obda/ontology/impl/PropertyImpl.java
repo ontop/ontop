@@ -5,12 +5,10 @@ import it.unibz.krdb.obda.ontology.Property;
 
 public class PropertyImpl implements Property {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2514037755762973974L;
-	private boolean		inverse		= false;
-	private Predicate	predicate	= null;
+	
+	private boolean inverse = false;
+	private Predicate predicate = null;
 
 	protected PropertyImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
@@ -30,20 +28,22 @@ public class PropertyImpl implements Property {
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof PropertyImpl))
+		if (!(obj instanceof PropertyImpl)) {
 			return false;
+		}
 		PropertyImpl concept2 = (PropertyImpl) obj;
-		if (inverse != concept2.inverse)
+		if (inverse != concept2.inverse) {
 			return false;
+		}
 		return (predicate.equals(concept2.predicate));
 	}
 
 	public String toString() {
 		StringBuffer bf = new StringBuffer();
 		bf.append(predicate.toString());
-		if (inverse)
+		if (inverse) {
 			bf.append("^-");
+		}
 		return bf.toString();
 	}
-
 }

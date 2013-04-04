@@ -1,17 +1,16 @@
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
@@ -19,7 +18,6 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.BooleanLiteral;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
-import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 import it.unibz.krdb.sql.api.DecimalLiteral;
 import it.unibz.krdb.sql.api.ICondition;
 import it.unibz.krdb.sql.api.IValueExpression;
@@ -33,8 +31,8 @@ import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.Selection;
 import it.unibz.krdb.sql.api.StringLiteral;
+import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 
-import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +42,6 @@ import java.util.List;
 import java.util.Stack;
 
 import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class MappingAnalyzer {
 
@@ -57,8 +54,6 @@ public class MappingAnalyzer {
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
-	 * 
-	 * @param model
 	 */
 	public MappingAnalyzer(ArrayList<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
 		this.mappingList = mappingList;
@@ -68,11 +63,8 @@ public class MappingAnalyzer {
 	}
 
 	public DatalogProgram constructDatalogProgram() {
-
 		DatalogProgram datalog = dfac.getDatalogProgram();
-
 		LinkedList<String> errorMessage = new LinkedList<String>();
-		
 		for (OBDAMappingAxiom axiom : mappingList) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
@@ -218,9 +210,11 @@ public class MappingAnalyzer {
 		}
 		if (errorMessage.size() > 0) {
 			StringBuffer errors = new StringBuffer();
-			for (String error: errorMessage)
+			for (String error: errorMessage) {
 				errors.append(error + "\n");
-			RuntimeException r = new RuntimeException("There was an error analyzing the following mappings. Please correct the issue(s) to continue.\n" + errors.toString());
+			}
+			final String msg = "There was an error analyzing the following mappings. Please correct the issue(s) to continue.\n" + errors.toString();
+			RuntimeException r = new RuntimeException(msg);
 			throw r;
 		}
 		return datalog;
@@ -288,24 +282,12 @@ public class MappingAnalyzer {
 
 		Function funct = null;
 		switch (op) {
-		case EQ:
-			funct = dfac.getEQFunction(t1, t2);
-			break;
-		case GT:
-			funct = dfac.getGTFunction(t1, t2);
-			break;
-		case LT:
-			funct = dfac.getLTFunction(t1, t2);
-			break;
-		case GE:
-			funct = dfac.getGTEFunction(t1, t2);
-			break;
-		case LE:
-			funct = dfac.getLTEFunction(t1, t2);
-			break;
-		case NE:
-			funct = dfac.getNEQFunction(t1, t2);
-			break;
+		case EQ: funct = dfac.getEQFunction(t1, t2); break;
+		case GT: funct = dfac.getGTFunction(t1, t2); break;
+		case LT: funct = dfac.getLTFunction(t1, t2); break;
+		case GE: funct = dfac.getGTEFunction(t1, t2); break;
+		case LE: funct = dfac.getLTEFunction(t1, t2); break;
+		case NE: funct = dfac.getNEQFunction(t1, t2); break;
 		default:
 			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
 		}
@@ -313,7 +295,10 @@ public class MappingAnalyzer {
 	}
 
 	private boolean containDateTimeString(String value) {
-		final String[] formatStrings = { "yyyy-MM-dd HH:mm:ss.SS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "yyyy-MM-dd'T'HH:mm:ssZ",
+		final String[] formatStrings = { "yyyy-MM-dd HH:mm:ss.SS", 
+				"yyyy-MM-dd HH:mm:ss", 
+				"yyyy-MM-dd", 
+				"yyyy-MM-dd'T'HH:mm:ssZ",
 				"yyyy-MM-dd'T'HH:mm:ss.sZ" };
 
 		for (String formatString : formatStrings) {
@@ -327,12 +312,8 @@ public class MappingAnalyzer {
 		return false; // the string doesn't contain date time info if none of the formats is suitable.
 	}
 
-	/***
-	 * Returns a new term with the updated references
-	 * 
-	 * @param term
-	 * @param lookupTable
-	 * @return
+	/**
+	 * Returns a new term with the updated references.
 	 */
 	private NewLiteral updateTerm(NewLiteral term, LookupTable lookupTable) {
 		NewLiteral result = null;
@@ -341,7 +322,8 @@ public class MappingAnalyzer {
 			String varName = var.getName();
 			String termName = lookupTable.lookup(varName);
 			if (termName == null) {
-				throw new RuntimeException(String.format("Error in identifying column name \"%s\", please check the query source in the mappings.\nPossible reasons:\n1. The name is ambiguous, or\n2. The name is not defined in the database schema.", var));
+				final String msg = String.format("Error in identifying column name \"%s\", please check the query source in the mappings.\nPossible reasons:\n1. The name is ambiguous, or\n2. The name is not defined in the database schema.", var);
+				throw new RuntimeException(msg);
 			}
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {

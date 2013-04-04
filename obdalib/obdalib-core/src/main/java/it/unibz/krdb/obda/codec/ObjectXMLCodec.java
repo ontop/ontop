@@ -8,16 +8,15 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-/*******************************************************************************
+/**
  * A class of Codecs which can translate from arbitrary objects into a DOM XML
  * Element representation. These are intended for input and output of XML OBDA
  * files. Elements return by this codec are created using the internal Document
  * object, through the createElement call. These should be adopted by target
  * documents.
  * 
- * @author Mariano Rodriguez Muro
- * 
- * @param <AssertionClass>
+ * Note: This is a legacy code. Do not use instances of this class. This code
+ * is used by the old test cases which needed to be updated.
  */
 public abstract class ObjectXMLCodec<ObjectClass extends Object> implements IOCodec<Element, ObjectClass>, XMLEncodable {
 
@@ -33,7 +32,6 @@ public abstract class ObjectXMLCodec<ObjectClass extends Object> implements IOCo
 		} catch (ParserConfigurationException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	public abstract Element encode(ObjectClass input) throws Exception;
@@ -43,5 +41,4 @@ public abstract class ObjectXMLCodec<ObjectClass extends Object> implements IOCo
 	protected Element createElement(String tagName) throws DOMException {
 		return doc.createElement(tagName);
 	}
-
 }

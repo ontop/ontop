@@ -2,13 +2,11 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRI;
 
 public class BooleanOperationPredicateImpl extends PredicateImpl implements BooleanOperationPredicate {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 360476649400908702L;
 
 	protected BooleanOperationPredicateImpl(IRI name) {
 		super(name, 1, null);

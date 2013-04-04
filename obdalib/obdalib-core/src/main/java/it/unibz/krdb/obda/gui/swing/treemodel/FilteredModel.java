@@ -5,31 +5,31 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import java.util.List;
 
 /**
- * Interface that implements a set of functions to add and remove filters of the TreeModel
- *
+ * Interface that implements a set of functions to add and remove filters of the
+ * TreeModel
  */
 public interface FilteredModel {
 
 	/**
-	 * @param T
+	 * @param filter
 	 *            Adds a new filter
 	 */
 	public void addFilter(TreeModelFilter<OBDAMappingAxiom> filter);
 
 	/**
-	 * @param T
+	 * @param filters
 	 *            Adds a list of filters
 	 */
 	public void addFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters);
 
 	/**
-	 * @param T
+	 * @param filter
 	 *            Remove a filter of the list of filters
 	 */
 	public void removeFilter(TreeModelFilter<OBDAMappingAxiom> filter);
 
 	/**
-	 * @param T
+	 * @param filters
 	 *            Remove a list of filters
 	 */
 	public void removeFilter(List<TreeModelFilter<OBDAMappingAxiom>> filters);
@@ -38,5 +38,4 @@ public interface FilteredModel {
 	 * Remove all the current filters
 	 */
 	public void removeAllFilters();
-
 }

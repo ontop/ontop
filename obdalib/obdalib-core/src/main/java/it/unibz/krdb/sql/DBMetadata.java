@@ -313,7 +313,7 @@ public class DBMetadata implements Serializable {
 		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
 		for (CQIE mapping : program.getRules()) {
 			for (Function newatom : mapping.getBody()) {
-				Predicate newAtomPredicate = newatom.getPredicate();
+				Predicate newAtomPredicate = newatom.getFunctionSymbol();
 				if (newAtomPredicate instanceof BooleanOperationPredicate) {
 					continue;
 				}
@@ -327,7 +327,7 @@ public class DBMetadata implements Serializable {
 					}
 				}
 				if (!pkeyIdx.isEmpty()) {
-					pkeys.put(newatom.getPredicate(), pkeyIdx);
+					pkeys.put(newatom.getFunctionSymbol(), pkeyIdx);
 				}
 			}
 		}

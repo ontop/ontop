@@ -1,15 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
- * The OBDA-API is licensed under the terms of the Lesser General Public License
- * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
- * include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
- * third-party components licensed under terms that may be different from those
- * of the LGPL. Information about such licenses can be found in the file named
- * OBDAAPI_3DPARTY-LICENSES.txt.
- */
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.codec.DatasourceXMLCodec;
@@ -21,7 +9,6 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
@@ -60,11 +47,11 @@ import org.w3c.dom.NodeList;
 
 import com.hp.hpl.jena.query.QueryParseException;
 
-/*******************************************************************************
- * Coordinates the saving/loading of the data for the plugin
+/**
+ * Coordinates the saving/loading of the data for the plugin.
  * 
- * @author Mariano Rodriguez
- * 
+ * Note: This is a legacy code. Do not use instances of this class. This code
+ * is used by the old test cases which needed to be updated.
  */
 public class DataManager {
 

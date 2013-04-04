@@ -5,5 +5,7 @@ package it.unibz.krdb.sql.api;
  */
 public abstract class Literal implements IValueExpression {
 	
+	private static final long serialVersionUID = 3027236534360355748L;
+
 	public abstract Object get();
 }

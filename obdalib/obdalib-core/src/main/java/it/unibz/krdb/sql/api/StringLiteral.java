@@ -5,6 +5,8 @@ package it.unibz.krdb.sql.api;
  */
 public class StringLiteral extends Literal {
 	
+	private static final long serialVersionUID = -1560568410005060451L;
+	
 	/**
 	 * The string value.
 	 */

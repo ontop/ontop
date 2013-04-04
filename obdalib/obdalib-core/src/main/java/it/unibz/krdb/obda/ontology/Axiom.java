@@ -6,13 +6,9 @@ import java.io.Serializable;
 import java.util.Set;
 
 /***
- * A logical axiom
- * 
- * @author Mariano Rodriguez Muro
- * 
+ * A logical axiom.
  */
 public interface Axiom  extends Serializable{
 
 	public Set<Predicate> getReferencedEntities();
-
 }

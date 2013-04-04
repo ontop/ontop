@@ -8,7 +8,7 @@
   <groupId>inf.unibz.it.obda</groupId>
   <artifactId>quest-rdb2rdf-compliance</artifactId>
   <version>1.7-alpha2</version>
-  <name>quest-rdb2rdf-compliance</name>
+  <name>rdb2rdf-compliance-tests</name>
   
   <dependencies>
 		<dependency>
@@ -67,5 +67,16 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

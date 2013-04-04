@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
  */
 public class DateTimeLiteral extends Literal {
 
+	private static final long serialVersionUID = -2040969206308713701L;
+
 	private final String[] formatStrings = {
 		"yyyy-MM-dd HH:mm:ss.SSS",
 		"yyyy-MM-dd HH:mm:ss",

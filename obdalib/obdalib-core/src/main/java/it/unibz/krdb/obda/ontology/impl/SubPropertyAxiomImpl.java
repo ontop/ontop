@@ -4,13 +4,9 @@ import it.unibz.krdb.obda.ontology.Property;
 
 public class SubPropertyAxiomImpl extends AbstractSubDescriptionAxiom {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -3020225654321319941L;
 
 	SubPropertyAxiomImpl(Property included, Property including) {
-
 		super(included, including);
 	}
 
@@ -23,13 +19,13 @@ public class SubPropertyAxiomImpl extends AbstractSubDescriptionAxiom {
 	}
 
 	public boolean equals(Object obj) {
-
-		if (!(obj instanceof SubPropertyAxiomImpl))
+		if (!(obj instanceof SubPropertyAxiomImpl)) {
 			return false;
+		}
 		SubPropertyAxiomImpl inc2 = (SubPropertyAxiomImpl) obj;
-		if (!including.equals(inc2.including))
+		if (!including.equals(inc2.including)) {
 			return false;
+		}
 		return (included.equals(inc2.included));
 	}
-
 }

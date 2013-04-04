@@ -1,13 +1,10 @@
 package it.unibz.krdb.obda.model.impl;
 
-import java.net.URI;
+import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
 
 import com.hp.hpl.jena.iri.IRI;
 
-import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
-
-public class NonBooleanOperationPredicateImpl extends PredicateImpl implements
-		NonBooleanOperationPredicate {
+public class NonBooleanOperationPredicateImpl extends PredicateImpl implements NonBooleanOperationPredicate {
 
 	private static final long serialVersionUID = 1L;
 

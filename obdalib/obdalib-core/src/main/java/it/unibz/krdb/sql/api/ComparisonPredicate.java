@@ -8,6 +8,8 @@ import java.io.Serializable;
  */
 public class ComparisonPredicate implements Serializable, IPredicate, ICondition {
 	
+	private static final long serialVersionUID = 4273645296168992941L;
+	
 	private IValueExpression left;
 	private IValueExpression right;
 	private Operator operator;

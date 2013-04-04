@@ -4,14 +4,11 @@ import java.util.ArrayList;
 
 public class TablePrimary implements ITable {
 	
+	private static final long serialVersionUID = -205626125381808960L;
+	
 	private String schema;
 	private String name;
 	private String alias;
-	
-	/**
-	 * Collection of table attributes.
-	 */
-	private ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
 	public TablePrimary(String name) {
 		this("", name);

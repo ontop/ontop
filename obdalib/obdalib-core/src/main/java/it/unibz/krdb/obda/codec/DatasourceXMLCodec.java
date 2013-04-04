@@ -11,23 +11,24 @@ import java.util.Collection;
 
 import org.w3c.dom.Element;
 
+/**
+ * Note: This is a legacy code. Do not use instances of this class. This code
+ * is used by the old test cases which needed to be updated.
+ */
 public class DatasourceXMLCodec extends ObjectXMLCodec<OBDADataSource> {
 
 	private static final String	TAG	= "dataSource";
 
 	@Override
 	public OBDADataSource decode(Element input) {
-
  		OBDADataSource new_src = null;
- 		OBDADataFactory fac =OBDADataFactoryImpl.getInstance();
-
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		String id = input.getAttribute("URI");
 		if(id.equals("")){
 			id = input.getAttribute("name"); //old version
 		}
 		String uristring = input.getAttribute("ontouri");
 		String driver = input.getAttribute("databaseDriver");
-		String dbname = input.getAttribute("databaseName");
 		String pwd = input.getAttribute("databasePassword");
 		String dburl = input.getAttribute("databaseURL");
 		String username = input.getAttribute("databaseUsername");
@@ -40,23 +41,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<OBDADataSource> {
 		new_src.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		new_src.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uristring);
 		new_src.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, usage);
-		/***
-		 * This if is only done because before, URI and name were used
-		 * interchangable. Since now URI stands for the ontology URI we check if
-		 * they are the same, if the are, it means its an old file and the URI
-		 * is set to the current ontlogy's URI
-		 */
-//		if (!name.equals(uri)) {
-//			new_src.setUri(uri);
-//		} else {
-//			throw new IllegalArgumentException("WARNING: A data source read form the .obda file has name=ontologyURI, this .obda file might be a deprecated file. Replace ontologyURI with the real URI of the ontology.");
-////			APIController controller = APIController.getController();
-////			URI currentOntologyURI = controller.getCurrentOntologyURI();
-////			new_src.setUri(currentOntologyURI.toString());
-//
-//		}
 		return new_src;
-
 	}
 
 	@Override
@@ -90,5 +75,4 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<OBDADataSource> {
 	public String getElementTag() {
 		return TAG;
 	}
-
 }

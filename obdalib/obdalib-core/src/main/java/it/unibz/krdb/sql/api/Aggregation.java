@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 public class Aggregation implements Serializable{
 	
+	private static final long serialVersionUID = 5806057160397315905L;
+	
 	/**
 	 * Collection of grouping columns. Uses {@link GroupingElement}
 	 * as the grouping unit. Each grouping unit can contain

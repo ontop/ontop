@@ -2,6 +2,8 @@ package it.unibz.krdb.sql.api;
 
 public class SetUnion extends Operator {
 	
+	private static final long serialVersionUID = 455219736799583763L;
+	
 	private static final int UNION_DEFAULT = 0;
 	private static final int UNION_ALL = 1;
 	private static final int UNION_DISTINCT = 2;

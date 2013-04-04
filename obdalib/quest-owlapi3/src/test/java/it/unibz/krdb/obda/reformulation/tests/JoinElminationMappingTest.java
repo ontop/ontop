@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -91,9 +90,8 @@ public class JoinElminationMappingTest extends TestCase {
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
 		controller = new QueryController();
-		DataManager ioManager = new DataManager(obdaModel, controller);
-		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
-				obdaModel.getPrefixManager());
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(new File(obdafile));
 	}
 
 	@Override

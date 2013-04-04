@@ -5,10 +5,10 @@ package it.unibz.krdb.sql.api;
  */
 public class NumericLiteral extends Literal {
 
+	private static final long serialVersionUID = 1727680122135214887L;
+
 	@Override
 	public Object get() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.model;
 
-
 /**
  * This class defines a type of {@link NewLiteral} in which it expresses a quantity
  * that during a calculation is assumed to vary or be capable of varying in
@@ -8,7 +7,5 @@ package it.unibz.krdb.obda.model;
  */
 public interface Variable extends NewLiteral {
 
-//	public void setName(String name);
-	
 	public String getName();
 }

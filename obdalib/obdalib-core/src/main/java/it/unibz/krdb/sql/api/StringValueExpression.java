@@ -6,6 +6,8 @@ import java.util.Queue;
 
 public class StringValueExpression extends AbstractValueExpression {
 
+	private static final long serialVersionUID = 4563093796759540610L;
+
 	public static final String CONCAT_OP = "||";
 	
 	/**

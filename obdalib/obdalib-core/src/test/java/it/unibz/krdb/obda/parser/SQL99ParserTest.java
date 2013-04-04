@@ -452,34 +452,34 @@ public class SQL99ParserTest extends TestCase {
 		DBMetadata metadata = new DBMetadata();
 
 		TableDefinition tableStudent = new TableDefinition("student");
-		tableStudent.setAttribute(1, new Attribute("id", Types.INTEGER, true, false, 0));
-		tableStudent.setAttribute(2, new Attribute("name", Types.VARCHAR, false, false, 0));
-		tableStudent.setAttribute(3, new Attribute("address", Types.VARCHAR, false, false, 0));
-		tableStudent.setAttribute(4, new Attribute("birth_date", Types.TIMESTAMP, false, false, 0));
+		tableStudent.setAttribute(1, new Attribute("id", Types.INTEGER, true, null, 0));
+		tableStudent.setAttribute(2, new Attribute("name", Types.VARCHAR, false, null, 0));
+		tableStudent.setAttribute(3, new Attribute("address", Types.VARCHAR, false, null, 0));
+		tableStudent.setAttribute(4, new Attribute("birth_date", Types.TIMESTAMP, false, null, 0));
 		metadata.add(tableStudent);
 
 		TableDefinition tableGrade = new TableDefinition("grade");
-		tableGrade.setAttribute(1, new Attribute("sm_id", Types.INTEGER, false, false, 0));
-		tableGrade.setAttribute(2, new Attribute("st_id", Types.INTEGER, false, true, 0));
-		tableGrade.setAttribute(3, new Attribute("course", Types.VARCHAR, false, false, 0));
-		tableGrade.setAttribute(4, new Attribute("score", Types.DECIMAL, false, false, 0));
-		tableGrade.setAttribute(5, new Attribute("mark", Types.CHAR, false, false, 0));
-		tableGrade.setAttribute(6, new Attribute("passed", Types.BOOLEAN, false, false, 0));
+		tableGrade.setAttribute(1, new Attribute("sm_id", Types.INTEGER, false, null, 0));
+		tableGrade.setAttribute(2, new Attribute("st_id", Types.INTEGER, false, null, 0));
+		tableGrade.setAttribute(3, new Attribute("course", Types.VARCHAR, false, null, 0));
+		tableGrade.setAttribute(4, new Attribute("score", Types.DECIMAL, false, null, 0));
+		tableGrade.setAttribute(5, new Attribute("mark", Types.CHAR, false, null, 0));
+		tableGrade.setAttribute(6, new Attribute("passed", Types.BOOLEAN, false, null, 0));
 		metadata.add(tableGrade);
 
 		TableDefinition tableSemester = new TableDefinition("semester");
-		tableSemester.setAttribute(1, new Attribute("id", Types.INTEGER, true, false, 0));
-		tableSemester.setAttribute(2, new Attribute("semester", Types.INTEGER, true, false, 0));
+		tableSemester.setAttribute(1, new Attribute("id", Types.INTEGER, true, null, 0));
+		tableSemester.setAttribute(2, new Attribute("semester", Types.INTEGER, true, null, 0));
 		metadata.add(tableSemester);
 
 		TableDefinition tableErasmus = new TableDefinition("erasmus");
-		tableErasmus.setAttribute(1, new Attribute("id", Types.INTEGER, true, false, 0));
-		tableErasmus.setAttribute(2, new Attribute("name", Types.VARCHAR, false, false, 0));
+		tableErasmus.setAttribute(1, new Attribute("id", Types.INTEGER, true, null, 0));
+		tableErasmus.setAttribute(2, new Attribute("name", Types.VARCHAR, false, null, 0));
 		metadata.add(tableErasmus);
 
 		TableDefinition tableTax = new TableDefinition("tax");
-		tableTax.setAttribute(1, new Attribute("payee", Types.VARCHAR, false, false, 0));
-		tableTax.setAttribute(2, new Attribute("amount", Types.DOUBLE, false, false, 0));
+		tableTax.setAttribute(1, new Attribute("payee", Types.VARCHAR, false, null, 0));
+		tableTax.setAttribute(2, new Attribute("amount", Types.DOUBLE, false, null, 0));
 		metadata.add(tableTax);
 
 		ANTLRStringStream inputStream = new ANTLRStringStream(input);

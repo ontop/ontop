@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.model;
 
 import java.io.Serializable;
-import java.net.URI;
 
 import com.hp.hpl.jena.iri.IRI;
 
@@ -64,5 +63,4 @@ public interface Predicate extends Cloneable, Serializable {
 	boolean isArithmeticPredicate();
 	
 	boolean isDataTypePredicate();
-
 }

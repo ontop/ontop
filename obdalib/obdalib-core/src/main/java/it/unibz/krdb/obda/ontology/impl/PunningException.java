@@ -5,18 +5,13 @@ import it.unibz.krdb.obda.model.Predicate;
 /***
  * Indicates that a URI has been PUNNED, i.e., it has been used as a Class and
  * Property at the same type (or Object and Data property).
- * 
- * @author Mariano Rodriguez Muro
- * 
  */
 public class PunningException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= 5273586443299868448L;
-	private Predicate			pred1				= null;
-	private Predicate			pred2				= null;
+	private static final long serialVersionUID = 5273586443299868448L;
+	
+	private Predicate pred1 = null;
+	private Predicate pred2 = null;
 
 	public PunningException(String message, Predicate pred1, Predicate pred2) {
 		super(message);

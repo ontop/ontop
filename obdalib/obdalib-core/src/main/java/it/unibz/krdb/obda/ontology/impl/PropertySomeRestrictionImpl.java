@@ -5,10 +5,8 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 
 public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 593821958539751283L;
+	
 	private Predicate	predicate	= null;
 	private boolean		isInverse	= false;
 
@@ -32,11 +30,13 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof PropertySomeRestrictionImpl))
+		if (!(obj instanceof PropertySomeRestrictionImpl)) {
 			return false;
+		}
 		PropertySomeRestrictionImpl concept2 = (PropertySomeRestrictionImpl) obj;
-		if (isInverse != concept2.isInverse)
+		if (isInverse != concept2.isInverse) {
 			return false;
+		}
 		return (predicate.equals(concept2.getPredicate()));
 	}
 
@@ -44,9 +44,9 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 		StringBuffer bf = new StringBuffer();
 		bf.append("E");
 		bf.append(predicate.toString());
-		if (isInverse)
+		if (isInverse) {
 			bf.append("^-");
+		}
 		return bf.toString();
 	}
-
 }

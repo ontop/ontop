@@ -22,21 +22,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-/*
- * OBDAPreferencesPanel.java
- *
- * Created on Jul 31, 2009, 3:06:37 PM
- */
-
-/**
- *
- * @author Manfred Gerstgrasser
- */
 public class OBDAPreferencesPanel extends javax.swing.JPanel {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private OBDAPreferences pref = null;
 	private HashMap<String, KeyStroke> shortCuts = new HashMap<String, KeyStroke>();
@@ -56,113 +43,99 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	return shortCuts.containsValue(stroke);
     }
     
-    private void addListener(){
-//    	jButtonBodyPropertyColour1.addActionListener(new ActionListener(){
-//
-//			public void actionPerformed(ActionEvent arg0) {
-//				ColorChooser cc = new ColorChooser(jButtonBodyPropertyColour1, MappingManagerPreferences.MAPPING_BODY_COLOR);
-//				cc.setVisible(true);
-//			}
-//    		
-//    	});
-    	
+    private void addListener(){    	
     	cmdClassColor.addActionListener(new ActionListener(){
-
+    		@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ColorChooser cc = new ColorChooser(cmdClassColor, OBDAPreferences.CLASS_COLOR);
 				cc.setVisible(true);
 			}
-    		
     	});
     	
     	cmdDataPropertyColor.addActionListener(new ActionListener(){
-
+    		@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, OBDAPreferences.DATAPROPERTY_COLOR);
 				cc.setVisible(true);
 			}
-    		
     	});
     	
     	cmdFunctorColor.addActionListener(new ActionListener(){
-
+    		@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ColorChooser cc = new ColorChooser(cmdFunctorColor, OBDAPreferences.FUCNTOR_COLOR);
 				cc.setVisible(true);
 			}
-    		
     	});
     	
-//    	jButtonIDColour2.addActionListener(new ActionListener(){
-//
-//			public void actionPerformed(ActionEvent arg0) {
-//				ColorChooser cc = new ColorChooser(jButtonIDColour2, MappingManagerPreferences.MAPPING_ID_COLOR);
-//				cc.setVisible(true);
-//			}
-//    		
-//    	});
-    	
     	cmdObjectPropertyColor.addActionListener(new ActionListener(){
-
+    		@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, OBDAPreferences.OBJECTPROPTERTY_COLOR);
 				cc.setVisible(true);
 			}
-    		
     	});
     	
     	cmdParameterColor.addActionListener(new ActionListener(){
-
+    		@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ColorChooser cc = new ColorChooser(cmdParameterColor, OBDAPreferences.PARAMETER_COLOR);
 				cc.setVisible(true);
 			}
-    		
     	});
     	
     	cmdVariableColor.addActionListener(new ActionListener(){
-
+    		@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ColorChooser cc = new ColorChooser(cmdVariableColor, OBDAPreferences.VARIABLE_COLOR);
 				cc.setVisible(true);
 			}
-    		
     	});
     	
     	String aux = pref.get(OBDAPreferences.ADD_MAPPING).toString();
     	KeyStroke ks = KeyStroke.getKeyStroke(aux);
     	lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(ks.getModifiers()) + " + "+ KeyEvent.getKeyText(ks.getKeyCode()));
     	lblAddMappingKey.addMouseListener(new MouseListener(){
-
+    		@Override
 			public void mouseClicked(MouseEvent e) {
-				
 				lblAddMappingKey.setText("");
 				lblAddMappingKey.requestFocus();
 			}
-			public void mouseEntered(MouseEvent e) {}
-			public void mouseExited(MouseEvent e) {}
-			public void mousePressed(MouseEvent e) {}
-			public void mouseReleased(MouseEvent e) {}
-    		
+    		@Override
+			public void mouseEntered(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseExited(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mousePressed(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseReleased(MouseEvent e) {
+    			// NO-OP
+    		}
     	});
+    	
     	lblAddMappingKey.addKeyListener(new KeyListener(){
-
+    		@Override
 			public void keyPressed(KeyEvent e) {
-				
 				int mod = e.getModifiers();
 				int key = e.getKeyCode();
-				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL || key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
+				if (key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL 
+						|| key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
 						|| key ==KeyEvent.VK_SHIFT || key ==KeyEvent.VK_ESCAPE){
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-//				System.out.println(stroke.toString());
-				if(!isKeyStrokeAlreadyAssigned(stroke)){
+				if (!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.ADD_MAPPING, stroke);
 				    lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblAddMappingKey.setToolTipText(stroke.toString());
 					pref.put(OBDAPreferences.ADD_MAPPING, stroke.toString());
-				}else{
+				} else {
 					KeyStroke oldValue = shortCuts.get(OBDAPreferences.ADD_MAPPING);
 					if(oldValue != null){
 						lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
@@ -170,89 +143,59 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
 			}
-
-			public void keyReleased(KeyEvent e) {}
-			public void keyTyped(KeyEvent e) {}
+    		@Override
+			public void keyReleased(KeyEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+			public void keyTyped(KeyEvent e) {
+				// NO-OP
+			}
     	});
-    	
-//    	String aux1 = pref.getShortCut(delete);
-//    	KeyStroke ks1 = KeyStroke.getKeyStroke(aux1);
-//    	jLabelDeleteKey.setText(KeyEvent.getKeyModifiersText(ks1.getModifiers()) + " + "+ KeyEvent.getKeyText(ks1.getKeyCode()));
-//    	jLabelDeleteKey.addMouseListener(new MouseListener(){
-//
-//			public void mouseClicked(MouseEvent e) {
-//				
-//				jLabelDeleteKey.setText("");
-//				jLabelDeleteKey.requestFocus();
-//			}
-//			public void mouseEntered(MouseEvent e) {}
-//			public void mouseExited(MouseEvent e) {}
-//			public void mousePressed(MouseEvent e) {}
-//			public void mouseReleased(MouseEvent e) {}
-//    		
-//    	});
-//    	jLabelDeleteKey.addKeyListener(new KeyListener(){
-//
-//			public void keyPressed(KeyEvent e) {
-//				int mod = e.getModifiers();
-//				int key = e.getKeyCode();
-//				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL || key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
-//						|| key ==KeyEvent.VK_SHIFT || key ==KeyEvent.VK_ESCAPE){
-//					return;
-//				}
-//				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-//				System.out.println(stroke.toString());
-//				if(!isKeyStrokeAlreadyAssigned(stroke)){
-//					shortCuts.put(delete, stroke);
-//					jLabelDeleteKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
-//					jLabelDeleteKey.setToolTipText(stroke.toString());
-//					pref.setShortcut(delete, stroke.toString());
-//				}else{
-//					KeyStroke oldValue = shortCuts.get(delete);
-//					if(oldValue != null){
-//						jLabelDeleteKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
-//					}
-//					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
-//				}
-//			}
-//
-//			public void keyReleased(KeyEvent e) {}
-//			public void keyTyped(KeyEvent e) {}
-//    	});
     	
     	String aux2 = pref.get(OBDAPreferences.EDIT_BODY).toString();
     	KeyStroke ks2 = KeyStroke.getKeyStroke(aux2);
     	lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(ks2.getModifiers()) + " + "+ KeyEvent.getKeyText(ks2.getKeyCode()));
     	lblEditMappingBodyKey.addMouseListener(new MouseListener(){
-
+    		@Override
 			public void mouseClicked(MouseEvent e) {
-				
 				lblEditMappingBodyKey.setText("");
 				lblEditMappingBodyKey.requestFocus();
 			}
-			public void mouseEntered(MouseEvent e) {}
-			public void mouseExited(MouseEvent e) {}
-			public void mousePressed(MouseEvent e) {}
-			public void mouseReleased(MouseEvent e) {}
-    		
+    		@Override
+			public void mouseEntered(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseExited(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mousePressed(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseReleased(MouseEvent e) {
+    			// NO-OP
+    		}
     	});
     	lblEditMappingBodyKey.addKeyListener(new KeyListener(){
-
+    		@Override
 			public void keyPressed(KeyEvent e) {
 				int mod = e.getModifiers();
 				int key = e.getKeyCode();
-				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL || key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
+				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL
+						|| key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
 						|| key ==KeyEvent.VK_SHIFT || key ==KeyEvent.VK_ESCAPE){
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-//				System.out.println(stroke.toString());
-				if(!isKeyStrokeAlreadyAssigned(stroke)){
+				if (!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.EDIT_BODY, stroke);
 					lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblEditMappingBodyKey.setToolTipText(stroke.toString());
 					pref.put(OBDAPreferences.EDIT_BODY, stroke.toString());
-				}else{
+				} else {
 					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_BODY);
 					if(oldValue != null){
 						lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
@@ -260,44 +203,59 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
 			}
-
-			public void keyReleased(KeyEvent e) {}
-			public void keyTyped(KeyEvent e) {}
+    		@Override
+			public void keyReleased(KeyEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+			public void keyTyped(KeyEvent e) {
+    			// NO-OP
+    		}
     	});
     	
     	String aux3 = pref.get(OBDAPreferences.EDIT_HEAD).toString();
     	KeyStroke ks3 = KeyStroke.getKeyStroke(aux3);
     	lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(ks3.getModifiers()) + " + "+ KeyEvent.getKeyText(ks3.getKeyCode()));
     	lblEditMappingHeadKey.addMouseListener(new MouseListener(){
-
+    		@Override
 			public void mouseClicked(MouseEvent e) {
-				
 				lblEditMappingHeadKey.setText("");
 				lblEditMappingHeadKey.requestFocus();
 			}
-			public void mouseEntered(MouseEvent e) {}
-			public void mouseExited(MouseEvent e) {}
-			public void mousePressed(MouseEvent e) {}
-			public void mouseReleased(MouseEvent e) {}
-    		
+    		@Override
+			public void mouseEntered(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseExited(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mousePressed(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseReleased(MouseEvent e) {
+    			// NO-OP
+    		}
     	});
     	lblEditMappingHeadKey.addKeyListener(new KeyListener(){
-
+    		@Override
 			public void keyPressed(KeyEvent e) {
 				int mod = e.getModifiers();
 				int key = e.getKeyCode();
-				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL || key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
+				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL 
+						|| key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
 						|| key ==KeyEvent.VK_SHIFT || key ==KeyEvent.VK_ESCAPE){
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-//				System.out.println(stroke.toString());
-				if(!isKeyStrokeAlreadyAssigned(stroke)){
+				if (!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.EDIT_HEAD, stroke);
 					lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblEditMappingHeadKey.setToolTipText(stroke.toString());
 					pref.put(OBDAPreferences.EDIT_HEAD, stroke.toString());
-				}else{
+				} else {
 					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_HEAD);
 					if(oldValue != null){
 						lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
@@ -305,44 +263,60 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
 			}
-
-			public void keyReleased(KeyEvent e) {}
-			public void keyTyped(KeyEvent e) {}
+    		@Override
+			public void keyReleased(KeyEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+			public void keyTyped(KeyEvent e) {
+				// NO-OP
+			}
     	});
     	
     	String aux4 = pref.get(OBDAPreferences.EDIT_ID).toString();
     	KeyStroke ks4 = KeyStroke.getKeyStroke(aux4);
     	lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(ks4.getModifiers()) + " + "+ KeyEvent.getKeyText(ks4.getKeyCode()));
     	lblMappingIdKey.addMouseListener(new MouseListener(){
-
+    		@Override
 			public void mouseClicked(MouseEvent e) {
-				
 				lblMappingIdKey.setText("");
 				lblMappingIdKey.requestFocus();
 			}
-			public void mouseEntered(MouseEvent e) {}
-			public void mouseExited(MouseEvent e) {}
-			public void mousePressed(MouseEvent e) {}
-			public void mouseReleased(MouseEvent e) {}
-    		
+    		@Override
+			public void mouseEntered(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseExited(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mousePressed(MouseEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+    		public void mouseReleased(MouseEvent e) {
+    			// NO-OP
+    		}	
     	});
+    	
     	lblMappingIdKey.addKeyListener(new KeyListener(){
-
+    		@Override
 			public void keyPressed(KeyEvent e) {
 				int mod = e.getModifiers();
 				int key = e.getKeyCode();
-				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL || key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
+				if(key == KeyEvent.VK_CONTROL || key ==KeyEvent.VK_CANCEL 
+						|| key ==KeyEvent.VK_ALT || key ==KeyEvent.VK_ALT_GRAPH
 						|| key ==KeyEvent.VK_SHIFT || key ==KeyEvent.VK_ESCAPE){
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-//				System.out.println(stroke.toString());
-				if(!isKeyStrokeAlreadyAssigned(stroke)){
+				if (!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.EDIT_ID, stroke);
 					lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblMappingIdKey.setToolTipText(stroke.toString());
 					pref.put(OBDAPreferences.EDIT_ID, stroke.toString());
-				}else{
+				} else {
 					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_ID);
 					if(oldValue != null){
 						lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
@@ -350,44 +324,47 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
 			}
-
-			public void keyReleased(KeyEvent e) {}
-			public void keyTyped(KeyEvent e) {}
+    		@Override
+			public void keyReleased(KeyEvent e) {
+    			// NO-OP
+    		}
+    		@Override
+			public void keyTyped(KeyEvent e) {
+				// NO-OP
+			}
     	});
     }
     
     private void applyPreferences(){
- 
     	Color clazz = new Color(Integer.parseInt(pref.get(OBDAPreferences.CLASS_COLOR).toString()));
     	cmdClassColor.setBackground(clazz);
     	cmdClassColor.setOpaque(true);
     	cmdClassColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	
     	Color dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
     	cmdDataPropertyColor.setBackground(dp);
     	cmdDataPropertyColor.setOpaque(true);
     	cmdDataPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	
     	Color op =new Color(Integer.parseInt(pref.get(OBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
     	cmdObjectPropertyColor.setBackground(op);
     	cmdObjectPropertyColor.setOpaque(true);
     	cmdObjectPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	
     	Color var = new Color(Integer.parseInt(pref.get(OBDAPreferences.VARIABLE_COLOR).toString()));
     	cmdVariableColor.setBackground(var);
     	cmdVariableColor.setOpaque(true);
     	cmdVariableColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	
     	Color par = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
     	cmdParameterColor.setBackground(par);
     	cmdParameterColor.setOpaque(true);
     	cmdParameterColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	
     	Color fun = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
     	cmdFunctorColor.setBackground(fun);
     	cmdFunctorColor.setOpaque(true);
     	cmdFunctorColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-//    	Color body = pref.getColor(MappingManagerPreferences.MAPPING_BODY_COLOR);
-//    	jButtonBodyPropertyColour1.setBackground(body);
-//    	jButtonBodyPropertyColour1.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-//    	Color id = pref.getColor(MappingManagerPreferences.MAPPING_ID_COLOR);
-//    	jButtonIDColour2.setBackground(id);
-//    	jButtonIDColour2.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
     	String fontBody = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
     	int bodySize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
@@ -395,11 +372,11 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdFontFamily.setToolTipText(fontBody + ", " + bodySize);
     	
     	jCheckBoxUseDefault.setSelected(new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString()));
-    	if(jCheckBoxUseDefault.isSelected()){
-    		cmdFontFamily.setEnabled(false);
-    	}else{
-    		cmdFontFamily.setEnabled(true);
-    	}
+		if (jCheckBoxUseDefault.isSelected()) {
+			cmdFontFamily.setEnabled(false);
+		} else {
+			cmdFontFamily.setEnabled(true);
+		}
     }
     
     /** This method is called from within the constructor to
@@ -852,7 +829,6 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 
     private void cmdFontFamilyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFontFamilyActionPerformed
     	FontChooser2 fe = new FontChooser2(cmdFontFamily, OBDAPreferences.OBDAPREFS_FONTFAMILY, OBDAPreferences.OBDAPREFS_FONTSIZE, OBDAPreferences.OBDAPREFS_ISBOLD);
-    	
     }//GEN-LAST:event_cmdFontFamilyActionPerformed
 
     private void jCheckBoxUseDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxUseDefaultActionPerformed
@@ -866,7 +842,6 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	}
     	
     }//GEN-LAST:event_jCheckBoxUseDefaultActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdClassColor;
@@ -906,19 +881,14 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     private javax.swing.JTabbedPane tabMainPanel;
     // End of variables declaration//GEN-END:variables
     
-    
     private class ColorChooser extends JPanel {
-    	
-    	/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = -5704647065277117955L;
 		JButton button = null;
     	String key = null;
     	
     	private ColorChooser(JButton button, String key){
     		super();
-//    		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     		this.button = button;
     		this.key = key;
     		this.setSize(500,500);
@@ -940,7 +910,6 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
             java.awt.GridBagConstraints gridBagConstraints;
 
             jColorChooser1 = new javax.swing.JColorChooser();
-//            jButton1 = new javax.swing.JButton();
             jLabelplaceholder2 = new javax.swing.JLabel();
             jLabel2 = new javax.swing.JLabel();
 
@@ -974,262 +943,246 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         	button.setOpaque(true);
         }
 
-
         // Variables declaration - do not modify
         private javax.swing.JColorChooser jColorChooser1;
         private javax.swing.JLabel jLabel1;
         private javax.swing.JLabel jLabel2;
         // End of variables declaration
-        
     }
     
-    public class FontChooser2 extends JPanel{
+	public class FontChooser2 extends JPanel {
 
-    	  // Results:
-
-    	  /**
-		 * 
-		 */
 		private static final long serialVersionUID = -602845875138513553L;
 
 		/** The font the user has chosen */
-    	  protected Font resultFont;
+		protected Font resultFont;
 
-    	  /** The resulting font name */
-    	  protected String resultName;
+		/** The resulting font name */
+		protected String resultName;
 
-    	  /** The resulting font size */
-    	  protected int resultSize;
+		/** The resulting font size */
+		protected int resultSize;
 
-    	  /** The resulting boldness */
-    	  protected boolean isBold;
+		/** The resulting boldness */
+		protected boolean isBold;
 
-    	  /** The resulting italicness */
-    	  protected boolean isItalic;
+		/** The resulting italicness */
+		protected boolean isItalic;
 
-    	  // Working fields
+		// Working fields
 
-    	  /** Display text */
-    	  protected String displayText = "Qwerty Yuiop";
+		/** Display text */
+		protected String displayText = "Qwerty Yuiop";
 
-    	  /** The list of Fonts */
-    	  protected String fontList[];
+		/** The list of Fonts */
+		protected String fontList[];
 
-    	  /** The font name chooser */
-    	  protected JList fontNameChoice;
+		/** The font name chooser */
+		protected JList fontNameChoice;
 
-    	  /** The font size chooser */
-    	  protected JList fontSizeChoice;
+		/** The font size chooser */
+		protected JList fontSizeChoice;
 
-    	  /** The bold and italic choosers */
-    	  JCheckBox bold;
+		/** The bold and italic choosers */
+		JCheckBox bold;
 
-    	  /** The list of font sizes */
-    	  protected String fontSizes[] = { "8", "10", "11", "12", "14", "16", "18",
-    	      "20", "24", "30", "36", "40", "48", "60", "72" };
+		/** The list of font sizes */
+		protected String fontSizes[] = { "8", "10", "11", "12", "14", "16",
+				"18", "20", "24", "30", "36", "40", "48", "60", "72" };
 
-    	  /** The index of the default size (e.g., 14 point == 4) */
-    	  protected static final int DEFAULT_SIZE = 4;
+		/** The index of the default size (e.g., 14 point == 4) */
+		protected static final int DEFAULT_SIZE = 4;
 
-    	  /**
-    	   * The display area. Use a JLabel as the AWT label doesn't always honor
-    	   * setFont() in a timely fashion :-)
-    	   */
-//    	  protected JLabel previewArea;
+		protected String fontfamily = null;
+
+		protected String fontsize = null;
+
+		protected String isbold = null;
+   	  
+		protected JButton button = null;
+
+		/**
+		 * Construct a FontChooser -- Sets title and gets array of fonts on the
+		 * system. Builds a GUI to let the user choose one font at one size.
+		 */
+		public FontChooser2(JButton b, String ff, String fs, String isb) {
+			super();
+			fontfamily = ff;
+			fontsize = fs;
+			isbold = isb;
+			button = b;
+			init();
+			JOptionPane pane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+			JDialog d = pane.createDialog("Font Chooser");
+			d.setModal(true);
+			d.setSize(400, 300);
+			d.setResizable(true);
+			d.setVisible(true);
+			Object o = pane.getValue();
+			if (o != null) {
+				int ret = (Integer) o;
+				if (ret == JOptionPane.OK_OPTION) {
+					applyChanges();
+				}
+			}
+		}
     	  
-    	  protected String fontfamily = null;
+		private void init() {
+
+			java.awt.GridBagConstraints gridBagConstraints;
+			javax.swing.JScrollPane scrFontNameList;
+			javax.swing.JScrollPane scrFontSizeList;
+
+			fontNameChoice = new javax.swing.JList();
+			fontSizeChoice = new javax.swing.JList();
+			scrFontNameList = new javax.swing.JScrollPane();
+			scrFontSizeList = new javax.swing.JScrollPane();
+			bold = new javax.swing.JCheckBox();
+			pnlDisplayPreferencesTab = new javax.swing.JPanel();
+
+			setMinimumSize(new java.awt.Dimension(400, 300));
+			setLayout(new java.awt.GridBagLayout());
+
+			fontNameChoice.setModel(new javax.swing.AbstractListModel() {
+				private static final long serialVersionUID = -1794346954116474402L;
+				String[] strings = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+				@Override
+				public int getSize() {
+					return strings.length;
+				}
+				@Override
+				public Object getElementAt(int i) {
+					return strings[i];
+				}
+			});
+			scrFontNameList.setViewportView(fontNameChoice);
+
+			gridBagConstraints = new java.awt.GridBagConstraints();
+			gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+			gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+			gridBagConstraints.weightx = 1.0;
+			gridBagConstraints.weighty = 1.0;
+			gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+			add(scrFontNameList, gridBagConstraints);
+
+			fontSizeChoice.setModel(new javax.swing.AbstractListModel() {
+				private static final long serialVersionUID = 4046867275908672992L;
+				String[] strings = { "8", "10", "11", "12", "14", "16", "18",
+						"20", "24", "30", "36", "40", "48", "60", "72" };
+				@Override
+				public int getSize() {
+					return strings.length;
+				}
+				@Override
+				public Object getElementAt(int i) {
+					return strings[i];
+				}
+			});
+			fontSizeChoice.setMaximumSize(new java.awt.Dimension(50, 285));
+			fontSizeChoice.setMinimumSize(new java.awt.Dimension(50, 285));
+			fontSizeChoice.setPreferredSize(new java.awt.Dimension(50, 285));
+			scrFontSizeList.setViewportView(fontSizeChoice);
+
+			gridBagConstraints = new java.awt.GridBagConstraints();
+			gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+			gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+			gridBagConstraints.weightx = 1.0;
+			gridBagConstraints.weighty = 1.0;
+			gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+			add(scrFontSizeList, gridBagConstraints);
+
+			bold.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+			bold.setText("Bold");
+			bold.setBorder(null);
+			gridBagConstraints = new java.awt.GridBagConstraints();
+			gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+			gridBagConstraints.weightx = 1.0;
+			gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+			add(bold, gridBagConstraints);
+
+			pnlDisplayPreferencesTab.setLayout(new java.awt.GridBagLayout());
+
+			String currentFont = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
+			int currentSize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+			Boolean isBold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
+			int i = getIndexOfFont(currentFont);
+			int j = getIndexOfSize(String.valueOf(currentSize));
+			fontNameChoice.setSelectedIndex(i);
+			fontSizeChoice.setSelectedIndex(j);
+			bold.setSelected(isBold);
+		}
     	  
-    	  protected String fontsize = null;
+		private int getIndexOfFont(String font) {
+			AbstractListModel model = (AbstractListModel) fontNameChoice.getModel();
+			int size = model.getSize();
+			for (int i = 0; i < size; i++) {
+				if (model.getElementAt(i).equals(font)) {
+					return i;
+				}
+			}
+			return 0;
+		}
     	  
-    	  protected String isbold = null;
+		private int getIndexOfSize(String size) {
+			AbstractListModel model = (AbstractListModel) fontSizeChoice.getModel();
+			int length = model.getSize();
+			for (int i = 0; i < length; i++) {
+				if (model.getElementAt(i).equals(size)) {
+					return i;
+				}
+			}
+			return 0;
+		}
+
+		protected void applyChanges() {
+			resultName = (String) fontNameChoice.getSelectedValue();
+			String resultSizeName = (String) fontSizeChoice.getSelectedValue();
+			isBold = bold.isSelected();
+			pref.put(OBDAPreferences.OBDAPREFS_FONTFAMILY, resultName);
+			pref.put(OBDAPreferences.OBDAPREFS_FONTSIZE, resultSizeName);
+			pref.put(OBDAPreferences.OBDAPREFS_ISBOLD, new Boolean(isBold).toString());
+			button.setText(resultName + ", " + resultSizeName);
+			button.setToolTipText(resultName + ", " + resultSizeName);
+		}
     	  
-//    	  protected JButton jButtonOK = null;
-//    	  
-//    	  protected JButton jButtonCancel = null;
-//    	  
-    	  protected JButton button = null;
-    	  /**
-    	   * Construct a FontChooser -- Sets title and gets array of fonts on the
-    	   * system. Builds a GUI to let the user choose one font at one size.
-    	   */
-    	  
-    	  public FontChooser2(JButton b, String ff, String fs, String isb) {
-    	    super();
-    	    fontfamily = ff;
-    	    fontsize = fs;
-    	    isbold = isb;
-    	    button = b;
-    	    init();
-    	    JOptionPane pane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-    		JDialog d = pane.createDialog("Font Chooser");
-    		d.setModal(true);
-    		d.setSize(400, 300);
-    		d.setResizable(true);
-    		d.setVisible(true);
-    		Object o = pane.getValue();
-            if (o != null){
-                int ret = (Integer)o;
-                if (ret == JOptionPane.OK_OPTION) {
-                    applyChanges();
-                }
-            }
-    	  }
-    	  
-//    	  private void cancel(){
-//    		  this.setVisible(false);
-//    	  }
-    	  
-    	  private void init(){
-    		  
-    		  java.awt.GridBagConstraints gridBagConstraints;
-			  javax.swing.JScrollPane scrFontNameList;
-			  javax.swing.JScrollPane scrFontSizeList;
-				
-    	        fontNameChoice = new javax.swing.JList();
-    	        fontSizeChoice = new javax.swing.JList();
-    	        scrFontNameList = new javax.swing.JScrollPane();
-    	        scrFontSizeList = new javax.swing.JScrollPane();
-    	        bold = new javax.swing.JCheckBox();
-    	        pnlDisplayPreferencesTab = new javax.swing.JPanel();
-//    	        jButtonCancel = new javax.swing.JButton();
-//    	        jButtonOK = new javax.swing.JButton();
+		/**
+		 * Called from the action handlers to get the font info, build a font,
+		 * and set it.
+		 */
+		protected void previewFont() {
+			resultName = (String) fontNameChoice.getSelectedValue();
+			String resultSizeName = (String) fontSizeChoice.getSelectedValue();
+			int resultSize = Integer.parseInt(resultSizeName);
+			isBold = bold.isSelected();
+			int attrs = Font.PLAIN;
+			if (isBold) {
+				attrs = Font.BOLD;
+			}
+			if (isItalic) {
+				attrs |= Font.ITALIC;
+			}
+			resultFont = new Font(resultName, attrs, resultSize);
+		}
 
-    	        setMinimumSize(new java.awt.Dimension(400, 300));
-    	        setLayout(new java.awt.GridBagLayout());
+		/** 
+		 * Retrieve the selected font name. 
+		 */
+		public String getSelectedName() {
+			return resultName;
+		}
 
-    	        fontNameChoice.setModel(new javax.swing.AbstractListModel() {
-    	            /**
-					 * 
-					 */
-					private static final long serialVersionUID = -1794346954116474402L;
-					String[] strings = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    	            public int getSize() { return strings.length; }
-    	            public Object getElementAt(int i) { return strings[i]; }
-    	        });
-    	        scrFontNameList.setViewportView(fontNameChoice);
+		/**
+		 * Retrieve the selected size 
+		 */
+		public int getSelectedSize() {
+			return resultSize;
+		}
 
-    	        gridBagConstraints = new java.awt.GridBagConstraints();
-    	        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    	        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    	        gridBagConstraints.weightx = 1.0;
-    	        gridBagConstraints.weighty = 1.0;
-    	        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    	        add(scrFontNameList, gridBagConstraints);
-
-    	        fontSizeChoice.setModel(new javax.swing.AbstractListModel() {
-    	            /**
-					 * 
-					 */
-					private static final long serialVersionUID = 4046867275908672992L;
-					String[] strings = { "8", "10", "11", "12", "14", "16", "18", "20", "24", "30", "36", "40", "48", "60", "72" };
-    	            public int getSize() { return strings.length; }
-    	            public Object getElementAt(int i) { return strings[i]; }
-    	        });
-    	        fontSizeChoice.setMaximumSize(new java.awt.Dimension(50, 285));
-    	        fontSizeChoice.setMinimumSize(new java.awt.Dimension(50, 285));
-    	        fontSizeChoice.setPreferredSize(new java.awt.Dimension(50, 285));
-    	        scrFontSizeList.setViewportView(fontSizeChoice);
-
-    	        gridBagConstraints = new java.awt.GridBagConstraints();
-    	        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    	        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    	        gridBagConstraints.weightx = 1.0;
-    	        gridBagConstraints.weighty = 1.0;
-    	        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    	        add(scrFontSizeList, gridBagConstraints);
-
-    	        bold.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-    	        bold.setText("Bold");
-    	        bold.setBorder(null);
-    	        gridBagConstraints = new java.awt.GridBagConstraints();
-    	        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    	        gridBagConstraints.weightx = 1.0;
-    	        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    	        add(bold, gridBagConstraints);
-
-    	        pnlDisplayPreferencesTab.setLayout(new java.awt.GridBagLayout());
-    		  
-    	        String currentFont = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
-    	        int currentSize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
-    	        Boolean isBold = new Boolean( pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
-	      	    int i = getIndexOfFont(currentFont);
-	      	    int j = getIndexOfSize(String.valueOf(currentSize));
-	      	    fontNameChoice.setSelectedIndex(i);
-	      	    fontSizeChoice.setSelectedIndex(j);
-	      	    bold.setSelected(isBold);
-
-    	  }
-    	  
-    	  private int getIndexOfFont(String font){
-    		  
-    		  AbstractListModel model = (AbstractListModel) fontNameChoice.getModel();
-    		  int size = model.getSize();
-    		  for(int i=0;i<size;i++){
-    			  if(model.getElementAt(i).equals(font)){
-    				  return i;
-    			  }  
-    		  }
-    		  return 0;
-    	  }
-    	  
-    	  private int getIndexOfSize(String size){
-    		  
-    		  AbstractListModel model = (AbstractListModel) fontSizeChoice.getModel();
-    		  int length = model.getSize();
-    		  for(int i=0;i<length;i++){
-    			  if(model.getElementAt(i).equals(size)){
-    				  return i;
-    			  }  
-    		  }
-    		  return 0;
-    	  }
-
-    	  protected void applyChanges(){
-    		  
-    		resultName = (String) fontNameChoice.getSelectedValue();
-      	    String resultSizeName = (String) fontSizeChoice.getSelectedValue();
-      	    isBold = bold.isSelected();
-      	    pref.put(OBDAPreferences.OBDAPREFS_FONTFAMILY, resultName);
-      	    pref.put(OBDAPreferences.OBDAPREFS_FONTSIZE, resultSizeName);
-      	    pref.put(OBDAPreferences.OBDAPREFS_ISBOLD, new Boolean(isBold).toString());
-      	    button.setText(resultName + ", " + resultSizeName);
-      	    button.setToolTipText(resultName + ", " + resultSizeName);
-    	  }
-    	  
-    	  /**
-    	   * Called from the action handlers to get the font info, build a font, and
-    	   * set it.
-    	   */
-    	  protected void previewFont() {
-    	    resultName = (String) fontNameChoice.getSelectedValue();
-    	    String resultSizeName = (String) fontSizeChoice.getSelectedValue();
-    	    int resultSize = Integer.parseInt(resultSizeName);
-    	    isBold = bold.isSelected();
-//    	    isItalic = italic.getState();
-    	    int attrs = Font.PLAIN;
-    	    if (isBold)
-    	      attrs = Font.BOLD;
-    	    if (isItalic)
-    	      attrs |= Font.ITALIC;
-    	    resultFont = new Font(resultName, attrs, resultSize);
-    	  }
-
-    	  /** Retrieve the selected font name. */
-    	  public String getSelectedName() {
-    	    return resultName;
-    	  }
-
-    	  /** Retrieve the selected size */
-    	  public int getSelectedSize() {
-    	    return resultSize;
-    	  }
-
-    	  /** Retrieve the selected font, or null */
-    	  public Font getSelectedFont() {
-    	    return resultFont;
-    	  
-    	  }
-    }
+		/** 
+		 * Retrieve the selected font, or null
+		 */
+		public Font getSelectedFont() {
+			return resultFont;
+		}
+	}
 }
-
-

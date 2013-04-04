@@ -13,9 +13,6 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 public class ValueConstantImpl extends AbstractLiteral implements ValueConstant {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8031338451909170400L;
 
 	private final String value;
@@ -40,11 +37,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		this(value, null, type);
 	}
 
-	protected ValueConstantImpl(String value, String language,
-			Predicate.COL_TYPE type) {
-		// if (language == null)
-		// language = "";
-
+	protected ValueConstantImpl(String value, String language, Predicate.COL_TYPE type) {
 		this.value = value;
 		this.language = language;
 		this.type = type;
@@ -54,13 +47,12 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public boolean equals(Object obj) {
-
-		if (obj == null || !(obj instanceof ValueConstantImpl))
+		if (obj == null || !(obj instanceof ValueConstantImpl)) {
 			return false;
-
-		if (this == OBDAVocabulary.NULL)
+		}
+		if (this == OBDAVocabulary.NULL) {
 			return false;
-
+		}
 		ValueConstantImpl value2 = (ValueConstantImpl) obj;
 		return this.identifier == value2.identifier;
 	}
@@ -72,9 +64,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public ValueConstant clone() {
-		// ValueConstantImpl clone = new ValueConstantImpl(value, this.type);
-		// clone.identifier = identifier;
-		// return clone;
 		return this;
 	}
 
@@ -95,9 +84,9 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public String toString() {
-		if (string != null)
+		if (string != null) {
 			return string;
-
+		}
 		StringBuffer bf = new StringBuffer();
 		bf.append("\"");
 		bf.append(value);
@@ -105,7 +94,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		if (type == COL_TYPE.LITERAL_LANG) {
 			bf.append("@");
 			bf.append(language);
-
 		} else if (type != COL_TYPE.LITERAL) {
 			bf.append("^^");
 			bf.append(type);
@@ -125,8 +113,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public Atom asAtom() {
-		throw new RuntimeException("Impossible to cast as atom: "
-				+ this.getClass());
+		throw new RuntimeException("Impossible to cast as atom: " + this.getClass());
 	}
-
 }

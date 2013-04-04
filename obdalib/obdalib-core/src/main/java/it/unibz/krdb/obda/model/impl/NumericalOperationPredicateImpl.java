@@ -2,12 +2,9 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 
-import java.net.URI;
-
 import com.hp.hpl.jena.iri.IRI;
 
-public class NumericalOperationPredicateImpl extends PredicateImpl implements
-		NumericalOperationPredicate {
+public class NumericalOperationPredicateImpl extends PredicateImpl implements NumericalOperationPredicate {
 
 	private static final long serialVersionUID = 1L;
 
