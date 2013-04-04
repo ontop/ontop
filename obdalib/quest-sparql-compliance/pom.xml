@@ -110,6 +110,7 @@
 		</repository>
 	</repositories>
 
+	<name>sparql-compliance-tests</name>
 	<build>
 		<plugins>
 			<plugin>
