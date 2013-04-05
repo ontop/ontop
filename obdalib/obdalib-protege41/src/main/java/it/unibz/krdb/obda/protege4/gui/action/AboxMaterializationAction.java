@@ -132,14 +132,15 @@ public class AboxMaterializationAction extends ProtegeAction {
 					fc.setSelectedFile(new File(fileName));
 					fc.showSaveDialog(workspace);
 					File file = fc.getSelectedFile();
-					
+					if (file!=null){
 					OWLOntology newOnto = cloneOnto(file);
 					OWLOntologyManager newMan = newOnto.getOWLOntologyManager();
+					materializeOnto(newOnto, newMan);
 					newMan.saveOntology(newOnto, new RDFXMLOntologyFormat(), new FileOutputStream(file));
-					OWLOntology o = newMan.loadOntologyFromOntologyDocument((file));
-					modelManager.setActiveOntology(o);
-					materializeOnto(o, modelManager.getOWLOntologyManager());
-					
+				//	OWLOntology o = newMan.loadOntologyFromOntologyDocument((file));
+				//	modelManager.setActiveOntology(o);
+				//	materializeOnto(o, modelManager.getOWLOntologyManager());
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					log.error(e.getMessage(), e);
