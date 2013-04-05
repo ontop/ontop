@@ -74,7 +74,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	{
 		
 		OBDAModel obdaModel = fac.getOBDAModel();
-		System.out.println(obdaURI.toString());
+	//	System.out.println(obdaURI.toString());
 		if (obdaURI.toString().endsWith(".obda"))
 		{
 				ModelIOManager modelIO = new ModelIOManager(obdaModel);
