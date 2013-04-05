@@ -718,6 +718,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 		for (int i = 0; i < values.length; i++) {
 			OBDAMappingAxiom mapping = (OBDAMappingAxiom) values[i];
+			if (mapping!=null)
 			controller.removeMapping(srcuri, mapping.getId());
 		}
 		mappingList.clearSelection();
