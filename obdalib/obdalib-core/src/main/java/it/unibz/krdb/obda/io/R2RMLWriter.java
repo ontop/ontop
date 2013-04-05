@@ -85,13 +85,19 @@ public class R2RMLWriter {
 			OBDAQuery targetQuery = mapping.getTargetQuery();
 			
 			//write subjectMap
-			out.write("\trr:subjectMap ["+getSubjectMap(targetQuery)+" \t];\n\n");
+			out.write("\trr:subjectMap ["+getSubjectMap(targetQuery)+" \t]");
 			
 			List<String> predobjs = getPredObjMap(targetQuery);
+			if (predobjs.size() > 0)
+				out.write(";\n\n");
+			else
+				out.write(".\n\n");
+			
 			for (int i=0;i<predobjs.size()-1;i++)
 				out.write("\trr:predicateObjectMap [\n"+ predobjs.get(i) + "\n\t];\n\n");
 			if(predobjs.size() > 0)
 				out.write("\trr:predicateObjectMap [\n"+ predobjs.get(predobjs.size()-1) + "\n\t].\n\n");
+			
 			}
 		}
 			
