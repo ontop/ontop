@@ -55,13 +55,14 @@ public class R2RMLImportAction extends ProtegeAction {
 			try {
 
 				File file = (fc.getSelectedFile());
-
+				if (file != null)
+				{
 				R2RMLReader reader = new R2RMLReader(file);
 
 				URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
 				obdaModel.addMappings(sourceID, reader.readMappings());
-
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
