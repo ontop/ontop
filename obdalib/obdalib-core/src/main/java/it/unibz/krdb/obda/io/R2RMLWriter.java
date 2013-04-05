@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.io;
 
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -9,6 +10,7 @@ import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -216,12 +218,21 @@ public class R2RMLWriter {
 		while(it.hasNext())
 		{
 			NewLiteral term = it.next();
-			if (term instanceof FunctionalTermImpl)
+			if (term instanceof AtomWrapperImpl)
 			{
+				Atom atom = term.asAtom();
+				int arity = atom.getTerms().size();
+				if (arity == 1) {
+					// class
+					if (atom.getPredicate().isClass())
+						classes.add(atom.getFunctionSymbol().toString());
+				}
+			}
+			else if (term instanceof FunctionalTermImpl)
+			{	
 				Function atom = (FunctionalTermImpl) term;
 				int arity = atom.getTerms().size();
-			
-			
+				
 				if (arity == 1) {
 					// class
 					if (atom.getPredicate().isClass())
@@ -246,10 +257,7 @@ public class R2RMLWriter {
 					subject += " rr:constant " + atom.getTerm(0).toString()+ ";\n";
 				
 			} else if (arity == 2 || atom.getPredicate().equals(OBDAVocabulary.RDFS_LITERAL_LANG)) {
-
 				
-				
-					
 				// column - arity 2 - base prefix + {} + 1 var
 				 if (atom.getTerm(0).toString().equals("\"http://example.com/base/{}\""))
 					 subject += " rr:column \"\\\""+ atom.getTerm(1).toString()+"\\\"\"";
@@ -326,6 +334,15 @@ public class R2RMLWriter {
 					predobj.add("\t\t rr:predicate \t<"+atom.getFunctionSymbol().toString()+"> ;\n"+getObject(atom.getTerm(1)));
 				}
 			}
+			else if (term instanceof AtomWrapperImpl)
+			{
+				Atom atom = term.asAtom();
+				//not class atoms
+				if (atom.getTerms().size() > 1)
+				{
+					predobj.add("\t\t rr:predicate \t<"+atom.getFunctionSymbol().toString()+"> ;\n"+getObject(atom.getTerm(1)));
+				}
+			}
 		}
 		
 		return predobj;
@@ -347,23 +364,25 @@ public class R2RMLWriter {
 			else
 			{
 				String lang ="", templ ="";
+				
+				if (fobj.getTerm(0).toString().startsWith("\"http"))
+					templ = " rr:template "+getTemplate((Function)obj);
+				else
+					templ = " rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"";
+				
+				
 				if (fobj.getFunctionSymbol().equals(OBDAVocabulary.RDFS_LITERAL_LANG))
 				{
-					
-					if (fobj.getTerm(0).toString().startsWith("\"http"))
-						templ = " rr:template "+getTemplate((Function)obj);
-					else
-						templ = " rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"";
-					
-					if(fobj.getTerm(size-1) instanceof ValueConstant)
-					{
+					if(fobj.getTerm(size-1) instanceof ValueConstant){
 						if (!((ValueConstant)(fobj.getTerm(size-1))).toString().equals(OBDAVocabulary.NULL.toString()))
-
 						 lang = ";  rr:language "+ fobj.getTerm(size-1).toString();
 					}
-					
-				object = "\t\t rr:objectMap \t[ "+templ+ lang+" ]";
-			}
+					object = "\t\t rr:objectMap \t[ "+templ+ lang+" ]";
+				}
+				else 
+				{
+					object = "\t\t rr:objectMap \t[ "+templ+" ]";
+				}
 			}
 		}
 		else if (obj instanceof Variable)
