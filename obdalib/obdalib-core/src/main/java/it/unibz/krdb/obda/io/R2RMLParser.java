@@ -1,10 +1,13 @@
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
@@ -112,6 +115,7 @@ public class R2RMLParser {
 
 		// search for logicalTable declaration
 		Set<Value> objects = util.getObjects(myGraph, subj, logicalTable,	(Resource) null);
+		if (objects.size() > 0){
 		Resource object = (Resource) objects.toArray()[0];
 		if (object instanceof BNode) {
 			
@@ -150,6 +154,7 @@ public class R2RMLParser {
 			
 			//logicalTable not a node, only sqlquery
 			return getSQLQueryString(myGraph, object);
+		}
 		}
 		return "";
 	}
@@ -199,6 +204,7 @@ public class R2RMLParser {
 		}
 		return predobjs;
 	}
+	
 	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj)
 			throws Exception {
 		return getSubjectAtom(myGraph, subj, "");
@@ -306,7 +312,6 @@ public class R2RMLParser {
 		return bodyPredicates;
 	}
 	
-	
 	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt)
 			throws Exception {
 		return getObjectAtom(myGraph, objectt, "");
@@ -372,7 +377,7 @@ public class R2RMLParser {
 
 				// craete uri("...",var)
 				objectString = trimTo1(parsedString);
-				objectAtom = getTypedFunction(trim(objectString), 3, joinCond);
+				objectAtom = getTypedFunction(trim(objectString), 1, joinCond);
 
 			}
 			// process termType declaration
@@ -403,13 +408,10 @@ public class R2RMLParser {
 				// System.out.println(parsedString);
 				
 				//create datatype(object) atom
-				Predicate dtype = fac.getPredicate(OBDADataFactoryImpl.getIRI(parsedString), 1);
-				NewLiteral dtAtom = fac.getAtom(dtype, objectAtom);
+				Predicate dtype =  new DataTypePredicateImpl(OBDADataFactoryImpl.getIRI(parsedString), COL_TYPE.OBJECT);
+				NewLiteral dtAtom = fac.getFunctionalTerm(dtype, objectAtom);
 				objectAtom = dtAtom;
 			}
-
-
-			
 		}
 
 		return objectAtom;
@@ -440,7 +442,8 @@ public class R2RMLParser {
 			if (type.endsWith(">"))
 				type = type.substring(0, type.length() - 1);
 
-			Predicate predicate = fac.getPredicate(OBDADataFactoryImpl.getIRI(type), 1);
+			DataTypePredicate predicate = new DataTypePredicateImpl(OBDADataFactoryImpl.getIRI(type), COL_TYPE.OBJECT);
+					//fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI(type));
 			NewLiteral constant = fac.getValueConstant(consts);
 			typedObject = fac.getFunctionalTerm(predicate, constant);
 		}
@@ -472,7 +475,6 @@ public class R2RMLParser {
 		return joinPredObjNodes;
 	}
 
-	
 	private Function getTermTypeAtom(String type, String string) {
 		
 		if (type.contentEquals(iri.stringValue())) {

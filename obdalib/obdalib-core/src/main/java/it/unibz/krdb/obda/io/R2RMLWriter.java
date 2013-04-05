@@ -67,7 +67,7 @@ public class R2RMLWriter {
 		out.write("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n");
 		for(String key : prefixes.keySet())
 		{
-			out.write("@prefix "+key+": "+prefixes.get(key)+" .\n");
+			out.write("@prefix "+key+" <"+prefixes.get(key)+"> .\n");
 		}
 			out.write("@base <http://example.com/base/> .\n\n");
 			
@@ -109,7 +109,7 @@ public class R2RMLWriter {
 		if (sql.contains("*"))
 		{
 			String table = getTableName(sql);
-			return ("[ rr:tableName \"\\"+table+"\\\" ];\n\n");
+			return ("[ rr:tableName \"\\"+table.substring(0, table.length()-1)+"\\\"\" ];\n\n");
 		}
 		else
 			return ("[ rr:sqlQuery \"\"\"\n"+sql+"\n\t\"\"\" ];\n\n");
