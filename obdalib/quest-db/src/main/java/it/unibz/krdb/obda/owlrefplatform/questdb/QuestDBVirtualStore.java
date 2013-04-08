@@ -187,14 +187,12 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	}
 	
 	public QuestConnection getQuestConnection() {
-		if (questConn == null) {
 			try {
 			//	System.out.println("getquestconn..");
 				questConn = questInstance.getConnection();
 			} catch (OBDAException e) {
 				e.printStackTrace();
 			}
-		}
 		return questConn;
 	}
 
