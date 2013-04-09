@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/quest-sparql-compliance/src/main/java/it/unibz/krdb/obda/quest/benchmark/QuestQueryPrint.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.maven.ide.eclipse.launchconfig.classpathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="it.unibz.krdb.obda.quest.benchmark.QuestQueryPrint"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;C:\Project\Test Cases\MovieOntology\movieontology.owl&quot;&#13;&#10;&quot;C:\Project\Test Cases\MovieOntology\movieontology.obda&quot;&#13;&#10;&quot;C:\Project\Test Cases\MovieOntology\movieontology.q&quot;&#13;&#10;&quot;C:\Project\Test Cases\_Results\movieontology-query.txt&quot;&#13;&#10;true"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="quest-sparql-compliance"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.maven.ide.eclipse.launchconfig.sourcepathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m"/>
+</launchConfiguration>
