@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -20,8 +19,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.utils.QueryUtils;
-import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.HashMap;
 import java.util.HashSet;

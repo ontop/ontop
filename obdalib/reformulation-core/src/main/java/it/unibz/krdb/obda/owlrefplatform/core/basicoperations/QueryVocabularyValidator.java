@@ -40,8 +40,7 @@ public class QueryVocabularyValidator implements Serializable {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	public QueryVocabularyValidator(Ontology ontology,
-			Map<Predicate, Description> equivalences) {
+	public QueryVocabularyValidator(Ontology ontology, Map<Predicate, Description> equivalences) {
 		this.ontology = ontology;
 		this.equivalences = equivalences;
 	}
@@ -57,22 +56,12 @@ public class QueryVocabularyValidator implements Serializable {
 
 		boolean isValid = true;
 		if (!invalidPredicates.isEmpty()) {
-			isValid = false; // if the list is not empty means the string is
-								// invalid!
+			isValid = false; // if the list is not empty means the string is invalid!
 		}
 		return isValid;
 	}
 
-	private boolean isEmptyOntology() {
-		return (ontology.getAssertions().size() == 0) ? true : false;
-	}
-
 	private void validate(CQIE query) {
-		// if (isEmptyOntology()) {
-		// // Skip if the input ontology is empty.
-		// return;
-		// }
-
 		// Get the predicates in the target query.
 		Iterator<Function> iterAtom = query.getBody().iterator();
 		while (iterAtom.hasNext()) {
@@ -118,17 +107,13 @@ public class QueryVocabularyValidator implements Serializable {
 				log.debug(debugMsg);
 			} else {
 				invalidPredicates.add(predicate.toString());
-				log.warn("WARNING: " + debugMsg
-						+ " is missing in the ontology!");
+				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
 			}
 		}
 	}
 
 	/***
 	 * Substite atoms based on the equivalence map.
-	 * 
-	 * @param queries
-	 * @return
 	 */
 	public DatalogProgram replaceEquivalences(DatalogProgram queries) {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -141,17 +126,15 @@ public class QueryVocabularyValidator implements Serializable {
 	}
 
 	public CQIE replaceEquivalences(CQIE query, boolean inplace) {
-		if (!inplace)
+		if (!inplace) {
 			query = query.clone();
-
+		}
 		replaceEquivalences(query.getBody());
-
 		return query;
 	}
 
 	public void replaceEquivalences(List body) {
 		// Get the predicates in the target query.
-
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = (Function) body.get(i);
 
@@ -174,16 +157,13 @@ public class QueryVocabularyValidator implements Serializable {
 			Function newatom = null;
 
 			if (equivalent instanceof OClass) {
-				newatom = fac.getAtom(((OClass) equivalent).getPredicate(),
-						atom.getTerm(0));
+				newatom = fac.getAtom(((OClass) equivalent).getPredicate(), atom.getTerm(0));
 			} else if (equivalent instanceof Property) {
 				Property equiproperty = (Property) equivalent;
 				if (!equiproperty.isInverse()) {
-					newatom = fac.getAtom(equiproperty.getPredicate(),
-							atom.getTerm(0), atom.getTerm(1));
+					newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
 				} else {
-					newatom = fac.getAtom(equiproperty.getPredicate(),
-							atom.getTerm(1), atom.getTerm(0));
+					newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 				}
 			}
 			body.set(i, newatom);
