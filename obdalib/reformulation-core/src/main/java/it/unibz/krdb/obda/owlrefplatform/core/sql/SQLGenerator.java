@@ -69,10 +69,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String INDENT = "    ";
 
 	private static final String IS_TRUE_OPERATOR = "%s IS TRUE";
-	//private static final String IS_TRUE_BOOL = "%s";
-	//private static final String IS_TRUE_INT = "%s > 0";
-	//private static final String IS_TRUE_DOUBLE = "%s > 0";
-	//private static final String IS_TRUE_STRING = "LENGTH(%s) > 0";
 	
 	/**
 	 * Formatting template
@@ -83,11 +79,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final JDBCUtility jdbcutil;
 	private final SQLDialectAdapter sqladapter;
 
-	private static final org.slf4j.Logger log = LoggerFactory
-			.getLogger(SQLGenerator.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
-	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil,
-			SQLDialectAdapter sqladapter) {
+	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
 		this.jdbcutil = jdbcutil;
 		this.sqladapter = sqladapter;
@@ -99,35 +93,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * method descriptions.
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram query,
-			List<String> signature) throws OBDAException {
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
 		String indent = "   ";
 		if (query.getQueryModifiers().hasModifiers()) {
 			final String outerViewName = "SUB_QVIEW";
 			String subquery = generateQuery(query, signature, indent);
 
 			String modifier = "";
-			List<OrderCondition> conditions = query.getQueryModifiers()
-					.getSortConditions();
+			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
 			if (!conditions.isEmpty()) {
-				modifier += sqladapter.sqlOrderBy(conditions, outerViewName)
-						+ "\n";
+				modifier += sqladapter.sqlOrderBy(conditions, outerViewName) + "\n";
 			}
-
 			long limit = query.getQueryModifiers().getLimit();
 			long offset = query.getQueryModifiers().getOffset();
 			if (limit != -1 || offset != -1) {
 				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
 			}
-
 			String sql = "SELECT *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
 			sql += modifier;
-
 			return sql;
-
 		} else {
 			return generateQuery(query, signature, "");
 		}
@@ -136,12 +123,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/***
 	 * Main method. Generates the full query, taking into account
 	 * limit/offset/order by.
-	 * 
-	 * @param query
-	 * @param signature
-	 * @param indent
-	 * @return
-	 * @throws OBDAException
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
 			String indent) throws OBDAException {
@@ -201,8 +182,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			String FROM = getFROM(cq, index);
 			String WHERE = getWHERE(cq, index);
-			String SELECT = getSelectClause(signature, cq, index,
-					innerdistincts);
+			String SELECT = getSelectClause(signature, cq, index, innerdistincts);
 
 			String querystr = SELECT + FROM + WHERE;
 			queriesStrings.add(querystr);
@@ -251,16 +231,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String condition = getSQLCondition(innerAtomAsFunction, index);
 			conditions.add(condition);
 		}
-
 		return conditions;
 	}
 
 	/***
-	 * Returns the SQL for an atom representing an SQL condition (booleans)
-	 * 
-	 * @param atom
-	 * @param index
-	 * @return
+	 * Returns the SQL for an atom representing an SQL condition (booleans).
 	 */
 	private String getSQLCondition(Function atom, QueryAliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
@@ -392,12 +367,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		int size = tableDefinitions.size();
 		if (isTopLevel) {
-
-			if (size == 0)
+			if (size == 0) {
 				throw new RuntimeException("No table definitions");
-
-			Iterator<String> tableDefinitionsIterator = tableDefinitions
-					.iterator();
+			}
+			Iterator<String> tableDefinitionsIterator = tableDefinitions.iterator();
 			tableDefinitionsString.append(indent);
 			tableDefinitionsString.append(tableDefinitionsIterator.next());
 			while (tableDefinitionsIterator.hasNext()) {
@@ -405,7 +378,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				tableDefinitionsString.append(indent);
 				tableDefinitionsString.append(tableDefinitionsIterator.next());
 			}
-
 		} else {
 
 			/*
@@ -422,8 +394,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					+ JOIN_KEYWORD + "\n" + indent + "%s\n" + indent + ")";
 
 			if (size == 0) {
-				throw new RuntimeException(
-						"Cannot generate definition for empty data");
+				throw new RuntimeException("Cannot generate definition for empty data");
 			}
 			if (size == 1) {
 				return tableDefinitions.get(0);
@@ -442,8 +413,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			int currentSize = tableDefinitions.size();
 			while (currentSize > 0) {
-				currentJoin = String.format(JOIN,
-						tableDefinitions.get(currentSize - 1), currentJoin);
+				currentJoin = String.format(JOIN, tableDefinitions.get(currentSize - 1), currentJoin);
 				tableDefinitions.remove(currentSize - 1);
 				currentSize = tableDefinitions.size();
 			}
@@ -455,22 +425,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * last parenthesis ')' and replace it with ' ON %s)' where %s are
 			 * all the conditions
 			 */
-			String conditions = getConditionsString(inneratoms, index, true,
-					indent);
+			String conditions = getConditionsString(inneratoms, index, true, indent);
 
-			if (conditions.length() > 0
-					&& tableDefinitionsString.lastIndexOf(")") != -1) {
+			if (conditions.length() > 0 && tableDefinitionsString.lastIndexOf(")") != -1) {
 				int lastidx = tableDefinitionsString.lastIndexOf(")");
-				tableDefinitionsString.delete(lastidx,
-						tableDefinitionsString.length());
-				// tableDefinitionsString.deleteCharAt(tableDefinitionsString
-				// .length() - 1);
-				String ON_CLAUSE = String.format("ON\n%s\n " + indent + ")",
-						conditions);
+				tableDefinitionsString.delete(lastidx, tableDefinitionsString.length());
+				String ON_CLAUSE = String.format("ON\n%s\n " + indent + ")", conditions);
 				tableDefinitionsString.append(ON_CLAUSE);
 			}
 		}
-
 		return tableDefinitionsString.toString();
 	}
 
@@ -479,13 +442,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * table or view, then it returns the value as defined by the
 	 * QueryAliasIndex. If the atom is a Join or Left Join, it will call
 	 * getTableDefinitions on the nested term list.
-	 * 
-	 * @param atom
-	 * @param index
-	 * @return
 	 */
-	private String getTableDefinition(Function atom, QueryAliasIndex index,
-			String indent) {
+	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
 
 		Predicate predicate = atom.getPredicate();
 
@@ -496,14 +454,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return "";
 		} else if (predicate instanceof AlgebraOperatorPredicate) {
 			List<Function> innerTerms = new LinkedList<Function>();
-			for (NewLiteral innerTerm : atom.getTerms())
+			for (NewLiteral innerTerm : atom.getTerms()) {
 				innerTerms.add((Function) innerTerm);
+			}
 			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
-				return getTableDefinitions(innerTerms, index, false, false,
-						indent + INDENT);
+				return getTableDefinitions(innerTerms, index, false, false, indent + INDENT);
 			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
-				return getTableDefinitions(innerTerms, index, false, true,
-						indent + INDENT);
+				return getTableDefinitions(innerTerms, index, false, true, indent + INDENT);
 			}
 		}
 
@@ -516,13 +473,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private String getFROM(CQIE query, QueryAliasIndex index) {
 		List<Function> atoms = new LinkedList<Function>();
-		for (Function atom : query.getBody())
+		for (Function atom : query.getBody()) {
 			atoms.add((Function) atom);
-
-		String tableDefinitions = getTableDefinitions(atoms, index, true,
-				false, "");
+		}
+		String tableDefinitions = getTableDefinitions(atoms, index, true, false, "");
 		return "\n FROM \n" + tableDefinitions;
-
 	}
 
 	/***
@@ -533,10 +488,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * <p>
 	 * The method assumes that no variable in this list (or nested ones) referes
 	 * to an upper level one.
-	 * 
-	 * @param atoms
-	 * @param index
-	 * @return
 	 */
 	private String getConditionsString(List<Function> atoms,
 			QueryAliasIndex index, boolean processShared, String indent) {
@@ -544,10 +495,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		LinkedHashSet<String> equalityConditions = new LinkedHashSet<String>();
 
 		// if (processShared)
-		equalityConditions.addAll(getConditionsSharedVariablesAndConstants(
-				atoms, index, processShared));
-		LinkedHashSet<String> booleanConditions = getBooleanConditionsString(
-				atoms, index);
+		equalityConditions.addAll(getConditionsSharedVariablesAndConstants(atoms, index, processShared));
+		LinkedHashSet<String> booleanConditions = getBooleanConditionsString(atoms, index);
 
 		LinkedHashSet<String> conditions = new LinkedHashSet<String>();
 		conditions.addAll(equalityConditions);
@@ -583,11 +532,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private Set<Variable> getVariableReferencesWithLeftJoin(Function atom) {
-		if (atom.isDataFunction())
+		if (atom.isDataFunction()) {
 			return atom.getVariables();
-		if (atom.isBooleanFunction())
+		}
+		if (atom.isBooleanFunction()) {
 			return new HashSet<Variable>();
-
+		}
 		/*
 		 * we have an alebra opertaor (join or left join) if its a join, we need
 		 * to collect all the varaibles of each nested atom., if its a left
@@ -596,23 +546,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 		boolean isLeftJoin = false;
 		boolean foundFirstDataAtom = false;
 
-		if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+		if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) {
 			isLeftJoin = true;
-
+		}
 		LinkedHashSet<Variable> innerVariables = new LinkedHashSet<Variable>();
 		for (NewLiteral t : atom.getTerms()) {
-
-			if (isLeftJoin && foundFirstDataAtom)
+			if (isLeftJoin && foundFirstDataAtom) {
 				break;
-
+			}
 			Function asFunction = (Function) t;
-
-			if (asFunction.isBooleanFunction())
+			if (asFunction.isBooleanFunction()) {
 				continue;
-
-			innerVariables.addAll(getVariableReferencesWithLeftJoin(asFunction
-					.asAtom()));
-
+			}
+			innerVariables.addAll(getVariableReferencesWithLeftJoin(asFunction.asAtom()));
 			foundFirstDataAtom = true;
 
 		}
@@ -641,16 +587,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Set<Variable> currentLevelVariables = new LinkedHashSet<Variable>();
 		if (processShared)
 			for (Function atom : atoms) {
-
-				currentLevelVariables
-						.addAll(getVariableReferencesWithLeftJoin(atom));
-
-				// if (atom.isDataFunction()) {
-				// currentLevelVariables.addAll(atom.getReferencedVariables());
-				// } else if (atom.isAlgebraFunction()) {
-				// currentLevelVariables.addAll(atom.getReferencedVariables());
-				// }
-
+				currentLevelVariables.addAll(getVariableReferencesWithLeftJoin(atom));
 			}
 
 		/*
@@ -669,36 +606,32 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String leftColumnReference = referenceIterator.next();
 			while (referenceIterator.hasNext()) {
 				String rightColumnReference = referenceIterator.next();
-				String equality = String.format("(%s = %s)",
-						leftColumnReference, rightColumnReference);
+				String equality = String.format("(%s = %s)", leftColumnReference, rightColumnReference);
 				equalities.add(equality);
 				leftColumnReference = rightColumnReference;
 			}
 		}
 
 		for (Function atom : atoms) {
-			if (!atom.isDataFunction())
+			if (!atom.isDataFunction()) {
 				continue;
+			}
 			for (int idx = 0; idx < atom.getArity(); idx++) {
 				NewLiteral l = atom.getTerm(idx);
 				if (l instanceof Constant) {
 					String value = getSQLString(l, index, false);
-					String columnReference = index
-							.getColumnReference(atom, idx);
-					equalities.add(String.format("(%s = %s)", columnReference,
-							value));
+					String columnReference = index.getColumnReference(atom, idx);
+					equalities.add(String.format("(%s = %s)", columnReference, value));
 				}
 			}
 
 		}
-
 		return equalities;
 
 	}
 
 	// return variable SQL data type
 	private int getVariableDataType (NewLiteral term, QueryAliasIndex idx) {
-	
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getPredicate();
@@ -712,36 +645,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 		// Return varchar for unknown
 		return 12;
 	}
-	
-	// private Set<Variable> getMandatoryColumnsOnJoinsAndLeftJoinsRecursively(
-	// Function atom) {
-	// if (atom.isDataFunction()) {
-	// return atom.getReferencedVariables();
-	// } else if (atom.isBooleanFunction())
-	// return new HashSet<Variable>();
-	// /* atom is an alebra function */
-	// Predicate pred = atom.getFunctionSymbol();
-	// boolean isLeftJoin = true;
-	// if (pred == OBDAVocabulary.SPARQL_JOIN) {
-	// isLeftJoin = false;
-	// }
-	//
-	// /* If its a normal join, all nexted variables are required variables, if
-	// its
-	// *
-	// */
-	//
-	// }
 
 	private String getWHERE(CQIE query, QueryAliasIndex index) {
 		List<Function> atoms = new LinkedList<Function>();
-		for (Function atom : query.getBody())
+		for (Function atom : query.getBody()) {
 			atoms.add((Function) atom);
-
+		}
 		String conditions = getConditionsString(atoms, index, false, "");
-		if (conditions.length() == 0)
+		if (conditions.length() == 0) {
 			return "";
-
+		}
 		return "\nWHERE \n" + conditions;
 	}
 
@@ -763,9 +676,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
-		if (distinct)
+		if (distinct) {
 			sb.append("DISTINCT ");
-
+		}
 		if (headterms.size() == 0) {
 			sb.append("true as x");
 			return sb.toString();
@@ -774,14 +687,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Iterator<NewLiteral> hit = headterms.iterator();
 		int hpos = 0;
 		while (hit.hasNext()) {
-
 			NewLiteral ht = hit.next();
-
 			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos);
-			String langColumn = getLangColumnForSELECT(ht, signature, hpos,
-					index);
-			String mainColumn = getMainColumnForSELECT(ht, signature, hpos,
-					index);
+			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index);
+			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -792,7 +701,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (hit.hasNext()) {
 				sb.append(", ");
 			}
-
 			hpos++;
 		}
 		return sb.toString();
@@ -904,9 +812,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String lang = null;
 				int last = ov.getTerms().size()-1;
 				NewLiteral langTerm = ov.getTerms().get(last);
-				if (langTerm == OBDAVocabulary.NULL)
+				if (langTerm == OBDAVocabulary.NULL) {
 					lang = "NULL";
-				else if (langTerm instanceof ValueConstant) {
+				} else if (langTerm instanceof ValueConstant) {
 					lang = jdbcutil.getSQLLexicalForm((ValueConstant) langTerm);
 				} else {
 					lang = getSQLString(langTerm, index, false);
@@ -1049,9 +957,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			
 				
-				if (vex.size()==1) 
+				if (vex.size() == 1) {
 					return vex.get(0);
-				 
+				}
 				String[] params = new String[vex.size()];
 				int i = 0;
 				for (String param : vex) {
@@ -1085,64 +993,55 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 	
-	private boolean isStringColType(NewLiteral currentTerm,
-			QueryAliasIndex index) {
-		if(currentTerm instanceof FunctionalTermImpl)
-		{
-			if (currentTerm.asAtom().getFunctionSymbol().getArity()==1)
+	private boolean isStringColType(NewLiteral currentTerm, QueryAliasIndex index) {
+		if(currentTerm instanceof FunctionalTermImpl) {
+			if (currentTerm.asAtom().getFunctionSymbol().getArity()==1) {
 				 currentTerm = currentTerm.asAtom().getTerm(0);
-					
-		}
-		if (currentTerm instanceof Variable){
-		Set<String> viewdef = index.getColumnReferences((Variable) currentTerm);
-		//System.out.println(viewdef.toString());
-		String def = viewdef.iterator().next();
-		String col = trim(def.split("\\.")[1]);
-		String table = def.split("\\.")[0];
-		if (def.startsWith("QVIEW"))
-		{
-			Map<Function, String> views = index.viewNames;
-			for (Function func : views.keySet())
-			{
-				String value = views.get(func);
-				if (value.equals(def.split("\\.")[0]))
-					{table = func.getFunctionSymbol().toString();
-					break;
-					}
 			}
 		}
-		List<TableDefinition> tables = metadata.getTableList();
-		for (TableDefinition tabledef: tables)
-		{
-			if (tabledef.getName().equals(table))
-			{
-				List<Attribute> attr = tabledef.getAttributes();
-				for (Attribute a : attr)
-					if (a.getName().equals(col)) {
-						switch (a.getType()) {
-						case Types.VARCHAR:
-						case Types.CHAR:
-						case Types.LONGNVARCHAR:
-						case Types.LONGVARCHAR:
-						case Types.NVARCHAR:
-						case Types.NCHAR:
-							return true;
-						default:
-							return false;
-						
+		if (currentTerm instanceof Variable) {
+			Set<String> viewdef = index.getColumnReferences((Variable) currentTerm);
+			//System.out.println(viewdef.toString());
+			String def = viewdef.iterator().next();
+			String col = trim(def.split("\\.")[1]);
+			String table = def.split("\\.")[0];
+			if (def.startsWith("QVIEW")) {
+				Map<Function, String> views = index.viewNames;
+				for (Function func : views.keySet()) {
+					String value = views.get(func);
+					if (value.equals(def.split("\\.")[0]))
+						{table = func.getFunctionSymbol().toString();
+						break;
+						}
+				}
+			}
+			List<TableDefinition> tables = metadata.getTableList();
+			for (TableDefinition tabledef: tables) {
+				if (tabledef.getName().equals(table)) {
+					List<Attribute> attr = tabledef.getAttributes();
+					for (Attribute a : attr) {
+						if (a.getName().equals(col)) {
+							switch (a.getType()) {
+							case Types.VARCHAR:
+							case Types.CHAR:
+							case Types.LONGNVARCHAR:
+							case Types.LONGVARCHAR:
+							case Types.NVARCHAR:
+							case Types.NCHAR:
+								return true;
+							default:
+								return false;
+							}
+						}
 					}
 				}
 			}
 		}
-		}
 		return false;
-		
 	}
 
 	private String trim(String string) {
-		
 		while (string.startsWith("\"") && string.endsWith("\"")) {
-			
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;
@@ -1177,11 +1076,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * builds the result of uri(...)
 	 * <p>
 	 * If its a boolean comparison, it returns the corresponding SQL comparison.
-	 * 
-	 * @param term
-	 * @param index
-	 * @param useBrackets
-	 * @return
 	 */
 	public String getSQLString(NewLiteral term, QueryAliasIndex index,
 			boolean useBrackets) {

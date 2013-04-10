@@ -1,7 +1,5 @@
 package it.unibz.krdb.sql.api;
 
-import java.util.ArrayList;
-
 public class TablePrimary implements ITable {
 	
 	private static final long serialVersionUID = -205626125381808960L;

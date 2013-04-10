@@ -60,9 +60,9 @@ public class SQLQueryTranslator {
 		int start = 6; // the keyword 'select'
 		int end = query.toLowerCase().indexOf("from");		
 		
-		if (end == -1)
+		if (end == -1) {
 			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
-
+		}
 		String projection = query.substring(start, end).trim();
 		String[] columns = projection.split(",");
 		
