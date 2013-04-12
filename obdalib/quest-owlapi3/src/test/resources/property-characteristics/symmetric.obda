@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#
+
+[SourceDeclaration]
+sourceUri	owlproperty
+connectionUrl	jdbc:postgresql://10.7.20.39/owlproperty
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Interacts
+target		:Person-{p1} :interacts :Person-{p2} . 
+source		select p1, p2 from "R"
+]]
+
