@@ -290,20 +290,23 @@ public class ModelIOManager {
         while (!(line = reader.readLine()).isEmpty()) {
             int lineNumber = reader.getLineNumber();
             String[] tokens = line.split("[\t| ]+", 2);
-            if (tokens[0].equals(Label.sourceUri.name())) {
-                sourceUri = URI.create(tokens[1]);
+            
+            final String parameter = tokens[0].trim();
+            final String inputParamter = tokens[1].trim();
+            if (parameter.equals(Label.sourceUri.name())) {
+                sourceUri = URI.create(inputParamter);
                 // TODO: BAD CODE! The data source id should be part of the parameters!
                 datasource = model.getDataFactory().getDataSource(sourceUri);
-            } else if (tokens[0].equals(Label.connectionUrl.name())) {
-                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, tokens[1]);
-            } else if (tokens[0].equals(Label.username.name())) {
-                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, tokens[1]);
-            } else if (tokens[0].equals(Label.password.name())) {
-                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, tokens[1]);
-            } else if (tokens[0].equals(Label.driverClass.name())) {
-                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, tokens[1]);
+            } else if (parameter.equals(Label.connectionUrl.name())) {
+                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, inputParamter);
+            } else if (parameter.equals(Label.username.name())) {
+                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, inputParamter);
+            } else if (parameter.equals(Label.password.name())) {
+                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, inputParamter);
+            } else if (parameter.equals(Label.driverClass.name())) {
+                datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);
             } else {
-                String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);
+                String msg = String.format("Unknown parameter name \"%s\" at line: %d.", parameter, lineNumber);
                 throw new IOException(msg);
             }
         }
