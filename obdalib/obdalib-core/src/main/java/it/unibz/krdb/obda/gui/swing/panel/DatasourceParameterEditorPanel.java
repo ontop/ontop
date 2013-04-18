@@ -304,7 +304,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		txtJdbcDriver.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
 		txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "select or type the JDBC Driver's class...",
 				"org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver",
-				"oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
+				"oracle.jdbc.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
 		txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
 		txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
 		txtJdbcDriver.addActionListener(new java.awt.event.ActionListener() {
