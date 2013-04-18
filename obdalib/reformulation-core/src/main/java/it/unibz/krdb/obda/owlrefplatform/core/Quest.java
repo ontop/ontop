@@ -91,7 +91,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// These can be changed in the properties file
 	protected int maxPoolSize = 10;
 	protected int startPoolSize = 2;
-	protected boolean removeAbandoned = true;
+	protected boolean removeAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	
 	
