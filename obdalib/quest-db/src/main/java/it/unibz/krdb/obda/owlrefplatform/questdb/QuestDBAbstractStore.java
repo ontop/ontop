@@ -5,21 +5,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
 public abstract class QuestDBAbstractStore implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8088123404566560283L;
 
 	protected Quest questInstance = null;

@@ -157,14 +157,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 	
 	public QuestConnection getQuestConnection() {
-		if (questConn == null) {
-			try {
-				questConn = questInstance.getConnection();
-			} catch (OBDAException e) {
-				e.printStackTrace();
-			}
+		QuestConnection conn = null;
+		try {
+			conn = questInstance.getConnection();
+		} catch (OBDAException e) {
+			e.printStackTrace();
 		}
-		return questConn;
+		return conn;
 	}
 
 	private Ontology getTBox(Dataset dataset) throws Exception {
