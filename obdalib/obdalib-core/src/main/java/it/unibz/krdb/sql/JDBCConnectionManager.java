@@ -173,9 +173,15 @@ public class JDBCConnectionManager {
 	public static DBMetadata getMetaData(Connection conn) throws SQLException {
 		DBMetadata metadata = null;
 		final DatabaseMetaData md = conn.getMetaData();
-		if (md.getDatabaseProductName().equals("Oracle")) {
+		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn);
+		} else if (md.getDatabaseProductName().contains("DB2")) {
+			// If the database engine is IBM DB2
+			metadata = getDB2MetaData(md, conn);
+		} else if (md.getDatabaseProductName().contains("SQL Server")) {
+			// If the database engine is SQL Server
+			metadata = getSqlServerMetaData(md, conn);
 		} else {
 			// For other database engines
 			metadata = getOtherMetaData(md);
@@ -184,8 +190,7 @@ public class JDBCConnectionManager {
 	}
 
 	/**
-	 * Retrieve metadata for most of the database engine, e.g., MySQL,
-	 * PostgreSQL, SQL server
+	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
 	 */
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
@@ -240,6 +245,121 @@ public class JDBCConnectionManager {
 		return metadata;
 	}
 
+	/**
+	 * Retrieve metadata for SQL Server database engine
+	 */
+	private static DBMetadata getSqlServerMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		ResultSet resultSet = null;
+		try {
+			/* Obtain the statement object for query execution */
+			stmt = conn.createStatement();
+			
+			/* Obtain the relational objects (i.e., tables and views) */
+			final String tableSelectQuery = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
+					"FROM INFORMATION_SCHEMA.TABLES " +
+					"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
+			resultSet = stmt.executeQuery(tableSelectQuery);
+			
+			/* Obtain the column information for each relational object */
+			while (resultSet.next()) {
+				ResultSet rsColumns = null;
+				try {
+					final String tblCatalog = resultSet.getString("TABLE_CATALOG");
+					final String tblSchema = resultSet.getString("TABLE_SCHEMA");
+					final String tblName = resultSet.getString("TABLE_NAME");
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
+					final Map<String, Reference> foreignKeys = getForeignKey(md, tblCatalog, tblSchema, tblName);
+					
+					TableDefinition td = new TableDefinition(tblName);
+					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
+					
+					for (int pos = 1; rsColumns.next(); pos++) {
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
+						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final Reference reference = foreignKeys.get(columnName);
+						final int isNullable = rsColumns.getInt("NULLABLE");
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+					}
+					// Add this information to the DBMetadata
+					metadata.add(td);
+				} finally {
+					if (rsColumns != null) {
+						rsColumns.close(); // close existing open cursor
+					}
+				}
+			}
+		} finally {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return metadata;
+	}
+	
+	/**
+	 * Retrieve metadata for DB2 database engine
+	 */
+	private static DBMetadata getDB2MetaData(DatabaseMetaData md, Connection conn) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		ResultSet resultSet = null;
+		try {
+			/* Obtain the statement object for query execution */
+			stmt = conn.createStatement();
+			
+			/* Obtain the relational objects (i.e., tables and views) */
+			final String tableSelectQuery = "SELECT TABSCHEMA, TABNAME " +
+					"FROM SYSCAT.TABLES " +
+					"WHERE OWNERTYPE='U' " +
+					"	AND (TYPE='T' OR TYPE='V') " +
+					"	AND TBSPACEID IN (SELECT TBSPACEID FROM SYSCAT.TABLESPACES WHERE TBSPACE LIKE 'USERSPACE%')";
+			resultSet = stmt.executeQuery(tableSelectQuery);
+			
+			/* Obtain the column information for each relational object */
+			while (resultSet.next()) {
+				ResultSet rsColumns = null;
+				try {
+					final String tblSchema = resultSet.getString("TABSCHEMA");
+					final String tblName = resultSet.getString("TABNAME");
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
+					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tblSchema, tblName);
+					
+					TableDefinition td = new TableDefinition(tblName);
+					rsColumns = md.getColumns(null, tblSchema, tblName, null);
+					
+					for (int pos = 1; rsColumns.next(); pos++) {
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
+						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final Reference reference = foreignKeys.get(columnName);
+						final int isNullable = rsColumns.getInt("NULLABLE");
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+					}
+					// Add this information to the DBMetadata
+					metadata.add(td);
+				} finally {
+					if (rsColumns != null) {
+						rsColumns.close(); // close existing open cursor
+					}
+				}
+			}
+		} finally {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return metadata;
+	}
+	
 	/**
 	 * Retrieve metadata for Oracle database engine
 	 */
