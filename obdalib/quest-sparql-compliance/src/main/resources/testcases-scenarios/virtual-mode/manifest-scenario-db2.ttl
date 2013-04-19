@@ -6,6 +6,7 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "Quest query evaluation scenario tests" ;
     mf:include (
+        <lubm/manifest-db2.ttl>
         #<bsbm/manifest-db2.ttl>
         #<fishmark/manifest-db2.ttl>
         #<iLog/manifest-db2.ttl>
