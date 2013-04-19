@@ -15,7 +15,9 @@ public class ReformulationTest extends TestCase {
 	private Tester tester = null;
 	Logger	log	= LoggerFactory.getLogger(this.getClass());
 	private String propfile = "src/test/resources/test.properties";
-	public ReformulationTest(){
+	
+	public ReformulationTest(String method) {
+		super(method);
 		tester = new Tester(propfile);
 	}
         private void test_function(String ontoname, QuestPreferences pref) throws Exception {

@@ -2,6 +2,10 @@ package it.unibz.krdb.sql;
 
 public class PgSqlConstraintTest extends AbstractConstraintTest {
 
+	public PgSqlConstraintTest(String method) {
+		super(method);
+	}
+
 	@Override
 	protected String getConnectionPassword() {
 		return "postgres";

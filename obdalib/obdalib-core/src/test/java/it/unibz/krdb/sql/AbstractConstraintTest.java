@@ -22,7 +22,11 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private static final String TB_EDITION = "Edition";
 	private static final String TB_BOOKWRITER = "BookWriter";
 	
-	private static Logger log = LoggerFactory.getLogger(AbstractDatatypeTest.class);
+	private static Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
+	
+	public AbstractConstraintTest(String method) {
+		super(method);
+	}
 	
 	@Override
 	public void setUp() {

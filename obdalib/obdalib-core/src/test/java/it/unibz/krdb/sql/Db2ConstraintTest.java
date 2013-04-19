@@ -2,6 +2,10 @@ package it.unibz.krdb.sql;
 
 public class Db2ConstraintTest extends AbstractConstraintTest {
 
+	public Db2ConstraintTest(String method) {
+		super(method);
+	}
+
 	@Override
 	protected String getConnectionPassword() {
 		return "fish";

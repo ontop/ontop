@@ -2,6 +2,10 @@ package it.unibz.krdb.sql;
 
 public class MySqlConstraintTest extends AbstractConstraintTest {
 
+	public MySqlConstraintTest(String method) {
+		super(method);
+	}
+
 	@Override
 	protected String getConnectionPassword() {
 		return "fish";

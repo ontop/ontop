@@ -2,6 +2,10 @@ package it.unibz.krdb.sql;
 
 public class MssqlConstraintTest extends AbstractConstraintTest {
 
+	public MssqlConstraintTest(String method) {
+		super(method);
+	}
+
 	@Override
 	protected String getConnectionPassword() {
 		return "obdaps83";

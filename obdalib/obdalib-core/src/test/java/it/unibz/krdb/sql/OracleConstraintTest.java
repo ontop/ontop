@@ -2,6 +2,10 @@ package it.unibz.krdb.sql;
 
 public class OracleConstraintTest extends AbstractConstraintTest {
 
+	public OracleConstraintTest(String method) {
+		super(method);
+	}
+
 	@Override
 	protected String getConnectionPassword() {
 		return "obdaps83";
