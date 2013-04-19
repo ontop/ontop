@@ -15,11 +15,12 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
@@ -79,6 +80,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final JDBCUtility jdbcutil;
 	private final SQLDialectAdapter sqladapter;
 
+	private boolean isDistinct = false;
+	private boolean isOrderBy = false;
+	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
@@ -94,8 +98,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	@Override
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
-		String indent = "   ";
+		isDistinct = hasSelectDistinctStatement(query);
+		isOrderBy = hasOrderByClause(query);
 		if (query.getQueryModifiers().hasModifiers()) {
+			final String indent = "   ";
 			final String outerViewName = "SUB_QVIEW";
 			String subquery = generateQuery(query, signature, indent);
 
@@ -119,6 +125,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return generateQuery(query, signature, "");
 		}
 	}
+	
+	private boolean hasSelectDistinctStatement(DatalogProgram query) {
+		boolean toReturn = false;
+		if (query.getQueryModifiers().hasModifiers()) {
+			toReturn = query.getQueryModifiers().isDistinct();
+		}
+		return toReturn;
+	}
+	
+	private boolean hasOrderByClause(DatalogProgram query) {
+		boolean toReturn = false;
+		if (query.getQueryModifiers().hasModifiers()) {
+			final List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
+			toReturn = (conditions.isEmpty()) ? false : true;
+		}
+		return toReturn;
+	}
 
 	/**
 	 * Main method. Generates the full query, taking into account
@@ -127,7 +150,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private String generateQuery(DatalogProgram query, List<String> signature,
 			String indent) throws OBDAException {
 
-		boolean distinct = query.getQueryModifiers().isDistinct();
 		int numberOfQueries = query.getRules().size();
 
 		List<String> queriesStrings = new LinkedList<String>();
@@ -176,7 +198,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			QueryAliasIndex index = new QueryAliasIndex(cq);
 
 			boolean innerdistincts = false;
-			if (distinct && numberOfQueries == 1) {
+			if (isDistinct && numberOfQueries == 1) {
 				innerdistincts = true;
 			}
 
@@ -195,7 +217,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		String UNION = null;
-		if (distinct) {
+		if (isDistinct) {
 			UNION = "UNION";
 		} else {
 			UNION = "UNION ALL";
@@ -925,7 +947,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				params[i] = param;
 				i += 1;
 			}
-			return sqladapter.strconcat(params);
+			return getStringConcatenation(sqladapter, params);
 			
 		} else if (t instanceof Variable) {
 			/*
@@ -950,15 +972,41 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 	
-	private boolean isStringColType(NewLiteral currentTerm, QueryAliasIndex index) {
-		if (currentTerm instanceof FunctionalTermImpl) {
-			if (currentTerm.asAtom().getFunctionSymbol().getArity()==1) {
-				 currentTerm = currentTerm.asAtom().getTerm(0);
+	private String getStringConcatenation(SQLDialectAdapter adapter, String[] params) {
+		String toReturn = sqladapter.strconcat(params);
+		if (adapter instanceof DB2SQLDialectAdapter) {
+			/*
+			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use of a string column, host variable, constant, or function name.
+			 * http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.messages.sql.doc%2Fdoc%2Fmsql00134n.html
+			 */
+			if (isDistinct || isOrderBy) {
+				return adapter.sqlCast(toReturn, Types.VARCHAR);
 			}
 		}
-		if (currentTerm instanceof Variable) {
-			Set<String> viewdef = index.getColumnReferences((Variable) currentTerm);
-			//System.out.println(viewdef.toString());
+		return toReturn;
+	}
+
+	private boolean isStringColType(NewLiteral term, QueryAliasIndex index) {
+		if (term instanceof Function) {
+			Function function = (Function) term;
+			Predicate functionSymbol = function.getFunctionSymbol();
+			if (functionSymbol instanceof URITemplatePredicate) {
+				/*
+				 * A URI function always returns a string, thus it is a string column type.
+				 */
+				return true;
+			} else {
+				if (isUnary(function)) {
+					/*
+					 * Update the term with the parent term's first parameter.
+					 * Note: this method is confusing :(
+					 */
+					 term = function.getTerm(0);
+					 return isStringColType(term, index);
+				}
+			}
+		} else if (term instanceof Variable) {
+			Set<String> viewdef = index.getColumnReferences((Variable) term);
 			String def = viewdef.iterator().next();
 			String col = trim(def.split("\\.")[1]);
 			String table = def.split("\\.")[0];
