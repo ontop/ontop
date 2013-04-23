@@ -29,11 +29,16 @@ public class QueryFolding {
 	private Set<NewLiteral> internalRoots;
 	private Set<NewLiteral> internalDomain;
 	private List<TreeWitness> interior;
-	private TreeWitness.NewLiteralCover NewLiterals;
+	private TreeWitness.TermCover terms;
 	private boolean status;
 
 	private static final Logger log = LoggerFactory.getLogger(QueryFolding.class);
 		
+	@Override
+	public String toString() {
+		return "Query Folding: " + roots + ", internal roots " + internalRoots + " and domain: " + internalDomain + " with properties: " + properties; 
+	}
+	
 	public QueryFolding(PropertiesCache propertiesCache) {
 		this.propertiesCache = propertiesCache;
 		properties = new IntersectionOfProperties(); 
@@ -88,7 +93,7 @@ public class QueryFolding {
 		roots.clear();
 		internalRootConcepts.clear(); 
 		internalDomain = Collections.singleton(t);
-		NewLiterals = null;
+		terms = null;
 		status = true;		
 	}
 
@@ -100,7 +105,7 @@ public class QueryFolding {
 		internalDomain = new HashSet<NewLiteral>(tw.getDomain());
 		interior = new LinkedList<TreeWitness>();
 		interior.add(tw);
-		NewLiterals = null;
+		terms = null;
 		status = true;		
 	}
 
@@ -129,16 +134,16 @@ public class QueryFolding {
 		return interior;
 	}
 	
-	public TreeWitness.NewLiteralCover getTerms() {
-		if (NewLiterals == null) {
+	public TreeWitness.TermCover getTerms() {
+		if (terms == null) {
 			Set<NewLiteral> domain = new HashSet<NewLiteral>(internalDomain);
 			Set<NewLiteral> rootNewLiterals = new HashSet<NewLiteral>();
 			for (Loop l : roots)
 				rootNewLiterals.add(l.getTerm());
 			domain.addAll(rootNewLiterals);
-			NewLiterals = new TreeWitness.NewLiteralCover(domain, rootNewLiterals);
+			terms = new TreeWitness.TermCover(domain, rootNewLiterals);
 		}
-		return NewLiterals;
+		return terms;
 	}
 	
 	public TreeWitness getTreeWitness(Collection<TreeWitnessGenerator> twg, Collection<Edge> edges) {

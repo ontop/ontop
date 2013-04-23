@@ -36,7 +36,7 @@ public class TreeWitnessSet {
 	// working lists (may all be nulls)
 	private List<TreeWitness> mergeable;
 	private Queue<TreeWitness> delta;
-	private Map<TreeWitness.NewLiteralCover, TreeWitness> twsCache;
+	private Map<TreeWitness.TermCover, TreeWitness> twsCache;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	
@@ -105,7 +105,7 @@ public class TreeWitnessSet {
 			}
 		
 		delta = new LinkedList<TreeWitness>();
-		twsCache = new HashMap<TreeWitness.NewLiteralCover, TreeWitness>();
+		twsCache = new HashMap<TreeWitness.TermCover, TreeWitness>();
 
 		while (!working.isEmpty()) {
 			while (!working.isEmpty()) {
@@ -332,7 +332,7 @@ public class TreeWitnessSet {
 	
 	
 	static class PropertiesCache {
-		private Map<NewLiteralOrderedPair, Set<Property>> propertiesCache = new HashMap<NewLiteralOrderedPair, Set<Property>>();
+		private Map<TermOrderedPair, Set<Property>> propertiesCache = new HashMap<TermOrderedPair, Set<Property>>();
 		private Map<NewLiteral, IntersectionOfConceptSets> conceptsCache = new HashMap<NewLiteral, IntersectionOfConceptSets>();
 
 		private final TreeWitnessReasonerLite reasoner;
@@ -353,7 +353,7 @@ public class TreeWitnessSet {
 		
 		
 		public Set<Property> getEdgeProperties(Edge edge, NewLiteral root, NewLiteral nonroot) {
-			NewLiteralOrderedPair idx = new NewLiteralOrderedPair(root, nonroot);
+			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Set<Property> properties = propertiesCache.get(idx);			
 			if (properties == null) {
 				for (Function a : edge.getBAtoms()) {
@@ -378,11 +378,11 @@ public class TreeWitnessSet {
 		}
 	}
 	
-	private static class NewLiteralOrderedPair {
+	private static class TermOrderedPair {
 		private final NewLiteral t0, t1;
 		private final int hashCode;
 
-		public NewLiteralOrderedPair(NewLiteral t0, NewLiteral t1) {
+		public TermOrderedPair(NewLiteral t0, NewLiteral t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ (t1.hashCode() << 4);
@@ -390,8 +390,8 @@ public class TreeWitnessSet {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof NewLiteralOrderedPair) {
-				NewLiteralOrderedPair other = (NewLiteralOrderedPair) o;
+			if (o instanceof TermOrderedPair) {
+				TermOrderedPair other = (TermOrderedPair) o;
 				return (this.t0.equals(other.t0) && this.t1.equals(other.t1));
 			}
 			return false;
@@ -399,7 +399,7 @@ public class TreeWitnessSet {
 
 		@Override
 		public String toString() {
-			return "NewLiteral pair: (" + t0 + ", " + t1 + ")";
+			return "term pair: (" + t0 + ", " + t1 + ")";
 		}
 		
 		@Override
