@@ -337,7 +337,7 @@ public class TreeWitnessReasonerLite {
 		
 		@Override
 		public String toString() {
-			return "intersection of " + set.toString();
+			return "intersection of " + ((set == null) ? "TOP" : set.toString());
 		}
 	}
 	
