@@ -337,6 +337,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			output = DatalogQueryServices.plugInDefinitions(output, extDP);
 			log.debug("INLINE EXT PROGRAM\n" + output);
 		}
+	
+		// extra CQC 
+		output = fac.getDatalogProgram(CQCUtilities.removeContainedQueries(output.getRules(), true, sigma));
+		
 		QueryUtils.copyQueryModifiers(input, output);
 
 		double endtime = System.currentTimeMillis();
