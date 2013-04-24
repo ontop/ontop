@@ -78,3 +78,73 @@ WHERE {
     ?prof a lubm:Professor . 
     ?stud lubm:advisor ?prof .
 	}
+	
+[QueryItem="Q6"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?uni0 ?uni1  
+WHERE { 
+    ?uni0 a lubm:University .
+    ?uni1 a lubm:University .
+    ?stud lubm:memberOf ?uni0 .
+    ?stud a lubm:Student . 
+    ?uni1 a lubm:University .
+    ?prof lubm:memberOf ?uni1 .
+    ?prof a lubm:Professor . 
+    ?stud lubm:advisor ?prof .
+	}
+
+[QueryItem="R1"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?staff   
+WHERE { 
+	?staff lubm:worksFor ?uni .
+	?uni lubm:affiliatedOrganizationOf ?org .
+}
+
+[QueryItem="R2"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?staff ?course   
+WHERE { 
+	?staff a lubm:Person .
+	?staff lubm:teacherOf ?course .
+	?course a lubm:Course .
+}
+
+[QueryItem="R3"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?student ?staff ?course   
+WHERE { 
+	?student a lubm:Student .
+	?student lubm:advisor ?staff .
+	?staff a lubm:Faculty .
+	?student lubm:takesCourse ?course .
+	?staff lubm:teacherOf ?course .
+	?course a lubm:Course .
+}
+
+[QueryItem="R4"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?staff ?org   
+WHERE { 
+	?staff a lubm:Person .
+	?staff lubm:worksFor ?org .
+	?org a lubm:Organization .
+}
+
+[QueryItem="R5"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?staff   
+WHERE { 
+	?staff a lubm:Person .
+	?staff lubm:worksFor ?org .
+	?org a lubm:University .
+	?org lubm:hasAlumnus ?staff .
+}
+
+	
