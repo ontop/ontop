@@ -1,0 +1,669 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+    xmlns="http://ksg.meraka.co.za/adolena.owl#"
+    xmlns:owl2="http://www.w3.org/2006/12/owl2#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:NAP="file:/home/aurona/0AlleWerk/Navorsing/Ontologies/NAP/NAP#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xml:base="http://ksg.meraka.co.za/adolena.owl">
+  <owl:Ontology rdf:about="">
+    <dc:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >This is an *experimental* ontology to demonstrate the proof-of-concept of OBDA with a real database, being the database behind the National Accessibility Portal; i.e. enhancing the NAP with an additional semantic layer to improve querying (compared to the keyword search now).
+
+This version is a simplified version from the Adolena v1 ontology. The aim is to only include the concepts and properties needed for the OBDA experiment in order to manually simplify the ontology to DL-LiteA.
+ 
+The next release will be a 'full' domain ontology mainly about abilities, disabilities, and assistive devices.</dc:type>
+    <dc:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Ronell Albert and Aurona Gerber</dc:creator>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ADOLENA v2 -- the Abilities and Disabilities OntoLogy for ENhancing Accessibility
+This version is a simplified version from the Adolena v1 ontology.</owl:versionInfo>
+  </owl:Ontology>
+  <owl:Class rdf:about="#MovementAbility">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalAbility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Stuttering">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#SpeechDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#LowerLimbMobility">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#UpperLimbMobility"/>
+    </owl:disjointWith>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: renamed from "move only lower limb" instance
+RA: Removed isAssistedBy some NAP:Wheelchair</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#LimbMobility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#FaceToFaceCommunicationDevice">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Communication_Device"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#SpeechAbility"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="WritingDevice">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Communication_Device"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Multiple_sclerosis">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Achondroplasia">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Achondroplasia is a type of autosomal dominant genetic disorder that is a common cause of dwarfism. Achondroplastic dwarfs have short stature, with an average adult height of 131 cm (4 feet 3.8 inches) for males and 123 cm (4 feet 0.6 inches) for females.
+Achondroplasia is a result of an autosomal dominant mutation in the fibroblast growth factor receptor gene 3 (FGFR3), which causes an abnormality of cartilage formation.
+(from Wikipedia)</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="BraillePillOrganiser">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="TactileReading"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#TelephoneAid">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="ListenDevice"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="SpeechDevice"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#MentalDisability">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#HearingDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#VisualDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#SpeechDisability"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Disability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#BatteryPowered_Wheelchair">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Motorised_Wheelchair"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Hear">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#HearingAbility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Muscular_dystrophy">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Wheelchair">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#MobilityDevice"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#LimbMobility"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Paraplegia">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#LowerLimbMobility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="affects"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#See">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#SightAbility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="BrailleAlarmClock">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#TactileReading"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Hear_partially">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#HearingAbility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Communication_Device">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#AssistiveDevice"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#MobilityDevice"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Motorised_Wheelchair">
+    <rdfs:subClassOf rdf:resource="#Wheelchair"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#UpperLimbMobility"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#LowerLimbMobility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#SensoryAbility">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Ability"/>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RA:Moved from under NAP:PhyscalAbility to under NAP: Ability</rdfs:comment>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#SpeechAbility"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#PhysicalAbility"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#LowVision">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#VisualDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#HearingAbility">
+    <rdfs:subClassOf rdf:resource="#SensoryAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Talking_Thermometer">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Tells indoor / outdoor temperature and alarm time. Gives readings on large LCD display and in voice with volume and on/off control</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="TalkingReading"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#SightAbility">
+    <rdfs:subClassOf rdf:resource="#SensoryAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#TalkingReading">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="ReadingDevice"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#SightAbility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#HearingAbility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#requiresAbility"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >like books on audio tape</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Epilepsy">
+    <rdfs:subClassOf rdf:resource="#MentalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#IntellectualDisability">
+    <rdfs:subClassOf rdf:resource="#MentalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Autism">
+    <rdfs:subClassOf rdf:resource="#MentalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Amputation">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: changed from "Amputee" (which is the person that has something amputated, whereas here we do not focus on the person him/herself)</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#AssistiveDevice">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Device"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#Ability"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Manual_Wheelchair">
+    <owl:disjointWith rdf:resource="#Motorised_Wheelchair"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="#requiresAbility"/>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#UpperLimbMobility"/>
+        </owl:someValuesFrom>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="#Wheelchair"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#LowerLimbMobility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="BrailleWatch">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#TactileReading"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Foldable_Wheelchair">
+    <rdfs:subClassOf rdf:resource="#Manual_Wheelchair"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Osteogensis_Imperfecta">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Hemiplegia">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Quadriplegia">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#UpperLimbMobility"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#LowerLimbMobility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: it is arguable if quadriplegia is also a type of Muscle_Impairment. Clearly, if the nerves do not work well, then the muscles do not, but from the perspective of subject domain semantics, this may not be a particularly useful logical deduction.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#Guillaume_Barre">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#SpeechAbility">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Ability"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#SensoryAbility"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#PhysicalAbility"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="BrailleWritingDevice">
+    <rdfs:subClassOf rdf:resource="#WritingDevice"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#SightAbility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#See_partially">
+    <rdfs:subClassOf rdf:resource="#SightAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Spina_Bifida">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#ReadingDevice">
+    <rdfs:subClassOf rdf:resource="#Communication_Device"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#SightAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#TactileAbility">
+    <rdfs:subClassOf rdf:resource="#SensoryAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#PhysicalAbility">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Ability"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#SpeechAbility"/>
+    <owl:disjointWith rdf:resource="#SensoryAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Device">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Ability"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Disability"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Ability">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#Device"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#isAssistedBy"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:about="#Disability"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#isAffectedBy"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Device"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#Disability"/>
+    </owl:disjointWith>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >The Abilities are divided into two main groups: Physical abilities and sensory abilities. Other abilities will be added later such as mental and intellectual abilities.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="#LightweightFoldable_Wheelchair">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Light weight rigid foldable manual wheelchair</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Foldable_Wheelchair"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Lightweight_Wheelchair"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Blind">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#VisualDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Reach">
+    <rdfs:subClassOf rdf:resource="#MovementAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#UpperLimbMobility">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: renamed from "move only upper limb" instance</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#LimbMobility"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Disability">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: do these things count as "diseases", or, say, a certain constellation of physical observables, put differently, as a "system", in the sense of being composed of endurants [more precisely: physical objects] and perdurants? If the latter, I think we can put "system" under endurant and say it has as parts EDs and POBs, and then Disability under System.
+
+summary of duscussion: a disability is not a disease, but a consequence of a disease (or of other things, like congenital, accident, etc.). So, e.g. "Multiple Sclerosis" in the ontology here is not meant to be the disease as classified in e.g. ICD10 but the debilitating effects of the disease.</rdfs:comment>
+    <owl:disjointWith rdf:resource="#Ability"/>
+    <owl:disjointWith rdf:resource="#Device"/>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#Ability"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#TactileReading">
+    <rdfs:subClassOf rdf:resource="#ReadingDevice"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#SightAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#TactileAbility"/>
+        <owl:onProperty rdf:resource="#requiresAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Deaf">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#SpeechAbility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#HearingDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Deafened">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#HearingDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#SymbolBoard">
+    <rdfs:subClassOf rdf:resource="#FaceToFaceCommunicationDevice"/>
+  </owl:Class>
+  <owl:Class rdf:about="#ListenDevice">
+    <rdfs:subClassOf rdf:resource="#Communication_Device"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#HearingAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Dystonia">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#PhysicalDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#PhysicalDisability">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#PhysicalAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="#Disability"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#HearingDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#VisualDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#SpeechDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#MentalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#FaceToFaceCommunicationSoftware">
+    <rdfs:subClassOf rdf:resource="#FaceToFaceCommunicationDevice"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Kyphosis">
+    <rdfs:subClassOf rdf:resource="#PhysicalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Hard_of_hearing">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#HearingDisability"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#HearingDisability">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#HearingAbility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="#Disability"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#VisualDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#PhysicalDisability"/>
+    <owl:disjointWith rdf:resource="#MentalDisability"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="#SpeechDisability"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="#Cerebral_palsy">
+    <rdfs:subClassOf rdf:resource="#PhysicalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#SpeechDevice">
+    <rdfs:subClassOf rdf:resource="#Communication_Device"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="#SpeechAbility"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Lightweight_Wheelchair">
+    <rdfs:subClassOf rdf:resource="#Manual_Wheelchair"/>
+  </owl:Class>
+  <owl:Class rdf:about="#LimbMobility">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: renamed from "move all limbs" instance</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#MovementAbility"/>
+  </owl:Class>
+  <owl:Class rdf:about="#VisualDisability">
+    <owl:disjointWith>
+      <owl:Class rdf:about="#SpeechDisability"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#PhysicalDisability"/>
+    <owl:disjointWith rdf:resource="#MentalDisability"/>
+    <owl:disjointWith rdf:resource="#HearingDisability"/>
+    <rdfs:subClassOf rdf:resource="#Disability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#MobilityDevice">
+    <rdfs:subClassOf rdf:resource="#AssistiveDevice"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#assistsWith"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#MovementAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="#Communication_Device"/>
+  </owl:Class>
+  <owl:Class rdf:about="#SpeechDisability">
+    <rdfs:subClassOf rdf:resource="#Disability"/>
+    <owl:disjointWith rdf:resource="#HearingDisability"/>
+    <owl:disjointWith rdf:resource="#VisualDisability"/>
+    <owl:disjointWith rdf:resource="#MentalDisability"/>
+    <owl:disjointWith rdf:resource="#PhysicalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Poliomyelitis">
+    <rdfs:subClassOf rdf:resource="#PhysicalDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Little_or_No_Speech">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#affects"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="#SpeechAbility"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="#SpeechDisability"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Scoliosis">
+    <rdfs:subClassOf rdf:resource="#PhysicalDisability"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="#affects">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="#isAffectedBy"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isAffectedBy">
+    <owl:inverseOf rdf:resource="#affects"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#isAssistedBy">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="#assistsWith"/>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#assistsWith">
+    <owl:inverseOf rdf:resource="#isAssistedBy"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MK: the "assistsWith" in the sense of that some person has a disability and then the device assists with realizing some ability</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:AnnotationProperty rdf:about="http://purl.org/dc/elements/1.1/type"/>
+  <owl:AnnotationProperty rdf:about="http://purl.org/dc/elements/1.1/creator"/>
+</rdf:RDF>
+
+<!-- Created with Protege (with OWL Plugin 3.3.1, Build 430)  http://protege.stanford.edu -->
