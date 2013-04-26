@@ -4,17 +4,17 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3ToFileMaterializer;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -27,7 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
+import org.openrdf.rio.n3.N3Writer;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
@@ -154,37 +155,46 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private void materializeToFile(int format) throws Exception
 	{
 		String fileName = "";
+		int count = 0;
+		long time = 0;
+		int vocab = 0;
 		final JFileChooser fc = new JFileChooser();
 		fc.setSelectedFile(new File(fileName));
 		fc.showSaveDialog(workspace);
 		try {
 			File file = fc.getSelectedFile();
+			if (file != null){
 			OutputStream out = new FileOutputStream(file);	
-			
+			BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+			SesameMaterializer materializer = new SesameMaterializer(obdaModel);
+			RDFWriter writer = null;
+			final long startTime = System.currentTimeMillis();
 			if (format == 0) // owl = rdfxml
 			{
-				SesameMaterializer materializer = new SesameMaterializer(obdaModel);
-				RDFWriter writer = new RDFXMLPrettyWriter(out);
-				writer.startRDF();
-				while(materializer.hasNext())
-					writer.handleStatement(materializer.next());
-				writer.endRDF();
+				writer = new RDFXMLWriter(fileWriter);
 				
 			} else if (format == 1) // n3
 			{
-				OWLAPI3ToFileMaterializer.materializeN3(file, obdaModel);
+				writer = new N3Writer(fileWriter);
 
 			} else if (format == 2) // ttl
 			{
-				SesameMaterializer materializer = new SesameMaterializer(obdaModel);
-				RDFWriter writer = new TurtleWriter(out);
-				writer.startRDF();
-				while(materializer.hasNext())
-					writer.handleStatement(materializer.next());
-				writer.endRDF();
+				writer = new TurtleWriter(fileWriter);
 			}
+			writer.startRDF();
+			while(materializer.hasNext())
+				writer.handleStatement(materializer.next());
+			writer.endRDF();
+			count = (int) materializer.getTriplesCount();
+			vocab = materializer.getVocabularySize();
+			materializer.disconnect();
+			fileWriter.close();
 			out.close();
-			JOptionPane.showMessageDialog(this.workspace, "Task is completed", "Done", JOptionPane.INFORMATION_MESSAGE);
+			final long endTime = System.currentTimeMillis();
+			time = endTime - startTime;
+			JOptionPane.showMessageDialog(this.workspace, "Task is completed\nNr. of triples: "+count+"\nVocabulary size: "+vocab+
+					"\nElapsed time: "+time+" ms.", "Done", JOptionPane.INFORMATION_MESSAGE);
+			}
 		} catch (FileNotFoundException e) {
 			throw e;
 		}
@@ -195,7 +205,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		//create new onto by cloning this one
 		OWLOntology currentOnto = modelManager.getActiveOntology();
 		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();	
-		OWLOntologyID id = new OWLOntologyID(IRI.create(file));
+		OWLOntologyID id = new OWLOntologyID(IRI.create(currentOnto.getOntologyID().getOntologyIRI().toString()));
 		OWLOntology newOnto = new OWLOntologyImpl(ontologyManager, id);
 		Set<OWLAxiom> axioms = currentOnto.getAxioms();
 		for(OWLAxiom axiom: axioms)

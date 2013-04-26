@@ -6,9 +6,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URI;
@@ -45,15 +47,21 @@ public class OWLAPI3ToFileMaterializer {
 	public static int materializeN3(File outputFile, OBDAModel model) throws Exception {
 		return materializeN3(new FileOutputStream(outputFile), model);
 	}
+	
+	public static int materializeN3(OutputStream outputStream, OBDAModel model) throws Exception {
+		return materializeN3(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8")), model);
+	}
 
-	public static int materializeN3(OutputStream outputFile, OBDAModel model) throws Exception {
-		OWLAPI3Materializer individuals = new OWLAPI3Materializer(model);
-		Writer bf = new PrintWriter(outputFile);
+	public static int materializeN3(Writer bf, OBDAModel model) throws Exception {
+		return materializeN3(bf, new OWLAPI3Materializer(model));
+	}
+	
+	public static int materializeN3(Writer bf, OWLAPI3Materializer materializer) throws Exception {
 
 		String rdftype = OBDAVocabulary.RDF_TYPE;
 		int count = 0;
-		while (individuals.hasNext()) {
-			OWLIndividualAxiom axiom = individuals.next();
+		while (materializer.hasNext()) {
+			OWLIndividualAxiom axiom = materializer.next();
 			if (axiom instanceof OWLClassAssertionAxiom) {
 				OWLClassAssertionAxiom ax = (OWLClassAssertionAxiom) axiom;
 				bf.append("<");
@@ -103,7 +111,7 @@ public class OWLAPI3ToFileMaterializer {
 		}
 		bf.flush();
 		bf.close();
-
+		
 		return count;
 	}
 }

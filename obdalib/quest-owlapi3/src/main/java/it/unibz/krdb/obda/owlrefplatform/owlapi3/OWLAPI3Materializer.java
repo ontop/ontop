@@ -1,22 +1,27 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
-import java.util.Iterator;
-
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+
+import java.util.Iterator;
 
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 public class OWLAPI3Materializer implements Iterator<OWLIndividualAxiom> {
 
 	private Iterator<Assertion> assertions = null;
-
+	private QuestMaterializer materializer;
 	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
 	
 	public OWLAPI3Materializer(OBDAModel model) throws Exception {
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		 this(null, model);
+	}
+	
+	public OWLAPI3Materializer(Ontology onto, OBDAModel model) throws Exception {
+		 materializer = new QuestMaterializer(onto, model);
 		 assertions = materializer.getAssertionIterator();
 		setAssertions(assertions);
 	}
@@ -44,5 +49,21 @@ public class OWLAPI3Materializer implements Iterator<OWLIndividualAxiom> {
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException("This iterator is read-only");
+	}
+	
+	public void disconnect() {
+		materializer.disconnect();
+	}
+	
+	public long getTriplesCount()
+	{ try {
+		return materializer.getTriplesCount();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}return -1;
+	}
+
+	public int getVocabularySize() {
+		return materializer.getVocabSize();
 	}
 }

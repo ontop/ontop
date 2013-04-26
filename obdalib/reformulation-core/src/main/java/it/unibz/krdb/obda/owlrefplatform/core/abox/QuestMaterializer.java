@@ -1,20 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -24,26 +13,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.krdb.obda.utils.MappingAnalyzer;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -70,73 +45,65 @@ import org.slf4j.LoggerFactory;
 public class QuestMaterializer {
 
 	private OBDAModel model;
+	private Quest questInstance;
+	private Ontology ontology;
+	
+	private Set<Predicate> vocabulary;
 
-	private Map<OBDADataSource, Quest> questInstanceMap = new HashMap<OBDADataSource, Quest>();
-	private Set<Predicate> vocabulary = new LinkedHashSet<Predicate>();
+	protected long counter = 0;
+	private VirtualTripleIterator iterator;
 
-	private Connection conn;
-
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/***
-	 * Collects the vocabulary from the OBDA model to prepare the ABox creation.
+	 * 
 	 * 
 	 * @param model
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model) throws Exception {
-		this.model = model;
+		this(null, model);
+	}
+	
+	/***
+	 * 
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	public QuestMaterializer(Ontology onto, OBDAModel modell) throws Exception {
+		this.model = modell;
+		this.ontology = onto;
+		this.vocabulary = new HashSet<Predicate>();
+		
+		if (model.getSources().size() > 1)
+			throw new Exception("Cannot materialize with multiple data sources!");
+		
+		//add all class/data/object predicates to vocabulary
+		//if (onto!=null)
 		
 		for (Predicate p: model.getDeclaredPredicates()) {
-			vocabulary.add(p);
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		if (onto!=null)
+		for (Predicate p: onto.getVocabulary()) {
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#") && !vocabulary.contains(p))
+				vocabulary.add(p);
 		}
 		
-		for (OBDADataSource source : model.getSources()) {
-			// For each data source in the model
-			URI sourceUri = source.getSourceID();
-			ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
-
-			// Retrieve the connection object to obtain the database metadata
-			setupConnection(source);
-			
-			// Construct the datalog program from the OBDA mappings
-			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
-			MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, metadata);
-			DatalogProgram datalog = analyzer.constructDatalogProgram();
-
-			// Insert the data type information
-			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
-			typeRepair.insertDataTyping(datalog);
-
-			// TODO: Design redundancy!
-			// For each data source, construct a new OBDA model!
-			OBDAModel newModel = dfac.getOBDAModel();
-			newModel.addSource(source);
-			newModel.addMappings(sourceUri, mappingList);
-			for (Predicate p : model.getDeclaredPredicates()) {
-				newModel.declarePredicate(p);
-			}
-
-			Quest questInstance = new Quest();
-			questInstance.setPreferences(getDefaultPreference());
-			Ontology ontology = ofac.createOntology();
+		questInstance = new Quest();
+		questInstance.setPreferences(getDefaultPreferences());
+		if (ontology == null) {
+			ontology = ofac.createOntology();
 			ontology.addEntities(model.getDeclaredPredicates());
-			questInstance.loadTBox(ontology);
-			questInstance.loadOBDAModel(newModel);			
-			questInstance.setupRepository();
-			
-			questInstanceMap.put(source, questInstance);
-			
-			// Collecting the vocabulary of the mappings
-			for (CQIE rule : datalog.getRules()) {
-				Predicate predicate = rule.getHead().getPredicate();
-				vocabulary.add(predicate);
-			}
 		}
+		questInstance.loadTBox(ontology);
+		questInstance.loadOBDAModel(model);			
+		questInstance.setupRepository();
 	}
 
-	private QuestPreferences getDefaultPreference() {
+	private QuestPreferences getDefaultPreferences() {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
@@ -145,26 +112,12 @@ public class QuestMaterializer {
 		return p;
 	}
 
-	private void setupConnection(OBDADataSource datasource) throws SQLException {
-		// Validate if the connection is already existed or not
-		if (conn == null || conn.isClosed()) {
-			String url = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-			String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-			String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-			String driver = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
-			try {
-				Class.forName(driver);
-			} catch (ClassNotFoundException e1) {
-				// Does nothing because the SQLException handles this problem
-				// also.
-			}
-			conn = DriverManager.getConnection(url, username, password);
-		}
-	}
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
-		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), questInstanceMap);
+		//return the inner class  iterator
+		iterator = new VirtualTripleIterator(questInstance, vocabulary.iterator());
+		return iterator;
+		
 	}
 
 	public List<Assertion> getAssertionList() throws Exception {
@@ -176,156 +129,28 @@ public class QuestMaterializer {
 		return assertions;
 	}
 
-	public Iterator<Assertion> getAssertionIterator(Predicate p) throws Exception {
-		return new VirtualTripleIterator(p, this.model.getSources(), questInstanceMap);
-	}
-
-	/**
-	 * Returns the list of all triples (ABox assertions) generated by the
-	 * mappings of the OBDA model. Note that this list is not linked to the DB,
-	 * that is, changes to the list do not affect the database.
-	 * 
-	 * This is only a convenience method since, internally, this method simply
-	 * calls the getAssertionIterator method.
-	 * 
-	 * @param p
-	 * @return
-	 * @throws Exception
-	 */
-	public List<Assertion> getAssertionList(Predicate p) throws Exception {
-		VirtualTripleIterator it = new VirtualTripleIterator(p, this.model.getSources(), questInstanceMap);
-		List<Assertion> assertions = new LinkedList<Assertion>();
-		while (it.hasNext()) {
-			assertions.add(it.next());
-		}
-		return assertions;
-	}
-
 	public int getTripleCount() throws Exception {
-		Iterator<Assertion> it = getAssertionIterator();
-
-		int tripleCount = 0;
-		while (it.hasNext()) {
-			it.next();
-			tripleCount += 1;
+		int counter = 0;
+		getAssertionIterator();
+		while(iterator.hasNext) {
+			counter++;
+			iterator.next();
 		}
-		return tripleCount;
-
+		return counter;
 	}
 
-	/***
-	 * Counts the number of triples generated by the mappings for this
-	 * predicate. Note, this method will actually execute queries and iterate
-	 * over them to count the results, this might take a long time depending on
-	 * the size of the DB.
-	 * 
-	 * @param pred
-	 * @return
-	 * @throws Exception
-	 */
-	public int getTripleCount(Predicate pred) throws Exception {
-		Iterator<Assertion> it = getAssertionIterator(pred);
-
-		int tripleCount = 0;
-		while (it.hasNext()) {
-			it.next();
-			tripleCount += 1;
-		}
-		return tripleCount;
+	public long getTriplesCount() throws Exception {
+		if (iterator != null)
+			return counter;
+		else  
+		return getTripleCount();
 	}
 
-	/**
-	 * This iterator iterates through all the vocabulary (i.e., the predicates)
-	 * that the OBDA mappings have.
-	 */
-	public class VirtualTriplePredicateIterator implements Iterator<Assertion> {
-
-		private Iterator<Predicate> predicates;
-		private Collection<OBDADataSource> sources;
-		private Map<OBDADataSource, Quest> questInstances;
-
-		private Predicate currentPredicate = null;
-		private VirtualTripleIterator currentIterator = null;
-
-		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
-				Map<OBDADataSource, Quest> questInstances) throws SQLException {
-			this.predicates = predicates;
-			this.sources = sources;
-			this.questInstances = questInstances;
-			try {
-				advanceToNextPredicate();
-			} catch (NoSuchElementException e) {
-				// NO-OP
-			}
-		}
-
-		/**
-		 * Iterate to the next predicate to be unfolded and generated the SQL
-		 * string
-		 */
-		private void advanceToNextPredicate() throws NoSuchElementException, SQLException {
-			try {
-				currentIterator.disconnect();
-			} catch (Exception e) {
-				// NO-OP
-			}
-			currentPredicate = predicates.next();
-			currentIterator = new VirtualTripleIterator(currentPredicate, sources, questInstances);
-		}
-
-		/**
-		 * Release the connection resources in the VirtualTripleIterator.
-		 */
-		public void disconnect() {
-			try {
-				currentIterator.disconnect();
-			} catch (Exception e) {
-
-			}
-		}
-
-		@Override
-		public boolean hasNext() {
-			if (currentIterator == null) {
-				return false;
-			}
-			boolean hasnext = currentIterator.hasNext(); // Check if there is
-															// more assertions
-			while (!hasnext) {
-				try {
-					advanceToNextPredicate(); // if not, let's check the next
-												// predicate
-					hasnext = currentIterator.hasNext();
-				} catch (Exception e) {
-					return false;
-				}
-			}
-			return hasnext;
-		}
-
-		@Override
-		public Assertion next() {
-			if (currentIterator == null) {
-				throw new NoSuchElementException();
-			}
-			boolean hasnext = currentIterator.hasNext(); // Check if there is
-															// more assertions
-			while (!hasnext) {
-				try {
-					advanceToNextPredicate(); // if not, let's check the next
-												// predicate
-					hasnext = currentIterator.hasNext();
-				} catch (Exception e) {
-					throw new NoSuchElementException();
-				}
-			}
-			return currentIterator.next();
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
+	public int getVocabSize() {
+		return vocabulary.size();
+	}
+	public void disconnect() {
+		iterator.disconnect();
 	}
 
 	/***
@@ -333,206 +158,121 @@ public class QuestMaterializer {
 	 * predicate based on the results of executing the mappings for the
 	 * predicate in each data source.
 	 * 
-	 * @author Mariano Rodriguez Muro
-	 * 
 	 */
-	public class VirtualTripleIterator implements Iterator<Assertion> {
+	private class VirtualTripleIterator implements Iterator<Assertion> {
 
-		/*
-		 * Indicates that we have peeked to see if there are more rows and that
-		 * a call to next should not invoke res.next
-		 */
-		private boolean peeked = false;
-		private boolean hasnext = false;
+		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
+		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-		private OBDADataSource currentSource;
-		private String currentQuery;
+		private QuestConnection questConn;
+		private QuestStatement stm;
+		
+		private boolean read = false, hasNext = false;
 
-		private Predicate predicate;
-
-		private OBDAResultSet currentResults;
-		private Iterator<OBDADataSource> sourceIterator;
-		private Map<OBDADataSource, Quest> questInstances;
-		private Queue<DatalogProgram> queryQueue = new LinkedList<DatalogProgram>();
-
-		private QuestConnection conn;
-		private QuestStatement st;
-
+		private GraphResultSet results;
+		
+		private Iterator<Predicate> vocabularyIterator;
+		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(Predicate predicate, Collection<OBDADataSource> sources, Map<OBDADataSource, Quest> questInstances)
+		public VirtualTripleIterator(Quest questInstance, Iterator<Predicate> vocabIter)
 				throws SQLException {
-			this.predicate = predicate;
-			this.questInstances = questInstances;
-
-			currentQuery = createQuery();
-			sourceIterator = sources.iterator();
-
-			try {
-				advanceToNextSource(); // look into the current data source
-				advanceToNextQuery(); // look into the current query
+			try{
+				questConn = questInstance.getNonPoolConnection();
+				vocabularyIterator = vocabIter;
+				//execute first query to start the process
+				counter = 0;
+				stm = questConn.createStatement();
+				if (!vocabularyIterator.hasNext())
+					throw new NullPointerException("Vocabulary is empty!");
+				results = stm.executeConstruct(getQuery(vocabularyIterator.next()));
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				e.printStackTrace();
 			}
 		}
-
-		// SPARQL query generated from the predicate
-		private String createQuery() {
-			StringBuffer sb = new StringBuffer();
-			sb.append("PREFIX :	<" + model.getPrefixManager().getDefaultPrefix() + ">\n");
-
-			if (predicate.getArity() == 1) {
-				sb.append("SELECT $x WHERE { $x a <" + predicate.getName() + "> . }");
-			} else {
-				sb.append("SELECT $x $y WHERE { $x <" + predicate.getName() + "> $y . }");
-			}
-
-			return sb.toString();
-		}
-
-		/**
-		 * Releases all the connection resources
-		 */
-		public void disconnect() {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (Exception e) {
-					// NO-OP
-				}
-			}
-
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
-					// NO-OP
-				}
-			}
-		}
-
-		/***
-		 * Advances to the next sources, configures an unfolder using the
-		 * mappings for the source and executes the query related to the
-		 * predicate
-		 * 
-		 * @throws NoSuchElementException
-		 * @throws Exception
-		 */
-		private void advanceToNextSource() throws Exception {
-			disconnect(); // disconnect from the current source
-
-			currentSource = sourceIterator.next();
-			Quest questInstance = questInstances.get(currentSource);
-
-			conn = questInstance.getConnection();
-			st = conn.createStatement();
-		}
-
-		/**
-		 * Advances to the next query rule such that it generates the SQL query
-		 * and produces a result set that contains database records.
-		 * 
-		 * @throws OBDAException
-		 * @throws SQLException
-		 */
-		private void advanceToNextQuery() throws OBDAException, SQLException {
-			currentResults = st.execute(currentQuery);
+		
+		private String getPredicateQuery(Predicate p) {
+			return String.format(query1, p.toString(), p.toString()); }
+		
+		private String getClassQuery(Predicate p) {
+			return String.format(query2, p.toString(), p.toString()); }
+		
+		private String getQuery(Predicate p)
+		{
+			if (p.getArity() == 1)
+				return getClassQuery(p);
+			else if (p.getArity() == 2)
+				return getPredicateQuery(p);
+			return "";
 		}
 
 		@Override
 		public boolean hasNext() {
-			try {
-				if (peeked) {
-					return hasnext;
-				} else {
-					peeked = true;
-					hasnext = currentResults.nextRow();
-					while (!hasnext) {
-						try {
-							if (queryQueue.peek() == null) {
-								advanceToNextSource();
-							}
-							advanceToNextQuery();
-							hasnext = currentResults.nextRow();
-						} catch (NoSuchElementException e) {
-							return false;
-						} catch (Exception e) {
-							log.error(e.getMessage());
-							return false;
-						}
-					}
+			try{
+				if (!read) {
+				hasNext = results.hasNext();
+				while (vocabularyIterator.hasNext() && hasNext == false)
+				{
+						//close previous statement if open
+						if (stm!= null && !stm.isClosed() && results!=null)
+							{stm.close(); results.close(); }
+						
+						//execute next query
+						stm = questConn.createStatement();
+						results = stm.executeConstruct(getQuery(vocabularyIterator.next()));
+						if (results!=null)
+							hasNext = results.hasNext();
+					
 				}
-				return hasnext;
-			} catch (OBDAException e) {
-				throw new RuntimeException(e);
+				read = true;
+				
 			}
+			} catch(Exception e)
+			{e.printStackTrace();}
+			return hasNext;
 		}
 
 		@Override
 		public Assertion next() {
 			try {
-				if (peeked) {
-					peeked = false;
-					return constructAssertion();
-				} else {
-					boolean hasnext = currentResults.nextRow();
-					while (!hasnext) {
-						try {
-							if (queryQueue.peek() == null) {
-								advanceToNextSource();
-							}
-							advanceToNextQuery();
-							hasnext = currentResults.nextRow();
-						} catch (NoSuchElementException e) {
-							throw e;
-						} catch (Exception e) {
-							log.error(e.getMessage());
-							throw new NoSuchElementException();
-						}
-					}
-					return constructAssertion();
+				counter+=1;
+				if (read && hasNext)
+				{
+					read = false;
+					return results.next().get(0);
 				}
-			} catch (OBDAException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		/***
-		 * Constructs an ABox assertion with the data from the current result
-		 * set.
-		 * 
-		 * @return
-		 * @throws URISyntaxException
-		 */
-		private Assertion constructAssertion() throws OBDAException {
-			Assertion assertion = null;
-			int arity = predicate.getArity();
-			if (arity == 1) {
-				Constant value = currentResults.getConstant(1);
-				if (value instanceof URIConstant) {
-					URIConstant c = (URIConstant) value;
-					assertion = ofac.createClassAssertion(predicate, c);
-				} else {
-					// Ignore - NO-OP
+				else if (!read){
+					hasNext();
+					return next();
 				}
-			} else {
-					Constant value1 = currentResults.getConstant(1);
-					Constant value2 = currentResults.getConstant(2);
-					if (value1 instanceof URIConstant && value2 instanceof URIConstant) {
-						URIConstant o1 = (URIConstant) value1;
-						URIConstant o2 = (URIConstant) value2;
-						assertion = ofac.createObjectPropertyAssertion(predicate, o1, o2);
-					} else 	if (value1 instanceof URIConstant) {
-						URIConstant o = (URIConstant) value1;
-						ValueConstant c = (ValueConstant) currentResults.getConstant(2);
-						assertion = ofac.createDataPropertyAssertion(predicate, o, c);
-					} else {
-						// Ignore - NO-OP
-					}
 				
+			} catch (OBDAException e) {
+				e.printStackTrace();
+				log.warn("Exception in Assertion Iterator next");
 			}
-			return assertion;
+			return null;
+		}
+			
+
+		/**
+		 * Releases all the connection resources
+		 */
+		public void disconnect() {
+			if (stm != null) {
+				try {
+					stm.close();
+				} catch (Exception e) {
+					// NO-OP
+				}
+			}
+
+			if (questConn != null) {
+				try {
+					questConn.close();
+				} catch (Exception e) {
+					// NO-OP
+				}
+			}
 		}
 
 		@Override

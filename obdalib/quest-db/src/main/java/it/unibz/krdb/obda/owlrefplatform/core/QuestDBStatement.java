@@ -12,10 +12,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer.VirtualTriplePredicateIterator;
-import it.unibz.krdb.obda.querymanager.QueryController;
 
-import java.io.File;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -109,13 +106,14 @@ public class QuestDBStatement implements OBDAStatement {
 	/* Move to query time ? */
 	private int loadOBDAModel(URI uri, boolean useFile, int commit, int batch)
 			throws OBDAException {
-		VirtualTriplePredicateIterator assertionIter = null;
+		Iterator<Assertion> assertionIter = null;
+		QuestMaterializer materializer = null;
 		try {
 			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager io = new ModelIOManager(obdaModel);
 			io.load(uri.toString());
-			QuestMaterializer materializer = new QuestMaterializer(obdaModel);
-			assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
+			materializer = new QuestMaterializer(obdaModel);
+			assertionIter =  materializer.getAssertionIterator();
 			int result = st.insertData(assertionIter, useFile, commit, batch);
 			return result;
 
@@ -125,7 +123,7 @@ public class QuestDBStatement implements OBDAStatement {
 			st.close();
 			try {
 				if (assertionIter != null)
-					assertionIter.disconnect();
+					materializer.disconnect();
 			} catch (Exception e) {
 				log.error(e.getMessage());
 				throw new OBDAException(e.getMessage());

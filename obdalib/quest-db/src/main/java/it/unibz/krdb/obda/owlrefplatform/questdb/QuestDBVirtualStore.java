@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -46,6 +47,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	
+	private static OBDAModel obdaModel = null;
 
 	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
 		this(name, null, getObdaModel(obdaURI), null);
@@ -72,7 +75,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	
 	public static OBDAModel getObdaModel(URI obdaURI)
 	{
-		
+		if (obdaModel != null)
+			return obdaModel;
 		OBDAModel obdaModel = fac.getOBDAModel();
 	//	System.out.println(obdaURI.toString());
 		if (obdaURI.toString().endsWith(".obda"))
@@ -92,7 +96,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			obdaModel = reader.readModel(obdaURI);
 			
 		}
-		
 		return obdaModel;
 	}
 
@@ -129,7 +132,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 				obdaModel.addSource(getMemOBDADataSource("MemH2"));
 		}
 		
-
+	
+		OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
+		this.obdaModel = obdaModel;
+		
 		questInstance = new Quest();
 		questInstance.setPreferences(config);
 		questInstance.loadTBox(tbox);
