@@ -27,9 +27,8 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.GraphUtil;
 
-public class R2RMLParser {
 
-	private GraphUtil util = new GraphUtil();
+public class R2RMLParser {
 
 	private final String baseuri = "http://example.com/base/";
 	
@@ -92,11 +91,11 @@ public class R2RMLParser {
 	 */
 	public Set<Resource> getMappingNodes(Graph myGraph)
 	{
-		Set<Resource> resources = util.getSubjects(myGraph, null, null, (Resource) null);
+		Set<Resource> resources = GraphUtil.getSubjects(myGraph, logicalTable, null);
 		Set<Resource> nodes = new HashSet<Resource>();
 		for (Resource subj : resources) {
-			//add resource if it's not a triplesMap declaration
-			iterator = myGraph.match(subj, fact.createURI(OBDAVocabulary.RDF_TYPE), TriplesMap, (Resource) null);
+			//add resource if it's a triplesMap declaration
+			iterator = myGraph.match(subj, fact.createURI(OBDAVocabulary.RDF_TYPE), TriplesMap);
 			if (iterator.hasNext()) {
 				nodes.add(subj);
 			}
@@ -114,9 +113,10 @@ public class R2RMLParser {
 		String sqlString;
 
 		// search for logicalTable declaration
-		Set<Value> objects = util.getObjects(myGraph, subj, logicalTable,	(Resource) null);
+		Set<Value> objects = GraphUtil.getObjects(myGraph, subj, logicalTable);
 		if (objects.size() > 0){
 		Resource object = (Resource) objects.toArray()[0];
+		
 		if (object instanceof BNode) {
 			
 			//look for tableName declaration
@@ -131,7 +131,7 @@ public class R2RMLParser {
 			
 
 			// search for r2rmlview declaration
-			tableit = myGraph.match(object, r2rmlView, null, (Resource) null);
+			tableit = myGraph.match(object, r2rmlView, null);
 			if (tableit.hasNext()) {
 				Resource objectt = (Resource) tableit.next().getObject();
 				
@@ -162,7 +162,7 @@ public class R2RMLParser {
 	private String getSQLQueryString(Graph myGraph, Resource object) {
 		
 		// search for sqlQuery declarations
-		Iterator<Statement> tableit = myGraph.match(object, sqlQuery, null, (Resource) null);
+		Iterator<Statement> tableit = myGraph.match(object, sqlQuery, null);
 		if (tableit.hasNext()) {
 			String sqlString = tableit.next().getObject().toString();
 			// System.out.println(sqlString);
@@ -177,7 +177,7 @@ public class R2RMLParser {
 	private String getSQLTableName(Graph myGraph, Resource object){
 		
 		//look for tableName declaration
-		Iterator<Statement> newiterator = myGraph.match(object, tableName, null, (Resource) null);
+		Iterator<Statement> newiterator = myGraph.match(object, tableName, null);
 		if (newiterator.hasNext()) {
 			String sqlString = newiterator.next().getObject().toString();
 			// System.out.println(sqlString);
@@ -197,7 +197,7 @@ public class R2RMLParser {
 	public Set<Resource> getPredicateObjects(Graph myGraph, Resource subj) {
 		// process PREDICATEOBJECTs
 		Set<Resource> predobjs = new HashSet<Resource>();
-		Set<Value> objectss = util.getObjects(myGraph, subj, predicateObjectMap, (Resource) null);
+		Set<Value> objectss = GraphUtil.getObjects(myGraph, subj, predicateObjectMap);
 		for (Value objectVal : objectss) {
 			Resource object = (Resource) objectVal;
 			predobjs.add(object);
@@ -215,11 +215,11 @@ public class R2RMLParser {
 		NewLiteral subjectAtom = null;
 
 		// process SUBJECT
-		Set<Value> objects = util.getObjects(myGraph, subj, subjectMap,	(Resource) null);
+		Set<Value> objects = GraphUtil.getObjects(myGraph, subj, subjectMap);
 		Resource object = (Resource) objects.toArray()[0];
 
 		// process template declaration
-		iterator = myGraph.match(object, template, null, (Resource) null);
+		iterator = myGraph.match(object, template, null);
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -229,7 +229,7 @@ public class R2RMLParser {
 		}
 
 		// process column declaration
-		iterator = myGraph.match(object, column, null, (Resource) null);
+		iterator = myGraph.match(object, column, null);
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -238,7 +238,7 @@ public class R2RMLParser {
 		}
 		
 		// process constant declaration
-		iterator = myGraph.match(object, constant, null, (Resource) null);
+		iterator = myGraph.match(object, constant, null);
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -247,7 +247,7 @@ public class R2RMLParser {
 		}
 		
 		// process termType declaration
-		iterator = myGraph.match(object, termType, null, (Resource) null);
+		iterator = myGraph.match(object, termType, null);
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -255,7 +255,7 @@ public class R2RMLParser {
 		}
 		
 		// process class declaration
-		iterator = myGraph.match(object, classUri, null, (Resource) null);
+		iterator = myGraph.match(object, classUri, null);
 		while (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -281,7 +281,7 @@ public class R2RMLParser {
 
 		// process PREDICATE
 		// look for the predicate
-		iterator = myGraph.match(object, predicate, null, (Resource) null);
+		iterator = myGraph.match(object, predicate, null);
 		while (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -291,12 +291,12 @@ public class R2RMLParser {
 
 		// process PREDICATEMAP
 		// look for the predicateMap
-		iterator = myGraph.match(object, predicateMap, null, (Resource) null);
+		iterator = myGraph.match(object, predicateMap, null);
 		while (iterator.hasNext()) {
 			Resource objectt = (Resource) (iterator.next().getObject());
 
 			// process constant declaration
-			Iterator<Statement> newiterator = myGraph.match(objectt, constant, null, (Resource) null);
+			Iterator<Statement> newiterator = myGraph.match(objectt, constant, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
@@ -323,7 +323,7 @@ public class R2RMLParser {
 
 		// process OBJECT
 		// look for the object
-		iterator = myGraph.match(objectt, this.object, null, (Resource) null);
+		iterator = myGraph.match(objectt, this.object, null);
 		if (iterator.hasNext()) {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
@@ -333,7 +333,7 @@ public class R2RMLParser {
 			else
 			{
 				//valueconstant
-				Predicate pred = fac.getUriTemplatePredicate(1);
+				Predicate pred = fac.getUriPredicate();
 				NewLiteral newlit = fac.getValueConstant(trim(parsedString));
 				objectAtom = fac.getFunctionalTerm(pred, newlit);
 			}
@@ -342,12 +342,12 @@ public class R2RMLParser {
 		}
 
 		// process OBJECTMAP
-		iterator = myGraph.match(objectt, objectMap, null, (Resource) null);
+		iterator = myGraph.match(objectt, objectMap, null);
 		if (iterator.hasNext()) {
 			Resource object = (Resource) (iterator.next().getObject());
 
 			// look for column declaration
-			newiterator = myGraph.match(object, column, null, (Resource) null);
+			newiterator = myGraph.match(object, column, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				objectString = trim(parsedString);
@@ -359,7 +359,7 @@ public class R2RMLParser {
 			
 
 			// look for constant declaration
-			newiterator = myGraph.match(object, constant, null, (Resource) null);
+			newiterator = myGraph.match(object, constant, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
@@ -371,7 +371,7 @@ public class R2RMLParser {
 			}
 
 			// look for template declaration
-			newiterator = myGraph.match(object, template, null, (Resource) null);
+			newiterator = myGraph.match(object, template, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 
@@ -381,7 +381,7 @@ public class R2RMLParser {
 
 			}
 			// process termType declaration
-			newiterator = myGraph.match(object, termType, null, (Resource) null);
+			newiterator = myGraph.match(object, termType, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
@@ -390,7 +390,7 @@ public class R2RMLParser {
 			}
 			
 			// look for language declaration
-			newiterator = myGraph.match(object, language, null, (Resource) null);
+			newiterator = myGraph.match(object, language, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
@@ -402,7 +402,7 @@ public class R2RMLParser {
 			}
 			
 			// look for datatype declaration
-			newiterator = myGraph.match(object, datatype, null, (Resource) null);
+			newiterator = myGraph.match(object, datatype, null);
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
@@ -460,12 +460,12 @@ public class R2RMLParser {
 			// for each predicate object map
 
 			// process OBJECTMAP
-			iterator = myGraph.match(predobj, objectMap, null, (Resource) null);
+			iterator = myGraph.match(predobj, objectMap, null);
 			if (iterator.hasNext()) {
 				Resource objectt = (Resource) (iterator.next().getObject());
 				
 				// look for parentTriplesMap declaration
-				newiterator = myGraph.match(objectt, parentTriplesMap, null, (Resource) null);
+				newiterator = myGraph.match(objectt, parentTriplesMap, null);
 				if (newiterator.hasNext()) {
 					// found a join condition, add the predicateobject node to the list
 					joinPredObjNodes.add(predobj);
@@ -595,12 +595,12 @@ public class R2RMLParser {
 	public Resource getReferencedTripleMap(Graph myGraph, Resource predobjNode) {
 	
 		// process OBJECTMAP
-		iterator = myGraph.match(predobjNode, objectMap, null, (Resource) null);
+		iterator = myGraph.match(predobjNode, objectMap, null);
 		if (iterator.hasNext()) {
 			Resource object = (Resource) (iterator.next().getObject());
 			
 			// look for parentTriplesMap declaration
-			newiterator = myGraph.match(object, parentTriplesMap, null,	(Resource) null);
+			newiterator = myGraph.match(object, parentTriplesMap, null);
 			if (newiterator.hasNext()) {
 				return (Resource)newiterator.next().getObject();
 			}
@@ -611,17 +611,17 @@ public class R2RMLParser {
 	public String getChildColumn(Graph myGraph, Resource predobjNode) {
 		
 		// process OBJECTMAP
-		iterator = myGraph.match(predobjNode, objectMap, null, (Resource) null);
+		iterator = myGraph.match(predobjNode, objectMap, null);
 		if (iterator.hasNext()) {
 			Resource object = (Resource) (iterator.next().getObject());
 
 			// look for joincondition declaration
-			newiterator = myGraph.match(object, joinCondition, null, (Resource) null);
+			newiterator = myGraph.match(object, joinCondition, null);
 			if (newiterator.hasNext()) {
 				Resource objectt = (Resource) (newiterator.next().getObject());
 				
 				// look for child declaration
-				Iterator<Statement> newiterator2 = myGraph.match(objectt, child, null, (Resource) null);
+				Iterator<Statement> newiterator2 = myGraph.match(objectt, child, null);
 				if (newiterator2.hasNext()) {
 					return trimTo1(newiterator2.next().getObject().stringValue());
 				}
@@ -632,17 +632,17 @@ public class R2RMLParser {
 
 	public String getParentColumn(Graph myGraph, Resource predobjNode) {
 		// process OBJECTMAP
-		iterator = myGraph.match(predobjNode, objectMap, null, (Resource) null);
+		iterator = myGraph.match(predobjNode, objectMap, null);
 		if (iterator.hasNext()) {
 			Resource object = (Resource) (iterator.next().getObject());
 			
 			// look for joincondition declaration
-			newiterator = myGraph.match(object, joinCondition, null, (Resource) null);
+			newiterator = myGraph.match(object, joinCondition, null);
 			if (newiterator.hasNext()) {
 				Resource objectt = (Resource) (newiterator.next().getObject());
 							
 				// look for parent declaration
-				Iterator<Statement> newiterator2 = myGraph.match(objectt, parent, null, (Resource) null);
+				Iterator<Statement> newiterator2 = myGraph.match(objectt, parent, null);
 				if (newiterator2.hasNext()) {
 					return trimTo1(newiterator2.next().getObject().stringValue());
 				}

@@ -2,17 +2,20 @@ package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
@@ -76,7 +79,7 @@ public class R2RMLWriter {
 			if (mapping.getId().contains("join"))
 				getJoinMapping(mapping);
 			else{
-			out.write("<"+mapping.getId()+">\n\n\t a rr:TriplesMap;\n\n");
+			out.write("<"+mapping.getId()+">\n\t a rr:TriplesMap;\n");
 			
 			//write sql table
 			out.write("\trr:logicalTable "+getSQL(mapping.getSourceQuery().toString()));
@@ -85,16 +88,16 @@ public class R2RMLWriter {
 			OBDAQuery targetQuery = mapping.getTargetQuery();
 			
 			//write subjectMap
-			out.write("\trr:subjectMap ["+getSubjectMap(targetQuery)+" \t]");
+			out.write("\trr:subjectMap ["+getSubjectMap(targetQuery)+" ]");
 			
 			List<String> predobjs = getPredObjMap(targetQuery);
 			if (predobjs.size() > 0)
-				out.write(";\n\n");
+				out.write(";\n");
 			else
 				out.write(".\n\n");
 			
 			for (int i=0;i<predobjs.size()-1;i++)
-				out.write("\trr:predicateObjectMap [\n"+ predobjs.get(i) + "\n\t];\n\n");
+				out.write("\trr:predicateObjectMap [\n"+ predobjs.get(i) + "\n\t];\n");
 			if(predobjs.size() > 0)
 				out.write("\trr:predicateObjectMap [\n"+ predobjs.get(predobjs.size()-1) + "\n\t].\n\n");
 			
@@ -115,10 +118,10 @@ public class R2RMLWriter {
 		if (sql.contains("*"))
 		{
 			String table = getTableName(sql);
-			return ("[ rr:tableName \"\\"+table.substring(0, table.length()-1)+"\\\"\" ];\n\n");
+			return ("[ rr:tableName \"\\"+table.substring(0, table.length()-1)+"\\\"\" ];\n");
 		}
 		else
-			return ("[ rr:sqlQuery \"\"\"\n"+sql+"\n\t\"\"\" ];\n\n");
+			return ("[ rr:sqlQuery \"\"\"\n\t\t"+sql+"\n\t\"\"\" ];\n");
 	}
 
 	private void getJoinMapping(OBDAMappingAxiom mapping) throws IOException {
@@ -133,17 +136,17 @@ public class R2RMLWriter {
 		OBDAQuery targetQuery = mapping.getTargetQuery();
 		
 		
-		out.write("<"+mapping.getId()+">\n\n\t a rr:TriplesMap;\n\n");
+		out.write("<"+mapping.getId()+">\n\t a rr:TriplesMap;\n");
 		
 		//write sql table
 		out.write("\trr:logicalTable "+getSQL(childSql));
 	
 		
 		//write subjectMap
-		out.write("\trr:subjectMap ["+getSubjectMap(targetQuery)+" \t];\n\n");
+		out.write("\trr:subjectMap ["+getSubjectMap(targetQuery)+" ];\n");
 		
 		//write predobjmap
-		out.write("\trr:predicateObjectMap [\n"+ getJoinPredicate(targetQuery) + getJoinObject(sql,refMap) + "\n\t].\n\n");
+		out.write("\trr:predicateObjectMap [\n"+ getJoinPredicate(targetQuery) + getJoinObject(sql,refMap) + "\t].\n\n");
 		
 		
 	}
@@ -152,8 +155,9 @@ public class R2RMLWriter {
 		String childCond = getChildCond(targetQuery);
 		String parentCond = getParentCond(targetQuery);
 		
-		return "rr:objectMap [\n\t\ta rr:RefObjectMap;\n\t\trr:parentTriplesMap <"+
-				parent+">;\n\t\trr:joinCondition [\n\t\t\trr:child "+childCond+";\n\t\t\trr:parent "+parentCond+";\n\t\t];\n\t];\n";
+		return "\t\t rr:objectMap [\n\t\t\ta rr:RefObjectMap;\n\t\t\trr:parentTriplesMap <"+
+				parent+">;\n\t\t\trr:joinCondition [\n\t\t\t\trr:child \"\\\""+childCond+"\\\"\";\n\t\t\t\trr:parent \"\\\""
+				+parentCond+"\\\"\";\n\t\t];\n\t];\n";
 		
 	}
 
@@ -260,13 +264,13 @@ public class R2RMLWriter {
 			
 				// constant - arity 1
 				if (!atom.getPredicate().isClass())
-					subject += " rr:constant " + atom.getTerm(0).toString()+ ";\n";
+					subject += " rr:constant " + removeJoinKeyword(atom.getTerm(0))+ ";\n";
 				
 			} else if (arity == 2 || atom.getPredicate().equals(OBDAVocabulary.RDFS_LITERAL_LANG)) {
 				
 				// column - arity 2 - base prefix + {} + 1 var
 				 if (atom.getTerm(0).toString().equals("\"http://example.com/base/{}\""))
-					 subject += " rr:column \"\\\""+ atom.getTerm(1).toString()+"\\\"\"";
+					 subject += " rr:column \"\\\""+ removeJoinKeyword(atom.getTerm(1))+"\\\"\"";
 				 else //template - arity 2
 					 subject += " rr:template " + getTemplate(atom);
 				
@@ -290,6 +294,15 @@ public class R2RMLWriter {
 		
 		return subject;
 	}
+	private String removeJoinKeyword(NewLiteral atom)
+	{
+		String str = atom.toString();
+		if (str.startsWith("CHILD_"))
+			return str.substring(6);
+		else if (str.startsWith("PARENT_"))
+			return str.substring(7);
+		return str;
+	}
 	
 	private String getTemplate(Function atom)
 	{
@@ -305,7 +318,7 @@ public class R2RMLWriter {
 			newtemp+= temp.substring(oldidx, idx);
 			
 			oldidx = idx+2;
-			newtemp += "{\\\""+atom.getTerm(i) + "\\\"}";
+			newtemp += "{\\\""+removeJoinKeyword(atom.getTerm(i)) + "\\\"}";
 			i++;
 			temp = temp.replaceFirst("[{]", "[");
 			
@@ -364,7 +377,11 @@ public class R2RMLWriter {
 			int size = fobj.getTerms().size();
 			if (size == 1)
 			{	//object 
-				object = "\t\t rr:object \t "+obj.asAtom().getTerm(0).toString();
+				if (fobj.isDataTypeFunction()) {
+					Predicate p = fobj.getFunctionSymbol();
+					object = "\t\t rr:objectMap \t[ rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"; rr:datatype "+ p.toString() + " ]";
+				} else
+					object = "\t\t rr:object \t "+obj.asAtom().getTerm(0).toString();
 				return object;
 			}
 			else
