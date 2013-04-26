@@ -333,7 +333,7 @@ public class R2RMLParser {
 			else
 			{
 				//valueconstant
-				Predicate pred = fac.getUriPredicate();
+				Predicate pred = fac.getUriTemplatePredicate(1);
 				NewLiteral newlit = fac.getValueConstant(trim(parsedString));
 				objectAtom = fac.getFunctionalTerm(pred, newlit);
 			}
