@@ -68,7 +68,7 @@ public class TreeWitnessSet {
 		
 		for (Loop loop : cc.getQuantifiedVariables()) {
 			NewLiteral v = loop.getTerm();
-			log.debug("QUANTIFIED VARIABLE " + v); 
+			log.debug("QUANTIFIED VARIABLE {}", v); 
 			qf.newOneStepFolding(v);
 			
 			for (Edge edge : cc.getEdges()) { // loop.getAdjacentEdges()
@@ -92,47 +92,46 @@ public class TreeWitnessSet {
 			}
 		}		
 		
-		if (tws.isEmpty())
-			return;
-		
-		mergeable = new ArrayList<TreeWitness>();
-		Queue<TreeWitness> working = new LinkedList<TreeWitness>();
+		if (!tws.isEmpty()) {
+			mergeable = new ArrayList<TreeWitness>();
+			Queue<TreeWitness> working = new LinkedList<TreeWitness>();
 
-		for (TreeWitness tw : tws) 
-			if (tw.isMergeable())  {
-				working.add(tw);			
-				mergeable.add(tw);
-			}
-		
-		delta = new LinkedList<TreeWitness>();
-		twsCache = new HashMap<TreeWitness.TermCover, TreeWitness>();
-
-		while (!working.isEmpty()) {
-			while (!working.isEmpty()) {
-				TreeWitness tw = working.poll(); 
-				qf.newQueryFolding(tw);
-				saturateTreeWitnesses(qf); 					
-			}
-			
-			while (!delta.isEmpty()) {
-				TreeWitness tw = delta.poll();
-				addTWS(tw);
+			for (TreeWitness tw : tws) 
 				if (tw.isMergeable())  {
 					working.add(tw);			
 					mergeable.add(tw);
 				}
-			}
-		}				
+			
+			delta = new LinkedList<TreeWitness>();
+			twsCache = new HashMap<TreeWitness.TermCover, TreeWitness>();
 
-		log.debug("TREE WITNESSES FOUND: " + tws.size());
+			while (!working.isEmpty()) {
+				while (!working.isEmpty()) {
+					TreeWitness tw = working.poll(); 
+					qf.newQueryFolding(tw);
+					saturateTreeWitnesses(qf); 					
+				}
+				
+				while (!delta.isEmpty()) {
+					TreeWitness tw = delta.poll();
+					addTWS(tw);
+					if (tw.isMergeable())  {
+						working.add(tw);			
+						mergeable.add(tw);
+					}
+				}
+			}				
+		}
+		
+		log.debug("TREE WITNESSES FOUND: {}", tws.size());
 	}
 	
 	private void addTWS(TreeWitness tw1) {
 		for (TreeWitness tw0 : tws)
 			if (!tw0.getDomain().containsAll(tw1.getDomain()) && !tw1.getDomain().containsAll(tw0.getDomain())) {
-				if (!tw0.isCompatibleWith(tw1)) {
+				if (!TreeWitness.isCompatible(tw0, tw1)) {
 					hasConflicts = true;
-					log.debug("CONFLICT: " + tw0 + " AND " + tw1);
+					log.debug("CONFLICT: {}  AND {}", tw0, tw1);
 				}
 			}
 		tws.add(tw1);
@@ -154,7 +153,7 @@ public class TreeWitnessSet {
 			else
 				continue;
 			
-			log.debug("EDGE " + edge + " IS ADJACENT TO THE TREE WITNESS " + qf); 
+			log.debug("EDGE {} IS ADJACENT TO THE TREE WITNESS {}", edge, qf); 
 
 			saturated = false; 
 
@@ -162,13 +161,13 @@ public class TreeWitnessSet {
 			NewLiteral internalNewLiteral = internalLoop.getTerm();
 			for (TreeWitness tw : mergeable)  
 				if (tw.getRoots().contains(rootNewLiteral) && tw.getDomain().contains(internalNewLiteral)) {
-					log.debug("    ATTACHING A TREE WITNESS " + tw);
+					log.debug("    ATTACHING A TREE WITNESS {}", tw);
 					saturateTreeWitnesses(qf.extend(tw)); 
 				} 
 			
 			QueryFolding qf2 = new QueryFolding(qf);
 			if (qf2.extend(internalLoop, edge, rootLoop)) {
-				log.debug("    ATTACHING A HANDLE " + edge);
+				log.debug("    ATTACHING A HANDLE {}", edge);
 				saturateTreeWitnesses(qf2);  
 			}	
 		}
@@ -185,7 +184,7 @@ public class TreeWitnessSet {
 					twsCache.put(qf.getTerms(), null); // cache negative
 			}
 			else {
-				log.debug("TWS CACHE HIT " + qf.getTerms());
+				log.debug("TWS CACHE HIT {}", qf.getTerms());
 			}
 		}
 	}
@@ -194,33 +193,32 @@ public class TreeWitnessSet {
 	
 	private Collection<TreeWitnessGenerator> getTreeWitnessGenerators(QueryFolding qf) {
 		Collection<TreeWitnessGenerator> twg = null;
-		log.debug("CHECKING WHETHER THE FOLDING " + qf + " CAN BE GENERATED: "); 
+		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
 		for (TreeWitnessGenerator g : reasoner.getGenerators()) {
-			log.debug("      CHECKING " + g);		
 			if (!qf.getProperties().contains(g.getProperty())) {
-				log.debug("        PROPERTIES ARE TOO SPECIFIC: " + qf.getProperties() + " FOR " + g.getProperty());
+				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
 				continue;
 			}
 			else
-				log.debug("        PROPERTIES ARE FINE: " + qf.getProperties() + " FOR " + g.getProperty());
+				log.debug("      POSITIVE PROPERTY CHECK {}", g.getProperty());
 
 			Set<BasicClassDescription> subc = qf.getInternalRootConcepts();
 			if ((subc != null) && !g.endPointEntailsAnyOf(subc)) {
-				 log.debug("        ENDTYPE TOO SPECIFIC: " + subc + " FOR " + g);
+				 log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, g);
 				 continue;			
 			}
 			else
-				 log.debug("        ENDTYPE IS FINE: " + subc + " FOR " + g);
+				 log.debug("        ENDTYPE IS FINE: TOP FOR {}", g);
 
 			boolean failed = false;
 			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) 
 				if (!g.endPointEntailsAnyOf(reasoner.getSubConceptsForGenerators(tw.getGenerators()))) { 
-					log.debug("        ENDTYPE TOO SPECIFIC: " + tw + " FOR " + g);
+					log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, g);
 					failed = true;
 					break;
 				} 
 				else
-					log.debug("        ENDTYPE IS FINE: " + tw + " FOR " + g);
+					log.debug("        ENDTYPE IS FINE: {} FOR {}", tw, g);
 				
 			if (failed)
 				continue;
@@ -312,7 +310,7 @@ public class TreeWitnessSet {
 	      	for (TreeWitness tw : tws)
 	      		if (isInNext[i++]) {
 	      			for (TreeWitness tw0 : nextSet)
-	      				if (!tw0.isCompatibleWith(tw)) 
+	      				if (!TreeWitness.isCompatible(tw0, tw)) 
 	      					return false;
 	      					
 	      			nextSet.add(tw);
@@ -358,7 +356,7 @@ public class TreeWitnessSet {
 			if (properties == null) {
 				for (Function a : edge.getBAtoms()) {
 					if (a.getPredicate() instanceof BooleanOperationPredicateImpl) {
-						log.debug("EDGE " + edge + " HAS PROPERTY " + a + " NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES ");
+						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
 						properties = Collections.EMPTY_SET;
 						break;
 					}
@@ -366,7 +364,7 @@ public class TreeWitnessSet {
 				if (properties == null) {
 					IntersectionOfProperties set = new IntersectionOfProperties();
 					for (Function a : edge.getBAtoms()) {
-						log.debug("EDGE " + edge + " HAS PROPERTY " + a);
+						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
 						if (!set.intersect(reasoner.getSubProperties(a.getPredicate(), !root.equals(a.getTerm(0)))))
 							break;
 					}
@@ -414,35 +412,35 @@ public class TreeWitnessSet {
 		
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
 			IntersectionOfConceptSets subc = reasoner.getSubConcepts(cc.getLoop().getAtoms());
-			log.debug("DEGENERATE DETACHED COMPONENT: " + cc);
+			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isEmpty()) // (subc == null) || 
 				for (TreeWitnessGenerator twg : reasoner.getGenerators()) {
 					if ((subc.get() == null) || twg.endPointEntailsAnyOf(subc.get())) {
-						log.debug("        ENDTYPE IS FINE: " + subc + " FOR " + twg);
+						log.debug("        ENDTYPE IS FINE: {} FOR {}", subc, twg);
 						generators.add(twg);					
 					}
 					else 
-						 log.debug("        ENDTYPE TOO SPECIFIC: " + subc + " FOR " + twg);
+						 log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, twg);
 				}
 		} 
 		else {
 			for (TreeWitness tw : tws) 
 				if (tw.getDomain().containsAll(cc.getVariables())) {
-					log.debug("TREE WITNESS " + tw + " COVERS THE QUERY");
+					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
 					IntersectionOfConceptSets subc = reasoner.getSubConcepts(tw.getRootAtoms());
 					if (!subc.isEmpty())
 						for (TreeWitnessGenerator twg : reasoner.getGenerators())
 							if ((subc.get() == null) || twg.endPointEntailsAnyOf(subc.get())) {
-								log.debug("        ENDTYPE IS FINE: " + subc + " FOR " + twg);
+								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
 								if (twg.endPointEntailsAnyOf(reasoner.getSubConceptsForGenerators(tw.getGenerators()))) {
-									log.debug("        ENDTYPE IS FINE: " + tw + " FOR " + twg);
+									log.debug("        ENDTYPE IS FINE: {} FOR {}",  tw, twg);
 									generators.add(twg);					
 								}
 								else  
-									log.debug("        ENDTYPE TOO SPECIFIC: " + tw + " FOR " + twg);
+									log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, twg);
 							}
 							else 
-								 log.debug("        ENDTYPE TOO SPECIFIC: " + subc + " FOR " + twg);
+								 log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, twg);
 				}
 		}
 		

@@ -47,7 +47,7 @@ public class TreeWitnessGenerator {
 		
 		if (cons.size() > 1) {
 			// TODO: re-implement as removals (inner iterator loop with restarts on top) 
-			log.debug("MORE THAN ONE GEN CON: " + cons);
+			log.debug("MORE THAN ONE GEN CON: {}", cons);
 			Set<BasicClassDescription> reduced = new HashSet<BasicClassDescription>();
 			for (BasicClassDescription concept0 : cons) {
 				boolean found = false;

@@ -37,7 +37,7 @@ public class MinimalCQProducer {
 	}
 
 	public boolean isMoreSpecific(Function a1, Function a2) {
-		if (a1.equals(a2))
+		if (a1 == a2 || a1.equals(a2))
 			return true;
 
 		if ((a2.getArity() == 1) && (a1.getArity() == 1)) {
@@ -45,7 +45,7 @@ public class MinimalCQProducer {
 					// add a2.NewLiteral anonymous 
 				Set<BasicClassDescription> subconcepts = reasoner.getSubConcepts(a2.getPredicate());
 				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
-					log.debug("" + a1 + " IS MORE SPECIFIC (1-1) THAN " + a2);
+					log.debug("{} IS MORE SPECIFIC (1-1) THAN {}", a1, a2);
 					return true;
 				}
 			}
@@ -56,7 +56,7 @@ public class MinimalCQProducer {
 				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a2.getPredicate(), false);
 				Set<BasicClassDescription> subconcepts = reasoner.getSubConcepts(prop);
 				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
-					log.debug("" + a1 + " IS MORE SPECIFIC (1-2) THAN " + a2);
+					log.debug("{} IS MORE SPECIFIC (1-2) THAN {}",  a1, a2);
 					return true;
 				}
 			}
@@ -64,37 +64,45 @@ public class MinimalCQProducer {
 				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a2.getPredicate(), true);
 				Set<BasicClassDescription> subconcepts = reasoner.getSubConcepts(prop);
 				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
-					log.debug("" + a1 + " IS MORE SPECIFIC (1-2) THAN " + a2);
+					log.debug("{} IS MORE SPECIFIC (1-2) THAN {}",  a1, a2);
 					return true;
 				}
 			}
 		}
 		else if ((a1.getArity() == 2) && (a2.getArity() == 1)) { // MOST USEFUL
-			NewLiteral a2NewLiteral = a2.getTerm(0);
-			if (a1.getTerm(0).equals(a2NewLiteral)) {
+			NewLiteral a2term = a2.getTerm(0);
+			if (a1.getTerm(0).equals(a2term)) {
 				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getPredicate(), false);
 				if (reasoner.getSubConcepts(a2.getPredicate()).contains(prop)) {
-					log.debug("" + a1 + " IS MORE SPECIFIC (2-1) THAN " + a2);
+					log.debug("{} IS MORE SPECIFIC (2-1) THAN ", a1, a2);
 					return true;
 				}
 			}
-			if (a1.getTerm(1).equals(a2NewLiteral)) {
+			if (a1.getTerm(1).equals(a2term)) {
 				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getPredicate(), true);
 				if (reasoner.getSubConcepts(a2.getPredicate()).contains(prop)) {
-					log.debug("" + a1 + " IS MORE SPECIFIC (2-1) THAN " + a2);
+					log.debug("{} IS MORE SPECIFIC (2-1) THAN {}", a1, a2);
 					return true;
 				}
 			}
 		}
 		return false;
 	}
+
+	public boolean subsumes(Function atom) {
+		for (Function a : atoms) 
+			if (isMoreSpecific(a, atom))
+				return true;
+		return false;
+	}
 	
 	public void add(Function atom) {
+		if (subsumes(atom))
+			return;
+			
 		Iterator<Function> i = atoms.iterator();
 		while (i.hasNext()) {
 			Function a = i.next();
-			if (isMoreSpecific(a, atom))
-				return;
 			if (isMoreSpecific(atom, a))
 				i.remove();
 		}
@@ -105,18 +113,15 @@ public class MinimalCQProducer {
 		for (Function a : aa) 
 			add(a);
 	}
-
-	public boolean wouldSubsume(Function atom) {
-		for (Function a : atoms) 
-			if (isMoreSpecific(a, atom))
-				return true;
-		return false;
-	}
 	
 	public void addNoCheck(Function atom) {
 		noCheckAtoms.add(atom);
 	}
 	
+	public void addAllNoCheck(Collection<Function> aa) {
+		noCheckAtoms.addAll(aa);
+	}
+
 	public List<Function> getAtoms() {
 		return atoms;
 	}

@@ -149,8 +149,8 @@ public class QueryFolding {
 	public TreeWitness getTreeWitness(Collection<TreeWitnessGenerator> twg, Collection<Edge> edges) {
 		
 		log.debug("NEW TREE WITNESS");
-		log.debug("  PROPERTIES " + properties);
-		log.debug("  ENDTYPE " + internalRootConcepts);
+		log.debug("  PROPERTIES {}", properties);
+		log.debug("  ENDTYPE {}", internalRootConcepts);
 
 		IntersectionOfConceptSets rootType = new IntersectionOfConceptSets();
 
@@ -159,7 +159,7 @@ public class QueryFolding {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
 				rootType = IntersectionOfConceptSets.EMPTY;
-				log.debug("  NOT MERGEABLE: " + root + " IS NOT QUANTIFIED");				
+				log.debug("  NOT MERGEABLE: {} IS NOT QUANTIFIED", root);				
 			}
 		}
 		
@@ -168,11 +168,11 @@ public class QueryFolding {
 			if (roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1())) {
 				rootAtoms.addAll(edge.getBAtoms());
 				rootType = IntersectionOfConceptSets.EMPTY;
-				log.debug("  NOT MERGEABLE: " + edge + " IS WITHIN THE ROOTS");				
+				log.debug("  NOT MERGEABLE: {} IS WITHIN THE ROOTS", edge);				
 			}
 		}
 		
-		log.debug("  ROOTTYPE " + rootAtoms);
+		log.debug("  ROOTTYPE {}", rootAtoms);
 
 		if (rootType.get() == null) // not empty 
 			for (Loop root : roots) {

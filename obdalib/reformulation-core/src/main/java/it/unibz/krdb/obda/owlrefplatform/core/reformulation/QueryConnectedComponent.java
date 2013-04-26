@@ -102,7 +102,7 @@ public class QueryConnectedComponent {
 	 */
 	
 	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
-		List<QueryConnectedComponent> ccs = new ArrayList<QueryConnectedComponent>();
+		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
 
 		Set<NewLiteral> headTerms = new HashSet<NewLiteral>(cqie.getHead().getTerms());
 
@@ -137,7 +137,7 @@ public class QueryConnectedComponent {
 				}
 			}
 			else { // non-DL precicate
-				log.debug("NON-DL ATOM" + a);
+				log.debug("NON-DL ATOM {}",  a);
 				nonDLAtoms.add(a);
 			}
 		}	
@@ -171,13 +171,13 @@ public class QueryConnectedComponent {
 					NewLiteral t0 = edge.getTerm0();
 					NewLiteral t1 = edge.getTerm1();
 					if (ccTerms.contains(t0)) {
-						if (ccTerms.add(t1))  { // the other NewLiteral is already there
+						if (ccTerms.add(t1))  { // the other term is already there
 							ccLoops.add(edge.getLoop1());
 							allLoops.remove(t1); // remove the loops that are covered by the edges in CC
 						}
 					}
 					else if (ccTerms.contains(t1)) {
-						if (ccTerms.add(t0))  { // the other NewLiteral is already there
+						if (ccTerms.add(t0))  { // the other term is already there
 							ccLoops.add(edge.getLoop0()); 
 							allLoops.remove(t0); // remove the loops that are covered by the edges in CC
 						}
@@ -220,7 +220,7 @@ public class QueryConnectedComponent {
 		}
 		
 		if (!nonDLAtoms.isEmpty())
-			log.debug("NON-DL ATOMS ARE NOT EMPTY: " + nonDLAtoms);
+			log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
 		
 		return ccs;
 	}
@@ -379,24 +379,16 @@ public class QueryConnectedComponent {
 			return l1.term;
 		}
 		
-		public Collection<Function> getAtoms0() {
-			return l0.atoms;
-		}
-		
-		public Collection<Function> getAtoms1() {
-			return l1.atoms;
-		}
-
 		public Collection<Function> getBAtoms() {
 			return bAtoms;
 		}
 		
 		public List<Function> getAtoms() {
-			List<Function> extAtoms = new ArrayList<Function>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
-			extAtoms.addAll(bAtoms);
-			extAtoms.addAll(l0.atoms);
-			extAtoms.addAll(l1.atoms);
-			return extAtoms;
+			List<Function> allAtoms = new ArrayList<Function>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
+			allAtoms.addAll(bAtoms);
+			allAtoms.addAll(l0.atoms);
+			allAtoms.addAll(l1.atoms);
+			return allAtoms;
 		}
 		
 		@Override
@@ -436,7 +428,7 @@ public class QueryConnectedComponent {
 
 		@Override
 		public String toString() {
-			return "NewLiteral pair: {" + t0 + ", " + t1 + "}";
+			return "term pair: {" + t0 + ", " + t1 + "}";
 		}
 		
 		@Override

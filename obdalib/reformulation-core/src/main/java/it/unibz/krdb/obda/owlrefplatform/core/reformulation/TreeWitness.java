@@ -113,20 +113,19 @@ public class TreeWitness {
 	}
 
 	/**
-	 * boolean isCompatibleWith(TreeWitness tw1)
+	 * boolean isCompatibleWith(TreeWitness tw1, TreeWitness tw2)
 	 * 
-	 * tree witnesses are compatible if their domains intersect only on their roots
-	 *     correct: tree witnesses are consistent iff their domains intersect on their **common** roots
+	 * tree witnesses are consistent iff their domains intersect on their **common** roots
 	 * 
 	 * @param tw1: a tree witness
 	 * @return true if tw1 is compatible with the given tree witness
 	 */
 	
-	public boolean isCompatibleWith(TreeWitness tw1) {
-		Set<NewLiteral> NewLiterals = new HashSet<NewLiteral>(getDomain());
-		NewLiterals.retainAll(tw1.getDomain());
-		if (!NewLiterals.isEmpty()) {
-			if (!getRoots().containsAll(NewLiterals) || !tw1.getRoots().containsAll(NewLiterals))
+	public static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {
+		Set<NewLiteral> commonTerms = new HashSet<NewLiteral>(tw1.getDomain());
+		commonTerms.retainAll(tw2.getDomain());
+		if (!commonTerms.isEmpty()) {
+			if (!tw1.getRoots().containsAll(commonTerms) || !tw2.getRoots().containsAll(commonTerms))
 				return false;
 		}
 		return true;

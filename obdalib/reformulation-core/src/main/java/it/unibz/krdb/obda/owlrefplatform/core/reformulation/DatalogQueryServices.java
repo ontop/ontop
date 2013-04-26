@@ -122,12 +122,12 @@ public class DatalogQueryServices {
 					}
 					else if (CQCUtilities.isContainedInSyntactic(q2, query)) {
 						i.remove();				
-						log.debug("   PRUNED " + q2 + " BY " + query);
+						log.debug("   PRUNED {} BY {}", q2, query);
 					}
 				}
 				
 				if (!found) {
-					log.debug("ADDING TO THE RESULT " + query);
+					log.debug("ADDING TO THE RESULT {}", query);
 					
 					output.add(query.clone());			
 					Collections.sort(output, new Comparator<CQIE> () {

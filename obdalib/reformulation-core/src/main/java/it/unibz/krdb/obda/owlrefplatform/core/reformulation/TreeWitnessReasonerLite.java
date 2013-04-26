@@ -67,7 +67,7 @@ public class TreeWitnessReasonerLite {
 	public void setTBox(Ontology ontology) {
 
 		this.tbox = ontology;
-		log.debug("SET ONTOLOGY " + ontology);
+		log.debug("SET ONTOLOGY {}", ontology);
 
 		Map<ClassDescription, TreeWitnessGenerator> gens = new HashMap<ClassDescription, TreeWitnessGenerator>();
 		subconcepts = new HashMap<BasicClassDescription, Set<BasicClassDescription>>();
@@ -83,7 +83,7 @@ public class TreeWitnessReasonerLite {
 		for (Axiom ax : tbox.getAssertions()) {
 			if (ax instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl sax = (SubClassAxiomImpl) ax;
-				log.debug("CI AXIOM: " + sax);
+				log.debug("CI AXIOM: {}", sax);
 				BasicClassDescription subConcept = (BasicClassDescription)sax.getSub();
 				ClassDescription superConcept = sax.getSuper();
 				if (superConcept instanceof PropertySomeClassRestriction) {
@@ -98,7 +98,7 @@ public class TreeWitnessReasonerLite {
 						gens.put(superConcept, twg);
 					}
 					twg.addConcept(subConcept);
-					log.debug("GENERATING CI: " + subConcept + " <= " + superConcept);
+					log.debug("GENERATING CI: {} <= {}", subConcept, superConcept);
 				}
 				else {
 					BasicClassDescription basicSuperConcept = (BasicClassDescription)superConcept;
@@ -118,13 +118,13 @@ public class TreeWitnessReasonerLite {
 							gens.put(superConcept, twg);
 						}
 						twg.addConcept(subConcept);
-						log.debug("GENERATING CI: " + subConcept + " <= " + some);
+						log.debug("GENERATING CI: {} <= {}", subConcept, some);
 					}
 				}
 			} 
 			else if (ax instanceof SubPropertyAxiomImpl) {
 				SubPropertyAxiomImpl sax = (SubPropertyAxiomImpl) ax;
-				log.debug("RI AXIOM: " + sax);
+				log.debug("RI AXIOM: {}", sax);
 				Property superProperty = sax.getSuper();
 				Property subProperty = sax.getSub();
 				Property superPropertyInv = ontFactory.createProperty(superProperty.getPredicate(), !superProperty.isInverse());
@@ -148,7 +148,7 @@ public class TreeWitnessReasonerLite {
 				setInv.add(subPropertyInv);
 			}
 			else
-				log.debug("UNKNOWN AXIOM TYPE:" + ax);
+				log.debug("UNKNOWN AXIOM TYPE: {}", ax);
 		}
 
 		generators = gens.values();
@@ -156,18 +156,18 @@ public class TreeWitnessReasonerLite {
 		// SATURATE PROPERTY HIERARCHY
 		{
 			for (Map.Entry<Property, Set<Property>> p : subproperties.entrySet())
-				log.debug("DECLARED SUBPROPERTIES OF " + p.getKey() + " ARE " + p.getValue());
+				log.debug("DECLARED SUBPROPERTIES OF {} ARE {}", p.getKey(), p.getValue());
 
 			graphTransitiveClosure(subproperties);
 			
 			for (Map.Entry<Property, Set<Property>> p : subproperties.entrySet())
-				log.debug("SATURATED SUBPROPERTY OF " + p.getKey() + " ARE " + p.getValue());
+				log.debug("SATURATED SUBPROPERTY OF {} ARE {}", p.getKey(), p.getValue());
 		}
 	
 		// SATURATE CONCEPT HIERARCHY
 		{
 			for (Map.Entry<BasicClassDescription, Set<BasicClassDescription>> k : subconcepts.entrySet())
-				log.debug("DECLARED SUBCONCEPTS OF " + k.getKey() + " ARE " + k.getValue());
+				log.debug("DECLARED SUBCONCEPTS OF {} ARE {}", k.getKey(), k.getValue());
 	
 			// ADD INCLUSIONS BETWEEN EXISTENTIALS OF SUB-PROPERTIES
 			for (Map.Entry<Property, Set<Property>> prop : subproperties.entrySet()) {
@@ -184,7 +184,7 @@ public class TreeWitnessReasonerLite {
 			graphTransitiveClosure(subconcepts);
 			
 			for (Map.Entry<BasicClassDescription, Set<BasicClassDescription>> k : subconcepts.entrySet())
-				log.debug("SATURATED SUBCONCEPTS OF " +  k.getKey() + " ARE " + k.getValue());
+				log.debug("SATURATED SUBCONCEPTS OF {} ARE {}", k.getKey(), k.getValue());
 		}
 	}
 	
@@ -303,6 +303,15 @@ public class TreeWitnessReasonerLite {
 	}
 	
 	
+	/**
+	 * computes intersections of sets of properties
+	 * 
+	 * internal representation: the downward-saturated set of properties (including all sub-properties)
+	 * 
+	 * @author roman
+	 *
+	 */
+	
 	public static class IntersectionOfProperties {
 		private Set<Property> set;
 		
@@ -337,7 +346,7 @@ public class TreeWitnessReasonerLite {
 		
 		@Override
 		public String toString() {
-			return "intersection of " + ((set == null) ? "TOP" : set.toString());
+			return ((set == null) ? "properties TOP" : "properties " + set.toString());
 		}
 	}
 	
