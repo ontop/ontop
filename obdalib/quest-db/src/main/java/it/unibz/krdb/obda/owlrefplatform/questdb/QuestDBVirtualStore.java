@@ -198,4 +198,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		return questConn;
 	}
 
+	/**
+	 * Shut down Quest and its connections.
+	 */
+	public void close() {
+		questInstance.close();
+	}
 }

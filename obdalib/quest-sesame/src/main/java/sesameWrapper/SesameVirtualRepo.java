@@ -105,6 +105,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		super.shutDown();
 		try {
 			questDBConn.close();
+			virtualStore.close();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

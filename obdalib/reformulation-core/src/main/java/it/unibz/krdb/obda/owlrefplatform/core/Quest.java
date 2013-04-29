@@ -84,8 +84,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-	private static PoolProperties poolProperties = null;
-	private static DataSource tomcatPool = null;
+	private PoolProperties poolProperties = null;
+	private DataSource tomcatPool = null;
 
 	// Tomcat pool default properties
 	// These can be changed in the properties file
@@ -1093,12 +1093,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
           "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
         tomcatPool = new DataSource();
         tomcatPool.setPoolProperties(poolProperties);
-    	
+        
         log.debug("Connection Pool Properties:");
         log.debug("Start size: " + startPoolSize);
         log.debug("Max size: " + maxPoolSize);
         log.debug("Remove abandoned connections: " + removeAbandoned);
          
+	}
+	
+	public void close() {
+		tomcatPool.close();
 	}
 	
 	public void releaseSQLPoolConnection (Connection co) {
