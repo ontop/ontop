@@ -47,36 +47,26 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-	
-	private static OBDAModel obdaModel = null;
 
 	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
-		this(name, null, getObdaModel(obdaURI), null);
+		this(name, null, obdaURI, null);
 	}
 	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config)
 			throws Exception {
 
-		this(name, null, getObdaModel(obdaURI), config);
+		this(name, null, obdaURI, config);
 	}
 	
 	//constructors String, URI, URI, (Config)
 	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI)
 			throws Exception {
 
-		this(name, tboxFile, getObdaModel(obdaURI), null);
+		this(name, tboxFile, obdaURI, null);
 
 	}
 	
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI,
-			QuestPreferences config) throws Exception {
-
-		this(name, tboxFile, getObdaModel(obdaURI), config);
-	}
-	
-	public static OBDAModel getObdaModel(URI obdaURI)
+	public  OBDAModel getObdaModel(URI obdaURI)
 	{
-		if (obdaModel != null)
-			return obdaModel;
 		OBDAModel obdaModel = fac.getOBDAModel();
 	//	System.out.println(obdaURI.toString());
 		if (obdaURI.toString().endsWith(".obda"))
@@ -99,11 +89,18 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		return obdaModel;
 	}
 
-	public QuestDBVirtualStore(String name, URI tboxFile, OBDAModel obdaModel,
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri,
 			QuestPreferences config) throws Exception {
 
 		super(name);
-
+		
+		OBDAModel obdaModel = null;
+		if (obdaUri == null) {
+			obdaModel = getOBDAModelDM();
+		} else {
+			obdaModel = getObdaModel(obdaUri);
+		}
+		
 		if (config == null) {
 			config = new QuestPreferences();
 		}
@@ -134,7 +131,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		
 	
 		OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
-		this.obdaModel = obdaModel;
 		
 		questInstance = new Quest();
 		questInstance.setPreferences(config);
@@ -145,7 +141,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	
 	public QuestDBVirtualStore(String name, QuestPreferences pref) throws Exception {
 		//direct mapping : no tbox, no obda file, repo in-mem h2
-		this(name, null, getOBDAModelDM(), pref);
+		this(name, null, null, pref);
 	}
 	
 	
@@ -177,7 +173,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		
 	}
 	
-	private static OBDAModel  getOBDAModelDM() {
+	private OBDAModel  getOBDAModelDM() {
 		
 		DirectMappingEngine dm = new DirectMappingEngine();
 		dm.setBaseURI("http://example.com/base");
