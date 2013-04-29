@@ -1,6 +1,10 @@
 package sesameWrapper;
 
+import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
+import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.io.R2RMLReader;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -9,6 +13,7 @@ import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URI;
@@ -62,8 +67,27 @@ class QuestSesameMaterializerCMD {
 			}
 			
 			URI obdaURI =  new File(obdafile).toURI();
-			OBDAModel model = QuestDBVirtualStore.getObdaModel(obdaURI);
+			//create model
+			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			//obda mapping
+			if (obdaURI.toString().endsWith(".obda"))
+			{
+					ModelIOManager modelIO = new ModelIOManager(model);
+					try {
+						modelIO.load(new File(obdaURI));
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (InvalidMappingException e) {
+						e.printStackTrace();
+					}
+			}//r2rml mapping
+			else if (obdaURI.toString().endsWith(".ttl"))
+			{
+				R2RMLReader reader = new R2RMLReader(new File(obdaURI));
+				model = reader.readModel(obdaURI);
+			}
 			
+			//create onto
 			Ontology onto = null;
 			OWLOntology ontology = null;
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -79,6 +103,8 @@ class QuestSesameMaterializerCMD {
 
 			 onto =  new OWLAPI3Translator().translate(ontology);
 			
+
+			 //start materializer
 			SesameMaterializer materializer = new SesameMaterializer(onto, model);
 			RDFHandler handler = null;
 			
