@@ -555,7 +555,9 @@ search_condition returns [BooleanValueExpression value]
   
 boolean_value_expression returns [BooleanValueExpression value]
 @init {
-  booleanExp = new BooleanValueExpression();
+  if (booleanExp == null) {
+     booleanExp = new BooleanValueExpression();
+  }
 }
   : //boolean_term (OR { booleanExp.putSpecification(new OrOperator()); } boolean_term)* {
 //    boolean_term {

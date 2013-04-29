@@ -2361,9 +2361,10 @@ public class SQL99Parser extends Parser {
         BooleanValueExpression value = null;
 
 
-
+        if (booleanExp == null) {
           booleanExp = new BooleanValueExpression();
-
+        }
+        
         try {
             // C:\\Project\\IntegrateCode\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:560:3: ( boolean_term ( OR boolean_term )* )
             // C:\\Project\\IntegrateCode\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:564:5: boolean_term ( OR boolean_term )*
