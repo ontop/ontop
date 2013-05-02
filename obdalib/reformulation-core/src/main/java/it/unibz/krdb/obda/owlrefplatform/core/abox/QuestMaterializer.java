@@ -1,7 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -14,6 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,6 +94,23 @@ public class QuestMaterializer {
 		for (Predicate p: onto.getVocabulary()) {
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#") && !vocabulary.contains(p))
 				vocabulary.add(p);
+		} else
+		{
+			for (URI uri : modell.getMappings().keySet()){
+				for (OBDAMappingAxiom axiom : modell.getMappings(uri))
+				{
+					if (axiom.getTargetQuery() instanceof CQIE)
+					{
+						CQIE rule = (CQIE)axiom.getTargetQuery();
+						for (Function f: rule.getBody())
+						{
+							vocabulary.add(f.getFunctionSymbol());
+						}
+					}
+					
+				}
+			
+			}
 		}
 		
 		questInstance = new Quest();

@@ -1,9 +1,14 @@
 package it.unibz.krdb.obda.protege4.gui.action;
 
+import it.unibz.krdb.obda.LUBM.rdf_generator.Writer;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3ToFileMaterializer;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.BorderLayout;
@@ -34,7 +39,10 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -87,7 +95,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		
 		JRadioButton b1 = new JRadioButton("Add individuals to current ontology", true);
 		JRadioButton b2 = new JRadioButton("Write individuals to file in format:\t");
-		String[] fileoptions = {"OWL", "N3", "TTL"};
+		String[] fileoptions = {"RDFXML", "N3", "TTL", "OWLXML"};
 		JComboBox combo = new JComboBox(fileoptions);
 		JRadioButton b3 = new JRadioButton("Create a new ontology with the individuals");
 		
@@ -161,39 +169,73 @@ public class AboxMaterializationAction extends ProtegeAction {
 		final JFileChooser fc = new JFileChooser();
 		fc.setSelectedFile(new File(fileName));
 		fc.showSaveDialog(workspace);
+		
 		try {
 			File file = fc.getSelectedFile();
-			if (file != null){
-			OutputStream out = new FileOutputStream(file);	
-			BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-			SesameMaterializer materializer = new SesameMaterializer(obdaModel);
-			RDFWriter writer = null;
-			final long startTime = System.currentTimeMillis();
-			if (format == 0) // owl = rdfxml
-			{
-				writer = new RDFXMLWriter(fileWriter);
-				
-			} else if (format == 1) // n3
-			{
-				writer = new N3Writer(fileWriter);
+			if (file != null) {
+				OutputStream out = new FileOutputStream(file);
+				BufferedWriter fileWriter = new BufferedWriter(
+						new OutputStreamWriter(out, "UTF-8"));
 
-			} else if (format == 2) // ttl
-			{
-				writer = new TurtleWriter(fileWriter);
-			}
-			writer.startRDF();
-			while(materializer.hasNext())
-				writer.handleStatement(materializer.next());
-			writer.endRDF();
-			count = (int) materializer.getTriplesCount();
-			vocab = materializer.getVocabularySize();
-			materializer.disconnect();
-			fileWriter.close();
-			out.close();
-			final long endTime = System.currentTimeMillis();
-			time = endTime - startTime;
-			JOptionPane.showMessageDialog(this.workspace, "Task is completed\nNr. of triples: "+count+"\nVocabulary size: "+vocab+
-					"\nElapsed time: "+time+" ms.", "Done", JOptionPane.INFORMATION_MESSAGE);
+				OWLOntology ontology = modelManager.getActiveOntology();
+				OWLOntologyManager manager = modelManager
+						.getOWLOntologyManager();
+				OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+				Ontology onto = new OWLAPI3Translator().translate(ontology);
+				
+				final long startTime = System.currentTimeMillis();
+				if (format != 3) {
+					// we are going to use SESAME MATERIALIZER
+				
+					SesameMaterializer materializer = new SesameMaterializer(
+							onto, obdaModel);
+					RDFWriter writer = null;
+
+					if (format == 0) // rdfxml
+					{
+						writer = new RDFXMLWriter(fileWriter);
+
+					} else if (format == 1) // n3
+					{
+						writer = new N3Writer(fileWriter);
+
+					} else if (format == 2) // ttl
+					{
+						writer = new TurtleWriter(fileWriter);
+					}
+					writer.startRDF();
+					while (materializer.hasNext())
+						writer.handleStatement(materializer.next());
+					writer.endRDF();
+					count = (int) materializer.getTriplesCount();
+					vocab = materializer.getVocabularySize();
+					materializer.disconnect();
+				}
+
+				else {
+					// owlxml, OWL materializer
+					OWLAPI3Materializer materializer = new OWLAPI3Materializer(onto,
+							obdaModel);
+
+					while (materializer.hasNext())
+						manager.addAxiom(ontology, materializer.next());
+					manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
+							new WriterDocumentTarget(fileWriter));
+
+					count = (int) materializer.getTriplesCount();
+					vocab = materializer.getVocabularySize();
+					materializer.disconnect();
+				}
+
+				fileWriter.close();
+				out.close();
+				final long endTime = System.currentTimeMillis();
+				time = endTime - startTime;
+				JOptionPane.showMessageDialog(this.workspace,
+						"Task is completed\nNr. of triples: " + count
+								+ "\nVocabulary size: " + vocab
+								+ "\nElapsed time: " + time + " ms.", "Done",
+						JOptionPane.INFORMATION_MESSAGE);
 			}
 		} catch (FileNotFoundException e) {
 			throw e;

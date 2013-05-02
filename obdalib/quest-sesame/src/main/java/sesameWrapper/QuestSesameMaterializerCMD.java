@@ -95,14 +95,12 @@ class QuestSesameMaterializerCMD {
 			if (owlfile != null) {
 			// Loading the OWL ontology from the file as with normal OWLReasoners
 				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+				 onto =  new OWLAPI3Translator().translate(ontology);
 			}
 			else {
 				ontology = manager.createOntology();
 			}
 			OBDAModelSynchronizer.declarePredicates(ontology, model);
-
-			 onto =  new OWLAPI3Translator().translate(ontology);
-			
 
 			 //start materializer
 			SesameMaterializer materializer = new SesameMaterializer(onto, model);

@@ -76,29 +76,18 @@ public class QuestOWLMaterializerCMD {
 
 			OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
-			Ontology onto =  new OWLAPI3Translator().translate(ontology);
-			OWLAPI3Materializer materializer = new OWLAPI3Materializer(onto, obdaModel);
-		
-			
-//			if (format.equals("N3"))
-//			{
-//				OWLAPI3ToFileMaterializer.materializeN3(writer, materializer);
-//			}
-//			else if (format.equals("Turtle"))
-//			{
-//				ontology = manager.createOntology();
-//				while(materializer.hasNext()) 
-//					manager.addAxiom(ontology, materializer.next());
-//				manager.saveOntology(ontology, new TurtleOntologyFormat(), new WriterDocumentTarget(writer));
-//				
-//			}
-//			else if (format.equals("OWLXML"))
-			{
-				while(materializer.hasNext()) 
-					manager.addAxiom(ontology, materializer.next());
-				manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
+			OWLAPI3Materializer materializer = null;
+			if (owlfile != null) {
+				Ontology onto =  new OWLAPI3Translator().translate(ontology);
+				materializer = new OWLAPI3Materializer(onto, obdaModel);
 			}
-
+			else
+				materializer = new OWLAPI3Materializer(obdaModel);
+	
+			while(materializer.hasNext()) 
+				manager.addAxiom(ontology, materializer.next());
+			manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
+			
 			System.out.println("NR of TRIPLES: "+materializer.getTriplesCount());
 			System.out.println("VOCABULARY SIZE (NR of QUERIES): "+materializer.getVocabularySize());
 			
