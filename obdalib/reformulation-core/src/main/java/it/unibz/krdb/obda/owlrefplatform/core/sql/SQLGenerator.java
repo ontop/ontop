@@ -163,31 +163,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * nested expressions (JOINS) are kept at their respective levels to
 			 * generate correct ON and wHERE clauses.
 			 */
-			log.debug("Before pushing equalities: \n{}", cq);
+//			log.debug("Before pushing equalities: \n{}", cq);
 
 			DatalogNormalizer.pushEqualities(cq, false);
 
-			log.debug("Before folding Joins: \n{}", cq);
+//			log.debug("Before folding Joins: \n{}", cq);
 
 			DatalogNormalizer.foldJoinTrees(cq, false);
 
-			log.debug("Before pulling out equalities: \n{}", cq);
+//			log.debug("Before pulling out equalities: \n{}", cq);
 			
 			DatalogNormalizer.pullOutEqualities(cq);
 			
-			log.debug("Before pulling out Left Join Conditions: \n{}", cq);
+//			log.debug("Before pulling out Left Join Conditions: \n{}", cq);
 			
 			DatalogNormalizer.pullOutLeftJoinConditions(cq);
 			
-			log.debug("Before pulling up nested references: \n{}", cq);
+//			log.debug("Before pulling up nested references: \n{}", cq);
 
 			DatalogNormalizer.pullUpNestedReferences(cq, false);
 
-			log.debug("Before adding trivial equalities: \n{}, cq);", cq);
+//			log.debug("Before adding trivial equalities: \n{}, cq);", cq);
 
 			DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
 
-			log.debug("Normalized CQ: \n{}", cq);
+//			log.debug("Normalized CQ: \n{}", cq);
 
 			Predicate headPredicate = cq.getHead().getFunctionSymbol();
 			if (!headPredicate.getName().toString().equals("ans1")) {
