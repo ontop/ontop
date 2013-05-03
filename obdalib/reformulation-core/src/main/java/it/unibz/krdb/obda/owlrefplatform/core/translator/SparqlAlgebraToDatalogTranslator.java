@@ -118,9 +118,13 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private NewLiteralComparator comparator = new NewLiteralComparator();
 
-	private final UriTemplateMatcher uriTemplateMatcher;
+	private UriTemplateMatcher uriTemplateMatcher;
 
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
+		uriTemplateMatcher = templateMatcher;
+	}
+	
+	public void setTemplateMatcher(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
 	}
 
@@ -152,7 +156,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		Op op = Algebra.compile(arqQuery);
 
-		log.debug("SPARQL algebra: \n{}", op.toString());
+		log.debug("SPARQL algebra: \n{}", op);
 
 		DatalogProgram result = ofac.getDatalogProgram();
 
