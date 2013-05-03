@@ -702,7 +702,7 @@ public class CQCUtilities {
 	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
 
 		int initialsize = queries.size();
-		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
+//		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
 		long startime = System.currentTimeMillis();
 
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
@@ -733,7 +733,7 @@ public class CQCUtilities {
 		for (int i = 0; i < queries.size(); i++) {
 			for (int j = queries.size() - 1; j > i; j--) {
 				if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
-					log.debug("REMOVE: " + queries.get(i));
+//					log.debug("REMOVE: " + queries.get(i));
 					queries.remove(i);
 					i = -1;
 					break;
@@ -745,7 +745,7 @@ public class CQCUtilities {
 			for (int i = queries.size() - 1; i > 0; i--) {
 				for (int j = 0; j < i; j++) {
 					if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
-						log.debug("REMOVE: " + queries.get(i));
+//						log.debug("REMOVE: " + queries.get(i));
 						queries.remove(i);
 						i = +1;
 						break;
@@ -758,8 +758,8 @@ public class CQCUtilities {
 		int queriesremoved = initialsize - newsize;
 		long endtime = System.currentTimeMillis();
 		long time = (endtime - startime) / 1000;
-		log.debug("Done. Time elapse: {}s", time);
-		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
+//		log.debug("Done. Time elapse: {}s", time);
+//		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
 	}
 
@@ -874,7 +874,7 @@ public class CQCUtilities {
 		queries.addAll(queriesInput);
 		
 		int initialsize = queries.size();
-		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
+//		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 
 		double startime = System.currentTimeMillis();
 
@@ -898,7 +898,7 @@ public class CQCUtilities {
 				for (int j = queries.size() - 1; j > i; j--) {
 					CQIE query2 = queries.get(j);
 					if (cqc.isContainedIn(query2)) {
-						log.debug("REMOVE (SIGMA): " + queries.get(i));
+//						log.debug("REMOVE (SIGMA): " + queries.get(i));
 						queries.remove(i);
 						i -= 1;
 						break;
@@ -911,7 +911,7 @@ public class CQCUtilities {
 					CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
 					for (int j = 0; j < i; j++) {
 						if (cqc.isContainedIn(queries.get(j))) {
-							log.debug("REMOVE (SIGMA): " + queries.get(i));
+//							log.debug("REMOVE (SIGMA): " + queries.get(i));
 							queries.remove(i);
 							break;
 						}
@@ -928,7 +928,7 @@ public class CQCUtilities {
 				for (int j = queries.size() - 1; j > i; j--) {
 					CQIE query2 = queries.get(j);
 					if (cqc.isContainedIn(query2)) {
-						log.debug("REMOVE (FK): " + queries.get(i));
+//						log.debug("REMOVE (FK): " + queries.get(i));
 						queries.remove(i);
 						i -= 1;
 						break;
@@ -942,7 +942,7 @@ public class CQCUtilities {
 					if (cqc.rules != null)
 					for (int j = 0; j < i; j++) {
 						if (cqc.isContainedIn(queries.get(j))) {
-							log.debug("REMOVE (FK): " + queries.get(i));
+//							log.debug("REMOVE (FK): " + queries.get(i));
 							queries.remove(i);
 							break;
 						}
@@ -955,7 +955,7 @@ public class CQCUtilities {
 		double endtime = System.currentTimeMillis();
 		double time = (endtime - startime) / 1000;
 
-		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
+//		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
 		
 		return queries;
 	}

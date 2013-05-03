@@ -518,7 +518,7 @@ public class OWLAPI3Translator {
 			SubClassAxiomImpl inc = (SubClassAxiomImpl) ofac.createSubClassAxiom(subDescription, superDescription);
 			dl_onto.addAssertion(inc);
 		} else {
-			log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
+//			log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
 
 			/*
 			 * We found an existential, we need to get an auxiliary set of

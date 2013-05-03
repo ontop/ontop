@@ -275,7 +275,7 @@ public class OntologyImpl implements Ontology {
 		if (isSaturated) {
 			return;
 		}
-		log.debug("Given assertions: {}", originalassertions);
+//		log.debug("Given assertions: {}", originalassertions);
 		/*
 		 * Our strategy requires that for every aciom R ISA S, we also have the
 		 * axioms \exists R ISA \exist S and \exists R- ISA \exists S- this
@@ -283,7 +283,7 @@ public class OntologyImpl implements Ontology {
 		 */
 		originalassertions.addAll(computeExistentials());
 		saturateAssertions();
-		log.debug("Computed assertions: {}", this.originalassertions);
+//		log.debug("Computed assertions: {}", this.originalassertions);
 		isSaturated = true;
 	}
 

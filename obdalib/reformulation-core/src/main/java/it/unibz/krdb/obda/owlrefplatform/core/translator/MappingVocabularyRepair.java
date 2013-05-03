@@ -42,19 +42,12 @@ public class MappingVocabularyRepair {
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
 	public void fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
-		// if (vocabulary.size() == 0) {
-		// // Nothing to repair!
-		// System.out.println("Test");
-		// return;
-		// }
-
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));
 			model.removeAllMappings(source.getSourceID());
 			try {
 				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
-
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -70,7 +63,7 @@ public class MappingVocabularyRepair {
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
-		log.debug("Reparing/validating {} mappings", originalMappings.size());
+//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<IRI, Predicate> urimap = new HashMap<IRI, Predicate>();
 		for (Predicate p : vocabulary) {
 			urimap.put(p.getName(), p);
@@ -89,7 +82,6 @@ public class MappingVocabularyRepair {
 				if (predicate == null) {
 					throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
 				}
-
 				/* Fixing terms */
 				LinkedList<NewLiteral> newTerms = new LinkedList<NewLiteral>();
 				for (NewLiteral term : atom.getTerms()) {
@@ -104,21 +96,16 @@ public class MappingVocabularyRepair {
 				if (!(t0 instanceof Function)){
 					newTerms.set(0, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), t0));
 				}
-				
-				
-				
 				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
 					newTerms.set(1, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
 				}
-				
-
 				newatom = dfac.getAtom(predicate, newTerms);
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
 			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
 		}
-		log.debug("Repair done. Returning {} mappings", result.size());
+//		log.debug("Repair done. Returning {} mappings", result.size());
 		return result;
 	}
 

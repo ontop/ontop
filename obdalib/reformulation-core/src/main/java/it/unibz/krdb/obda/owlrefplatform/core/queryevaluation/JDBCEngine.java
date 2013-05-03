@@ -50,7 +50,7 @@ public class JDBCEngine implements EvaluationEngine {
 		String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
 		String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		try {
-			Class d = Class.forName(driver);
+			Class.forName(driver);
 		} catch (Exception e) {
 			log.warn("WARNING: JDBC Driver not found exception or may have been already loaded by the system.");
 			// log.debug(e.getMessage(), e);
@@ -69,16 +69,17 @@ public class JDBCEngine implements EvaluationEngine {
 			try {
 				connection.close();
 			} catch (Exception e) {
-				log.debug(e.getMessage());
+				log.error(e.getMessage());
 			}
 		}
 	}
 
 	public ResultSet execute(String sql) throws Exception {
-		log.debug("Executing SQL query: \n{}", sql);
+//		log.debug("Executing SQL query: \n{}", sql);
 		if (!actionCanceled) {
-			if (connection == null)
+			if (connection == null) {
 				throw new SQLException("No connection has been stablished yet");
+			}
 			statement = connection.createStatement();
 			return statement.executeQuery(sql);
 		} else {

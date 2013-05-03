@@ -93,21 +93,10 @@ public class QueryVocabularyValidator implements Serializable {
 			boolean isPredicateValid = isClass || isObjectProp || isDataProp
 					|| isBooleanOpFunction;
 
-			String debugMsg = "The predicate: [" + predicate.toString() + "]";
-			if (isPredicateValid) {
-				if (isClass) {
-					debugMsg += " is a Class.";
-				} else if (isObjectProp) {
-					debugMsg += " is an Object property.";
-				} else if (isDataProp) {
-					debugMsg += " is a Data property.";
-				} else if (isBooleanOpFunction) {
-					debugMsg += " is a Boolean operation function.";
-				}
-				log.debug(debugMsg);
-			} else {
+			if (!isPredicateValid) {
 				invalidPredicates.add(predicate.toString());
-				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
+				String debugMsg = "The predicate: [" + predicate.toString() + "]";
+				log.warn("WARNING: {} is missing in the ontology!", debugMsg);
 			}
 		}
 	}

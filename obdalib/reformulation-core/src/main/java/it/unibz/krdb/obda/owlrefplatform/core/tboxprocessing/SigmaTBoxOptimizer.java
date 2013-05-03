@@ -92,7 +92,7 @@ public class SigmaTBoxOptimizer {
 
 			}
 		}
-		log.debug("Finished semantic-reduction.");
+//		log.debug("Finished semantic-reduction.");
 		return rv;
 	}
 
@@ -101,7 +101,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant_role(parent, child))
 			return true;
 		else {
-			log.debug("Not directly redundant role {} {}", parent, child);
+//			log.debug("Not directly redundant role {} {}", parent, child);
 			for (DAGNode child_prime : parent.getChildren()) {
 				if (!child_prime.equals(child) && check_directly_redundant_role(child_prime, child)
 						&& !check_redundant(child_prime, parent)) {
@@ -109,7 +109,7 @@ public class SigmaTBoxOptimizer {
 				}
 			}
 		}
-		log.debug("Not redundant role {} {}", parent, child);
+//		log.debug("Not redundant role {} {}", parent, child);
 
 		return false;
 	}
