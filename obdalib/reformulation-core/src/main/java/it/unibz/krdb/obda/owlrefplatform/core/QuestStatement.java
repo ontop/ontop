@@ -64,7 +64,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryRewriter rewriter = null;
 
-	private UnfoldingMechanism unfoldingmechanism = null;
+//	private UnfoldingMechanism unfoldingmechanism = null;
 
 	private SQLQueryGenerator querygenerator = null;
 
@@ -131,7 +131,7 @@ public class QuestStatement implements OBDAStatement {
 		this.repository = questinstance.dataRepository;
 		this.conn = conn;
 		this.rewriter = questinstance.rewriter;
-		this.unfoldingmechanism = questinstance.unfolder;
+//		this.unfoldingmechanism = questinstance.unfolder;
 		this.querygenerator = questinstance.datasourceQueryGenerator;
 
 		this.sqlstatement = st;
@@ -180,6 +180,8 @@ public class QuestStatement implements OBDAStatement {
 
 		@Override
 		public void run() {
+			
+			log.debug("Executing query: \n{}", strquery);
 			
 			try {
 				
@@ -252,7 +254,7 @@ public class QuestStatement implements OBDAStatement {
 								+ e.getMessage() + "\nSQL query:\n " + sql, e);
 					}
 				}
-//				log.debug("Finish.\n");
+				log.debug("Execution finished.\n");
 			} catch (Exception e) {
 				e.printStackTrace();
 				exception = e;
@@ -312,7 +314,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			program = translator.translate(query);
 
-//			log.debug("Translated query: \n{}", program.toString());
+			log.debug("Translated query: \n{}", program);
 
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(),
 					new HashMap<Predicate, List<Integer>>());
@@ -320,14 +322,14 @@ public class QuestStatement implements OBDAStatement {
 
 			program = unfolder.unfold(program, "ans1");
 
-//			log.debug("Flattened query: \n{}", program.toString());
+			log.debug("Flattened query: \n{}", program);
 		} catch (Exception e) {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
 			throw ex;
 		}
-//		log.debug("Replacing equivalences...");
+		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
 		return program;
 	}
@@ -337,20 +339,20 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = unfoldingmechanism.unfold(
+		DatalogProgram unfolding = questInstance.unfolder.unfold(
 				(DatalogProgram) query, "ans1");
-//		log.debug("Partial evaluation: {}\n", unfolding);
+		log.debug("Partial evaluation: \n{}", unfolding);
 
 		removeNonAnswerQueries(unfolding);
 
-//		log.debug("After target rules removed: \n{}", unfolding);
+		log.debug("After target rules removed: \n{}", unfolding);
 		
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
 		evaluator.evaluateExpressions(unfolding);
 
-//		log.debug("Boolean expression evaluated: \n{}", unfolding);
-//		log.debug("Partial evaluation ended.");
+		log.debug("Boolean expression evaluated: \n{}", unfolding);
+		log.debug("Partial evaluation ended.");
 
 		return unfolding;
 	}
@@ -371,13 +373,13 @@ public class QuestStatement implements OBDAStatement {
 		if (((DatalogProgram) query).getRules().size() == 0) {
 			return "";
 		}
-//		log.debug("Producing the SQL string...");
+		log.debug("Producing the SQL string...");
 
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) query,
 				signature);
 
-//		log.debug("Resulting sql: \n{}", sql);
+		log.debug("Resulting sql: \n{}", sql);
 		return sql;
 	}
 
@@ -465,8 +467,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Returns the final rewriting of the given query
 	 */
 	public String getRewriting(String strquery) throws Exception {
-		// TODO FIX to limit to SPARQL input and output
-//		log.debug("Input user query:\n" + strquery);
+		// TODO FIX to limit to SPARQL input and output		
 
 		Query query = QueryFactory.create(strquery);
 		DatalogProgram program = translateAndPreProcess(query);
@@ -503,14 +504,14 @@ public class QuestStatement implements OBDAStatement {
 			Query query = QueryFactory.create(strquery);
 			DatalogProgram program = translateAndPreProcess(query);
 			try {
-//				log.debug("Input user query:\n" + strquery);
+//				log.debug("Input query:\n{}", strquery);
 
 				
 				for (CQIE q : program.getRules()) {
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
 
-//				log.debug("Normalized program: \n{}", program);
+				log.debug("Normalized program: \n{}", program);
 
 				/*
 				 * Empty unfolding, constructing an empty result set
@@ -525,7 +526,7 @@ public class QuestStatement implements OBDAStatement {
 				optimizeQueryWithSigmaRules(program, rulesIndex);
 				
 			} catch (Exception e1) {
-				log.error(e1.getMessage(), e1);
+				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(e1);
 				obdaException.setStackTrace(e1.getStackTrace());
 				throw obdaException;
@@ -541,7 +542,7 @@ public class QuestStatement implements OBDAStatement {
 				optimizeQueryWithSigmaRules(programAfterRewriting, rulesIndex);
 
 			} catch (Exception e1) {
-				log.error(e1.getMessage(), e1);
+				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(
 						"Error rewriting query. \n" + e1.getMessage());
 				obdaException.setStackTrace(e1.getStackTrace());
@@ -554,7 +555,7 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				unfoldingTime = endTime - startTime;
 			} catch (Exception e1) {
-				log.error(e1.getMessage(), e1);
+				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(
 						"Error unfolding query. \n" + e1.getMessage());
 				obdaException.setStackTrace(e1.getStackTrace());
@@ -566,7 +567,7 @@ public class QuestStatement implements OBDAStatement {
 				sql = getSQL(programAfterUnfolding, signature);
 				cacheQueryAndProperties(strquery, sql);
 			} catch (Exception e1) {
-				log.error(e1.getMessage(), e1);
+				log.debug(e1.getMessage(), e1);
 
 				OBDAException obdaException = new OBDAException(
 						"Error generating SQL. \n" + e1.getMessage());
@@ -869,6 +870,14 @@ public class QuestStatement implements OBDAStatement {
 			} catch (IOException e) {
 				log.error(e.getMessage());
 			}
+		}
+		
+		try {
+			questInstance.updateSemanticIndexMappings();
+			translator.setTemplateMatcher(questInstance.getUriTemplateMatcher());
+		
+		} catch (Exception e) {
+			log.error("Error updating semantic index mappings after insert.", e);
 		}
 
 		return result;

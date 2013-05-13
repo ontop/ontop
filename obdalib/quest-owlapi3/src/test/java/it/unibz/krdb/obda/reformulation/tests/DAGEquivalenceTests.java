@@ -10,8 +10,8 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
 
 import java.io.File;
 import java.net.URI;

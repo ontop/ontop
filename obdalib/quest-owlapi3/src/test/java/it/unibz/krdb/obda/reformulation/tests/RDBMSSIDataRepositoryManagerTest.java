@@ -129,15 +129,15 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		int count = 0;
 		for (Assertion ass : list) {
-			//System.out.println(ass.toString());
+			System.out.println(ass.toString());
 			count += 1;
 		}
-		assertTrue("count: " + count, count == 7);
+		assertEquals(9, count);
 
 		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 7);
+		assertTrue("count: " + count, count == 9);
 
 		// dbman.getDropDDL(out);
 
@@ -207,12 +207,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 //			//System.out.println(ass.toString());
 			count += 1;
 		}
-		assertTrue("count: " + count, count == 7);
+		assertTrue("count: " + count, count == 9);
 
 //		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 7);
+		assertTrue("count: " + count, count == 9);
 
 		conn.close();
 	}

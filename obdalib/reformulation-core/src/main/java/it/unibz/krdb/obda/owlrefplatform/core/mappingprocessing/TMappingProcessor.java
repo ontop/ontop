@@ -327,7 +327,7 @@ public class TMappingProcessor implements Serializable {
 		return newProgram;
 	}
 
-	public DatalogProgram getTMappings(DatalogProgram originalMappings) throws OBDAException {
+	public DatalogProgram getTMappings(DatalogProgram originalMappings, boolean full) throws OBDAException {
 
 		/*
 		 * Normalizing constants
@@ -390,6 +390,10 @@ public class TMappingProcessor implements Serializable {
 					Function newMappingHead = null;
 					Function oldMappingHead = childmapping.getHead();
 					if (!requiresInverse) {
+						
+						if (!full)
+							continue;
+						
 						newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
 					} else {
 						NewLiteral term0 = oldMappingHead.getTerms().get(1);
@@ -474,6 +478,8 @@ public class TMappingProcessor implements Serializable {
 				boolean isClass = true;
 				boolean isInverse = false;
 				if (childDescription instanceof OClass) {
+					if (!full)
+						continue;
 					childPredicate = ((OClass) childDescription).getPredicate();
 				} else if (childDescription instanceof PropertySomeRestriction) {
 					childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();

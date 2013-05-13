@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -150,7 +151,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	 */
 	public boolean checkMetadata(Connection conn) throws SQLException;
 
-	public Collection<OBDAMappingAxiom> getMappings();
+	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException;
 
 	public void collectStatistics(Connection conn) throws SQLException;
 

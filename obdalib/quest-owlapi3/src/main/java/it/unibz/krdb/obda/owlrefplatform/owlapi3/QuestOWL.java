@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -90,6 +91,7 @@ import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,8 +234,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		// Load the preferences
 		questInstance.setPreferences(preferences);
 		
+		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
-			questInstance.setABox(new OWLAPI3ABoxIterator(man.getImportsClosure(getRootOntology()),
+			questInstance.setABox(new OWLAPI3ABoxIterator(importsClosure,
 							questInstance.getEquivalenceMap()));
 			
 		}
@@ -252,12 +255,12 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
-			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
+			if (false & unfoldingMode.equals(QuestConstants.CLASSIC)) {
 				QuestStatement st = conn.createStatement();
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(man.getImportsClosure(getRootOntology()),
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
 							questInstance.getEquivalenceMap());
 					st.insertData(aBoxIter, 5000, 500);
 				}
@@ -274,8 +277,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();
 				}
-				st.createIndexes();
+//				st.createIndexes();
 				st.close();
+				if (!conn.getAutoCommit())
 				conn.commit();
 			} else {
 				// VIRTUAL MODE - NO-OP
@@ -320,7 +324,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 	 * are used later when classify() is called.
 	 * 
 	 */
-	private void loadOntologies() throws Exception {
+	public static Ontology loadOntologies(OWLOntology ontology) throws Exception {
 		/*
 		 * We will keep track of the loaded ontologies and translate the TBox
 		 * part of them into our internal representation.
@@ -329,15 +333,21 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 
-		try {
+		
 
-			OWLOntologyManager man = getRootOntology().getOWLOntologyManager();
-			Set<OWLOntology> clousure = man.getImportsClosure(getRootOntology());
-			translatedOntologyMerge = translator.mergeTranslateOntologies(clousure);
-		} catch (Exception e) {
-			throw e;
-		}
+			OWLOntologyManager man = ontology.getOWLOntologyManager();
+			Set<OWLOntology> clousure = man.getImportsClosure(ontology);
+			
+			
+			
+			OWLOntologyMerger merger = new OWLOntologyMerger(man);
+			ontology = merger.createMergedOntology(man, IRI.create("http://www.unibz.it/krdb/obda/ontop/quest/merge.owl"));			
+			
+			Ontology translatedOntologyMerge = translator.translate(ontology);
+			
+		
 		log.debug("Ontology loaded: {}", translatedOntologyMerge);
+		return translatedOntologyMerge;
 	}
 
 	@Override
@@ -406,7 +416,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			 * axioms of the closure of the root ontology
 			 */
 
-			loadOntologies();
+			this.translatedOntologyMerge = loadOntologies(getRootOntology());
 
 			classHierarchyInfo.computeHierarchy();
 			objectPropertyHierarchyInfo.computeHierarchy();
@@ -425,7 +435,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 				questException = e;
 				errorMessage = e.getMessage();
 				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
-				log.error(e.getMessage());
+				log.error(e.getMessage(), e);
 			}
 
 		} catch (Exception e) {

@@ -1,0 +1,1055 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.unibz.it/krdb/semweb/quest/benchmarks/lubm-ex-20-uni1/"
+     xml:base="http://www.unibz.it/krdb/semweb/quest/benchmarks/lubm-ex-20-uni1/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:univ-bench="http://swat.cse.lehigh.edu/onto/univ-bench.owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.unibz.it/krdb/semweb/quest/benchmarks/lubm-ex-20-uni1/">
+        <owl:ObjectProperty></owl:ObjectProperty>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_1.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_10.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_11.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_12.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_13.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_14.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_2.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_3.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_4.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_5.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_6.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_7.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_8.owl"/>
+        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_9.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#advisor -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#advisor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#affiliateOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#affiliateOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#affiliatedOrganizationOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#affiliatedOrganizationOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#degreeFrom -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#degreeFrom"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#doctoralDegreeFrom -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#doctoralDegreeFrom"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#hasAlumnus -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#hasAlumnus"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#hasExamRecord -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#hasExamRecord"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#hasFaculty -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#hasFaculty"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#headOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#headOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#isPartOfUniversity -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#isPartOfUniversity"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#listedCourse -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#listedCourse"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#mastersDegreeFrom -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#mastersDegreeFrom"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#member -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#member"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#memberOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#memberOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#orgPublication -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#orgPublication"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#publicationAuthor -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#publicationAuthor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#publicationDate -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#publicationDate"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#publicationResearch -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#publicationResearch"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#researchProject -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#researchProject"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#softwareDocumentation -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#softwareDocumentation"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#softwareVersion -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#softwareVersion"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#subOrganizationOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#subOrganizationOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#takesCourse -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#takesCourse"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#teacherOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#teacherOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#teachingAssistantOf -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#teachingAssistantOf"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#tenured -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#tenured"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#undergraduateDegreeFrom -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#undergraduateDegreeFrom"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#worksFor -->
+
+    <owl:ObjectProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#worksFor"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#age -->
+
+    <owl:DatatypeProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#age"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#emailAddress -->
+
+    <owl:DatatypeProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#emailAddress"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#name -->
+
+    <owl:DatatypeProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#name"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#researchInterest -->
+
+    <owl:DatatypeProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#researchInterest"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#telephone -->
+
+    <owl:DatatypeProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#telephone"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#title -->
+
+    <owl:DatatypeProperty rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#title"/>
+    
+
+
+    <!-- http://www.w3.org/2000/01/rdf-schema#label -->
+
+    <owl:DatatypeProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#label"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#AdministrativeStaff -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#AdministrativeStaff"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Article -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Article"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#AssistantProfessor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#AssistantProfessor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#AssociateProfessor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#AssociateProfessor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#BachelorExam -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#BachelorExam"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Book -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Book"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Chair -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Chair"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#ClericalStaff -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#ClericalStaff"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#College -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#College"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#ConferencePaper -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#ConferencePaper"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Dean -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Dean"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Director -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Director"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Employee -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Employee"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#ExDean -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#ExDean"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Exam -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Exam"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#ExamRecord -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#ExamRecord"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Faculty -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Faculty"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#FullProfessor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#FullProfessor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#GraduateCourse -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#GraduateCourse"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#GraduateStudent -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#GraduateStudent"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Institute -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Institute"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#JournalArticle -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#JournalArticle"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Lecturer -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Lecturer"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Manual -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Manual"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Organization -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Organization"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Person -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Person"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#PostDoc -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#PostDoc"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Program -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Program"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Publication -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Publication"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Research -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Research"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#ResearchAssistant -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#ResearchAssistant"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#ResearchGroup -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#ResearchGroup"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Schedule -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Schedule"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Software -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Software"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Specification -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Specification"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj10Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj11Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj12Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj13Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj14Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj15Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj16Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj17Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj18Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj19Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj1Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj20Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj2Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj3Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj4Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj5Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj6Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj7Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj8Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Course -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Course"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Department -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Department"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Professor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Professor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Student -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Subj9Student"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#SystemsStaff -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#SystemsStaff"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#TeachingAssistant -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#TeachingAssistant"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#TechnicalReport -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#TechnicalReport"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#UndergraduateStudent -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#UndergraduateStudent"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#University -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#University"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#UnofficialPublication -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#UnofficialPublication"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#VisitingProfessor -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#VisitingProfessor"/>
+    
+
+
+    <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#Work -->
+
+    <owl:Class rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl#Work"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="http://www.w3.org/2002/07/owl#Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version [Not Released]) http://owlapi.sourceforge.net -->
+

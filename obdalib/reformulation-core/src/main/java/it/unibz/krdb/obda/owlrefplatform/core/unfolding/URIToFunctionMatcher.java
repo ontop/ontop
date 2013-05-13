@@ -22,6 +22,10 @@ public class URIToFunctionMatcher implements Serializable {
 	public URIToFunctionMatcher(Map<String, Function> functionTermMap) {
 		this.functTermMap = functionTermMap;
 	}
+	
+	public void put(String st, Function f) {
+		functTermMap.put(st, f);
+	}
 
 	/***
 	 * Looks in the list of functional terms registred during the creation of

@@ -103,7 +103,12 @@ public class DBMetadata implements Serializable {
 	 *            The string name.
 	 */
 	public DataDefinition getDefinition(String name) {
-		return schema.get(name);
+		DataDefinition def = schema.get(name);
+		if (def == null)
+			def = schema.get(name.toLowerCase());
+		if (def == null)
+			def = schema.get(name.toUpperCase());
+		return def;
 	}
 	
 	/**

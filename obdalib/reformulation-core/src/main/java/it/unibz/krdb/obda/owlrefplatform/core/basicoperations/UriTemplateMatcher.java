@@ -27,6 +27,11 @@ public class UriTemplateMatcher {
 		// NO-OP
 	}
 	
+	
+	public void clear() {
+		uriTemplateMatcher.clear();
+	}
+	
 	public UriTemplateMatcher(Map<Pattern, Function> existing) {
 		uriTemplateMatcher.putAll(existing);
 	}

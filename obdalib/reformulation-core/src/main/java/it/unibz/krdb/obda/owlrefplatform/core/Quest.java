@@ -84,8 +84,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-	private PoolProperties poolProperties = null;
-	private DataSource tomcatPool = null;
+	private static PoolProperties poolProperties = null;
+	private static DataSource tomcatPool = null;
 
 	// Tomcat pool default properties
 	// These can be changed in the properties file
@@ -93,8 +93,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected int startPoolSize = 2;
 	protected boolean removeAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
-	
-	
+
 	/***
 	 * Internal components
 	 */
@@ -214,6 +213,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
+	private DBMetadata metadata;
+
+	private Map<Predicate, List<Integer>> pkeys;
+
 	protected Map<String, String> getSQLCache() {
 		return querycache;
 	}
@@ -236,20 +239,27 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
-		inputOBDAModel = (OBDAModel) model.clone();
+
 		aboxIterator = new Iterator<Assertion>() {
 			@Override
 			public boolean hasNext() {
 				return false;
 			}
+
 			@Override
 			public Assertion next() {
 				return null;
 			}
+
 			@Override
 			public void remove() {
 			}
 		};
+
+		if (model == null) {
+			model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+		}
+		inputOBDAModel = (OBDAModel) model.clone();
 	}
 
 	public OBDAModel getOBDAModel() {
@@ -324,7 +334,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		abandonedTimeout = Integer.valueOf((String) preferences.get(QuestPreferences.ABANDONED_TIMEOUT));
 		startPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.INIT_POOL_SIZE));
 		maxPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.MAX_POOL_SIZE));
-		
+
 		reformulate = Boolean.valueOf((String) preferences.get(QuestPreferences.REWRITE));
 		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
@@ -350,10 +360,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		if (!unfoldingMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
 			log.debug("Schema configuration: {}", dbType);
-			log.debug("Get ABox assertions from OBDA models: {}",
-					bObtainFromMappings);
-			log.debug("Get ABox assertions from ontology: {}",
-					bObtainFromOntology);
+			log.debug("Get ABox assertions from OBDA models: {}", bObtainFromMappings);
+			log.debug("Get ABox assertions from ontology: {}", bObtainFromOntology);
 		}
 
 	}
@@ -407,8 +415,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Input checking (we need to extend this)
 		 */
 
-		if (unfoldingMode.equals(QuestConstants.VIRTUAL)
-				&& inputOBDAModel == null) {
+		if (unfoldingMode.equals(QuestConstants.VIRTUAL) && inputOBDAModel == null) {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
 
@@ -416,14 +423,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
 
-		// log.debug("Fixing vocabulary typing");
-
 		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
 			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
 			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
 		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
+
 		sigma = OntologyFactoryImpl.getInstance().createOntology();
 
 		/*
@@ -456,7 +462,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
 				if (inmemory) {
 					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:questrepository:"	+ System.currentTimeMillis();
+					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis();
 					String username = "sa";
 					String password = "";
 
@@ -469,32 +475,71 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 				} else {
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver);
+
+					if (aboxJdbcURL.trim().equals(""))
+						throw new OBDAException("Found empty JDBC_URL parametery. Quest in CLASSIC/JDBC mode requires a JDBC_URL value.");
+
+					if (aboxJdbcDriver.trim().equals(""))
+						throw new OBDAException(
+								"Found empty JDBC_DRIVER parametery. Quest in CLASSIC/JDBC mode requires a JDBC_DRIVER value.");
+
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver.trim());
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, aboxJdbcPassword);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, aboxJdbcUser);
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL.trim());
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, aboxJdbcUser.trim());
 					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 				}
-				
+
+				if (!dbType.equals(QuestConstants.SEMANTIC)) {
+					throw new Exception(dbType
+							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
+				}
+
+				// TODO one of these is redundant??? check
 				connect();
-				
 				// setup connection pool
 				setupConnectionPool();
 
-				if (dbType.equals(QuestConstants.SEMANTIC)) {
-					dataRepository = new RDBMSSIRepositoryManager(reformulationOntology.getVocabulary());
-					dataRepository.addRepositoryChangedListener(this);
-				} else {
-					throw new Exception(dbType + " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
-				}
+				dataRepository = new RDBMSSIRepositoryManager(reformulationOntology.getVocabulary());
+				dataRepository.addRepositoryChangedListener(this);
+
 				dataRepository.setTBox(reformulationOntology);
+				for (Axiom axiom : dataRepository.getABoxDependencies().getAssertions()) {
+					sigma.addEntities(axiom.getReferencedEntities());
+					sigma.addAssertion(axiom);
+				}
 
-				/* Creating the ABox repository */
+				if (inmemory) {
 
-				if (!dataRepository.isDBSchemaDefined(localConnection)) {
-					dataRepository.createDBSchema(localConnection, false);
-					dataRepository.insertMetadata(localConnection);
+					/*
+					 * in this case we we work in memory (with H2), the database
+					 * is clean and Quest will insert new Abox assertions into
+					 * the database.
+					 */
+
+					/* Creating the ABox repository */
+
+					if (!dataRepository.isDBSchemaDefined(localConnection)) {
+						dataRepository.createDBSchema(localConnection, false);
+						dataRepository.insertMetadata(localConnection);
+					}
+
+				} else {
+					/*
+					 * Here we expect the repository to be already created in
+					 * the database, we will restore the repository and we will
+					 * NOT insert any data in the repo, it should have been
+					 * inserted already.
+					 */
+					dataRepository.loadMetadata(localConnection);
+
+					// TODO add code to verify that the existing semantic index
+					// repository can be used
+					// with the current ontology, e.g., checking the vocabulary
+					// of URIs, checking the
+					// ranges w.r.t. to the ontology entailments, etc.
+
 				}
 
 				/* Setting up the OBDA model */
@@ -502,48 +547,42 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfoldingOBDAModel.addSource(obdaSource);
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
-				for (Axiom axiom : dataRepository.getABoxDependencies().getAssertions()) {
-					sigma.addEntities(axiom.getReferencedEntities());
-					sigma.addAssertion(axiom);
-				}
-
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
 				// log.debug("Working in virtual mode");
 
-				Collection<OBDADataSource> sources = this.inputOBDAModel
-						.getSources();
-				if (sources == null || sources.size() == 0) {
-					throw new Exception("No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
-				} else if (sources.size() > 1) {
+				Collection<OBDADataSource> sources = this.inputOBDAModel.getSources();
+				if (sources == null || sources.size() == 0)
+					throw new Exception(
+							"No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
+				if (sources.size() > 1)
 					throw new Exception(
 							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
 									+ sources.size() + " data sources. Please remove the aditional sources.");
-				} else {
 
-					/* Setting up the OBDA model */
+				/* Setting up the OBDA model */
 
-					obdaSource = sources.iterator().next();
-					
-					log.debug("Testing DB connection...");
-					connect();
-					
-					// setup connection pool
-					setupConnectionPool();
+				obdaSource = sources.iterator().next();
 
-					unfoldingOBDAModel.addSource(obdaSource);
+				log.debug("Testing DB connection...");
+				connect();
 
-					/*
-					 * Processing mappings with respect to the vocabulary
-					 * simplification
-					 */
+				// setup connection pool
+				setupConnectionPool();
 
-					MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
-					Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(this.inputOBDAModel
-									.getMappings(obdaSource.getSourceID()),	equivalenceMaps);
+				unfoldingOBDAModel.addSource(obdaSource);
 
-					unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
-				}
+				/*
+				 * Processing mappings with respect to the vocabulary
+				 * simplification
+				 */
+
+				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
+				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(
+						this.inputOBDAModel.getMappings(obdaSource.getSourceID()), equivalenceMaps);
+
+				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
+
 			}
 
 			// NOTE: Currently the system only supports one data source.
@@ -551,231 +590,66 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-			DBMetadata metadata = JDBCConnectionManager.getMetaData(localConnection);
-			SQLDialectAdapter sqladapter = SQLAdapterFactory
-					.getSQLDialectAdapter(datasource
+			metadata = JDBCConnectionManager.getMetaData(localConnection);
+
+			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource
 					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			preprocessProjection(unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
-			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), 
-					metadata);
-			unfoldingProgram = analyzer.constructDatalogProgram();
 
-			log.debug("Original mapping size: {}", unfoldingProgram.getRules().size());
+			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
 
-			/*
-			 * Normalizing language tags. Making all LOWER CASE
-			 */
-
-			for (CQIE mapping : unfoldingProgram.getRules()) {
-				Function head = mapping.getHead();
-				for (NewLiteral term : head.getTerms()) {
-					if (!(term instanceof Function)) {
-						continue;
-					}
-					Function typedTerm = (Function) term;
-					Predicate type = typedTerm.getFunctionSymbol();
-
-					if (typedTerm.getTerms().size() != 2
-							|| !type.getName().toString().equals(
-									OBDAVocabulary.RDFS_LITERAL_URI))
-						continue;
-					/*
-					 * changing the language, its always the second inner term
-					 * (literal,lang)
-					 */
-					NewLiteral originalLangTag = typedTerm.getTerm(1);
-					NewLiteral normalizedLangTag = null;
-
-					if (originalLangTag instanceof Constant) {
-						ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-						normalizedLangTag = fac.getValueConstant(
-								originalLangConstant.getValue().toLowerCase(),
-								originalLangConstant.getType());
-					} else {
-						normalizedLangTag = originalLangTag;
-					}
-					typedTerm.setTerm(1, normalizedLangTag);
-				}
-			}
-
-			/*
-			 * Normalizing equalities
-			 */
-
-			unfoldingProgram = DatalogNormalizer
-					.pushEqualities(unfoldingProgram);
+			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
 			/***
-			 * Adding ABox as facts in the unfolding program This feature is
-			 * disabled for the current release
-			 */
-			
-//			if (false && unfoldingMode.equals(QuestConstants.VIRTUAL)) {
-//				ABoxToFactConverter.addFacts(this.aboxIterator,
-//						unfoldingProgram, this.equivalenceMaps);
-//			}
-			
-			/*
-			 * T-mappings implementation
+			 * Starting mapping processing
 			 */
 
+			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
+
+			unfoldingProgram = analyzer.constructDatalogProgram();
+
+			/***
+			 * T-Mappings
+			 */
 			boolean optimizeMap = true;
 
-			final long startTime = System.currentTimeMillis();
-
-			TMappingProcessor tmappingProc = new TMappingProcessor(
-					reformulationOntology, optimizeMap);
-			unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram);
-
-			sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
-			sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
-
-			/*
-			 * Eliminating redundancy from the unfolding program
-			 */
-			unfoldingProgram = DatalogNormalizer.pushEqualities(unfoldingProgram);
-			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
-
-			if (optimizeMap) {
-				CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
-				unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(
-						unfoldingProgram, true, foreignKeyRules);
-			}
-
-			final long endTime = System.currentTimeMillis();
-
-			log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
-			log.debug("TMapping processing time: {} ms", (endTime - startTime));
-
-			/*
-			 * Adding data typing on the mapping axioms.
-			 */
-			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
-			typeRepair.insertDataTyping(unfoldingProgram);
-
-			/*
-			 * Adding NOT NULL conditions to the variables used in the head of
-			 * all mappings to preserve SQL-RDF semantics
-			 */
-			List<CQIE> currentMappingRules = unfoldingProgram.getRules();
-			for (CQIE mapping : currentMappingRules) {
-				Set<Variable> headvars = mapping.getHead().getReferencedVariables();
-				for (Variable var : headvars) {
-					Function notnull = fac.getIsNotNullAtom(var);
-					mapping.getBody().add(notnull);
-				}
-			}
-
-			/*
-			 * Collecting primary key data
-			 */
-			Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
-
-			/*
-			 * Collecting URI templates
-			 */
-			for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
-				// Looking for mappings with exactly 2 data atoms
-				CQIE mapping = currentMappingRules.get(i);
-				Function head = mapping.getHead();
-				
-				/*
-				 * Collecting URI templates and making pattern matchers for
-				 * them.
-				 */
-				for (NewLiteral term : head.getTerms()) {
-					if (!(term instanceof Function)) {
-						continue;
-					}
-					Function fun = (Function) term;
-					if (!(fun.getFunctionSymbol().toString().equals(OBDAVocabulary.QUEST_URI))) {
-						continue;
-					}
-					/*
-					 * This is a URI function, so it can generate pattern
-					 * matchers for the URIS. We have two cases, one where the
-					 * arity is 1, and there is a constant/variable. <p> The
-					 * second case is where the first element is a string
-					 * template of the URI, and the rest of the terms are
-					 * variables/constants
-					 */
-					if (fun.getTerms().size() == 1) {
-						/*
-						 * URI without tempalte, we get it direclty from the
-						 * column of the table, and the function is only f(x)
-						 */
-						if (templateStrings.contains("(.+)")) {
-							continue;
-						}
-						Function templateFunction = fac.getFunctionalTerm(
-								fac.getUriTemplatePredicate(1), 
-								fac.getVariable("x"));
-						Pattern matcher = Pattern.compile("(.+)");
-						getUriTemplateMatcher().put(matcher, templateFunction);
-						templateStrings.add("(.+)");
-					} else {
-						ValueConstant template = (ValueConstant) fun.getTerms().get(0);
-						String templateString = template.getValue();
-						templateString = templateString.replace("{}", "(.+)");
-
-						if (templateStrings.contains(templateString)) {
-							continue;
-						}
-						Pattern mattcher = Pattern.compile(templateString);
-						getUriTemplateMatcher().put(mattcher, fun);
-						templateStrings.add(templateString);
-					}
-				}
-			}
-
-			/*
-			 * Transforming body of mappings with 2 atoms into JOINs
-			 */
-			for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
-				// Looking for mappings with exactly 2 data atoms
-				CQIE mapping = currentMappingRules.get(i);
-				int dataAtoms = 0;
-
-				LinkedList<Function> dataAtomsList = new LinkedList<Function>();
-				LinkedList<Function> otherAtomsList = new LinkedList<Function>();
-
-				for (Function subAtom : mapping.getBody()) {
-					if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
-						dataAtoms += 1;
-						dataAtomsList.add(subAtom);
-					} else {
-						otherAtomsList.add(subAtom);
-					}
-				}
-				if (dataAtoms == 1) {
-					continue;
-				}
+			if ((unfoldingMode.equals(QuestConstants.VIRTUAL))) {
+				log.debug("Original mapping size: {}", unfoldingProgram.getRules().size());
 
 				/*
-				 * This mapping can be transformed into a normal join with ON
-				 * conditions. Doing so.
+				 * Normalizing language tags. Making all LOWER CASE
 				 */
-				Function foldedJoinAtom = null;
 
-				while (dataAtomsList.size() > 1) {
-					foldedJoinAtom = fac.getFunctionalTerm(
-							OBDAVocabulary.SPARQL_JOIN,
-							(NewLiteral) dataAtomsList.remove(0),
-							(NewLiteral) dataAtomsList.remove(0));
-					dataAtomsList.add(0, foldedJoinAtom);
-				}
+				normalizeLanguageTagsinMappings(fac, unfoldingProgram);
 
-				List<Function> newBodyMapping = new LinkedList<Function>();
-				newBodyMapping.add(foldedJoinAtom.asAtom());
-				newBodyMapping.addAll(otherAtomsList);
+				/*
+				 * Normalizing equalities
+				 */
 
-				CQIE newmapping = fac
-						.getCQIE(mapping.getHead(), newBodyMapping);
+				DatalogNormalizer.pushEqualities(unfoldingProgram);
 
-				unfoldingProgram.removeRule(mapping);
-				unfoldingProgram.appendRule(newmapping);
-				i -= 1;
+				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
+
+				/*
+				 * Adding data typing on the mapping axioms.
+				 */
+				extendTypesWithMetadata(metadata, unfoldingProgram);
+
+				/*
+				 * Adding NOT NULL conditions to the variables used in the head
+				 * of all mappings to preserve SQL-RDF semantics
+				 */
+				addNOTNULLToMappings(fac, unfoldingProgram);
+
+				normalizeMappingsToJOIN(fac, unfoldingProgram);
 			}
+
+			/*
+			 * 
+			 * 
+			 * /* Collecting URI templates
+			 */
+			generateURITemplateMatchers(fac, unfoldingProgram);
 
 			/*
 			 * Adding "triple(x,y,z)" mappings for support of unbounded
@@ -783,57 +657,36 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * sparql translator)
 			 */
 
-			List<CQIE> newmappings = new LinkedList<CQIE>();
-			generateTripleMappings(fac, newmappings);
-			unfoldingProgram.appendRule(newmappings);
+			unfoldingProgram.appendRule(generateTripleMappings(fac, unfoldingProgram));
 
 			log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
 			log.debug("DB Metadata: \n{}", metadata);
 
-			/*
+			/**
 			 * Setting up the unfolder and SQL generation
 			 */
 
-			if (dbType.equals(QuestConstants.SEMANTIC)) {
-				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, dataRepository);
-			}
-			else {
-				unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
-			}
-			JDBCUtility jdbcutil = new JDBCUtility(
-					datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
+			pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-			/*
+			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+
+			/***
 			 * Setting up the TBox we will use for the reformulation
 			 */
+			Ontology reducedOntology;
 			if (bOptimizeTBoxSigma) {
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationOntology, sigma);
-				reformulationOntology = reducer.getReducedOntology();
+				reducedOntology = reducer.getReducedOntology();
+			} else {
+				reducedOntology = reformulationOntology;
 			}
 
 			/*
 			 * Setting up the reformulation engine
 			 */
 
-			if (reformulate == false) {
-				rewriter = new DummyReformulator();
-			} else if (QuestConstants.PERFECTREFORMULATION
-					.equals(reformulationTechnique)) {
-				rewriter = new DLRPerfectReformulator();
-			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
-				rewriter = new TreeRedReformulator();
-			} else if (QuestConstants.TW.equals(reformulationTechnique)) {
-				rewriter = new TreeWitnessRewriter();
-			} else {
-				throw new IllegalArgumentException(
-						"Invalid value for argument: "
-								+ QuestPreferences.REFORMULATION_TECHNIQUE);
-			}
-
-			rewriter.setTBox(reformulationOntology);
-			rewriter.setCBox(sigma);
+			setupRewriter(reducedOntology, sigma);
 
 			Ontology saturatedSigma = sigma.clone();
 			saturatedSigma.saturate();
@@ -847,13 +700,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			vocabularyValidator = new QueryVocabularyValidator(
-					reformulationOntology, equivalenceMaps);
+			vocabularyValidator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
 
 			log.debug("... Quest has been initialized.");
 			isClassified = true;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			OBDAException ex = new OBDAException(e);
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
@@ -876,28 +727,271 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-	private void preprocessProjection(ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory, 
+	public void updateSemanticIndexMappings() throws Exception {
+		/* Setting up the OBDA model */
+
+		unfoldingOBDAModel.removeAllMappings(obdaSource.getSourceID());
+
+		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
+
+		MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+
+		unfoldingProgram = analyzer.constructDatalogProgram();
+		
+		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram, sigma, false);;
+
+		/*
+		 * Adding "triple(x,y,z)" mappings for support of unbounded predicates
+		 * and variables as class names (implemented in the sparql translator)
+		 */
+
+		unfoldingProgram.appendRule(generateTripleMappings(OBDADataFactoryImpl.getInstance(), unfoldingProgram));
+		
+		generateURITemplateMatchers(OBDADataFactoryImpl.getInstance(), unfoldingProgram);
+
+		log.debug("Final set of mappings: \n{}", unfoldingProgram);
+
+		/**
+		 * Setting up the unfolder and SQL generation
+		 */
+
+		pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
+
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+
+		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
+
+	}
+
+	private void setupRewriter(Ontology reformulationOntology, Ontology sigma) {
+		if (reformulate == false) {
+			rewriter = new DummyReformulator();
+		} else if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
+			rewriter = new DLRPerfectReformulator();
+		} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
+			rewriter = new TreeRedReformulator();
+		} else if (QuestConstants.TW.equals(reformulationTechnique)) {
+			rewriter = new TreeWitnessRewriter();
+		} else {
+			throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
+		}
+
+		rewriter.setTBox(reformulationOntology);
+		rewriter.setCBox(sigma);
+	}
+
+	private void extendTypesWithMetadata(DBMetadata metadata, DatalogProgram unfoldingProgram) throws OBDAException {
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+		typeRepair.insertDataTyping(unfoldingProgram);
+	}
+
+	private void addNOTNULLToMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
+
+		for (CQIE mapping : unfoldingProgram.getRules()) {
+			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
+			for (Variable var : headvars) {
+				Function notnull = fac.getIsNotNullAtom(var);
+				mapping.getBody().add(notnull);
+			}
+		}
+
+	}
+
+	private void normalizeLanguageTagsinMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
+		for (CQIE mapping : unfoldingProgram.getRules()) {
+			Function head = mapping.getHead();
+			for (NewLiteral term : head.getTerms()) {
+				if (!(term instanceof Function)) {
+					continue;
+				}
+				Function typedTerm = (Function) term;
+				Predicate type = typedTerm.getFunctionSymbol();
+
+				if (typedTerm.getTerms().size() != 2 || !type.getName().toString().equals(OBDAVocabulary.RDFS_LITERAL_URI))
+					continue;
+				/*
+				 * changing the language, its always the second inner term
+				 * (literal,lang)
+				 */
+				NewLiteral originalLangTag = typedTerm.getTerm(1);
+				NewLiteral normalizedLangTag = null;
+
+				if (originalLangTag instanceof Constant) {
+					ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
+					normalizedLangTag = fac.getValueConstant(originalLangConstant.getValue().toLowerCase(), originalLangConstant.getType());
+				} else {
+					normalizedLangTag = originalLangTag;
+				}
+				typedTerm.setTerm(1, normalizedLangTag);
+			}
+		}
+	}
+
+	private DatalogProgram applyTMappings(DBMetadata metadata, boolean optimizeMap, DatalogProgram unfoldingProgram, Ontology sigma, boolean full)
+			throws OBDAException {
+		final long startTime = System.currentTimeMillis();
+
+		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationOntology, optimizeMap);
+		unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram, full);
+
+		sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
+		sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
+
+		/*
+		 * Eliminating redundancy from the unfolding program
+		 */
+		unfoldingProgram = DatalogNormalizer.pushEqualities(unfoldingProgram);
+		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
+
+		if (optimizeMap) {
+			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
+		}
+
+		final long endTime = System.currentTimeMillis();
+
+		log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
+		log.debug("TMapping processing time: {} ms", (endTime - startTime));
+		
+		return unfoldingProgram;
+	}
+
+	private void generateURITemplateMatchers(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
+
+		templateStrings.clear();
+		getUriTemplateMatcher().clear();
+
+		for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
+
+			// Looking for mappings with exactly 2 data atoms
+			CQIE mapping = unfoldingProgram.getRules().get(i);
+			Function head = mapping.getHead();
+
+			/*
+			 * Collecting URI templates and making pattern matchers for them.
+			 */
+			for (NewLiteral term : head.getTerms()) {
+				if (!(term instanceof Function)) {
+					continue;
+				}
+				Function fun = (Function) term;
+				if (!(fun.getFunctionSymbol().toString().equals(OBDAVocabulary.QUEST_URI))) {
+					continue;
+				}
+				/*
+				 * This is a URI function, so it can generate pattern matchers
+				 * for the URIS. We have two cases, one where the arity is 1,
+				 * and there is a constant/variable. <p> The second case is
+				 * where the first element is a string template of the URI, and
+				 * the rest of the terms are variables/constants
+				 */
+				if (fun.getTerms().size() == 1) {
+					/*
+					 * URI without tempalte, we get it direclty from the column
+					 * of the table, and the function is only f(x)
+					 */
+					if (templateStrings.contains("(.+)")) {
+						continue;
+					}
+					Function templateFunction = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
+					Pattern matcher = Pattern.compile("(.+)");
+					getUriTemplateMatcher().put(matcher, templateFunction);
+					templateStrings.add("(.+)");
+				} else {
+					ValueConstant template = (ValueConstant) fun.getTerms().get(0);
+					String templateString = template.getValue();
+					templateString = templateString.replace("{}", "(.+)");
+
+					if (templateStrings.contains(templateString)) {
+						continue;
+					}
+					Pattern mattcher = Pattern.compile(templateString);
+					getUriTemplateMatcher().put(mattcher, fun);
+					templateStrings.add(templateString);
+				}
+			}
+		}
+	}
+
+	private void normalizeMappingsToJOIN(OBDADataFactory fac, DatalogProgram currentMappingRules) {
+		/*
+		 * Transforming body of mappings with 2 atoms into JOINs
+		 */
+		for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
+			// Looking for mappings with exactly 2 data atoms
+			CQIE mapping = currentMappingRules.getRules().get(i);
+			int dataAtoms = 0;
+
+			LinkedList<Function> dataAtomsList = new LinkedList<Function>();
+			LinkedList<Function> otherAtomsList = new LinkedList<Function>();
+
+			for (Function subAtom : mapping.getBody()) {
+				if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
+					dataAtoms += 1;
+					dataAtomsList.add(subAtom);
+				} else {
+					otherAtomsList.add(subAtom);
+				}
+			}
+			if (dataAtoms == 1) {
+				continue;
+			}
+
+			/*
+			 * This mapping can be transformed into a normal join with ON
+			 * conditions. Doing so.
+			 */
+			Function foldedJoinAtom = null;
+
+			while (dataAtomsList.size() > 1) {
+				foldedJoinAtom = fac.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, (NewLiteral) dataAtomsList.remove(0),
+						(NewLiteral) dataAtomsList.remove(0));
+				dataAtomsList.add(0, foldedJoinAtom);
+			}
+
+			List<Function> newBodyMapping = new LinkedList<Function>();
+			newBodyMapping.add(foldedJoinAtom.asAtom());
+			newBodyMapping.addAll(otherAtomsList);
+
+			CQIE newmapping = fac.getCQIE(mapping.getHead(), newBodyMapping);
+
+			unfoldingProgram.removeRule(mapping);
+			unfoldingProgram.appendRule(newmapping);
+			i -= 1;
+		}
+	}
+
+	/***
+	 * Expands a SELECT * into a SELECT with all columns implicit in the *
+	 * 
+	 * @param mappings
+	 * @param factory
+	 * @param adapter
+	 * @throws SQLException
+	 */
+	private void preprocessProjection(Connection localConnection, ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory,
 			SQLDialectAdapter adapter) throws SQLException {
 		Statement st = null;
 		try {
 			st = localConnection.createStatement();
 			for (OBDAMappingAxiom axiom : mappings) {
 				String sourceString = axiom.getSourceQuery().toString();
-				
+
 				/*
-				 * Check if the projection contains select all keyword, i.e., 'SELECT * [...]'.
+				 * Check if the projection contains select all keyword, i.e.,
+				 * 'SELECT * [...]'.
 				 */
 				if (containSelectAll(sourceString)) {
 					StringBuffer sb = new StringBuffer();
-					
+
 					/*
 					 * If the SQL string has sub-queries in its statement
 					 */
 					if (containChildParentSubQueries(sourceString)) {
 						int childquery1 = sourceString.indexOf("(");
 						int childquery2 = sourceString.indexOf(") as CHILD");
-						String childquery = sourceString.substring(childquery1+1, childquery2);
-						
+						String childquery = sourceString.substring(childquery1 + 1, childquery2);
+
 						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
 						if (st.execute(copySourceQuery)) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();
@@ -907,16 +1001,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 									sb.append(", ");
 								}
 								String col = rsm.getColumnName(pos);
-								sb.append("CHILD.\""+col+"\" as CHILD_"+(col));
+								sb.append("CHILD.\"" + col + "\" as CHILD_" + (col));
 								needComma = true;
 							}
 						}
 						sb.append(", ");
-						
+
 						int parentquery1 = sourceString.indexOf(", (", childquery2);
 						int parentquery2 = sourceString.indexOf(") as PARENT");
-						String parentquery = sourceString.substring(parentquery1+3, parentquery2);
-						
+						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
+
 						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
 						if (st.execute(copySourceQuery)) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();
@@ -926,11 +1020,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 									sb.append(", ");
 								}
 								String col = rsm.getColumnName(pos);
-								sb.append("PARENT.\""+col+"\" as PARENT_"+(col));
+								sb.append("PARENT.\"" + col + "\" as PARENT_" + (col));
 								needComma = true;
 							}
 						}
-						
+
 						/*
 						 * If the SQL string doesn't have sub-queries
 						 */
@@ -942,13 +1036,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
 								if (needComma) {
 									sb.append(", ");
-								}	
-								sb.append("\""+rsm.getColumnName(pos)+"\"");
+								}
+								sb.append("\"" + rsm.getColumnName(pos) + "\"");
 								needComma = true;
 							}
-						}					
+						}
 					}
-					
+
 					/*
 					 * Replace the asterisk with the proper column names
 					 */
@@ -976,12 +1070,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		final Pattern pattern = Pattern.compile(selectAllPattern);
 		return pattern.matcher(sql).find();
 	}
-	
+
 	private boolean containChildParentSubQueries(String sql) {
 		final Pattern pattern = Pattern.compile(subQueriesPattern);
 		return pattern.matcher(sql).find();
 	}
-	
+
 	private String createDummyQueryToFetchColumns(String originalQuery, SQLDialectAdapter adapter) {
 		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
 		if (adapter instanceof SQLServerSQLDialectAdapter) {
@@ -1010,7 +1104,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
 		for (CQIE rule : sigmaRules) {
-			Function atom = rule.getBody().get(0); // The rule always has one body atom
+			Function atom = rule.getBody().get(0); // The rule always has one
+													// body atom
 			Predicate predicate = atom.getFunctionSymbol();
 			List<CQIE> rules = sigmaRulesMap.get(predicate);
 			if (rules == null) {
@@ -1022,7 +1117,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return sigmaRulesMap;
 	}
 
-	private void generateTripleMappings(OBDADataFactory fac, List<CQIE> newmappings) {
+	/***
+	 * Creates mappings with heads as "triple(x,y,z)" from mappings with binary
+	 * and unary atoms"
+	 * 
+	 * @param fac
+	 * @param unfoldingProgram
+	 * @return
+	 */
+	private List<CQIE> generateTripleMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
+		List<CQIE> newmappings = new LinkedList<CQIE>();
+
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			Function newhead = null;
 			Function currenthead = mapping.getHead();
@@ -1030,30 +1135,27 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
 			if (currenthead.getArity() == 1) {
 				/*
-				 * head is Class(x) Forming head as triple(x,uri(rdf:type), uri(Class))
+				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
+				 * uri(Class))
 				 */
 				terms.add(currenthead.getTerm(0));
-				Function rdfTypeConstant = fac.getFunctionalTerm(
-						fac.getUriTemplatePredicate(1), 
+				Function rdfTypeConstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
 						fac.getURIConstant(OBDADataFactoryImpl.getIRI(OBDAVocabulary.RDF_TYPE)));
 				terms.add(rdfTypeConstant);
 
 				IRI classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunctionalTerm(
-						fac.getUriTemplatePredicate(1),
-						fac.getURIConstant(classname)));
+				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
 				newhead = fac.getAtom(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
 				/*
-				 * head is Property(x,y) Forming head as triple(x,uri(Property), y)
+				 * head is Property(x,y) Forming head as triple(x,uri(Property),
+				 * y)
 				 */
 				terms.add(currenthead.getTerm(0));
 
 				IRI propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunctionalTerm(
-						fac.getUriTemplatePredicate(1),
-						fac.getURIConstant(propname));
+				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getAtom(pred, terms);
@@ -1061,6 +1163,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());
 			newmappings.add(newmapping);
 		}
+		return newmappings;
 	}
 
 	private void setupConnectionPool() {
@@ -1068,51 +1171,43 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-		
-		if (driver.contains("mysql")) {
-			url = url + "?relaxAutoCommit=true";
-		}		
-        poolProperties = new PoolProperties();
-        poolProperties.setUrl(url);
-        poolProperties.setDriverClassName(driver);
-        poolProperties.setUsername(username);
-        poolProperties.setPassword(password);
-        poolProperties.setJmxEnabled(true);
-        poolProperties.setTestOnBorrow(false);
-        poolProperties.setTestOnReturn(false);
-        poolProperties.setMaxActive(maxPoolSize);
-        poolProperties.setMaxIdle(maxPoolSize);
-        poolProperties.setInitialSize(startPoolSize);
-        poolProperties.setMaxWait(10000);
-        poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
-        poolProperties.setMinEvictableIdleTimeMillis(30000);
-        poolProperties.setLogAbandoned(removeAbandoned);
-        poolProperties.setRemoveAbandoned(removeAbandoned);
-        poolProperties.setJdbcInterceptors(
-          "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
-          "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
-        tomcatPool = new DataSource();
-        tomcatPool.setPoolProperties(poolProperties);
-        
-        log.debug("Connection Pool Properties:");
-        log.debug("Start size: " + startPoolSize);
-        log.debug("Max size: " + maxPoolSize);
-        log.debug("Remove abandoned connections: " + removeAbandoned);
-         
+
+		poolProperties = new PoolProperties();
+		poolProperties.setUrl(url);
+		poolProperties.setDriverClassName(driver);
+		poolProperties.setUsername(username);
+		poolProperties.setPassword(password);
+		poolProperties.setJmxEnabled(true);
+		poolProperties.setTestOnBorrow(false);
+		poolProperties.setTestOnReturn(false);
+		poolProperties.setMaxActive(maxPoolSize);
+		poolProperties.setMaxIdle(maxPoolSize);
+		poolProperties.setInitialSize(startPoolSize);
+		poolProperties.setMaxWait(10000);
+		poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
+		poolProperties.setMinEvictableIdleTimeMillis(30000);
+		poolProperties.setLogAbandoned(removeAbandoned);
+		poolProperties.setRemoveAbandoned(removeAbandoned);
+		poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
+				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+		tomcatPool = new DataSource();
+		tomcatPool.setPoolProperties(poolProperties);
+
+		log.debug("Connection Pool Properties:");
+		log.debug("Start size: " + startPoolSize);
+		log.debug("Max size: " + maxPoolSize);
+		log.debug("Remove abandoned connections: " + removeAbandoned);
+
 	}
-	
-	public void close() {
-		tomcatPool.close();
-	}
-	
-	public void releaseSQLPoolConnection (Connection co) {
+
+	public void releaseSQLPoolConnection(Connection co) {
 		try {
-				co.close();
+			co.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public synchronized Connection getSQLPoolConnection() throws OBDAException {
 		Connection conn = null;
 		try {
@@ -1122,7 +1217,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 		return conn;
 	}
-	
+
 	/***
 	 * Establishes a new connection to the data source.
 	 * 
@@ -1137,9 +1232,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		if (driver.contains("mysql")) {
-			url = url + "?relaxAutoCommit=true";
-		}
+		// if (driver.contains("mysql")) {
+		// url = url + "?relaxAutoCommit=true";
+		// }
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
@@ -1155,12 +1250,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return conn;
 	}
 
-	// get a real (non pool) connection - used for protege plugin 
+	// get a real (non pool) connection - used for protege plugin
 	public QuestConnection getNonPoolConnection() throws OBDAException {
 
 		return new QuestConnection(this, getSQLConnection());
 	}
-	
+
 	public QuestConnection getConnection() throws OBDAException {
 
 		return new QuestConnection(this, getSQLPoolConnection());

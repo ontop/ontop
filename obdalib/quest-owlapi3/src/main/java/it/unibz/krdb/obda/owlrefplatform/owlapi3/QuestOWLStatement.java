@@ -2,17 +2,23 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLConnection;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -27,8 +33,10 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 
 public class QuestOWLStatement implements OWLStatement {
 
@@ -39,6 +47,8 @@ public class QuestOWLStatement implements OWLStatement {
 		this.conn = conn;
 		this.st = st;
 	}
+	
+	
 	
 	public QuestStatement getQuestStatement() {
 		return st;
@@ -110,6 +120,20 @@ public class QuestOWLStatement implements OWLStatement {
 			owlException.setStackTrace(e.getStackTrace());
 			throw owlException;
 		}
+	}
+	
+	public int insertData(File owlFile, int commitSize, int batchsize) throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
+		Set<OWLOntology> set = manager.getImportsClosure(ontology);
+		
+		
+
+		// Retrieves the ABox from the ontology file.
+		
+		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(set,
+				new HashMap<Predicate, Description>());
+		return st.insertData(aBoxIter, commitSize, batchsize);
 	}
 
 	@Override

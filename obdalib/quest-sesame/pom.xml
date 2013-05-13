@@ -45,12 +45,12 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha2</version>
 		</dependency>
-
+ 
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha2</version>
-		</dependency>
+		</dependency> 
 
 		<dependency>
 			<artifactId>quest-db</artifactId>

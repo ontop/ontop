@@ -101,6 +101,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 		while (true) {
 			try {
 				OWLIndividualAxiom next = nextInCurrentIterator();
+				
 				Assertion ass = translator.translate(next,equivalenceMap);
 				if (ass == null)
 					throw new NoSuchElementException();
@@ -153,7 +154,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 		}
 
 		currentABoxAssertion = owlaxiomiterator.next();
-
+		
 		
 		while (true) {
 //			System.out.println(currentABoxAssertion);
@@ -173,6 +174,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 
 		try {
 			currentABoxAssertion = owlaxiomiterator.next();
+			
 		} catch (NoSuchElementException e) {
 			return false;
 		}
