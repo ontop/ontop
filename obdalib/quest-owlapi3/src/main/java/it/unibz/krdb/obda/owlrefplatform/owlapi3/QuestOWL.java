@@ -333,21 +333,16 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 
-		
+		try {
 
 			OWLOntologyManager man = ontology.getOWLOntologyManager();
 			Set<OWLOntology> clousure = man.getImportsClosure(ontology);
-			
-			
-			
-			OWLOntologyMerger merger = new OWLOntologyMerger(man);
-			ontology = merger.createMergedOntology(man, IRI.create("http://www.unibz.it/krdb/obda/ontop/quest/merge.owl"));			
-			
-			Ontology translatedOntologyMerge = translator.translate(ontology);
-			
-		
-		log.debug("Ontology loaded: {}", translatedOntologyMerge);
-		return translatedOntologyMerge;
+			Ontology mergeOntology = translator.mergeTranslateOntologies(clousure);
+			return mergeOntology;
+		} catch (Exception e) {
+			throw e;
+		}
+//		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
 	@Override
