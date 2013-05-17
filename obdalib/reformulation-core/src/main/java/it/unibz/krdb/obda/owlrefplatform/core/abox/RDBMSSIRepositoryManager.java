@@ -121,9 +121,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public final static String emptyness_index_table = "NONEMPTYNESSINDEX";
 
 	
-	public static final String class_table = "quest_class_assertion";
+	public static final String class_table = "QUEST_CLASS_ASSERTION";
 
-	public static final String role_table = "quest_object_property_assertion";
+	public static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
 	
 	public static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
 
