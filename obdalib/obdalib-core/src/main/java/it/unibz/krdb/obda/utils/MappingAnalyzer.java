@@ -9,29 +9,33 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.AndOperator;
+import it.unibz.krdb.sql.api.BooleanAlgebraPredicate;
 import it.unibz.krdb.sql.api.BooleanLiteral;
+import it.unibz.krdb.sql.api.BooleanOperator;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
+import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 import it.unibz.krdb.sql.api.DecimalLiteral;
 import it.unibz.krdb.sql.api.ICondition;
 import it.unibz.krdb.sql.api.IValueExpression;
 import it.unibz.krdb.sql.api.IntegerLiteral;
+import it.unibz.krdb.sql.api.LeftParenthesis;
 import it.unibz.krdb.sql.api.Literal;
-import it.unibz.krdb.sql.api.LogicalOperator;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
+import it.unibz.krdb.sql.api.Parenthesis;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
+import it.unibz.krdb.sql.api.RightParenthesis;
 import it.unibz.krdb.sql.api.Selection;
 import it.unibz.krdb.sql.api.StringLiteral;
-import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -131,63 +135,59 @@ public class MappingAnalyzer {
 				// For the selection "where" clause conditions
 				Selection selection = queryTree.getSelection();
 				if (selection != null) {
-					// Filling up the OR stack
-					Stack<Function> stack = new Stack<Function>();
+					// Stack for filter function
+					Stack<Function> filterFunctionStack = new Stack<Function>();
+					// Stack for boolean algebra predicate
+					Stack<BooleanAlgebraPredicate> booleanPredicateStack = new Stack<BooleanAlgebraPredicate>();
+					
 					List<ICondition> conditions = selection.getRawConditions();
 					for (int i = 0; i < conditions.size(); i++) {
 						Object element = conditions.get(i);
 						if (element instanceof ComparisonPredicate) {
 							ComparisonPredicate pred = (ComparisonPredicate) element;
-							Function compOperator = getFunction(pred, lookupTable);
-							stack.push(compOperator);
+							Function filterFunction = getFunction(pred, lookupTable);
+							if (hasBooleanOperator(booleanPredicateStack)) {
+								BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();
+								Function otherFilterFunction = filterFunctionStack.pop();
+								filterFunction = createBooleanFunction(otherFilterFunction, filterFunction, op);
+							}
+							filterFunctionStack.push(filterFunction);
 						} else if (element instanceof NullPredicate) {
 							NullPredicate pred = (NullPredicate) element;
-							Function nullOperator = getFunction(pred, lookupTable);
-							stack.push(nullOperator);
-						} else if (element instanceof LogicalOperator) {
-							// Check either it's AND or OR operator
-							if (element instanceof AndOperator) {
-								/*
-								 * The AND operator has the expression:
-								 * <condition> AND <condition> There are two
-								 * types of conditions: (1) using the comparison
-								 * predicate (such as EQ, LT, GT, etc.) and (2)
-								 * using the null predicate (i.e., IS NULL or IS
-								 * NOT NULL). Each has a different way to
-								 * handle.
-								 */
-								ICondition condition = conditions.get(i + 1);
-								i++; // the right-hand condition
-								if (condition instanceof ComparisonPredicate) {
-									ComparisonPredicate pred = (ComparisonPredicate) condition;
-									NewLiteral leftCondition = stack.pop();
-									NewLiteral rightCondition = getFunction(pred, lookupTable);
-									Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
-									stack.push(andOperator);
-								} else if (condition instanceof NullPredicate) {
-									NullPredicate pred = (NullPredicate) condition;
-									NewLiteral leftCondition = stack.pop();
-									NewLiteral rightCondition = getFunction(pred, lookupTable);
-									Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
-									stack.push(andOperator);
-								}
-							} else if (element instanceof OrOperator) {
-								// NO-OP
+							Function filterFunction = getFunction(pred, lookupTable);
+							if (hasBooleanOperator(booleanPredicateStack)) {
+								BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();
+								Function otherFilterFunction = filterFunctionStack.pop();
+								filterFunction = createBooleanFunction(otherFilterFunction, filterFunction, op);
 							}
-						} else {
-							/* Unsupported query */
-							return null;
+							filterFunctionStack.push(filterFunction);
+						} else if (element instanceof BooleanAlgebraPredicate) {
+							BooleanAlgebraPredicate pred = (BooleanAlgebraPredicate) element;
+							if (pred instanceof BooleanOperator) {
+								BooleanOperator op = (BooleanOperator) pred;
+								manageBooleanOperator(op, booleanPredicateStack);
+							} else if (pred instanceof Parenthesis) {
+								Parenthesis paren = (Parenthesis) pred;
+								manageParenthesis(paren, booleanPredicateStack, filterFunctionStack);
+							}
 						}
 					}
-
-					// Collapsing into a single atom.
-					while (stack.size() > 1) {
-						Function orAtom = dfac.getORFunction(stack.pop(), stack.pop());
-						stack.push(orAtom);
+					
+					// Check if there are still boolean operators left in the stack
+					while (!booleanPredicateStack.isEmpty()) {
+						BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();					
+						Function filterFunction = createBooleanFunction(filterFunctionStack, op);
+						filterFunctionStack.push(filterFunction);
 					}
-					Function f = stack.pop();
-					Function atom = dfac.getAtom(f.getFunctionSymbol(), f.getTerms());
-					atoms.add(atom);
+					
+					// The filter function stack must have 1 element left
+					if (filterFunctionStack.size() == 1) {
+						Function filterFunction = filterFunctionStack.pop();
+						Function atom = dfac.getAtom(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
+						atoms.add(atom);
+					} else {						
+						throwInvalidFilterExpressionException(filterFunctionStack);
+					}
 				}
 
 				// Construct the head from the target query.
@@ -219,7 +219,59 @@ public class MappingAnalyzer {
 		}
 		return datalog;
 	}
+	
+	private void throwInvalidFilterExpressionException(Stack<Function> filterFunctionStack) {
+		StringBuffer filterExpression = new StringBuffer();
+		while (!filterFunctionStack.isEmpty()) {
+			filterExpression.append(filterFunctionStack.pop());
+		}
+		throw new RuntimeException("Illegal filter expression: " + filterExpression.toString());
+	}
 
+	private void manageBooleanOperator(BooleanOperator op, Stack<BooleanAlgebraPredicate> booleanPredicateStack) {
+		booleanPredicateStack.push(op);
+	}
+	
+	private void manageParenthesis(Parenthesis paren, Stack<BooleanAlgebraPredicate> booleanPredicateStack, Stack<Function> filterFunctionStack) {
+		if (paren instanceof LeftParenthesis) {
+			booleanPredicateStack.push(paren);
+		} else if (paren instanceof RightParenthesis) {
+			while (true) {
+				BooleanAlgebraPredicate predicate = booleanPredicateStack.pop();		
+				if (predicate instanceof LeftParenthesis) {
+					break;
+				}
+				BooleanOperator op = (BooleanOperator) predicate;					
+				Function filterFunction = createBooleanFunction(filterFunctionStack, op);
+				filterFunctionStack.push(filterFunction);
+			}
+		}
+	}
+	
+	private Function createBooleanFunction(Stack<Function> filterFunctionStack, BooleanOperator op) {
+		Function rightFunction = filterFunctionStack.pop();
+		Function leftFunction = filterFunctionStack.pop();
+		return createBooleanFunction(leftFunction, rightFunction, op);
+	}
+
+	private Function createBooleanFunction(Function leftFunction, Function rightFunction, BooleanOperator op) {
+		Function booleanFunction = null;
+		if (op instanceof AndOperator) {
+			booleanFunction = dfac.getANDFunction(leftFunction, rightFunction);
+		} else if (op instanceof OrOperator) {
+			booleanFunction = dfac.getORFunction(leftFunction, rightFunction);
+		}
+		return booleanFunction;
+	}
+
+	private boolean hasBooleanOperator(Stack<BooleanAlgebraPredicate> boolStack) {
+		if (!boolStack.isEmpty()) {
+			BooleanAlgebraPredicate pred = boolStack.peek();
+			return (pred instanceof BooleanOperator) ? true : false;
+		}
+		return false;
+	}
+	
 	private Function getFunction(NullPredicate pred, LookupTable lookupTable) {
 		IValueExpression column = pred.getValueExpression();
 

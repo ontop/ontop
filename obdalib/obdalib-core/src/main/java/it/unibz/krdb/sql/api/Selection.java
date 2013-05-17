@@ -57,25 +57,14 @@ public class Selection implements Serializable{
 	}
 	
 	/**
-	 * Inserts a boolean operator among boolean conditions. A boolean
-	 * operator must not succeed another boolean operator.
+	 * Inserts a boolean algebra predicate among boolean conditions.
 	 * 
-	 * @param op
-	 * 			A {@link LogicalOperator} object.
-	 * @throws Exception An exception is thrown if a boolean operator
-	 * immediately succeed another boolean operator.
-	 * @see {@link AndOperator}, {@link OrOperator}
+	 * @param pred
+	 * 			A {@link BooleanAlgebraPredicate} object.
+	 * @see {@link AndOperator}, {@link OrOperator}, {@link LeftParenthesis}, {@link RightParenthesis
 	 */
-	public void addOperator(LogicalOperator op) throws Exception {
-		if (!conditions.isEmpty()) {
-			Object obj = conditions.peekLast();
-			if (!(obj instanceof LogicalOperator)) {
-				conditions.add(op);
-			}
-			else {
-				throw new Exception("Illegal conditional expression!");
-			}
-		}
+	public void addOperator(BooleanAlgebraPredicate pred) throws Exception {
+		conditions.add(pred);
 	}
 	
 	/**
@@ -94,12 +83,12 @@ public class Selection implements Serializable{
 			else if (obj instanceof NullPredicate) {
 				addCondition((NullPredicate) obj);
 			}
-			else if (obj instanceof LogicalOperator) {
-				addOperator((LogicalOperator) obj);
+			else if (obj instanceof BooleanAlgebraPredicate) {
+				addOperator((BooleanAlgebraPredicate) obj);
 			}
 		}
 	}
-	
+
 	/**
 	 * Updates the conditions list in this selection. Any existing
 	 * conditions are going to be replaced by the new specification.

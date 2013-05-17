@@ -68,11 +68,11 @@ public class JoinOperator extends Operator {
 	 * @throws Exception An exception is thrown if a boolean condition
 	 * immediately succeed another boolean condition.
 	 */
-	public void addCondition(ComparisonPredicate predicate) throws Exception {
+	public void addCondition(ComparisonPredicate predicate) {
 		if (!conditions.isEmpty()) {
 			Object obj = conditions.peekLast();
 			if (obj instanceof ComparisonPredicate) {
-				throw new Exception("Illegal conditional expression!");
+				throw new RuntimeException("Illegal conditional expression!");
 			}
 		}
 		conditions.add(predicate);
@@ -83,16 +83,16 @@ public class JoinOperator extends Operator {
 	 * operator must not succeed another boolean operator.
 	 * 
 	 * @param op
-	 * 			A {@link LogicalOperator} object.
+	 * 			A {@link BooleanOperator} object.
 	 * @throws Exception An exception is thrown if a boolean operator
 	 * immediately succeed another boolean operator.
 	 * @see {@link AndOperator}, {@link OrOperator}
 	 */
-	public void addCondition(LogicalOperator op) throws Exception {
+	public void addCondition(BooleanOperator op) {
 		if (!conditions.isEmpty()) {
 			Object obj = conditions.peekLast();
-			if (obj instanceof LogicalOperator) {
-				throw new Exception("Illegal conditional expression!");
+			if (obj instanceof BooleanOperator) {
+				throw new RuntimeException("Illegal conditional expression!");
 			}
 		}
 		conditions.add(op);
@@ -106,14 +106,14 @@ public class JoinOperator extends Operator {
 	 * @throws Exception An exception is thrown if it violates the
 	 * rule for adding boolean conditions or boolean operators.
 	 */
-	public void copy(Queue<Object> specification) throws Exception {
+	public void copy(Queue<Object> specification) {
 		conditions.clear();  // clear the list.
 		for (Object obj : specification) {
 			if (obj instanceof ComparisonPredicate) {
 				addCondition((ComparisonPredicate)obj);
 			}
 			else {
-				addCondition((LogicalOperator)obj);
+				addCondition((BooleanOperator)obj);
 			}
 		}
 	}
@@ -148,7 +148,7 @@ public class JoinOperator extends Operator {
 	 */
 	public ComparisonPredicate getCondition(int index) {
 		index = index * 2;
-		return (ComparisonPredicate)conditions.get(index);
+		return (ComparisonPredicate) conditions.get(index);
 	}
 	
 	/**
@@ -160,9 +160,9 @@ public class JoinOperator extends Operator {
 	 */
 	public String getLogicalOperator(int index) {
 		index = (index * 2) + 1;
-		return (String)conditions.get(index);
+		return (String) conditions.get(index);
 	}
-	
+		
 	@Override
 	public String toString() {
 		String str = "%s " + getName() + " %s";

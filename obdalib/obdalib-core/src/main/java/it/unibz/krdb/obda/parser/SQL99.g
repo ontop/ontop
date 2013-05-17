@@ -41,6 +41,8 @@ import it.unibz.krdb.sql.api.ComparisonPredicate;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.OrOperator;
+import it.unibz.krdb.sql.api.LeftParenthesis;
+import it.unibz.krdb.sql.api.RightParenthesis;
 import it.unibz.krdb.sql.api.ColumnReference;
 
 import it.unibz.krdb.sql.api.Literal;
@@ -583,7 +585,7 @@ predicate returns [IPredicate value]
   ;
 
 parenthesized_boolean_value_expression
-  : LPAREN boolean_value_expression RPAREN
+  : LPAREN { booleanExp.putSpecification(new LeftParenthesis()); } boolean_value_expression RPAREN { booleanExp.putSpecification(new RightParenthesis()); }
   ;
   
 comparison_predicate returns [ComparisonPredicate value]
@@ -671,14 +673,13 @@ joined_table returns [TablePrimary value]
 }
   : ((join_type { joinType = $join_type.value; })? JOIN table_reference join_specification {
       JoinOperator joinOp = new JoinOperator(joinType);
-      joinOp.copy($join_specification.value.getSpecification());
-      relationStack.push(joinOp);
-      $value = $table_reference.value;
-    })+
+      if ($join_specification.value != null) {
+          joinOp.copy($join_specification.value.getSpecification());
+          relationStack.push(joinOp);
+          $value = $table_reference.value;
+      }
+    })
   ;
-  catch [Exception e] {
-     // Does nothing.
-  }  
 
 join_type returns [int value]
 @init {
@@ -724,7 +725,7 @@ join_column_list
   : column_name (COMMA column_name)*
   ;
 
-// Limitation: nested table is not supported yet.
+// Limitation: subquery is not supported yet.
 table_primary returns [TablePrimary value]
   : table_name
     (AS? alias_name)? {
@@ -733,10 +734,10 @@ table_primary returns [TablePrimary value]
       Relation table = new Relation($value);      
       relationStack.push(table);
     }
-  | derived_table
-    AS? alias_name {
-      $value = null;
-    }
+//  | derived_table
+//    AS? alias_name {
+//      $value = null;
+//    }
   ; 
  
 table_name returns [TablePrimary value]
