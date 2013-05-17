@@ -1,5 +1,21 @@
 package it.unibz.krdb.obda.owlapi3.directmapping;
 
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.TableDefinition;
+
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,24 +25,13 @@ import java.util.Set;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
 
 
 /***
@@ -122,7 +127,7 @@ public class DirectMappingEngine {
 		
 		//Add all the object properties
 		for(Iterator<Predicate> it = objectset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
+			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 			manager.saveOntology(ontology);
@@ -130,7 +135,7 @@ public class DirectMappingEngine {
 		
 		//Add all the data properties
 		for(Iterator<Predicate> it = dataset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
+			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 			manager.saveOntology(ontology);
@@ -176,6 +181,20 @@ public class DirectMappingEngine {
 			model.addMappings(source.getSourceID(), getMapping(td, source));
 		}	
 		System.out.println(model.getMappings().toString());
+		
+		for (URI uri : model.getMappings().keySet())
+			for (OBDAMappingAxiom axiom : model.getMappings().get(uri))
+			{
+				CQIE query = (CQIE) axiom.getTargetQuery();
+				for (Function f : query.getBody()) {
+					if (f.getArity() == 1)
+						model.declareClass(f.getFunctionSymbol());
+					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
+						model.declareObjectProperty(f.getFunctionSymbol());
+					else 
+						model.declareDataProperty(f.getFunctionSymbol());
+				}
+			}
 	}
 	
 	
