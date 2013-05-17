@@ -255,7 +255,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
-			if (false & unfoldingMode.equals(QuestConstants.CLASSIC)) {
+			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
 				QuestStatement st = conn.createStatement();
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
