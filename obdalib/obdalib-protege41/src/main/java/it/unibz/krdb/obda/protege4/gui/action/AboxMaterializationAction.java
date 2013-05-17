@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.protege4.gui.action;
 
-import it.unibz.krdb.obda.LUBM.rdf_generator.Writer;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
@@ -8,7 +7,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3ToFileMaterializer;
+
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.BorderLayout;
@@ -39,7 +38,6 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
