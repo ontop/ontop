@@ -420,24 +420,24 @@ typedLiteral returns [Function value]
       String functionName = $resource.value.toString();
       Predicate functionSymbol = null;
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateLiteral();
+          functionSymbol = dfac.getDataTypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateString();
+          functionSymbol = dfac.getDataTypePredicateString();
       } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-     	functionSymbol = dfac.getDataTypePredicateInteger();
+          functionSymbol = dfac.getDataTypePredicateInteger();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDecimal();
+          functionSymbol = dfac.getDataTypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDouble();
+          functionSymbol = dfac.getDataTypePredicateDouble();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDateTime();
+          functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateBoolean();
+          functionSymbol = dfac.getDataTypePredicateBoolean();
       } else {
-        throw new RecognitionException();
+          throw new RecognitionException();
       }
       $value = dfac.getFunctionalTerm(functionSymbol, var);
-    }
+     }
   ;
 
 language returns [NewLiteral value]
@@ -693,7 +693,7 @@ fragment ID: ID_START (ID_CORE)*;
 
 fragment NAME_START_CHAR: (ALPHA|UNDERSCORE);
 
-fragment NAME_CHAR: (NAME_START_CHAR|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH);	 
+fragment NAME_CHAR: (NAME_START_CHAR|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH|PERCENT|EQUALS|SEMI);	 
 
 NCNAME
   : NAME_START_CHAR (NAME_CHAR)*
