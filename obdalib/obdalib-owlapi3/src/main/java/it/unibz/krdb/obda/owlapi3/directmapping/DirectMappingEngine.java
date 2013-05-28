@@ -109,8 +109,8 @@ public class DirectMappingEngine {
 	 * 
 	 * @throws Exceptions
 	 */
-	public OWLOntology getOntology(OWLOntologyManager manager, OBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
-		OWLOntology ontology = manager.createOntology();
+	public OWLOntology getOntology(OWLOntologyManager manager, OBDAModel model, String name) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
+		OWLOntology ontology = manager.createOntology(IRI.create(name));
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
 		Set<Predicate> classset = model.getDeclaredClasses();
