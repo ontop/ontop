@@ -15,11 +15,11 @@ driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
-target		:address-{id} a :Address; :addressID {id}; :inStreet {street}; :hasNumber {number}; :inCity {city}; :inState {state}; :inCountry {country} .
+target		:address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} .
 source		select id, street, number, city, state, country from address
 
 mappingId	mapping-brokers
-target		:person-{id} a :StockBroker; :firstName {name}; :lastName {lastname}; :dateOfBirth {dateofbirth}; :ssn {ssn} . 
+target		:person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
 source		select id, name, lastname, dateofbirth, ssn from broker
 
 mappingId	mapping-broker-address
@@ -27,7 +27,7 @@ target		:person-{id} :hasAddress :address-{addressid} .
 source		select id, addressid from broker
 
 mappingId	mapping-investors
-target		:person-{id} a :Investor; :firstName {name}; :lastName {lastname}; :dateOfBirth {dateofbirth}; :ssn {ssn} . 
+target		:person-{id} a :Investor ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
 source		select id, name, lastname, dateofbirth, ssn from client
 
 mappingId	mapping-investor-address
@@ -35,7 +35,7 @@ target		:person-{id} :hasAddress :address-{addressid} .
 source		select id, name, lastname, addressid from client
 
 mappingId	mapping-companies
-target		:company-{id} a :Company; :companyName {name}; :marketShares {marketshares}; :netWorth {networth} . 
+target		:company-{id} a :Company ; :companyName {name} ; :marketShares {marketshares} ; :netWorth {networth} . 
 source		select id, name, marketshares, networth from company
 
 mappingId	mapping-company-addresses
@@ -43,11 +43,11 @@ target		:company-{id} :hasAddress :address-{addressid} .
 source		select id, addressid from company
 
 mappingId	mapping-stocks
-target		:stock-{id} a :Stock; :financialInstrumentID {id}; :amountOfShares {numberofshares}; :typeOfShares {sharetype}; :stockDescription {description}@en-us . 
+target		:stock-{id} a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype} ; :stockDescription {description}@en-us . 
 source		select id, numberofshares, sharetype, description from stockinformation
 
 mappingId	mapping-stockbooks
-target		:stockbook-{date} a :StockExchangeList; :listdate {date} . 
+target		:stockbook-{date} a :StockExchangeList ; :listdate {date} . 
 source		select distinct date from stockbooklist 
 
 mappingId	mapping-tradesOnBehalfOf-physical
@@ -59,15 +59,15 @@ target		:person-{brokerid} :tradesOnBehalfOf :company-{companyid} .
 source		select brokerid, companyid from brokerworksfor where companyid IS NOT NULL
 
 mappingId	mapping-transactions
-target		:transaction-{id} a :Transaction; :transactionID {id}; :transactionDate {date}; :amountOfTransaction {amount} . 
+target		:transaction-{id} a :Transaction ; :transactionID {id} ; :transactionDate {date} ; :amountOfTransaction {amount} . 
 source		select id, date, amount from transaction
 
 mappingId	mapping-transaction-roles-persons
-target		:transaction-{id} :isExecutedBy :person-{brokerid}; :isExecutedFor :person-{forclientid}; :involvesInstrument :stock-{stockid} . 
+target		:transaction-{id} :isExecutedBy :person-{brokerid} ; :isExecutedFor :person-{forclientid} ; :involvesInstrument :stock-{stockid} . 
 source		select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL
 
 mappingId	mapping-transaction-roles-companies
-target		:transaction-{id} :isExecutedBy :person-{brokerid}; :isExecutedFor :company-{forcompanyid}; :involvesInstrument :stock-{stockid} . 
+target		:transaction-{id} :isExecutedBy :person-{brokerid} ; :isExecutedFor :company-{forcompanyid} ; :involvesInstrument :stock-{stockid} . 
 source		select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL
 
 mappingId	mapping-stock-company

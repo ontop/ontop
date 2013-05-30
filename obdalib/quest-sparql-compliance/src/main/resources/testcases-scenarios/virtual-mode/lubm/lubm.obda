@@ -13,7 +13,7 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Undergraduate Students
-target		<http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent{id}> a :UndergraduateStudent; :memberOf <http://www.Department{depid}.University{uniid}.edu>; :emailAddress {email}; :telephone {phone} . 
+target		<http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent{id}> a :UndergraduateStudent ; :memberOf <http://www.Department{depid}.University{uniid}.edu> ; :emailAddress {email} ; :telephone {phone} . 
 source		select depid, uniid, id, stype, name, degreeuniid, email, phone, advisorid, advisortype from students where stype=0
 
 mappingId	Undergrad Student has Advisor Associate Professor
@@ -29,7 +29,7 @@ target		<http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent
 source		select depid, uniid, id, stype, name, degreeuniid, email, phone, advisorid, advisortype from students where stype=0 and advisortype=3
 
 mappingId	Graduate Students
-target		<http://www.Department{depid}.University{uniid}.edu/GraduateStudent{id}> a :GraduateStudent; :memberOf <http://www.Department{depid}.University{uniid}.edu>; :undergraduateDegreeFrom <http://www.University{degreeuniid}.edu>; :emailAddress {email}; :telephone {phone} . 
+target		<http://www.Department{depid}.University{uniid}.edu/GraduateStudent{id}> a :GraduateStudent ; :memberOf <http://www.Department{depid}.University{uniid}.edu> ; :undergraduateDegreeFrom <http://www.University{degreeuniid}.edu> ; :emailAddress {email} ; :telephone {phone} . 
 source		select depid, uniid, id, stype, name, degreeuniid, email, phone, advisorid, advisortype from students where stype=1
 
 mappingId	Grad Student has Advisor Associate Professor
@@ -53,35 +53,35 @@ target		<http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent
 source		select depid, uniid, studtype, studid, coursetype, courseid from takescourses where coursetype=0
 
 mappingId	Associate Professor
-target		<http://www.Department{depid}.University{uniid}.edu/AssociateProfessor{id}> a :AssociateProfessor; :worksFor <http://www.Department{depid}.University{uniid}.edu>; :undergraduateDegreeFrom <http://www.University{underD}.edu>; :mastersDegreeFrom <http://www.University{masterD}.edu>; :doctoralDegreeFrom <http://www.University{docD}.edu>; :name {name}; :emailAddress {email}; :telephone {phone}; :researchInterest {research} . 
+target		<http://www.Department{depid}.University{uniid}.edu/AssociateProfessor{id}> a :AssociateProfessor ; :worksFor <http://www.Department{depid}.University{uniid}.edu> ; :undergraduateDegreeFrom <http://www.University{underD}.edu> ; :mastersDegreeFrom <http://www.University{masterD}.edu> ; :doctoralDegreeFrom <http://www.University{docD}.edu> ; :name {name} ; :emailAddress {email} ; :telephone {phone} ; :researchInterest {research} . 
 source		select depid, uniid, ttype, id, name, underD, masterD, docD, email, phone, research from teachers where ttype=2
 
 mappingId	Assistant Professor
-target		<http://www.Department{depid}.University{uniid}.edu/AssistantProfessor{id}> a :AssistantProfessor; :worksFor <http://www.Department{depid}.University{uniid}.edu>; :undergraduateDegreeFrom <http://www.University{underD}.edu>; :mastersDegreeFrom <http://www.University{masterD}.edu>; :doctoralDegreeFrom <http://www.University{docD}.edu>; :name {name}; :emailAddress {email}; :telephone {phone}; :researchInterest {research} . 
+target		<http://www.Department{depid}.University{uniid}.edu/AssistantProfessor{id}> a :AssistantProfessor ; :worksFor <http://www.Department{depid}.University{uniid}.edu> ; :undergraduateDegreeFrom <http://www.University{underD}.edu> ; :mastersDegreeFrom <http://www.University{masterD}.edu> ; :doctoralDegreeFrom <http://www.University{docD}.edu> ; :name {name} ; :emailAddress {email} ; :telephone {phone} ; :researchInterest {research} . 
 source		select depid, uniid, ttype, id, name, underD, masterD, docD, email, phone, research from teachers where ttype=1
 
 mappingId	Full Professor
-target		<http://www.Department{depid}.University{uniid}.edu/FullProfessor{id}> a :FullProfessor; :worksFor <http://www.Department{depid}.University{uniid}.edu>; :undergraduateDegreeFrom <http://www.University{underD}.edu>; :mastersDegreeFrom <http://www.University{masterD}.edu>; :doctoralDegreeFrom <http://www.University{docD}.edu>; :name {name}; :emailAddress {email}; :telephone {phone}; :researchInterest {research} . 
+target		<http://www.Department{depid}.University{uniid}.edu/FullProfessor{id}> a :FullProfessor ; :worksFor <http://www.Department{depid}.University{uniid}.edu> ; :undergraduateDegreeFrom <http://www.University{underD}.edu> ; :mastersDegreeFrom <http://www.University{masterD}.edu> ; :doctoralDegreeFrom <http://www.University{docD}.edu> ; :name {name} ; :emailAddress {email} ; :telephone {phone} ; :researchInterest {research} . 
 source		select depid, uniid, ttype, id, name, underD, masterD, docD, email, phone, research from teachers where ttype=3
 
 mappingId	Lecturer
-target		<http://www.Department{depid}.University{uniid}.edu/Lecturer{id}> a :Lecturer; :worksFor <http://www.Department{depid}.University{uniid}.edu>; :undergraduateDegreeFrom <http://www.University{underD}.edu>; :mastersDegreeFrom <http://www.University{masterD}.edu>; :doctoralDegreeFrom <http://www.University{docD}.edu>; :name {name}; :emailAddress {email}; :telephone {phone} . 
+target		<http://www.Department{depid}.University{uniid}.edu/Lecturer{id}> a :Lecturer ; :worksFor <http://www.Department{depid}.University{uniid}.edu> ; :undergraduateDegreeFrom <http://www.University{underD}.edu> ; :mastersDegreeFrom <http://www.University{masterD}.edu> ; :doctoralDegreeFrom <http://www.University{docD}.edu> ; :name {name} ; :emailAddress {email} ; :telephone {phone} . 
 source		select depid, uniid, ttype, id, name, underD, masterD, docD, email, phone, research from teachers where ttype=0
 
 mappingId	Associate Professor makes Publications
-target		<http://www.Department{depid}.University{uniid}.edu/AssociateProfessor{authorid}/Publication{publicationid}> a :Publication; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/AssociateProfessor{authorid}> . 
+target		<http://www.Department{depid}.University{uniid}.edu/AssociateProfessor{authorid}/Publication{publicationid}> a :Publication ; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/AssociateProfessor{authorid}> . 
 source		select depid, uniid, publicationid, authortype, authorid from publications where authortype=2
 
 mappingId	Assistant Professor makes Publications
-target		<http://www.Department{depid}.University{uniid}.edu/AssistantProfessor{authorid}/Publication{publicationid}> a :Publication; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/AssistantProfessor{authorid}> . 
+target		<http://www.Department{depid}.University{uniid}.edu/AssistantProfessor{authorid}/Publication{publicationid}> a :Publication ; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/AssistantProfessor{authorid}> . 
 source		select depid, uniid, publicationid, authortype, authorid from publications where authortype=1
 
 mappingId	Full Professor makes Publications
-target		<http://www.Department{depid}.University{uniid}.edu/FullProfessor{authorid}/Publication{publicationid}> a :Publication; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/FullProfessor{authorid}> . 
+target		<http://www.Department{depid}.University{uniid}.edu/FullProfessor{authorid}/Publication{publicationid}> a :Publication ; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/FullProfessor{authorid}> . 
 source		select depid, uniid, publicationid, authortype, authorid from publications where authortype=3
 
 mappingId	Lecturer makes Publications
-target		<http://www.Department{depid}.University{uniid}.edu/Lecturer{authorid}/Publication{publicationid}> a :Publication; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/Lecturer{authorid}> . 
+target		<http://www.Department{depid}.University{uniid}.edu/Lecturer{authorid}/Publication{publicationid}> a :Publication ; :publicationAuthor <http://www.Department{depid}.University{uniid}.edu/Lecturer{authorid}> . 
 source		select depid, uniid, publicationid, authortype, authorid from publications where authortype=0
 
 mappingId	Associate Professor Teaches Courses
@@ -141,19 +141,19 @@ target		<http://www.Department{depid}.University{uniid}.edu> :member <http://www
 source		select depid, uniid, id, stype, name, degreeuniid, email, phone, advisorid, advisortype from students where stype=1
 
 mappingId	Reaseach Group sub-organization of Department
-target		<http://www.Department{depid}.University{uniid}.edu/ResearchGroup{id}> a :ResearchGroup; :subOrganizationOf <http://www.Department{depid}.University{uniid}.edu> . 
+target		<http://www.Department{depid}.University{uniid}.edu/ResearchGroup{id}> a :ResearchGroup ; :subOrganizationOf <http://www.Department{depid}.University{uniid}.edu> . 
 source		select depid, uniid, id from researchgroups
 
 mappingId	Department sub-organization of University
-target		<http://www.Department{departmentid}.University{universityid}.edu> a :Department; :subOrganizationOf <http://www.University{universityid}.edu> . 
+target		<http://www.Department{departmentid}.University{universityid}.edu> a :Department ; :subOrganizationOf <http://www.University{universityid}.edu> . 
 source		select departmentid, universityid from departments
 
 mappingId	ResearchGroup sub-organization of University
-target		<http://www.Department{depid}.University{uniid}.edu/ResearchGroup{id}> a :ResearchGroup; :subOrganizationOf <http://www.University{uniid}.edu> . 
+target		<http://www.Department{depid}.University{uniid}.edu/ResearchGroup{id}> a :ResearchGroup ; :subOrganizationOf <http://www.University{uniid}.edu> . 
 source		select depid, uniid, id from researchgroups
 
 mappingId	Chair
-target		<http://www.Department{depid}.University{uniid}.edu/FullProfessor{profid}> a :Chair; :headOf <http://www.Department{depid}.University{uniid}.edu> . 
+target		<http://www.Department{depid}.University{uniid}.edu/FullProfessor{profid}> a :Chair ; :headOf <http://www.Department{depid}.University{uniid}.edu> . 
 source		select depid, uniid, profid from heads
 ]]
 

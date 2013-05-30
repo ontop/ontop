@@ -10,23 +10,23 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Numeric Types
-target		:numeric-{id} a :Row; :hasTinyInt {type_tinyint}; :hasSmallInt {type_smallint}; :hasMediumInt {type_mediumint}; :hasInt {type_int}; :hasBigInt {type_bigint}; :hasDecimal {type_decimal}; :hasFloat {type_float}; :hasDouble {type_double} . 
+target		:numeric-{id} a :Row ; :hasTinyInt {type_tinyint} ; :hasSmallInt {type_smallint} ; :hasMediumInt {type_mediumint} ; :hasInt {type_int} ; :hasBigInt {type_bigint} ; :hasDecimal {type_decimal} ; :hasFloat {type_float} ; :hasDouble {type_double} . 
 source		select id, type_tinyint, type_smallint, type_mediumint, type_int, type_bigint, type_decimal, type_float, type_double from Numerics
 
 mappingId	Character Types
-target		:character-{id} a :Row; :hasChar {type_char}; :hasVarChar {type_varchar}; :hasText {type_text}; :hasEnum {type_enum}; :hasSet {type_set}; :hasLongText {type_longtext}; :hasMediumText {type_mediumtext}; :hasTinyText {type_tinytext} . 
+target		:character-{id} a :Row ; :hasChar {type_char} ; :hasVarChar {type_varchar} ; :hasText {type_text} ; :hasEnum {type_enum} ; :hasSet {type_set} ; :hasLongText {type_longtext} ; :hasMediumText {type_mediumtext} ; :hasTinyText {type_tinytext} . 
 source		select id, type_char, type_varchar, type_text, type_enum, type_set, type_longtext, type_mediumtext, type_tinytext from Characters
 
 mappingId	Date-Time Types
-target		:datetime-{id} a :Row; :hasDate {type_date}; :hasDateTime {type_datetime}; :hasTimestamp {type_timestamp}; :hasTime {type_time}; :hasYear {type_year} . 
+target		:datetime-{id} a :Row ; :hasDate {type_date} ; :hasDateTime {type_datetime} ; :hasTimestamp {type_timestamp} ; :hasTime {type_time} ; :hasYear {type_year} . 
 source		select id, type_date, type_datetime, type_timestamp, type_time, type_year from DateTimes
 
 mappingId	Boolean Types
-target		:boolean-{id} a :Row; :hasBit {type_bit} . 
+target		:boolean-{id} a :Row ; :hasBit {type_bit} . 
 source		select id, type_bit from Booleans
 
 mappingId	Binary Types
-target		:binary-{id} a :Row; :hasBinary {type_binary}; :hasVarBinary {type_varbinary}; :hasBlob {type_blob}; :hasLongBlob {type_longblob}; :hasMediumBlob {type_mediumblob}; :hasTinyBlob {type_tinyblob} . 
+target		:binary-{id} a :Row ; :hasBinary {type_binary} ; :hasVarBinary {type_varbinary} ; :hasBlob {type_blob} ; :hasLongBlob {type_longblob} ; :hasMediumBlob {type_mediumblob} ; :hasTinyBlob {type_tinyblob} . 
 source		select id, type_binary, type_varbinary, type_blob, type_longblob, type_mediumblob, type_tinyblob from Binaries
 ]]
 

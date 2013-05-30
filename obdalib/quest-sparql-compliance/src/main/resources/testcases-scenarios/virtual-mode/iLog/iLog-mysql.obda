@@ -32,15 +32,15 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Customer-mapping
-target		<"&iLogOntology;customer/{$ID}"> a iLogOntology:Customer; iLogOntology:hasCustomerName $customerName . 
+target		<"&iLogOntology;customer/{$ID}"> a iLogOntology:Customer ; iLogOntology:hasCustomerName $customerName . 
 source		SELECT ID, customerName FROM customer
 
 mappingId	RequestForWork
-target		<"&iLogOntology;customer/{$CustomerID}"> iLogOntology:requests <"&iLogOntology;request/{$ID}"> . <"&iLogOntology;request/{$ID}"> a iLogOntology:RequestForWork; iLogOntology:hasRequestDate $requestDate . 
+target		<"&iLogOntology;customer/{$CustomerID}"> iLogOntology:requests <"&iLogOntology;request/{$ID}"> . <"&iLogOntology;request/{$ID}"> a iLogOntology:RequestForWork ; iLogOntology:hasRequestDate $requestDate . 
 source		select ID, CustomerID, requestDate from requestforwork
 
 mappingId	ITU
-target		<"&iLogOntology;itu/{$ID}"> a iLogOntology:ITU; iLogOntology:hasITUID $ID; iLogOntology:hasBeenLate $beenLate . 
+target		<"&iLogOntology;itu/{$ID}"> a iLogOntology:ITU ; iLogOntology:hasITUID $ID ; iLogOntology:hasBeenLate $beenLate . 
 source		SELECT ID, beenLate FROM itu
 
 mappingId	RequestForWorkcontainsITU
@@ -48,7 +48,7 @@ target		<"&iLogOntology;request/{$rfv}"> iLogOntology:containsITU <"&iLogOntolog
 source		SELECT requestForWorkID as rfv, ITUID as itu FROM containsitu
 
 mappingId	ITUEvent
-target		<"&iLogOntology;ituevent/{$ID}"> iLogOntology:hasEventTime $eventTime; iLogOntology:happensToITU <"&iLogOntology;itu/{$ITUID}">; iLogOntology:takesPlaceAt <"&iLogOntology;terminal/{$terminalID}">; iLogOntology:happensOnTrain <"&iLogOntology;train/{$trainID}"> . 
+target		<"&iLogOntology;ituevent/{$ID}"> iLogOntology:hasEventTime $eventTime ; iLogOntology:happensToITU <"&iLogOntology;itu/{$ITUID}"> ; iLogOntology:takesPlaceAt <"&iLogOntology;terminal/{$terminalID}"> ; iLogOntology:happensOnTrain <"&iLogOntology;train/{$trainID}"> . 
 source		SELECT ID, eventTime, terminalID, trainID, ITUID FROM ituevent
 
 mappingId	ITUClassLoading
@@ -64,15 +64,15 @@ target		<"&iLogOntology;ituevent/{$ID}"> a iLogOntology:Unloading .
 source		SELECT ID FROM ituevent WHERE ITUEventTypeID = 3
 
 mappingId	TransportOrder
-target		<"&iLogOntology;torder/{$ID}"> a iLogOntology:TransportOrder; iLogOntology:hasITUDeparture <"&iLogOntology;terminal/{$terminalIDOrigin}">; iLogOntology:hasITUArrival <"&iLogOntology;terminal/{$terminalIDDestination}">; iLogOntology:relatesToITU <"&iLogOntology;itu/{$ITUID}">; iLogOntology:satisfies <"&iLogOntology;request/{$RequestForWorkID}"> . 
+target		<"&iLogOntology;torder/{$ID}"> a iLogOntology:TransportOrder ; iLogOntology:hasITUDeparture <"&iLogOntology;terminal/{$terminalIDOrigin}"> ; iLogOntology:hasITUArrival <"&iLogOntology;terminal/{$terminalIDDestination}"> ; iLogOntology:relatesToITU <"&iLogOntology;itu/{$ITUID}"> ; iLogOntology:satisfies <"&iLogOntology;request/{$RequestForWorkID}"> . 
 source		SELECT ID, terminalIDOrigin, terminalIDDestination, ITUID, RequestForWorkID FROM transportorder
 
 mappingId	Terminal
-target		<"&iLogOntology;terminal/{$ID}"> a iLogOntology:Terminal; iLogOntology:hasTerminalName $terminalName . 
+target		<"&iLogOntology;terminal/{$ID}"> a iLogOntology:Terminal ; iLogOntology:hasTerminalName $terminalName . 
 source		SELECT ID, terminalName FROM terminal
 
 mappingId	ScheduledStop
-target		<"&iLogOntology;stop/{$ID}"> a iLogOntology:ScheduledStop; iLogOntology:hasScheduledStopTerminal <"&iLogOntology;terminal/{$terminalID}">; iLogOntology:hasScheduledTime $scheduledTime . 
+target		<"&iLogOntology;stop/{$ID}"> a iLogOntology:ScheduledStop ; iLogOntology:hasScheduledStopTerminal <"&iLogOntology;terminal/{$terminalID}"> ; iLogOntology:hasScheduledTime $scheduledTime . 
 source		SELECT ID, scheduledTime, terminalID FROM scheduledstop
 
 mappingId	RouteOrigin
@@ -88,11 +88,11 @@ target		<"&iLogOntology;route/{$routeID}"> iLogOntology:passesThrough <"&iLogOnt
 source		SELECT ID, routeID FROM scheduledstop WHERE scheduledStopTypeID = 2
 
 mappingId	Route
-target		<"&iLogOntology;route/{$ID}"> a iLogOntology:Route; iLogOntology:hasRouteName $routeName . 
+target		<"&iLogOntology;route/{$ID}"> a iLogOntology:Route ; iLogOntology:hasRouteName $routeName . 
 source		SELECT ID, routeName FROM route
 
 mappingId	Train
-target		<"&iLogOntology;train/{$ID}"> a iLogOntology:Train; iLogOntology:hasCapacity $capacity; iLogOntology:hasTrainNumber $trainNumber . 
+target		<"&iLogOntology;train/{$ID}"> a iLogOntology:Train ; iLogOntology:hasCapacity $capacity ; iLogOntology:hasTrainNumber $trainNumber . 
 source		SELECT ID, capacity, trainNumber FROM train
 
 mappingId	TrainRoute
@@ -112,7 +112,7 @@ target		<"&iLogOntology;trainevent/{$ID}"> a iLogOntology:TrainPassage .
 source		select ID from trainevent where trainEventTypeID = 2
 
 mappingId	TrainEvent
-target		<"&iLogOntology;trainevent/{$ID}"> a iLogOntology:TrainEvent; iLogOntology:happensToTrain <"&iLogOntology;train/{$trainID}">; iLogOntology:takesPlaceAt <"&iLogOntology;terminal/{$terminalID}">; iLogOntology:hasEventTime $eventTime . 
+target		<"&iLogOntology;trainevent/{$ID}"> a iLogOntology:TrainEvent ; iLogOntology:happensToTrain <"&iLogOntology;train/{$trainID}"> ; iLogOntology:takesPlaceAt <"&iLogOntology;terminal/{$terminalID}"> ; iLogOntology:hasEventTime $eventTime . 
 source		select ID, trainID, terminalID, eventTime from trainevent
 
 mappingId	Customer-operatesNearby

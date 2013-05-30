@@ -8,18 +8,18 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
+connectionUrl	jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe
 username	system
 password	obdaps83
 driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
-target		:address-{ID} a :Address; :addressID {ID}; :inStreet {STREET}; :hasNumber {NUMBER}^^xsd:integer; :inCity {CITY}; :inState {STATE}; :inCountry {COUNTRY} .
+target		:address-{ID} a :Address ; :addressID {ID} ; :inStreet {STREET} ; :hasNumber {NUMBER}^^xsd:integer ; :inCity {CITY} ; :inState {STATE} ; :inCountry {COUNTRY} .
 source		select ID, STREET, "NUMBER", CITY, STATE, COUNTRY from ADDRESS
 
 mappingId	mapping-brokers
-target		:person-{ID} a :StockBroker; :firstName {NAME}; :lastName {LASTNAME}; :dateOfBirth {DATEOFBIRTH}; :ssn {SSN} .
+target		:person-{ID} a :StockBroker ; :firstName {NAME} ; :lastName {LASTNAME} ; :dateOfBirth {DATEOFBIRTH} ; :ssn {SSN} .
 source		select ID, NAME, LASTNAME, DATEOFBIRTH, SSN from BROKER
 
 mappingId	mapping-broker-address
@@ -27,7 +27,7 @@ target		:person-{ID} :hasAddress :address-{ADDRESSID} .
 source		select ID, ADDRESSID from BROKER
 
 mappingId	mapping-investors
-target		:person-{ID} a :Investor; :firstName {NAME}; :lastName {LASTNAME}; :dateOfBirth {DATEOFBIRTH}; :ssn {SSN} . 
+target		:person-{ID} a :Investor ; :firstName {NAME} ; :lastName {LASTNAME} ; :dateOfBirth {DATEOFBIRTH} ; :ssn {SSN} . 
 source		select ID, NAME, LASTNAME, DATEOFBIRTH, SSN from CLIENT
 
 mappingId	mapping-investor-address
@@ -35,7 +35,7 @@ target		:person-{ID} :hasAddress :address-{ADDRESSID} .
 source		select ID, NAME, LASTNAME, ADDRESSID from CLIENT
 
 mappingId	mapping-companies
-target		:company-{ID} a :Company; :companyName {NAME}; :marketShares {MARKETSHARES}; :netWorth {NETWORTH} .
+target		:company-{ID} a :Company ; :companyName {NAME} ; :marketShares {MARKETSHARES} ; :netWorth {NETWORTH} .
 source		select ID, NAME, MARKETSHARES, NETWORTH from COMPANY
 
 mappingId	mapping-company-addresses
@@ -43,11 +43,11 @@ target		:company-{ID} :hasAddress :address-{ADDRESSID} .
 source		select ID, ADDRESSID from COMPANY
 
 mappingId	mapping-stocks
-target		:stock-{ID} a :Stock; :financialInstrumentID {ID}; :amountOfShares {NUMBEROFSHARES}; :typeOfShares {SHARETYPE}^^xsd:boolean; :stockDescription {DESCRIPTION}@en-us . 
+target		:stock-{ID} a :Stock ; :financialInstrumentID {ID} ; :amountOfShares {NUMBEROFSHARES} ; :typeOfShares {SHARETYPE}^^xsd:boolean ; :stockDescription {DESCRIPTION}@en-us . 
 source		select ID, NUMBEROFSHARES, SHARETYPE, DESCRIPTION from STOCKINFORMATION
 
 mappingId	mapping-stockbooks
-target		:stockbook-{DATE} a :StockExchangeList; :listdate {DATE} . 
+target		:stockbook-{DATE} a :StockExchangeList ; :listdate {DATE} . 
 source		select distinct "DATE" from STOCKBOOKLIST 
 
 mappingId	mapping-tradesOnBehalfOf-physical
@@ -59,15 +59,15 @@ target		:person-{BROKERID} :tradesOnBehalfOf :company-{COMPANYID} .
 source		select BROKERID, COMPANYID from BROKERWORKSFOR where COMPANYID IS NOT NULL
 
 mappingId	mapping-transactions
-target		:transaction-{ID} a :Transaction; :transactionID {ID}; :transactionDate {DATE}; :amountOfTransaction {AMOUNT} . 
+target		:transaction-{ID} a :Transaction ; :transactionID {ID} ; :transactionDate {DATE} ; :amountOfTransaction {AMOUNT} . 
 source		select ID, "DATE", AMOUNT from TRANSACTION
 
 mappingId	mapping-transaction-roles-persons
-target		:transaction-{ID} :isExecutedBy :person-{BROKERID}; :isExecutedFor :person-{FORCLIENTID}; :involvesInstrument :stock-{STOCKID} .
+target		:transaction-{ID} :isExecutedBy :person-{BROKERID} ; :isExecutedFor :person-{FORCLIENTID} ; :involvesInstrument :stock-{STOCKID} .
 source		select ID, BROKERID, FORCLIENTID, STOCKID from TRANSACTION where FORCLIENTID IS NOT NULL
 
 mappingId	mapping-transaction-roles-companies
-target		:transaction-{ID} :isExecutedBy :person-{BROKERID}; :isExecutedFor :company-{FORCOMPANYID}; :involvesInstrument :stock-{STOCKID} . 
+target		:transaction-{ID} :isExecutedBy :person-{BROKERID} ; :isExecutedFor :company-{FORCOMPANYID} ; :involvesInstrument :stock-{STOCKID} . 
 source		select ID, BROKERID, FORCOMPANYID, STOCKID from TRANSACTION where FORCOMPANYID IS NOT NULL
 
 mappingId	mapping-stock-company
