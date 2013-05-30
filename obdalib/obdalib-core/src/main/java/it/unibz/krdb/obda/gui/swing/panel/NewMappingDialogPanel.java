@@ -517,7 +517,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		releaseResultset();
 
-		final String targetQueryString = makePlainText(txtTargetQuery.getText());
+		final String targetQueryString = txtTargetQuery.getText();
 		final String sourceQueryString = txtSourceQuery.getText();
 
 		if (txtMappingID.getText().trim().length() == 0) {

@@ -318,7 +318,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 				boolean semiColonSeparator = false;
 				for (String predicate : subjectToPredicates.get(subject)) {
 					if (semiColonSeparator) {
-						sb.append("; ");
+						sb.append(" ; ");
 					}
 					sb.append(predicate);
 					sb.append(" ");
@@ -327,7 +327,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					boolean commaSeparator = false;
 					for (String object : predicateToObjects.get(predicate)) {
 						if (commaSeparator) {
-							sb.append(", ");
+							sb.append(" , ");
 						}
 						sb.append(object);
 						commaSeparator = true;
