@@ -1,3 +1,29 @@
+[QueryItem="CACHE EXTS"]
+PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+
+SELECT ?staff ?uni ?org ?course ?staff2 ?course2 ?student ?staff3 ?org2 ?student2 ?dept ?emp ?org3 ?emp2
+WHERE { 
+	?staff lubm:worksFor ?uni .
+	?uni lubm:affiliatedOrganizationOf ?org .
+	?staff2 a lubm:Person .
+	?staff lubm:teacherOf ?course .
+	?course2 a lubm:Course .
+	?student2 a lubm:Student .
+	?student lubm:advisor ?staff .
+	?staff3 a lubm:Faculty .
+	?student lubm:takesCourse ?course .
+	?org2 a lubm:Organization .
+	?org lubm:hasAlumnus ?staff .
+    ?dept a lubm:Department .
+    ?student lubm:memberOf ?dept .	
+	?uni lubm:subOrganizationOf ?org .
+	?org3 a lubm:University .
+	?emp a lubm:Employee .
+	?emp2 a lubm:Professor .
+	?course a lubm:GraduateCourse .
+}
+
+
 [QueryItem="R1"]
 PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
 
