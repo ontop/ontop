@@ -15,11 +15,9 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.Connection;
 
 import junit.framework.TestCase;
 
@@ -28,8 +26,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import sesameWrapper.SemanticIndexManager;
 
 /***
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -85,6 +81,10 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
 		
 		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
+		
+		st.createIndexes();
+		
+		
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
