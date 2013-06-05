@@ -211,14 +211,13 @@ public class DirectMappingAxiom {
 	 * TODO replace URI predicate to BNode predicate for tables without PKs
 	 * 		in the following method after 'else'
 	 */
-	
 	private NewLiteral generateSubject(OBDADataFactory df, TableDefinition td, boolean ref){
 		String tableName = "";
 //		if (ref)
 //			tableName = percentEncode(td.getName())+".";
 		
 		if(td.getPrimaryKeys().size()>0){
-			Predicate uritemple = df.getUriPredicate();
+			Predicate uritemple = df.getUriTemplatePredicate(td.getPrimaryKeys().size()+1);
 			List<NewLiteral> terms = new ArrayList<NewLiteral>();
 			terms.add(df.getValueConstant(subjectTemple(td,td.getPrimaryKeys().size())));
 			for(int i=0;i<td.getPrimaryKeys().size();i++){
@@ -233,7 +232,7 @@ public class DirectMappingAxiom {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i+1)));
 			}
 			
-			Predicate bNode = df.getBNodePredicate();			
+			Predicate bNode = df.getBNodeTemplatePredicate(1);			
 			return df.getFunctionalTerm(bNode, vars);
 		}
 	}
