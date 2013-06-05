@@ -89,6 +89,15 @@ public class QuestOWLStatement implements OWLStatement {
 			throw owlException;
 		}
 	}
+	
+	public void createIndexes() throws Exception {
+		st.createIndexes();
+	}
+	
+	public void dropIndexes() throws Exception {
+		st.dropIndexes();
+
+	}
 
 	@Override
 	public List<OWLAxiom> executeConstruct(String query) throws OWLException {
