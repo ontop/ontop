@@ -4,6 +4,8 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.sql.DBMetadata;
@@ -15,24 +17,28 @@ import java.sql.SQLException;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 public abstract class AbstractDBMetadata
 {
 	
 	private OWLOntology onto;
 	private OBDAModel model;
+	private OBDADataSource source;
 	
 	protected DBMetadata getMetadata() 
 	{
 		DBMetadata metadata = null;
 		try {
-			Class.forName(getDriverName());
+			Class.forName(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 		}
 		catch (ClassNotFoundException e) { /* NO-OP */ }
 
 		try {
-			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
+			Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
+					source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
 			metadata = JDBCConnectionManager.getMetaData(conn);
 		
 		} catch (SQLException e) { 
@@ -41,23 +47,11 @@ public abstract class AbstractDBMetadata
 		return metadata;
 	}
 	
-	protected void getOntologyAndDirectMappings(String mappings_file, String ontology_uri_str) {
-	try{
+	protected void getOntologyAndDirectMappings(OWLOntology onto, OBDAModel model, OBDADataSource source) throws SQLException, DuplicateMappingException, OWLOntologyCreationException, OWLOntologyStorageException {
+		this.source = source;	
 		DirectMappingEngine engine = new DirectMappingEngine();
-		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
-		OBDADataSource source = fact.getJDBCDataSource(getConnectionString(), getConnectionUsername(), getConnectionPassword(), getDriverName());
-		 model =  engine.extractMappings(source);
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		 onto =  engine.getOntology(manager, model, ontology_uri_str);
-		
-		if (mappings_file != null)
-		{
-			ModelIOManager mng = new ModelIOManager(model);
-			mng.save(mappings_file);
-		}
-	}
-	catch(Exception e)
-	{e.printStackTrace();}
+		this.model =  engine.extractMappings(model, source);
+		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
 	
 	protected OBDAModel getOBDAModel()
@@ -70,9 +64,4 @@ public abstract class AbstractDBMetadata
 		return this.onto;
 	}
 	
-	
-	protected abstract String getDriverName();
-	protected abstract String getConnectionString();
-	protected abstract String getConnectionUsername();
-	protected abstract String getConnectionPassword();
 }

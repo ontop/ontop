@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -20,6 +21,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
@@ -32,6 +34,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+
+//import com.hp.hpl.jena.iri.impl.IRIFactoryImpl;
+//import it.unibz.krdb.obda.model.net.IRIFactory;
+
 
 
 /***
@@ -109,8 +115,7 @@ public class DirectMappingEngine {
 	 * 
 	 * @throws Exceptions
 	 */
-	public OWLOntology getOntology(OWLOntologyManager manager, OBDAModel model, String name) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
-		OWLOntology ontology = manager.createOntology(IRI.create(name));
+	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, OBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
 		Set<Predicate> classset = model.getDeclaredClasses();
@@ -122,7 +127,6 @@ public class DirectMappingEngine {
 			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
-			manager.saveOntology(ontology);
 		}
 		
 		//Add all the object properties
@@ -130,7 +134,6 @@ public class DirectMappingEngine {
 			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
-			manager.saveOntology(ontology);
 		}
 		
 		//Add all the data properties
@@ -138,7 +141,6 @@ public class DirectMappingEngine {
 			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
-			manager.saveOntology(ontology);
 		}
 				
 		return ontology;		
@@ -155,10 +157,13 @@ public class DirectMappingEngine {
 	 */
 	public OBDAModel extractMappings(OBDADataSource source) throws SQLException, DuplicateMappingException{
 		OBDAModelImpl model = new OBDAModelImpl();
+		return extractMappings(model, source);
+	}
+	
+	public OBDAModel extractMappings(OBDAModel model, OBDADataSource source) throws SQLException, DuplicateMappingException{
 		insertMapping(source, model);
 		return model;
 	}
-	
 	
 	
 	/***
@@ -175,25 +180,27 @@ public class DirectMappingEngine {
 	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri =  model.getPrefixManager().getDefaultPrefix();
-		model.addSource(source);
-		for(int i=0;i<conMan.getMetaData(source).getTableList().size();i++){
-			TableDefinition td = conMan.getMetaData(source).getTableList().get(i);
+		List<TableDefinition> tables = conMan.getMetaData(source).getTableList();
+		for(int i=0;i<tables.size();i++){
+			TableDefinition td = tables.get(i);
 			model.addMappings(source.getSourceID(), getMapping(td, source));
 		}	
 		System.out.println(model.getMappings().toString());
-		
 		for (URI uri : model.getMappings().keySet())
-			for (OBDAMappingAxiom axiom : model.getMappings().get(uri))
+			for (OBDAMappingAxiom mapping: model.getMappings().get(uri))
 			{
-				CQIE query = (CQIE) axiom.getTargetQuery();
-				for (Function f : query.getBody()) {
-					if (f.getArity() == 1)
-						model.declareClass(f.getFunctionSymbol());
+				OBDAQuery q = mapping.getTargetQuery();
+				CQIE rule = (CQIE)q;
+				for (Function f : rule.getBody())
+				{
+					if (f.getArity() ==1)
+						model.declarePredicate(f.getFunctionSymbol());
 					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
 						model.declareObjectProperty(f.getFunctionSymbol());
-					else 
+					else
 						model.declareDataProperty(f.getFunctionSymbol());
 				}
+				
 			}
 	}
 	
@@ -215,13 +222,16 @@ public class DirectMappingEngine {
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
 		axioms.add(dfac.getRDBMSMappingAxiom(dma.getSQL(), dma.getCQ(dfac)));
 		
-		List<String> refSqls = dma.getRefSQLs();
-		List<CQIE> refCQs = dma.getRefCQs(dfac);
-		for (int i=0; i< refSqls.size(); i++)
-			axioms.add(dfac.getRDBMSMappingAxiom(refSqls.get(i), refCQs.get(i)));
+		Map<String, CQIE> refAxioms = dma.getRefAxioms(dfac);
+		for (String refSQL : refAxioms.keySet())
+			axioms.add(dfac.getRDBMSMappingAxiom(refSQL, refAxioms.get(refSQL)));
 		
 		return axioms;
 	}
+
+
+
+	
 	
 
 	
