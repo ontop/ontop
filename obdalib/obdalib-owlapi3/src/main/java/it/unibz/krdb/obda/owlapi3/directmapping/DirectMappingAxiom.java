@@ -93,7 +93,7 @@ public class DirectMappingAxiom {
 			if (i == 0)
 				Table += ", \"" + tableRef + "\"";
 			String columnRef = ref.getColumnReference();
-			Column += "\"" + tableRef + "\".\"" + columnRef + "\"";
+			Column += "\"" + tableRef + "\".\"" + columnRef + "\" AS "+tableRef+"_"+columnRef;
 
 			Condition += "\"" + tableRef + "\".\"" + columnRef + "\"";
 
@@ -146,11 +146,10 @@ public class DirectMappingAxiom {
 		// Object Atoms
 		// Foreign key reference
 		for (int i = 0; i < table.countAttribute(); i++) {
-			if (table.getAttribute(i + 1).isForeignKey()){
-			//	if (table.getAttribute(i + 1).hasName(fk)) {
-					Attribute att = table.getAttribute(i + 1);
-					Reference ref = att.getReference();
-					if (ref.getReferenceName().equals(fk)){
+			if (table.getAttribute(i + 1).isForeignKey()) {
+				Attribute att = table.getAttribute(i + 1);
+				Reference ref = att.getReference();
+				if (ref.getReferenceName().equals(fk)) {
 					String pkTableReference = ref.getTableReference();
 					TableDefinition tdRef = (TableDefinition) obda_md
 							.getDefinition(pkTableReference);
@@ -213,8 +212,8 @@ public class DirectMappingAxiom {
 	 */
 	private NewLiteral generateSubject(OBDADataFactory df, TableDefinition td, boolean ref){
 		String tableName = "";
-//		if (ref)
-//			tableName = percentEncode(td.getName())+".";
+		if (ref)
+			tableName = percentEncode(td.getName())+"_";
 		
 		if(td.getPrimaryKeys().size()>0){
 			Predicate uritemple = df.getUriTemplatePredicate(td.getPrimaryKeys().size()+1);
