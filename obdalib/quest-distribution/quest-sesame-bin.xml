@@ -64,7 +64,7 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../quest-sesame/services</directory>
+			<directory>${project.basedir}/../quest-sesame/target/classes/services</directory>
 			<outputDirectory>/META-INF/services</outputDirectory>
 			<includes>
 				<include>*</include>
