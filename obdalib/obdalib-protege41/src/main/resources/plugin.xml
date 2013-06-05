@@ -178,6 +178,14 @@
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
+	<extension id="menu.obda.bootstrap" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Bootstrap ontology and mappings"/>
+		<toolTip value="Bootstrap from database source owl ontology and obda mappings"/>
+		<class value="it.unibz.krdb.obda.protege4.gui.action.BootstrapAction"/>
+		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotD-A"/>
+		<editorKitId value="OWLEditorKit"/>
+	</extension>
+	
   <!-- <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
     <name value="Load OWL individuals (ABox) to a DB..."/> 
     <toolTip value="Stores all ABox data in a database"/>
