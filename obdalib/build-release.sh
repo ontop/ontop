@@ -1,21 +1,21 @@
 #!/bin/sh
 
 #location for the JDBC plugin jars
-export JDBC_PLUGINS_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
+export JDBC_PLUGINS_PATH=~/Documents/Dependencies
 
 # location for protege clean folder (Protege 4.2)
-export PROTEGE_COPY_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
+export PROTEGE_COPY_PATH=~/Documents/Dependencies
 export PROTEGE_COPY_FILENAME=protege-4.2-beta.284
 export PROTEGE_MAIN_FOLDER_NAME=Protege_4.2
 
 # location and name for jetty distribution (should be ZIP)
-export JETTY_COPY_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
+export JETTY_COPY_PATH=~/Documents/Dependencies
 export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
-export JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9.v20130131
+export JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9
 
 #location for sesame and workbench WEB-APP jars
-export OPENRDF_WORKBENCH_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies
-export OPENRDF_SESAME_PATH=/Users/mariano/Documents/OBDA/related_software/build-dependencies      
+export OPENRDF_WORKBENCH_PATH=~/Documents/Dependencies
+export OPENRDF_SESAME_PATH=~/Documents/Dependencies      
 
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
 export OPENRDF_SESAME_FILENAME=openrdf-sesame
@@ -27,7 +27,7 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export REVISION=2171
+export REVISION=2365
 
 #svn update
 mvn clean
@@ -40,13 +40,13 @@ echo " Making -ontopPro- distribution package"
 echo "-----------------------------------------"
 echo "pluginVersion=1.7-alpha2.b$REVISION" >  obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
 rm -fr obdalib-protege41/dist
-mvn -o install -DskipTests
+mvn install -DskipTests
 cd obdalib-protege41/
-mvn -o bundle:bundle -DskipTests
+mvn bundle:bundle -DskipTests
 
 rm -fr ../quest-distribution/$PROTEGE_DIST
 mkdir ../quest-distribution/$PROTEGE_DIST
-cp target/it.unibz.inf.obda.p4plugin-1.7a1.jar ../quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-1.7-alpha2-b$REVISION.jar
+cp target/it.unibz.inf.obda.p4plugin-1.7-alpha2.jar ../quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-1.7-alpha2-b$REVISION.jar
 cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip ../quest-distribution/$PROTEGE_DIST/
 
 cd ../quest-distribution/$PROTEGE_DIST/
@@ -70,7 +70,7 @@ echo " Making Sesame distribution package"
 echo "-----------------------------------------"
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
-mvn -o assembly:assembly -DskipTests
+mvn assembly:assembly -DskipTests
 cp target/quest-distribution-1.7-alpha2-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/quest-distribution-1.7-alpha2-sesame-b$REVISION.jar
 unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-1.7-alpha2-dependencies.zip
 cp $OPENRDF_SESAME_PATH/$OPENRDF_SESAME_FILENAME.war $QUEST_SESAME_DIST/
