@@ -1,21 +1,34 @@
 #!/bin/sh
 
-#location for the JDBC plugin jars
-export JDBC_PLUGINS_PATH=~/Documents/Dependencies
+###
+# README:
+#
+# The required components for building the release can be found: http://obda.inf.unibz.it/files/dev/Dependencies.zip
+# 
+# - If you're using MacOSX system, extract and put the Dependencies/ folder in your ~/Documents/
+# - For UNIX systems, extract and put the Dependencies/ folder to ONTOP_DEP_HOME location
+#
+###
+
+# location for the build dependencies home
+export ONTOP_DEP_HOME=~/Documents
+
+# location for the JDBC plugin jars
+export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME/Dependencies
 
 # location for protege clean folder (Protege 4.2)
-export PROTEGE_COPY_PATH=~/Documents/Dependencies
+export PROTEGE_COPY_PATH=$ONTOP_DEP_HOME/Dependencies
 export PROTEGE_COPY_FILENAME=protege-4.2-beta.284
 export PROTEGE_MAIN_FOLDER_NAME=Protege_4.2
 
 # location and name for jetty distribution (should be ZIP)
-export JETTY_COPY_PATH=~/Documents/Dependencies
+export JETTY_COPY_PATH=$ONTOP_DEP_HOME/Dependencies
 export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
 export JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9
 
 #location for sesame and workbench WEB-APP jars
-export OPENRDF_WORKBENCH_PATH=~/Documents/Dependencies
-export OPENRDF_SESAME_PATH=~/Documents/Dependencies      
+export OPENRDF_WORKBENCH_PATH=$ONTOP_DEP_HOME/Dependencies
+export OPENRDF_SESAME_PATH=$ONTOP_DEP_HOME/Dependencies      
 
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
 export OPENRDF_SESAME_FILENAME=openrdf-sesame
