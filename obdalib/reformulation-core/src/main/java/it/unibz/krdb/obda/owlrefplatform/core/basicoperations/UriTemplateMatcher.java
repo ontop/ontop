@@ -80,6 +80,13 @@ public class UriTemplateMatcher {
 			}
 			break;
 		}
+		if (functionURI == null) {
+			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
+			 * generate empty queires later in the query answering process
+			 */
+			functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri));
+		}
+			
 		return functionURI;
 	}
 }

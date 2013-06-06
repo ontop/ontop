@@ -262,7 +262,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
 							questInstance.getEquivalenceMap());
-					st.insertData(aBoxIter, 5000, 500);
+					int count = st.insertData(aBoxIter, 5000, 500);
+					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {
 					// Retrieves the ABox from the target database via mapping.
@@ -274,13 +275,16 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					}
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-					st.insertData(assertionIter, 5000, 500);
+					int count = st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();
+					log.debug("Inserted {} triples from the mappings.", count);
 				}
 //				st.createIndexes();
 				st.close();
 				if (!conn.getAutoCommit())
 				conn.commit();
+				
+				questInstance.updateSemanticIndexMappings();
 			} else {
 				// VIRTUAL MODE - NO-OP
 			}

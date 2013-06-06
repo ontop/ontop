@@ -206,7 +206,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
+//		reasoner.loadOBDAModel(obdaModel);
 
 		// Now we are ready for querying
 		OWLStatement st = reasoner.getStatement();
