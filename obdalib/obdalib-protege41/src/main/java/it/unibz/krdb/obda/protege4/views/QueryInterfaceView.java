@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLResultSetTableModel;
 import it.unibz.krdb.obda.owlapi3.OWLResultSetWriter;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
@@ -166,7 +167,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor = new OBDAProgessMonitor("Executing queries...");
 					monitor.start();
 					CountDownLatch latch = new CountDownLatch(1);
-					InternalQuery internalQuery = new InternalQuery(query);
+					SPARQLQueryUtility internalQuery = new SPARQLQueryUtility(query);
 					ExecuteQueryAction action = new ExecuteQueryAction(latch, internalQuery);
 					monitor.addProgressListener(action);
 					long startTime = System.currentTimeMillis();
@@ -533,9 +534,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread = null;
 		private OWLResultSet result = null;
 		private List<OWLAxiom> graphResult = null;
-		private InternalQuery query = null;
+		private SPARQLQueryUtility query = null;
 
-		private ExecuteQueryAction(CountDownLatch latch, InternalQuery query) {
+		private ExecuteQueryAction(CountDownLatch latch, SPARQLQueryUtility query) {
 			this.latch = latch;
 			this.query = query;
 		}
@@ -719,42 +720,5 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	@Override
 	public void activeOntologyChanged() {
 		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModel());
-	}
-
-	/**
-	 * A utility class to store input query to Protege -ontop- plugin.
-	 */
-	private class InternalQuery {
-		
-		private String query;
-		
-		private static final String ASK_KEYWORD = "ask";
-		private static final String SELECT_KEYWORD = "select";
-		private static final String CONSTRUCT_KEYWORD = "construct";
-		private static final String DESCRIBE_KEYWORD = "describe";
-		
-		public InternalQuery(String query) {
-			this.query = query;
-		}
-		
-		public String getQueryString() {
-			return query;
-		}
-		
-		public boolean isAskQuery() {
-			return query.toLowerCase().contains(ASK_KEYWORD);
-		}
-		
-		public boolean isSelectQuery() {
-			return query.toLowerCase().contains(SELECT_KEYWORD);
-		}
-		
-		public boolean isConstructQuery() {
-			return query.toLowerCase().contains(CONSTRUCT_KEYWORD);
-		}
-		
-		public boolean isDescribeQuery() {
-			return query.toLowerCase().contains(DESCRIBE_KEYWORD);
-		}
 	}
 }
