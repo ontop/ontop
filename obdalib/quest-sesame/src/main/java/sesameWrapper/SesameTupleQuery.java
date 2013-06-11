@@ -1,7 +1,7 @@
 package sesameWrapper;
 
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import java.util.LinkedList;
@@ -44,12 +44,12 @@ public class SesameTupleQuery implements TupleQuery {
 	
 	// needed by TupleQuery interface
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
-		OBDAResultSet res = null;
+		TupleResultSet res = null;
 		QuestDBStatement stm = null;
 		try {
 		
 			stm = conn.createStatement();
-			res = stm.execute(queryString);
+			res = (TupleResultSet) stm.execute(queryString);
 			
 			List<String> signature = res.getSignature();
 			List<BindingSet> results = new LinkedList<BindingSet>();
@@ -88,7 +88,7 @@ public class SesameTupleQuery implements TupleQuery {
 		}
 	}
 
-	private Binding createBinding(String bindingName, OBDAResultSet set) {
+	private Binding createBinding(String bindingName, TupleResultSet set) {
 		
 		SesameBindingSet bset = new SesameBindingSet(set);
 		return bset.getBinding(bindingName);

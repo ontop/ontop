@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.ValueConstant;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 import com.hp.hpl.jena.iri.IRI;
 
-public class EmptyQueryResultSet implements OBDAResultSet {
+public class EmptyQueryResultSet implements TupleResultSet {
 
 	List<String> head = null;
 	private OBDAStatement st;

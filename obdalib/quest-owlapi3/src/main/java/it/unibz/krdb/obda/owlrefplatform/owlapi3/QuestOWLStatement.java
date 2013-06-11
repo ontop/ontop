@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
@@ -79,9 +80,9 @@ public class QuestOWLStatement implements OWLStatement {
 	}
 
 	@Override
-	public OWLResultSet execute(String query) throws OWLException {
+	public OWLResultSet executeTuple(String query) throws OWLException {
 		try {
-			return new QuestOWLResultSet(st.execute(query), this);
+			return new QuestOWLResultSet((TupleResultSet) st.execute(query), this);
 		} catch (OBDAException e) {
 			OWLException owlException = new OWLException(e) {
 			};
@@ -100,19 +101,9 @@ public class QuestOWLStatement implements OWLStatement {
 	}
 
 	@Override
-	public List<OWLAxiom> executeConstruct(String query) throws OWLException {
+	public List<OWLAxiom> executeGraph(String query) throws OWLException {
 		try {
-			GraphResultSet resultSet = st.executeConstruct(query);
-			return createOWLIndividualAxioms(resultSet);
-		} catch (Exception e) {
-			throw new OWLOntologyCreationException(e);
-		}
-	}
-
-	@Override
-	public List<OWLAxiom> executeDescribe(String query) throws OWLException {
-		try {
-			GraphResultSet resultSet = st.executeDescribe(query);
+			GraphResultSet resultSet = (GraphResultSet) st.execute(query);
 			return createOWLIndividualAxioms(resultSet);
 		} catch (Exception e) {
 			throw new OWLOntologyCreationException(e);

@@ -86,7 +86,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		try {
 			conn = reasoner.getConnection();
 			stmt = conn.createStatement();
-			return stmt.execute(sparql);
+			return stmt.executeTuple(sparql);
 		} catch (OWLException e) {
 			System.err.println(e.getMessage());
 		} catch (OBDAException e) {

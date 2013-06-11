@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.hp.hpl.jena.iri.IRI;
 
-public interface OBDAResultSet {
+public interface TupleResultSet extends ResultSet{
 
 	/*
 	 * ResultSet management functions

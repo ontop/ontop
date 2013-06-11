@@ -106,7 +106,7 @@ public class BenchmarkVirtualScenario {
 					String sparql = query.getQuery();
 					
 					System.out.println("Executing " + query.getID());
-					st.execute(sparql);
+					st.executeTuple(sparql);
 					
 					out.write(appendValues(st.getQuestStatement()));
 					out.flush();

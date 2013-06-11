@@ -167,7 +167,7 @@ public class Tester {
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
         OWLStatement statement = reasoner.getStatement();
-        OWLResultSet result = statement.execute(fullquery);
+        OWLResultSet result = statement.executeTuple(fullquery);
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {

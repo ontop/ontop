@@ -13,11 +13,9 @@ public interface OWLStatement {
 
 	public void close() throws OWLException;
 
-	public OWLResultSet execute(String query) throws OWLException;
+	public OWLResultSet executeTuple(String query) throws OWLException;
 
-	public List<OWLAxiom> executeConstruct(String query) throws OWLException;
-
-	public List<OWLAxiom> executeDescribe(String query) throws OWLException;
+	public List<OWLAxiom> executeGraph(String query) throws OWLException;
 
 	public int executeUpdate(String query) throws OWLException;
 
@@ -56,4 +54,5 @@ public interface OWLStatement {
 	public void setQueryTimeout(int seconds) throws Exception;
 
 	public int getTupleCount(String query) throws OWLException;
+
 }

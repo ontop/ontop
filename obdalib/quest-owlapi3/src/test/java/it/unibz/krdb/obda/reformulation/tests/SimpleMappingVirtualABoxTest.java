@@ -143,7 +143,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z }";
 		try {
-			OWLResultSet rs = st.execute(query);
+			OWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");

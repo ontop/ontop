@@ -155,8 +155,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	public DatalogProgram translate(Query arqQuery) {
 
 		Op op = Algebra.compile(arqQuery);
-
-		log.debug("SPARQL algebra: \n{}", op);
+ 
+		log.debug("SPARQL algebra:  \n{}", op);
 
 		DatalogProgram result = ofac.getDatalogProgram();
 
@@ -816,6 +816,8 @@ public class SparqlAlgebraToDatalogTranslator {
 				subjectUri = irifac.construct(subject_URI);
 
 				Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
+				if (functionURI == null)
+					return;
 				terms.add(functionURI);
 
 				// Function functionURI = ofac.getFunctionalTerm(
@@ -884,8 +886,12 @@ public class SparqlAlgebraToDatalogTranslator {
 				objectUri = irifac.construct(object_URI);
 
 
-				Function functionURI = uriTemplateMatcher
-						.generateURIFunction(objectUri);
+				Function functionURI = uriTemplateMatcher.generateURIFunction(objectUri);
+				if (functionURI == null)
+					{
+						throw new RuntimeException(object_URI + " cannot be translated into object!");
+						
+					}
 				terms.add(functionURI);
 
 				// Function functionURI = ofac.getFunctionalTerm(
@@ -1182,6 +1188,8 @@ public class SparqlAlgebraToDatalogTranslator {
 						.getDataTypePredicateLiteral(), ofac.getValueConstant(
 						node.getLiteralLexicalForm(), COL_TYPE.STRING));
 			} else if (node instanceof Node_URI) {
+//				constantFunction = uriTemplateMatcher.generateURIFunction(irifac.construct(node.toString()));
+////				
 				constantFunction = ofac.getFunctionalTerm(ofac
 						.getUriTemplatePredicate(1), ofac.getValueConstant(
 						node.toString(), COL_TYPE.OBJECT));

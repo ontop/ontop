@@ -6,11 +6,7 @@ public interface OBDAStatement {
 
 	public void close() throws OBDAException;
 
-	public OBDAResultSet execute(String query) throws OBDAException;
-
-	public GraphResultSet executeConstruct(String query) throws OBDAException;
-
-	public GraphResultSet executeDescribe(String query) throws OBDAException;
+	public ResultSet execute(String query) throws OBDAException;
 
 	public int executeUpdate(String query) throws OBDAException;
 
@@ -22,7 +18,7 @@ public interface OBDAStatement {
 
 	public void getMoreResults() throws OBDAException;
 
-	public OBDAResultSet getResultSet() throws OBDAException;
+	public ResultSet getResultSet() throws OBDAException;
 
 	public int getQueryTimeout() throws OBDAException;
 

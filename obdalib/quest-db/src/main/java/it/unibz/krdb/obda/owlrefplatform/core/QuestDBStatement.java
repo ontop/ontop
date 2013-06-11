@@ -1,12 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.ResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
@@ -142,18 +142,8 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public OBDAResultSet execute(String query) throws OBDAException {
+	public ResultSet execute(String query) throws OBDAException {
 		return st.execute(query);
-	}
-	
-	@Override
-	public GraphResultSet executeConstruct(String query) throws OBDAException {
-		return st.executeConstruct(query);
-	}
-
-	@Override
-	public GraphResultSet executeDescribe(String query) throws OBDAException {
-		return st.executeDescribe(query);
 	}
 
 	@Override
@@ -182,7 +172,7 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public OBDAResultSet getResultSet() throws OBDAException {
+	public TupleResultSet getResultSet() throws OBDAException {
 		return st.getResultSet();
 	}
 

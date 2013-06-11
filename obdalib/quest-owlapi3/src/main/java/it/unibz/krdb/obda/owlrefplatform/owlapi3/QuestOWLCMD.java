@@ -134,7 +134,7 @@ public class QuestOWLCMD {
 	}
 
 	public static OWLResultSet executeQuery(String query) throws OWLException {
-		return st.execute(query);
+		return st.executeTuple(query);
 	}
 
 	public static void initQuest(String owlfile, String obdafile) throws Exception {

@@ -564,11 +564,11 @@ throw new RuntimeException(e);
 		}
 		
 		if (pred == null)
-			p = "?p ";
+			p = " ?p ";
 		else 
 			p = "<" + pred.stringValue()  + ">";
 		if (obj == null)
-			o = "?o ";
+			o = " ?o ";
 		else {
 			if (obj instanceof URI) {
 				o = "<" + obj.stringValue() + ">";
@@ -576,20 +576,22 @@ throw new RuntimeException(e);
 				o = obj.stringValue();
 			}
 		}
-		queryString+= s+p+o+"} WHERE {"+s+p+o+"}";
-			
+		queryString+= s+p+o+"} WHERE {"+s+p+o+"}";	
+		
 		//execute construct query
 		try {
-			GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
-					queryString);
-			GraphQueryResult result = query.evaluate();
-
 			List<Statement> list = new LinkedList<Statement>();
-		//	System.out.println("result: "+result.hasNext());
-			while (result.hasNext())
-				list.add(result.next());
-			//result.close();
+			
+			if (contexts.length == 0 || (contexts.length > 0 && contexts[0] == null)) {
+					GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
+							queryString);
+					GraphQueryResult result = query.evaluate();
 
+					// System.out.println("result: "+result.hasNext());
+					while (result.hasNext())
+						list.add(result.next());
+					// result.close();
+			}
 			CloseableIteration<Statement, RepositoryException> iter = new CloseableIteratorIteration<Statement, RepositoryException>(
 					list.iterator());
 			RepositoryResult<Statement> repoResult = new RepositoryResult<Statement>(iter);

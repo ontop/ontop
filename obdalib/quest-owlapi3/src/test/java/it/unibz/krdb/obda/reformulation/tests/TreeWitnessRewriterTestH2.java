@@ -224,7 +224,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 			long start = System.currentTimeMillis();
 			long end = 0;
 			try {
-				OWLResultSet rs = st.execute(tq.query);
+				OWLResultSet rs = st.executeTuple(tq.query);
 				end = System.currentTimeMillis();
 				while (rs.nextRow()) {
 					count += 1;

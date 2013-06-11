@@ -2,7 +2,7 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -30,7 +30,7 @@ public class SesameBindingSet implements BindingSet {
 	private int count = 0;
 	private ValueFactory fact = new ValueFactoryImpl();
 
-	public SesameBindingSet(OBDAResultSet set) {
+	public SesameBindingSet(TupleResultSet set) {
 		this.set = (QuestResultset) set;
 		try {
 			this.count = set.getColumCount();

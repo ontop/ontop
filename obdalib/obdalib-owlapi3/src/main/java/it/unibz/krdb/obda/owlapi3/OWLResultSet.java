@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlapi3;
 
+import it.unibz.krdb.obda.model.ResultSet;
+
 import java.util.List;
 
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -10,7 +12,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
-public interface OWLResultSet {
+public interface OWLResultSet extends ResultSet {
 
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//

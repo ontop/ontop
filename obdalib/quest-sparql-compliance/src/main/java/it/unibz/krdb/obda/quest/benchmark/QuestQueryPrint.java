@@ -105,7 +105,7 @@ public class QuestQueryPrint {
 					String sparql = query.getQuery();
 					
 					System.out.println("Executing " + query.getID());
-					st.execute(sparql);
+					st.executeTuple(sparql);
 										
 					out.write("========== " + query.getID() + " ==========\n\n");
 					out.write(sparql);

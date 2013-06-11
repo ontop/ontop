@@ -157,7 +157,7 @@ public class SemanticIndexCMD {
 			log.debug("Query: \n{}", query.getQuery());
 			
 			long start = System.nanoTime();
-			QuestOWLResultSet res = (QuestOWLResultSet)st.execute(query.getQuery());
+			QuestOWLResultSet res = (QuestOWLResultSet)(st.executeTuple(query.getQuery()));
 			long end = System.nanoTime();
 			
 			double time = (end - start) / 1000; 

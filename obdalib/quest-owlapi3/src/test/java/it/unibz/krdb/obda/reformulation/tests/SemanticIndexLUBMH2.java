@@ -110,7 +110,7 @@ public class SemanticIndexLUBMH2 extends TestCase {
 			// + " }";
 
 			long start = System.nanoTime();
-			QuestOWLResultSet res = (QuestOWLResultSet) st.execute(query.getQuery());
+			QuestOWLResultSet res = (QuestOWLResultSet) st.executeTuples(query.getQuery());
 			long end = System.nanoTime();
 
 			double time = (end - start) / 1000;

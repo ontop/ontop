@@ -208,7 +208,7 @@ public class LUBM50Tests {
 				long start = System.nanoTime();
 				QuestOWLResultSet res;
 				try {
-					res = (QuestOWLResultSet) st.execute(query.getQuery());
+					res = (QuestOWLResultSet) st.executeTuple(query.getQuery());
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

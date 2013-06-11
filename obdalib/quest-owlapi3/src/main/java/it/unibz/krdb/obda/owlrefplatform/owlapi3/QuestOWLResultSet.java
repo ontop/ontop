@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
@@ -18,11 +18,11 @@ import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
 public class QuestOWLResultSet implements OWLResultSet {
 
-	private final OBDAResultSet res;
+	private final TupleResultSet res;
 
 	private final OWLStatement owlst;
 
-	public QuestOWLResultSet(OBDAResultSet res, QuestOWLStatement owlst) {
+	public QuestOWLResultSet(TupleResultSet res, QuestOWLStatement owlst) {
 		if (res == null)
 			throw new IllegalArgumentException("The result set must not be null");
 		this.res = res;

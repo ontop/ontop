@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -27,7 +27,7 @@ import com.hp.hpl.jena.iri.impl.IRIFactoryImpl;
  * 
  */
 
-public class BooleanOWLOBDARefResultSet implements OBDAResultSet {
+public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 
 	private ResultSet set = null;
 	private boolean isTrue = false;

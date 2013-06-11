@@ -104,14 +104,7 @@ public class SesameGraphQuery implements GraphQuery {
 		QuestDBStatement stm = null;
 		try {
 			stm = conn.createStatement();
-	
-			if (isConstruct()) {
-				res = stm.executeConstruct(queryString);
-			} else if (isDescribe()) {
-				res = stm.executeDescribe(queryString);
-			} else {
-				throw new QueryEvaluationException("Invalid query string!");
-			}
+			res = (GraphResultSet) stm.execute(queryString);
 			
 			Map<String, String> namespaces = new HashMap<String, String>();
 			List<Statement> results = new LinkedList<Statement>();
@@ -140,7 +133,7 @@ public class SesameGraphQuery implements GraphQuery {
 			}
 			try {
 				if (stm != null)
-				stm.close();
+						stm.close();
 			} catch (OBDAException e) {
 				e.printStackTrace();
 			}
@@ -155,13 +148,5 @@ public class SesameGraphQuery implements GraphQuery {
 			handler.handleStatement(result.next());
 		handler.endRDF();
 
-	}
-	
-	private boolean isConstruct() {
-		return queryString.toLowerCase().contains("construct");
-	}
-	
-	private boolean isDescribe() {
-		return queryString.toLowerCase().contains("describe");
 	}
 }

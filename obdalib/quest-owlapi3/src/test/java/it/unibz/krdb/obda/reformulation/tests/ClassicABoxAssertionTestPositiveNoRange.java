@@ -73,7 +73,7 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 		String prefix = "PREFIX : <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
-		OWLResultSet res = st.execute(query);
+		OWLResultSet res = st.executeTuple(query);
 		int count = 0;
 		int columns = res.getColumCount();
 		while (res.nextRow()) {

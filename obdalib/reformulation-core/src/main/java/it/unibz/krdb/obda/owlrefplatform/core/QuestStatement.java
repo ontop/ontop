@@ -1,10 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAConnection;
@@ -12,9 +13,10 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.TupleResultSet;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -23,22 +25,22 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.ConstructGraphResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.DescribeGraphResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,7 +55,6 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.syntax.Template;
 
 /**
@@ -64,7 +65,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryRewriter rewriter = null;
 
-//	private UnfoldingMechanism unfoldingmechanism = null;
+	// private UnfoldingMechanism unfoldingmechanism = null;
 
 	private SQLQueryGenerator querygenerator = null;
 
@@ -83,15 +84,15 @@ public class QuestStatement implements OBDAStatement {
 	protected Quest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
-	
+
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	Thread runningThread = null;
 
 	private QueryExecutionThread executionthread;
-	
+
 	private DatalogProgram programAfterRewriting;
-	
+
 	private DatalogProgram programAfterUnfolding;
 
 	final Map<String, String> querycache;
@@ -105,16 +106,16 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, Boolean> isdescribecache;
 
 	final SparqlAlgebraToDatalogTranslator translator;
-	
+
 	/*
 	 * For benchmark purpose
 	 */
 	private long queryProcessingTime = 0;
 
 	private long rewritingTime = 0;
-	
+
 	private long unfoldingTime = 0;
-		
+
 	public QuestStatement(Quest questinstance, QuestConnection conn,
 			Statement st) {
 
@@ -131,7 +132,7 @@ public class QuestStatement implements OBDAStatement {
 		this.repository = questinstance.dataRepository;
 		this.conn = conn;
 		this.rewriter = questinstance.rewriter;
-//		this.unfoldingmechanism = questinstance.unfolder;
+		// this.unfoldingmechanism = questinstance.unfolder;
 		this.querygenerator = questinstance.datasourceQueryGenerator;
 
 		this.sqlstatement = st;
@@ -143,15 +144,37 @@ public class QuestStatement implements OBDAStatement {
 
 		private final CountDownLatch monitor;
 		private final String strquery;
-		private OBDAResultSet tupleResult;
+		private Query query;
+		private TupleResultSet tupleResult;
 		private GraphResultSet graphResult;
 		private Exception exception;
 		private boolean error = false;
 		private boolean executingSQL = false;
 
+		boolean isBoolean = false, isConstruct = false, isDescribe = false,
+				isSelect = false;
+
 		public QueryExecutionThread(String strquery, CountDownLatch monitor) {
 			this.monitor = monitor;
 			this.strquery = strquery;
+			this.query = QueryFactory.create(strquery);
+		}
+
+		public void setQueryType(int type) {
+			switch (type) {// encoding of query type to from numbers
+			case 1:
+				this.isSelect = true;
+				break;
+			case 2:
+				this.isBoolean = true;
+				break;
+			case 3:
+				this.isConstruct = true;
+				break;
+			case 4:
+				this.isDescribe = true;
+				break;
+			}
 		}
 
 		public boolean errorStatus() {
@@ -162,7 +185,7 @@ public class QuestStatement implements OBDAStatement {
 			return exception;
 		}
 
-		public OBDAResultSet getTupleResult() {
+		public TupleResultSet getTupleResult() {
 			return tupleResult;
 		}
 
@@ -180,76 +203,69 @@ public class QuestStatement implements OBDAStatement {
 
 		@Override
 		public void run() {
-			
+
 			log.debug("Executing query: \n{}", strquery);
-			
+
 			try {
-				
+
 				if (!querycache.containsKey(strquery)) {
-					//final long startTime = System.currentTimeMillis();
+					// final long startTime = System.currentTimeMillis();
 					String sqlQuery = getUnfolding(strquery);
-					//final long endTime = System.currentTimeMillis();
-					//queryProcessingTime = endTime - startTime;
-					
+					// final long endTime = System.currentTimeMillis();
+					// queryProcessingTime = endTime - startTime;
+
 					// Cache the sql for better performance
 					cacheQueryAndProperties(strquery, sqlQuery);
 				}
 				String sql = getSqlString(strquery);
-				
+
 				List<String> signature = signaturecache.get(strquery);
-				boolean isBoolean = isbooleancache.get(strquery);
-				boolean isConstruct = isconstructcache.get(strquery);
-				boolean isDescribe = isdescribecache.get(strquery);
-				
-				
+
 				log.debug("Executing the query and get the result...");
 				if (sql.equals("") && !isBoolean) {
-					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
+					tupleResult = new EmptyQueryResultSet(signature,
+							QuestStatement.this);
 				} else if (sql.equals("")) {
-					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
+					tupleResult = new BooleanOWLOBDARefResultSet(false,
+							QuestStatement.this);
 				} else {
 					try {
-						// Check pre-condition for DESCRIBE
-						if (isDescribe && signature.size() > 1) {
-							throw new OBDAException(
-									"Only support query with one variable in DESCRIBE");
-						}
+
 						// Execute the SQL query string
 						executingSQL = true;
 						ResultSet set = null;
-//						try {
+						// try {
 
-							set = sqlstatement.executeQuery(sql);
-//						}
-//						catch(SQLException e)
-//						{
-//
+						set = sqlstatement.executeQuery(sql);
+
+						// }
+						// catch(SQLException e)
+						// {
+						//
 						// Store the SQL result to application result set.
-						if (isBoolean) {
-							tupleResult = new BooleanOWLOBDARefResultSet(set,
-									QuestStatement.this);
-						} else if (isConstruct) {
-							Query query = QueryFactory.create(strquery);
-							Template template = query.getConstructTemplate();
-							OBDAResultSet tuples = new QuestResultset(set,
-									signature, QuestStatement.this);
-							graphResult = new ConstructGraphResultSet(tuples,
-									template);
-						} else if (isDescribe) {
-							Query query = QueryFactory.create(strquery);
-							PrefixMapping pm = query.getPrefixMapping();
-							OBDAResultSet tuples = new QuestResultset(set,
-									signature, QuestStatement.this);
-							graphResult = new DescribeGraphResultSet(tuples, pm);
-						} else { // is tuple-based results
+						if (isSelect) { // is tuple-based results
 							tupleResult = new QuestResultset(set, signature,
 									QuestStatement.this);
+
+						} else if (isBoolean) {
+							tupleResult = new BooleanOWLOBDARefResultSet(set,
+									QuestStatement.this);
+
+						} else if (isConstruct || isDescribe) {
+							boolean collectResults = false;
+							if (isDescribe)
+								collectResults = true;
+							Template template = query.getConstructTemplate();
+							TupleResultSet tuples = new QuestResultset(set,
+									signature, QuestStatement.this);
+							graphResult = new QuestGraphResultSet(tuples,
+									template, collectResults);
 						}
 					} catch (SQLException e) {
 						exception = e;
 						error = true;
 						log.error(e.getMessage(), e);
-						
+
 						throw new OBDAException("Error executing SQL query: \n"
 								+ e.getMessage() + "\nSQL query:\n " + sql, e);
 					}
@@ -267,33 +283,89 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	/**
-	 * Returns the result set for the given query
+	 * Calls the necessary tuple or graph query execution Implements describe
+	 * uri or var logic Returns the result set for the given query
 	 */
 	@Override
-	public OBDAResultSet execute(String strquery) throws OBDAException {
-		
-		
-		if (strquery.isEmpty()) {
-			throw new OBDAException("Cannot execute an empty query");
-		}
-		return executeSelectQuery(strquery);
-	}
-
-	@Override
-	public GraphResultSet executeConstruct(String strquery)
+	public it.unibz.krdb.obda.model.ResultSet execute(String strquery)
 			throws OBDAException {
 		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
-		return executeConstructQuery(strquery);
-	}
 
-	@Override
-	public GraphResultSet executeDescribe(String strquery) throws OBDAException {
-		if (strquery.isEmpty()) {
-			throw new OBDAException("Cannot execute an empty query");
+		// encoding ofquery type into numbers
+		if (SPARQLQueryUtility.isSelectQuery(strquery)) {
+			return executeTupleQuery(strquery, 1);
+
+		} else if (SPARQLQueryUtility.isAskQuery(strquery)) {
+			return executeTupleQuery(strquery, 2);
+		} else if (SPARQLQueryUtility.isConstructQuery(strquery)) {
+			return executeGraphQuery(strquery, 3);
+		} else if (SPARQLQueryUtility.isDescribeQuery(strquery)) {
+			// create list of uriconstants we want to describe
+			List<URIConstant> constants = new ArrayList<URIConstant>();
+			if (SPARQLQueryUtility.isVarDescribe(strquery)) {
+				// if describe ?var, we have to do select distinct ?var first
+				String sel = SPARQLQueryUtility.getSelectVarDescribe(strquery);
+				it.unibz.krdb.obda.model.ResultSet resultSet = (it.unibz.krdb.obda.model.ResultSet) this
+						.executeTupleQuery(sel, 1);
+				if (resultSet instanceof EmptyQueryResultSet)
+					return null;
+				else if (resultSet instanceof QuestResultset) {
+					QuestResultset res = (QuestResultset) resultSet;
+					while (res.nextRow()) {
+						Constant constant = res.getConstant(1);
+						if (constant instanceof URIConstant) {
+							// collect constants in list
+							constants.add((URIConstant) constant);
+						}
+					}
+				}
+			} else if (SPARQLQueryUtility.isURIDescribe(strquery)) {
+				// DESCRIBE <uri> gives direct results, so we put the
+				// <uri> constant directly in the list of constants
+				constants.add(SPARQLQueryUtility.getDescribeURI(strquery));
+			}
+
+			QuestGraphResultSet describeResultSet = null;
+			// execute describe <uriconst> in subject position
+			for (Constant constant : constants) {
+				// for each constant we execute a construct with
+				// the uri as subject, and collect the results
+				// in one graphresultset
+				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
+				if (describeResultSet == null) {
+					// just for the first time
+					describeResultSet = (QuestGraphResultSet) executeGraphQuery(
+							str, 4);
+				} else {
+					// 2nd and manyth times execute, but collect result into one
+					// object
+					QuestGraphResultSet set = (QuestGraphResultSet) executeGraphQuery(
+							str, 4);
+					if (set != null) {
+						while (set.hasNext()) {
+							// already process the result, add list<Assertion>
+							// to internal buffer
+							describeResultSet.addNewResultSet(set.next());
+						}
+					}
+				}
+			}
+			// execute describe <uriconst> in object position
+			for (Constant constant : constants) {
+				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
+				QuestGraphResultSet set = (QuestGraphResultSet) executeGraphQuery(
+						str, 4);
+				if (set != null) {
+					while (set.hasNext()) {
+						describeResultSet.addNewResultSet(set.next());
+					}
+				}
+			}
+			return describeResultSet;
 		}
-		return executeDescribeQuery(strquery);
+		throw new OBDAException("Error, the result set was null");
 	}
 
 	/**
@@ -346,7 +418,7 @@ public class QuestStatement implements OBDAStatement {
 		removeNonAnswerQueries(unfolding);
 
 		log.debug("After target rules removed: \n{}", unfolding);
-		
+
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
 		evaluator.evaluateExpressions(unfolding);
@@ -383,42 +455,49 @@ public class QuestStatement implements OBDAStatement {
 		return sql;
 	}
 
-	private OBDAResultSet executeSelectQuery(String strquery)
+	
+	/**
+	 * The method executes select or ask queries by 
+	 * starting a new quest execution thread
+	 * @param strquery the select or ask query string
+	 * @param type 1 - SELECT, 2 - ASK
+	 * @return the obtained TupleResultSet result
+	 * @throws OBDAException
+	 */
+	private TupleResultSet executeTupleQuery(String strquery, int type)
 			throws OBDAException {
-		CountDownLatch monitor = new CountDownLatch(1);
-		executionthread = new QueryExecutionThread(strquery, monitor);
-		executionthread.start();
-		try {
-			monitor.await();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 
-		if (executionthread.errorStatus()) {
-			throw new RuntimeException(executionthread.getException());
-			// OBDAException ex = new
-			// OBDAException(executionthread.getException().getMessage());
-			// ex.setStackTrace(executionthread.getStackTrace());
-			// throw ex;
-		}
-
-		if (canceled == true) {
-			canceled = false;
-			throw new OBDAException("Query execution was cancelled");
-		}
-
-		OBDAResultSet result = executionthread.getTupleResult();
+		startExecute(strquery, type);
+		TupleResultSet result = executionthread.getTupleResult();
 
 		if (result == null)
 			throw new RuntimeException("Error, the result set was null");
 
-		return executionthread.getTupleResult();
+		return result;
 	}
 
-	private GraphResultSet executeConstructQuery(String strquery)
+	/**
+	 * The method executes construct or describe queries
+	 * @param strquery the query string
+	 * @param type 3- CONSTRUCT, 4 - DESCRIBE
+	 * @return the obtained GraphResultSet result
+	 * @throws OBDAException
+	 */
+	private GraphResultSet executeGraphQuery(String strquery, int type)
 			throws OBDAException {
+		startExecute(strquery, type);
+		return executionthread.getGraphResult();
+	}
+
+	/**
+	 * Internal method to start a new query execution thread
+	 * type defines the query type
+	 * 1-SELECT, 2-ASK, 3-CONSTRUCT, 4-DESCRIBE
+	 */
+	private void startExecute(String strquery, int type) throws OBDAException {
 		CountDownLatch monitor = new CountDownLatch(1);
 		executionthread = new QueryExecutionThread(strquery, monitor);
+		executionthread.setQueryType(type);
 		executionthread.start();
 		try {
 			monitor.await();
@@ -436,38 +515,13 @@ public class QuestStatement implements OBDAStatement {
 			canceled = false;
 			throw new OBDAException("Query execution was cancelled");
 		}
-		return executionthread.getGraphResult();
-	}
-
-	private GraphResultSet executeDescribeQuery(String strquery)
-			throws OBDAException {
-		CountDownLatch monitor = new CountDownLatch(1);
-		executionthread = new QueryExecutionThread(strquery, monitor);
-		executionthread.start();
-		try {
-			monitor.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		if (executionthread.errorStatus()) {
-			OBDAException ex = new OBDAException(executionthread.getException()
-					.getMessage());
-			ex.setStackTrace(executionthread.getStackTrace());
-			throw ex;
-		}
-
-		if (canceled == true) {
-			canceled = false;
-			throw new OBDAException("Query execution was cancelled");
-		}
-		return executionthread.getGraphResult();
 	}
 
 	/**
 	 * Returns the final rewriting of the given query
 	 */
 	public String getRewriting(String strquery) throws Exception {
-		// TODO FIX to limit to SPARQL input and output		
+		// TODO FIX to limit to SPARQL input and output
 
 		Query query = QueryFactory.create(strquery);
 		DatalogProgram program = translateAndPreProcess(query);
@@ -495,7 +549,8 @@ public class QuestStatement implements OBDAStatement {
 		List<String> signature;
 		Map<Predicate, List<CQIE>> rulesIndex = questInstance.sigmaRulesIndex;
 
-		// Check the cache first if the system has processed the query string before
+		// Check the cache first if the system has processed the query string
+		// before
 		if (querycache.containsKey(strquery)) {
 			// Obtain immediately the SQL string from cache
 			sql = querycache.get(strquery);
@@ -504,9 +559,8 @@ public class QuestStatement implements OBDAStatement {
 			Query query = QueryFactory.create(strquery);
 			DatalogProgram program = translateAndPreProcess(query);
 			try {
-//				log.debug("Input query:\n{}", strquery);
+				// log.debug("Input query:\n{}", strquery);
 
-				
 				for (CQIE q : program.getRules()) {
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
@@ -521,10 +575,10 @@ public class QuestStatement implements OBDAStatement {
 				}
 
 				/*
-				 * Query optimization w.r.t Sigma rules 
+				 * Query optimization w.r.t Sigma rules
 				 */
 				optimizeQueryWithSigmaRules(program, rulesIndex);
-				
+
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException(e1);
@@ -565,7 +619,7 @@ public class QuestStatement implements OBDAStatement {
 			try {
 				signature = getSignature(query);
 				sql = getSQL(programAfterUnfolding, signature);
-				cacheQueryAndProperties(strquery, sql);
+				// cacheQueryAndPr operties(strquery, sql);
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 
@@ -583,41 +637,46 @@ public class QuestStatement implements OBDAStatement {
 	 * @param program
 	 * @param rules
 	 */
-	private void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
+	private void optimizeQueryWithSigmaRules(DatalogProgram program,
+			Map<Predicate, List<CQIE>> rulesIndex) {
 		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
-		//for each rule in the query
-		for (int qi = 0; qi < unionOfQueries.size() ; qi++) {
+		// for each rule in the query
+		for (int qi = 0; qi < unionOfQueries.size(); qi++) {
 			CQIE query = unionOfQueries.get(qi);
-			//get query head, body
+			// get query head, body
 			Function queryHead = query.getHead();
 			List<Function> queryBody = query.getBody();
-			//for each atom in query body
+			// for each atom in query body
 			for (int i = 0; i < queryBody.size(); i++) {
 				Set<Function> removedAtom = new HashSet<Function>();
 				Function atomQuery = queryBody.get(i);
 				Predicate predicate = atomQuery.getPredicate();
-				
-				//for each tbox rule
+
+				// for each tbox rule
 				List<CQIE> rules = rulesIndex.get(predicate);
 				if (rules == null || rules.isEmpty()) {
 					continue;
 				}
 				for (CQIE rule : rules) {
-					//try to unify current query body atom with tbox rule body atom
-					rule = DatalogUnfolder.getFreshRule(rule, 4022013);  // Random suffix number
+					// try to unify current query body atom with tbox rule body
+					// atom
+					rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random
+																		// suffix
+																		// number
 					Function ruleBody = rule.getBody().get(0);
-					Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody, atomQuery);
+					Map<Variable, NewLiteral> theta = Unifier.getMGU(ruleBody,
+							atomQuery);
 					if (theta == null || theta.isEmpty()) {
 						continue;
 					}
 					// if unifiable, apply to head of tbox rule
 					Function ruleHead = rule.getHead();
-					Function copyRuleHead = (Function)ruleHead.clone();
+					Function copyRuleHead = (Function) ruleHead.clone();
 					Unifier.applyUnifier(copyRuleHead, theta);
-					
+
 					removedAtom.add(copyRuleHead);
 				}
-				
+
 				for (int j = 0; j < queryBody.size(); j++) {
 					if (j == i) {
 						continue;
@@ -632,7 +691,7 @@ public class QuestStatement implements OBDAStatement {
 					}
 				}
 			}
-			//update query datalog program
+			// update query datalog program
 			unionOfQueries.remove(qi);
 			unionOfQueries.add(qi, ofac.getCQIE(queryHead, queryBody));
 		}
@@ -646,18 +705,10 @@ public class QuestStatement implements OBDAStatement {
 
 		// Store the query properties
 		Query query = QueryFactory.create(sparqlQuery);
-		
+
 		List<String> signature = getSignature(query);
 		signaturecache.put(sparqlQuery, signature);
 
-		boolean isBoolean = isBoolean(query);
-		isbooleancache.put(sparqlQuery, isBoolean);
-		
-		boolean isConstruct = isConstruct(query);
-		isconstructcache.put(sparqlQuery, isConstruct);
-
-		boolean isDescribe = isDescribe(query);
-		isdescribecache.put(sparqlQuery, isDescribe);
 	}
 
 	/**
@@ -725,18 +776,6 @@ public class QuestStatement implements OBDAStatement {
 		return signature;
 	}
 
-	private boolean isBoolean(Query query) {
-		return query.isAskType();
-	}
-
-	private boolean isConstruct(Query query) {
-		return query.isConstructType();
-	}
-
-	public boolean isDescribe(Query query) {
-		return query.isDescribeType();
-	}
-
 	@Override
 	public void cancel() throws OBDAException {
 		try {
@@ -756,7 +795,7 @@ public class QuestStatement implements OBDAStatement {
 	public int getFetchSize() throws OBDAException {
 		try {
 			return sqlstatement.getFetchSize();
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 
@@ -766,7 +805,7 @@ public class QuestStatement implements OBDAStatement {
 	public int getMaxRows() throws OBDAException {
 		try {
 			return sqlstatement.getMaxRows();
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 
@@ -776,7 +815,7 @@ public class QuestStatement implements OBDAStatement {
 	public void getMoreResults() throws OBDAException {
 		try {
 			sqlstatement.getMoreResults();
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 
@@ -786,7 +825,7 @@ public class QuestStatement implements OBDAStatement {
 	public void setFetchSize(int rows) throws OBDAException {
 		try {
 			sqlstatement.setFetchSize(rows);
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 
@@ -796,7 +835,7 @@ public class QuestStatement implements OBDAStatement {
 	public void setMaxRows(int max) throws OBDAException {
 		try {
 			sqlstatement.setMaxRows(max);
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 
@@ -806,7 +845,7 @@ public class QuestStatement implements OBDAStatement {
 	public void setQueryTimeout(int seconds) throws OBDAException {
 		try {
 			sqlstatement.setQueryTimeout(seconds);
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 	}
@@ -817,7 +856,7 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	@Override
-	public OBDAResultSet getResultSet() throws OBDAException {
+	public TupleResultSet getResultSet() throws OBDAException {
 		return null;
 	}
 
@@ -825,7 +864,7 @@ public class QuestStatement implements OBDAStatement {
 	public int getQueryTimeout() throws OBDAException {
 		try {
 			return sqlstatement.getQueryTimeout();
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 	}
@@ -834,7 +873,7 @@ public class QuestStatement implements OBDAStatement {
 	public boolean isClosed() throws OBDAException {
 		try {
 			return sqlstatement.isClosed();
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 	}
@@ -871,11 +910,12 @@ public class QuestStatement implements OBDAStatement {
 				log.error(e.getMessage());
 			}
 		}
-		
+
 		try {
 			questInstance.updateSemanticIndexMappings();
-			translator.setTemplateMatcher(questInstance.getUriTemplateMatcher());
-		
+			translator
+					.setTemplateMatcher(questInstance.getUriTemplateMatcher());
+
 		} catch (Exception e) {
 			log.error("Error updating semantic index mappings after insert.", e);
 		}
@@ -928,26 +968,26 @@ public class QuestStatement implements OBDAStatement {
 	public void analyze() throws Exception {
 		repository.collectStatistics(conn.conn);
 	}
-	
+
 	/*
 	 * Methods for getting the benchmark parameters
 	 */
 	public long getQueryProcessingTime() {
 		return queryProcessingTime;
 	}
-	
+
 	public long getRewritingTime() {
 		return rewritingTime;
 	}
-	
+
 	public long getUnfoldingTime() {
 		return unfoldingTime;
 	}
-	
+
 	public int getUCQSizeAfterRewriting() {
 		return programAfterRewriting.getRules().size();
 	}
-	
+
 	public int getMinQuerySizeAfterRewriting() {
 		int toReturn = Integer.MAX_VALUE;
 		List<CQIE> rules = programAfterRewriting.getRules();
@@ -971,11 +1011,11 @@ public class QuestStatement implements OBDAStatement {
 		}
 		return toReturn;
 	}
-	
+
 	public int getUCQSizeAfterUnfolding() {
 		return programAfterUnfolding.getRules().size();
 	}
-	
+
 	public int getMinQuerySizeAfterUnfolding() {
 		int toReturn = Integer.MAX_VALUE;
 		List<CQIE> rules = programAfterUnfolding.getRules();
@@ -999,11 +1039,11 @@ public class QuestStatement implements OBDAStatement {
 		}
 		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
 	}
-	
+
 	public String getSqlString(String sparqlString) {
 		return querycache.get(sparqlString);
 	}
-	
+
 	private int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;
 		for (Function atom : atoms) {

@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
@@ -35,11 +35,11 @@ public class SesameBooleanQuery implements BooleanQuery {
 	}
 
 	public boolean evaluate() throws QueryEvaluationException {
-		OBDAResultSet rs = null;
+		TupleResultSet rs = null;
 		QuestDBStatement stm = null;
 		try {
 			stm = conn.createStatement();
-			rs = stm.execute(queryString);
+			rs = (TupleResultSet) stm.execute(queryString);
 			boolean next = rs.nextRow();
 			if (next){
 				if (rs.getInt(1) == 1) {

@@ -566,12 +566,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							statement = dqr.getStatement();
 							String queryString = query.getQueryString();
 							if (query.isSelectQuery() || query.isAskQuery()) {
-								result = statement.execute(queryString);
-							} else if (query.isConstructQuery()) {
-								graphResult = statement.executeConstruct(queryString);
-							} else if (query.isDescribeQuery()) {
-								graphResult = statement.executeDescribe(queryString);
-							}
+								result = statement.executeTuple(queryString);
+							} else  {
+								graphResult = statement.executeGraph(queryString);
+							} 
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();

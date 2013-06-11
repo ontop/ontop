@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB.StoreStatus;
 
@@ -245,7 +245,7 @@ public class QuestDBCMD {
 			try {
 
 				QuestDBStatement st = dbInstance.getStatement(currentstore);
-				OBDAResultSet result = st.execute(query);
+				TupleResultSet result = (TupleResultSet) st.execute(query);
 				int count = printResultSet(result);
 				System.out.println(count + " rows.");
 				result.close();
@@ -257,7 +257,7 @@ public class QuestDBCMD {
 		}
 	}
 
-	private int printResultSet(OBDAResultSet result) throws OBDAException {
+	private int printResultSet(TupleResultSet result) throws OBDAException {
 		int cols = result.getColumCount();
 		List<String> signature = result.getSignature();
 		for (int i = 0; i < signature.size(); i++) {

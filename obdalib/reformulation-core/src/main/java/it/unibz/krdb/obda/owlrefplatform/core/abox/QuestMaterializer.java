@@ -206,7 +206,7 @@ public class QuestMaterializer {
 				stm = questConn.createStatement();
 				if (!vocabularyIterator.hasNext())
 					throw new NullPointerException("Vocabulary is empty!");
-				results = stm.executeConstruct(getQuery(vocabularyIterator.next()));
+				results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -240,7 +240,7 @@ public class QuestMaterializer {
 						
 						//execute next query
 						stm = questConn.createStatement();
-						results = stm.executeConstruct(getQuery(vocabularyIterator.next()));
+						results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
 						if (results!=null)
 							hasNext = results.hasNext();
 					
