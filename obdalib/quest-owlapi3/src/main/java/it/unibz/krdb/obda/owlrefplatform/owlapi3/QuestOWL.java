@@ -279,7 +279,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					materializer.disconnect();
 					log.debug("Inserted {} triples from the mappings.", count);
 				}
-//				st.createIndexes();
+				st.createIndexes();
 				st.close();
 				if (!conn.getAutoCommit())
 				conn.commit();
