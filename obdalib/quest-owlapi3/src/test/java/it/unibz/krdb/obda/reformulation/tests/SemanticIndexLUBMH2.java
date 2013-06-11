@@ -79,12 +79,14 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
 
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
-		
+
 		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
-		
-		st.createIndexes();
-		
-		
+
+		try {
+			st.createIndexes();
+		} catch (Exception e) {
+			log.debug(e.getMessage(), e);
+		}
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
