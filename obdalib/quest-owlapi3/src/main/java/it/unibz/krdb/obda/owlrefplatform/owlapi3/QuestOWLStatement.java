@@ -331,4 +331,11 @@ public class QuestOWLStatement implements OWLStatement {
 		OWLLiteral individual2 = factory.getOWLLiteral(objectValue);
 		return factory.getOWLDataPropertyAssertionAxiom(propertyExpression, individual1, individual2);
 	}
+
+
+
+	public void analyze() throws Exception {
+		st.analyze();
+		
+	}
 }
