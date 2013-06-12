@@ -67,7 +67,6 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 
-import org.antlr.misc.IntervalSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,35 +83,40 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
+	// public static final String class_table = "\"QUEST_CLASS_ASSERTION\"";
+	//
+	// public static final String role_table =
+	// "\"QUEST_OBJECT_PROPERTY_ASSERTION\"";
 
-	
+	// public static final String attribute_table_literal =
+	// "\"QUEST_DATA_PROPERTY_LITERAL_ASSERTION\"";
+	//
+	// public static final String attribute_table_string =
+	// "\"QUEST_DATA_PROPERTY_STRING_ASSERTION\"";
+	//
+	// public static final String attribute_table_integer =
+	// "\"QUEST_DATA_PROPERTY_INTEGER_ASSERTION\"";
+	//
+	// public static final String attribute_table_decimal =
+	// "\"QUEST_DATA_PROPERTY_DECIMAL_ASSERTION\"";
+	//
+	// public static final String attribute_table_double =
+	// "\"QUEST_DATA_PROPERTY_DOUBLE_ASSERTION\"";
+	//
+	// public static final String attribute_table_datetime =
+	// "\"QUEST_DATA_PROPERTY_DATETIME_ASSERTION\"";
+	//
+	// public static final String attribute_table_boolean =
+	// "\"QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION\"";
+	//
 
-//	public static final String class_table = "\"QUEST_CLASS_ASSERTION\"";
-//
-//	public static final String role_table = "\"QUEST_OBJECT_PROPERTY_ASSERTION\"";
-
-//	public static final String attribute_table_literal = "\"QUEST_DATA_PROPERTY_LITERAL_ASSERTION\"";
-//
-//	public static final String attribute_table_string = "\"QUEST_DATA_PROPERTY_STRING_ASSERTION\"";
-//
-//	public static final String attribute_table_integer = "\"QUEST_DATA_PROPERTY_INTEGER_ASSERTION\"";
-//
-//	public static final String attribute_table_decimal = "\"QUEST_DATA_PROPERTY_DECIMAL_ASSERTION\"";
-//
-//	public static final String attribute_table_double = "\"QUEST_DATA_PROPERTY_DOUBLE_ASSERTION\"";
-//
-//	public static final String attribute_table_datetime = "\"QUEST_DATA_PROPERTY_DATETIME_ASSERTION\"";
-//
-//	public static final String attribute_table_boolean = "\"QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION\"";
-//	
-	
-	
-//	public final static String index_table = "\"IDX\"";
-//
-//	public final static String interval_table = "\"IDXINTERVAL\"";
-//
-//	public final static String emptyness_index_table = "\"NONEMPTYNESSINDEX\"";
-//
+	// public final static String index_table = "\"IDX\"";
+	//
+	// public final static String interval_table = "\"IDXINTERVAL\"";
+	//
+	// public final static String emptyness_index_table =
+	// "\"NONEMPTYNESSINDEX\"";
+	//
 
 	public final static String index_table = "IDX";
 
@@ -120,11 +124,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public final static String emptyness_index_table = "NONEMPTYNESSINDEX";
 
-	
 	public static final String class_table = "QUEST_CLASS_ASSERTION";
 
 	public static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
-	
+
 	public static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
 
 	public static final String attribute_table_string = "QUEST_DATA_PROPERTY_STRING_ASSERTION";
@@ -138,7 +141,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_datetime = "QUEST_DATA_PROPERTY_DATETIME_ASSERTION";
 
 	public static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
-	
+
 	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(150), "
 			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
 
@@ -158,7 +161,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static String insert_interval_query = "INSERT INTO " + interval_table
 			+ "(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)";
-	
+
 	
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" VARCHAR(150) NOT NULL, "
 			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
@@ -359,6 +362,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private Map<IRI, Integer> roleIndexes = new LinkedHashMap<IRI, Integer>();
 
+	private Map<Description, Description> equivalentIndex = new HashMap<Description, Description>();
+
 	private Map<IRI, List<Interval>> classIntervals = new LinkedHashMap<IRI, List<Interval>>();
 
 	private Map<IRI, List<Interval>> roleIntervals = new LinkedHashMap<IRI, List<Interval>>();
@@ -473,6 +478,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 */
 		for (Description d : dag.equi_mappings.keySet()) {
 			pureIsa.equi_mappings.put(d, dag.equi_mappings.get(d));
+			equivalentIndex.put(d, dag.equi_mappings.get(d));
 		}
 
 		/*
@@ -797,9 +803,41 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	 */
 	private int getIndex(IRI name, int type) {
 		if (type == 1) {
-			return classIndexes.get(name);
+			Integer index = classIndexes.get(name);
+		
+			if (index == null) {
+				/* direct name is not indexed, maybe there is an equivalent */
+				OClass c = (OClass)ofac.createClass(name);
+				OClass equivalent = (OClass)equivalentIndex.get(c);
+				return classIndexes.get(equivalent.getPredicate().getName());
+			}
+					
+			return index;
 		} else if (type == 2) {
-			return roleIndexes.get(name);
+			Integer index = roleIndexes.get(name);
+			
+			if (index == null) {
+				/* direct name is not indexed, maybe there is an equivalent, we need to test
+				 * with object properties and data properties */
+				Property c = ofac.createObjectProperty(name);
+				Property equivalent = (Property)equivalentIndex.get(c);
+				
+				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
+				
+				if (index1 != null)
+					return index1;
+				
+				/* object property equivalent failed, we now look for data property equivalent */
+				
+				c = ofac.createDataProperty(name);
+				equivalent = (Property)equivalentIndex.get(c);
+				
+				index1 = roleIndexes.get(equivalent.getPredicate().getName());
+				return index1;
+			}
+			
+			return index;
+				
 		}
 		throw new RuntimeException("Could not find index for: IRI =  " + name + " type = " + type);
 	}
@@ -906,25 +944,25 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
-//		Statement st = conn.createStatement();
-//
-//		st.addBatch(drop_idx);
-//		st.addBatch(drop_interval);
-//		st.addBatch(drop_emptyness);
-//
-//		st.addBatch(class_table_drop);
-//		st.addBatch(role_table_drop);
-//
-//		st.addBatch(attribute_table_literal_drop);
-//		st.addBatch(attribute_table_string_drop);
-//		st.addBatch(attribute_table_integer_drop);
-//		st.addBatch(attribute_table_decimal_drop);
-//		st.addBatch(attribute_table_double_drop);
-//		st.addBatch(attribute_table_datetime_drop);
-//		st.addBatch(attribute_table_boolean_drop);
-//
-//		st.executeBatch();
-//		st.close();
+		// Statement st = conn.createStatement();
+		//
+		// st.addBatch(drop_idx);
+		// st.addBatch(drop_interval);
+		// st.addBatch(drop_emptyness);
+		//
+		// st.addBatch(class_table_drop);
+		// st.addBatch(role_table_drop);
+		//
+		// st.addBatch(attribute_table_literal_drop);
+		// st.addBatch(attribute_table_string_drop);
+		// st.addBatch(attribute_table_integer_drop);
+		// st.addBatch(attribute_table_decimal_drop);
+		// st.addBatch(attribute_table_double_drop);
+		// st.addBatch(attribute_table_datetime_drop);
+		// st.addBatch(attribute_table_boolean_drop);
+		//
+		// st.executeBatch();
+		// st.close();
 	}
 
 	@Override
