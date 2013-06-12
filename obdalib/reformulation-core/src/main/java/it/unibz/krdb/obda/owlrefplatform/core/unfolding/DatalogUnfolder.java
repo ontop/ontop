@@ -1116,6 +1116,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	public int computePartialEvaluation(List<CQIE> workingList) {
 
+
 		int[] rcount = { 0, 0 };
 
 		for (int queryIdx = 0; queryIdx < workingList.size(); queryIdx++) {
@@ -1180,60 +1181,256 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param termidx
 	 * @return
 	 */
-	private List<CQIE> computePartialEvaluation(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx) {
 
-		for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
-			termidx.push(atomIdx);
+private List<CQIE> computePartialEvaluation(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx) {
 
-			Function focusLiteral = (Function) currentTerms.get(atomIdx);
+	for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
+		termidx.push(atomIdx);
 
-			if (focusLiteral.isBooleanFunction()) {
-				termidx.pop();
-				continue;
-			}
+		Function focusLiteral = (Function) currentTerms.get(atomIdx);
 
-			if (focusLiteral.isAlgebraFunction()) {
-				/*
-				 * These may contain data atoms that need to be unfolded, we
-				 * need to recursively unfold each term.
-				 */
-
-				// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
-
-				List<CQIE> result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx);
-
-				if (result == null)
-					return null;
-
-				if (result.size() > 0)
-					return result;
-
-				// // }
-				// // if we finish and havent returned, it means
-				// // no change, so we return an empty list
-				// if (result.size() == 0)
-				// return new LinkedList<CQIE>();
-
-			} else if (focusLiteral.isDataFunction()) {
-
-				/*
-				 * This is a data atom, it should be unfolded with the usual
-				 * resolution algorithm.
-				 */
-
-				List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount);
-
-				if (result == null)
-					return null;
-
-				if (result.size() > 0)
-					return result;
-			}
+		if (focusLiteral.isBooleanFunction()) {
 			termidx.pop();
+			continue;
 		}
 
-		return new LinkedList<CQIE>();
+		if (focusLiteral.isAlgebraFunction()) {
+			/*
+			 * These may contain data atoms that need to be unfolded, we
+			 * need to recursively unfold each term.
+			 */
+
+			// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
+
+		
+			Predicate predicate = focusLiteral.getPredicate();
+			boolean isLJ =predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+			List<CQIE> result = new LinkedList<CQIE>();
+			if (!isLJ)
+			result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx);
+			else
+			result = computePartialEvaluationLeftJoin(focusLiteral.getTerms(), rule, resolutionCount, termidx);
+			
+			if (result == null)
+				return null;
+
+			if (result.size() > 0)
+				return result;
+
+			// // }
+			// // if we finish and havent returned, it means
+			// // no change, so we return an empty list
+			// if (result.size() == 0)
+			// return new LinkedList<CQIE>();
+
+		} else if (focusLiteral.isDataFunction()) {
+
+			/*
+			 * This is a data atom, it should be unfolded with the usual
+			 * resolution algorithm.
+			 */
+
+			List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount);
+
+			if (result == null)
+				return null;
+
+			if (result.size() > 0)
+				return result;
+		}
+		termidx.pop();
 	}
+
+	return new LinkedList<CQIE>();
+}
+
+private List<CQIE> computePartialEvaluationLeftJoin(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx) {
+
+	//This variabl is used to check when I am in the second argument of the LJ
+	int ArgumentAtomCount = 0;
+
+	for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
+		termidx.push(atomIdx);
+
+		Function focusLiteral = (Function) currentTerms.get(atomIdx);
+
+		if (focusLiteral.isBooleanFunction()) {
+			termidx.pop();
+			continue;
+		}
+
+		if (focusLiteral.isAlgebraFunction()) {
+			
+			
+			ArgumentAtomCount++;
+			
+			Predicate predicate = focusLiteral.getPredicate();
+			boolean isLJ =predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+			List<CQIE> result = new LinkedList<CQIE>();
+			if (!isLJ)
+			result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx);
+			else
+			result = computePartialEvaluationLeftJoin(focusLiteral.getTerms(), rule, resolutionCount, termidx);
+			
+			if (result == null && ArgumentAtomCount!=2)
+				return null;
+			
+			if (result == null && ArgumentAtomCount==2) 
+			{
+				log.debug("Empty evaluation - Algebra Func "+ focusLiteral.toString());
+				CQIE freshRule = rule.clone();
+				Stack<Integer> termidx1 = new Stack<Integer>();
+				termidx1.addAll(termidx); 
+					
+				
+				
+				/*
+				LeftJoin(trainevent(t1_2,t2_2,t3_2,t4_2,t5_2,t6_2),IS_NOT_NULL(t4_2),IS_NOT_NULL(t1_2),IS_NOT_NULL(t3_2),
+						Join(trainevent(t1_6,t2_6,t3_6,t4_2,t5_6,t6_6),IS_NOT_NULL(t1_6),IS_NOT_NULL(t4_2),IS_NOT_NULL(t1_6),IS_NOT_NULL(t3_6),http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Passing(URI("http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#trainevent/{}",t1_6))),AND(GT(http://www.w3.org/2001/XMLSchema#dateTime(t3_6),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T14:00:00Z"^^DATETIME)),LTE(http://www.w3.org/2001/XMLSchema#dateTime(t3_6),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T15:00:00Z"^^DATETIME)))), AND(GT(http://www.w3.org/2001/XMLSchema#dateTime(t3_2),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T14:00:00Z"^^DATETIME)),LTE(http://www.w3.org/2001/XMLSchema#dateTime(t3_2),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T15:00:00Z"^^DATETIME))), NOT(IS_NOT_NULL(URI("http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#trainevent/{}",t1_6)))
+*/
+
+
+				
+				
+				
+				termidx1.pop();
+				termidx1.add(0);
+				List<Function> innerAtoms = (List<Function>) getNestedList(termidx1, freshRule);
+				
+				int ArgumentAtoms =0;
+				List<Function> newbody = new LinkedList<Function>();
+				HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
+				HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
+
+				//Here we build the new  LJ body where we remove the 2nd data atom
+				for (Function atom : innerAtoms) {
+					if (atom.isDataFunction() || atom.isAlgebraFunction()){
+						ArgumentAtoms ++;
+						//we found the first argument of the LJ, we need the variables
+						if (ArgumentAtoms==1){
+							variablesArg1 =	(HashSet<Variable>) atom.getReferencedVariables();
+							newbody.add(atom);
+						}else if (ArgumentAtoms!=2){
+							newbody.add(atom);
+						} else {
+							//Here we keep the variables of the second LJ data argument
+							variablesArg2 =	(HashSet<Variable>) atom.getReferencedVariables();
+							
+							//and we remove the variables that are in both arguments
+							for (Variable var : variablesArg1) {	
+								if (variablesArg2.contains(var)){
+									variablesArg2.remove(var);
+								}
+							} //end for removing variables
+							continue;
+						}
+					} else{
+						//boolean atom
+						newbody.add(atom);
+					}
+					
+				}// end for body
+				freshRule.updateBody(newbody);
+				HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
+				
+				OBDAVocabulary myNull = new OBDAVocabulary();
+				for (Variable var : variablesArg2) {	
+					unifier.put(var, myNull.NULL);
+				}
+				//Now I need to add the null to the variables of the second LJ data argument
+				freshRule=	Unifier.applyUnifier(freshRule, unifier,false);
+
+				List<CQIE> newRules = new LinkedList<CQIE>();
+				newRules.add(freshRule);
+				return newRules;
+			}
+
+			if (result.size() > 0)
+				return result;
+
+		} else if (focusLiteral.isDataFunction()) {
+
+			/*
+			 * This is a data atom, it should be unfolded with the usual
+			 * resolution algorithm.
+			 */
+			
+			ArgumentAtomCount += 1;
+
+			List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount);
+
+			if (result == null && ArgumentAtomCount!=2)
+				return null;
+			
+			if (result == null && ArgumentAtomCount==2) 
+			{
+				log.debug("Empty evaluation - Data Atom "+focusLiteral.toString());
+				CQIE freshRule = rule.clone();
+				//List<Function> body = freshRule.getBody();
+				
+				Stack<Integer> termidx1 = new Stack<Integer>();
+				termidx1.addAll(termidx); 
+					
+				termidx1.pop();
+				termidx1.add(0);
+				List<Function> innerAtoms = (List<Function>) getNestedList(termidx1, freshRule);
+				
+				int ArgumentAtoms =0;
+				List<Function> newbody = new LinkedList<Function>();
+				HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
+				HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
+
+				//Here we build the new  LJ body where we remove the 2nd data atom
+				for (Function atom : innerAtoms) {
+					if (atom.isDataFunction() || atom.isAlgebraFunction()){
+						ArgumentAtoms ++;
+						//we found the first argument of the LJ, we need the variables
+						if (ArgumentAtoms==1){
+							variablesArg1 =	(HashSet<Variable>) atom.getReferencedVariables();
+							newbody.add(atom);
+						}else if (ArgumentAtoms!=2){
+							newbody.add(atom);
+						} else {
+							//Here we keep the variables of the second LJ data argument
+							variablesArg2 =	(HashSet<Variable>) atom.getReferencedVariables();
+							
+							//and we remove the variables that are in both arguments
+							for (Variable var : variablesArg1) {	
+								if (variablesArg2.contains(var)){
+									variablesArg2.remove(var);
+								}
+							} //end for removing variables
+							continue;
+						}
+					} else{
+						newbody.add(atom);
+					}
+					
+				}// end for rule body
+				freshRule.updateBody(newbody);
+				HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
+				
+				OBDAVocabulary myNull = new OBDAVocabulary();
+				for (Variable var : variablesArg2) {	
+					unifier.put(var, myNull.NULL);
+				}
+				//Now I need to add the null to the variables of the second LJ data argument
+				freshRule=	Unifier.applyUnifier(freshRule, unifier,false);
+
+				List<CQIE> newRules = new LinkedList<CQIE>();
+				newRules.add(freshRule);
+				return newRules;
+
+			} //enf if checking the second null argument of the LJ
+			if (result.size() > 0)
+				return result;
+		}
+		termidx.pop();
+	}
+
+	return new LinkedList<CQIE>();
+}
+
 
 	/***
 	 * This resolves one single data atom againts the set of rules of the

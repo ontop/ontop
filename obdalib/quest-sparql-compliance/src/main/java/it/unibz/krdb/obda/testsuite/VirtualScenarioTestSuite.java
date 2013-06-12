@@ -17,7 +17,7 @@ public class VirtualScenarioTestSuite extends TestSuite {
 		suite.addTest(PgsqlVirtualScenarioTest.suite());
 		suite.addTest(MssqlVirtualScenarioTest.suite());
 		suite.addTest(OracleVirtualScenarioTest.suite());
-		suite.addTest(Db2VirtualScenarioTest.suite());
+	//	suite.addTest(Db2VirtualScenarioTest.suite());
 		return suite;
 	}
 }
