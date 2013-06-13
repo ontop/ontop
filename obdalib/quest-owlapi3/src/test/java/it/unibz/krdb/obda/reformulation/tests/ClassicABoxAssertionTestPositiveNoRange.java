@@ -132,15 +132,15 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 	}
 
 	public void testDataPropertyAssertionsDouble() throws OWLException{
-		String query = "SELECT ?x WHERE {?x :udouble ?y}";
+		String query = "SELECT ?y WHERE {?x :udouble ?y}";
 		int count = executeQuery(query);
-		assertEquals(9, count);
+		assertEquals(7, count);
 	}
 
 	public void testDataPropertyAssertionsFloat() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :ufloat ?y}";
 		int count = executeQuery(query);
-		assertEquals(9, count);
+		assertEquals(7, count);
 	}
 
 	public void testDataPropertyAssertionsInt() throws OWLException{
@@ -154,9 +154,9 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 	}
 
 	public void testDataPropertyAssertionsInteger()throws OWLException {
-		String query = "SELECT ?x WHERE {?x :uinteger ?y}";
+		String query = "SELECT ?y WHERE {?x :uinteger ?y}";
 		int count = executeQuery(query);
-		assertEquals(5, count);
+		assertEquals(4, count);
 	}
 
 	public void testDataPropertyAssertionsLong() throws OWLException{

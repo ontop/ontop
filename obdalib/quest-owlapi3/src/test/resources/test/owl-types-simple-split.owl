@@ -152,9 +152,9 @@
      -->
 
     
+<owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#b"/>
+    
 
-
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#a -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#a">
         <rdf:type rdf:resource="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#class"/>
@@ -162,7 +162,6 @@
     </owl:NamedIndividual>
     
     
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#a -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uliteral">
         <uliteral rdf:datatype="&rdfs;Literal">literal1</uliteral>
@@ -171,13 +170,18 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#b -->
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#b"/>
+    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uinteger">
+        <uinteger rdf:datatype="&xsd;integer">+100000</uinteger>
+        <uinteger rdf:datatype="&xsd;integer">-1</uinteger>
+        <uinteger rdf:datatype="&xsd;integer">0</uinteger>
+        <uinteger rdf:datatype="&xsd;integer">123678967543233</uinteger>
+    </owl:NamedIndividual>
+
+
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uboolean -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uboolean">
         <uboolean rdf:datatype="&xsd;boolean">0</uboolean>
@@ -186,22 +190,6 @@
         <uboolean rdf:datatype="&xsd;boolean">true</uboolean>
     </owl:NamedIndividual>
     
-
-
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ubyte -->
-
- <!--    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ubyte">
-        <ubyte rdf:datatype="&xsd;byte">+100</ubyte>
-        <ubyte rdf:datatype="&xsd;byte">-1</ubyte>
-        <ubyte rdf:datatype="&xsd;byte">-128</ubyte>
-        <ubyte rdf:datatype="&xsd;byte">0</ubyte>
-        <ubyte rdf:datatype="&xsd;byte">126</ubyte>
-        <ubyte rdf:datatype="&xsd;byte">127</ubyte>
-    </owl:NamedIndividual> -->
-    
-
-
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udatetime -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udatetime">
         <udateTime rdf:datatype="&xsd;dateTime">2002-05-30T09:00:00</udateTime>
@@ -215,7 +203,6 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udecimal -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udecimal">
         <udecimal rdf:datatype="&xsd;decimal">+100000.00</udecimal>
@@ -230,7 +217,6 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udouble -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udouble">
         <udouble rdf:datatype="&xsd;double">-0</udouble>
@@ -246,7 +232,6 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ufloat -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ufloat">
         <ufloat rdf:datatype="&xsd;float">-0</ufloat>
@@ -262,7 +247,6 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uint -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uint">
         <uint rdf:datatype="&xsd;int">+100000</uint>
@@ -275,18 +259,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uinteger -->
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uinteger">
-        <uinteger rdf:datatype="&xsd;integer">+100000</uinteger>
-        <uinteger rdf:datatype="&xsd;integer">-1</uinteger>
-        <uinteger rdf:datatype="&xsd;integer">0</uinteger>
-        <uinteger rdf:datatype="&xsd;integer">123678967543233</uinteger>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ulong -->
 
     <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ulong">
         <ulong rdf:datatype="&xsd;long">+100000</ulong>
@@ -298,17 +271,6 @@
     </owl:NamedIndividual>
     
 
-
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ushort -->
-
-  <!--   <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ushort">
-        <ushort rdf:datatype="&xsd;short">+10000</ushort>
-        <ushort rdf:datatype="&xsd;short">-1</ushort>
-        <ushort rdf:datatype="&xsd;short">-32768</ushort>
-        <ushort rdf:datatype="&xsd;short">0</ushort>
-        <ushort rdf:datatype="&xsd;short">12678</ushort>
-        <ushort rdf:datatype="&xsd;short">32767</ushort>
-    </owl:NamedIndividual> -->
 </rdf:RDF>
 
 

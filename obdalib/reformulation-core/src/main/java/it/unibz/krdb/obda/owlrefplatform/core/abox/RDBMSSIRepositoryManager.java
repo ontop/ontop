@@ -177,7 +177,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ "\"URI\" VARCHAR(150)  NOT NULL, " + "VALUE VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
-			+ "\"URI\" VARCHAR(150)  NOT NULL, " + "VALUE INT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" VARCHAR(150)  NOT NULL, " + "VALUE BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
 			+ "\"URI\" VARCHAR(150) NOT NULL, " + "VALUE DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
@@ -486,7 +486,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 */
 		Set<Description> descriptions = pureIsa.allnodes.keySet();
 		for (Description description : descriptions) {
-			if (description instanceof ClassDescription) {
+			if (description instanceof OClass) {
 
 				OClass cdesc = (OClass) description;
 				DAGNode node = pureIsa.get(description);
@@ -497,7 +497,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				classIndexes.put(iri, idx);
 				classIntervals.put(iri, intervals);
 
-			} else if (description instanceof Property) {
+			} else if (description instanceof PropertyImpl) {
 				PropertyImpl cdesc = (PropertyImpl) description;
 
 				if (cdesc.isInverse()) {
@@ -513,9 +513,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				roleIndexes.put(iri, idx);
 				roleIntervals.put(iri, intervals);
 
-			} else {
-				throw new RuntimeException("Error while constructing semanc index cache from DAG. Found ");
-			}
+			} 
 		}
 
 		// try {
@@ -1156,7 +1154,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			case INTEGER:
 				if (value.charAt(0) == '+')
 					value = value.substring(1, value.length());
-				setInputStatement(attributeIntegerStm, uri, Integer.parseInt(value), idx, c1isBNode);
+				setInputStatement(attributeIntegerStm, uri, Long.parseLong(value), idx, c1isBNode);
 				// log.debug("Int");
 				break;
 			case DECIMAL:

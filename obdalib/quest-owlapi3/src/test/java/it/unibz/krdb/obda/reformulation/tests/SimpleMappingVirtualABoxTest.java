@@ -150,7 +150,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind1.toString());
 			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"^^xsd:string", val.toString());
+			assertEquals("\"value1\"", val.toString());
 			
 
 		} catch (Exception e) {
