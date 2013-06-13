@@ -120,6 +120,9 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private UriTemplateMatcher uriTemplateMatcher;
 
+	private LinkedHashSet<String> uriRef = null;
+	private boolean isSI = false;
+	
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
 	}
@@ -155,8 +158,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	public DatalogProgram translate(Query arqQuery) {
 
 		Op op = Algebra.compile(arqQuery);
- 
-		log.debug("SPARQL algebra:  \n{}", op);
+
+		log.debug("SPARQL algebra: \n{}", op);
 
 		DatalogProgram result = ofac.getDatalogProgram();
 
@@ -671,6 +674,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 */
 	public void translate(List<Variable> vars, Triple triple,
 			DatalogProgram pr, int i, int[] varcount) {
+		
 		Node o = triple.getObject();
 		Node p = triple.getPredicate();
 		Node s = triple.getSubject();
@@ -711,6 +715,12 @@ public class SparqlAlgebraToDatalogTranslator {
 				 * equation of the variable to uri("http:....")
 				 */
 
+				if (isSI) {
+					int id = indexOfRef(s);
+					Function functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getValueConstant(String.valueOf(id), COL_TYPE.INTEGER));
+					terms.add(functionURI);
+				} else {
+				
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
 				subjectUri = irifac.construct(subject.getURI());
@@ -718,7 +728,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
 				functionURI.getTerms();
 				terms.add(functionURI);
-
+				}
 				// Function functionURI = ofac.getFunctionalTerm(
 				// ofac.getUriTemplatePredicate(1),
 				// ofac.getURIConstant(subjectUri));
@@ -815,11 +825,18 @@ public class SparqlAlgebraToDatalogTranslator {
 				;
 				subjectUri = irifac.construct(subject_URI);
 
-				Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
-				if (functionURI == null)
+				if (isSI) {
+					int id = indexOfRef(s);
+					Function functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getValueConstant(String.valueOf(id), COL_TYPE.INTEGER));
+					if (functionURI == null)
 					return;
-				terms.add(functionURI);
-
+					terms.add(functionURI);
+				} else {
+					Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
+					if (functionURI == null)
+					return;
+					terms.add(functionURI);
+				}
 				// Function functionURI = ofac.getFunctionalTerm(
 				// ofac.getUriTemplatePredicate(1),
 				// ofac.getURIConstant(subjectUri));
@@ -870,6 +887,14 @@ public class SparqlAlgebraToDatalogTranslator {
 					terms.add(dataTypeFunction);
 				}
 			} else if (o instanceof Node_URI) {
+				
+				if (isSI) {
+					int id = indexOfRef(o);
+					Function functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getValueConstant(String.valueOf(id), COL_TYPE.INTEGER));
+					terms.add(functionURI);
+				} else {
+					
+				
 				Node_URI object = (Node_URI) o;
 				objectType = COL_TYPE.OBJECT;
 
@@ -893,7 +918,7 @@ public class SparqlAlgebraToDatalogTranslator {
 						
 					}
 				terms.add(functionURI);
-
+				}
 				// Function functionURI = ofac.getFunctionalTerm(
 				// ofac.getUriTemplatePredicate(1),
 				// ofac.getURIConstant(objectUri));
@@ -930,6 +955,18 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		CQIE newrule = ofac.getCQIE(head, result);
 		pr.appendRule(newrule);
+	}
+
+	private int indexOfRef(Node s) {
+		String uri = s.toString();
+		int i = 0;
+		for(String el : uriRef) {
+		    i++;  
+			if (el.equals(uri)) {
+		          return i;
+		      }
+		 }
+		return 0;
 	}
 
 	// private class VariableComparator implements Comparator<Variable> {
@@ -1188,8 +1225,6 @@ public class SparqlAlgebraToDatalogTranslator {
 						.getDataTypePredicateLiteral(), ofac.getValueConstant(
 						node.getLiteralLexicalForm(), COL_TYPE.STRING));
 			} else if (node instanceof Node_URI) {
-//				constantFunction = uriTemplateMatcher.generateURIFunction(irifac.construct(node.toString()));
-////				
 				constantFunction = ofac.getFunctionalTerm(ofac
 						.getUriTemplatePredicate(1), ofac.getValueConstant(
 						node.toString(), COL_TYPE.OBJECT));
@@ -1367,4 +1402,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		return q.isAskType();
 	}
 
+	public void setUriRef(LinkedHashSet<String> uriR) {
+		this.uriRef = uriR;
+	}
+	
+	public void setSI() {
+		isSI = true;
+	}
 }

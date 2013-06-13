@@ -14,13 +14,23 @@ import it.unibz.krdb.obda.owlapi3.OWLConnection;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.security.InvalidParameterException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -37,7 +47,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.OWLOntologyMerger;
 
 public class QuestOWLStatement implements OWLStatement {
 
@@ -123,19 +132,145 @@ public class QuestOWLStatement implements OWLStatement {
 	}
 	
 	public int insertData(File owlFile, int commitSize, int batchsize) throws Exception {
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
-		Set<OWLOntology> set = manager.getImportsClosure(ontology);
-		
-		
+		int ins = insertData(owlFile, commitSize, batchsize, null);
+		return ins;
+	}
+	
+	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
 
-		// Retrieves the ABox from the ontology file.
-		
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(set,
-				new HashMap<Predicate, Description>());
-		return st.insertData(aBoxIter, commitSize, batchsize);
+		Iterator<Assertion> aBoxIter = null;
+
+		if (owlFile.getName().toLowerCase().endsWith(".owl")) {
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			OWLOntology ontology = manager
+					.loadOntologyFromOntologyDocument(owlFile);
+			Set<OWLOntology> set = manager.getImportsClosure(ontology);
+
+			// Retrieves the ABox from the ontology file.
+
+			aBoxIter = new OWLAPI3ABoxIterator(set,
+					new HashMap<Predicate, Description>());
+			return st.insertData(aBoxIter, commitSize, batchsize);
+		} else if (owlFile.getName().toLowerCase().endsWith(".ttl")
+				|| owlFile.getName().toLowerCase().endsWith(".nt")) {
+
+			RDFParser rdfParser = null;
+			
+			if (owlFile.getName().toLowerCase().endsWith(".nt") ) {
+				rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
+			} else if (owlFile.getName().toLowerCase().endsWith(".ttl")) {
+				rdfParser = Rio.createParser(RDFFormat.TURTLE);
+			}
+
+			rdfParser.setVerifyData(true);
+			rdfParser.setStopAtFirstError(true);
+			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
+
+			boolean autoCommit = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			SesameRDFIterator rdfHandler = new SesameRDFIterator();
+			rdfParser.setRDFHandler(rdfHandler);
+			
+			BufferedReader reader = new BufferedReader(new FileReader(owlFile));
+
+			try {
+				
+
+
+				Thread insert = new Thread(new Insert(rdfParser,
+						reader, baseURI));
+				Process processor = new Process(rdfHandler, this.st);
+				Thread process = new Thread(processor);
+
+				// start threads
+				insert.start();
+				process.start();
+
+				insert.join();
+				process.join();
+
+				return processor.getInsertCount();
+				
+
+			} catch (RuntimeException e) {
+				// System.out.println("exception, rolling back!");
+
+				if (autoCommit) {
+					conn.rollBack();
+				}
+				throw e;
+			} catch (OBDAException e) {
+
+				if (autoCommit) {
+					conn.rollBack();
+				}
+				throw e;
+				} catch (InterruptedException e) {
+				if (autoCommit) {
+					conn.rollBack();
+				}
+
+				throw e;
+			} finally {
+				conn.setAutoCommit(autoCommit);				
+			}
+
+		} else {
+			throw new InvalidParameterException(
+					"Only .owl, .ttl and .nt files are supported for load opertions.");
+		}
+
 	}
 
+	
+	private class Insert implements Runnable {
+		private RDFParser rdfParser;
+		private Reader inputStreamOrReader;
+		private String baseURI;
+
+		public Insert(RDFParser rdfParser, Reader inputStreamOrReader,
+				String baseURI) {
+			this.rdfParser = rdfParser;
+			this.inputStreamOrReader = inputStreamOrReader;
+			this.baseURI = baseURI;
+		}
+
+		public void run() {
+			try {
+				rdfParser.parse(inputStreamOrReader, baseURI);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+	}
+
+	private class Process implements Runnable {
+		private SesameRDFIterator iterator;
+		private QuestStatement questStmt;
+		
+		int insertCount = -1;
+
+		public Process(SesameRDFIterator iterator, QuestStatement qstm)
+				throws OBDAException {
+			this.iterator = iterator;
+			this.questStmt = qstm;
+		}
+
+		public void run() {
+			try {
+				insertCount = questStmt.insertData(iterator, 15000, 5000);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public int getInsertCount() {
+			return insertCount;
+		}
+	}
+	
 	@Override
 	public OWLConnection getConnection() throws OWLException {
 		return conn;

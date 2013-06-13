@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -870,6 +871,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		NewLiteral t = ov.getTerms().get(0);
 		NewLiteral c;
 	
+		String literalValue = "";
+		
 		if (t instanceof ValueConstant || t instanceof BNode) {
 			/*
 			 * The function is actually a template. The first parameter is a
@@ -880,8 +883,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (t instanceof BNode) {
 				c = (BNode) t;
+				literalValue = ((BNode) t).getValue();
 			} else {
-				c = (ValueConstant) t;
+				c = (ValueConstant) t;	
+				literalValue = ((ValueConstant) t).getValue();
 			}		
 			Predicate pred = ov.getFunctionSymbol();
 			String replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
@@ -906,7 +911,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					  "'''', '%22'), "+
 					  "'/', '%2F')";
 				
-			String template = trim(c.toString());
+			String template = trim(literalValue);
 			String[] split = template.split("[{][}]");
 			
 			List<String> vex = new LinkedList<String>();
@@ -939,6 +944,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 		
 			if (vex.size() == 1) {
+				
 				return vex.get(0);
 			}
 			String[] params = new String[vex.size()];

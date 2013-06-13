@@ -80,9 +80,9 @@ public class SemIndexRepositoryTestLUBMMySQL extends TestCase {
 		Set<Predicate> preds = ext.getVocabulary(clousure);
 
 		String driver = "com.mysql.jdbc.Driver";
-		String url = "jdbc:mysql://localhost/lubmex2050?sessionVariables=sql_mode='ANSI'";
-		String username = "root";
-		String password = "";
+		String url = "jdbc:mysql://obdalin3/lubmex2050?sessionVariables=sql_mode='ANSI'";
+		String username = "fish";
+		String password = "fish";
 
 		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);

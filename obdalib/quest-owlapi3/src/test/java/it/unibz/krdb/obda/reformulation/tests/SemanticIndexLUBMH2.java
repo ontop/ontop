@@ -65,7 +65,8 @@ public class SemanticIndexLUBMH2 extends TestCase {
 	}
 
 	public void test3InitializingQuest() throws Exception {
-
+		long start = System.nanoTime();
+	
 		QuestOWLFactory fac = new QuestOWLFactory();
 
 		QuestPreferences pref = new QuestPreferences();
@@ -79,14 +80,113 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
 
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
-
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
-
-		try {
-			st.createIndexes();
-		} catch (Exception e) {
-			log.debug(e.getMessage(), e);
-		}
+		long end = System.nanoTime();
+		double init_time = (end - start) / 1000000;
+		start = System.nanoTime();
+		//st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
+		// Lets test 25 unis
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		double time1 = (end - start) / 1000000000;
+		log.debug("File 1. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University1.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 2. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University2.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 3. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University3.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 4. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University4.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 5. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University5.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 6. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University6.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 7. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University7.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 8. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University8.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		end = System.nanoTime();
+		time1 = (end - start) / 1000000000;
+		log.debug("File 9. Total insertion time: {}", time1);
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University9.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 10. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University10.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 11. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University11.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 12. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University12.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 13. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University13.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 14. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University14.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 15. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University15.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 16. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University16.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 17. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University17.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 18. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University18.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 19. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University19.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 20. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University20.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 21. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University21.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 22. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University22.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 23. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University23.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 24. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		
+		st.createIndexes();
+		end = System.nanoTime();
+		double insert_time = (end - start) / 1000000;
+		
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
@@ -109,18 +209,20 @@ public class SemanticIndexLUBMH2 extends TestCase {
 			// "	?staff lubm:teacherOf ?course ." + "	?course a lubm:Course . "
 			// + " }";
 
-			long start = System.nanoTime();
+			start = System.nanoTime();
 			QuestOWLResultSet res = (QuestOWLResultSet) st.executeTuple(query.getQuery());
-			long end = System.nanoTime();
+			end = System.nanoTime();
 
-			double time = (end - start) / 1000;
+			double time = (end - start) / 1000000;
 
 			int count = 0;
 			while (res.nextRow()) {
 				count += 1;
 			}
 			log.debug("Total result: {}", count);
-			log.debug("Elapsed time: {} ms", time);
+			log.debug("Initialization time: {} ms", init_time);
+			log.debug("Data insertion time: {} ms", insert_time);
+			log.debug("Query execution time: {} ms", time);
 		}
 		// }
 	}

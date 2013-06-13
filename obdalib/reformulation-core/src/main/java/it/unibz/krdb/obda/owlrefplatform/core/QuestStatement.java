@@ -64,8 +64,9 @@ import com.hp.hpl.jena.sparql.syntax.Template;
 public class QuestStatement implements OBDAStatement {
 
 	private QueryRewriter rewriter = null;
-
-	// private UnfoldingMechanism unfoldingmechanism = null;
+	
+	private boolean isSI = false;
+    	// private UnfoldingMechanism unfoldingmechanism = null;
 
 	private SQLQueryGenerator querygenerator = null;
 
@@ -234,6 +235,7 @@ public class QuestStatement implements OBDAStatement {
 						// Execute the SQL query string
 						executingSQL = true;
 						ResultSet set = null;
+						isSI = questInstance.isSemIdx();
 						// try {
 
 						set = sqlstatement.executeQuery(sql);
@@ -244,6 +246,10 @@ public class QuestStatement implements OBDAStatement {
 						//
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
+							if (isSI) 
+								tupleResult = new QuestResultset(set, signature,
+										QuestStatement.this, questInstance.getUriRefIds());
+							else
 							tupleResult = new QuestResultset(set, signature,
 									QuestStatement.this);
 
@@ -256,7 +262,12 @@ public class QuestStatement implements OBDAStatement {
 							if (isDescribe)
 								collectResults = true;
 							Template template = query.getConstructTemplate();
-							TupleResultSet tuples = new QuestResultset(set,
+							TupleResultSet tuples = null;
+							if (isSI) 
+								tuples = new QuestResultset(set, signature,
+										QuestStatement.this, questInstance.getUriRefIds());
+							else 
+							tuples = new QuestResultset(set,
 									signature, QuestStatement.this);
 							graphResult = new QuestGraphResultSet(tuples,
 									template, collectResults);
@@ -384,6 +395,10 @@ public class QuestStatement implements OBDAStatement {
 		// Contruct the datalog program object from the query string
 		DatalogProgram program = null;
 		try {
+			if (questInstance.isSemIdx()) {
+				translator.setSI();
+				translator.setUriRef(questInstance.getUriRefIds());
+			}
 			program = translator.translate(query);
 
 			log.debug("Translated query: \n{}", program);
@@ -1044,6 +1059,10 @@ public class QuestStatement implements OBDAStatement {
 		return querycache.get(sparqlString);
 	}
 
+	public void setSI() {
+		isSI = true;
+	}
+	
 	private int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;
 		for (Function atom : atoms) {

@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 
+import org.antlr.misc.IntervalSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,51 +85,49 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
-	// public static final String class_table = "\"QUEST_CLASS_ASSERTION\"";
-	//
-	// public static final String role_table =
-	// "\"QUEST_OBJECT_PROPERTY_ASSERTION\"";
 
-	// public static final String attribute_table_literal =
-	// "\"QUEST_DATA_PROPERTY_LITERAL_ASSERTION\"";
-	//
-	// public static final String attribute_table_string =
-	// "\"QUEST_DATA_PROPERTY_STRING_ASSERTION\"";
-	//
-	// public static final String attribute_table_integer =
-	// "\"QUEST_DATA_PROPERTY_INTEGER_ASSERTION\"";
-	//
-	// public static final String attribute_table_decimal =
-	// "\"QUEST_DATA_PROPERTY_DECIMAL_ASSERTION\"";
-	//
-	// public static final String attribute_table_double =
-	// "\"QUEST_DATA_PROPERTY_DOUBLE_ASSERTION\"";
-	//
-	// public static final String attribute_table_datetime =
-	// "\"QUEST_DATA_PROPERTY_DATETIME_ASSERTION\"";
-	//
-	// public static final String attribute_table_boolean =
-	// "\"QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION\"";
-	//
+	
 
-	// public final static String index_table = "\"IDX\"";
-	//
-	// public final static String interval_table = "\"IDXINTERVAL\"";
-	//
-	// public final static String emptyness_index_table =
-	// "\"NONEMPTYNESSINDEX\"";
-	//
+//	public static final String class_table = "\"QUEST_CLASS_ASSERTION\"";
+//
+//	public static final String role_table = "\"QUEST_OBJECT_PROPERTY_ASSERTION\"";
+
+//	public static final String attribute_table_literal = "\"QUEST_DATA_PROPERTY_LITERAL_ASSERTION\"";
+//
+//	public static final String attribute_table_string = "\"QUEST_DATA_PROPERTY_STRING_ASSERTION\"";
+//
+//	public static final String attribute_table_integer = "\"QUEST_DATA_PROPERTY_INTEGER_ASSERTION\"";
+//
+//	public static final String attribute_table_decimal = "\"QUEST_DATA_PROPERTY_DECIMAL_ASSERTION\"";
+//
+//	public static final String attribute_table_double = "\"QUEST_DATA_PROPERTY_DOUBLE_ASSERTION\"";
+//
+//	public static final String attribute_table_datetime = "\"QUEST_DATA_PROPERTY_DATETIME_ASSERTION\"";
+//
+//	public static final String attribute_table_boolean = "\"QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION\"";
+//	
+	
+	
+//	public final static String index_table = "\"IDX\"";
+//
+//	public final static String interval_table = "\"IDXINTERVAL\"";
+//
+//	public final static String emptyness_index_table = "\"NONEMPTYNESSINDEX\"";
+//
 
 	public final static String index_table = "IDX";
 
 	public final static String interval_table = "IDXINTERVAL";
 
 	public final static String emptyness_index_table = "NONEMPTYNESSINDEX";
+	
+	public final static String uri_id_table = "URIID";
 
+	
 	public static final String class_table = "QUEST_CLASS_ASSERTION";
 
 	public static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
-
+	
 	public static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
 
 	public static final String attribute_table_string = "QUEST_DATA_PROPERTY_STRING_ASSERTION";
@@ -141,7 +141,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_datetime = "QUEST_DATA_PROPERTY_DATETIME_ASSERTION";
 
 	public static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
-
+	
 	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(150), "
 			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
 
@@ -150,6 +150,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static String create_emptyness_index = "CREATE TABLE " + emptyness_index_table + " ( TABLEID INTEGER, IDX INTEGER, "
 			+ " TYPE1 INTEGER, TYPE2 INTEGER )";
+	
+	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(150) " + ")";
 
 	private final static String drop_idx = "DROP TABLE " + index_table + "";
 
@@ -158,38 +160,40 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table + "";
 
 	private final static String insert_idx_query = "INSERT INTO " + index_table + "(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)";
+	
+	private final static String uriid_insert = "INSERT INTO " + uri_id_table + "(ID, URI) VALUES(?, ?)";
 
 	private final static String insert_interval_query = "INSERT INTO " + interval_table
 			+ "(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)";
-
 	
-	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" VARCHAR(150) NOT NULL, "
+	
+	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
 			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
 
-	public static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" VARCHAR(150) NOT NULL, "
-			+ "\"URI2\" VARCHAR(150) NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, "
+	public static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" INTEGER NOT NULL, "
+			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, "
 			+ "ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE)";
 
 	public static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
-			+ "\"URI\" VARCHAR(150) NOT NULL, " + "VALUE VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
-			+ "\"URI\" VARCHAR(150)  NOT NULL, " + "VALUE VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
+			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
-			+ "\"URI\" VARCHAR(150)  NOT NULL, " + "VALUE BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE INT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
-			+ "\"URI\" VARCHAR(150) NOT NULL, " + "VALUE DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
-			+ "\"URI\" VARCHAR(150) NOT NULL, " + "VALUE DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
-			+ "\"URI\" VARCHAR(150) NOT NULL, " + "VALUE TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
-			+ "\"URI\" VARCHAR(150) NOT NULL, " + "VALUE BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 
 	public static final String class_table_drop = "DROP TABLE " + class_table;
@@ -223,14 +227,20 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean
 			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 
-	// TODO we still need to index on the isBNODE COLUMNS!!
+	
+	public static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
+	public static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
+	public static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
+
 
 	public static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + " (URI)";
 	public static final String indexclass2 = "CREATE INDEX idxclass2 ON " + class_table + " (IDX)";
+	public static final String indexclassfull2 = "CREATE INDEX idxclassfull2 ON " + class_table + " (URI, IDX)";
 
 	public static final String indexrole1 = "CREATE INDEX idxrole1 ON " + role_table + " (URI1)";
 	public static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + " (IDX)";
 	public static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
+	public static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
 
 	public static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
 	public static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
@@ -368,6 +378,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private Map<IRI, List<Interval>> roleIntervals = new LinkedHashMap<IRI, List<Interval>>();
 
+	private LinkedHashSet<String> uriIds = new LinkedHashSet<String> ();
+	
 	private Properties config;
 
 	private DAG dag;
@@ -877,7 +889,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			log.debug("Schema already exists. Skipping creation");
 			return;
 		}
-
+		st.addBatch(create_uri_id);
+		
 		st.addBatch(create_idx);
 		st.addBatch(create_interval);
 		st.addBatch(create_emptyness_index);
@@ -900,14 +913,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
-
 		Statement st = conn.createStatement();
 
-		st.addBatch(indexclass1);
-		st.addBatch(indexclass2);
-		st.addBatch(indexrole1);
-		st.addBatch(indexrole2);
-		st.addBatch(indexrole3);
+//		st.addBatch(indexclass1);
+//		st.addBatch(indexclass2);
+//		st.addBatch(indexrole1);
+//		st.addBatch(indexrole2);
+//		st.addBatch(indexrole3);
 
 		st.addBatch(indexattribute_literal1);
 		st.addBatch(indexattribute_string1);
@@ -933,7 +945,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexattribute_datetime3);
 		st.addBatch(indexattribute_boolean3);
 
+		st.addBatch(indexclass_composite);
+		st.addBatch(indexrole_composite1);
+		st.addBatch(indexrole_composite2);
+		
+		st.addBatch(indexclassfull2);
+		st.addBatch(indexrolefull22);
+		
 		st.executeBatch();
+		
+		log.debug("Executing ANALYZE");
+		st.addBatch(analyze);
+		st.executeBatch();
+		
 		st.close();
 
 		isIndexed = true;
@@ -942,25 +966,25 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
-		// Statement st = conn.createStatement();
-		//
-		// st.addBatch(drop_idx);
-		// st.addBatch(drop_interval);
-		// st.addBatch(drop_emptyness);
-		//
-		// st.addBatch(class_table_drop);
-		// st.addBatch(role_table_drop);
-		//
-		// st.addBatch(attribute_table_literal_drop);
-		// st.addBatch(attribute_table_string_drop);
-		// st.addBatch(attribute_table_integer_drop);
-		// st.addBatch(attribute_table_decimal_drop);
-		// st.addBatch(attribute_table_double_drop);
-		// st.addBatch(attribute_table_datetime_drop);
-		// st.addBatch(attribute_table_boolean_drop);
-		//
-		// st.executeBatch();
-		// st.close();
+//		Statement st = conn.createStatement();
+//
+//		st.addBatch(drop_idx);
+//		st.addBatch(drop_interval);
+//		st.addBatch(drop_emptyness);
+//
+//		st.addBatch(class_table_drop);
+//		st.addBatch(role_table_drop);
+//
+//		st.addBatch(attribute_table_literal_drop);
+//		st.addBatch(attribute_table_string_drop);
+//		st.addBatch(attribute_table_integer_drop);
+//		st.addBatch(attribute_table_decimal_drop);
+//		st.addBatch(attribute_table_double_drop);
+//		st.addBatch(attribute_table_datetime_drop);
+//		st.addBatch(attribute_table_boolean_drop);
+//
+//		st.executeBatch();
+//		st.close();
 	}
 
 	@Override
@@ -977,6 +1001,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		// Create the insert statement for all assertions (i.e, concept, role
 		// and attribute)
+		PreparedStatement uriidStm = conn.prepareStatement(uriid_insert);
 		PreparedStatement classStm = conn.prepareStatement(class_insert);
 		PreparedStatement roleStm = conn.prepareStatement(role_insert);
 		PreparedStatement attributeLiteralStm = conn.prepareStatement(attribute_table_literal_insert);
@@ -1002,7 +1027,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				batchCount += 1;
 				commitCount += 1;
 
-				addPreparedStatement(classStm, roleStm, attributeLiteralStm, attributeStringStm, attributeIntegerStm, attributeDecimalStm,
+				addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStringStm, attributeIntegerStm, attributeDecimalStm,
 						attributeDoubleStm, attributeDateStm, attributeBooleanStm, monitor, ax);
 
 				/*
@@ -1023,6 +1048,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Check if the batch count is already in the batch limit
 			if (batchCount == batchLimit) {
+				executeBatch(uriidStm);
 				executeBatch(roleStm);
 				executeBatch(attributeLiteralStm);
 				executeBatch(attributeStringStm);
@@ -1043,6 +1069,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 
 		// Execute the rest of the batch
+		executeBatch(uriidStm);
 		executeBatch(roleStm);
 		executeBatch(attributeLiteralStm);
 		executeBatch(attributeStringStm);
@@ -1053,16 +1080,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		executeBatch(attributeBooleanStm);
 		executeBatch(classStm);
 
+	
 		// Close all open statements
-		closeStatment(roleStm);
-		closeStatment(attributeLiteralStm);
-		closeStatment(attributeStringStm);
-		closeStatment(attributeIntegerStm);
-		closeStatment(attributeDecimalStm);
-		closeStatment(attributeDoubleStm);
-		closeStatment(attributeDateStm);
-		closeStatment(attributeBooleanStm);
-		closeStatment(classStm);
+		closeStatement(uriidStm);
+		closeStatement(roleStm);
+		closeStatement(attributeLiteralStm);
+		closeStatement(attributeStringStm);
+		closeStatement(attributeIntegerStm);
+		closeStatement(attributeDecimalStm);
+		closeStatement(attributeDoubleStm);
+		closeStatement(attributeDateStm);
+		closeStatement(attributeBooleanStm);
+		closeStatement(classStm);
 
 		// Commit the rest of the batch insert
 		conn.commit();
@@ -1083,10 +1112,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	private void addPreparedStatement(PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
+	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
 			PreparedStatement attributeStringStm, PreparedStatement attributeIntegerStm, PreparedStatement attributeDecimalStm,
 			PreparedStatement attributeDoubleStm, PreparedStatement attributeDateStm, PreparedStatement attributeBooleanStm,
 			InsertionMonitor monitor, Assertion ax) throws SQLException {
+		int uri_id = 0;
+		int uri2_id = 0;
+		boolean newUri = false;
 		if (ax instanceof BinaryAssertion) {
 			// Get the data property assertion
 			BinaryAssertion attributeAssertion = (BinaryAssertion) ax;
@@ -1128,9 +1160,34 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				}
 
 				// Construct the database INSERT statement
-				roleStm.setString(1, uri);
-				roleStm.setString(2, uri2);
-
+				// replace URIs with their ids
+				
+				newUri = uriIds.add(uri);
+				if (newUri) {
+					uri_id = uriIds.size();
+					uriidStm.setInt(1, uri_id);
+					uriidStm.setString(2, uri);
+					uriidStm.addBatch();
+				} else {
+					uri_id = idOfURI(uri);
+				}
+				newUri = uriIds.add(uri2);
+				if (newUri) {
+					uri2_id = uriIds.size();
+					uriidStm.setInt(1, uri2_id);
+					uriidStm.setString(2, uri2);
+					uriidStm.addBatch();
+				} else {
+					uri2_id = idOfURI(uri2);
+				}
+				
+				
+				//roleStm.setString(1, uri);
+				//roleStm.setString(2, uri2);
+				roleStm.setInt(1, uri_id);
+				roleStm.setInt(2, uri2_id);
+				
+				
 				roleStm.setInt(3, idx);
 				roleStm.setBoolean(4, c1isBNode);
 				roleStm.setBoolean(5, c2isBNode);
@@ -1144,29 +1201,29 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				break;
 			case LITERAL:
 			case LITERAL_LANG:
-				setInputStatement(attributeLiteralStm, uri, value, lang, idx, c1isBNode);
+				setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
 				// log.debug("literal");
 				break;
 			case STRING:
-				setInputStatement(attributeStringStm, uri, value, idx, c1isBNode);
+				setInputStatement(attributeStringStm, uri_id, value, idx, c1isBNode);
 				// log.debug("string");
 				break;
 			case INTEGER:
 				if (value.charAt(0) == '+')
 					value = value.substring(1, value.length());
-				setInputStatement(attributeIntegerStm, uri, Long.parseLong(value), idx, c1isBNode);
+				setInputStatement(attributeIntegerStm, uri_id, Integer.parseInt(value), idx, c1isBNode);
 				// log.debug("Int");
 				break;
 			case DECIMAL:
-				setInputStatement(attributeDecimalStm, uri, parseBigDecimal(value), idx, c1isBNode);
+				setInputStatement(attributeDecimalStm, uri_id, parseBigDecimal(value), idx, c1isBNode);
 				// log.debug("BigDecimal");
 				break;
 			case DOUBLE:
-				setInputStatement(attributeDoubleStm, uri, Double.parseDouble(value), idx, c1isBNode);
+				setInputStatement(attributeDoubleStm, uri_id, Double.parseDouble(value), idx, c1isBNode);
 				// log.debug("Double");
 				break;
 			case DATETIME:
-				setInputStatement(attributeDateStm, uri, parseTimestamp(value), idx, c1isBNode);
+				setInputStatement(attributeDateStm, uri_id, parseTimestamp(value), idx, c1isBNode);
 				// log.debug("Date");
 				break;
 			case BOOLEAN:
@@ -1174,7 +1231,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 													// abbreviates the
 													// boolean value to
 													// 't' and 'f'
-				setInputStatement(attributeBooleanStm, uri, Boolean.parseBoolean(value), idx, c1isBNode);
+				setInputStatement(attributeBooleanStm, uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
 				// log.debug("boolean");
 				break;
 			case UNSUPPORTED:
@@ -1201,7 +1258,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				uri = ((URIConstant) c1).getURI().toString();
 
 			// Construct the database INSERT statement
-			classStm.setString(1, uri);
+			newUri = uriIds.add(uri);
+			if (newUri) {
+				uri_id = uriIds.size();
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+			} else {
+				uri_id = idOfURI(uri);
+			}
+
+			classStm.setInt(1, uri_id);
 			int conceptIndex = getConceptIndex(concept);
 			classStm.setInt(2, conceptIndex);
 			classStm.setBoolean(3, c1isBNode);
@@ -1215,7 +1282,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	private void closeStatment(PreparedStatement statement) throws SQLException {
+	private int idOfURI(String uri) {
+		int i = 0;
+		for (String s : uriIds) {
+		    ++i;
+		    if (s.equals(uri)) {
+		        break;
+		    }
+		}
+		return i;
+	}
+
+	private void closeStatement(PreparedStatement statement) throws SQLException {
 		statement.close();
 	}
 
@@ -1553,12 +1631,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, String value, String lang, int idx, boolean isBnode)
+	private void setInputStatement(PreparedStatement stm, int uri, String value, String lang, int idx, boolean isBnode)
 			throws SQLException {
 
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {} {}", lang, idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setString(2, value);
 		stm.setString(3, lang);
 		stm.setInt(4, idx);
@@ -1567,10 +1645,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.addBatch();
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, String value, int idx, boolean isBnode) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, int uri, String value, int idx, boolean isBnode) throws SQLException {
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {}", idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setString(2, value);
 		stm.setInt(3, idx);
 		stm.setBoolean(4, isBnode);
@@ -1578,10 +1656,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.addBatch();
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, int value, int idx, boolean isBnode) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, int uri, int value, int idx, boolean isBnode) throws SQLException {
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {}", idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setInt(2, value);
 		stm.setInt(3, idx);
 		stm.setBoolean(4, isBnode);
@@ -1589,10 +1667,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.addBatch();
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, BigDecimal value, int idx, boolean isBnode) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, int uri, BigDecimal value, int idx, boolean isBnode) throws SQLException {
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {}", idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setBigDecimal(2, value);
 		stm.setInt(3, idx);
 		stm.setBoolean(4, isBnode);
@@ -1600,10 +1678,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.addBatch();
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, double value, int idx, boolean isBnode) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, int uri, double value, int idx, boolean isBnode) throws SQLException {
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {}", idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setDouble(2, value);
 		stm.setInt(3, idx);
 		stm.setBoolean(4, isBnode);
@@ -1611,10 +1689,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.addBatch();
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, Timestamp value, int idx, boolean isBnode) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, int uri, Timestamp value, int idx, boolean isBnode) throws SQLException {
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {}", idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setTimestamp(2, value);
 		stm.setInt(3, idx);
 		stm.setBoolean(4, isBnode);
@@ -1622,10 +1700,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.addBatch();
 	}
 
-	private void setInputStatement(PreparedStatement stm, String uri, boolean value, int idx, boolean isBnode) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, int uri, boolean value, int idx, boolean isBnode) throws SQLException {
 		// log.debug("inserted: {} {}", uri, value);
 		// log.debug("inserted: {}", idx);
-		stm.setString(1, uri);
+		stm.setInt(1, uri);
 		stm.setBoolean(2, value);
 		stm.setInt(3, idx);
 		stm.setBoolean(4, isBnode);
@@ -3708,6 +3786,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// return empty;
 	// }
 
+	public LinkedHashSet<String> getUriIds(){
+		return uriIds;
+	}
+	
 	/***
 	 * A hashing for indexing functions. Implemented using String hashing code.
 	 * 

@@ -1,4 +1,4 @@
-package sesameWrapper;
+package it.unibz.krdb.obda.sesame;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;

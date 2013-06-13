@@ -18,8 +18,12 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import com.hp.hpl.jena.iri.IRI;
@@ -27,6 +31,7 @@ import com.hp.hpl.jena.iri.IRIFactory;
 
 public class QuestResultset implements TupleResultSet {
 
+	private boolean isSemIndex = false;
 	private ResultSet set = null;
 	private OBDAStatement st;
 	private Vector<String> signature;
@@ -35,6 +40,7 @@ public class QuestResultset implements TupleResultSet {
 
 	private HashMap<String, String> bnodeMap = new HashMap<String, String>();
 
+	private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -53,8 +59,22 @@ public class QuestResultset implements TupleResultSet {
 	 */
 	public QuestResultset(ResultSet set, List<String> signature,
 			OBDAStatement st) throws OBDAException {
+		this(set, signature, st, null);
+
+	}
+
+	// This ResultSet is used for semantic index case
+	// It encodes URIs as Integers for faster query performance
+	// Later in the results we need to replace URI references with actual URIs
+	public QuestResultset(ResultSet set, List<String> signature,
+			OBDAStatement st, LinkedHashSet<String> uriRef) throws OBDAException {
 		this.set = set;
 		this.st = st;
+		this.uriRef = uriRef;
+		if (uriRef != null)
+			this.isSemIndex = true;
+		else
+			this.isSemIndex = false;
 
 		this.signature = new Vector<String>(signature);
 		for (int j = 1; j <= signature.size(); j++) {
@@ -98,7 +118,7 @@ public class QuestResultset implements TupleResultSet {
 	public URI getURI(int column) throws OBDAException {
 		return getURI(signature.get(column - 1));
 	}
-	
+
 	public IRI getIRI(int column) throws OBDAException {
 		return getIRI(signature.get(column - 1));
 	}
@@ -161,16 +181,16 @@ public class QuestResultset implements TupleResultSet {
 		try {
 			COL_TYPE type = getQuestType((byte) set.getInt(name + "QuestType"));
 			String realValue = set.getString(name);
-			
+
 			if (type == null || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
-				//	URI value = getURI(name);
+					// URI value = getURI(name);
 					IRI irivalue = getIRI(name);
-				//	result = fac.getURIConstant(value);
+					// result = fac.getURIConstant(value);
 					result = fac.getURIConstant(irivalue);
-					
+
 				} else if (type == COL_TYPE.BNODE) {
 					String rawLabel = set.getString(name);
 					String scopedLabel = this.bnodeMap.get(rawLabel);
@@ -183,7 +203,8 @@ public class QuestResultset implements TupleResultSet {
 				} else {
 					/*
 					 * The constant is a literal, we need to find if its
-					 * rdfs:Literal or a normal literal and construct it properly.
+					 * rdfs:Literal or a normal literal and construct it
+					 * properly.
 					 */
 					if (type == COL_TYPE.LITERAL) {
 						String value = set.getString(name);
@@ -202,14 +223,15 @@ public class QuestResultset implements TupleResultSet {
 						}
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(name);
-						//format name into correct double representation
+						// format name into correct double representation
 						DecimalFormat formatter = new DecimalFormat("0.0###E0");
-						DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
+						DecimalFormatSymbols symbol = DecimalFormatSymbols
+								.getInstance();
 						symbol.setDecimalSeparator('.');
 						formatter.setDecimalFormatSymbols(symbol);
-						String s = formatter.format(d);   
+						String s = formatter.format(d);
 						result = fac.getValueConstant(s, type);
-						
+
 					} else if (type == COL_TYPE.DATETIME) {
 						Timestamp value = set.getTimestamp(name);
 						result = fac.getValueConstant(
@@ -254,7 +276,7 @@ public class QuestResultset implements TupleResultSet {
 			return COL_TYPE.DATETIME;
 		} else if (sqltype == 9) {
 			return COL_TYPE.BOOLEAN;
-		}else if (sqltype == 0) {
+		} else if (sqltype == 0) {
 			return null;
 		} else {
 			throw new RuntimeException("COLTYPE unknown: " + sqltype);
@@ -266,20 +288,24 @@ public class QuestResultset implements TupleResultSet {
 		String result = "";
 		try {
 			result = set.getString(name);
-		      
-			return URI.create(result);//.replace(' ', '_'));
-			
+
+			return URI.create(result);// .replace(' ', '_'));
+
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}
 	}
-	
+
 	@Override
 	public IRI getIRI(String name) throws OBDAException {
 		String result = "";
 		try {
 			result = set.getString(name);
-
+			if (isSemIndex) {
+				int id = Integer.parseInt(result);
+				if (id == 0) result = "";
+					else result = (String) uriRef.toArray()[id-1];
+			}
 			IRIFactory irif = new IRIFactory();
 			IRI iri = irif.create(result);
 			return iri;

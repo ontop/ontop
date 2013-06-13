@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
+import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
 import java.io.File;
 import java.io.FileInputStream;

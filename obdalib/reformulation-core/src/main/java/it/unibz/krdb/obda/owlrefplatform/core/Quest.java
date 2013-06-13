@@ -65,6 +65,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private PoolProperties poolProperties = null;
 	private DataSource tomcatPool = null;
-
+	private boolean isSemanticIdx = false;
+	private LinkedHashSet<String> uriRefIds = new LinkedHashSet();
 	// Tomcat pool default properties
 	// These can be changed in the properties file
 	protected int maxPoolSize = 10;
@@ -99,7 +101,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 
 	/* The active ABox repository, might be null */
-	protected RDBMSSIRepositoryManager dataRepository = null;
+	public RDBMSSIRepositoryManager dataRepository = null;
 
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
@@ -460,6 +462,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
+				
 				if (inmemory) {
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis();
@@ -495,7 +498,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					throw new Exception(dbType
 							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
 				}
-
+				isSemanticIdx = true;
 				// TODO one of these is redundant??? check
 				connect();
 				// setup connection pool
@@ -591,7 +594,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			URI sourceId = datasource.getSourceID();
 
 			metadata = JDBCConnectionManager.getMetaData(localConnection);
-
+			uriRefIds = dataRepository.getUriIds();
+			
 			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource
 					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 
@@ -1274,8 +1278,24 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return uriTemplateMatcher;
 	}
 
+	public void setUriRefIds(LinkedHashSet<String> uriIds){
+		this.uriRefIds = uriIds;
+	}
+	
+	public LinkedHashSet<String> getUriRefIds() {
+		return uriRefIds;
+	}
+	
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();
+	}
+	
+	public RDBMSSIRepositoryManager getSIRepo() {
+		return dataRepository;
+	}
+	
+	public boolean isSemIdx () {
+		return isSemanticIdx;
 	}
 }

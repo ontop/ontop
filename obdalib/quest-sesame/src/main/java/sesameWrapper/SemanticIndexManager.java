@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIter
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
