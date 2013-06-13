@@ -58,7 +58,7 @@ public class OWLConstructDescribe extends TestCase{
 	OWLConnection conn = null;
 	OWLStatement st = null;
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	String owlFile = "//Users/timi/Documents/workspace/obdalib-parent/quest-owlapi3/src/test/resources/describeConstruct.owl";
+	String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@Override
 	public void setUp() throws Exception {

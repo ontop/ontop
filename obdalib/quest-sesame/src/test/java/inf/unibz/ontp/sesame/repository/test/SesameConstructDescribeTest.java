@@ -34,8 +34,8 @@ public class SesameConstructDescribeTest extends TestCase{
 	RepositoryConnection con = null;
 	Repository repo = null;
 	ValueFactory fac = null;
-	String fileName = "file:///Users/timi/Documents/workspace/obdalib-parent/quest-sesame/src/test/resources/describeConstruct.ttl";
-	String owlFile = "//Users/timi/Documents/workspace/obdalib-parent/quest-sesame/src/test/resources/describeConstruct.owl";
+	String fileName = "src/test/resources/describeConstruct.ttl";
+	String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@Override
 	public void setUp() throws Exception {
@@ -53,7 +53,7 @@ public class SesameConstructDescribeTest extends TestCase{
 			repo.initialize();
 			con = (RepositoryConnection) repo.getConnection();
 			fac = con.getValueFactory();
-			File data = new File(URI.create(fileName));
+			File data = new File(fileName);
 			System.out.println(data.getAbsolutePath());
 			if (data.canRead())
 				con.add(data, "http://www.semanticweb.org/ontologies/test", RDFFormat.TURTLE, (Resource)null);
