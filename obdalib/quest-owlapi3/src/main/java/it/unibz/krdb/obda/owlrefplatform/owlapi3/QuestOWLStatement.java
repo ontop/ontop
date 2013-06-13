@@ -287,6 +287,7 @@ public class QuestOWLStatement implements OWLStatement {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory();
 		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
+		if (resultSet != null) {
 		while (resultSet.hasNext()) {
 			for (Assertion assertion : resultSet.next()) {
 				if (assertion instanceof ClassAssertion) {
@@ -309,6 +310,7 @@ public class QuestOWLStatement implements OWLStatement {
 				}
 			}
 		}		
+		}
 		return axiomList;
 	}
 	

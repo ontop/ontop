@@ -26,8 +26,8 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo{
 	{
 		if (config.getProperty(QuestPreferences.ABOX_MODE) != QuestConstants.CLASSIC)
 			throw new RepositoryException("Must be in classic mode!");
-		
-		this.classicStore = new QuestDBClassicStore(name, (new File(tboxFile)).toURI(), config);
+			
+		this.classicStore = new QuestDBClassicStore(name, tboxFile, config);
 	}
 	
 	

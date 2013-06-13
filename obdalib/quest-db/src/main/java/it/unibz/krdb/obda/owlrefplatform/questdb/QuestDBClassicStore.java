@@ -16,15 +16,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -82,35 +76,46 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	public QuestDBClassicStore(String name, java.net.URI tboxFile,
 			QuestPreferences config) throws Exception {
-
 		super(name);
-		if (config == null) {
-			config = new QuestPreferences();
+		Ontology tbox = readOntology(tboxFile.toASCIIString());
+	
+		setup(tbox, config);
+	}
+	
+	public QuestDBClassicStore(String name, String tboxFile,
+			QuestPreferences config) throws Exception {
+		super(name);
+
+		Ontology tbox = null;
+		if (tboxFile == null) {
+			tbox = ofac.createOntology(OBDADataFactoryImpl.getIRI(name));
+		} else {
+			tbox = readOntology(tboxFile);
 		}
-		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-
-		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(
-				QuestConstants.CLASSIC))
-			throw new Exception(
-					"A classic repository must be created with the CLASSIC flag in the configuration.");
-
+		setup(tbox, config);
+	}
+	
+	private Ontology readOntology(String tboxFile) throws Exception {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
-		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(tboxFile).getParentFile(), false);
+		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(
+				tboxFile).getParentFile(), false);
 		man.addIRIMapper(iriMapper);
 		OWLOntology owlontology = man
 				.loadOntologyFromOntologyDocument(new File(tboxFile));
 		Set<OWLOntology> clousure = man.getImportsClosure(owlontology);
-		
-		Ontology tbox = translator.mergeTranslateOntologies(clousure);
 
-		createInstance(tbox, config);
-
+		return translator.mergeTranslateOntologies(clousure);
 	}
 
 	public QuestDBClassicStore(String name, Dataset data,
 			QuestPreferences config) throws Exception {
 
 		super(name);
+		Ontology tbox = getTBox(data);
+		setup(tbox, config);
+	}
+	
+	private void setup(Ontology onto, QuestPreferences config) throws Exception {
 		if (config == null) {
 			config = new QuestPreferences();
 		}
@@ -120,10 +125,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				QuestConstants.CLASSIC))
 			throw new Exception(
 					"A classic repository must be created with the CLASSIC flag in the configuration.");
-		Ontology tbox = getTBox(data);
-
-		createInstance(tbox, config);
-
+	
+		createInstance(onto, config);
 	}
 
 	private void createInstance(Ontology tbox, Properties config)
