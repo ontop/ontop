@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
@@ -23,13 +22,9 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -243,11 +238,12 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			}
 		}
 		else {
-			// degenerate connected component -- a single loop
+			// degenerate connected component
+			MinimalCQProducer loopbody = new MinimalCQProducer(reasoner);
 			Loop loop = cc.getLoop();
 			log.debug("LOOP {}", loop);
-			MinimalCQProducer loopbody = new MinimalCQProducer(reasoner);
-			loopbody.addAll(loop.getAtoms());
+			if (loop != null)
+				loopbody.addAll(loop.getAtoms());
 			loopbody.addAllNoCheck(cc.getNonDLAtoms());
 			output.appendRule(fac.getCQIE(headAtom, cache.getExtAtoms(loopbody))); 
 		}
@@ -273,7 +269,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 			if (ccs.size() == 1) {
 				QueryConnectedComponent cc = ccs.iterator().next();
-				log.debug("CONNECTED COMPONENT (" + cc.getFreeVariables() + ")" + " EXISTS " + cc.getQuantifiedVariables() + " WITH EDGES " + cc.getEdges() + " AND LOOP " + cc.getLoop());
+				log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
+				log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
+				log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 				rewriteCC(cc, cqieAtom, output, cache, edgeDP); 				
 			}
 			else {
@@ -282,7 +280,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				IRI cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<Function>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
-					log.debug("CONNECTED COMPONENT (" + cc.getFreeVariables() + ")" + " EXISTS " + cc.getQuantifiedVariables() + " WITH EDGES " + cc.getEdges());
+					log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
+					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
+					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
 					rewriteCC(cc, ccAtom, ccDP, cache, edgeDP); 
 					ccBody.add(ccAtom);

@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.ArrayList;
@@ -56,11 +57,12 @@ public class QueryConnectedComponent {
 	 * @param terms: terms that are covered by the edges
 	 */
 	
-	private QueryConnectedComponent(List<Edge> edges, Loop loop, List<Function> nonDLAtoms, List<Loop> terms) {
+	private QueryConnectedComponent(List<Edge> edges, List<Function> nonDLAtoms, List<Loop> terms) {
 		this.edges = edges;
-		this.loop = loop;
 		this.nonDLAtoms = nonDLAtoms;
 
+		this.loop = isDegenerate() ? terms.get(0) : null; 
+				
 		quantifiedVariables = new ArrayList<Loop>(terms.size());
 		variables = new ArrayList<NewLiteral>(terms.size());
 		freeVariables = new ArrayList<NewLiteral>(terms.size());
@@ -94,6 +96,76 @@ public class QueryConnectedComponent {
 		return l;
 	}
 	
+	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<NewLiteral, Loop> allLoops, List<Function> nonDLAtoms,
+																NewLiteral seed) {
+		Set<NewLiteral> ccTerms = new HashSet<NewLiteral>((allLoops.size() * 2) / 3);
+		List<Edge> ccEdges = new ArrayList<Edge>(pairs.size());
+		List<Function> ccNonDLAtoms = new LinkedList<Function>();
+		List<Loop> ccLoops = new ArrayList<Loop>(allLoops.size());
+		
+		ccTerms.add(seed);
+		Loop seedLoop = allLoops.get(seed);
+		if (seedLoop != null) {
+			ccLoops.add(seedLoop);
+			allLoops.remove(seed);
+		}
+		
+		// expand the current CC by adding all edges that are have at least one of the NewLiterals in them
+		boolean expanded = true;
+		while (expanded) {
+			expanded = false;
+			Iterator<Entry<TermPair, Edge>> i = pairs.entrySet().iterator();
+			//i = pairs.entrySet().iterator();
+			while (i.hasNext()) {
+				Edge edge = i.next().getValue();
+				NewLiteral t0 = edge.getTerm0();
+				NewLiteral t1 = edge.getTerm1();
+				if (ccTerms.contains(t0)) {
+					if (ccTerms.add(t1))  { // the other term is already there
+						ccLoops.add(edge.getLoop1());
+						allLoops.remove(t1); // remove the loops that are covered by the edges in CC
+					}
+				}
+				else if (ccTerms.contains(t1)) {
+					if (ccTerms.add(t0))  { // the other term is already there
+						ccLoops.add(edge.getLoop0()); 
+						allLoops.remove(t0); // remove the loops that are covered by the edges in CC
+					}
+				}
+				else
+					continue;
+				
+				ccEdges.add(edge);
+				expanded = true;
+				i.remove();
+			}
+			
+			// non-DL atoms
+			Iterator<Function> ni = nonDLAtoms.iterator();
+			while (ni.hasNext()) {
+				Function atom = ni.next();
+				boolean intersects = false;
+				Set<Variable> atomVars = atom.getReferencedVariables();
+				for (Variable t : atomVars) 
+					if (ccTerms.contains(t)) {
+						intersects = true;
+						break;
+					}
+				
+				if (intersects) {
+					ccNonDLAtoms.add(atom);
+					ccTerms.addAll(atomVars);
+					for (Variable v : atomVars) {
+						allLoops.remove(v);
+					}
+					expanded = true;
+					ni.remove();
+				}
+			}
+		}
+		return new QueryConnectedComponent(ccEdges, ccNonDLAtoms, ccLoops); 
+	}
+	
 	/**
 	 * getConnectedComponents creates a list of connected components of a given CQ
 	 * 
@@ -116,7 +188,9 @@ public class QueryConnectedComponent {
 		List<Function> nonDLAtoms = new LinkedList<Function>();
 		
 		for (Function a: cqie.getBody()) {
-			if (a.isDataFunction()) { // if DL predicate
+			Predicate p = a.getFunctionSymbol();
+			if (p.isDataPredicate()) {
+			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate
 				NewLiteral t0 = a.getTerm(0);				
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms
@@ -137,91 +211,33 @@ public class QueryConnectedComponent {
 				}
 			}
 			else { // non-DL precicate
-				log.debug("NON-DL ATOM {}",  a);
+				//log.debug("NON-DL ATOM {}",  a);
 				nonDLAtoms.add(a);
 			}
 		}	
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			List<Edge> ccEdges = new ArrayList<Edge>(pairs.size());
-			List<Function> ccNonDLAtoms = new LinkedList<Function>();
-			Set<NewLiteral> ccTerms = new HashSet<NewLiteral>((allLoops.size() * 2) / 3);
-			Iterator<Entry<TermPair, Edge>> i = pairs.entrySet().iterator();
-			List<Loop> ccLoops = new ArrayList<Loop>(allLoops.size());
-			
-			// add the first available edge to the current CC
-			Edge edge0 = i.next().getValue();
-			ccEdges.add(edge0);
-			ccTerms.add(edge0.getTerm0());
-			ccLoops.add(edge0.getLoop0());
-			allLoops.remove(edge0.getTerm0());
-			ccTerms.add(edge0.getTerm1());
-			ccLoops.add(edge0.getLoop1());
-			allLoops.remove(edge0.getTerm1());
-			i.remove();
-			
-			// expand the current CC by adding all edges that are have at least one of the NewLiterals in them
-			boolean expanded = true;
-			while (expanded) {
-				expanded = false;
-				i = pairs.entrySet().iterator();
-				while (i.hasNext()) {
-					Edge edge = i.next().getValue();
-					NewLiteral t0 = edge.getTerm0();
-					NewLiteral t1 = edge.getTerm1();
-					if (ccTerms.contains(t0)) {
-						if (ccTerms.add(t1))  { // the other term is already there
-							ccLoops.add(edge.getLoop1());
-							allLoops.remove(t1); // remove the loops that are covered by the edges in CC
-						}
-					}
-					else if (ccTerms.contains(t1)) {
-						if (ccTerms.add(t0))  { // the other term is already there
-							ccLoops.add(edge.getLoop0()); 
-							allLoops.remove(t0); // remove the loops that are covered by the edges in CC
-						}
-					}
-					else
-						continue;
-					
-					ccEdges.add(edge);
-					expanded = true;
-					i.remove();
-				}
-				
-				// non-DL atoms
-				Iterator<Function> ni = nonDLAtoms.iterator();
-				while (ni.hasNext()) {
-					Function atom = ni.next();
-					boolean intersects = false;
-					Set<Variable> atomVars = atom.getReferencedVariables();
-					for (Variable t : atomVars) 
-						if (ccTerms.contains(t)) {
-							intersects = true;
-							break;
-						}
-					
-					if (intersects) {
-						ccNonDLAtoms.add(atom);
-						ccTerms.addAll(atomVars);
-						expanded = true;
-						ni.remove();
-					}
-				}
-			} 
-			
-			ccs.add(new QueryConnectedComponent(ccEdges, null, ccNonDLAtoms, ccLoops));			
+			Edge edge = pairs.entrySet().iterator().next().getValue();			
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, edge.getTerm0()));			
 		}
 		
+		while (!nonDLAtoms.isEmpty()) {
+			//log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
+			Function f = nonDLAtoms.iterator().next(); 
+			Set<Variable> vars = f.getReferencedVariables();
+			Variable v = vars.iterator().next();
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v));			
+		}
+
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
-		for (Entry<NewLiteral, Loop> loop : allLoops.entrySet()) {
-			ccs.add(new QueryConnectedComponent(Collections.EMPTY_LIST, loop.getValue(), Collections.EMPTY_LIST, Collections.singletonList(loop.getValue())));
+		//for (Entry<NewLiteral, Loop> loop : allLoops.entrySet()) {
+		while (!allLoops.isEmpty()) {
+			NewLiteral seed = allLoops.keySet().iterator().next();
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed));			
+			//ccs.add(new QueryConnectedComponent(Collections.EMPTY_LIST, loop.getValue(), Collections.EMPTY_LIST, Collections.singletonList(loop.getValue())));
 		}
-		
-		if (!nonDLAtoms.isEmpty())
-			log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
-		
+				
 		return ccs;
 	}
 	
@@ -236,7 +252,7 @@ public class QueryConnectedComponent {
 	 */
 	
 	public boolean isDegenerate() {
-		return edges.isEmpty();
+		return edges.isEmpty() && nonDLAtoms.isEmpty();
 	}
 	
 	/**
