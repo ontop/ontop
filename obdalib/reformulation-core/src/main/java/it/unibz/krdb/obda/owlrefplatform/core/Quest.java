@@ -550,6 +550,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfoldingOBDAModel.addSource(obdaSource);
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
+				uriRefIds = dataRepository.getUriIds();
+				
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
 				// log.debug("Working in virtual mode");
@@ -594,8 +596,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			URI sourceId = datasource.getSourceID();
 
 			metadata = JDBCConnectionManager.getMetaData(localConnection);
-			uriRefIds = dataRepository.getUriIds();
-			
+						
 			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource
 					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 
