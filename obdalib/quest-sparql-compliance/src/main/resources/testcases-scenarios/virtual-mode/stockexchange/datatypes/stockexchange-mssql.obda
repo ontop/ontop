@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:sqlserver://obdawin.unibz.it;databaseName=stockexchange
+connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=stockexchange
 username	mssql
 password	obdaps83
 driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -19,7 +19,7 @@ target		:address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNu
 source		select id, street, number, city, state, country from address
 
 mappingId	mapping-brokers
-target		:getPersonObj($id) a :StockBroker ; :firstName $name ; :lastName $lastname ; :dateOfBirth $dateofbirth ; :ssn $ssn . 
+target		:person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} .
 source		select id, name, lastname, dateofbirth, ssn from broker
 
 mappingId	mapping-broker-address

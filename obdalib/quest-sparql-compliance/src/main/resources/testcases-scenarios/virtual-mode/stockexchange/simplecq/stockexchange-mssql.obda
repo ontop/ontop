@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:sqlserver://obdawin.unibz.it;databaseName=stockexchange
+connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=stockexchange
 username	mssql
 password	obdaps83
 driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver

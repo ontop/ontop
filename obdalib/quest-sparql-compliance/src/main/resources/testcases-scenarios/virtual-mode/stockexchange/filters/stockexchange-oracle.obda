@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe
+connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
 username	system
 password	obdaps83
 driverClass	oracle.jdbc.driver.OracleDriver
