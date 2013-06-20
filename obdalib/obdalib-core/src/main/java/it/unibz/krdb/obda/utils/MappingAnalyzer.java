@@ -203,7 +203,7 @@ public class MappingAnalyzer {
 					datalog.appendRule(rule);
 				}
 			} catch (Exception e) {
-				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \nDescription: "
+				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
 						+ e.getMessage() + " \nMapping: [" + axiom.toString() + "]");
 				
 			}
