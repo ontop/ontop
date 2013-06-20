@@ -84,18 +84,21 @@ public class QuestMaterializer {
 			throw new Exception("Cannot materialize with multiple data sources!");
 		
 		//add all class/data/object predicates to vocabulary
-		//if (onto!=null)
-		
+		//add declared predicates in model
 		for (Predicate p: model.getDeclaredPredicates()) {
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		if (onto!=null)
-		for (Predicate p: onto.getVocabulary()) {
-			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#") && !vocabulary.contains(p))
-				vocabulary.add(p);
+		if (onto != null) {
+			//from ontology
+			for (Predicate p : onto.getVocabulary()) {
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
 		} else
 		{
+			//from mapping undeclared predicates (can happen)
 			for (URI uri : modell.getMappings().keySet()){
 				for (OBDAMappingAxiom axiom : modell.getMappings(uri))
 				{
@@ -206,7 +209,9 @@ public class QuestMaterializer {
 				stm = questConn.createStatement();
 				if (!vocabularyIterator.hasNext())
 					throw new NullPointerException("Vocabulary is empty!");
-				results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
+				while (results == null) {
+					results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -230,12 +235,12 @@ public class QuestMaterializer {
 		@Override
 		public boolean hasNext() {
 			try{
-				if (!read) {
+			if (!read) {
 				hasNext = results.hasNext();
 				while (vocabularyIterator.hasNext() && hasNext == false)
 				{
 						//close previous statement if open
-						if (stm!= null && !stm.isClosed() && results!=null)
+						if (stm!= null && results!=null)
 							{stm.close(); results.close(); }
 						
 						//execute next query
