@@ -6,9 +6,9 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "Quest query evaluation scenario tests" ;
     mf:include (
-        #<bsbm/manifest-mssql.ttl>
-        #<fishmark/manifest-mssql.ttl>
-        #<iLog/manifest-mssql.ttl>
+        #<bsbm/manifest-mssql.ttl> # no database
+        #<fishmark/manifest-mssql.ttl> # no database
+        #<iLog/manifest-mssql.ttl> # no database
         <stockexchange/datatypes/manifest-mssql.ttl>
         <stockexchange/filters/manifest-mssql.ttl>
         <stockexchange/modifiers/manifest-mssql.ttl>

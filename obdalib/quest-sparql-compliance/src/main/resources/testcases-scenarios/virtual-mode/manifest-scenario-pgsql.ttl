@@ -6,10 +6,10 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "Quest query evaluation scenario tests" ;
     mf:include (
-        #<lubm/manifest-pgsql.ttl>
-        #<bsbm/manifest-pgsql.ttl>
-        #<fishmark/manifest-pgsql.ttl>
-        #<iLog/manifest-pgsql.ttl>
+        #<lubm/manifest-pgsql.ttl> # no database
+        #<bsbm/manifest-pgsql.ttl> # no database
+        #<fishmark/manifest-pgsql.ttl> # no database
+        #<iLog/manifest-pgsql.ttl> # no database
         <stockexchange/datatypes/manifest-pgsql.ttl>
         <stockexchange/filters/manifest-pgsql.ttl>
         <stockexchange/modifiers/manifest-pgsql.ttl>
