@@ -76,6 +76,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
@@ -206,8 +207,9 @@ public class OWLAPI3Translator {
 			// axiomIgnoresOWL2QL.add(violation.getAxiom());
 		}
 
-		Ontology dl_onto = ofac.createOntology(ifac.construct(owl.getOntologyID().getOntologyIRI().toString()));
-
+		//Ontology dl_onto = ofac.createOntology(ifac.construct(owl.getOntologyID().getOntologyIRI().toString()));
+		Ontology dl_onto = ofac.createOntology(ifac.construct("http://www.unibz.it/ontology"));
+		
 		HashSet<String> objectproperties = new HashSet<String>();
 		HashSet<String> dataproperties = new HashSet<String>();
 		HashSet<String> classes = new HashSet<String>();

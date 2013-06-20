@@ -41,11 +41,11 @@ import sesameWrapper.SemanticIndexManager;
 public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
 
 	String driver = "com.mysql.jdbc.Driver";
-	String url = "jdbc:mysql://localhost/lubmex2050?sessionVariables=sql_mode='ANSI'";
-	String username = "root";
-	String password = "";
+	String url = "jdbc:mysql://obdalin3/si_test?sessionVariables=sql_mode='ANSI'";
+	String username = "fish";
+	String password = "fish";
 
-	String owlfile = "src/test/resources/test/lubm-ex-20-uni1/merge.owl";
+	String owlfile = "src/test/resources/merge.owl";
 
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
@@ -94,7 +94,7 @@ public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
 
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
 
-			simanager.restoreRepository();
+			//simanager.restoreRepository();
 
 			int inserts = simanager.insertData(ontology, 20000, 5000);
 			

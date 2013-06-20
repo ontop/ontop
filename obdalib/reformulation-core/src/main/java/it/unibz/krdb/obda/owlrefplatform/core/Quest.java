@@ -601,6 +601,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
+			if (isSemanticIdx) {
+				datasourceQueryGenerator.setUriIds(uriRefIds);
+			}
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 

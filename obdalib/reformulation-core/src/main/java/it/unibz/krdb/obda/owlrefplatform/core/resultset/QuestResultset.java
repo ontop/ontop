@@ -299,12 +299,21 @@ public class QuestResultset implements TupleResultSet {
 	@Override
 	public IRI getIRI(String name) throws OBDAException {
 		String result = "";
+		int id = 0;
 		try {
 			result = set.getString(name);
 			if (isSemIndex) {
-				int id = Integer.parseInt(result);
-				if (id == 0) result = "";
-					else result = (String) uriRef.toArray()[id-1];
+				try {
+					id = Integer.parseInt(result);
+				} catch (NumberFormatException e) {
+					// its not a number - its a URI
+					IRIFactory irif = new IRIFactory();
+					IRI iri = irif.create(result);
+					return iri;
+				}
+
+				if (id == 0) result = "0";
+				else result = (String) uriRef.toArray()[id-1];
 			}
 			IRIFactory irif = new IRIFactory();
 			IRI iri = irif.create(result);

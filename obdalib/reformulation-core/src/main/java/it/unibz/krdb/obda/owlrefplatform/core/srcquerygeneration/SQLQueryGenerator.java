@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -39,6 +40,8 @@ public interface SQLQueryGenerator extends Serializable {
 	 */
 	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
 	// uris);
+
+	void setUriIds(LinkedHashSet<String> uriid);
 
 	// public ViewManager getViewManager();
 }

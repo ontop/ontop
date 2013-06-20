@@ -85,36 +85,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
-
-	
-
-//	public static final String class_table = "\"QUEST_CLASS_ASSERTION\"";
-//
-//	public static final String role_table = "\"QUEST_OBJECT_PROPERTY_ASSERTION\"";
-
-//	public static final String attribute_table_literal = "\"QUEST_DATA_PROPERTY_LITERAL_ASSERTION\"";
-//
-//	public static final String attribute_table_string = "\"QUEST_DATA_PROPERTY_STRING_ASSERTION\"";
-//
-//	public static final String attribute_table_integer = "\"QUEST_DATA_PROPERTY_INTEGER_ASSERTION\"";
-//
-//	public static final String attribute_table_decimal = "\"QUEST_DATA_PROPERTY_DECIMAL_ASSERTION\"";
-//
-//	public static final String attribute_table_double = "\"QUEST_DATA_PROPERTY_DOUBLE_ASSERTION\"";
-//
-//	public static final String attribute_table_datetime = "\"QUEST_DATA_PROPERTY_DATETIME_ASSERTION\"";
-//
-//	public static final String attribute_table_boolean = "\"QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION\"";
-//	
-	
-	
-//	public final static String index_table = "\"IDX\"";
-//
-//	public final static String interval_table = "\"IDXINTERVAL\"";
-//
-//	public final static String emptyness_index_table = "\"NONEMPTYNESSINDEX\"";
-//
-
+/**
+ * Metadata tables 
+ */
 	public final static String index_table = "IDX";
 
 	public final static String interval_table = "IDXINTERVAL";
@@ -123,6 +96,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	public final static String uri_id_table = "URIID";
 
+/**
+ *  Data tables
+ */
 	
 	public static final String class_table = "QUEST_CLASS_ASSERTION";
 
@@ -142,6 +118,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
 	
+/**
+ *  CREATE metadata tables
+ */
+	
 	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(150), "
 			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
 
@@ -153,19 +133,27 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(150) " + ")";
 
-	private final static String drop_idx = "DROP TABLE " + index_table + "";
-
-	private final static String drop_interval = "DROP TABLE " + interval_table + "";
-
-	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table + "";
-
-	private final static String insert_idx_query = "INSERT INTO " + index_table + "(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)";
+/**
+ * DROP metadata tables 	
+ */
 	
-	private final static String uriid_insert = "INSERT INTO " + uri_id_table + "(ID, URI) VALUES(?, ?)";
+	private final static String drop_idx = "DROP TABLE " + index_table + "";
+	private final static String drop_interval = "DROP TABLE " + interval_table + "";
+	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table + "";
+	private final static String drop_uri_id = "DROP TABLE " + uri_id_table + "";
 
+/**
+ *  INSERT metadata
+ */
+	
+	private final static String insert_idx_query = "INSERT INTO " + index_table + "(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)";
+	private final static String uriid_insert = "INSERT INTO " + uri_id_table + "(ID, URI) VALUES(?, ?)";
 	private final static String insert_interval_query = "INSERT INTO " + interval_table
 			+ "(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)";
 	
+/**
+ *  CREATE data tables
+ */
 	
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
 			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
@@ -196,8 +184,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ "\"URI\" INTEGER NOT NULL, " + "VALUE BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 
+/**
+ *  DROP data tables	
+ */
+	
 	public static final String class_table_drop = "DROP TABLE " + class_table;
-
 	public static final String role_table_drop = "DROP TABLE " + role_table;
 
 	public static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
@@ -208,8 +199,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_datetime_drop = "DROP TABLE " + attribute_table_datetime;
 	public static final String attribute_table_boolean_drop = "DROP TABLE " + attribute_table_boolean;
 
+/**
+ *  INSERT data 	
+ */
+	
 	public static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX, ISBNODE) VALUES (?, ?, ?)";
-
 	public static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)";
 
 	public static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
@@ -227,6 +221,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean
 			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 
+/**
+ *  Indexes
+ */
 	
 	public static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
 	public static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
@@ -295,6 +292,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table_boolean
 			+ " (VALUE)";
 
+/**
+ *  DROP indexes	
+ */
+	
 	public static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
 	public static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
 
@@ -365,8 +366,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private static final IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
-
-	// private HashMap<Predicate, Integer> indexes;
 
 	private Map<IRI, Integer> classIndexes = new LinkedHashMap<IRI, Integer>();
 
@@ -1131,6 +1130,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			ObjectConstant subject = (ObjectConstant) attributeAssertion.getValue1();
 
 			String uri = subject.getValue();
+			newUri = uriIds.add(uri);
+			if (newUri) {
+				uri_id = uriIds.size();
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+			} else {
+				uri_id = idOfURI(uri);
+			}
+			
 			boolean c1isBNode = subject instanceof BNode;
 
 			int idx = getAttributeIndex(predicate);

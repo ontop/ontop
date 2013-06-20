@@ -83,6 +83,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
+	private boolean isSI = false;
+	private LinkedHashSet<String> uriRefIds = new LinkedHashSet();
 	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
@@ -90,6 +92,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.metadata = metadata;
 		this.jdbcutil = jdbcutil;
 		this.sqladapter = sqladapter;
+	}
+	
+	@Override
+	public void setUriIds (LinkedHashSet<String> uriid){
+		this.isSI = true;
+		this.uriRefIds = uriid;
 	}
 
 	/**
@@ -1000,6 +1008,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * A URI function always returns a string, thus it is a string column type.
 				 */
+				if (isSI) return false;
 				return true;
 			} else {
 				if (isUnary(function)) {
@@ -1092,11 +1101,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (term == null) {
 			return "";
 		}
-
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
+			if (ct.getType() == COL_TYPE.OBJECT) {
+				int id = getUriid(ct.getValue());
+				return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+			}
 			return jdbcutil.getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
+			if (isSI) {
+				String uri = term.toString();
+				int id = getUriid(uri);
+				return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+			}
 			URIConstant uc = (URIConstant) term;
 			return jdbcutil.getSQLLexicalForm(uc.toString());
 		} else if (term instanceof Variable) {
@@ -1204,6 +1221,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else {
 			throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 		}
+	}
+
+
+	private int getUriid(String uri) {
+		int i = 0;
+		for(String el : uriRefIds) {
+		    i++;  
+			if (el.equals(uri)) {
+		          return i;
+		      }
+		 }
+		return 0;
 	}
 
 	/**
