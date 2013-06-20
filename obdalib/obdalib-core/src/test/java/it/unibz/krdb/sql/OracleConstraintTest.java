@@ -13,7 +13,7 @@ public class OracleConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe";
+		return "jdbc:oracle:thin:@//10.7.20.91:1521/xe";
 	}
 
 	@Override

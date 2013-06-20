@@ -13,7 +13,7 @@ public class MssqlConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:sqlserver://obdawin.unibz.it;databaseName=dbconstraints";
+		return "jdbc:sqlserver://10.7.20.91;databaseName=dbconstraints";
 	}
 
 	@Override

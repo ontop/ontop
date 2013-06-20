@@ -9,7 +9,7 @@ public class MssqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:sqlserver://obdawin.unibz.it;databaseName=datatypes";
+		return "jdbc:sqlserver://10.7.20.91;databaseName=datatypes";
 	}
 
 	@Override
