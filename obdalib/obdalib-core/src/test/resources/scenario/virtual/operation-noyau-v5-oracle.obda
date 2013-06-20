@@ -1,150 +1,147 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE OBDA [
-   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
-   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
-   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
-   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
-   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
-   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
-]>
-<OBDA version="1.0" xml:base="http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#" xmlns="http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
-  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="PgmOpe">
-    <mapping id="OperationPhysiqueMere">
-      <CQ string="OperationPhysiqueMere(operation($opeid)),aPourId(operation($opeid),$opeid)"/>
-      <SQLQuery string="select opeid from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="OperationPhysiqueMere aPourLibelle String">
-      <CQ string="aPourLibelle(operation($opeid),$libelle)"/>
-      <SQLQuery string="select opeid, libelle from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="OperationPhysiqueMere aPourMontantDecimal, aPourType, aPourMode">
-      <CQ string="aPourMontant(operation($opeid),montantOpe($opeid)),aPourType(montantOpe($opeid),type($TypeMontant)),aPourMode(montantOpe($opeid),mode($ModeMontant))"/>
-      <SQLQuery string="select opeid, MontantDecimal, TypeMontant, ModeMontant from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="ModeQuantite">
-      <CQ string="ModeQuantite(mode($modeMontant)),aPourLibelle(mode($modeMontant),$modeMontant)"/>
-      <SQLQuery string="select modeMontant from &quot;ModeQuantite&quot;"/>
-    </mapping>
-    <mapping id="TypeMontant">
-      <CQ string="TypeQuantite(type($typeMontant)),aPourLibelle(type($typeMontant),$typeMontant)"/>
-      <SQLQuery string="select typeMontant from &quot;TypeQuantite&quot;"/>
-    </mapping>
-    <mapping id="montantOpe aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree">
-      <CQ string="aPourUniteTemporelle(montantOpe($opeid),utOpe($opeid)),aPourDepart(utOpe($opeid),$anneedepart),aPourArrivee(utOpe($opeid),$anneeArrivee),aPourDuree(utOpe($opeid),$Duree)"/>
-      <SQLQuery string="select opeid, anneedepart, anneeArrive, Duree from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="OperationPhysiqueMere estConsolidePjt Projet">
-      <CQ string="estConsolidePjt(ope($opeid),projet($pjtLibelle))"/>
-      <SQLQuery string="select opeid, pjtlibelle from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="Projet">
-      <CQ string="Projet(projet($libelle)),aPourLibelle(projet($ibelle),$ibelle)"/>
-      <SQLQuery string="select libelle from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="Montant Ope">
-      <CQ string="Montant(montantOpe($opeid)),aPourMontantDecimal(montantOpe($opeid),$montantdecimal)"/>
-      <SQLQuery string="select opeid, montantdecimal from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="UniteTemporelle Ope">
-      <CQ string="UniteTemperrel(utOpe($opeid))"/>
-      <SQLQuery string="select opeid from &quot;OperationPhysiqueMere&quot;"/>
-    </mapping>
-    <mapping id="Montant Projet">
-      <CQ string="Montant(montantPjt($libelle)),aPourMontantDecimal(montantPjt($libelle),$montantDecimal)"/>
-      <SQLQuery string="select libelle, montantdecimal from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="Unite Temporelle Projet">
-      <CQ string="UniteTemporelle(utPjt($libelle))"/>
-      <SQLQuery string="select libelle from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="montantPjt aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree">
-      <CQ string="aPourUniteTemporelle(montantPjt($libelle),utPjt($libelle)),aPourDepart(utPjt($libelle),$anneedepart),aPourArrivee(utPjt($libelle),$anneeArrivee),aPourDuree(utPjt($libelle),$Duree)"/>
-      <SQLQuery string="select libelle, anneedepart, anneeArrive, Duree from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="Pjt estVentilleOpe Ope">
-      <CQ string="estVentilleOpe(projet($libelle),ope($opeid))"/>
-      <SQLQuery string="select libelle, &quot;Opeid&quot; opeid from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="Projet aPourMontant, aPourType, aPourMode">
-      <CQ string="aPourMontant(projet($libelle),montantPjt($libelle)),aPourType(montantPjt($Libelle),type($TypeMontant)),aPourMode(montantPjt($libelle),mode($ModeMontant))"/>
-      <SQLQuery string="select libelle, MontantDecimal, TypeMontant, ModeMontant from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="Programme">
-      <CQ string="Programme(programme($libelle)),aPourLibelle(programme($ibelle),$ibelle)"/>
-      <SQLQuery string="select libelle from &quot;Programme&quot;"/>
-    </mapping>
-    <mapping id="Montant Programme">
-      <CQ string="Montant(montantPgr($libelle)),aPourMontantDecimal(montantPgr($libelle),$montantdecimal)"/>
-      <SQLQuery string="select libelle, montantdecimal from &quot;Programme&quot;"/>
-    </mapping>
-    <mapping id="Unite Temporelle Programme">
-      <CQ string="UniteTemporelle(utPgr($libelle))"/>
-      <SQLQuery string="select libelle from &quot;Programme&quot;"/>
-    </mapping>
-    <mapping id="montantPgr aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree">
-      <CQ string="aPourUniteTemporelle(montantPgr($libelle),utPgr($libelle)),aPourDepart(utPgr($libelle),$anneedepart),aPourArrivee(utPgr($libelle),$anneeArrivee),aPourDuree(utPgr($libelle),$Duree)"/>
-      <SQLQuery string="select libelle, anneedepart, anneeArrive, Duree from &quot;Programme&quot;"/>
-    </mapping>
-    <mapping id="Pgr estVentillePjt Projet">
-      <CQ string="estVentillePjt(programme($libelle),projet($pjtlibelle))"/>
-      <SQLQuery string="select libelle, pjtlibelle from &quot;Programme&quot;"/>
-    </mapping>
-    <mapping id="Programme aPourMontant, aPourType, aPourMode">
-      <CQ string="aPourMontant(programme($libelle),montantPgr($libelle)),aPourType(montantPgr($libelle),type($TypeMontant)),aPourMode(montantPgr($libelle),mode($ModeMontant))"/>
-      <SQLQuery string="select libelle, MontantDecimal, TypeMontant, ModeMontant from &quot;Programme&quot;"/>
-    </mapping>
-    <mapping id="Projet estConsolidePgr Programme">
-      <CQ string="estConsolidePgr(projet($libelle),programme($pgrLibelle))"/>
-      <SQLQuery string="select libelle, &quot;pgrLibelle&quot; pgrLibelle from &quot;Projet&quot;"/>
-    </mapping>
-    <mapping id="Programme estDeclinePluriannuel BudgetPluriannuel">
-      <CQ string="estDeclinePluriannuel(programme($pgrlibelle),budgPluri($budgpluriId))"/>
-      <SQLQuery string="select pgrlibelle, budgpluriId from &quot;Programme_Budget&quot;"/>
-    </mapping>
-    <mapping id="Budget Pluriannuel">
-      <CQ string="BudgetPluriannuel(budgPluri($budgPluriId)),aPourId(budgPluri($budgPluriId),$budgPluriId)"/>
-      <SQLQuery string="select &quot;budgPluriid&quot; budgPluriId from &quot;BudgetPluriannuel&quot;"/>
-    </mapping>
-    <mapping id="BudgPluri Montant aPourMontantDecimal aPourMontant, aPourType, aPourMode">
-      <CQ string="Montant(montantBudgPluri($budgPluriId)),aPourMontantDecimal(montantBudgPluri($budgPluriId),$montantdecimal),aPourMontant(budgPluri($budgPluriId),montantBudgPluri($budgPluriId)),aPourType(montantBudgPluri($budgPluriId),type($TypeMontant)),aPourMode(montantBudgPluri($budgPluriId),mode($ModeMontant))"/>
-      <SQLQuery string="select &quot;budgPluriid&quot; budgPluriId,  MontantDecimal, TypeMontant, ModeMontant from &quot;BudgetPluriannuel&quot;"/>
-    </mapping>
-    <mapping id="montantBudgPluri aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree">
-      <CQ string="aPourUniteTemporelle(montantBudgPluri($budgPluriId),utBudgPluri($budgPluriId)),aPourDepart(utBudgPluri($budgPluriId),$anneedepart),aPourArrivee(utBudgPluri($budgPluriId),$anneeArrivee),aPourDuree(utBudgPluri($budgPluriId),$Duree)"/>
-      <SQLQuery string="select &quot;budgPluriid&quot; budgPluriId, anneedepart, anneeArrive, Duree from &quot;BudgetPluriannuel&quot;"/>
-    </mapping>
-    <mapping id="budgPluri abondeEnveloppe enveloppeAP">
-      <CQ string="abondeEnveloppe(budgPluri($budgPluriId),envAP($envAPid))"/>
-      <SQLQuery string="select &quot;budgPluriid&quot; budgPluriId, &quot;envAPid&quot; envAPid from &quot;BudgetPluriannuel&quot;"/>
-    </mapping>
-    <mapping id="Unite Temporelle Budget Pluriannuel">
-      <CQ string="UniteTemporelle(utBudgPluri($budgPluriId))"/>
-      <SQLQuery string="select &quot;budgPluriid&quot; budgPluriId from &quot;BudgetPluriannuel&quot;"/>
-    </mapping>
-    <mapping id="Enveloppe AP">
-      <CQ string="EnveloppeAPAE(envAP($envAPid)),aPourId(envAP($envAPid),$envAPid)"/>
-      <SQLQuery string="select &quot;envAPid&quot; envAPid from &quot;EnveloppeAP&quot;"/>
-    </mapping>
-    <mapping id="EnveloppeAP Montant aPourMontantDecimal aPourMontant, aPourType, aPourMode&#xd;">
-      <CQ string="Montant(montantEnvAP($envAPid)),aPourMonantDecimal(montantEnvAP($envAPid),$montantDecimal),aPourMontant(envAP($envAPid),montantEnvAP($envAPid)),aPourType(montantEnvAP($envAPid),type($TypeMontant)),aPourMode(montantEnvAP($envAPid),mode($ModeMontant))"/>
-      <SQLQuery string="select &quot;envAPid&quot; envAPid, MontantDecimal, TypeMontant, ModeMontant  from &quot;EnveloppeAP&quot;"/>
-    </mapping>
-    <mapping id="montantEnvAP UniteTemporelle aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree">
-      <CQ string="UniteTemporelle(utEnvAP($envAPid)),aPourUniteTemporelle(montantEnvAPi($envAPid),utEnvAPi($envAPid)),aPourDepart(utEnvAP($envAPid),$anneedepart),aPourArrivee(utEnvAP($envAPid),$anneeArrivee),aPourDuree(utEnvAP($envAPid),$Duree)"/>
-      <SQLQuery string="select &quot;envAPid&quot; envAPid, anneedepart, anneeArrive, Duree  from &quot;EnveloppeAP&quot;"/>
-    </mapping>
-  </mappings>
-  <dataSource URI="PgmOpe" databaseDriver="org.postgresql.Driver" databasePassword="Moulf04" databaseURL="jdbc:postgresql://localhost/PgmOpe" databaseUsername="postgres" isAboxDump="" ontouri="http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#"/>
-  <SavedQueries>
-    <QueryGroup id="OntoOpe">
-      <Query id="OperationPhysiqueMere" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select $x where{$x rdf:type ope:OperationPhysiqueMere.} "/>
-      <Query id="OperationPhysiqueMere-aPourLibelle" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select ?x ?y where {&#x9;?x rdf:type ope:OperationPhysiqueMere.&#xa;&#x9;&#x9; ?x ope:aPourLibelle ?y}&#xa; "/>
-      <Query id="Projet" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select $x where{$x rdf:type ope:Projet.} "/>
-      <Query id="Ope estConsolidePjt Projet" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;SELECT  ?operationPhysiqueMere ?Projet &#xa;WHERE{ ?operationPhysiqueMere ope:estConsolidePjt  ?Projet . }"/>
-      <Query id="Ope Montant UniteTemporelle" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select $x $m $md $ut  $d where{$x ope:aPourMontant $m.&#xa;&#x9;&#x9;$m ope:aPourMontantDecimal $md.&#xa;&#x9;&#x9;$m ope:aPourUniteTemporelle $ut.&#xa;&#x9;&#x9;$ut ope:aPourDepart $d.} "/>
-      <Query id="OperationPhysiqueMere-aPourMontant - aPourMode - apourType 2" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select ?x ?m ?t ?mo where {&#x9;?x rdf:type ope:OperationPhysiqueMere.&#xa;&#x9;&#x9; ?x ope:aPourMontant ?m.&#xa;&#x9;&#x9;?m ope:aPourType $t.&#xa;&#x9;&#x9;?m ope:aPourMode $mo}&#xa; "/>
-      <Query id="Pjt estVentilleOpe Ope" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select distinct ?z ?x ?y where {&#x9;?x ope:estVentilleOpe $y.&#xa;&#x9;&#x9;$z ope:estVentillePjt $x.&#xa;&#x9;&#x9;}&#xa; "/>
-      <Query id="Enveloppe Budget Programme Projet Ope" text="PREFIX ope: &lt;http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;&#xa;select distinct ?ev ?bp ?z ?x ?y where { ?bp ope:abondeEnveloppe ?ev.&#x9;&#xa;&#x9;&#x9;?z ope:estDeclinePluriannuel ?bp.&#xa;&#x9;&#x9;?x ope:estVentilleOpe $y.&#xa;&#x9;&#x9;$z ope:estVentillePjt $x.&#xa;&#x9;&#x9;}&#xa; "/>
-    </QueryGroup>
-  </SavedQueries>
-</OBDA>
+[PrefixDeclaration]
+:		http://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	PgmOpe
+connectionUrl	jdbc:postgresql://localhost/PgmOpe
+username	postgres
+password	Moulf04
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	OperationPhysiqueMere
+target		:Operation-{opeid} a :OperationPhysiqueMere ; :aPourId {opeid} . 
+source		select opeid from "OperationPhysiqueMere"
+
+mappingId	OperationPhysiqueMere aPourLibelle String
+target		:Operation-{opeid} :aPourLibelle {libelle} . 
+source		select opeid, libelle from "OperationPhysiqueMere"
+
+mappingId	OperationPhysiqueMere aPourMontantDecimal, aPourType, aPourMode
+target		:MontantOpe-{opeid} :aPourType :Type-{TypeMontant} ; :aPourMode :Mode-{ModeMontant} . :Operation-{opeid} :aPourMontant :MontantOpe-{opeid} . 
+source		select opeid, MontantDecimal, TypeMontant, ModeMontant from "OperationPhysiqueMere"
+
+mappingId	ModeQuantite
+target		:Mode-{ModeMontant} a :ModeQuantite ; :aPourLibelle {modeMontant} . 
+source		select modeMontant from "ModeQuantite"
+
+mappingId	TypeMontant
+target		:Type-{TypeMontant} a :TypeQuantite ; :aPourLibelle {typeMontant} . 
+source		select typeMontant from "TypeQuantite"
+
+mappingId	montantOpe aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree
+target		:MontantOpe-{opeid} :aPourUniteTemporelle :UtOpe-{opeid} . :UtOpe-{opeid} :aPourDepart {anneedepart} ; :aPourArrivee {anneeArrivee} ; :aPourDuree {Duree} . 
+source		select opeid, anneedepart, anneeArrive, Duree from "OperationPhysiqueMere"
+
+mappingId	OperationPhysiqueMere estConsolidePjt Projet
+target		:Ope-{opeid} :estConsolidePjt :Projet-{pjtLibelle} . 
+source		select opeid, pjtlibelle from "OperationPhysiqueMere"
+
+mappingId	Projet
+target		:Projet-{ibelle} :aPourLibelle {ibelle} . :Projet-{libelle} a :Projet . 
+source		select libelle from "Projet"
+
+mappingId	Montant Ope
+target		:MontantOpe-{opeid} a :Montant ; :aPourMontantDecimal {montantdecimal} . 
+source		select opeid, montantdecimal from "OperationPhysiqueMere"
+
+mappingId	UniteTemporelle Ope
+target		:UtOpe-{opeid} a :UniteTemperrel . 
+source		select opeid from "OperationPhysiqueMere"
+
+mappingId	Montant Projet
+target		:MontantPjt-{libelle} a :Montant ; :aPourMontantDecimal {montantDecimal} . 
+source		select libelle, montantdecimal from "Projet"
+
+mappingId	Unite Temporelle Projet
+target		:UtPjt-{libelle} a :UniteTemporelle . 
+source		select libelle from "Projet"
+
+mappingId	montantPjt aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree
+target		:UtPjt-{libelle} :aPourDepart $anneedepart ; :aPourArrivee $anneeArrivee ; :aPourDuree $Duree . :MontantPjt-{libelle} :aPourUniteTemporelle :UtPjt-{libelle} . 
+source		select libelle, anneedepart, anneeArrive, Duree from "Projet"
+
+mappingId	Pjt estVentilleOpe Ope
+target		:Projet-{libelle} :estVentilleOpe :Ope-{opeid} . 
+source		select libelle, "Opeid" opeid from "Projet"
+
+mappingId	Projet aPourMontant, aPourType, aPourMode
+target		:MontantPjt-{libelle} :aPourType :Type-{TypeMontant} . :Projet-{libelle} :aPourMontant :MontantPjt-{libelle} . :MontantPjt-{libelle} :aPourMode :Mode-{ModeMontant} . 
+source		select libelle, MontantDecimal, TypeMontant, ModeMontant from "Projet"
+
+mappingId	Programme
+target		:Programme-{libelle} a :Programme . :Programme-{ibelle} :aPourLibelle {ibelle} . 
+source		select libelle from "Programme"
+
+mappingId	Montant Programme
+target		:MontantPgr-{libelle} a :Montant ; :aPourMontantDecimal {montantDecimal} . 
+source		select libelle, montantdecimal from "Programme"
+
+mappingId	Unite Temporelle Programme
+target		:UtPgr-{libelle} a :UniteTemporelle . 
+source		select libelle from "Programme"
+
+mappingId	montantPgr aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree
+target		:MontantPgr-{libelle} :aPourUniteTemporelle :UtPgr-{libelle} . :UtPgr-{libelle} :aPourDepart {anneedepart} ; :aPourArrivee {anneeArrivee} ; :aPourDuree {Duree} . 
+source		select libelle, anneedepart, anneeArrive, Duree from "Programme"
+
+mappingId	Pgr estVentillePjt Projet
+target		:Programme-{libelle} :estVentillePjt :Projet-{pjtLibelle} . 
+source		select libelle, pjtlibelle from "Programme"
+
+mappingId	Programme aPourMontant, aPourType, aPourMode
+target		:MontantPgr-{libelle} :aPourType :Type-{TypeMontant} ; :aPourMode :Mode-{ModeMontant} . :Programme-{libelle} :aPourMontant :MontantPgr-{libelle} . 
+source		select libelle, MontantDecimal, TypeMontant, ModeMontant from "Programme"
+
+mappingId	Projet estConsolidePgr Programme
+target		:Projet-{libelle} :estConsolidePgr :Programme-{pgrLibelle} . 
+source		select libelle, "pgrLibelle" pgrLibelle from "Projet"
+
+mappingId	Programme estDeclinePluriannuel BudgetPluriannuel
+target		:Programme-{pgrLibelle} :estDeclinePluriannuel :BudgPluri-{budgpluriId} . 
+source		select pgrlibelle, budgpluriId from "Programme_Budget"
+
+mappingId	Budget Pluriannuel
+target		:BudgPluri-{budgpluriId} a :BudgetPluriannuel ; :aPourId {budgPluriId} . 
+source		select "budgPluriid" budgPluriId from "BudgetPluriannuel"
+
+mappingId	BudgPluri Montant aPourMontantDecimal aPourMontant, aPourType, aPourMode
+target		:BudgPluri-{budgpluriId} :aPourMontant :montantBudgPluri-{budgpluriId} . :montantBudgPluri-{budgpluriId} a :Montant ; :aPourMontantDecimal {montantDecimal} ; :aPourType :Type-{TypeMontant} ; :aPourMode :Mode-{ModeMontant} . 
+source		select "budgPluriid" budgPluriId,  MontantDecimal, TypeMontant, ModeMontant from "BudgetPluriannuel"
+
+mappingId	montantBudgPluri aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree
+target		:montantBudgPluri-{budgpluriId} :aPourUniteTemporelle :utBudgPluri-{budgpluriId} . :utBudgPluri-{budgpluriId} :aPourDepart $anneedepart ; :aPourArrivee $anneeArrivee ; :aPourDuree $Duree . 
+source		select "budgPluriid" budgPluriId, anneedepart, anneeArrive, Duree from "BudgetPluriannuel"
+
+mappingId	budgPluri abondeEnveloppe enveloppeAP
+target		:BudgPluri-{budgpluriId} :abondeEnveloppe :EnvAP-{envAPid} . 
+source		select "budgPluriid" budgPluriId, "envAPid" envAPid from "BudgetPluriannuel"
+
+mappingId	Unite Temporelle Budget Pluriannuel
+target		:utBudgPluri-{budgpluriId} a :UniteTemporelle . 
+source		select "budgPluriid" budgPluriId from "BudgetPluriannuel"
+
+mappingId	Enveloppe AP
+target		:EnvAP-{envAPid} a :EnveloppeAPAE ; :aPourId {envAPid} . 
+source		select "envAPid" envAPid from "EnveloppeAP"
+
+mappingId	EnveloppeAP Montant aPourMontantDecimal aPourMontant, aPourType, aPourMode
+target		:montantEnvAP-{envAPid} a :Montant ; :aPourMonantDecimal {montantDecimal} ; :aPourType :Type-{TypeMontant} ; :aPourMode :Mode-{ModeMontant} . :EnvAP-{envAPid} :aPourMontant :montantEnvAP-{envAPid} . 
+source		select "envAPid" envAPid, MontantDecimal, TypeMontant, ModeMontant  from "EnveloppeAP"
+
+mappingId	montantEnvAP UniteTemporelle aPourUniteTemporelle aPourDepart aPourArrrivee aPourDuree
+target		:utEnvAP-{envAPid} a :UniteTemporelle ; :aPourDepart {anneedepart} ; :aPourArrivee {anneeArrivee} ; :aPourDuree {Duree} . :MontantEnvAPi-{envAPid} :aPourUniteTemporelle :UtEnvAPi-{envAPid} . 
+source		select "envAPid" envAPid, anneedepart, anneeArrive, Duree  from "EnveloppeAP"
+]]
+

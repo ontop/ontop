@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
+import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
@@ -51,7 +51,7 @@ public class MappingAnalyzerTest extends TestCase {
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TurtleSyntaxParser targetParser = new TurtleSyntaxParser(pm);
+		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm);
 		CQIE target = targetParser.parse(targetString);
 		
 		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(source, target);
@@ -68,96 +68,96 @@ public class MappingAnalyzerTest extends TestCase {
 	public void testAnalysis_1() throws Exception {
 		runAnalysis(
 				"select id from Student",
-				"<\"&:;S_{$id}\"> a :Student .");
+				":S_{id} a :Student .");
 	}
 	
 	public void testAnalysis_2() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student",
-				"<\"&:;S_{$id}\"> a :Student; :fname $first_name; :lname $last_name .");
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
 	}
 	
 	public void testAnalysis_3() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student where year=2010",
-				"<\"&:;S_{$id}\"> a :Student; :fname $first_name; :lname $last_name .");
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
 	}
 	
 	public void testAnalysis_4() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student where nationality='it'",
-				"<\"&:;S_{$id}\"> a :Student; :fname $first_name; :lname $last_name .");
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
 	}
 	
 	public void testAnalysis_5() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student where year=2010 and nationality='it'",
-				"<\"&:;S_{$id}\"> a :Student; :fname $first_name; :lname $last_name .");
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
 	}
 	
 	public void testAnalysis_6() throws Exception {
 		runAnalysis(
 				"select cid, title, credits, description from Course",
-				"<\"&:;C_{$cid}\"> a :Course; :title $title; :creditPoint $credits; :hasDescription $description .");
+				":C_{cid} a :Course ; :title {title} ; :creditPoint {credits} ; :hasDescription {description} .");
 	}
 	
 	public void testAnalysis_7() throws Exception {
 		runAnalysis(
 				"select cid, title from Course where credits>=4",
-				"<\"&:;C_{$cid}\"> a :Course; :title $title .");
+				":C_{cid} a :Course ; :title {title} .");
 	}
 	
 	public void testAnalysis_8() throws Exception {
 		runAnalysis(
 				"select student_id, course_id from Enrollment",
-				"<\"&:;S_{$student_id}\"> :hasCourse <\"&:;C_{$course_id}\">.");
+				":S_{student_id} :hasCourse :C_{course_id}.");
 	}
 	
 	public void testAnalysis_9() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student, Enrollment where Student.id=Enrollment.student_id and Enrollment.course_id='BA002'",
-				"<\"&:;S_{$id}\"> a :Student; :fname $first_name; :lname $last_name .");
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
 	}
 	
 	public void testAnalysis_10() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student, Enrollment where Student.id=Enrollment.student_id and Enrollment.course_id='BA002' and Student.year=2010",
-				"<\"&:;S_{$id}\"> a :Student; :fname $first_name; :lname $last_name .");
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
 	}
 	
 	public void testAnalysis_11() throws Exception {
 		runAnalysis(
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student",
-				"<\"&:;S_{$StudentNumber}\"> a :Student; :fname $Name; :lname $FamilyName .");
+				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
 	
 	public void testAnalysis_12() throws Exception {
 		runAnalysis(
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as TableStudent where TableStudent.year=2010",
-				"<\"&:;S_{$StudentNumber}\"> a :Student; :fname $Name; :lname $FamilyName .");
+				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
 	
 	public void testAnalysis_13() throws Exception {
 		runAnalysis(
 				"select cid as CourseCode, title as CourseTitle, credits as CreditPoints, description as CourseDescription from Course",
-				"<\"&:;C_{$CourseCode}\"> a :Course; :title $CourseTitle; :creditPoint $CreditPoints; :hasDescription $CourseDescription .");
+				":C_{CourseCode} a :Course ; :title {CourseTitle} ; :creditPoint {CreditPoints} ; :hasDescription {CourseDescription} .");
 	}
 	
 	public void testAnalysis_14() throws Exception {
 		runAnalysis(
 				"select cid as CourseCode, title as CourseTitle from Course as TableCourse where TableCourse.credits>=4",
-				"<\"&:;C_{$cid}\"> a :Course; :title $title .");
+				":C_{cid} a :Course ; :title {title} .");
 	}
 	
 	public void testAnalysis_15() throws Exception {
 		runAnalysis(
 				"select student_id as sid, course_id as cid from Enrollment",
-				"<\"&:;S_{$sid}\"> :hasCourse <\"&:;C_{$cid}\">.");
+				":S_{sid} :hasCourse :C_{cid} .");
 	}
 	
 	public void testAnalysis_16() throws Exception {
 		runAnalysis(
-				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where t1.StudentNumber=t2.student_id and t2.course_id='BA002'",
-				"<\"&:;S_{$StudentNumber}\"> a :Student; :fname $Name; :lname $FamilyName .");
+				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
+				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
 }
