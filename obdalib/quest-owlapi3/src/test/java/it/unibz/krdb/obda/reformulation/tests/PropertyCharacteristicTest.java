@@ -13,7 +13,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import junit.framework.TestCase;
 
@@ -23,6 +30,9 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class PropertyCharacteristicTest extends TestCase {
 	
@@ -30,13 +40,81 @@ public class PropertyCharacteristicTest extends TestCase {
 	private OWLStatement stmt = null;
 	private QuestOWL reasoner = null;
 	
+	Connection jdbcconn = null;
+	
+	Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
 	private static 	QuestPreferences prefs;
 	static {
 		prefs = new QuestPreferences();
 		prefs.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.FALSE);
+		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
+	}
+	
+	
+	@Override
+	public void setUp() throws Exception {
+		createTables();
+
+	}
+	
+	private String readSQLFile(String file) throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		StringBuffer bf = new StringBuffer();
+		String line = reader.readLine();
+		while (line != null) {
+			bf.append(line + "\n");
+			line = reader.readLine();
+		}
+		return bf.toString();
+	}
+	
+	private void createTables() throws IOException, SQLException
+	{
+		String createDDL = readSQLFile("src/test/resources/property-characteristics/sqlcreate.sql");
+		
+		/*
+		 * Initializing and H2 database with the stock exchange data
+		 */
+		// String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:questjunitdb";
+		String username = "sa";
+		String password = "";
+
+		ofac = OBDADataFactoryImpl.getInstance();
+
+		jdbcconn = DriverManager.getConnection(url, username, password);
+		Statement st = jdbcconn.createStatement();
+
+		
+		st.executeUpdate(createDDL);
+		jdbcconn.commit();
+		
+		
+	}
+
+
+	@Override
+	public void tearDown() throws Exception {
+		try {
+			dropTables();
+			conn.close();
+			jdbcconn.close();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
+	}
+
+	private void dropTables() throws SQLException, IOException {
+
+		
+		String dropDDL = readSQLFile("src/test/resources/property-characteristics/drop.sql");
+		Statement st = jdbcconn.createStatement();
+		st.executeUpdate(dropDDL);
+		st.close();
+		jdbcconn.commit();
 	}
 	
 	public void testNoProperty() throws Exception {
@@ -82,35 +160,13 @@ public class PropertyCharacteristicTest extends TestCase {
 		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 	}
 	
-	private OWLResultSet executeQuery(String sparql) {
-		try {
+	private OWLResultSet executeQuery(String sparql) throws Exception {
 			conn = reasoner.getConnection();
 			stmt = conn.createStatement();
 			return stmt.executeTuple(sparql);
-		} catch (OWLException e) {
-			System.err.println(e.getMessage());
-		} catch (OBDAException e) {
-			System.err.println(e.getMessage());
-		}
-		throw new RuntimeException();
+		
 	}
-	
-	@Override
-	public void tearDown() {
-		try {
-			if (stmt != null && !stmt.isClosed()) {
-				stmt.close();
-			}
-			if (conn != null && !conn.isClosed()) {
-				conn.close();
-			}
-			if (reasoner != null) {
-				reasoner.dispose();
-			}
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-	}
+
 	
 	private int countResult(OWLResultSet rs, boolean stdout) throws OWLException {
 		int counter = 0;

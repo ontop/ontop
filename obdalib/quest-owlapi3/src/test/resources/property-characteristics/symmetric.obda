@@ -3,14 +3,14 @@
 
 [SourceDeclaration]
 sourceUri	owlproperty
-connectionUrl	jdbc:postgresql://10.7.20.39/owlproperty
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
+connectionUrl	jdbc:h2:mem:questjunitdb
+username	sa
+password	
+driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Interacts
 target		:Person-{p1} :interacts :Person-{p2} . 
-source		select p1, p2 from "R"
+source		select p1, p2 from R
 ]]
 
