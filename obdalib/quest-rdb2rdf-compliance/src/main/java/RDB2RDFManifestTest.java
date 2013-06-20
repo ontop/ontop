@@ -1,12 +1,10 @@
 import info.aduna.io.FileUtil;
-import info.aduna.io.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
+import java.net.URI;
 import java.net.URL;
-import java.util.jar.JarFile;
 
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
@@ -38,13 +36,13 @@ public class RDB2RDFManifestTest {
 		public static TestSuite suite(RDB2RDFScenarioTest.Factory factory) throws Exception {
 			final String manifestFile;
 			final File tmpDir;
-
+			URL url;
 			//System.out.println(RDB2RDFManifestTest.class.getResource(factory.getMainManifestFile()).getPath());
-//			URL url = RDB2RDFManifestTest.class.getResource(factory.getMainManifestFile());
+			//URL url = RDB2RDFManifestTest.class.getResource(factory.getMainManifestFile());
 			
 			{
-				manifestFile = "file:///C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/manifest-h2.ttl";
-						//url.toString();
+				manifestFile = "src/main/resources/manifest-h2.ttl";
+				 url = (new File(manifestFile)).toURI().toURL();
 				tmpDir = null;
 			}
 
@@ -70,7 +68,7 @@ public class RDB2RDFManifestTest {
 			manifestRep.initialize();
 			RepositoryConnection con = manifestRep.getConnection();
 
-			addTurtle(con, new URL(manifestFile), manifestFile);
+			addTurtle(con, url, url.toString());
 
 			String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
 					+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "

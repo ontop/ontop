@@ -232,7 +232,7 @@ public class RDB2RDFScenarioTest extends TestCase{
 				logger.debug("Found test case: {}", testName);
 
 				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
-				String path = pathUri.substring(8);
+				String path = pathUri.substring(5);
 				RDB2RDFScenarioTest test = factory.createRDB2RDFScenarioTest(testURI, testName, path + sqlFile,
 						  null, path + outputFile);
 				if (test != null) {
