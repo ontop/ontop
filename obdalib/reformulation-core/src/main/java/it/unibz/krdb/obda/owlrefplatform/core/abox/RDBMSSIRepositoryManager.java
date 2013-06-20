@@ -169,7 +169,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE INT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
@@ -708,7 +708,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 						out.append(String.format(attribute_insert_string_str, getQuotedString(uri), getQuotedString(lit), idx, c1isBNode));
 						break;
 					case INTEGER:
-						out.append(String.format(attribute_insert_integer_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
+						out.append(String.format(attribute_insert_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
 						break;
 					case DECIMAL:
 						out.append(String.format(attribute_insert_decimal_str, getQuotedString(uri), parseBigDecimal(lit), idx, c1isBNode));
@@ -1220,7 +1220,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			case INTEGER:
 				if (value.charAt(0) == '+')
 					value = value.substring(1, value.length());
-				setInputStatement(attributeIntegerStm, uri_id, Integer.parseInt(value), idx, c1isBNode);
+				setInputStatement(attributeIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
 				// log.debug("Int");
 				break;
 			case DECIMAL:
