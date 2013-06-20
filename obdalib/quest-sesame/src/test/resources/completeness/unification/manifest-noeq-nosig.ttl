@@ -1,0 +1,157 @@
+@prefix :	<http://obda.org/quest/tests/completeness#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:    <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:	<http://obda.org/quest/tests/test-query#> .
+@prefix obdat: <http://obda.org/quest/tests/test-scenario#> .
+
+<> rdf:type mf:Manifest ;
+   rdfs:label "Unification tests" ;
+   mf:entries
+   (
+      :test_28a
+      :test_28b
+      :test_28c
+      :test_28d
+      :test_29a
+      :test_29b
+      :test_86a
+      :test_86b
+      :test_86c
+      :test_86d
+      :test_86e
+      :test_86f
+
+   ) .
+
+:test_28a rdf:type mf:CompletenessTest ;
+   mf:name "28a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_28.owl> ;
+        qt:query <test_28a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_28a.srx> .
+
+:test_28b rdf:type mf:CompletenessTest ;
+   mf:name "28b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_28.owl> ;
+        qt:query <test_28b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_28b.srx> .
+
+:test_28c rdf:type mf:CompletenessTest ;
+   mf:name "28c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_28.owl> ;
+        qt:query <test_28c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_28c.srx> .
+
+:test_28d rdf:type mf:CompletenessTest ;
+   mf:name "28d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_28.owl> ;
+        qt:query <test_28d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_28d.srx> .
+
+:test_29a rdf:type mf:CompletenessTest ;
+   mf:name "29a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_29.owl> ;
+        qt:query <test_29a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_29a.srx> .
+
+:test_29b rdf:type mf:CompletenessTest ;
+   mf:name "29b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_29.owl> ;
+        qt:query <test_29b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_29b.srx> .
+
+:test_86a rdf:type mf:CompletenessTest ;
+   mf:name "86a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_86.owl> ;
+        qt:query <test_86a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_86a.srx> .
+
+:test_86b rdf:type mf:CompletenessTest ;
+   mf:name "86b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_86.owl> ;
+        qt:query <test_86b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_86b.srx> .
+
+:test_86c rdf:type mf:CompletenessTest ;
+   mf:name "86c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_86.owl> ;
+        qt:query <test_86c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_86c.srx> .
+
+:test_86d rdf:type mf:CompletenessTest ;
+   mf:name "86d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_86.owl> ;
+        qt:query <test_86d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_86d.srx> .
+
+:test_86e rdf:type mf:CompletenessTest ;
+   mf:name "86e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_86.owl> ;
+        qt:query <test_86e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_86e.srx> .
+
+:test_86f rdf:type mf:CompletenessTest ;
+   mf:name "86f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_86.owl> ;
+        qt:query <test_86f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_86f.srx> .

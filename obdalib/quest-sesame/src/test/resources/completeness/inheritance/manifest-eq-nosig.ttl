@@ -1,0 +1,133 @@
+@prefix :	<http://obda.org/quest/tests/completeness#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:    <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:	<http://obda.org/quest/tests/test-query#> .
+@prefix obdat: <http://obda.org/quest/tests/test-scenario#> .
+
+<> rdf:type mf:Manifest ;
+   rdfs:label "Inheritance tests" ;
+   mf:entries
+   (
+      :test_200a
+      :test_200b
+      :test_200c
+      :test_200d
+      :test_201a
+      :test_201b
+      :test_201c
+      :test_201d
+      :test_210a
+      :test_210b
+
+   ) .
+
+:test_200a rdf:type mf:CompletenessTest ;
+   mf:name "200a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_200.owl> ;
+        qt:query <test_200a.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_200a.srx> .
+
+:test_200b rdf:type mf:CompletenessTest ;
+   mf:name "200b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_200.owl> ;
+        qt:query <test_200b.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_200b.srx> .
+
+:test_200c rdf:type mf:CompletenessTest ;
+   mf:name "200c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_200.owl> ;
+        qt:query <test_200c.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_200c.srx> .
+
+:test_200d rdf:type mf:CompletenessTest ;
+   mf:name "200d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_200.owl> ;
+        qt:query <test_200d.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_200d.srx> .
+
+:test_201a rdf:type mf:CompletenessTest ;
+   mf:name "201a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_201.owl> ;
+        qt:query <test_201a.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_201a.srx> .
+
+:test_201b rdf:type mf:CompletenessTest ;
+   mf:name "201b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_201.owl> ;
+        qt:query <test_201b.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_201b.srx> .
+
+:test_201c rdf:type mf:CompletenessTest ;
+   mf:name "201c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_201.owl> ;
+        qt:query <test_201c.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_201c.srx> .
+
+:test_201d rdf:type mf:CompletenessTest ;
+   mf:name "201d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_201.owl> ;
+        qt:query <test_201d.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_201d.srx> .
+
+:test_210a rdf:type mf:CompletenessTest ;
+   mf:name "210a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_210.owl> ;
+        qt:query <test_210a.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_210a.srx> .
+
+:test_210b rdf:type mf:CompletenessTest ;
+   mf:name "210b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_210.owl> ;
+        qt:query <test_210b.rq>  ] ;
+   mf:parameters <quest-eq-nosig.properties> ;
+   mf:result  <test_210b.srx> .

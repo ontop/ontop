@@ -9,9 +9,7 @@
 	</parent>
 	<artifactId>quest-owlapi3</artifactId>
 
-
 	<dependencies>
-
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -20,7 +18,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
@@ -31,35 +28,32 @@
 			<artifactId>obdalib-owlapi3</artifactId>
 			<version>1.7-alpha2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.7-alpha2</version>
 		</dependency>
-		
-
-
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi</artifactId>
 			<version>3.4.3</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-runtime</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-				<dependency>
+		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-model</artifactId>
 			<version>2.6.9</version>
@@ -74,15 +68,7 @@
 			<artifactId>sesame-rio-turtle</artifactId>
 			<version>2.6.9</version>
 		</dependency>
-
-
-	
-
-
-
 	</dependencies>
-
-
 
 	<build>
 		<plugins>
@@ -110,15 +96,10 @@
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
 		</plugins>
-
-
 	</build>
-
-
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
 	<name>quest-owlapi3</name>
 </project>

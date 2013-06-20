@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<sparql
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema#"
+      xmlns="http://www.w3.org/2005/sparql-results#">
+   <head>
+      <variable name="x"/>
+      <variable name="y"/>
+   </head>
+   <results>
+      <result>
+         <binding name="x">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#b11</uri>
+         </binding>
+         <binding name="y">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#b12</uri>
+         </binding>
+      </result>
+      <result>
+         <binding name="x">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#b22</uri>
+         </binding>
+         <binding name="y">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#b21</uri>
+         </binding>
+      </result>
+      <result>
+         <binding name="x">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#b31</uri>
+         </binding>
+         <binding name="y">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#b32</uri>
+         </binding>
+      </result>
+      <result>
+         <binding name="x">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c11</uri>
+         </binding>
+         <binding name="y">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c12</uri>
+         </binding>
+      </result>
+      <result>
+         <binding name="x">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c22</uri>
+         </binding>
+         <binding name="y">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c21</uri>
+         </binding>
+      </result>
+      <result>
+         <binding name="x">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c31</uri>
+         </binding>
+         <binding name="y">
+            <uri>http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c32</uri>
+         </binding>
+      </result>
+   </results>
+</sparql>

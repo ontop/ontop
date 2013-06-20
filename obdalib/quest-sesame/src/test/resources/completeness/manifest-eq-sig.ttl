@@ -1,0 +1,27 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "DL-Lite Completeness Tests (Setting: with Optimizing Equivalences and with using TBox Sigma" ;
+    mf:include (
+        <class-subsumption/manifest-eq-sig.ttl>
+        <role-subsumption/manifest-eq-sig.ttl>
+        <invrole-subsumption/manifest-eq-sig.ttl>  
+        
+        <class-with-uri/manifest-eq-sig.ttl>
+        <role-with-uri/manifest-eq-sig.ttl>
+        <invrole-with-uri/manifest-eq-sig.ttl>
+               
+        <role-inclusion/manifest-eq-sig.ttl>
+        
+        <ask/manifest-eq-sig.ttl>
+        <rdf-type/manifest-eq-sig.ttl>
+		<inheritance/manifest-eq-sig.ttl>
+        <equivalence/manifest-eq-sig.ttl>
+        <unification/manifest-eq-sig.ttl>
+      
+        <combined/manifest-eq-sig.ttl>
+    ).
+

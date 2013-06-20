@@ -1,0 +1,25 @@
+@prefix :	<http://obda.org/quest/tests/completeness#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:    <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:	<http://obda.org/quest/tests/test-query#> .
+@prefix obdat: <http://obda.org/quest/tests/test-scenario#> .
+
+<> rdf:type mf:Manifest ;
+   rdfs:label "RDF:type test" ;
+   mf:entries
+   (
+      :test_600a
+
+   ) .
+
+:test_600a rdf:type mf:CompletenessTest ;
+   mf:name "600a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_600.owl> ;
+        qt:query <test_600a.rq>  ] ;
+   mf:parameters <quest-noeq-sig.properties> ;
+   mf:result  <test_600a.srx> .

@@ -1,0 +1,625 @@
+@prefix :	<http://obda.org/quest/tests/completeness#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:    <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:	<http://obda.org/quest/tests/test-query#> .
+@prefix obdat: <http://obda.org/quest/tests/test-scenario#> .
+
+<> rdf:type mf:Manifest ;
+   rdfs:label "Equivalence tests" ;
+   mf:entries
+   (
+      :test_401a
+      :test_401b
+      :test_401c
+      :test_401d
+      :test_401e
+      :test_401f
+      :test_401g
+      :test_401h
+      :test_401i
+      :test_402a
+      :test_402b
+      :test_402c
+      :test_402d
+      :test_402e
+      :test_402f
+      :test_402g
+      :test_402h
+      :test_402i
+      :test_403a
+      :test_403b
+      :test_403c
+      :test_403d
+      :test_403e
+      :test_403f
+      :test_403g
+      :test_403h
+      :test_403i
+      :test_404a
+      :test_404b
+      :test_404c
+      :test_404d
+      :test_404e
+      :test_404f
+      :test_404g
+      :test_404h
+      :test_404i
+      :test_405a
+      :test_405b
+      :test_405c
+      :test_405d
+      :test_405e
+      :test_405f
+      :test_405g
+      :test_405h
+      :test_405i
+      :test_405j
+      :test_405k
+      :test_405l
+      :test_405m
+      :test_405n
+      :test_405o
+
+   ) .
+
+:test_401a rdf:type mf:CompletenessTest ;
+   mf:name "401a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401a.srx> .
+
+:test_401b rdf:type mf:CompletenessTest ;
+   mf:name "401b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401b.srx> .
+
+:test_401c rdf:type mf:CompletenessTest ;
+   mf:name "401c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401c.srx> .
+
+:test_401d rdf:type mf:CompletenessTest ;
+   mf:name "401d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401d.srx> .
+
+:test_401e rdf:type mf:CompletenessTest ;
+   mf:name "401e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401e.srx> .
+
+:test_401f rdf:type mf:CompletenessTest ;
+   mf:name "401f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401f.srx> .
+
+:test_401g rdf:type mf:CompletenessTest ;
+   mf:name "401g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401g.srx> .
+
+:test_401h rdf:type mf:CompletenessTest ;
+   mf:name "401h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401h.srx> .
+
+:test_401i rdf:type mf:CompletenessTest ;
+   mf:name "401i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_401.owl> ;
+        qt:query <test_401i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_401i.srx> .
+
+:test_402a rdf:type mf:CompletenessTest ;
+   mf:name "402a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402a.srx> .
+
+:test_402b rdf:type mf:CompletenessTest ;
+   mf:name "402b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402b.srx> .
+
+:test_402c rdf:type mf:CompletenessTest ;
+   mf:name "402c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402c.srx> .
+
+:test_402d rdf:type mf:CompletenessTest ;
+   mf:name "402d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402d.srx> .
+
+:test_402e rdf:type mf:CompletenessTest ;
+   mf:name "402e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402e.srx> .
+
+:test_402f rdf:type mf:CompletenessTest ;
+   mf:name "402f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402f.srx> .
+
+:test_402g rdf:type mf:CompletenessTest ;
+   mf:name "402g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402g.srx> .
+
+:test_402h rdf:type mf:CompletenessTest ;
+   mf:name "402h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402h.srx> .
+
+:test_402i rdf:type mf:CompletenessTest ;
+   mf:name "402i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_402.owl> ;
+        qt:query <test_402i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_402i.srx> .
+
+:test_403a rdf:type mf:CompletenessTest ;
+   mf:name "403a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403a.srx> .
+
+:test_403b rdf:type mf:CompletenessTest ;
+   mf:name "403b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403b.srx> .
+
+:test_403c rdf:type mf:CompletenessTest ;
+   mf:name "403c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403c.srx> .
+
+:test_403d rdf:type mf:CompletenessTest ;
+   mf:name "403d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403d.srx> .
+
+:test_403e rdf:type mf:CompletenessTest ;
+   mf:name "403e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403e.srx> .
+
+:test_403f rdf:type mf:CompletenessTest ;
+   mf:name "403f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403f.srx> .
+
+:test_403g rdf:type mf:CompletenessTest ;
+   mf:name "403g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403g.srx> .
+
+:test_403h rdf:type mf:CompletenessTest ;
+   mf:name "403h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403h.srx> .
+
+:test_403i rdf:type mf:CompletenessTest ;
+   mf:name "403i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_403.owl> ;
+        qt:query <test_403i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_403i.srx> .
+
+:test_404a rdf:type mf:CompletenessTest ;
+   mf:name "404a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404a.srx> .
+
+:test_404b rdf:type mf:CompletenessTest ;
+   mf:name "404b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404b.srx> .
+
+:test_404c rdf:type mf:CompletenessTest ;
+   mf:name "404c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404c.srx> .
+
+:test_404d rdf:type mf:CompletenessTest ;
+   mf:name "404d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404d.srx> .
+
+:test_404e rdf:type mf:CompletenessTest ;
+   mf:name "404e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404e.srx> .
+
+:test_404f rdf:type mf:CompletenessTest ;
+   mf:name "404f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404f.srx> .
+
+:test_404g rdf:type mf:CompletenessTest ;
+   mf:name "404g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404g.srx> .
+
+:test_404h rdf:type mf:CompletenessTest ;
+   mf:name "404h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404h.srx> .
+
+:test_404i rdf:type mf:CompletenessTest ;
+   mf:name "404i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_404.owl> ;
+        qt:query <test_404i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_404i.srx> .
+
+:test_405a rdf:type mf:CompletenessTest ;
+   mf:name "405a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405a.srx> .
+
+:test_405b rdf:type mf:CompletenessTest ;
+   mf:name "405b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405b.srx> .
+
+:test_405c rdf:type mf:CompletenessTest ;
+   mf:name "405c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405c.srx> .
+
+:test_405d rdf:type mf:CompletenessTest ;
+   mf:name "405d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405d.srx> .
+
+:test_405e rdf:type mf:CompletenessTest ;
+   mf:name "405e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405e.srx> .
+
+:test_405f rdf:type mf:CompletenessTest ;
+   mf:name "405f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405f.srx> .
+
+:test_405g rdf:type mf:CompletenessTest ;
+   mf:name "405g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405g.srx> .
+
+:test_405h rdf:type mf:CompletenessTest ;
+   mf:name "405h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405h.srx> .
+
+:test_405i rdf:type mf:CompletenessTest ;
+   mf:name "405i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405i.srx> .
+
+:test_405j rdf:type mf:CompletenessTest ;
+   mf:name "405j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405j.srx> .
+
+:test_405k rdf:type mf:CompletenessTest ;
+   mf:name "405k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405k.srx> .
+
+:test_405l rdf:type mf:CompletenessTest ;
+   mf:name "405l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405l.srx> .
+
+:test_405m rdf:type mf:CompletenessTest ;
+   mf:name "405m" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405m.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405m.srx> .
+
+:test_405n rdf:type mf:CompletenessTest ;
+   mf:name "405n" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405n.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405n.srx> .
+
+:test_405o rdf:type mf:CompletenessTest ;
+   mf:name "405o" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_405.owl> ;
+        qt:query <test_405o.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_405o.srx> .

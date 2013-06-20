@@ -1,0 +1,1165 @@
+@prefix :	<http://obda.org/quest/tests/completeness#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:    <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:	<http://obda.org/quest/tests/test-query#> .
+@prefix obdat: <http://obda.org/quest/tests/test-scenario#> .
+
+<> rdf:type mf:Manifest ;
+   rdfs:label "Role subsumption" ;
+   mf:entries
+   (
+      :test_10a
+      :test_10b
+      :test_10c
+      :test_10d
+      :test_10e
+      :test_10f
+      :test_10g
+      :test_10h
+      :test_11a
+      :test_11b
+      :test_11c
+      :test_11d
+      :test_11e
+      :test_11f
+      :test_11g
+      :test_11h
+      :test_12a
+      :test_12b
+      :test_12c
+      :test_12d
+      :test_12e
+      :test_12f
+      :test_12g
+      :test_12h
+      :test_13a
+      :test_13b
+      :test_13c
+      :test_13d
+      :test_13e
+      :test_13f
+      :test_13g
+      :test_13h
+      :test_13i
+      :test_13j
+      :test_13k
+      :test_13l
+      :test_14a
+      :test_14b
+      :test_14c
+      :test_14d
+      :test_14e
+      :test_14f
+      :test_14g
+      :test_14h
+      :test_14i
+      :test_14j
+      :test_14k
+      :test_14l
+      :test_15a
+      :test_15b
+      :test_15c
+      :test_15d
+      :test_15e
+      :test_15f
+      :test_15g
+      :test_15h
+      :test_15i
+      :test_15j
+      :test_15k
+      :test_15l
+      :test_16a
+      :test_16b
+      :test_16c
+      :test_16d
+      :test_16e
+      :test_16f
+      :test_16g
+      :test_16h
+      :test_16i
+      :test_16j
+      :test_16k
+      :test_16l
+      :test_17a
+      :test_17b
+      :test_17c
+      :test_17d
+      :test_17e
+      :test_17f
+      :test_17g
+      :test_17h
+      :test_17i
+      :test_17j
+      :test_17k
+      :test_17l
+      :test_18a
+      :test_18b
+      :test_18c
+      :test_18d
+      :test_18e
+      :test_18f
+      :test_18g
+      :test_18h
+      :test_18i
+      :test_18j
+      :test_18k
+      :test_18l
+
+   ) .
+
+:test_10a rdf:type mf:CompletenessTest ;
+   mf:name "10a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10a.srx> .
+
+:test_10b rdf:type mf:CompletenessTest ;
+   mf:name "10b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10b.srx> .
+
+:test_10c rdf:type mf:CompletenessTest ;
+   mf:name "10c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10c.srx> .
+
+:test_10d rdf:type mf:CompletenessTest ;
+   mf:name "10d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10d.srx> .
+
+:test_10e rdf:type mf:CompletenessTest ;
+   mf:name "10e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10e.srx> .
+
+:test_10f rdf:type mf:CompletenessTest ;
+   mf:name "10f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10f.srx> .
+
+:test_10g rdf:type mf:CompletenessTest ;
+   mf:name "10g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10g.srx> .
+
+:test_10h rdf:type mf:CompletenessTest ;
+   mf:name "10h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_10.owl> ;
+        qt:query <test_10h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_10h.srx> .
+
+:test_11a rdf:type mf:CompletenessTest ;
+   mf:name "11a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11a.srx> .
+
+:test_11b rdf:type mf:CompletenessTest ;
+   mf:name "11b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11b.srx> .
+
+:test_11c rdf:type mf:CompletenessTest ;
+   mf:name "11c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11c.srx> .
+
+:test_11d rdf:type mf:CompletenessTest ;
+   mf:name "11d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11d.srx> .
+
+:test_11e rdf:type mf:CompletenessTest ;
+   mf:name "11e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11e.srx> .
+
+:test_11f rdf:type mf:CompletenessTest ;
+   mf:name "11f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11f.srx> .
+
+:test_11g rdf:type mf:CompletenessTest ;
+   mf:name "11g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11g.srx> .
+
+:test_11h rdf:type mf:CompletenessTest ;
+   mf:name "11h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_11.owl> ;
+        qt:query <test_11h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_11h.srx> .
+
+:test_12a rdf:type mf:CompletenessTest ;
+   mf:name "12a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12a.srx> .
+
+:test_12b rdf:type mf:CompletenessTest ;
+   mf:name "12b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12b.srx> .
+
+:test_12c rdf:type mf:CompletenessTest ;
+   mf:name "12c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12c.srx> .
+
+:test_12d rdf:type mf:CompletenessTest ;
+   mf:name "12d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12d.srx> .
+
+:test_12e rdf:type mf:CompletenessTest ;
+   mf:name "12e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12e.srx> .
+
+:test_12f rdf:type mf:CompletenessTest ;
+   mf:name "12f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12f.srx> .
+
+:test_12g rdf:type mf:CompletenessTest ;
+   mf:name "12g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12g.srx> .
+
+:test_12h rdf:type mf:CompletenessTest ;
+   mf:name "12h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_12.owl> ;
+        qt:query <test_12h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_12h.srx> .
+
+:test_13a rdf:type mf:CompletenessTest ;
+   mf:name "13a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13a.srx> .
+
+:test_13b rdf:type mf:CompletenessTest ;
+   mf:name "13b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13b.srx> .
+
+:test_13c rdf:type mf:CompletenessTest ;
+   mf:name "13c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13c.srx> .
+
+:test_13d rdf:type mf:CompletenessTest ;
+   mf:name "13d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13d.srx> .
+
+:test_13e rdf:type mf:CompletenessTest ;
+   mf:name "13e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13e.srx> .
+
+:test_13f rdf:type mf:CompletenessTest ;
+   mf:name "13f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13f.srx> .
+
+:test_13g rdf:type mf:CompletenessTest ;
+   mf:name "13g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13g.srx> .
+
+:test_13h rdf:type mf:CompletenessTest ;
+   mf:name "13h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13h.srx> .
+
+:test_13i rdf:type mf:CompletenessTest ;
+   mf:name "13i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13i.srx> .
+
+:test_13j rdf:type mf:CompletenessTest ;
+   mf:name "13j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13j.srx> .
+
+:test_13k rdf:type mf:CompletenessTest ;
+   mf:name "13k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13k.srx> .
+
+:test_13l rdf:type mf:CompletenessTest ;
+   mf:name "13l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_13.owl> ;
+        qt:query <test_13l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_13l.srx> .
+
+:test_14a rdf:type mf:CompletenessTest ;
+   mf:name "14a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14a.srx> .
+
+:test_14b rdf:type mf:CompletenessTest ;
+   mf:name "14b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14b.srx> .
+
+:test_14c rdf:type mf:CompletenessTest ;
+   mf:name "14c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14c.srx> .
+
+:test_14d rdf:type mf:CompletenessTest ;
+   mf:name "14d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14d.srx> .
+
+:test_14e rdf:type mf:CompletenessTest ;
+   mf:name "14e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14e.srx> .
+
+:test_14f rdf:type mf:CompletenessTest ;
+   mf:name "14f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14f.srx> .
+
+:test_14g rdf:type mf:CompletenessTest ;
+   mf:name "14g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14g.srx> .
+
+:test_14h rdf:type mf:CompletenessTest ;
+   mf:name "14h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14h.srx> .
+
+:test_14i rdf:type mf:CompletenessTest ;
+   mf:name "14i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14i.srx> .
+
+:test_14j rdf:type mf:CompletenessTest ;
+   mf:name "14j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14j.srx> .
+
+:test_14k rdf:type mf:CompletenessTest ;
+   mf:name "14k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14k.srx> .
+
+:test_14l rdf:type mf:CompletenessTest ;
+   mf:name "14l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_14.owl> ;
+        qt:query <test_14l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_14l.srx> .
+
+:test_15a rdf:type mf:CompletenessTest ;
+   mf:name "15a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15a.srx> .
+
+:test_15b rdf:type mf:CompletenessTest ;
+   mf:name "15b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15b.srx> .
+
+:test_15c rdf:type mf:CompletenessTest ;
+   mf:name "15c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15c.srx> .
+
+:test_15d rdf:type mf:CompletenessTest ;
+   mf:name "15d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15d.srx> .
+
+:test_15e rdf:type mf:CompletenessTest ;
+   mf:name "15e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15e.srx> .
+
+:test_15f rdf:type mf:CompletenessTest ;
+   mf:name "15f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15f.srx> .
+
+:test_15g rdf:type mf:CompletenessTest ;
+   mf:name "15g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15g.srx> .
+
+:test_15h rdf:type mf:CompletenessTest ;
+   mf:name "15h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15h.srx> .
+
+:test_15i rdf:type mf:CompletenessTest ;
+   mf:name "15i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15i.srx> .
+
+:test_15j rdf:type mf:CompletenessTest ;
+   mf:name "15j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15j.srx> .
+
+:test_15k rdf:type mf:CompletenessTest ;
+   mf:name "15k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15k.srx> .
+
+:test_15l rdf:type mf:CompletenessTest ;
+   mf:name "15l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_15.owl> ;
+        qt:query <test_15l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_15l.srx> .
+
+:test_16a rdf:type mf:CompletenessTest ;
+   mf:name "16a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16a.srx> .
+
+:test_16b rdf:type mf:CompletenessTest ;
+   mf:name "16b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16b.srx> .
+
+:test_16c rdf:type mf:CompletenessTest ;
+   mf:name "16c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16c.srx> .
+
+:test_16d rdf:type mf:CompletenessTest ;
+   mf:name "16d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16d.srx> .
+
+:test_16e rdf:type mf:CompletenessTest ;
+   mf:name "16e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16e.srx> .
+
+:test_16f rdf:type mf:CompletenessTest ;
+   mf:name "16f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16f.srx> .
+
+:test_16g rdf:type mf:CompletenessTest ;
+   mf:name "16g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16g.srx> .
+
+:test_16h rdf:type mf:CompletenessTest ;
+   mf:name "16h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16h.srx> .
+
+:test_16i rdf:type mf:CompletenessTest ;
+   mf:name "16i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16i.srx> .
+
+:test_16j rdf:type mf:CompletenessTest ;
+   mf:name "16j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16j.srx> .
+
+:test_16k rdf:type mf:CompletenessTest ;
+   mf:name "16k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16k.srx> .
+
+:test_16l rdf:type mf:CompletenessTest ;
+   mf:name "16l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_16.owl> ;
+        qt:query <test_16l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_16l.srx> .
+
+:test_17a rdf:type mf:CompletenessTest ;
+   mf:name "17a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17a.srx> .
+
+:test_17b rdf:type mf:CompletenessTest ;
+   mf:name "17b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17b.srx> .
+
+:test_17c rdf:type mf:CompletenessTest ;
+   mf:name "17c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17c.srx> .
+
+:test_17d rdf:type mf:CompletenessTest ;
+   mf:name "17d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17d.srx> .
+
+:test_17e rdf:type mf:CompletenessTest ;
+   mf:name "17e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17e.srx> .
+
+:test_17f rdf:type mf:CompletenessTest ;
+   mf:name "17f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17f.srx> .
+
+:test_17g rdf:type mf:CompletenessTest ;
+   mf:name "17g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17g.srx> .
+
+:test_17h rdf:type mf:CompletenessTest ;
+   mf:name "17h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17h.srx> .
+
+:test_17i rdf:type mf:CompletenessTest ;
+   mf:name "17i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17i.srx> .
+
+:test_17j rdf:type mf:CompletenessTest ;
+   mf:name "17j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17j.srx> .
+
+:test_17k rdf:type mf:CompletenessTest ;
+   mf:name "17k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17k.srx> .
+
+:test_17l rdf:type mf:CompletenessTest ;
+   mf:name "17l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_17.owl> ;
+        qt:query <test_17l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_17l.srx> .
+
+:test_18a rdf:type mf:CompletenessTest ;
+   mf:name "18a" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18a.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18a.srx> .
+
+:test_18b rdf:type mf:CompletenessTest ;
+   mf:name "18b" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18b.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18b.srx> .
+
+:test_18c rdf:type mf:CompletenessTest ;
+   mf:name "18c" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18c.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18c.srx> .
+
+:test_18d rdf:type mf:CompletenessTest ;
+   mf:name "18d" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18d.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18d.srx> .
+
+:test_18e rdf:type mf:CompletenessTest ;
+   mf:name "18e" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18e.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18e.srx> .
+
+:test_18f rdf:type mf:CompletenessTest ;
+   mf:name "18f" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18f.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18f.srx> .
+
+:test_18g rdf:type mf:CompletenessTest ;
+   mf:name "18g" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18g.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18g.srx> .
+
+:test_18h rdf:type mf:CompletenessTest ;
+   mf:name "18h" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18h.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18h.srx> .
+
+:test_18i rdf:type mf:CompletenessTest ;
+   mf:name "18i" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18i.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18i.srx> .
+
+:test_18j rdf:type mf:CompletenessTest ;
+   mf:name "18j" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18j.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18j.srx> .
+
+:test_18k rdf:type mf:CompletenessTest ;
+   mf:name "18k" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18k.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18k.srx> .
+
+:test_18l rdf:type mf:CompletenessTest ;
+   mf:name "18l" ;
+   rdfs:comment "" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_18.owl> ;
+        qt:query <test_18l.rq>  ] ;
+   mf:parameters <quest-noeq-nosig.properties> ;
+   mf:result  <test_18l.srx> .

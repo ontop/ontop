@@ -2,25 +2,30 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.Properties;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
@@ -47,9 +52,6 @@ import org.slf4j.LoggerFactory;
 /***
  * An instance of Store that encapsulates all the functionality needed for a
  * "classic" store.
- * 
- * @author mariano
- * 
  */
 public class QuestDBClassicStore extends QuestDBAbstractStore {
 
@@ -58,34 +60,26 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private static final long serialVersionUID = 2495624993519521937L;
 
-	private static Logger log = LoggerFactory
-			.getLogger(QuestDBClassicStore.class);
+	private static Logger log = LoggerFactory.getLogger(QuestDBClassicStore.class);
 
-	protected transient OWLOntologyManager man = OWLManager
-			.createOWLOntologyManager();
-
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
 	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	
+	private Set<OWLOntology> closure;
 
-	public QuestDBClassicStore(String name, java.net.URI tboxFile)
-			throws Exception {
+	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
 		this(name, tboxFile, null);
-
 	}
 
-	public QuestDBClassicStore(String name, java.net.URI tboxFile,
-			QuestPreferences config) throws Exception {
+	public QuestDBClassicStore(String name, java.net.URI tboxFile, QuestPreferences config) throws Exception {
 		super(name);
 		Ontology tbox = readOntology(tboxFile.toASCIIString());
-	
 		setup(tbox, config);
 	}
 	
-	public QuestDBClassicStore(String name, String tboxFile,
-			QuestPreferences config) throws Exception {
+	public QuestDBClassicStore(String name, String tboxFile, QuestPreferences config) throws Exception {
 		super(name);
-
 		Ontology tbox = null;
 		if (tboxFile == null) {
 			tbox = ofac.createOntology(OBDADataFactoryImpl.getIRI(name));
@@ -97,19 +91,21 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Ontology readOntology(String tboxFile) throws Exception {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
-		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(
-				tboxFile).getParentFile(), false);
+		File f = new File(tboxFile);
+		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
 		man.addIRIMapper(iriMapper);
-		OWLOntology owlontology = man
-				.loadOntologyFromOntologyDocument(new File(tboxFile));
-		Set<OWLOntology> clousure = man.getImportsClosure(owlontology);
-
-		return translator.mergeTranslateOntologies(clousure);
+		
+		OWLOntology owlontology = null;
+		if (tboxFile.contains("file:")) {
+			owlontology = man.loadOntologyFromOntologyDocument(new URL(tboxFile).openStream());
+		} else {
+			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
+		}
+		closure = man.getImportsClosure(owlontology);
+		return translator.mergeTranslateOntologies(closure);
 	}
 
-	public QuestDBClassicStore(String name, Dataset data,
-			QuestPreferences config) throws Exception {
-
+	public QuestDBClassicStore(String name, Dataset data, QuestPreferences config) throws Exception {
 		super(name);
 		Ontology tbox = getTBox(data);
 		setup(tbox, config);
@@ -121,41 +117,57 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		}
 		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
-		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(
-				QuestConstants.CLASSIC))
-			throw new Exception(
-					"A classic repository must be created with the CLASSIC flag in the configuration.");
-	
+		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			throw new Exception("A classic repository must be created with the CLASSIC flag in the configuration.");
+		}
 		createInstance(onto, config);
 	}
 
-	private void createInstance(Ontology tbox, Properties config)
-			throws Exception {
+	private void createInstance(Ontology tbox, QuestPreferences config) throws Exception {
 		questInstance = new Quest();
 		questInstance.setPreferences(config);
 		questInstance.loadTBox(tbox);
 		questInstance.setupRepository();
+		
+		final boolean bObtainFromOntology = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		QuestConnection conn = questInstance.getNonPoolConnection();
+		QuestStatement st = conn.createStatement();
+		if (bObtainFromOntology) {
+			// Retrieves the ABox from the ontology file.
+			log.debug("Loading data from Ontology into the database");
+			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getEquivalenceMap());
+			int count = st.insertData(aBoxIter, 5000, 500);
+			log.debug("Inserted {} triples from the ontology.", count);
+		}
+		if (bObtainFromMappings) {
+			// Retrieves the ABox from the target database via mapping.
+			log.debug("Loading data from Mappings into the database");
+			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+			for (Predicate p : tbox.getVocabulary()) {
+				obdaModelForMaterialization.declarePredicate(p);
+			}
+			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
+			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
+			int count = st.insertData(assertionIter, 5000, 500);
+			materializer.disconnect();
+			log.debug("Inserted {} triples from the mappings.", count);
+		}
+		st.createIndexes();
+		st.close();
+		if (!conn.getAutoCommit())
+		conn.commit();
+		
+		questInstance.updateSemanticIndexMappings();
 
 		log.debug("Store {} has been created successfully", name);
 	}
-	
-	
 
 	public void saveState(String storePath) throws IOException {
-		//StringBuffer filename = new StringBuffer();
-	//	filename.append(storePath);
-		//ObjectOutput out = new ObjectOutputStream(new FileOutputStream(filename.toString()));
-	//	out.writeObject(store);
-	//	out.close();
-
+		// NO-OP
 	}
 
-	public QuestDBClassicStore restore(String storePath) throws IOException {
-		//File file = new File(storePath);
-		//ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-		//QuestDBAbstractStore store = (QuestDBAbstractStore) in.readObject();
-		//in.close();
-		
+	public QuestDBClassicStore restore(String storePath) throws IOException {	
 		return this;
 	}
 	
@@ -182,17 +194,12 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			result.addEntities(o.getVocabulary());
 			result.addAssertions(result.getAssertions());
 		}
-
 		return result;
-
 	}
 
-	private Ontology getOntology(URI graphURI, Resource context)
-			throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(
-				graphURI.toString(), RDFFormat.TURTLE);
-		RDFParser rdfParser = Rio.createParser(rdfFormat,
-				ValueFactoryImpl.getInstance());
+	private Ontology getOntology(URI graphURI, Resource context) throws Exception {
+		RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString(), RDFFormat.TURTLE);
+		RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
 		rdfParser.setVerifyData(false);
 		rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
 		rdfParser.setPreserveBNodeIDs(true);
@@ -207,22 +214,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		} finally {
 			in.close();
 		}
-
 		return reader.getOntology();
-
 	}
 
 	public class RDFTBoxReader extends RDFHandlerBase {
-
 		private Ontology ontology = null;
-
 		private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
 		private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-		public RDFTBoxReader() {
-
-		}
 
 		public Ontology getOntology() {
 			return ontology;
@@ -237,8 +235,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		public void handleStatement(Statement st) throws RDFHandlerException {
 			ontology.addEntity(getVocabulary(st));
 			Axiom axiom = getTBoxAxiom(st);
-			if (axiom == null)
+			if (axiom == null) {
 				return;
+			}
 			ontology.addAssertion(axiom);
 		}
 
@@ -250,19 +249,14 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			URI pred = st.getPredicate();
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
-				Predicate dataProperty = fac.getDataPropertyPredicate(pred
-						.stringValue());
+				Predicate dataProperty = fac.getDataPropertyPredicate(pred.stringValue());
 				return dataProperty;
 			} else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
 				Predicate className = fac.getClassPredicate(obj.stringValue());
 				return className;
 			}
-			Predicate objectProperty = fac.getObjectPropertyPredicate(pred
-					.stringValue());
+			Predicate objectProperty = fac.getObjectPropertyPredicate(pred.stringValue());
 			return objectProperty;
-
 		}
-
 	}
-
 }
