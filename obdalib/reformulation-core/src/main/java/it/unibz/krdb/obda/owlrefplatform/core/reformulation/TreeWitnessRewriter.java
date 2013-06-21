@@ -334,8 +334,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 *
 	 */
 	private static class ExtPredicateCache {
-		private Set<Predicate> usedExts = new HashSet<Predicate>();
-		private ExtDatalogProgram extDP;
+		//private Set<Predicate> usedExts = new HashSet<Predicate>();
+		private boolean usedExts = false;
+		final private ExtDatalogProgram extDP;
 		
 		public ExtPredicateCache(ExtDatalogProgram extDP) {
 			this.extDP = extDP;
@@ -353,21 +354,37 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 				
 		public Function getExtAtom(Function a) {
+			Predicate p = a.getFunctionSymbol();
+			
 			if (a.getArity() == 1) {
-				return extDP.getExtClassAtom(a, usedExts);
+				Predicate ext = extDP.getEntryForPredicate(p);
+				if (ext != null) {
+					usedExts = true; // usedExts.add(ext);
+					return fac.getAtom(ext, a.getTerm(0));
+				}
 			}
 			else if (a.getArity() == 2) {
 				NewLiteral t0 = a.getTerm(0);
 				NewLiteral t1 = a.getTerm(1);
-				if (t0 instanceof AnonymousVariable) 
-					return extDP.getExtPropertySomeAtom(a.getFunctionSymbol(), true, t1, usedExts);
-				else if (t1 instanceof AnonymousVariable) 
-					return extDP.getExtPropertySomeAtom(a.getFunctionSymbol(), false, t0, usedExts);
-				else 
-					return extDP.getExtPropertyAtom(a, usedExts);
+				if (t0 instanceof AnonymousVariable) {
+					Predicate ext = extDP.getEntryForPropertySomeRestriction(p, true);
+					usedExts = true; // usedExts.add(ext);
+					return fac.getAtom(ext, t1);					
+				}
+				else if (t1 instanceof AnonymousVariable) {
+					Predicate ext = extDP.getEntryForPropertySomeRestriction(p, false);
+					usedExts = true; // usedExts.add(ext);
+					return fac.getAtom(ext, t0);										
+				}
+				else {
+					Predicate ext = extDP.getEntryForPredicate(a.getFunctionSymbol());
+					if (ext != null) {
+						usedExts = true; // usedExts.add(ext);
+						return fac.getAtom(ext, t0, t1);
+					}
+				}
 			}
-			else 
-				return a; //(Function)a.clone();
+			return a;
 		}
 		
 		/**
@@ -375,7 +392,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		 */
 
 		public DatalogProgram getExtDP() {
-			if (usedExts.isEmpty())
+			if (!usedExts) 
 				return null;
 			
 			//DatalogProgram dp = fac.getDatalogProgram();		
@@ -383,7 +400,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			//	List<CQIE> extDef = extDP.getDP(pred);			 
 			//	dp.appendRule(extDef);		 
 			//}
-			return extDP.getFullDP(); //dp;
+			return extDP.getFullDP(); 
 		}
 	}
 	

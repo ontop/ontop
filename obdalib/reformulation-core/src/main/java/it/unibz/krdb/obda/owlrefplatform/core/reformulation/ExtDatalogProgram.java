@@ -18,12 +18,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hp.hpl.jena.iri.IRI;
 
 public class ExtDatalogProgram {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -59,40 +55,7 @@ public class ExtDatalogProgram {
 		extSomeInvPropertyMap.clear();
 		fullDP.removeAllRules();
 	}
-	
-	/**
-	 * 
-	 * @param p: a query predicate E
-	 * @param usedExts: a collection of Ext_E predicates that have been used in the rewriting so far
-	 * @return the Ext_E predicate or E if Ext_E is trivially defined (i.e., with a single rule Ext_E :- E)
-	 */
-	
-	public Function getExtClassAtom(Function a, Set<Predicate> usedExts)  {
-		Predicate ext = getEntryFor(a.getFunctionSymbol());
-		if (ext != null) {
-			usedExts.add(ext);
-			return fac.getAtom(ext, a.getTerm(0));
-		}
-		else
-			return a;
-	}
-	
-	public Function getExtPropertyAtom(Function a, Set<Predicate> usedExts)  {
-		Predicate ext = getEntryFor(a.getFunctionSymbol());
-		if (ext != null) {
-			usedExts.add(ext);
-			return fac.getAtom(ext, a.getTerm(0), a.getTerm(1));
-		}
-		else
-			return a;
-	}
-	
-	public Function getExtPropertySomeAtom(Predicate p, boolean inverse, NewLiteral t, Set<Predicate> usedExts) {
-		Predicate ext = getEntryFor(p, inverse);
-		usedExts.add(ext);
-		return fac.getAtom(ext, t);
-	}
-	
+
 	public DatalogProgram getFullDP() {
 		return fullDP;
 	}
@@ -130,7 +93,7 @@ public class ExtDatalogProgram {
 		return dp;
 	}
 	
-	private Predicate getEntryFor(Predicate p) {
+	public Predicate getEntryForPredicate(Predicate p) {
 		if (extPredicateMap.containsKey(p))
 			return extPredicateMap.get(p);
 			
@@ -159,7 +122,7 @@ public class ExtDatalogProgram {
 		}
 	}	
 
-	private Predicate getEntryFor(Predicate p, boolean inverse) {
+	public Predicate getEntryForPropertySomeRestriction(Predicate p, boolean inverse) {
 		Map<Predicate, Predicate> extMap = inverse ? extSomePropertyMap : extSomeInvPropertyMap;	
 		if (extMap.containsKey(p))
 			return extMap.get(p);
