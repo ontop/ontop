@@ -9,16 +9,6 @@
       <variable name="m"/>
    </head>
    <results>
-      <result>
-         <binding name="x">
-            <literal>NULL</literal>
-         </binding>
-         <binding name="y">
-            <literal>NULL</literal>
-         </binding>
-         <binding name="m">
-            <literal>NULL</literal>
-         </binding>
-      </result>
+
    </results>
 </sparql>

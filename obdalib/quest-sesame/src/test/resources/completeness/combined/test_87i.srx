@@ -8,13 +8,6 @@
       <variable name="z"/>
    </head>
    <results>
-      <result>
-         <binding name="x">
-            <literal>NULL</literal>
-         </binding>
-         <binding name="z">
-            <literal>NULL</literal>
-         </binding>
-      </result>
+
    </results>
 </sparql>

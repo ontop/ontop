@@ -7,10 +7,6 @@
       <variable name="x"/>
    </head>
    <results>
-      <result>
-         <binding name="x">
-            <literal>NULL</literal>
-         </binding>
-      </result>
+
    </results>
 </sparql>

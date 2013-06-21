@@ -41,7 +41,6 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.dawg.DAWGTestResultSetUtil;
 import org.openrdf.query.impl.MutableTupleQueryResult;
 import org.openrdf.query.impl.TupleQueryResultBuilder;
@@ -271,32 +270,6 @@ public abstract class CompletenessTest extends TestCase {
 		}
 	
 	/**
-	 * Removes bindings that has "NULL" keyword value. This method is app-dependent to this test framework.
-	 * The reason to have this method is because Quest doesn't produce tuples if there is no answer and 
-	 * Sesame Test Compliance library cannot parse NULL value in the expected result. Therefore, the 
-	 * alternative way is to create a "NULL" keyword in the expected result and then remove it from the 
-	 * <code>BindingSet</code> so both results (i.e., actual and expected) can be compared well.
-	 * 
-	 * @param expectedResults
-	 * 			The expected result <code>BindingSet,/code>
-	 * @return Returns a new <code>BindingSet</code> list in which "NULL" values are removed.
-	 */
-	private static List<BindingSet> removeNullValuesFromBindingSet(List<BindingSet> expectedResults) {
-		List<BindingSet> toReturn = new ArrayList<BindingSet>();
-		for (BindingSet expectedBs : expectedResults) {
-			QueryBindingSet newExpectedBs = new QueryBindingSet();
-			for (String bindingName : expectedBs.getBindingNames()) {
-				Value value = expectedBs.getValue(bindingName);
-				if (!value.stringValue().equals("NULL")) {
-					newExpectedBs.addBinding(bindingName, value);
-					toReturn.add(newExpectedBs);
-				}
-			}
-		}
-		return toReturn;
-	}
-	
-	/**
 	 * Compares the two query results by converting them to graphs and returns
 	 * true if they are equal. QueryResults are equal if they contain the same
 	 * set of BindingSet and have the headers. Blank nodes identifiers are not
@@ -312,10 +285,6 @@ public abstract class CompletenessTest extends TestCase {
 		List<BindingSet> list1 = Iterations.asList(tqr1);
 		List<BindingSet> list2 = Iterations.asList(tqr2);
 
-		// XXX Hack to remove null values
-		list1 = removeNullValuesFromBindingSet(list1);
-		list2 = removeNullValuesFromBindingSet(list2);
-		
 		return matchBindingSets(list1, list2) && matchBindingSets(list2, list1);
 	}
 
@@ -324,10 +293,6 @@ public abstract class CompletenessTest extends TestCase {
 	{
 		List<BindingSet> list1 = Iterations.asList(tqr1);
 		List<BindingSet> list2 = Iterations.asList(tqr2);
-
-		// XXX Hack to remove null values
-		list1 = removeNullValuesFromBindingSet(list1);
-		list2 = removeNullValuesFromBindingSet(list2);
 		
 		return matchBindingSets(list1, list2);
 	}
