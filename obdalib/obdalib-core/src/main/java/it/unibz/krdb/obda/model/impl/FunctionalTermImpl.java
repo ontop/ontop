@@ -155,46 +155,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public String toString() {
-		if (string == null) {
-			StringBuffer sb_t = new StringBuffer();
-			for (int i = 0; i < terms.size(); i++) {
-				if (sb_t.length() > 0) {
-					sb_t.append(",");
-				}
-				NewLiteral t = terms.get(i);
-				sb_t.append(t.toString());
-			}
-			StringBuffer sb_name = new StringBuffer();
-
-			if (functor == OBDAVocabulary.EQ) {
-				sb_name.append("EQ");
-			} else if (functor == OBDAVocabulary.NEQ) {
-				sb_name.append("NEQ");
-			} else if (functor == OBDAVocabulary.GT) {
-				sb_name.append("GT");
-			} else if (functor == OBDAVocabulary.GTE) {
-				sb_name.append("GTE");
-			} else if (functor == OBDAVocabulary.LT) {
-				sb_name.append("LT");
-			} else if (functor == OBDAVocabulary.LTE) {
-				sb_name.append("LTE");
-			} else if (functor == OBDAVocabulary.NOT) {
-				sb_name.append("NOT");
-			} else if (functor == OBDAVocabulary.AND) {
-				sb_name.append("AND");
-			} else if (functor == OBDAVocabulary.OR) {
-				sb_name.append("OR");
-			} else {
-				sb_name.append(this.functor.getName());
-			}
-
-			sb_name.append("(");
-			sb_name.append(sb_t);
-			sb_name.append(")");
-
-			string = sb_name.toString();
-		}
-		return string;
+		return TermUtil.toString(this);
 	}
 
 	/**

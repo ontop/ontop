@@ -1,15 +1,14 @@
 package it.unibz.krdb.obda.model.impl;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ValueConstantImpl extends AbstractLiteral implements ValueConstant {
 
@@ -20,10 +19,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	private final String language;
 
 	private final Predicate.COL_TYPE type;
-
-	private final int identifier;
-
-	private String string = null;
 
 	/**
 	 * The default constructor.
@@ -41,8 +36,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		this.value = value;
 		this.language = language;
 		this.type = type;
-		this.string = toString();
-		this.identifier = string.hashCode();
 	}
 
 	@Override
@@ -54,12 +47,13 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 			return false;
 		}
 		ValueConstantImpl value2 = (ValueConstantImpl) obj;
-		return this.identifier == value2.identifier;
+		return this.hashCode() == value2.hashCode();
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
+		final String constantString = toString();
+		return constantString.hashCode();
 	}
 
 	@Override
@@ -84,21 +78,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public String toString() {
-		if (string != null) {
-			return string;
-		}
-		StringBuffer bf = new StringBuffer();
-		bf.append("\"");
-		bf.append(value);
-		bf.append("\"");
-		if (type == COL_TYPE.LITERAL_LANG) {
-			bf.append("@");
-			bf.append(language);
-		} else if (type != COL_TYPE.LITERAL) {
-			bf.append("^^");
-			bf.append(type);
-		}
-		return bf.toString();
+		return TermUtil.toString(this);
 	}
 
 	@Override

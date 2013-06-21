@@ -28,19 +28,19 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	/**
 	 * The default constructor.
 	 * 
-	 * @param uri
+	 * @param iri
 	 *            URI from a term.
 	 */
-	protected URIConstantImpl(IRI uri) {
-		this.iri = uri;
-		this.iristr = uri.toString();
-		this.identifier = uri.hashCode();
+	protected URIConstantImpl(IRI iri) {
+		this.iri = iri;
+		this.iristr = iri.toString();
+		this.identifier = iri.hashCode();
 	}
 
-	protected URIConstantImpl(String uri) {
-		this.iri = OBDADataFactoryImpl.getIRI(uri);
-		this.iristr = uri.toString();
-		this.identifier = uri.hashCode();
+	protected URIConstantImpl(String iri) {
+		this.iri = OBDADataFactoryImpl.getIRI(iri);
+		this.iristr = iri;
+		this.identifier = iri.hashCode();
 	}
 	
 	@Override
@@ -69,7 +69,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String toString() {
-		return iristr;
+		return TermUtil.toString(this);
 	}
 
 	@Override

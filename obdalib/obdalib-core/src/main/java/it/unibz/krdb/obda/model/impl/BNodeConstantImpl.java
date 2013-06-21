@@ -58,7 +58,7 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 
 	@Override
 	public String toString() {
-		return name;
+		return TermUtil.toString(this);
 	}
 
 	@Override

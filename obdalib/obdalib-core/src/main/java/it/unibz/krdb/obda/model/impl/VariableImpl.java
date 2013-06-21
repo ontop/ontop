@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.sun.msv.datatype.xsd.XSDatatype;
-
 public class VariableImpl extends AbstractLiteral implements Variable {
 
 	private static final long serialVersionUID = 5723075311798541659L;
@@ -50,7 +48,7 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 	// case
 	@Override
 	public String toString() {
-		return name;
+		return TermUtil.toString(this);
 	}
 
 	@Override

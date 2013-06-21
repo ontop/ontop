@@ -12,7 +12,8 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 
 	private static final long serialVersionUID = 6099056787768897902L;
 
-	private static final String name = "_";
+	private static final String DEFAULT_NAME = "_";
+	
 	private static final int identifier = -4000;
 
 	protected AnonymousVariable() {
@@ -34,7 +35,7 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 
 	@Override
 	public String getName() {
-		return name;
+		return DEFAULT_NAME;
 	}
 
 	@Override
@@ -44,7 +45,7 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 
 	@Override
 	public String toString() {
-		return getName();
+		return TermUtil.toString(this);
 	}
 
 	@Override
