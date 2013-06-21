@@ -12,6 +12,5 @@ public class MappingStyledDocument extends DefaultStyledDocument {
 
 	public MappingStyledDocument(JTextPane parent, OBDAModel apic, TargetQueryVocabularyValidator validator) {
 		super();
-		QueryPainter painter = new QueryPainter(apic, parent, validator);
 	}
 }

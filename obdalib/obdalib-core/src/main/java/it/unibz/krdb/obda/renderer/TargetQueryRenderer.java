@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.codec;
+package it.unibz.krdb.obda.renderer;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
@@ -6,7 +6,6 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
-import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
@@ -17,62 +16,55 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
-
-	private static final long serialVersionUID = 1L;
-
-	/**
-	 * The Prefix Manager to obtain the prefix name and its complete URI.
-	 */
-	private PrefixManager prefMan = apic.getPrefixManager();
+/**
+ * A utility class to render a Target Query object into its representational
+ * string.
+ */
+public class TargetQueryRenderer {
 
 	/**
-	 * Default constructor.
-	 * 
-	 * @param apic
-	 *            The OBDA model.
+	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
+	 * a prefix manager to shorten full IRI name.
 	 */
-	public TargetQueryToTurtleCodec(OBDAModel apic) {
-		super(apic);
-	}
-
-	@Override
-	public String encode(OBDAQuery input) {
+	public static String encode(OBDAQuery input, PrefixManager prefixManager) {
 		if (!(input instanceof CQIE)) {
 			return "";
 		}
-		TurtleContainer turtle = new TurtleContainer();
+		TurtleWriter turtleWriter = new TurtleWriter();
 		List<Function> body = ((CQIE) input).getBody();
 		for (Function atom : body) {
 			String subject, predicate, object = "";
 			String originalString = atom.getFunctionSymbol().toString();
 			if (isUnary(atom)) {
-				subject = getDisplayName(atom.getTerm(0));
+				NewLiteral subjectTerm = atom.getTerm(0);
+				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = "a";
-				object = getAbbreviatedName(originalString, false);
-				if (originalString.equals(object))
+				object = getAbbreviatedName(originalString, prefixManager, false);
+				if (originalString.equals(object)) {
 					object = "<" + object + ">";
+				}
 			} else {
-				subject = getDisplayName(atom.getTerm(0));
-				predicate = getAbbreviatedName(originalString, false);
-				if (originalString.equals(predicate))
+				NewLiteral subjectTerm = atom.getTerm(0);
+				subject = getDisplayName(subjectTerm, prefixManager);
+				predicate = getAbbreviatedName(originalString, prefixManager, false);
+				if (originalString.equals(predicate)) {
 					predicate = "<" + predicate + ">";
-				object = getDisplayName(atom.getTerm(1));
+				}
+				NewLiteral objectTerm = atom.getTerm(1);
+				object = getDisplayName(objectTerm, prefixManager);
 			}
-
-			turtle.put(subject, predicate, object);
+			turtleWriter.put(subject, predicate, object);
 		}
-		return turtle.print();
+		return turtleWriter.print();
 	}
 
 	/**
 	 * Checks if the atom is unary or not.
 	 */
-	private boolean isUnary(Function atom) {
+	private static boolean isUnary(Function atom) {
 		return atom.getArity() == 1 ? true : false;
 	}
 
@@ -89,12 +81,12 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	 * cloning the existing prefix manager, and hence this is highly inefficient
 	 * method. *
 	 */
-	private String getAbbreviatedName(String uri, boolean insideQuotes) {
+	private static String getAbbreviatedName(String uri, PrefixManager pm, boolean insideQuotes) {
 		// Cloning the existing manager
 		PrefixManager prefManClone = new SimplePrefixManager();
-		Map<String,String> currentMap = this.prefMan.getPrefixMap();
+		Map<String,String> currentMap = pm.getPrefixMap();
 		for (String prefix: currentMap.keySet()) {
-			prefManClone.addPrefix(prefix, this.prefMan.getURIDefinition(prefix));
+			prefManClone.addPrefix(prefix, pm.getURIDefinition(prefix));
 		}
 		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
 		boolean containsRDFPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDF);
@@ -123,12 +115,12 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	/**
 	 * Prints the text representation of different terms.
 	 */
-	private String getDisplayName(NewLiteral term) {
+	private static String getDisplayName(NewLiteral term, PrefixManager prefixManager) {
 		StringBuffer sb = new StringBuffer();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
-			String fname = getAbbreviatedName(functionSymbol.toString(), false);
+			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (functionSymbol instanceof DataTypePredicate) {
 				// if the function symbol is a data type predicate
 				if (isLiteralDataType(functionSymbol)) {
@@ -137,25 +129,25 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					if (arity == 1) {
 						// without the language tag
 						NewLiteral var = function.getTerms().get(0);
-						sb.append(getDisplayName(var));
+						sb.append(getDisplayName(var, prefixManager));
 						sb.append("^^rdfs:Literal");
 					} else if (arity == 2) {
 						// with the language tag
 						NewLiteral var = function.getTerms().get(0);
 						NewLiteral lang = function.getTerms().get(1);
-						sb.append(getDisplayName(var));
+						sb.append(getDisplayName(var, prefixManager));
 						sb.append("@");
 						if (lang instanceof ValueConstant) {
 							// Don't pass this to getDisplayName() because 
 							// language constant is not written as @"lang-tag"
 							sb.append(((ValueConstant) lang).getValue());
 						} else {
-							sb.append(getDisplayName(lang));
+							sb.append(getDisplayName(lang, prefixManager));
 						}
 					}
 				} else { // for the other data types
 					NewLiteral var = function.getTerms().get(0);
-					sb.append(getDisplayName(var));
+					sb.append(getDisplayName(var, prefixManager));
 					sb.append("^^");
 					sb.append(fname);
 				}
@@ -167,11 +159,11 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 				List<String> varNames = new ArrayList<String>();
 				for (NewLiteral innerTerm : function.getTerms()) {
 					if (innerTerm instanceof Variable) {
-						varNames.add(getDisplayName(innerTerm));
+						varNames.add(getDisplayName(innerTerm, prefixManager));
 					}
 				}
 				String originalUri = String.format(templateFormat, varNames.toArray());
-				String shortenUri = getAbbreviatedName(originalUri, false); // shorten the URI if possible
+				String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
 				if (!shortenUri.equals(originalUri)) {
 					sb.append(shortenUri);
 				} else {
@@ -188,7 +180,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					if (separator) {
 						sb.append(", ");
 					}
-					sb.append(getDisplayName(innerTerm));
+					sb.append(getDisplayName(innerTerm, prefixManager));
 					separator = true;
 				}
 				sb.append(")");
@@ -199,7 +191,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			sb.append("}");
 		} else if (term instanceof URIConstant) {
 			String originalUri = term.toString();
-			String shortenUri = getAbbreviatedName(originalUri, false); // shorten the URI if possible
+			String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
 			if (!shortenUri.equals(originalUri)) {
 				sb.append(shortenUri);
 			} else {
@@ -216,128 +208,11 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		return sb.toString();
 	}
 
-	private boolean isLiteralDataType(Predicate predicate) {
+	private static boolean isLiteralDataType(Predicate predicate) {
 		return predicate.equals(OBDAVocabulary.RDFS_LITERAL) || predicate.equals(OBDAVocabulary.RDFS_LITERAL_LANG);
 	}
 
-	@Override
-	public OBDAQuery decode(String input) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * A utility class to store the Turtle main components, i.e., subject,
-	 * predicate and object. The data structure simulates a tree structure where
-	 * the subjects are the roots, the predicates are the intermediate nodes and
-	 * the objects are the leaves.
-	 * <p>
-	 * An example:
-	 * 
-	 * <pre>
-	 *   $s1 :p1 $o1
-	 *   $s1 :p2 $o2
-	 *   $s1 :p2 $o3
-	 * </pre>
-	 * 
-	 * The example is stored to the TurtleContainer as shown below.
-	 * 
-	 * <pre>
-	 *         :p1 - $o1    
-	 *        / 
-	 *   $s1 <      $o2
-	 *        :p2 <
-	 *              $o3
-	 * </pre>
-	 * <p>
-	 * This data structure helps in printing the short Turtle syntax by
-	 * traversing the tree.
-	 * 
-	 * <pre>
-	 * $s1 :p1 $o1; :p2 $o2, $o3 .
-	 * </pre>
-	 */
-	class TurtleContainer {
-
-		private HashMap<String, ArrayList<String>> subjectToPredicates = new HashMap<String, ArrayList<String>>();
-		private HashMap<String, ArrayList<String>> predicateToObjects = new HashMap<String, ArrayList<String>>();
-
-		TurtleContainer() { /* NO-OP */
-		}
-
-		/**
-		 * Adding the subject, predicate and object components to this
-		 * container.
-		 * 
-		 * @param subject
-		 *            The subject term of the Function.
-		 * @param predicate
-		 *            The Function predicate.
-		 * @param object
-		 *            The object term of the Function.
-		 */
-		void put(String subject, String predicate, String object) {
-			// Subject to Predicates map
-			ArrayList<String> predicateList = subjectToPredicates.get(subject);
-			if (predicateList == null) {
-				predicateList = new ArrayList<String>();
-			}
-			insert(predicateList, predicate);
-			subjectToPredicates.put(subject, predicateList);
-
-			// Predicate to Objects map
-			ArrayList<String> objectList = predicateToObjects.get(predicate);
-			if (objectList == null) {
-				objectList = new ArrayList<String>();
-			}
-			objectList.add(object);
-			predicateToObjects.put(predicate, objectList);
-		}
-
-		// Utility method to insert the predicate
-		private void insert(ArrayList<String> list, String input) {
-			if (!list.contains(input)) {
-				if (input.equals("a") || input.equals("rdf:type")) {
-					list.add(0, input);
-				} else {
-					list.add(input);
-				}
-			}
-		}
-
-		/**
-		 * Prints the container.
-		 * 
-		 * @return The Turtle short representation.
-		 */
-		String print() {
-			StringBuffer sb = new StringBuffer();
-			for (String subject : subjectToPredicates.keySet()) {
-				sb.append(subject);
-				sb.append(" ");
-				boolean semiColonSeparator = false;
-				for (String predicate : subjectToPredicates.get(subject)) {
-					if (semiColonSeparator) {
-						sb.append(" ; ");
-					}
-					sb.append(predicate);
-					sb.append(" ");
-					semiColonSeparator = true;
-
-					boolean commaSeparator = false;
-					for (String object : predicateToObjects.get(predicate)) {
-						if (commaSeparator) {
-							sb.append(" , ");
-						}
-						sb.append(object);
-						commaSeparator = true;
-					}
-				}
-				sb.append(" ");
-				sb.append(".");
-				sb.append(" ");
-			}
-			return sb.toString();
-		}
+	private TargetQueryRenderer() {
+		// Prevent initialization
 	}
 }

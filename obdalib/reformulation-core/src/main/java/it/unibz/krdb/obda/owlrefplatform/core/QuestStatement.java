@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -35,6 +34,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerat
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
+import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -542,9 +542,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram program = translateAndPreProcess(query);
 
 		OBDAQuery rewriting = rewriter.rewrite(program);
-		DatalogProgramToTextCodec codec = new DatalogProgramToTextCodec(
-				unfoldingOBDAModel);
-		return codec.encode((DatalogProgram) rewriting);
+		return DatalogProgramRenderer.encode((DatalogProgram) rewriting);
 	}
 
 	/**

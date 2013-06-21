@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
-import it.unibz.krdb.obda.codec.TargetQueryToTurtleCodec;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.IconLoader;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
@@ -12,16 +11,20 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.gui.swing.utils.QueryPainter;
 import it.unibz.krdb.obda.gui.swing.utils.QueryPainter.ValidatorListener;
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
+import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
+import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.awt.Component;
@@ -53,26 +56,30 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
-	private OBDAModel controller;
+	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
+	private PrefixManager prefixManager;
+	
 	/** Logger */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModel controller, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
+	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
-		this.controller = controller;
+		this.obdaModel = obdaModel;
 		this.parent = parent;
 		this.dataSource = dataSource;
 		this.validator = validator;
 
+		prefixManager = obdaModel.getPrefixManager();
+		
 		initComponents();
 
 		// Formatting the src query
@@ -87,7 +94,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		cmdInsertMapping.setEnabled(false);
-		QueryPainter painter = new QueryPainter(controller, txtTargetQuery, validator);
+		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery, validator);
 		painter.addValidatorListener(new ValidatorListener() {
 
 			@Override
@@ -182,7 +189,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			final boolean isValid = validator.validate(targetQuery);
 			if (isValid) {
 				try {
-					OBDAModel mapcon = controller;
+					OBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
 
 					OBDASQLQuery body = dataFactory.getSQLQuery(source);
@@ -534,11 +541,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		}
 		insertMapping(targetQueryString, sourceQueryString);
 	}// GEN-LAST:event_cmdInsertMappingActionPerformed
-
-	/* A utility method to make the text plain by removing white spaces, tabs and newlines */
-	private String makePlainText(String text) {
-		return text.replaceAll("\\s+", " ").trim();
-	}
 	
 	private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdCancelActionPerformed
 		parent.setVisible(false);
@@ -571,7 +573,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAMappingAxiom mapping;
 
 	private CQIE parse(String query) {
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(controller.getPrefixManager());
+		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
@@ -601,14 +603,17 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * creating a new one.
 	 */
 	public void setMapping(OBDAMappingAxiom mapping) {
-		cmdInsertMapping.setText("Update");
 		this.mapping = mapping;
+
+		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		txtSourceQuery.setText(mapping.getSourceQuery().toString());
+		OBDAQuery sourceQuery = mapping.getSourceQuery();
+		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
+		txtSourceQuery.setText(srcQuery);
 
-		TargetQueryToTurtleCodec trgcodec = new TargetQueryToTurtleCodec(this.controller);
-		String trgQuery = trgcodec.encode(mapping.getTargetQuery());
+		OBDAQuery targetQuery = mapping.getTargetQuery();
+		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		txtTargetQuery.setText(trgQuery);
 	}
 }

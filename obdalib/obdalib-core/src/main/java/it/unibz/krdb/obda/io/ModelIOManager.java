@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.io;
 
-import it.unibz.krdb.obda.codec.TargetQueryToTurtleCodec;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.Indicator;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
@@ -17,6 +16,8 @@ import it.unibz.krdb.obda.parser.TargetQueryParserException;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
 import it.unibz.krdb.obda.parser.UnparsableTargetQueryException;
+import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
+import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -63,8 +64,6 @@ public class ModelIOManager {
     
     private List<TargetQueryParser> listOfParsers = new ArrayList<TargetQueryParser>();
     
-    private TargetQueryToTurtleCodec turtleRenderer;
-
     private static final Logger log = LoggerFactory.getLogger(ModelIOManager.class);
     
     /**
@@ -75,7 +74,6 @@ public class ModelIOManager {
      */
     public ModelIOManager(OBDAModel model) {
         this.model = model;
-        turtleRenderer = new TargetQueryToTurtleCodec(model);
         prefixManager = model.getPrefixManager();
         dataFactory = model.getDataFactory();
 
@@ -229,7 +227,6 @@ public class ModelIOManager {
 
     private void writeMappingDeclaration(OBDADataSource source, BufferedWriter writer) throws IOException {
         final URI sourceUri = source.getSourceID();
-//        CQFormatter formatter = new TurtleFormatter(model.getPrefixManager());
 
         writer.write(MAPPING_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
         writer.write("\n");
@@ -240,17 +237,26 @@ public class ModelIOManager {
                 writer.write("\n");
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
-            writer.write(Label.target.name() + "\t\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
-            writer.write(Label.source.name() + "\t\t" + printSourceQuery(mapping.getSourceQuery()) + "\n");
+            
+            OBDAQuery targetQuery = mapping.getTargetQuery();
+            writer.write(Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
+            
+            OBDAQuery sourceQuery = mapping.getSourceQuery();
+            writer.write(Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
         writer.write(END_COLLECTION_SYMBOL);
         writer.write("\n\n");
     }
 
+    private String printTargetQuery(OBDAQuery query) {
+    	return TargetQueryRenderer.encode(query, prefixManager);
+    }
+    
     private String printSourceQuery(OBDAQuery query) {
-    	String str = convertTabToSpaces(query.toString());
-    	return str.replaceAll("\n", "\n\t\t\t");
+    	String sourceString = SourceQueryRenderer.encode(query);
+    	String toReturn = convertTabToSpaces(sourceString);
+    	return toReturn.replaceAll("\n", "\n\t\t\t");
     }
     
     /*
