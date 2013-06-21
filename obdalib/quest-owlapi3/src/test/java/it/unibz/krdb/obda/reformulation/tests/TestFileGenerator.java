@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -39,6 +39,14 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is used to generate completeness tests by reading the wiki page at
+ * https://babbage.inf.unibz.it/trac/obdapublic/wiki/dllite_completness_test.
+ * 
+ * It is no longer use and has been replaced by DLLiteCompletenessTest_* in
+ * quest-sesame package.
+ */
+@Deprecated
 public class TestFileGenerator {
 
 	private static final String ONTOURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/";
@@ -51,30 +59,24 @@ public class TestFileGenerator {
 	private String testlocation = null;
 	private String mode = null;
 
-	// private OWLOntologyManager manager = null;
-	// private OWLDataFactory dataFactory = null;
 	private OBDAModel apic = null;
 	private it.unibz.krdb.obda.reformulation.tests.XMLResultWriter writer = null;
 	private Vector<String> tests = null;
 
-	private Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression> expressions = null;
+	private Vector<OntologyGeneratorExpression> expressions = null;
 
 	private int linenr = 1;
-
-	// private boolean GENERATE_ALTERNATIVES_FOR_EXISTS = false;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public TestFileGenerator(String basefolder, String mode) {
-		this.obdalocation = "file://" + basefolder
-				+ "src/test/resources/test/ontologies/";
+		this.obdalocation = "file://" + basefolder + "src/test/resources/test/ontologies/";
 		this.xmllocation = basefolder + "src/test/resources/test/ontologies/";
-		this.testlocation = basefolder
-				+ "src/test/java/it/unibz/krdb/obda/reformulation/tests/";
+		this.testlocation = basefolder + "src/test/java/it/unibz/krdb/obda/reformulation/tests/";
 		this.mode = mode;
 		tests = new Vector<String>();
-		expressions = new Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>();
-		// manager = OWLManager.createOWLOntologyManager();
+		expressions = new Vector<OntologyGeneratorExpression>();
+
 		log.info("Main Location: {}", basefolder);
 		log.info("Location for OBDA files: {}", obdalocation);
 		log.info("Location for XML files: {}", xmllocation);
@@ -83,14 +85,12 @@ public class TestFileGenerator {
 	}
 
 	public static void main(String[] args) throws Exception {
-
 		if (args.length != 3) {
 			throw new Exception("The program requires 3 parameters.\n"
 					+ "1. root folder for the tests"
 					+ "2. the query mode. Can either be 'sparql' or 'datalog'"
 					+ "3. path to the input file\n");
 		}
-
 		String tl = args[0];
 		String mode = args[1];
 		String inputfile = args[2];
@@ -100,37 +100,31 @@ public class TestFileGenerator {
 	}
 
 	public void parseInputFile(String f) throws Exception {
-
 		File file = new File(f);
 		FileInputStream fis = null;
 		BufferedInputStream bis = null;
 		DataInputStream dis = null;
-
+		OntologyGeneratorExpression expression = null;
+		
 		try {
 			fis = new FileInputStream(file);
-
 			bis = new BufferedInputStream(fis);
 			dis = new DataInputStream(bis);
 
-			it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression expression = null;
-
 			while (dis.available() != 0) {
-
-				String line = dis.readLine().trim();
+				String line = dis.readUTF().trim();
 				log.debug("Input: {}", line);
 				if (line.contains("#END#")) {
 					log.debug("Found end. Ignoring the rest of the file");
 					break;
 				}
-
 				if (line.startsWith("||")) {
 					line = line.substring(2, line.length() - 2);
 					line.trim();
 					line = line.replace("||", "#");
 					String[] array = line.split("#");
 					if (array.length != 7) {
-						throw new Exception(" Input at " + linenr
-								+ " is not in proper format!");
+						throw new Exception(" Input at " + linenr + " is not in proper format!");
 					} else {
 						if (lineContainsScenario(array[0].trim())) {
 							if (array[0].trim().length() > 0) {
@@ -140,8 +134,7 @@ public class TestFileGenerator {
 								String id = array[0].trim();
 								String tbox = array[2].trim();
 								String abox = array[3].trim();
-								expression = new OntologyGeneratorExpression(
-										id, tbox, abox);
+								expression = new OntologyGeneratorExpression(id, tbox, abox);
 							}
 							String queryid = array[1].trim();
 							String query = array[4].trim();
@@ -159,7 +152,6 @@ public class TestFileGenerator {
 			fis.close();
 			bis.close();
 			dis.close();
-
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -167,19 +159,13 @@ public class TestFileGenerator {
 		}
 
 		Iterator<OntologyGeneratorExpression> it = expressions.iterator();
-		int t = 1;
 		while (it.hasNext()) {
 			OntologyGeneratorExpression ex = it.next();
 			String abox = ex.getAbox();
 			String tbox = ex.getTbox();
 			String id = ex.getId();
-			Vector<OWLOntology> o = null;
-
-			// Iterator<OWLOntology> oit = o.iterator();
-
+			
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-
-			// OWLOntology onto = oit.next();
 
 			OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 			apic = obdafac.getOBDAModel();
@@ -187,8 +173,7 @@ public class TestFileGenerator {
 
 			OWLOntology onto = null;
 			try {
-				onto = createOntology(id, abox, tbox, manager,
-						manager.getOWLDataFactory());
+				onto = createOntology(id, abox, tbox, manager, manager.getOWLDataFactory());
 			} catch (Exception e) {
 				log.error(e.getMessage());
 				log.error("Processing ontology: {} {}", id, abox + " " + tbox);
@@ -206,46 +191,40 @@ public class TestFileGenerator {
 			Iterator<String> qit = queries.iterator();
 			while (qit.hasNext()) {
 				String query = qit.next();
-
 				String genQuery = "";
 				try {
-					if (mode.equals(SPARQL_MODE))
+					if (mode.equals(SPARQL_MODE)) {
 						genQuery = getSPARQLQuery(query);
-					else if (mode.equals(DATALOG_MODE))
+					} else if (mode.equals(DATALOG_MODE)) {
 						genQuery = getDatalogQuery(query);
-					else
+					} else {
 						throw new Exception("Cannot generate the proper query");
+					}
 				} catch (Exception e) {
 					log.error("Processing query: {}", query);
 					log.error(e.getMessage());
 					throw e;
 				}
-
 				controller.addQuery(genQuery, ids.get(query));
 				String[] queryhead = getQueryHead(query);
 				String[] results = getResults(queriesMap.get(query));
 				writer.addResult(ids.get(query), queryhead, results);
 			}
 			String loc = obdalocation + ontoname + ".obda";
-			DataManager ioManager = new DataManager(apic, controller);
-			ioManager.saveOBDAData(URI.create(loc), apic.getPrefixManager());
+			ModelIOManager ioManager = new ModelIOManager(apic);
+			ioManager.save(loc);
 
 			/* we start from 7 because the location must start with file:// */
 			String owluri = obdalocation.substring(7) + ontoname + ".owl";
-			manager.saveOntology(onto, new DefaultOntologyFormat(),
-					IRI.create(new File(owluri).toURI()));
+			manager.saveOntology(onto, new DefaultOntologyFormat(),	IRI.create(new File(owluri).toURI()));
 			String xmluri = xmllocation + ontoname + ".xml";
 			writer.saveXMLResults(xmluri);
 			tests.add(ontoname);
-			t++;
-
 		}
-
 		generateJUnitTestClass();
 	}
 
 	private String[] getQueryHead(String query) throws Exception {
-
 		String[] aux = query.split(":-");
 		if (aux.length != 2) {
 			throw new Exception("Wrong query format at " + linenr);
@@ -262,12 +241,12 @@ public class TestFileGenerator {
 		}
 	}
 
-	private OWLClassExpression getOWLEntity(URI ontouri, String e,
-			OWLDataFactory dataFactory) {
+	private OWLClassExpression getOWLEntity(URI ontouri, String e, OWLDataFactory dataFactory) {
 		e = e.trim();
 
-		if (e.length() == 0)
+		if (e.length() == 0) {
 			return null;
+		}
 		if (e.startsWith("E")) {
 			e = e.substring(1);
 			if (e.contains("-")) {
@@ -284,40 +263,30 @@ public class TestFileGenerator {
 						dataFactory.getOWLThing());
 			}
 		}
-		return dataFactory.getOWLClass(IRI.create(URI.create(ontouri.toString()
-				+ "#" + e)));
-
+		return dataFactory.getOWLClass(IRI.create(URI.create(ontouri.toString()	+ "#" + e)));
 	}
 
-	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri,
-			String name, OWLDataFactory dataFactory) {
+	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri, String name, OWLDataFactory dataFactory) {
 		name = name.trim();
-		// System.out.println(name);
 		if (name.contains("-")) {
 			name = name.substring(0, name.length() - 5);// remove ^^-^^ from end
-			OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI
-					.create(URI.create(ontouri.toString() + "#" + name)));
+			OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + name)));
 			return dataFactory.getOWLObjectInverseOf(op);
 		} else {
-			return dataFactory.getOWLObjectProperty(IRI.create(URI
-					.create(ontouri.toString() + "#" + name)));
+			return dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + name)));
 		}
 	}
 
-	private OWLOntology createOntology(String testid, String abox, String tbox,
-			OWLOntologyManager manager, OWLDataFactory dataFactory)
+	private OWLOntology createOntology(String testid, String abox, String tbox, OWLOntologyManager manager, OWLDataFactory dataFactory)
 			throws Exception {
 
-		// URI uri = URI.create(ONTOURI + "test.owl");
-		URI uri = URI
-				.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl");
+		URI uri = URI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl");
 
 		/*
 		 * Adding the TBox
 		 */
 		String tboxcontent[] = tbox.split(",");
-		List<OWLAxiom> axioms = getAxiomsFromTBox(tboxcontent, uri, manager,
-				dataFactory);
+		List<OWLAxiom> axioms = getAxiomsFromTBox(tboxcontent, uri, manager, dataFactory);
 		OWLOntology onto = getOntolgoies(axioms, testid);
 
 		/*
@@ -336,31 +305,21 @@ public class TestFileGenerator {
 				axiom = null;
 				if (names.length == 2) {
 					String objprop = uri.toString() + "#" + entity;
-					OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI
-							.create(URI.create(objprop)));
+					OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(objprop)));
 					String ind1uri = uri + "#" + names[0];
 					String ind2uri = uri + "#" + names[1];
-					OWLIndividual ind1 = dataFactory.getOWLNamedIndividual(IRI
-							.create(URI.create(ind1uri)));
-					OWLIndividual ind2 = dataFactory.getOWLNamedIndividual(IRI
-							.create(URI.create(ind2uri)));
-
-					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(op,
-							ind1, ind2);
+					OWLIndividual ind1 = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(ind1uri)));
+					OWLIndividual ind2 = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(ind2uri)));
+					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(op, ind1, ind2);
 
 					// declaration
-					manager.addAxiom(onto,
-							dataFactory.getOWLDeclarationAxiom(op));
-
+					manager.addAxiom(onto, dataFactory.getOWLDeclarationAxiom(op));
 				} else {
 					String clazz = uri.toString() + "#" + entity;
-					OWLClass cl = dataFactory.getOWLClass(IRI.create(URI
-							.create(clazz)));
+					OWLClass cl = dataFactory.getOWLClass(IRI.create(URI.create(clazz)));
 					String induri = uri + "#" + parameters;
-					OWLIndividual ind = dataFactory.getOWLNamedIndividual(IRI
-							.create(URI.create(induri)));
+					OWLIndividual ind = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(induri)));
 					axiom = dataFactory.getOWLClassAssertionAxiom(cl, ind);
-
 				}
 			}
 			if (axiom != null) {
@@ -371,15 +330,9 @@ public class TestFileGenerator {
 		return onto;
 	}
 
-	private OWLOntology getOntolgoies(List<OWLAxiom> axioms, String testid)
-			throws Exception {
-
+	private OWLOntology getOntolgoies(List<OWLAxiom> axioms, String testid) throws Exception {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create(ONTOURI
-				+ "test_" + testid.trim() + ".owl")));
-		// OWLOntology onto =
-		// manager.createOntology(IRI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl"));
-
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create(ONTOURI	+ "test_" + testid.trim() + ".owl")));
 		for (int i = 0; i < axioms.size(); i++) {
 			OWLAxiom vex = axioms.get(i);
 			manager.addAxiom(onto, vex);
@@ -387,13 +340,10 @@ public class TestFileGenerator {
 		return onto;
 	}
 
-	private List<OWLAxiom> getAxiomsFromTBox(String[] tbox, URI uri,
-			OWLOntologyManager manager, OWLDataFactory dataFactory)
+	private List<OWLAxiom> getAxiomsFromTBox(String[] tbox, URI uri, OWLOntologyManager manager, OWLDataFactory dataFactory)
 			throws Exception {
-
 		List<OWLAxiom> axioms = new LinkedList<OWLAxiom>();
 		for (int i = 0; i < tbox.length; i++) {
-			// Vector<OWLAxiom> axioms = new Vector<OWLAxiom>();
 			String exp = tbox[i].trim();
 			String[] entities = null;
 			boolean isRoleInclusion = false;
@@ -405,19 +355,15 @@ public class TestFileGenerator {
 				entities = exp.split("ISA");
 			}
 
-			if (entities.length != 2)
-				throw new Exception(" TBox at " + linenr
-						+ " is not in proper format!");
-
+			if (entities.length != 2) {
+				throw new Exception(" TBox at " + linenr + " is not in proper format!");
+			}
 			String s1 = entities[0].trim();
 			String s2 = entities[1].trim();
 			if (isRoleInclusion) {
-				OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri,
-						s1, dataFactory);
-				OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri,
-						s2, dataFactory);
-				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyOfAxiom(role1,
-						role2);
+				OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri, s1, dataFactory);
+				OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri, s2, dataFactory);
+				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyOfAxiom(role1, role2);
 
 				for (OWLEntity ent : role1.getSignature()) {
 					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
@@ -425,28 +371,22 @@ public class TestFileGenerator {
 				for (OWLEntity ent : role2.getSignature()) {
 					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
 				}
-
 				axioms.add(ax);
 			} else {
 				OWLClassExpression left = getOWLEntity(uri, s1, dataFactory);
 				OWLClassExpression right = getOWLEntity(uri, s2, dataFactory);
-				int c = 1;
-
 				OWLAxiom ax = dataFactory.getOWLSubClassOfAxiom(left, right);
 
 				for (OWLEntity ent : ax.getSignature()) {
 					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
 				}
-
 				axioms.add(ax);
-
 			}
 		}
 		return axioms;
 	}
 
 	private String getSPARQLQuery(String query) throws Exception {
-
 		String[] aux = query.split(":-");
 		if (aux.length != 2) {
 			throw new Exception("Wrong query format at " + linenr);
@@ -477,11 +417,9 @@ public class TestFileGenerator {
 		StringBuffer sb1 = new StringBuffer();
 		for (int i = 0; i < atoms.length; i++) {
 			String atom = atoms[i];
-
 			if (sb1.length() > 0) {
 				sb1.append(" . ");
 			}
-
 			i1 = atom.indexOf("(");
 			i2 = atom.indexOf(")");
 			String name = atom.substring(0, i1);
@@ -493,18 +431,9 @@ public class TestFileGenerator {
 							+ linenr);
 				}
 				sb1.append(getSPARQLTerm(p[0]));
-				// if (!(p[0].startsWith("'") && p[0].endsWith("'"))) {
-				// sb1.append("$");
-				// }
-				// sb1.append(p[0]);
 				sb1.append(" dllite:");
 				sb1.append(name);
-
 				sb1.append(getSPARQLTerm(p[1]));
-				// if (!(p[1].startsWith("") && p[1].endsWith("'"))) {
-				// sb1.append("$");
-				// }
-				// sb1.append(p[1]);
 			} else {
 				sb1.append(getSPARQLTerm(parameters));
 				sb1.append(" rdf:type dllite:");
@@ -532,7 +461,6 @@ public class TestFileGenerator {
 	}
 
 	private String getDatalogQuery(String query) throws Exception {
-
 		StringBuffer ds = new StringBuffer(); // datalog string
 
 		String[] aux = query.split(":-");
@@ -618,7 +546,6 @@ public class TestFileGenerator {
 		log.info("Generating JUnit test file: {}", outfile);
 		try {
 			FileWriter fstream = new FileWriter(outfile);
-
 			BufferedWriter out = new BufferedWriter(fstream);
 
 			out.append("package it.unibz.krdb.obda.reformulation.tests;\n");
@@ -812,10 +739,8 @@ public class TestFileGenerator {
 			out.newLine();
 			out.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	private boolean lineContainsScenario(String s) {
