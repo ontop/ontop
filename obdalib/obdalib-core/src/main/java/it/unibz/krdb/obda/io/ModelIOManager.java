@@ -166,24 +166,28 @@ public class ModelIOManager {
         String line = "";
         URI sourceUri = null;
         while ((line = reader.readLine()) != null) {
-            if (isCommentLine(line) || line.isEmpty()) {
-                continue; // skip comment lines and blank lines
-            }
-            if (line.contains(PREFIX_DECLARATION_TAG)) {
-                readPrefixDeclaration(reader);
-            } else if (line.contains(CLASS_DECLARATION_TAG)) {
-                readClassDeclaration(reader);
-            } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
-                readObjectPropertyDeclaration(reader);
-            } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
-                readDataPropertyDeclaration(reader);
-            } else if (line.contains(SOURCE_DECLARATION_TAG)) {
-                sourceUri = readSourceDeclaration(reader);
-            } else if (line.contains(MAPPING_DECLARATION_TAG)) {
-                readMappingDeclaration(reader, sourceUri);
-            } else {
-                throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()));
-            }
+        	try {
+	            if (isCommentLine(line) || line.isEmpty()) {
+	                continue; // skip comment lines and blank lines
+	            }
+	            if (line.contains(PREFIX_DECLARATION_TAG)) {
+	                readPrefixDeclaration(reader);
+	            } else if (line.contains(CLASS_DECLARATION_TAG)) {
+	                readClassDeclaration(reader);
+	            } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
+	                readObjectPropertyDeclaration(reader);
+	            } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
+	                readDataPropertyDeclaration(reader);
+	            } else if (line.contains(SOURCE_DECLARATION_TAG)) {
+	                sourceUri = readSourceDeclaration(reader);
+	            } else if (line.contains(MAPPING_DECLARATION_TAG)) {
+	                readMappingDeclaration(reader, sourceUri);
+	            } else {
+	                throw new IOException("Unknown syntax: " + line);
+	            }
+        	} catch (Exception e) {
+        		throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()), e);
+        	}
         }
         
         // Throw some validation exceptions
@@ -369,6 +373,7 @@ public class ModelIOManager {
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.TARGET_QUERY_IS_BLANK));
                     isMappingValid = false;
                 }
+                // Load the target query
                 targetQuery = loadTargetQuery(targetString);
             } else if (currentLabel.equals(Label.source.name())) {
                 String sourceString = value;
