@@ -2,7 +2,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -255,7 +257,7 @@ public class TreeWitnessReasonerLite {
 	 * @return the set of subproperties
 	 */
 	
-	public Set<Property> getSubProperties(Property prop) {
+	private Set<Property> getSubProperties(Property prop) {
 		Set<Property> s = subproperties.get(prop);
 		if (s == null) {
 			s = Collections.singleton(prop);
@@ -273,6 +275,60 @@ public class TreeWitnessReasonerLite {
 		}
 		return s;
 	}
+	
+	public boolean isMoreSpecific(Function a1, Function a2) {
+		if (a1 == a2 || a1.equals(a2))
+			return true;
+
+		if ((a2.getArity() == 1) && (a1.getArity() == 1)) {
+			if (a1.getTerm(0).equals(a2.getTerm(0))) {
+					// add a2.NewLiteral anonymous 
+				Set<BasicClassDescription> subconcepts = getSubConcepts(a2.getPredicate());
+				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
+					log.debug("{} IS MORE SPECIFIC (1-1) THAN {}", a1, a2);
+					return true;
+				}
+			}
+		}
+		else if ((a1.getArity() == 1) && (a2.getArity() == 2)) {
+			NewLiteral a1NewLiteral = a1.getTerm(0);
+			if ((a2.getTerm(1) instanceof AnonymousVariable) && a2.getTerm(0).equals(a1NewLiteral)) {
+				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a2.getPredicate(), false);
+				Set<BasicClassDescription> subconcepts = getSubConcepts(prop);
+				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
+					log.debug("{} IS MORE SPECIFIC (1-2) THAN {}",  a1, a2);
+					return true;
+				}
+			}
+			else if ((a2.getTerm(0) instanceof AnonymousVariable) && a2.getTerm(1).equals(a1NewLiteral)) {
+				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a2.getPredicate(), true);
+				Set<BasicClassDescription> subconcepts = getSubConcepts(prop);
+				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
+					log.debug("{} IS MORE SPECIFIC (1-2) THAN {}",  a1, a2);
+					return true;
+				}
+			}
+		}
+		else if ((a1.getArity() == 2) && (a2.getArity() == 1)) { // MOST USEFUL
+			NewLiteral a2term = a2.getTerm(0);
+			if (a1.getTerm(0).equals(a2term)) {
+				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getPredicate(), false);
+				if (getSubConcepts(a2.getPredicate()).contains(prop)) {
+					log.debug("{} IS MORE SPECIFIC (2-1) THAN ", a1, a2);
+					return true;
+				}
+			}
+			if (a1.getTerm(1).equals(a2term)) {
+				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getPredicate(), true);
+				if (getSubConcepts(a2.getPredicate()).contains(prop)) {
+					log.debug("{} IS MORE SPECIFIC (2-1) THAN {}", a1, a2);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	
 	/**
 	 * getGenerators

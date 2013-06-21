@@ -164,7 +164,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			List<List<Function>> twfs = new ArrayList<List<Function>>(subsumes ? 1 : genAtoms.size());			
 			if (!subsumes) {
 				for (Function a : genAtoms) {				
-					MinimalCQProducer twfa = new MinimalCQProducer(reasoner, twf);
+					MinimalCQProducer twfa = new MinimalCQProducer(twf);
 					twfa.add(a); // 
 					twfs.add(cache.getExtAtoms(twfa));
 				}
