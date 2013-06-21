@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -12,7 +11,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.BufferedReader;
 import java.io.File;
