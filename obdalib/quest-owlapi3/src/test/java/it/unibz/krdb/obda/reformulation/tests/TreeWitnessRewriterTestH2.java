@@ -30,6 +30,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -68,32 +69,49 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 
 	final String testCase = "bsbm";
-	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl";  // bsbm LUBM-ex-20  stockexchange adolena
+	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; // bsbm
+																						// LUBM-ex-20
+																						// stockexchange
+																						// adolena
 	final String obdafile = "src/test/resources/test/treewitness" + testCase + ".obda";
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
-	
+
 	/* These are the distinct tuples that we know each query returns */
-	final int[] tuples = {
-		7, 0, 4, 1,								// Simple queries group
-		1, 2, 2, 1, 4, 3, 3, 					// CQs group
-		0, 1,    								// Literal
-		0, -1, 2, 								// String: Incompatible, Invalid, OK
-		0, 2, 2, 0, 2, 2, 0, 0, 0, 		    	// Integer: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
-		0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)
-		0, 2, 2, 0, 2, 2, 0, 0, 0,  			// Double: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
-		0, 0, 0, -1, -1, -1, -1, -1, 1,  	 	// Date time: (Incompatible, Incompatible, Incompatible); (Invalid, Invalid, Invalid); (Invalid, Invalid, OK)
-		0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,  // Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (OK, OK, Invalid, Invalid); (OK, Invalid, Invalid, OK)
-        2, 5,								    // FILTER: String (EQ, NEQ)
-        2, 5, 5, 7, 0, 2,					    // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
-        1, 3, 2, 3, 1, 2,					    // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
-        2, 0, 0, 2, 0, 2,					    // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-        1, 3, 2, 3, 1, 2,					    // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-        5, 5,								    // FILTER: Boolean (EQ, NEQ)
-        10,										// FILTER: LangMatches
-		1, 2, 1, 3, 2,							// Nested boolean expression
-		3, 3, 5, 5, 3, 7, 7, 7, 3, 10			// Query modifiers: LIMIT, OFFSET, and ORDER BY
+	final int[] tuples = { 7, 0, 4, 1, // Simple queries group
+			1, 2, 2, 1, 4, 3, 3, // CQs group
+			0, 1, // Literal
+			0, -1, 2, // String: Incompatible, Invalid, OK
+			0, 2, 2, 0, 2, 2, 0, 0, 0, // Integer: (Incompatible, OK, OK);
+										// (Incompatible, OK, OK);
+										// (Incompatible, No result, No result)
+			0, 1, 1, 0, 1, 1, 0, 1, 1, // Decimal: (Incompatible, OK, OK);
+										// (Incompatible, OK, OK);
+										// (Incompatible, OK, OK)
+			0, 2, 2, 0, 2, 2, 0, 0, 0, // Double: (Incompatible, OK, OK);
+										// (Incompatible, OK, OK);
+										// (Incompatible, No result, No result)
+			0, 0, 0, -1, -1, -1, -1, -1, 1, // Date time: (Incompatible,
+											// Incompatible, Incompatible);
+											// (Invalid, Invalid, Invalid);
+											// (Invalid, Invalid, OK)
+			0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5, // Boolean: (Incompatible,
+													// Incompatible,
+													// Incompatible,
+													// Incompatible); (OK, OK,
+													// Invalid, Invalid); (OK,
+													// Invalid, Invalid, OK)
+			2, 5, // FILTER: String (EQ, NEQ)
+			2, 5, 5, 7, 0, 2, // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
+			1, 3, 2, 3, 1, 2, // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
+			2, 0, 0, 2, 0, 2, // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
+			1, 3, 2, 3, 1, 2, // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
+			5, 5, // FILTER: Boolean (EQ, NEQ)
+			10, // FILTER: LangMatches
+			1, 2, 1, 3, 2, // Nested boolean expression
+			3, 3, 5, 5, 3, 7, 7, 7, 3, 10 // Query modifiers: LIMIT, OFFSET, and
+											// ORDER BY
 	};
-	
+
 	public class TestQuery {
 		public String id = "";
 		public String query = "";
@@ -112,7 +130,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */
-//		String driver = "org.h2.Driver";
+		// String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
@@ -133,15 +151,20 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-		
+
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel); // (obdaModel, new QueryController());
-		ioManager.load(new File(obdafile)); //.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(), obdaModel.getPrefixManager());
+		ModelIOManager ioManager = new ModelIOManager(obdaModel); // (obdaModel,
+																	// new
+																	// QueryController());
+		ioManager.load(new File(obdafile)); // .loadOBDADataFromURI(new
+											// File(obdafile).toURI(),
+											// ontology.getOntologyID().getOntologyIRI().toURI(),
+											// obdaModel.getPrefixManager());
 	}
 
 	@Override
@@ -153,7 +176,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 			log.debug(e.getMessage());
 		}
 	}
-	
+
 	private void dropTables() throws SQLException, IOException {
 
 		Statement st = conn.createStatement();
@@ -180,56 +203,67 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 		QueryIOManager qman = new QueryIOManager(qcontroller);
 
 		qman.load(new File(qfile));
-		
+
 		int counter = 0;
-		//for (QueryControllerGroup group : qcontroller.getGroups()) {
-			for (QueryControllerEntity entity : qcontroller.getElements()) {
-				if (!(entity instanceof QueryControllerQuery))
-					continue;
-				QueryControllerQuery query = (QueryControllerQuery)entity;
-				TestQuery tq = new TestQuery();
-				tq.id = query.getID();
-				tq.query = query.getQuery();
-				tq.distinctTuples = answer[counter];
-				testQueries.add(tq);
-				counter += 1;
-			}
-		//}
+		// for (QueryControllerGroup group : qcontroller.getGroups()) {
+		for (QueryControllerEntity entity : qcontroller.getElements()) {
+			if (!(entity instanceof QueryControllerQuery))
+				continue;
+			QueryControllerQuery query = (QueryControllerQuery) entity;
+			TestQuery tq = new TestQuery();
+			tq.id = query.getID();
+			tq.query = query.getQuery();
+			tq.distinctTuples = answer[counter];
+			testQueries.add(tq);
+			counter += 1;
+		}
+		// }
 	}
-	
+
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
-	
+
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-//		reasoner.loadOBDAModel(obdaModel);
+		// reasoner.loadOBDAModel(obdaModel);
 
 		// Now we are ready for querying
 		OWLStatement st = reasoner.getStatement();
 
 		List<Result> summaries = new LinkedList<TreeWitnessRewriterTestH2.Result>();
 
+		boolean fail = false;
+
 		int qc = 0;
 		for (TestQuery tq : testQueries) {
 			log.debug("Executing query: {}", qc);
-			log.debug("Query: {}", tq.query);
-			
+			String query = tq.query;
+			log.debug("Query: {}", query);
+
 			qc += 1;
-			
+
 			int count = 0;
 			long start = System.currentTimeMillis();
 			long end = 0;
 			try {
-				OWLResultSet rs = st.executeTuple(tq.query);
-				end = System.currentTimeMillis();
-				while (rs.nextRow()) {
-					count += 1;
+
+				if (query.toLowerCase().contains("select")) {
+					OWLResultSet rs = st.executeTuple(query);
+
+					end = System.currentTimeMillis();
+					while (rs.nextRow()) {
+						count += 1;
+					}
+				} else {
+					List<OWLAxiom> list = st.executeGraph(query);
+					count += list.size();
 				}
 			} catch (Exception e) {
+				fail = true;
 				log.debug(e.getMessage(), e);
 				end = System.currentTimeMillis();
 				count = -1;
@@ -237,7 +271,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 
 			Result summary = new Result();
 			summary.id = tq.id;
-			summary.query = tq.query;
+			summary.query = query;
 			summary.timeelapsed = end - start;
 			summary.distinctTuples = count;
 			summaries.add(summary);
@@ -247,36 +281,37 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 		st.close();
 		reasoner.dispose();
 
-		boolean fail = false;
-		/* Comparing and printing results */
-
-		int totaltime = 0;
-		for (int i = 0; i < testQueries.size(); i++) {
-			TestQuery tq = testQueries.get(i);
-			Result summary = summaries.get(i);
-			totaltime += summary.timeelapsed;
-			fail = fail | tq.distinctTuples != summary.distinctTuples;
-			String out = "Query: %3d   Tup. Ex.: %6d Tup. ret.: %6d    Time elapsed: %6.3f s     ";
-			log.debug(String.format(out, i, tq.distinctTuples, summary.distinctTuples, (double) summary.timeelapsed / (double) 1000)
-					+ "   " + (tq.distinctTuples == summary.distinctTuples ? " " : "ERROR"));
-		}
-		log.debug("==========================");
-		log.debug(String.format("Total time elapsed: %6.3f s", (double) totaltime / (double) 1000));
+		// /* Comparing and printing results */
+		//
+		// int totaltime = 0;
+		// for (int i = 0; i < testQueries.size(); i++) {
+		// TestQuery tq = testQueries.get(i);
+		// Result summary = summaries.get(i);
+		// totaltime += summary.timeelapsed;
+		// fail = fail | tq.distinctTuples != summary.distinctTuples;
+		// String out =
+		// "Query: %3d   Tup. Ex.: %6d Tup. ret.: %6d    Time elapsed: %6.3f s     ";
+		// log.debug(String.format(out, i, tq.distinctTuples,
+		// summary.distinctTuples, (double) summary.timeelapsed / (double) 1000)
+		// + "   " + (tq.distinctTuples == summary.distinctTuples ? " " :
+		// "ERROR"));
+		// }
+		// log.debug("==========================");
+//		log.debug(String.format("Total time elapsed: %6.3f s", (double) totaltime / (double) 1000));
 		assertFalse(fail);
 	}
-
-
 
 	public void testViEqSig() throws Exception {
 
 		prepareTestQueries(tuples);
 		/*
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setProperty("rewrite", "true");
-		*/
+		 * QuestPreferences p = new QuestPreferences();
+		 * p.setCurrentValueOf(QuestPreferences.ABOX_MODE,
+		 * QuestConstants.VIRTUAL);
+		 * p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		 * p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		 * p.setProperty("rewrite", "true");
+		 */
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
@@ -285,9 +320,8 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setProperty("rewrite", "true");
-		
+
 		runTests(p);
 	}
 
-	
 }

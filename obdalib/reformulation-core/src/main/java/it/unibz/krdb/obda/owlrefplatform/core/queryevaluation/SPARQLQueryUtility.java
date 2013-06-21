@@ -92,13 +92,21 @@ public class SPARQLQueryUtility {
 	 }
 
 	public static String getSelectVarDescribe(String strquery) {
+		
 		String strlower = strquery.toLowerCase();
 		if (strlower.contains("describe"))
 		{
+			StringBuffer bf = new StringBuffer();
+			
 			int idx1 = strlower.indexOf("describe");
 			int idx2 = idx1 + 8;
-			strquery = strquery.substring(idx2);
-			strquery = "SELECT DISTINCT "+strquery;
+			
+			if (idx1 > 0)
+				bf.append(strquery.substring(0, idx1));
+			bf.append(" SELECT DISTINCT ");
+			bf.append(strquery.substring(idx2));
+				
+			strquery = bf.toString();
 		}
 		return strquery;
 	}
