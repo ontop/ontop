@@ -79,14 +79,17 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	}
 	
 	
-	
+	public static IRI getIRI(IRI base, String suffix) {
+		return OBDADataFactoryImpl.getIRI(base.toString() + suffix);
+	}
+
 	
 	/*
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
 	private static Function getHeadAtom(IRI base, String suffix, List<NewLiteral> arguments) {
-		Predicate predicate = fac.getPredicate(OBDADataFactoryImpl.getIRI(base.toString() + suffix), arguments.size(), null);
+		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
 		return fac.getAtom(predicate, arguments);
 	}
 	
@@ -196,7 +199,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 						}
 					}
 					for (TreeWitness tw : compatibleTWs) {
-						Function twAtom = getHeadAtom(headURI, "TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
+						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
 						mainbody.addNoCheck(twAtom);				
 						for (List<Function> twfa : tw.getFormula())
 							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
@@ -218,7 +221,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 							if (edgeAtom == null) {
 								//IRI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
 								edgeAtom = getHeadAtom(headURI, 
-										"EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
+										"_EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.addNoCheck(edgeAtom);				
 								
 								MinimalCQProducer edgeAtoms = new MinimalCQProducer(reasoner); 
@@ -283,7 +286,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-					Function ccAtom = getHeadAtom(cqieURI, "CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
+					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
 					rewriteCC(cc, ccAtom, ccDP, cache, edgeDP); 
 					ccBody.add(ccAtom);
 				}

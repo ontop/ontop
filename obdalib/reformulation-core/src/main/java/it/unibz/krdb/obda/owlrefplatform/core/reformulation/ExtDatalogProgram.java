@@ -39,10 +39,6 @@ public class ExtDatalogProgram {
 	private DatalogProgram fullDP;
 	//private Map<Predicate, List<CQIE>> extDPs = new HashMap<Predicate, List<CQIE>>();
 
-	private static IRI getIRI(IRI base, String suffix) {
-		return OBDADataFactoryImpl.getIRI(base.toString() + suffix);
-	}
-
 	public ExtDatalogProgram(TreeWitnessReasonerLite reasoner) {
 		this.reasoner = reasoner;
 		fullDP = fac.getDatalogProgram();
@@ -117,15 +113,17 @@ public class ExtDatalogProgram {
 	}
 	
 	private ExtDatalogProgramDef getConceptDP(BasicClassDescription b) {
-		IRI extURI;
-		if (b instanceof OClass) 
-			extURI = getIRI(((OClass)b).getPredicate().getName(), "EXT_");
+		Predicate extb;
+		if (b instanceof OClass) {
+			OClass a = (OClass)b;
+			extb = fac.getClassPredicate(TreeWitnessRewriter.getIRI(a.getPredicate().getName(), "_EXT_"));
+		}
 		else {
 			PropertySomeRestriction some = (PropertySomeRestriction)b;
-			extURI = getIRI(some.getPredicate().getName(), !some.isInverse() ? "EXT_E_" : "EXT_E_INV_");
+			extb = fac.getClassPredicate(TreeWitnessRewriter.getIRI(some.getPredicate().getName(), !some.isInverse() ? "_EXT_E_" : "_EXT_E_INV_"));
 		}
 		
-		ExtDatalogProgramDef dp = new ExtDatalogProgramDef(fac.getAtom(fac.getClassPredicate(extURI), x), getAtom(b));
+		ExtDatalogProgramDef dp = new ExtDatalogProgramDef(fac.getAtom(extb, x), getAtom(b));
 		for (BasicClassDescription c : reasoner.getSubConcepts(b)) 
 			dp.add(getAtom(c));
 	
@@ -141,9 +139,8 @@ public class ExtDatalogProgram {
 			dp = getConceptDP(reasoner.getOntologyFactory().createClass(p));
 		}
 		else  {
-			IRI extURI = getIRI(p.getName(), "EXT_");
-			dp = new ExtDatalogProgramDef(fac.getAtom(fac.getObjectPropertyPredicate(extURI), x, y), 
-										fac.getAtom(p, x, y));
+			Predicate extp = fac.getObjectPropertyPredicate(TreeWitnessRewriter.getIRI(p.getName(), "_EXT_"));
+			dp = new ExtDatalogProgramDef(fac.getAtom(extp, x, y), fac.getAtom(p, x, y));
 			for (Property sub: reasoner.getSubProperties(p, false))
 				dp.add((!sub.isInverse()) ? 
 					fac.getAtom(sub.getPredicate(), x, y) : fac.getAtom(sub.getPredicate(), y, x)); 
