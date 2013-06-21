@@ -180,7 +180,7 @@ public class QuestOWLStatement implements OWLStatement {
 
 				Thread insert = new Thread(new Insert(rdfParser,
 						reader, baseURI));
-				Process processor = new Process(rdfHandler, this.st);
+				Process processor = new Process(rdfHandler, this.st, commitSize, batchsize);
 				Thread process = new Thread(processor);
 
 				// start threads
@@ -251,16 +251,20 @@ public class QuestOWLStatement implements OWLStatement {
 		private QuestStatement questStmt;
 		
 		int insertCount = -1;
+		private int commitsize;
+		private int batchsize;
 
-		public Process(SesameRDFIterator iterator, QuestStatement qstm)
+		public Process(SesameRDFIterator iterator, QuestStatement qstm, int commitsize, int batchsize)
 				throws OBDAException {
 			this.iterator = iterator;
 			this.questStmt = qstm;
+			this.commitsize = commitsize;
+			this.batchsize = batchsize;
 		}
 
 		public void run() {
 			try {
-				insertCount = questStmt.insertData(iterator, 15000, 5000);
+				insertCount = questStmt.insertData(iterator, commitsize, batchsize);
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}

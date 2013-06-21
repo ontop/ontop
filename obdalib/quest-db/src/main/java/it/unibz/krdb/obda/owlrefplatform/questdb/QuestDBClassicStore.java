@@ -153,7 +153,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			materializer.disconnect();
 			log.debug("Inserted {} triples from the mappings.", count);
 		}
-		st.createIndexes();
+//		st.createIndexes();
 		st.close();
 		if (!conn.getAutoCommit())
 		conn.commit();

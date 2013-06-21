@@ -36,17 +36,17 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexLUBMH2 extends TestCase {
 
-	String driver = "com.mysql.jdbc.Driver";
-	String url = "jdbc:mysql://localhost/lubmex2050?sessionVariables=sql_mode='ANSI'";
-	String username = "root";
-	String password = "";
+//	String driver = "com.mysql.jdbc.Driver";
+//	String url = "jdbc:mysql://localhost/lubmex2050?sessionVariables=sql_mode='ANSI'";
+//	String username = "root";
+//	String password = "";
 
 	String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
 
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	private OBDADataSource source;
+//	private OBDADataSource source;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -54,13 +54,13 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"));
 
-		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
-		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+//		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+//		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+//		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+//		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+//		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+//		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
+//		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 	}
 
@@ -85,43 +85,43 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		start = System.nanoTime();
 		//st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
 		// Lets test 25 unis
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 		end = System.nanoTime();
-		double time1 = (end - start) / 1000000000;
-		log.debug("File 1. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University1.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 2. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University2.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 3. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University3.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 4. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University4.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 5. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University5.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 6. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University6.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 7. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University7.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 8. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University8.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		end = System.nanoTime();
-		time1 = (end - start) / 1000000000;
-		log.debug("File 9. Total insertion time: {}", time1);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University9.ttl"), 5000, 500, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		double time1 = (end - start) / 1000000000;
+//		log.debug("File 1. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University1.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 2. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University2.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 3. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University3.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 4. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University4.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 5. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University5.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 6. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University6.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 7. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University7.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 8. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University8.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+//		end = System.nanoTime();
+//		time1 = (end - start) / 1000000000;
+//		log.debug("File 9. Total insertion time: {}", time1);
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University9.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 //		end = System.nanoTime();
 //		time1 = (end - start) / 1000000000;
 //		log.debug("File 10. Total insertion time: {}", time1);
