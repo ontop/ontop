@@ -122,16 +122,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  *  CREATE metadata tables
  */
 	
-	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(150), "
+	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(400), "
 			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
 
-	private final static String create_interval = "CREATE TABLE " + interval_table + " ( " + "URI VARCHAR(150), " + "IDX_FROM INTEGER, "
+	private final static String create_interval = "CREATE TABLE " + interval_table + " ( " + "URI VARCHAR(400), " + "IDX_FROM INTEGER, "
 			+ "IDX_TO INTEGER, " + "ENTITY_TYPE INTEGER" + ")";
 
 	private final static String create_emptyness_index = "CREATE TABLE " + emptyness_index_table + " ( TABLEID INTEGER, IDX INTEGER, "
 			+ " TYPE1 INTEGER, TYPE2 INTEGER )";
 	
-	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(150) " + ")";
+	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(400) " + ")";
 
 /**
  * DROP metadata tables 	
