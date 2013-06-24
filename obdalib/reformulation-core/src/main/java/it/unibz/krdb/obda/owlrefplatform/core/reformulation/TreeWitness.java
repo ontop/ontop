@@ -7,6 +7,7 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
 
 /**
@@ -99,6 +100,24 @@ public class TreeWitness {
 	
 	public Collection<TreeWitnessGenerator> getGenerators() {
 		return gens;
+	}
+
+	/**
+	 * getSubConcepts
+	 * 
+	 * @param twgs a set of tree witness generators
+	 * @return the set of all sub-concepts for all of the tree witness generators
+	 */
+	
+	
+	public Set<BasicClassDescription> getGeneratorSubConcepts() {
+		if (gens.size() == 1)
+			return gens.iterator().next().getSubConcepts();
+		
+		Set<BasicClassDescription> all = new HashSet<BasicClassDescription>();		
+		for (TreeWitnessGenerator twg : gens) 
+			all.addAll(twg.getSubConcepts());
+		return all;
 	}
 	
 	

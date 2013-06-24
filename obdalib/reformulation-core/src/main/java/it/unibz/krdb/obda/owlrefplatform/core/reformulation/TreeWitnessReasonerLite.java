@@ -1,10 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -57,7 +55,7 @@ public class TreeWitnessReasonerLite {
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 	private Collection<TreeWitnessGenerator> generators;
 
-	private static OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
+	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessReasonerLite.class);	
 
 	public static final OClass owlThing = ontFactory.createClass("http://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing");	
@@ -243,7 +241,7 @@ public class TreeWitnessReasonerLite {
 			 if (a.getArity() != 1)
 				 return IntersectionOfConceptSets.EMPTY;   // binary predicates R(x,x) cannot be matched to the anonymous part
 
-			 if (!subc.intersect(getSubConcepts(a.getPredicate())))
+			 if (!subc.intersect(getSubConcepts(a.getFunctionSymbol())))
 				 return IntersectionOfConceptSets.EMPTY;
 		}
 		return subc;
@@ -266,6 +264,10 @@ public class TreeWitnessReasonerLite {
 		return s;
 	}
 	
+	public Property getProperty(PropertySomeRestriction some) {
+		return ontFactory.createProperty(some.getPredicate(), some.isInverse());
+	}
+	
 	public Set<Property> getSubProperties(Predicate pred, boolean inverse) {
 		Map<Predicate, Set<Property>> cache = (inverse ? predicateSubpropertiesInv : predicateSubproperties);
 		Set<Property> s = cache.get(pred);
@@ -282,29 +284,9 @@ public class TreeWitnessReasonerLite {
 
 		if ((a2.getArity() == 1) && (a1.getArity() == 1)) {
 			if (a1.getTerm(0).equals(a2.getTerm(0))) {
-					// add a2.NewLiteral anonymous 
-				Set<BasicClassDescription> subconcepts = getSubConcepts(a2.getPredicate());
-				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
+				Set<BasicClassDescription> subconcepts = getSubConcepts(a2.getFunctionSymbol());
+				if (subconcepts.contains(ontFactory.createClass(a1.getFunctionSymbol()))) {
 					log.debug("{} IS MORE SPECIFIC (1-1) THAN {}", a1, a2);
-					return true;
-				}
-			}
-		}
-		else if ((a1.getArity() == 1) && (a2.getArity() == 2)) {
-			NewLiteral a1NewLiteral = a1.getTerm(0);
-			if ((a2.getTerm(1) instanceof AnonymousVariable) && a2.getTerm(0).equals(a1NewLiteral)) {
-				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a2.getPredicate(), false);
-				Set<BasicClassDescription> subconcepts = getSubConcepts(prop);
-				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
-					log.debug("{} IS MORE SPECIFIC (1-2) THAN {}",  a1, a2);
-					return true;
-				}
-			}
-			else if ((a2.getTerm(0) instanceof AnonymousVariable) && a2.getTerm(1).equals(a1NewLiteral)) {
-				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a2.getPredicate(), true);
-				Set<BasicClassDescription> subconcepts = getSubConcepts(prop);
-				if (subconcepts.contains(ontFactory.createClass(a1.getPredicate()))) {
-					log.debug("{} IS MORE SPECIFIC (1-2) THAN {}",  a1, a2);
 					return true;
 				}
 			}
@@ -312,20 +294,22 @@ public class TreeWitnessReasonerLite {
 		else if ((a1.getArity() == 2) && (a2.getArity() == 1)) { // MOST USEFUL
 			NewLiteral a2term = a2.getTerm(0);
 			if (a1.getTerm(0).equals(a2term)) {
-				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getPredicate(), false);
-				if (getSubConcepts(a2.getPredicate()).contains(prop)) {
+				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getFunctionSymbol(), false);
+				if (getSubConcepts(a2.getFunctionSymbol()).contains(prop)) {
 					log.debug("{} IS MORE SPECIFIC (2-1) THAN ", a1, a2);
 					return true;
 				}
 			}
 			if (a1.getTerm(1).equals(a2term)) {
-				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getPredicate(), true);
-				if (getSubConcepts(a2.getPredicate()).contains(prop)) {
+				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getFunctionSymbol(), true);
+				if (getSubConcepts(a2.getFunctionSymbol()).contains(prop)) {
 					log.debug("{} IS MORE SPECIFIC (2-1) THAN {}", a1, a2);
 					return true;
 				}
 			}
 		}
+		// TODO: implement the (2-2) check
+		
 		return false;
 	}
 	
@@ -340,23 +324,6 @@ public class TreeWitnessReasonerLite {
 		return generators;
 	}
 	
-	/**
-	 * getSubConcepts
-	 * 
-	 * @param twgs a set of tree witness generators
-	 * @return the set of all sub-concepts for all of the tree witness generators
-	 */
-	
-	
-	public static Set<BasicClassDescription> getSubConceptsForGenerators(Collection<TreeWitnessGenerator> twgs) {
-		if (twgs.size() == 1)
-			return twgs.iterator().next().getSubConcepts();
-		
-		Set<BasicClassDescription> all = new HashSet<BasicClassDescription>();		
-		for (TreeWitnessGenerator twg : twgs) 
-			all.addAll(twg.getSubConcepts());
-		return all;
-	}
 	
 	
 	/**

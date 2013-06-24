@@ -21,27 +21,22 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.iri.IRI;
+
 public class ExtDatalogProgram {
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(ExtDatalogProgram.class);
 
-	private TreeWitnessReasonerLite reasoner;
 	private Ontology sigma;
 
-	private Map<Predicate, Predicate> extPredicateMap = new HashMap<Predicate, Predicate>();
-	private Map<Predicate, Predicate> extSomePropertyMap = new HashMap<Predicate, Predicate>();
-	private Map<Predicate, Predicate> extSomeInvPropertyMap = new HashMap<Predicate, Predicate>();
-	private DatalogProgram fullDP;
-	//private Map<Predicate, List<CQIE>> extDPs = new HashMap<Predicate, List<CQIE>>();
+	private final TreeWitnessReasonerLite reasoner;
+
+	private final Map<Predicate, ExtDatalogProgramDef> extPredicateMap = new HashMap<Predicate, ExtDatalogProgramDef>();
+	private final DatalogProgram fullDP;
 
 	public ExtDatalogProgram(TreeWitnessReasonerLite reasoner) {
 		this.reasoner = reasoner;
 		fullDP = fac.getDatalogProgram();
-	}
-	
-	public TreeWitnessReasonerLite getReasoner() {
-		return reasoner;
 	}
 	
 	/**
@@ -51,8 +46,6 @@ public class ExtDatalogProgram {
 	public void setSigma(Ontology sigma) {
 		this.sigma = sigma;
 		extPredicateMap.clear();
-		extSomePropertyMap.clear();
-		extSomeInvPropertyMap.clear();
 		fullDP.removeAllRules();
 	}
 
@@ -64,77 +57,42 @@ public class ExtDatalogProgram {
 	private final NewLiteral y = fac.getVariable("y");
 	private final NewLiteral w = fac.getNondistinguishedVariable(); 
 	
-	private Function getAtom(BasicClassDescription c) {
-		if (c instanceof OClass) 
-			return (fac.getAtom(((OClass)c).getPredicate(), x));
-		else {     //if (c instanceof PropertySomeRestriction) {
-			PropertySomeRestriction some = (PropertySomeRestriction)c;
-			return ((!some.isInverse()) ? 
-					fac.getAtom(some.getPredicate(), x, w) : fac.getAtom(some.getPredicate(), w, x)); 
-		}		
-		
-	}
-	
-	private ExtDatalogProgramDef getConceptDP(BasicClassDescription b) {
-		Predicate extb;
-		if (b instanceof OClass) {
-			OClass a = (OClass)b;
-			extb = fac.getClassPredicate(TreeWitnessRewriter.getIRI(a.getPredicate().getName(), "_EXT_"));
-		}
-		else {
-			PropertySomeRestriction some = (PropertySomeRestriction)b;
-			extb = fac.getClassPredicate(TreeWitnessRewriter.getIRI(some.getPredicate().getName(), !some.isInverse() ? "_EXT_E_" : "_EXT_E_INV_"));
-		}
-		
-		ExtDatalogProgramDef dp = new ExtDatalogProgramDef(fac.getAtom(extb, x), getAtom(b));
-		for (BasicClassDescription c : reasoner.getSubConcepts(b)) 
-			dp.add(getAtom(c));
-	
-		return dp;
-	}
-	
 	public Predicate getEntryForPredicate(Predicate p) {
-		if (extPredicateMap.containsKey(p))
-			return extPredicateMap.get(p);
-			
-		ExtDatalogProgramDef dp = null;
-		if (p.getArity() == 1) {
-			dp = getConceptDP(reasoner.getOntologyFactory().createClass(p));
+		ExtDatalogProgramDef def = extPredicateMap.get(p);
+		if (def == null) {			
+			IRI extName = TreeWitnessRewriter.getIRI(p.getName(), "_EXT");
+			if (p.getArity() == 1) {
+				Predicate extp = fac.getClassPredicate(extName);		
+				def = new ExtDatalogProgramDef(fac.getAtom(extp, x), fac.getAtom(p, x));
+				
+				// add a rule for each of the sub-concepts
+				for (BasicClassDescription c : reasoner.getSubConcepts(p)) {
+					if (c instanceof OClass) 
+						def.add(fac.getAtom(((OClass)c).getPredicate(), x));
+					else {     
+						PropertySomeRestriction some = (PropertySomeRestriction)c;
+						def.add((!some.isInverse()) ? 
+								fac.getAtom(some.getPredicate(), x, w) : fac.getAtom(some.getPredicate(), w, x)); 
+					}						
+				}
+			}
+			else  {
+				Predicate extp = fac.getObjectPropertyPredicate(extName);
+				def = new ExtDatalogProgramDef(fac.getAtom(extp, x, y), fac.getAtom(p, x, y));
+				
+				// add a rule for each of the sub-roles
+				for (Property sub: reasoner.getSubProperties(p, false))
+					def.add((!sub.isInverse()) ? 
+						fac.getAtom(sub.getPredicate(), x, y) : fac.getAtom(sub.getPredicate(), y, x)); 
+			}
+	
+			def.minimise();			
+			// if the reduced datalog program is not trivial
+			if (def.dp != null) 
+				fullDP.appendRule(def.dp);
+			extPredicateMap.put(p, def);
 		}
-		else  {
-			Predicate extp = fac.getObjectPropertyPredicate(TreeWitnessRewriter.getIRI(p.getName(), "_EXT_"));
-			dp = new ExtDatalogProgramDef(fac.getAtom(extp, x, y), fac.getAtom(p, x, y));
-			for (Property sub: reasoner.getSubProperties(p, false))
-				dp.add((!sub.isInverse()) ? 
-					fac.getAtom(sub.getPredicate(), x, y) : fac.getAtom(sub.getPredicate(), y, x)); 
-		}
-
-		dp.minimise();			
-		if (dp.dp.size() <= 1) {
-			extPredicateMap.put(p, null);
-			return null;
-		}
-		else {
-			fullDP.appendRule(dp.dp);
-			Predicate ext = dp.extAtom.getFunctionSymbol();
-			extPredicateMap.put(p, ext);
-			return ext;	
-		}
-	}	
-
-	public Predicate getEntryForPropertySomeRestriction(Predicate p, boolean inverse) {
-		Map<Predicate, Predicate> extMap = inverse ? extSomePropertyMap : extSomeInvPropertyMap;	
-		if (extMap.containsKey(p))
-			return extMap.get(p);
-			
-		ExtDatalogProgramDef dp = getConceptDP(reasoner.getOntologyFactory().createPropertySomeRestriction(p, inverse));
-
-		dp.minimise();			
-
-		fullDP.appendRule(dp.dp);			
-		Predicate ext = dp.extAtom.getFunctionSymbol();
-		extMap.put(p, ext);
-		return ext;
+		return def.extPredicate;	
 	}	
 
 	/**
@@ -146,14 +104,14 @@ public class ExtDatalogProgram {
 	 */
 	
 	private class ExtDatalogProgramDef {
-		private final Function extAtom;
+		private Predicate extPredicate;
 		private final Predicate mainPredicate;
 		private final CQIE mainQuery;
 		private List<CQIE> dp = new LinkedList<CQIE>();
 		
 		public ExtDatalogProgramDef(Function extAtom, Function mainAtom) {
-			this.extAtom = extAtom;
 			this.mainPredicate = mainAtom.getFunctionSymbol();
+			this.extPredicate = extAtom.getFunctionSymbol();
 			this.mainQuery = fac.getCQIE(extAtom, mainAtom);
 		}
 		
@@ -161,7 +119,7 @@ public class ExtDatalogProgram {
 			if (body.getFunctionSymbol().equals(mainPredicate))
 				return;
 			
-			CQIE query = fac.getCQIE(extAtom, body);
+			CQIE query = fac.getCQIE(mainQuery.getHead(), body);
 			CQCUtilities cqc = new CQCUtilities(query, sigma);
 			if (!cqc.isContainedIn(mainQuery)) 
 				dp.add(query);
@@ -170,11 +128,16 @@ public class ExtDatalogProgram {
 		}
 		
 		public void minimise() {
-			log.debug("DP FOR {} IS {}", extAtom, dp);
-			dp.add(mainQuery);
-			if (dp.size() > 1) {
+			log.debug("DP FOR {} IS {}", extPredicate, dp);
+			if (!dp.isEmpty()) {
+				dp.add(mainQuery);
 				dp = CQCUtilities.removeContainedQueries(dp, true, sigma);
-				log.debug("SIMPLIFIED DP FOR {} IS {}", extAtom, dp);
+				log.debug("SIMPLIFIED DP FOR {} IS {}", extPredicate, dp);
+			}
+			// reset if the reduced datalog program is trivial
+			if (dp.size() <= 1) {
+				dp = null;
+				extPredicate = null;
 			}
 		}
 	}	

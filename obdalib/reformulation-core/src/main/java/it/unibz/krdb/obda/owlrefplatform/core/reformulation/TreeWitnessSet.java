@@ -141,19 +141,30 @@ public class TreeWitnessSet {
 		boolean saturated = true; 
 		
 		for (Edge edge : cc.getEdges()) { 
-			Loop rootLoop = edge.getLoop0();
-			Loop internalLoop = edge.getLoop1();
-			if (qf.canBeAttachedToAnInternalRoot(rootLoop, internalLoop)) {
-				// ok
+			Loop rootLoop, internalLoop;
+			if (qf.canBeAttachedToAnInternalRoot(edge.getLoop0(), edge.getLoop1())) {
+				rootLoop = edge.getLoop0();
+				internalLoop = edge.getLoop1();
 			}
-			else if (qf.canBeAttachedToAnInternalRoot(internalLoop, rootLoop)) { 
-				rootLoop = internalLoop;
+			else if (qf.canBeAttachedToAnInternalRoot(edge.getLoop1(), edge.getLoop0())) { 
+				rootLoop = edge.getLoop1();
 				internalLoop = edge.getLoop0();
 			}
 			else
 				continue;
 			
 			log.debug("EDGE {} IS ADJACENT TO THE TREE WITNESS {}", edge, qf); 
+
+			if (qf.getRoots().contains(internalLoop)) {
+				if (qf.extend(internalLoop, edge, rootLoop)) {
+					log.debug("    RE-ATTACHING A HANDLE {}", edge);
+					continue;
+				}	
+				else {
+					log.debug("    FAILED TO RE-ATTACH A HANDLE {}", edge);
+					return;					
+				}
+			}
 
 			saturated = false; 
 
@@ -212,7 +223,7 @@ public class TreeWitnessSet {
 
 			boolean failed = false;
 			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) 
-				if (!g.endPointEntailsAnyOf(reasoner.getSubConceptsForGenerators(tw.getGenerators()))) { 
+				if (!g.endPointEntailsAnyOf(tw.getGeneratorSubConcepts())) { 
 					log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, g);
 					failed = true;
 					break;
@@ -432,7 +443,7 @@ public class TreeWitnessSet {
 						for (TreeWitnessGenerator twg : reasoner.getGenerators())
 							if ((subc.get() == null) || twg.endPointEntailsAnyOf(subc.get())) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
-								if (twg.endPointEntailsAnyOf(reasoner.getSubConceptsForGenerators(tw.getGenerators()))) {
+								if (twg.endPointEntailsAnyOf(tw.getGeneratorSubConcepts())) {
 									log.debug("        ENDTYPE IS FINE: {} FOR {}",  tw, twg);
 									generators.add(twg);					
 								}
@@ -448,7 +459,10 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				Set<BasicClassDescription> subc = reasoner.getSubConceptsForGenerators(generators); 
+				Set<BasicClassDescription> subc = new HashSet<BasicClassDescription>();		
+				for (TreeWitnessGenerator twg : generators) 
+					subc.addAll(twg.getSubConcepts());
+				
 				for (TreeWitnessGenerator g : reasoner.getGenerators()) 
 					if (g.endPointEntailsAnyOf(subc)) {
 						if (generators.add(g))

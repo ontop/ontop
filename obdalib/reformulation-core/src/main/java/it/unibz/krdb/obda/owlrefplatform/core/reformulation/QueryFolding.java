@@ -118,12 +118,16 @@ public class QueryFolding {
 		return status;
 	}
 	
+	public Set<Loop> getRoots() {
+		return roots;
+	}
+	
 	public boolean hasRoot() { 
 		return !roots.isEmpty();
 	}
 	
 	public boolean canBeAttachedToAnInternalRoot(Loop t0, Loop t1) {
-		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()) && !roots.contains(t1);
+		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()); // && !roots.contains(t1);
 	}
 	
 	public Set<BasicClassDescription> getInternalRootConcepts() {

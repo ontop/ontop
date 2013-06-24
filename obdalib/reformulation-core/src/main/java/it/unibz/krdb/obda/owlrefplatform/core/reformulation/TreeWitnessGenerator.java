@@ -17,12 +17,14 @@ import org.slf4j.LoggerFactory;
 public class TreeWitnessGenerator {
 	private final Property property;
 	private final OClass filler;
+
 	private Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
 	private Set<BasicClassDescription> subconcepts;
 	private PropertySomeRestriction existsRinv;
-	private TreeWitnessReasonerLite reasoner;
 
+	private final TreeWitnessReasonerLite reasoner;
 	private final OntologyFactory ontFactory; 
+
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
 	
 	public TreeWitnessGenerator(TreeWitnessReasonerLite reasoner, Property property, OClass filler) {
@@ -37,32 +39,70 @@ public class TreeWitnessGenerator {
 	}
 	
 	public static Set<BasicClassDescription> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TreeWitnessReasonerLite reasoner) {
-		if (gens.size() == 1)
-			return gens.iterator().next().concepts;
+		Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
+		for (TreeWitnessGenerator twg : gens) 
+			concepts.addAll(twg.concepts);
+
+		if (concepts.size() == 1 && concepts.iterator().next() instanceof OClass)
+			return concepts;
 		
-		Set<BasicClassDescription> cons = new HashSet<BasicClassDescription>();
-		for (TreeWitnessGenerator twg : gens) {
-			cons.addAll(twg.concepts);
-		}
+		log.debug("MORE THAN ONE GENERATING CONCEPT: {}", concepts);
+		// add all sub-concepts of all \exists R
+		Set<BasicClassDescription> extension = new HashSet<BasicClassDescription>();
+		for (BasicClassDescription b : concepts) 
+			if (b instanceof PropertySomeRestriction)
+				extension.addAll(reasoner.getSubConcepts(b));
+		concepts.addAll(extension);
 		
-		if (cons.size() > 1) {
-			// TODO: re-implement as removals (inner iterator loop with restarts on top) 
-			log.debug("MORE THAN ONE GEN CON: {}", cons);
-			Set<BasicClassDescription> reduced = new HashSet<BasicClassDescription>();
-			for (BasicClassDescription concept0 : cons) {
-				boolean found = false;
-				for (BasicClassDescription concept1 : cons)
-					if (!concept0.equals(concept1) && reasoner.getSubConcepts(concept1).contains(concept0)) {
-						found = true;
-						break;
+		// use all concept names to subsume their sub-concepts
+		{
+			boolean modified = true; 
+			while (modified) {
+				modified = false;
+				for (BasicClassDescription b : concepts) 
+					if (b instanceof OClass) {
+						Set<BasicClassDescription> bsubconcepts = reasoner.getSubConcepts(b);
+						Iterator<BasicClassDescription> i = concepts.iterator();
+						while (i.hasNext()) {
+							BasicClassDescription bp = i.next();
+							if ((b != bp) && bsubconcepts.contains(bp)) { 
+								i.remove();
+								modified = true;
+							}
+						}
+						if (modified)
+							break;
 					}
-				if (!found)
-					reduced.add(concept0);
 			}
-			cons = reduced;
 		}
 		
-		return cons;
+		// use all \exists R to subsume their sub-concepts of the form \exists R
+		{
+			boolean modified = true;
+			while (modified) {
+				modified = false;
+				for (BasicClassDescription b : concepts) 
+					if (b instanceof PropertySomeRestriction) {
+						PropertySomeRestriction some = (PropertySomeRestriction)b;
+						Set<Property> bsubproperties = reasoner.getSubProperties(some.getPredicate(), some.isInverse());
+						Iterator<BasicClassDescription> i = concepts.iterator();
+						while (i.hasNext()) {
+							BasicClassDescription bp = i.next();
+							if ((b != bp) && (bp instanceof PropertySomeRestriction)) {
+								PropertySomeRestriction somep = (PropertySomeRestriction)bp;
+								if (bsubproperties.contains(reasoner.getProperty(somep))) {
+									i.remove();
+									modified = true;
+								}
+							}
+						}
+						if (modified)
+							break;
+					}
+			}
+		}
+		
+		return concepts;
 	}
 	
 	

@@ -7,7 +7,6 @@ import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -22,10 +21,8 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +96,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, NewLiteral r0)  {
-		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, extDP.getReasoner());		
+		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
 		NewLiteral x = fac.getNondistinguishedVariable(); 
 		
@@ -354,34 +351,15 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 				
 		public Function getExtAtom(Function a) {
-			Predicate p = a.getFunctionSymbol();
+			Predicate ext = extDP.getEntryForPredicate(a.getFunctionSymbol());
 			
-			if (a.getArity() == 1) {
-				Predicate ext = extDP.getEntryForPredicate(p);
-				if (ext != null) {
-					usedExts = true; // usedExts.add(ext);
+			if (ext != null) {
+				usedExts = true;        // usedExts.add(ext);
+				if (a.getArity() == 1) 
 					return fac.getAtom(ext, a.getTerm(0));
-				}
-			}
-			else if (a.getArity() == 2) {
-				NewLiteral t0 = a.getTerm(0);
-				NewLiteral t1 = a.getTerm(1);
-				if (t0 instanceof AnonymousVariable) {
-					Predicate ext = extDP.getEntryForPropertySomeRestriction(p, true);
-					usedExts = true; // usedExts.add(ext);
-					return fac.getAtom(ext, t1);					
-				}
-				else if (t1 instanceof AnonymousVariable) {
-					Predicate ext = extDP.getEntryForPropertySomeRestriction(p, false);
-					usedExts = true; // usedExts.add(ext);
-					return fac.getAtom(ext, t0);										
-				}
 				else {
-					Predicate ext = extDP.getEntryForPredicate(a.getFunctionSymbol());
-					if (ext != null) {
-						usedExts = true; // usedExts.add(ext);
-						return fac.getAtom(ext, t0, t1);
-					}
+					assert (a.getArity() == 2);
+					return fac.getAtom(ext, a.getTerm(0), a.getTerm(1));
 				}
 			}
 			return a;
