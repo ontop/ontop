@@ -103,7 +103,8 @@ class QuestSesameMaterializerCMD {
 			OBDAModelSynchronizer.declarePredicates(ontology, model);
 
 			 //start materializer
-			SesameMaterializer materializer = new SesameMaterializer(onto, model);
+			SesameMaterializer materializer = new SesameMaterializer(model, onto);
+			SesameStatementIterator iterator = materializer.getIterator();
 			RDFHandler handler = null;
 			
 			if (format.equals("N3"))
@@ -120,8 +121,8 @@ class QuestSesameMaterializerCMD {
 			}
 
 			handler.startRDF();
-			while(materializer.hasNext())
-				handler.handleStatement(materializer.next());
+			while(iterator.hasNext())
+				handler.handleStatement(iterator.next());
 			handler.endRDF();
 			
 			System.out.println("NR of TRIPLES: "+materializer.getTriplesCount());

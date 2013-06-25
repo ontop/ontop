@@ -66,7 +66,16 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model) throws Exception {
-		this(null, model);
+		this(model, null, getDefaultPreferences());
+	}
+	
+	public QuestMaterializer(OBDAModel model, QuestPreferences pref) throws Exception {
+		this(model, null, pref);
+		
+	}
+	
+	public QuestMaterializer(OBDAModel modell, Ontology onto) throws Exception {
+		this(modell, onto, getDefaultPreferences());
 	}
 	
 	/***
@@ -75,12 +84,12 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(Ontology onto, OBDAModel modell) throws Exception {
+	public QuestMaterializer(OBDAModel modell, Ontology onto, QuestPreferences preferences) throws Exception {
 		this.model = modell;
 		this.ontology = onto;
 		this.vocabulary = new HashSet<Predicate>();
 		
-		if (model.getSources().size() > 1)
+		if (model.getSources()!= null && model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
 		
 		//add all class/data/object predicates to vocabulary
@@ -99,8 +108,8 @@ public class QuestMaterializer {
 		} else
 		{
 			//from mapping undeclared predicates (can happen)
-			for (URI uri : modell.getMappings().keySet()){
-				for (OBDAMappingAxiom axiom : modell.getMappings(uri))
+			for (URI uri : model.getMappings().keySet()){
+				for (OBDAMappingAxiom axiom : model.getMappings(uri))
 				{
 					if (axiom.getTargetQuery() instanceof CQIE)
 					{
@@ -115,9 +124,9 @@ public class QuestMaterializer {
 			
 			}
 		}
-		
+		//start a quest instance
 		questInstance = new Quest();
-		questInstance.setPreferences(getDefaultPreferences());
+		questInstance.setPreferences(preferences);
 		if (ontology == null) {
 			ontology = ofac.createOntology();
 			ontology.addEntities(model.getDeclaredPredicates());
@@ -126,8 +135,9 @@ public class QuestMaterializer {
 		questInstance.loadOBDAModel(model);			
 		questInstance.setupRepository();
 	}
+	
 
-	private QuestPreferences getDefaultPreferences() {
+	private static QuestPreferences getDefaultPreferences() {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
@@ -210,7 +220,13 @@ public class QuestMaterializer {
 				if (!vocabularyIterator.hasNext())
 					throw new NullPointerException("Vocabulary is empty!");
 				while (results == null) {
-					results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
+					if (vocabularyIterator.hasNext()) {
+						Predicate pred = vocabularyIterator.next();
+						String query = getQuery(pred);
+						results = (GraphResultSet) stm.execute(query);
+					}
+					else
+						break;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -235,7 +251,7 @@ public class QuestMaterializer {
 		@Override
 		public boolean hasNext() {
 			try{
-			if (!read) {
+			if (!read && results!=null) {
 				hasNext = results.hasNext();
 				while (vocabularyIterator.hasNext() && hasNext == false)
 				{

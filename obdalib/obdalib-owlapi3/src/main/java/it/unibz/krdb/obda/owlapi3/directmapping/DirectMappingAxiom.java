@@ -27,36 +27,39 @@ public class DirectMappingAxiom {
 	protected DataDefinition table;
 	protected String SQLString;
 	protected String baseuri;
-	
-	public DirectMappingAxiom(){		
+
+	public DirectMappingAxiom() {
 	}
-	
-	public DirectMappingAxiom(String baseuri, DataDefinition dd, DBMetadata obda_md){
+
+	public DirectMappingAxiom(String baseuri, DataDefinition dd,
+			DBMetadata obda_md) {
 		this.table = dd;
 		this.SQLString = new String();
 		this.obda_md = obda_md;
-		if (baseuri!=null)
+		if (baseuri != null)
 			this.baseuri = baseuri;
 		else
 			this.baseuri = new String("http://example.org/");
 	}
-	
-	public DirectMappingAxiom(DirectMappingAxiom dmab){
+
+	public DirectMappingAxiom(DirectMappingAxiom dmab) {
 		this.table = dmab.table;
 		this.SQLString = new String(dmab.getSQL());
 		this.baseuri = new String(dmab.getbaseuri());
 	}
-		
-	public String getSQL(){
-		String SQLStringTemple=new String("SELECT * FROM %s");	
-			
-		SQLString=String.format(SQLStringTemple, "\""+this.table.getName()+"\"");
+
+	public String getSQL() {
+		String SQLStringTemple = new String("SELECT * FROM %s");
+
+		SQLString = String.format(SQLStringTemple, "\"" + this.table.getName()
+				+ "\"");
 		return new String(SQLString);
 	}
-	
+
 	public Map<String, CQIE> getRefAxioms(OBDADataFactory dfac) {
 		HashMap<String, CQIE> refAxioms = new HashMap<String, CQIE>();
-		Map<String, List<Attribute>> fks = ((TableDefinition) table).getForeignKeys();
+		Map<String, List<Attribute>> fks = ((TableDefinition) table)
+				.getForeignKeys();
 		if (fks.size() > 0) {
 			Set<String> keys = fks.keySet();
 			for (String key : keys) {
@@ -65,7 +68,7 @@ public class DirectMappingAxiom {
 		}
 		return refAxioms;
 	}
-	
+
 	private String getRefSQL(String key) {
 		Map<String, List<Attribute>> fks = ((TableDefinition) table)
 				.getForeignKeys();
@@ -93,7 +96,8 @@ public class DirectMappingAxiom {
 			if (i == 0)
 				Table += ", \"" + tableRef + "\"";
 			String columnRef = ref.getColumnReference();
-			Column += "\"" + tableRef + "\".\"" + columnRef + "\" AS "+tableRef+"_"+columnRef;
+			Column += "\"" + tableRef + "\".\"" + columnRef + "\" AS "
+					+ tableRef + "_" + columnRef;
 
 			Condition += "\"" + tableRef + "\".\"" + columnRef + "\"";
 
@@ -120,9 +124,18 @@ public class DirectMappingAxiom {
 		for(int i=0;i<table.countAttribute();i++){
 			Attribute att = table.getAttribute(i+1);
 			Predicate type = typeMapper.getPredicate(att.getType());
-			Function obj = df.getFunctionalTerm(type, df.getVariable(att.getName()));
-			
-			atoms.add(df.getAtom(df.getDataPropertyPredicate(generateDPURI(table.getName(), att.getName())), sub, obj));
+			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
+				Variable objV = df.getVariable(att.getName());
+				atoms.add(df.getAtom(
+						df.getDataPropertyPredicate(generateDPURI(
+								table.getName(), att.getName())), sub, objV));
+			} else {
+				Function obj = df.getFunctionalTerm(type,
+						df.getVariable(att.getName()));
+				atoms.add(df.getAtom(
+						df.getDataPropertyPredicate(generateDPURI(
+								table.getName(), att.getName())), sub, obj));
+			}
 		}
 	
 		//To construct the head, there is no static field about this predicate
@@ -136,8 +149,7 @@ public class DirectMappingAxiom {
 		
 		return df.getCQIE(head, atoms);
 	}
-	
-	
+
 	private CQIE getRefCQ(String fk, OBDADataFactory df) {
 
 		NewLiteral sub = generateSubject(df, (TableDefinition) table, true);
@@ -174,109 +186,109 @@ public class DirectMappingAxiom {
 		}
 		return null;
 	}
-	
-	
-	
-	//Generate an URI for class predicate from a string(name of table)
-	private String generateClassURI(String table){
-		return new String(baseuri+table);
-		
+
+	// Generate an URI for class predicate from a string(name of table)
+	private String generateClassURI(String table) {
+		return new String(baseuri + table);
+
 	}
-	
+
 	/*
-	 * Generate an URI for datatype property from a string(name of column)
-	 * The style should be "baseuri/tablename#columnname" as required in Direct Mapping Definition
+	 * Generate an URI for datatype property from a string(name of column) The
+	 * style should be "baseuri/tablename#columnname" as required in Direct
+	 * Mapping Definition
 	 */
-	private String generateDPURI(String table, String column){
-		return new String(baseuri+percentEncode(table)+"#"+percentEncode(column));	
+	private String generateDPURI(String table, String column) {
+		return new String(baseuri + percentEncode(table) + "#"
+				+ percentEncode(column));
 	}
-	
-	//Generate an URI for object property from a string(name of column)
-	private String generateOPURI(String table, ArrayList<Attribute> columns){
+
+	// Generate an URI for object property from a string(name of column)
+	private String generateOPURI(String table, ArrayList<Attribute> columns) {
 		String column = "";
-		for(Attribute a : columns)
+		for (Attribute a : columns)
 			if (a.isForeignKey())
-				column+= a.getName()+"_";
-		column = column.substring(0, column.length()-1);
-		return new String(baseuri+percentEncode(table)+"#ref-"+column);
+				column += a.getName() + "_";
+		column = column.substring(0, column.length() - 1);
+		return new String(baseuri + percentEncode(table) + "#ref-" + column);
 	}
-	
-	
-	
+
 	/*
 	 * Generate the subject term of the table
 	 * 
 	 * 
-	 * TODO replace URI predicate to BNode predicate for tables without PKs
-	 * 		in the following method after 'else'
+	 * TODO replace URI predicate to BNode predicate for tables without PKs in
+	 * the following method after 'else'
 	 */
-	private NewLiteral generateSubject(OBDADataFactory df, TableDefinition td, boolean ref){
+	private NewLiteral generateSubject(OBDADataFactory df, TableDefinition td,
+			boolean ref) {
 		String tableName = "";
 		if (ref)
-			tableName = percentEncode(td.getName())+"_";
-		
-		if(td.getPrimaryKeys().size()>0){
-			Predicate uritemple = df.getUriTemplatePredicate(td.getPrimaryKeys().size()+1);
+			tableName = percentEncode(td.getName()) + "_";
+
+		if (td.getPrimaryKeys().size() > 0) {
+			Predicate uritemple = df.getUriTemplatePredicate(td
+					.getPrimaryKeys().size() + 1);
 			List<NewLiteral> terms = new ArrayList<NewLiteral>();
-			terms.add(df.getValueConstant(subjectTemple(td,td.getPrimaryKeys().size())));
-			for(int i=0;i<td.getPrimaryKeys().size();i++){
-				terms.add(df.getVariable(tableName + td.getPrimaryKeys().get(i).getName()));
+			terms.add(df.getValueConstant(subjectTemple(td, td.getPrimaryKeys()
+					.size())));
+			for (int i = 0; i < td.getPrimaryKeys().size(); i++) {
+				terms.add(df.getVariable(tableName
+						+ td.getPrimaryKeys().get(i).getName()));
 			}
 			return df.getFunctionalTerm(uritemple, terms);
-			
-		}
-		else{
+
+		} else {
 			List<NewLiteral> vars = new ArrayList<NewLiteral>();
-			for(int i=0;i<td.countAttribute();i++){
-				vars.add(df.getVariable(tableName + td.getAttributeName(i+1)));
+			for (int i = 0; i < td.countAttribute(); i++) {
+				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
-			
-			Predicate bNode = df.getBNodeTemplatePredicate(1);			
+
+			Predicate bNode = df.getBNodeTemplatePredicate(1);
 			return df.getFunctionalTerm(bNode, vars);
 		}
 	}
-	
-	
-	private String subjectTemple(TableDefinition td, int numPK){
+
+	private String subjectTemple(TableDefinition td, int numPK) {
 		/*
-		 * It is hard to generate a uniform temple since the number of PK differs
-		 * For example, the subject uri temple with one pk should be like:
-		 * 	baseuri+tablename/PKcolumnname={}('col={}...)
-		 * For table with more than one pk columns, there will be a ";" between column names 
+		 * It is hard to generate a uniform temple since the number of PK
+		 * differs For example, the subject uri temple with one pk should be
+		 * like: baseuri+tablename/PKcolumnname={}('col={}...) For table with
+		 * more than one pk columns, there will be a ";" between column names
 		 */
 
 		String temp = new String(baseuri);
-		temp+=percentEncode(td.getName());
-		temp+="/";
-		for(int i=0;i<numPK;i++){
-			temp+=percentEncode("{"+td.getPrimaryKeys().get(i).getName())+"};";
+		temp += percentEncode(td.getName());
+		temp += "/";
+		for (int i = 0; i < numPK; i++) {
+			temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName())
+					+ "};";
 		}
-		
-		//remove the last "." which is not neccesary
-		temp=temp.substring(0, temp.length()-1);
-		//temp="\""+temp+"\"";
+
+		// remove the last "." which is not neccesary
+		temp = temp.substring(0, temp.length() - 1);
+		// temp="\""+temp+"\"";
 		return temp;
 	}
-	
-	public String getbaseuri(){
+
+	public String getbaseuri() {
 		return baseuri;
 	}
-	
-	public void setbaseuri(String uri){
-		if (uri!=null)
-		baseuri=new String(uri);
+
+	public void setbaseuri(String uri) {
+		if (uri != null)
+			baseuri = new String(uri);
 	}
-	
-	
+
 	/*
 	 * percent encoding for a String
-	 */	
-	private String percentEncode(String pe){
+	 */
+	private String percentEncode(String pe) {
 		pe = pe.replace("#", "%23");
 		pe = pe.replace(".", "%2E");
 		pe = pe.replace("-", "%2D");
 		pe = pe.replace("/", "%2F");
-		
+
 		pe = pe.replace(" ", "%20");
 		pe = pe.replace("!", "%21");
 		pe = pe.replace("$", "%24");
@@ -296,8 +308,5 @@ public class DirectMappingAxiom {
 		pe = pe.replace("]", "%5D");
 		return new String(pe);
 	}
-	
-	
-	
 
 }

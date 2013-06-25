@@ -53,15 +53,15 @@ public class OWLAPI3ToFileMaterializer {
 	}
 
 	public static int materializeN3(Writer bf, OBDAModel model) throws Exception {
-		return materializeN3(bf, new OWLAPI3Materializer(model));
+		return materializeN3(bf, (new OWLAPI3Materializer(model)).getIterator());
 	}
 	
-	public static int materializeN3(Writer bf, OWLAPI3Materializer materializer) throws Exception {
+	public static int materializeN3(Writer bf, QuestOWLIndividualIterator iterator) throws Exception {
 
 		String rdftype = OBDAVocabulary.RDF_TYPE;
 		int count = 0;
-		while (materializer.hasNext()) {
-			OWLIndividualAxiom axiom = materializer.next();
+		while (iterator.hasNext()) {
+			OWLIndividualAxiom axiom = iterator.next();
 			if (axiom instanceof OWLClassAssertionAxiom) {
 				OWLClassAssertionAxiom ax = (OWLClassAssertionAxiom) axiom;
 				bf.append("<");

@@ -79,13 +79,14 @@ public class QuestOWLMaterializerCMD {
 			OWLAPI3Materializer materializer = null;
 			if (owlfile != null) {
 				Ontology onto =  new OWLAPI3Translator().translate(ontology);
-				materializer = new OWLAPI3Materializer(onto, obdaModel);
+				materializer = new OWLAPI3Materializer(obdaModel, onto);
 			}
 			else
 				materializer = new OWLAPI3Materializer(obdaModel);
+			QuestOWLIndividualIterator iterator = materializer.getIterator();
 	
-			while(materializer.hasNext()) 
-				manager.addAxiom(ontology, materializer.next());
+			while(iterator.hasNext()) 
+				manager.addAxiom(ontology, iterator.next());
 			manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
 			
 			System.out.println("NR of TRIPLES: "+materializer.getTriplesCount());

@@ -4,11 +4,12 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 
 import java.awt.Container;
+import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
 
-import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -23,13 +24,15 @@ public class MaterializeAction implements OBDAProgressListener {
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
 	private OWLAPI3Materializer materializer = null;
+	private Iterator<OWLIndividualAxiom> iterator = null;
 	private Container cont = null;
 	private boolean bCancel = false;
 
-	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer iterator, Container cont) {
+	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer materialize, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
-		this.materializer = iterator;
+		this.materializer = materialize;
+		this.iterator = materializer.getIterator();
 		this.cont = cont;  
 	}
 
@@ -52,8 +55,8 @@ public class MaterializeAction implements OBDAProgressListener {
 		thread = new Thread() {
 			public void run() {
 				try {
-					while(materializer.hasNext()) {
-						ontologyManager.addAxiom(currentOntology, materializer.next());
+					while(iterator.hasNext()) {
+						ontologyManager.addAxiom(currentOntology, iterator.next());
 					}
 					
 					latch.countDown();

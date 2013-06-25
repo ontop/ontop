@@ -7,46 +7,22 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
 import java.util.Iterator;
 
-import org.openrdf.model.Statement;
-
-public class SesameMaterializer implements Iterator<Statement> {
+public class SesameMaterializer {
 	
 		private Iterator<Assertion> assertions = null;
 		private QuestMaterializer materializer;
 		
 		public SesameMaterializer(OBDAModel model) throws Exception {
-			this(null, model);
+			this(model, null);
 		}
 		
-		public SesameMaterializer(Ontology onto, OBDAModel model) throws Exception {
-			 materializer = new QuestMaterializer(onto, model);
+		public SesameMaterializer(OBDAModel model, Ontology onto) throws Exception {
+			 materializer = new QuestMaterializer(model, onto);
 			 assertions = materializer.getAssertionIterator();
-			setAssertions(assertions);
 		}
 		
-		public SesameMaterializer(Iterator<Assertion> assertions) {
-			setAssertions(assertions);
-		}
-		
-		public void setAssertions(Iterator<Assertion> assertions) {
-			this.assertions = assertions;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return assertions.hasNext();
-		}
-
-		@Override
-		public Statement next() {
-			Assertion assertion = assertions.next();
-			Statement individual = new SesameStatement(assertion);
-			return individual;
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException("This iterator is read-only");
+		public SesameStatementIterator getIterator() {
+			return new SesameStatementIterator(assertions);
 		}
 		
 		public void disconnect() {

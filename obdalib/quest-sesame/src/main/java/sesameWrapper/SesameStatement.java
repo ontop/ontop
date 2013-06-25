@@ -22,6 +22,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameStatement implements Statement {
 
+	private static final long serialVersionUID = 3398547980791013746L;
 	private Resource subject = null;
 	private URI predicate = null;
 	private Value object = null;

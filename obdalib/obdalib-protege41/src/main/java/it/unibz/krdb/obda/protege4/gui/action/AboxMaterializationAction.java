@@ -7,7 +7,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
-
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.BorderLayout;
@@ -19,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -30,6 +30,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
@@ -43,6 +44,7 @@ import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -186,7 +188,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 					// we are going to use SESAME MATERIALIZER
 				
 					SesameMaterializer materializer = new SesameMaterializer(
-							onto, obdaModel);
+							obdaModel, onto);
+					Iterator<Statement> iterator = materializer.getIterator();
 					RDFWriter writer = null;
 
 					if (format == 0) // rdfxml
@@ -202,8 +205,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 						writer = new TurtleWriter(fileWriter);
 					}
 					writer.startRDF();
-					while (materializer.hasNext())
-						writer.handleStatement(materializer.next());
+					while (iterator.hasNext())
+						writer.handleStatement(iterator.next());
 					writer.endRDF();
 					count = (int) materializer.getTriplesCount();
 					vocab = materializer.getVocabularySize();
@@ -212,11 +215,11 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 				else {
 					// owlxml, OWL materializer
-					OWLAPI3Materializer materializer = new OWLAPI3Materializer(onto,
-							obdaModel);
-
-					while (materializer.hasNext())
-						manager.addAxiom(ontology, materializer.next());
+					OWLAPI3Materializer materializer = new OWLAPI3Materializer(
+							obdaModel, onto);
+					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
+					while (iterator.hasNext())
+						manager.addAxiom(ontology, iterator.next());
 					manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
 							new WriterDocumentTarget(fileWriter));
 
