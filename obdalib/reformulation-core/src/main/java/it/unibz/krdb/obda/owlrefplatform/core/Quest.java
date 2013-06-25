@@ -65,6 +65,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,6 +90,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private DataSource tomcatPool = null;
 	private boolean isSemanticIdx = false;
 	private LinkedHashSet<String> uriRefIds = new LinkedHashSet();
+	private LinkedHashMap<Integer, String> uriMap = new LinkedHashMap();
 	// Tomcat pool default properties
 	// These can be changed in the properties file
 	protected int maxPoolSize = 10;
@@ -551,6 +553,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
 				uriRefIds = dataRepository.getUriIds();
+				uriMap = dataRepository.getUriMap();
 				
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
@@ -1290,6 +1293,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return uriRefIds;
 	}
 	
+	public void setUriMap(LinkedHashMap<Integer, String> uriMap){
+		this.uriMap = uriMap;
+	}
+	
+	public LinkedHashMap<Integer, String> getUriMap() {
+		return uriMap;
+	}
+		
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();

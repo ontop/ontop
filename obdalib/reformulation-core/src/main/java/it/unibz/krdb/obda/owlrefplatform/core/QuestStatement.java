@@ -248,7 +248,7 @@ public class QuestStatement implements OBDAStatement {
 						if (isSelect) { // is tuple-based results
 							if (isSI) 
 								tupleResult = new QuestResultset(set, signature,
-										QuestStatement.this, questInstance.getUriRefIds());
+										QuestStatement.this, questInstance.getUriMap());
 							else
 							tupleResult = new QuestResultset(set, signature,
 									QuestStatement.this);
@@ -265,7 +265,7 @@ public class QuestStatement implements OBDAStatement {
 							TupleResultSet tuples = null;
 							if (isSI) 
 								tuples = new QuestResultset(set, signature,
-										QuestStatement.this, questInstance.getUriRefIds());
+										QuestStatement.this, questInstance.getUriMap());
 							else 
 							tuples = new QuestResultset(set,
 									signature, QuestStatement.this);

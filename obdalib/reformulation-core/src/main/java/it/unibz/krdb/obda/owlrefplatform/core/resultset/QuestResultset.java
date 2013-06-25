@@ -44,6 +44,7 @@ public class QuestResultset implements TupleResultSet {
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private LinkedHashMap<Integer, String> uriMap = new LinkedHashMap<Integer, String>();
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -63,14 +64,31 @@ public class QuestResultset implements TupleResultSet {
 
 	}
 
-	// This ResultSet is used for semantic index case
-	// It encodes URIs as Integers for faster query performance
-	// Later in the results we need to replace URI references with actual URIs
+//	// This ResultSet is used for semantic index case
+//	// It encodes URIs as Integers for faster query performance
+//	// Later in the results we need to replace URI references with actual URIs
+//	public QuestResultset(ResultSet set, List<String> signature,
+//			OBDAStatement st, LinkedHashSet<String> uriRef) throws OBDAException {
+//		this.set = set;
+//		this.st = st;
+//		this.uriRef = uriRef;
+//		if (uriRef != null)
+//			this.isSemIndex = true;
+//		else
+//			this.isSemIndex = false;
+//
+//		this.signature = new Vector<String>(signature);
+//		for (int j = 1; j <= signature.size(); j++) {
+//			columnMap.put(signature.get(j - 1), j - 1);
+//		}
+//
+//	}
+
 	public QuestResultset(ResultSet set, List<String> signature,
-			OBDAStatement st, LinkedHashSet<String> uriRef) throws OBDAException {
+			OBDAStatement st, LinkedHashMap<Integer, String> uriMap) throws OBDAException {
 		this.set = set;
 		this.st = st;
-		this.uriRef = uriRef;
+		this.uriMap = uriMap;
 		if (uriRef != null)
 			this.isSemIndex = true;
 		else
@@ -82,7 +100,7 @@ public class QuestResultset implements TupleResultSet {
 		}
 
 	}
-
+	
 	public double getDouble(int column) throws OBDAException {
 		try {
 			return set.getDouble(signature.get(column - 1));
@@ -313,7 +331,7 @@ public class QuestResultset implements TupleResultSet {
 				}
 
 				if (id == 0) result = "0";
-				else result = (String) uriRef.toArray()[id-1];
+				else result = (String) uriMap.get(new Integer(id));
 			}
 			IRIFactory irif = new IRIFactory();
 			IRI iri = irif.create(result);

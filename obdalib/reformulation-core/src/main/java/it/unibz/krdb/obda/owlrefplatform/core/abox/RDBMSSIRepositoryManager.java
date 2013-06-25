@@ -377,7 +377,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private Map<IRI, List<Interval>> roleIntervals = new LinkedHashMap<IRI, List<Interval>>();
 
+	// Semantic Index URI reference structures
 	private LinkedHashSet<String> uriIds = new LinkedHashSet<String> ();
+	private LinkedHashMap <Integer, String> uriMap = new LinkedHashMap<Integer, String> ();
 	
 	private Properties config;
 
@@ -1139,6 +1141,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			} else {
 				uri_id = idOfURI(uri);
 			}
+			uriMap.put(new Integer(uri_id), uri);
 			
 			boolean c1isBNode = subject instanceof BNode;
 
@@ -1180,6 +1183,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				} else {
 					uri_id = idOfURI(uri);
 				}
+				uriMap.put(new Integer(uri_id), uri);
 				newUri = uriIds.add(uri2);
 				if (newUri) {
 					uri2_id = uriIds.size();
@@ -1189,7 +1193,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				} else {
 					uri2_id = idOfURI(uri2);
 				}
-				
+				uriMap.put(new Integer(uri2_id), uri2);
 				
 				//roleStm.setString(1, uri);
 				//roleStm.setString(2, uri2);
@@ -1276,6 +1280,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			} else {
 				uri_id = idOfURI(uri);
 			}
+			uriMap.put(new Integer(uri_id), uri);
 
 			classStm.setInt(1, uri_id);
 			int conceptIndex = getConceptIndex(concept);
@@ -3797,6 +3802,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public LinkedHashSet<String> getUriIds(){
 		return uriIds;
+	}
+	
+	public LinkedHashMap<Integer, String> getUriMap() {
+		return uriMap;
 	}
 	
 	/***
