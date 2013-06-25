@@ -47,6 +47,8 @@
       :test_503a
       :test_504a
       :test_505a
+      :test_510
+      :test_511
       :test_87a
       :test_87b
       :test_87c
@@ -501,6 +503,28 @@
         qt:query <test_505a.rq>  ] ;
    mf:parameters <quest-noeq-sig.properties> ;
    mf:result  <test_505a.srx> .
+
+:test_510 rdf:type mf:CompletenessTest ;
+   mf:name "510" ;
+   rdfs:comment "conflicting tree witnesses (extension of 504a)" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_510.owl> ;
+        qt:query <test_510.rq>  ] ;
+   mf:parameters <quest-noeq-sig.properties> ;
+   mf:result  <test_510.srx> .
+
+:test_511 rdf:type mf:CompletenessTest ;
+   mf:name "511" ;
+   rdfs:comment "false handle in tree witnesses" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_511.owl> ;
+        qt:query <test_511.rq>  ] ;
+   mf:parameters <quest-noeq-sig.properties> ;
+   mf:result  <test_511.srx> .
 
 :test_87a rdf:type mf:CompletenessTest ;
    mf:name "87a" ;

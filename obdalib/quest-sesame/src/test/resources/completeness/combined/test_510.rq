@@ -1,0 +1,5 @@
+PREFIX : <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dllite: <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>
+
+SELECT ?x ?ypp WHERE { ?x dllite:R ?y . ?y dllite:T ?z . ?yp dllite:T ?z . ?xp dllite:R ?yp. ?xp dllite:S ?u . ?xpp dllite:S ?u . ?xpp dllite:R ?ypp .}
