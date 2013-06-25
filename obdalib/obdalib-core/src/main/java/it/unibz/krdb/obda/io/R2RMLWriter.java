@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
@@ -379,7 +380,10 @@ public class R2RMLWriter {
 			{	//object 
 				if (fobj.isDataTypeFunction()) {
 					Predicate p = fobj.getFunctionSymbol();
-					object = "\t\t rr:objectMap \t[ rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"; rr:datatype "+ p.toString() + " ]";
+					if (p instanceof DataTypePredicate || p instanceof URITemplatePredicate)
+						object = "\t\t rr:objectMap \t[ rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"; rr:datatype <"+ p.toString() + "> ]";
+					else
+						object = "\t\t rr:objectMap \t[ rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"; rr:datatype "+ p.toString() + " ]";
 				} else
 					object = "\t\t rr:object \t "+obj.asAtom().getTerm(0).toString();
 				return object;
