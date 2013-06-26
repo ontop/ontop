@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.quest.scenarios.PgsqlVirtualScenarioTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class VirtualScenarioTestSuite extends TestSuite {
+public class TestVirtualScenarioSuite extends TestSuite {
 
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite("Scenario Tests for Quest in Virtual mode");

@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.quest.datatypes.PgsqlDatatypeTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class DatatypeTestSuite extends TestSuite {
+public class TestDatatypeSuite extends TestSuite {
 		
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite("Database Data-type Test Suite");
