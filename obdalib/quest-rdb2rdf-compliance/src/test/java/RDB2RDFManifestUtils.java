@@ -1,9 +1,12 @@
 import info.aduna.io.FileUtil;
+import info.aduna.io.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.URL;
+import java.util.jar.JarFile;
 
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
@@ -27,25 +30,36 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RDB2RDFManifestTest {
+public class RDB2RDFManifestUtils {
 
-	static final Logger logger = LoggerFactory.getLogger(RDB2RDFManifestTest.class);
+	static final Logger logger = LoggerFactory.getLogger(RDB2RDFManifestUtils.class);
 
-	public static TestSuite suite(RDB2RDFScenarioTest.Factory factory)
-			throws Exception {
+	public static TestSuite suite(RDB2RDFScenarioParent.Factory factory) throws Exception {
 		final String manifestFile;
 		final File tmpDir;
-		URL url;
-		// System.out.println(RDB2RDFManifestTest.class.getResource(factory.getMainManifestFile()).getPath());
-		// URL url =
-		// RDB2RDFManifestTest.class.getResource(factory.getMainManifestFile());
 
-		{
-			manifestFile = "src/main/resources/manifest-h2.ttl";
-			url = (new File(manifestFile)).toURI().toURL();
+		URL url = RDB2RDFManifestUtils.class.getResource(factory.getMainManifestFile());
+		
+		if ("jar".equals(url.getProtocol())) {
+			// Extract manifest files to a temporary directory
+			try {
+				tmpDir = FileUtil.createTempDir("scenario-evaluation");
+
+				JarURLConnection con = (JarURLConnection) url.openConnection();
+				JarFile jar = con.getJarFile();
+
+				ZipUtil.extract(jar, tmpDir);
+
+				File localFile = new File(tmpDir, con.getEntryName());
+				manifestFile = localFile.toURI().toURL().toString();
+			} catch (IOException e) {
+				throw new AssertionError(e);
+			}
+		} else {
+			manifestFile = url.toString();
 			tmpDir = null;
 		}
-
+		
 		TestSuite suite = new TestSuite(factory.getClass().getName()) {
 			@Override
 			public void run(TestResult result) {
@@ -82,7 +96,7 @@ public class RDB2RDFManifestTest {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile")
 					.toString();
-			suite.addTest(RDB2RDFScenarioTest.suite(subManifestFile, factory));
+			suite.addTest(RDB2RDFScenarioParent.suite(subManifestFile, factory));
 		}
 
 		manifestResults.close();

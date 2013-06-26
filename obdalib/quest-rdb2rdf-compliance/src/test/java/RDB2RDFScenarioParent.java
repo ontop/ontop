@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import sesameWrapper.SesameVirtualRepo;
 
 
-public class RDB2RDFScenarioTest extends TestCase {
+public class RDB2RDFScenarioParent extends TestCase {
 
 	protected final String sqlFileURL;
 	protected final String mappingFileURL;
@@ -43,20 +43,20 @@ public class RDB2RDFScenarioTest extends TestCase {
 	protected Repository dataRep;
 	private OutputStream output = null;
 	private Connection sqlConnection;
-	static final Logger logger = LoggerFactory.getLogger(RDB2RDFScenarioTest.class);
+	static final Logger logger = LoggerFactory.getLogger(RDB2RDFScenarioParent.class);
 
 	public interface Factory {
-		RDB2RDFScenarioTest createRDB2RDFScenarioTest(String testURI, String name, String sqlFileURL, 
+		RDB2RDFScenarioParent createRDB2RDFScenarioTest(String testURI, String name, String sqlFileURL, 
 				String mappingFileURL, String outputFileURL);
 		
-		RDB2RDFScenarioTest createRDB2RDFScenarioTest(String testURI, String name, String sqlFileURL, 
+		RDB2RDFScenarioParent createRDB2RDFScenarioTest(String testURI, String name, String sqlFileURL, 
 				String mappingFileURL, String outputFileURL, String parameterFileURL);
 	
 		String getMainManifestFile();
 	}
 
 	
-	public RDB2RDFScenarioTest(String testUri, String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException
+	public RDB2RDFScenarioParent(String testUri, String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException
 	{
 		this.testURI = testUri;
 		this.name = name;
@@ -173,7 +173,7 @@ public class RDB2RDFScenarioTest extends TestCase {
 		manifestRep.initialize();
 		RepositoryConnection con = manifestRep.getConnection();
 
-		RDB2RDFManifestTest.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
+		RDB2RDFManifestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
 
 		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
 
@@ -225,7 +225,7 @@ public class RDB2RDFScenarioTest extends TestCase {
 
 				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
 				String path = pathUri.substring(5);
-				RDB2RDFScenarioTest test = factory.createRDB2RDFScenarioTest(testURI, testName, path + sqlFile,
+				RDB2RDFScenarioParent test = factory.createRDB2RDFScenarioTest(testURI, testName, path + sqlFile,
 						  null, path + outputFile);
 				if (test != null) {
 					suite.addTest(test);
@@ -270,7 +270,7 @@ public class RDB2RDFScenarioTest extends TestCase {
 
 				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
 				String path = pathUri.substring(8);
-				RDB2RDFScenarioTest test2 = null;
+				RDB2RDFScenarioParent test2 = null;
 				if (outputFile == null) {
 					test2 = factory.createRDB2RDFScenarioTest(testURI,
 							testName, path + sqlFile, path + mappingFile, null);
