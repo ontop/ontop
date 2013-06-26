@@ -32,7 +32,7 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.7-alpha2</version>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
@@ -74,42 +74,42 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-sparql-compliance</artifactId>
-            <version>2.6.9</version>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-sparql-testsuite</artifactId>
-            <version>2.6.9</version>
-        </dependency>
-        <dependency>
-        	<groupId>junit</groupId>
-        	<artifactId>junit</artifactId>
-        	<version>4.10</version>
-        	<scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.maven.surefire</groupId>
-        	<artifactId>surefire-junit47</artifactId>
-        	<version>2.12</version>
-        </dependency>
-        
-        
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sparql-compliance</artifactId>
+			<version>2.6.9</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sparql-testsuite</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+<!-- 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.surefire</groupId>
+			<artifactId>surefire-junit47</artifactId>
+			<version>2.12</version> 
+		</dependency>-->
+
+
 	</dependencies>
-                          
+
 	<repositories>
 		<repository>
 			<id>sesame-official-repository</id>
 			<url>http://repo.aduna-software.org/maven2/releases</url>
 			<releases>
 				<enabled>true</enabled>
-			</releases> 
-			 <snapshots>
-    				<enabled>true</enabled>
-    			</snapshots>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>bolzano-nexus-public</id>
@@ -126,20 +126,20 @@
 	<name>sparql-compliance-tests</name>
 	<build>
 		<plugins>
-		
-		<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <version>2.15</version>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.maven.surefire</groupId>
-        <artifactId>surefire-junit47</artifactId>
-        <version>2.12</version>
-      </dependency>
-    </dependencies>
-  </plugin>
-  
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.15</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit47</artifactId>
+						<version>2.12</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
