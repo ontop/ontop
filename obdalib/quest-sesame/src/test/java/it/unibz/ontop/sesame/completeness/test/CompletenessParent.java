@@ -68,9 +68,9 @@ import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SesameClassicInMemoryRepo;
 
-public abstract class CompletenessTest extends TestCase {
+public abstract class CompletenessParent extends TestCase {
 
-	static final Logger logger = LoggerFactory.getLogger(CompletenessTest.class);
+	static final Logger logger = LoggerFactory.getLogger(CompletenessParent.class);
 
 	protected final String testId;
 	protected final String queryFile;
@@ -89,12 +89,12 @@ public abstract class CompletenessTest extends TestCase {
 	
 	public interface Factory 
 	{
-		CompletenessTest createCompletenessTest(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception;
+		CompletenessParent createCompletenessTest(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception;
 	
 		String getMainManifestFile();
 	}
 	
-	public CompletenessTest(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception {
+	public CompletenessParent(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception {
 		super(name);
 		testId = tid;
 		resultFile = resf;
@@ -609,7 +609,7 @@ public abstract class CompletenessTest extends TestCase {
 
 			logger.debug("Found test case: {}", testName);
 
-			CompletenessTest test = factory.createCompletenessTest(testId, testName, resultFile, parameterFile, ontologyFile, queryFile);
+			CompletenessParent test = factory.createCompletenessTest(testId, testName, resultFile, parameterFile, ontologyFile, queryFile);
 			if (test != null) {
 				suite.addTest(test);
 			}

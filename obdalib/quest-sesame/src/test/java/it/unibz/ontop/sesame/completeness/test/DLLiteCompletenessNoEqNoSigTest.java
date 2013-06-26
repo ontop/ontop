@@ -8,9 +8,9 @@ import junit.framework.Test;
  * 
  * Setting: Without Optimizing Equivalences and Without Using TBox Sigma. 
  */
-public class DLLiteCompletenessTest_Setting1 extends CompletenessTest {
+public class DLLiteCompletenessNoEqNoSigTest extends CompletenessParent {
 
-	public DLLiteCompletenessTest_Setting1(String tid, String name, String resf,
+	public DLLiteCompletenessNoEqNoSigTest(String tid, String name, String resf,
 			String propf, String owlf, String sparqlf) throws Exception {
 		super(tid, name, resf, propf, owlf, sparqlf);
 	}
@@ -18,11 +18,11 @@ public class DLLiteCompletenessTest_Setting1 extends CompletenessTest {
 	public static Test suite() throws Exception {
 		return CompletenessTestUtils.suite(new Factory() {
 			@Override
-			public CompletenessTest createCompletenessTest(String testId,
+			public CompletenessParent createCompletenessTest(String testId,
 					String testName, String testResultPath,
 					String testParameterPath, String testOntologyPath,
 					String testQueryPath) throws Exception {
-				return new DLLiteCompletenessTest_Setting1(testId, testName,
+				return new DLLiteCompletenessNoEqNoSigTest(testId, testName,
 						testResultPath, testParameterPath, testOntologyPath,
 						testQueryPath);
 			}

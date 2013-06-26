@@ -36,7 +36,7 @@ public class CompletenessTestUtils {
 	
 	static final Logger logger = LoggerFactory.getLogger(CompletenessTestUtils.class);
 
-	public static TestSuite suite(CompletenessTest.Factory factory) throws Exception {
+	public static TestSuite suite(CompletenessParent.Factory factory) throws Exception {
 		final String manifestFile;
 		final File tmpDir;
 
@@ -94,7 +94,7 @@ public class CompletenessTestUtils {
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile").toString();
-			suite.addTest(CompletenessTest.suite(subManifestFile, factory));
+			suite.addTest(CompletenessParent.suite(subManifestFile, factory));
 		}
 
 		manifestResults.close();
