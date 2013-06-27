@@ -8,22 +8,22 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <owl:Ontology rdf:about="http://www.unibz.it/krdb/semweb/quest/benchmarks/lubm-ex-20-uni1/">
         <owl:ObjectProperty></owl:ObjectProperty>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_1.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_10.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_11.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_12.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_13.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_14.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_2.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_3.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_4.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_5.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_6.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_7.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_8.owl"/>
-        <owl:imports rdf:resource="file:///Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_9.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_0.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_1.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_10.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_11.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_12.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_13.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_14.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_2.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_3.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_4.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_5.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_6.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_7.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_8.owl"/>
+        <owl:imports rdf:resource="src/test/resources/test/lubm-ex-20-uni1/University0_9.owl"/>
     </owl:Ontology>
     
 
