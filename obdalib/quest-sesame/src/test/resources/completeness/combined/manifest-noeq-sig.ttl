@@ -49,6 +49,7 @@
       :test_505a
       :test_510
       :test_511
+      :test_512           
       :test_87a
       :test_87b
       :test_87c
@@ -525,6 +526,19 @@
         qt:query <test_511.rq>  ] ;
    mf:parameters <quest-noeq-sig.properties> ;
    mf:result  <test_511.srx> .
+
+
+:test_512 rdf:type mf:CompletenessTest ;
+   mf:name "512" ;
+   rdfs:comment "qualified quantifier with inverse role" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_512.owl> ;
+        qt:query <test_512.rq>  ] ;
+   mf:parameters <quest-noeq-sig.properties> ;
+   mf:result  <test_512.srx> .
+
 
 :test_87a rdf:type mf:CompletenessTest ;
    mf:name "87a" ;
