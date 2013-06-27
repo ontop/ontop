@@ -2,18 +2,6 @@
 :		http://it.unibz.krdb/obda/test/simple#
 quest:		http://obda.org/quest#
 
-[ClassDeclaration] @collection [[
-:A
-]]
-
-[ObjectPropertyDeclaration] @collection [[
-:P
-]]
-
-[DataPropertyDeclaration] @collection [[
-:U
-]]
-
 [SourceDeclaration]
 sourceUri	h2
 connectionUrl	jdbc:h2:mem:questjunitdb
@@ -23,7 +11,7 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1
-target	$uri a :A; :P $uri; :U $value . 
+target	{uri} a :A ; :P {uri} ; :U {value} . 
 source	SELECT uri, value FROM table1
 ]]
 
