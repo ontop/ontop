@@ -1,31 +1,21 @@
 package it.unibz.krdb.obda.testsuite;
 
-import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
 import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -39,17 +29,13 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 /**
  * This unit test is for testing correctness of construct and describe queries
- * in ontop from the owl api.  
- * It is the same as SesameConstructDescribe for the Sesame API, 
- * with the only difference that all abox data comes from the owl file 
- * as declared named individuals and axioms,
- * AND a property cannot have both constant and uri objects.
- * It must be clear if it's a data property or object property.
- * @author timi
- *
+ * in ontop from the owl api. It is the same as SesameConstructDescribe for the
+ * Sesame API, with the only difference that all abox data comes from the owl
+ * file as declared named individuals and axioms, AND a property cannot have
+ * both constant and uri objects. It must be clear if it's a data property or
+ * object property.
  */
-
-public class OWLConstructDescribe extends TestCase{
+public class OWLConstructDescribeTest extends TestCase{
 
 	Connection con = null;
 	OWLOntology ontology = null;
@@ -62,7 +48,6 @@ public class OWLConstructDescribe extends TestCase{
 	
 	@Override
 	public void setUp() throws Exception {
-		
 		try {
 			// Loading the OWL file
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -120,15 +105,12 @@ public class OWLConstructDescribe extends TestCase{
 	public void testAInsertData() throws Exception {		
 		String query = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 		List<OWLAxiom> rs = st.executeGraph(query);
-		for (OWLAxiom ax: rs)
-			System.out.println(ax);
 		Assert.assertEquals(4, rs.size());
 	}
 	
 	@Test
 	public void testDescribeUri0() throws Exception {
 		String query = "DESCRIBE <http://www.semanticweb.org/ontologies/test#p1>";
-		
 		List<OWLAxiom> rs = st.executeGraph(query);
 		Assert.assertEquals(0, rs.size());
 	}
@@ -136,7 +118,6 @@ public class OWLConstructDescribe extends TestCase{
 	@Test
 	public void testDescribeUri1() throws Exception {
 		String query = "DESCRIBE <http://example.org/D>";
-
 		List<OWLAxiom> rs = st.executeGraph(query);
 		Assert.assertEquals(1, rs.size());
 	}
@@ -159,7 +140,6 @@ public class OWLConstructDescribe extends TestCase{
 	public void testDescribeVar1() throws Exception {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> <http://example.org/A>}";
 		List<OWLAxiom> rs = st.executeGraph(query);
-		
 		Assert.assertEquals(1, rs.size());
 	}
 	
@@ -190,5 +170,4 @@ public class OWLConstructDescribe extends TestCase{
 		List<OWLAxiom> rs = st.executeGraph(query);
 		Assert.assertEquals(2, rs.size());
 	}
-
 }

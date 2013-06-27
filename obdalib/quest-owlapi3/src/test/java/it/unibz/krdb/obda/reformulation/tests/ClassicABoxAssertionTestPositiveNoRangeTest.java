@@ -21,23 +21,20 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-/***
+/**
  * This test check proper handling of ABox assertions, including handling of the
  * supported data types. We check that each ABox assertion is inserted in the
  * database and the data is taken into account in relevant queries. Typing is
  * important in that although all data will be entered, not all data
  * participates in all queries.
- * 
- * @author mariano
- * 
  */
-public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
+public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 	QuestOWL reasoner = null;
 	private OWLConnection conn;
 	private OWLStatement st;
 
-	public ClassicABoxAssertionTestPositiveNoRange() throws Exception {
+	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
@@ -53,11 +50,7 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 
 		OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 		OBDAModel apic = obdafac.getOBDAModel();
-//		String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
-
-//		DataManager ioManager = new DataManager(apic);
-//		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
-//				apic.getPrefixManager());
+		
 		QuestOWLFactory fac = new QuestOWLFactory();
 		fac.setOBDAController(apic);
 		fac.setPreferenceHolder(pref);
@@ -83,10 +76,8 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 			}
 			count += 1;
 		}
-
 		res.close();
 		return count;
-
 	}
 
 	public void testClassAssertions() throws OWLException {
@@ -99,8 +90,6 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 		String query = "SELECT ?x ?y WHERE {?x :oproperty ?y}";
 		int count = executeQuery(query);
 		assertEquals(1, count);
-		
-		
 	}
 
 	public void testDataPropertyAssertionsLiteral() throws OWLException{
@@ -113,10 +102,6 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 		String query = "SELECT ?x WHERE {?x :uboolean ?y}";
 		int count = executeQuery(query);
 		assertEquals(4, count);
-	}
-
-	public void testDataPropertyAssertionsByte() throws OWLException{
-
 	}
 
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
@@ -164,9 +149,4 @@ public class ClassicABoxAssertionTestPositiveNoRange extends TestCase {
 		int count = executeQuery(query);
 		assertEquals(6, count);
 	}
-
-	public void testDataPropertyAssertionsShort()throws OWLException {
-		
-	}
-
 }

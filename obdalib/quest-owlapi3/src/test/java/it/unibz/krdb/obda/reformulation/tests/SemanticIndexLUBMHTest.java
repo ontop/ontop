@@ -2,9 +2,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -17,7 +15,6 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import java.io.File;
-import java.net.URI;
 
 import junit.framework.TestCase;
 
@@ -27,41 +24,23 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***
+/**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
  * created by the SemanticIndexManager.
- * 
- * @author mariano
- * 
  */
-public class SemanticIndexLUBMH2 extends TestCase {
-
-//	String driver = "com.mysql.jdbc.Driver";
-//	String url = "jdbc:mysql://localhost/lubmex2050?sessionVariables=sql_mode='ANSI'";
-//	String username = "root";
-//	String password = "";
+public class SemanticIndexLUBMHTest extends TestCase {
 
 	String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
 
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-//	private OBDADataSource source;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public SemanticIndexLUBMH2() throws Exception {
+	public SemanticIndexLUBMHTest() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"));
-
-//		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
-//		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-//		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-//		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-//		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-//		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
-//		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-
 	}
 
 	public void test3InitializingQuest() throws Exception {
@@ -83,8 +62,7 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		long end = System.nanoTime();
 		double init_time = (end - start) / 1000000;
 		start = System.nanoTime();
-		//st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
-		// Lets test 25 unis
+//		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
 		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 		end = System.nanoTime();
 //		double time1 = (end - start) / 1000000000;
@@ -187,7 +165,6 @@ public class SemanticIndexLUBMH2 extends TestCase {
 		end = System.nanoTime();
 		double insert_time = (end - start) / 1000000;
 		
-
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
 		qman.load("src/test/resources/test/treewitness/LUBM-ex-20.q");
@@ -224,7 +201,5 @@ public class SemanticIndexLUBMH2 extends TestCase {
 			log.debug("Data insertion time: {} ms", insert_time);
 			log.debug("Query execution time: {} ms", time);
 		}
-		// }
 	}
-
 }

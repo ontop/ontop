@@ -37,7 +37,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***
+/**
  * The following tests take the Stock exchange scenario and execute the queries
  * of the scenario to validate the results. The validation is simple, we only
  * count the number of distinct tuples returned by each query, which we know in
@@ -49,12 +49,8 @@ import org.slf4j.LoggerFactory;
  * The data is obtained from an inmemory database with the stock exchange
  * tuples. If the scenario is run in classic, this data gets imported
  * automatically by the reasoner.
- * 
- * 
- * @author mariano
- * 
  */
-public class TreeWitnessRewriterTestH2 extends TestCase {
+public class TreeWitnessRewriterH2Test extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -69,10 +65,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 
 	final String testCase = "bsbm";
-	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; // bsbm
-																						// LUBM-ex-20
-																						// stockexchange
-																						// adolena
+	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
 	final String obdafile = "src/test/resources/test/treewitness" + testCase + ".obda";
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
 
@@ -234,7 +227,7 @@ public class TreeWitnessRewriterTestH2 extends TestCase {
 		// Now we are ready for querying
 		OWLStatement st = reasoner.getStatement();
 
-		List<Result> summaries = new LinkedList<TreeWitnessRewriterTestH2.Result>();
+		List<Result> summaries = new LinkedList<TreeWitnessRewriterH2Test.Result>();
 
 		boolean fail = false;
 
