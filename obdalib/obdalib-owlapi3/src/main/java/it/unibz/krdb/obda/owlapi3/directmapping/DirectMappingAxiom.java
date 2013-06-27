@@ -261,10 +261,10 @@ public class DirectMappingAxiom {
 		temp += percentEncode(td.getName());
 		temp += "/";
 		for (int i = 0; i < numPK; i++) {
-			temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName())
-					+ "};";
-		}
+			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
+			temp+=percentEncode(td.getPrimaryKeys().get(i).getName())+"={};";
 
+		}
 		// remove the last "." which is not neccesary
 		temp = temp.substring(0, temp.length() - 1);
 		// temp="\""+temp+"\"";
