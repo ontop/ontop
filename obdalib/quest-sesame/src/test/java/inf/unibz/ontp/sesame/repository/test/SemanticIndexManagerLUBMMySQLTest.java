@@ -31,14 +31,11 @@ import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SemanticIndexManager;
 
-/***
+/**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
  * created by the SemanticIndexManager.
- * 
- * @author mariano
- * 
  */
-public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
+public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 	String driver = "com.mysql.jdbc.Driver";
 	String url = "jdbc:mysql://obdalin3/si_test?sessionVariables=sql_mode='ANSI'";
@@ -54,7 +51,7 @@ public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public SemanticIndexManagerTestLUBMMySQL() throws Exception {
+	public SemanticIndexManagerLUBMMySQLTest() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
@@ -65,58 +62,44 @@ public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-
 	}
 
 	public void test1Setup() throws Exception {
-
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
-
 			simanager.setupRepository(true);
-
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			if (conn != null)
+			if (conn != null) {
 				conn.close();
+			}
 		}
 	}
 
 	public void test2RestoringAndLoading() throws Exception {
-
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
-
 			//simanager.restoreRepository();
-
 			int inserts = simanager.insertData(ontology, 20000, 5000);
 			
 			simanager.updateMetadata();
-
 			log.debug("Inserts: {}", inserts);
-			
-			
 //			assertEquals(30033, inserts);
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			if (conn != null)
+			if (conn != null) {
 				conn.close();
+			}
 		}
-		
-		
-
 	}
 
 	public void test3InitializingQuest() throws Exception {
-
 		QuestOWLFactory fac = new QuestOWLFactory();
 
 		QuestPreferences pref = new QuestPreferences();
@@ -128,14 +111,11 @@ public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, url);
 		pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
-		
 
 		fac.setPreferenceHolder(pref);
 
 		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
-
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
-
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
 
 		QueryController qc = new QueryController();
@@ -164,5 +144,4 @@ public class SemanticIndexManagerTestLUBMMySQL extends TestCase {
 			log.debug("Elapsed time: {} ms", time);
 		}
 	}
-
 }
