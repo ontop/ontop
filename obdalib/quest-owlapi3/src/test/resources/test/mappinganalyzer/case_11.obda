@@ -2,18 +2,6 @@
 :		http://it.unibz.krdb/obda/test/simple#
 quest:	http://obda.org/quest#
 
-[ClassDeclaration] @collection [[
-:A
-]]
-
-[ObjectPropertyDeclaration] @collection [[
-:P, :Q
-]]
-
-[DataPropertyDeclaration] @collection [[
-:U, :V
-]]
-
 [SourceDeclaration]
 sourceUri	      h2
 connectionUrl	  jdbc:h2:mem:questjunitdb
@@ -23,6 +11,6 @@ driverClass	      org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	M:0
-target	    <"&:;{$id}"> a :A; :U $alias1; :V $alias2 .
-source	    SELECT id, name as alias1, value as alias2 as id FROM table1
+target	    :{id} a :A ; :U {alias1} ; :V {alias2} .
+source	    SELECT id, name as alias1, value as alias2 FROM table1
 ]]
