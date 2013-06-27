@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.alg.StrongConnectivityInspector;
-import org.jgrapht.alg.TransitiveClosure;
 import org.jgrapht.graph.DefaultEdge;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -19,13 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SNOMEDTestJGraphT {
+	
 	public static void main(String args[]) throws Exception {
 
 		Logger log = LoggerFactory.getLogger("SNOMEDTEST");
 
 		String owlfile = "/Users/mariano/Downloads/SnomedCT_INT_20110731/res_StatedOWLF_Core_INT_20110731.owl";
-		// String owlfile =
-		// "src/test/resources/test/stockexchange-unittest.owl";
 		log.info("Loading SNOMED");
 
 		// Loading the OWL file
@@ -44,24 +42,11 @@ public class SNOMEDTestJGraphT {
 		StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(
 				dag.getDag());
 		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
-
-//		int count = 0;
-//		for (Set<Description> set : equivalenceSets) {
-//			if (set.size() > 1) {
-//				System.out.println(set);
-//				count += 1;
-//			}
-//		}
 		
 		log.info("Equi sets: {}", equivalenceSets.size());
 		
 		log.info("Transitive closure");
-		TransitiveClosure t = TransitiveClosure.INSTANCE;
-//		t.closeSimpleDirectedGraph(dag.getDag());
-
-		
 
 		log.info("Done.");
-
 	}
 }

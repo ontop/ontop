@@ -12,6 +12,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 public class SemanticReductionTest extends TestCase {
+	
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	public void test_2_0_0() throws Exception {
@@ -67,6 +68,4 @@ public class SemanticReductionTest extends TestCase {
 		//System.out.println(rv);
 		assertEquals(45, rv.size());
 	}
-	
-	
 }

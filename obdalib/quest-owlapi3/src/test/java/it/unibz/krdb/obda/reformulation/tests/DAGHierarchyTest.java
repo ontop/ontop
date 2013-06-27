@@ -11,7 +11,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Set;
 
 import junit.framework.TestCase;

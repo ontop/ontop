@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGEdgeIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.Edge;
 import junit.framework.TestCase;
 
 public class DAGEdgeIteratorTest extends TestCase {
@@ -26,8 +25,7 @@ public class DAGEdgeIteratorTest extends TestCase {
 		int count = 0;
 		while (it.hasNext()) {
 			count += 1;
-			Edge edge = it.next();
-			//System.out.println(edge.toString());
+			it.next();
 		}
 		assertEquals(9,count);
 	}
@@ -41,20 +39,10 @@ public class DAGEdgeIteratorTest extends TestCase {
 		int count = 0;
 		while (it.hasNext()) {
 			count += 1;
-			Edge edge = it.next();
-			//System.out.println(edge.toString());
+			it.next();
 		}
 		
 		/* 9 for role inclusions, 9 for exists R, 9 for exists Rinv */
 		assertEquals(36,count);
 	}
-
-	public void testEnumerationForSingleNodeClass() {
-
-	}
-
-	public void testEnumerationForSingleNodeProperty() {
-
-	}
-
 }

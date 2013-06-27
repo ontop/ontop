@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLConnection;
@@ -33,17 +32,14 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class PropertyCharacteristicTest extends TestCase {
 	
 	private OWLConnection conn = null;
 	private OWLStatement stmt = null;
 	private QuestOWL reasoner = null;
 	
-	Connection jdbcconn = null;
-	
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	
+	private Connection jdbcconn = null;
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
 	private static 	QuestPreferences prefs;
@@ -53,11 +49,9 @@ public class PropertyCharacteristicTest extends TestCase {
 		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 	}
 	
-	
 	@Override
 	public void setUp() throws Exception {
 		createTables();
-
 	}
 	
 	private String readSQLFile(String file) throws IOException {
@@ -71,13 +65,10 @@ public class PropertyCharacteristicTest extends TestCase {
 		return bf.toString();
 	}
 	
-	private void createTables() throws IOException, SQLException
-	{
+	private void createTables() throws IOException, SQLException {
 		String createDDL = readSQLFile("src/test/resources/property-characteristics/sqlcreate.sql");
 		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
+		// Initializing and H2 database with the stock exchange data
 		// String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
@@ -88,13 +79,9 @@ public class PropertyCharacteristicTest extends TestCase {
 		jdbcconn = DriverManager.getConnection(url, username, password);
 		Statement st = jdbcconn.createStatement();
 
-		
 		st.executeUpdate(createDDL);
 		jdbcconn.commit();
-		
-		
 	}
-
 
 	@Override
 	public void tearDown() throws Exception {
@@ -108,8 +95,6 @@ public class PropertyCharacteristicTest extends TestCase {
 	}
 
 	private void dropTables() throws SQLException, IOException {
-
-		
 		String dropDDL = readSQLFile("src/test/resources/property-characteristics/drop.sql");
 		Statement st = jdbcconn.createStatement();
 		st.executeUpdate(dropDDL);
@@ -164,9 +149,7 @@ public class PropertyCharacteristicTest extends TestCase {
 			conn = reasoner.getConnection();
 			stmt = conn.createStatement();
 			return stmt.executeTuple(sparql);
-		
 	}
-
 	
 	private int countResult(OWLResultSet rs, boolean stdout) throws OWLException {
 		int counter = 0;

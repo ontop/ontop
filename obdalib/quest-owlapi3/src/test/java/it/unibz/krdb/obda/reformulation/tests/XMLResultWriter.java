@@ -52,7 +52,6 @@ public class XMLResultWriter {
 	}
 	
 	public void saveXMLResults(String fileuri) throws Exception{
-		
 		FileOutputStream fos = new FileOutputStream(fileuri);
 		OutputFormat of = new OutputFormat("XML","ISO-8859-1",true);
 		of.setIndent(2);

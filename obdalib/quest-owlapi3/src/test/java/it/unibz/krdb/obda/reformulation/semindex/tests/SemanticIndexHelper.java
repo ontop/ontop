@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -43,16 +42,15 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Helper class to load ontologies and comapre computed values to expected results
+ * Helper class to load ontologies and compare computed values to expected results
  *
  * @author Sergejs Pugac
  */
 public class SemanticIndexHelper {
-    public final static Logger log = LoggerFactory
-            .getLogger(SemanticIndexHelper.class);
+	
+    public final static Logger log = LoggerFactory.getLogger(SemanticIndexHelper.class);
 
     public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    //    public static OBDAModel apic;
     
     public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     
@@ -84,11 +82,9 @@ public class SemanticIndexHelper {
 
         Ontology ontology = translator.translate(owlOntology);
         return ontology;
-
     }
 
     public DAG load_dag(String ontoname) throws Exception {
-
         return DAGConstructor.getISADAG(load_onto(ontoname));
     }
 
@@ -96,7 +92,6 @@ public class SemanticIndexHelper {
         String resfile = owlloc + resname + ".si";
         File results = new File(resfile);
         Document doc = null;
-
 
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -170,7 +165,6 @@ public class SemanticIndexHelper {
                     description = descFactory.createProperty(p, inverse);
                 }
 
-
                 DAGNode _node = new DAGNode(description);
 
                 _node.setIndex(idx);
@@ -207,5 +201,4 @@ public class SemanticIndexHelper {
         }
         return rv;
     }
-
 }

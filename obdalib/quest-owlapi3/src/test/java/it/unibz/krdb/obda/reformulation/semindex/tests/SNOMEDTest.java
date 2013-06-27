@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.reformulation.semindex.tests;
 
-import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -8,7 +7,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.File;
 
@@ -20,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SNOMEDTest {
+	
 	public static void main(String args[]) throws Exception {
 		
 		Logger log = LoggerFactory.getLogger("SNOMEDTEST");
@@ -50,9 +49,6 @@ public class SNOMEDTest {
 		 * Loading the queries (we have 11 queries)
 		 */
 
-		QueryController qcontroller = new QueryController();
-		QueryStorageManager qman = new QueryStorageManager(qcontroller);
-
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
@@ -66,8 +62,5 @@ public class SNOMEDTest {
 		log.info("Done");
 		
 		reasoner.dispose();
-		
-		
-
 	}
 }

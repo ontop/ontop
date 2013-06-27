@@ -1,9 +1,9 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 
 import java.util.Map;
@@ -61,13 +61,10 @@ public class DAGPerformanceTest extends TestCase {
 			classes[i] = c;
 			man.addAxiom(ont, fac.getOWLDeclarationAxiom(c));
 		}
-
 		log.debug("Generating axioms");
-		int baseIdx = 0;
 		LevelRange[] ranges = new LevelRange[10];
 		for (int depth = 0; depth < maxdepth; depth++) {
 			int width = (int) ((Math.log10(depth + 1)) * size);
-
 			LevelRange r = null;
 			if (depth == 0) {
 				r = new LevelRange(0, width);
@@ -86,17 +83,14 @@ public class DAGPerformanceTest extends TestCase {
 			}
 			corrected[depth] = r2;
 		}
-
 		log.info("Creating axioms");
 		Random r = new Random(10);
 		for (int i = 1; i < 9; i++) {
 			LevelRange parentRange = corrected[i - 1];
 			LevelRange currentRange = corrected[i];
-
 			for (int axiomindex = 0; axiomindex < (currentRange.width*1.5); axiomindex++) {
 				int rand1 = r.nextInt(parentRange.width);
 				int rand2 = r.nextInt(currentRange.width);
-				
 				int parent = parentRange.min + rand1;
 				int child = currentRange.min + rand2;
 				
@@ -106,7 +100,6 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
-
 		System.out.println(ont);
 
 		log.debug("Translating into quest API");
@@ -119,18 +112,14 @@ public class DAGPerformanceTest extends TestCase {
 		log.debug("Optimizing Equivalences");
 		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
 		equiOptimizer.optimize();
-		Ontology o2 = equiOptimizer.getOptimalTBox();
-		Map equi = equiOptimizer.getEquivalenceMap();
-		log.debug("Equivalences: {}", equi.size());
 		
+		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
+		log.debug("Equivalences: {}", equi.size());
 		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
-
 		log.debug("Done.");
-
 	}
 	
-	
-	/***
+	/**
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
@@ -149,11 +138,9 @@ public class DAGPerformanceTest extends TestCase {
 		}
 
 		log.debug("Generating axioms");
-		int baseIdx = 0;
 		LevelRange[] ranges = new LevelRange[10];
 		for (int depth = 0; depth < maxdepth; depth++) {
 			int width = (int) ((Math.log10(depth + 1)) * size);
-
 			LevelRange r = null;
 			if (depth == 0) {
 				r = new LevelRange(0, width);
@@ -172,17 +159,14 @@ public class DAGPerformanceTest extends TestCase {
 			}
 			corrected[depth] = r2;
 		}
-
 		log.info("Creating axioms");
 		Random r = new Random(10);
 		for (int i = 1; i < 9; i++) {
 			LevelRange parentRange = corrected[i - 1];
 			LevelRange currentRange = corrected[i];
-
 			for (int axiomindex = 0; axiomindex < (currentRange.width*1.7); axiomindex++) {
 				int rand1 = r.nextInt(parentRange.width);
 				int rand2 = r.nextInt(currentRange.width);
-				
 				int parent = parentRange.min + rand1;
 				int child = currentRange.min + rand2;
 				
@@ -192,9 +176,6 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
-
-		System.out.println(ont);
-
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		Ontology o = t.translate(ont);
@@ -205,17 +186,14 @@ public class DAGPerformanceTest extends TestCase {
 		log.debug("Optimizing Equivalences");
 		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
 		equiOptimizer.optimize();
-		Ontology o2 = equiOptimizer.getOptimalTBox();
-		Map equi = equiOptimizer.getEquivalenceMap();
+
+		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
 		log.debug("Equivalences: {}", equi.size());
-		
 		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
-
 		log.debug("Done.");
-
 	}
 	
-	/***
+	/**
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
@@ -234,11 +212,9 @@ public class DAGPerformanceTest extends TestCase {
 		}
 
 		log.debug("Generating axioms");
-		int baseIdx = 0;
 		LevelRange[] ranges = new LevelRange[10];
 		for (int depth = 0; depth < maxdepth; depth++) {
 			int width = (int) ((Math.log10(depth + 1)) * size);
-
 			LevelRange r = null;
 			if (depth == 0) {
 				r = new LevelRange(0, width);
@@ -263,11 +239,9 @@ public class DAGPerformanceTest extends TestCase {
 		for (int i = 1; i < 9; i++) {
 			LevelRange parentRange = corrected[i - 1];
 			LevelRange currentRange = corrected[i];
-
 			for (int axiomindex = 0; axiomindex < (currentRange.width*1.9); axiomindex++) {
 				int rand1 = r.nextInt(parentRange.width);
 				int rand2 = r.nextInt(currentRange.width);
-				
 				int parent = parentRange.min + rand1;
 				int child = currentRange.min + rand2;
 				
@@ -277,9 +251,6 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
-
-		System.out.println(ont);
-
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		Ontology o = t.translate(ont);
@@ -290,13 +261,10 @@ public class DAGPerformanceTest extends TestCase {
 		log.debug("Optimizing Equivalences");
 		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
 		equiOptimizer.optimize();
-		Ontology o2 = equiOptimizer.getOptimalTBox();
-		Map equi = equiOptimizer.getEquivalenceMap();
-		log.debug("Equivalences: {}", equi.size());
 		
+		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
+		log.debug("Equivalences: {}", equi.size());
 		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
-
 		log.debug("Done.");
-
 	}	
 }
