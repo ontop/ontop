@@ -4,10 +4,8 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.QueryTree;
-import it.unibz.krdb.sql.api.Relation;
 
 import java.sql.Types;
-import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
@@ -537,6 +535,7 @@ public class SQL99ParserTest extends TestCase {
 		if (parser.getNumberOfSyntaxErrors() != 0) {
 			return false;
 		}
+		
 		return true;
 	}
 	
