@@ -560,7 +560,7 @@ public class OWLAPI3Translator {
 
 				/* Creating the new subrole assertions */
 				SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) ofac.createSubPropertyAxiom(auxRole,
-						ofac.createProperty(role, isInverse));
+						ofac.createProperty(role, false)); // Roman: was isInverse in place of false
 				/* Creatin the range assertion */
 				PropertySomeRestriction propertySomeRestrictionInv = ofac.getPropertySomeRestriction(auxRole.getPredicate(), !isInverse);
 
