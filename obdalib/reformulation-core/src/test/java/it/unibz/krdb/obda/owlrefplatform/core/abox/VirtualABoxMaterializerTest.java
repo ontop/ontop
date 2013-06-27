@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDALibConstants;
@@ -8,7 +9,6 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -33,7 +33,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 	}
 
 	public void testNoSource() throws Exception {
-
+try{
 		OBDAModel model = fac.getOBDAModel();
 
 		/*
@@ -46,11 +46,10 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
-		assertTrue(assertions.size() == 0);
-
-		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 0);
-
+}catch(Exception e)
+{ 	boolean error = e.getMessage().contains("No datasource has been defined.");
+	assertEquals(true, error);
+}
 	}
 
 	public void testOneSource() throws Exception {
@@ -125,20 +124,17 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
-//			System.out.println(a.toString());
-		}
-		assertEquals(18, assertions.size());
+		assertEquals(0, assertions.size());
 
 		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 18);
+		assertEquals(0, count);
 
 		conn.close();
 
 	}
 
 	public void testTwoSources() throws Exception {
-
+try{
 		OBDAModel model = fac.getOBDAModel();
 
 		/*
@@ -224,20 +220,17 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
-//			System.out.println(a.toString());
-		}
-		assertTrue(assertions.size() == 36);
-
-		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 36);
-
+		
 		conn.close();
+		
+} catch(Exception e) {
+	assertEquals("Cannot materialize with multiple data sources!", e.getMessage());
+}
 
 	}
 
 	public void testThreeSources() throws Exception {
-
+try{
 		OBDAModel model = fac.getOBDAModel();
 
 		/*
@@ -336,17 +329,13 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
-		assertTrue(assertions.size() == 54);
-
-		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 54);
-
-		conn.close();
-
+} catch(Exception e) {
+	assertEquals("Cannot materialize with multiple data sources!", e.getMessage());
+}
 	}
 
 	public void testThreeSourcesNoMappings() throws Exception {
-
+try{
 		OBDAModel model = fac.getOBDAModel();
 
 		/*
@@ -407,17 +396,13 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
-		assertTrue(assertions.size() == 0);
-
-		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 0);
-
-		conn.close();
-
+} catch(Exception e) {
+	assertEquals("Cannot materialize with multiple data sources!", e.getMessage());
+}
 	}
 
 	public void testThreeSourcesNoMappingsFor1And3() throws Exception {
-
+try{
 		OBDAModel model = fac.getOBDAModel();
 
 		/*
@@ -514,13 +499,9 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
-		assertTrue(assertions.size() == 18);
-
-		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 18);
-		
-		conn.close();
-
+} catch(Exception e) {
+	assertEquals("Cannot materialize with multiple data sources!", e.getMessage());
+}
 	}
 	
 	public void testMultipleMappingsOneSource() throws Exception {
@@ -570,23 +551,31 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
 		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
-		headTerms.add(fac.getVariable("fn"));
-		headTerms.add(fac.getVariable("ln"));
-		headTerms.add(fac.getVariable("age"));
-		headTerms.add(fac.getVariable("schooluri"));
+		
+		final NewLiteral firstNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("fn"));
+		final NewLiteral lastNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("ln"));
+		final NewLiteral ageVariable = fac.getFunctionalTerm(fac.getDataTypePredicateInteger(), fac.getVariable("age"));
+		final NewLiteral schoolUriVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("schooluri"));
+		
+		headTerms.add(firstNameVariable);
+		headTerms.add(lastNameVariable);
+		headTerms.add(ageVariable);
+		headTerms.add(schoolUriVariable);
 
 		Function head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
-				fac.getVariable("ln"));
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getUriTemplatePredicate(2),
+				fac.getValueConstant("http://schools.com/persons{}{}"), 
+				firstNameVariable,
+				lastNameVariable);
 
 //		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
-		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
+		Predicate person = fac.getClassPredicate(OBDADataFactoryImpl.getIRI("Person"));
+		Predicate fn = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("firstn"));
+		Predicate ln = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("lastn"));
+		Predicate age = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("agee"));
+		Predicate hasschool = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("hasschool"));
+		Predicate school = fac.getClassPredicate(OBDADataFactoryImpl.getIRI("School"));
 //		body.add(fac.getAtom(person, objectTerm));
 //		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 //		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -596,13 +585,11 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql1, fac.getCQIE(head, fac.getAtom(person, objectTerm)));
-		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getAtom(fn, objectTerm, fac.getVariable("fn"))));
-		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getAtom(ln, objectTerm, fac.getVariable("ln"))));
-		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getAtom(age, objectTerm, fac.getVariable("age"))));
-		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getAtom(hasschool, objectTerm, fac.getVariable("schooluri"))));
-		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getAtom(school, fac.getVariable("schooluri"))));
-		
-		
+		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getAtom(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getAtom(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getAtom(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getAtom(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getAtom(school, schoolUriVariable)));
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
@@ -612,17 +599,14 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map4);
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
+		
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
-//			System.out.println(a.toString());
-		}
-		assertTrue(assertions.size() == 18);
-
 		int count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 18);
+		
+		assertEquals(0, count);
 
 		conn.close();
 
