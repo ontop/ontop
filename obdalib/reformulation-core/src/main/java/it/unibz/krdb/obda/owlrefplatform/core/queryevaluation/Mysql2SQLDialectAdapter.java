@@ -1,9 +1,25 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
+	private static Map<Integer, String> SqlDatatypes;
+	static {
+		SqlDatatypes = new HashMap<Integer, String>();
+		SqlDatatypes.put(Types.INTEGER, "INT");
+		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
+		SqlDatatypes.put(Types.REAL, "FLOAT");
+		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");
+		SqlDatatypes.put(Types.CHAR, "CHAR");
+		SqlDatatypes.put(Types.VARCHAR, "CHAR(8000) CHARACTER SET utf8");  // for korean, chinese, etc characters we need to use utf8
+		SqlDatatypes.put(Types.DATE, "DATE");
+		SqlDatatypes.put(Types.TIME, "TIME");
+		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
+	}
+	
 	@Override
 	public String strconcat(String[] strings) {
 		if (strings.length == 0)
@@ -61,13 +77,10 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	    public String sqlCast(String value, int type) {
-	        String strType = null;
-	        if (type == Types.VARCHAR) {
-	            strType = "CHAR(8000)";
-	        } else {
-	            throw new RuntimeException("Unsupported SQL type");
-	        }
-	        // for korean, chinese, etc characters we need to use utf8
-	        return "CAST(" + value + " AS " + strType + " CHARACTER SET utf8)";
-	    }
+		String strType = SqlDatatypes.get(type);
+		if (strType != null) {	
+			return "CAST(" + value + " AS " + strType + ")";
+		}
+		throw new RuntimeException("Unsupported SQL type");
+	}
 }

@@ -1,8 +1,3 @@
-/*
- * Copyright Aduna (http://www.aduna-software.com/) (c) 1997-2008.
- *
- * Licensed under the Aduna BSD-style license.
- */
 package it.unibz.krdb.obda.quest.sparql;
 
 import junit.framework.Test;
@@ -12,10 +7,10 @@ import org.openrdf.repository.Repository;
 
 import sesameWrapper.SesameClassicInMemoryRepo;
 
-public class QuestMemorySPARQLQueryTest extends SPARQLQueryTest {
+public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 
 	public static Test suite() throws Exception {
-		return QuestManifestTest.suite(new Factory() {
+		return QuestManifestTestUtils.suite(new Factory() {
 			public QuestMemorySPARQLQueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
@@ -53,7 +48,7 @@ public class QuestMemorySPARQLQueryTest extends SPARQLQueryTest {
 	protected Repository newRepository() {
 		try {
 			SesameClassicInMemoryRepo repo = new SesameClassicInMemoryRepo(
-					"test", dataset);
+					"QuestSPARQLTest", dataset);
 			repo.initialize();
 			return repo;
 		} catch (Exception e) {

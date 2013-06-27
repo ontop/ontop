@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.quest.datatypes;
 import info.aduna.io.IOUtil;
 import info.aduna.iteration.Iterations;
 import info.aduna.text.StringUtil;
-import it.unibz.krdb.obda.quest.scenarios.QuestScenarioTest;
+import it.unibz.krdb.obda.quest.scenarios.QuestScenarioParent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,9 +47,9 @@ import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SesameVirtualRepo;
 
-public class QuestDatatypeTest extends TestCase {
+public class QuestDatatypeParent extends TestCase {
 	
-	static final Logger logger = LoggerFactory.getLogger(QuestScenarioTest.class);
+	static final Logger logger = LoggerFactory.getLogger(QuestScenarioParent.class);
 
 	protected final String testURI;
 	protected final String queryFileURL;
@@ -60,21 +60,21 @@ public class QuestDatatypeTest extends TestCase {
 	protected Repository dataRep;
 	
 	public interface Factory {
-		QuestDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
+		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
 				String resultFileURL, String owlFileURL, String obdaFileURL);
 		
-		QuestDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
+		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
 				String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
 	
 		String getMainManifestFile();
 	}
 
-	public QuestDatatypeTest(String testURI, String name, String queryFileURL, String resultFileURL, 
+	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL, 
 			String owlFileURL, String obdaFileURL) {
 		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
 	}
 
-	public QuestDatatypeTest(String testURI, String name, String queryFileURL, String resultFileURL,
+	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL,
 			String owlFileURL, String obdaFileURL, String parameterFileURL) {
 		super(name);
 		this.testURI = testURI;
@@ -285,7 +285,7 @@ public class QuestDatatypeTest extends TestCase {
 		manifestRep.initialize();
 		RepositoryConnection con = manifestRep.getConnection();
 
-		ManifestTest.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
+		QuestDatatypeTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
 
 		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
 
@@ -325,7 +325,7 @@ public class QuestDatatypeTest extends TestCase {
 
 			logger.debug("Found test case: {}", testName);
 
-			QuestDatatypeTest test = factory.createQuestDatatypeTest(testURI.toString(), testName, queryFile,
+			QuestDatatypeParent test = factory.createQuestDatatypeTest(testURI.toString(), testName, queryFile,
 					resultFile, owlFile, obdaFile, parameterFile);
 			if (test != null) {
 				suite.addTest(test);

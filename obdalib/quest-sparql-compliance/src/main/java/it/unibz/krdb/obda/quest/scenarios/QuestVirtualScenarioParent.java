@@ -4,9 +4,9 @@ import org.openrdf.repository.Repository;
 
 import sesameWrapper.SesameVirtualRepo;
 
-public abstract class QuestVirtualScenarioTest extends QuestScenarioTest {
+public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 
-	public QuestVirtualScenarioTest(String testURI, String name,
+	public QuestVirtualScenarioParent(String testURI, String name,
 			String queryFileURL, String resultFileURL, String owlFileURL,
 			String obdaFileURL, String parameterFileURL) {
 		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);

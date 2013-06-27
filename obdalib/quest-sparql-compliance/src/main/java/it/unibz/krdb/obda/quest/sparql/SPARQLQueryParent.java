@@ -70,13 +70,13 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class SPARQLQueryTest extends TestCase {
+public abstract class SPARQLQueryParent extends TestCase {
 
 	/*-----------*
 	 * Constants *
 	 *-----------*/
 
-	static final Logger logger = LoggerFactory.getLogger(SPARQLQueryTest.class);
+	static final Logger logger = LoggerFactory.getLogger(SPARQLQueryParent.class);
 
 	protected final String testURI;
 
@@ -100,13 +100,13 @@ public abstract class SPARQLQueryTest extends TestCase {
 	 * Constructors *
 	 *--------------*/
 
-	public SPARQLQueryTest(String testURI, String name, String queryFileURL, String resultFileURL,
+	public SPARQLQueryParent(String testURI, String name, String queryFileURL, String resultFileURL,
 			Dataset dataSet, boolean laxCardinality)
 	{
 		this(testURI, name, queryFileURL, resultFileURL, dataSet, laxCardinality, false);
 	}
 
-	public SPARQLQueryTest(String testURI, String name, String queryFileURL, String resultFileURL,
+	public SPARQLQueryParent(String testURI, String name, String queryFileURL, String resultFileURL,
 			Dataset dataSet, boolean laxCardinality, boolean checkOrder)
 	{
 		super(name);
@@ -736,10 +736,10 @@ public abstract class SPARQLQueryTest extends TestCase {
 
 	public interface Factory {
 
-		SPARQLQueryTest createSPARQLQueryTest(String testURI, String name, String queryFileURL,
+		SPARQLQueryParent createSPARQLQueryTest(String testURI, String name, String queryFileURL,
 				String resultFileURL, Dataset dataSet, boolean laxCardinality);
 
-		SPARQLQueryTest createSPARQLQueryTest(String testURI, String name, String queryFileURL,
+		SPARQLQueryParent createSPARQLQueryTest(String testURI, String name, String queryFileURL,
 				String resultFileURL, Dataset dataSet, boolean laxCardinality, boolean checkOrder);
 	}
 
@@ -761,7 +761,7 @@ public abstract class SPARQLQueryTest extends TestCase {
 		manifestRep.initialize();
 		RepositoryConnection con = manifestRep.getConnection();
 
-		ManifestTest.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
+		QuestManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
 
 		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
 
@@ -876,7 +876,7 @@ public abstract class SPARQLQueryTest extends TestCase {
 				checkOrder = Boolean.parseBoolean(ordered.stringValue());
 			}
 
-			SPARQLQueryTest test = factory.createSPARQLQueryTest(testURI.toString(), testName, queryFile,
+			SPARQLQueryParent test = factory.createSPARQLQueryTest(testURI.toString(), testName, queryFile,
 					resultFile, dataset, laxCardinality, checkOrder);
 			if (test != null) {
 				suite.addTest(test);

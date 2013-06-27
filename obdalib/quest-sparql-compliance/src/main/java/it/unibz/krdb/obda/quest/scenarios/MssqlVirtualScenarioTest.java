@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.quest.scenarios;
 
 import junit.framework.Test;
 
-public class MssqlVirtualScenarioTest extends QuestVirtualScenarioTest {
+public class MssqlVirtualScenarioTest extends QuestVirtualScenarioParent {
 
 	public MssqlVirtualScenarioTest(String testURI, String name, String queryFileURL, String resultFileURL, 
 			String owlFileURL, String obdaFileURL, String parameterFileURL) {
@@ -10,15 +10,15 @@ public class MssqlVirtualScenarioTest extends QuestVirtualScenarioTest {
 	}
 
 	public static Test suite() throws Exception {
-		return ScenarioManifestTest.suite(new Factory() {
+		return ScenarioManifestTestUtils.suite(new Factory() {
 			@Override
-			public QuestVirtualScenarioTest createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
 					String resultFileURL, String owlFileURL, String obdaFileURL) {
 				return new MssqlVirtualScenarioTest(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
 						obdaFileURL, "");
 			}
 			@Override
-			public QuestVirtualScenarioTest createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
 					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
 				return new MssqlVirtualScenarioTest(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
 						obdaFileURL, parameterFileURL);

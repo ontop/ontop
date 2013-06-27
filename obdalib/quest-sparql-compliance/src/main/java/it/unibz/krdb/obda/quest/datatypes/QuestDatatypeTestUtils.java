@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.quest.datatypes;
 
 import info.aduna.io.FileUtil;
 import info.aduna.io.ZipUtil;
-import it.unibz.krdb.obda.quest.scenarios.ScenarioManifestTest;
+import it.unibz.krdb.obda.quest.scenarios.ScenarioManifestTestUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,16 +33,16 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ManifestTest {
+public class QuestDatatypeTestUtils {
 
-	static final Logger logger = LoggerFactory.getLogger(ManifestTest.class);
+	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeTestUtils.class);
 
-	public static TestSuite suite(QuestDatatypeTest.Factory factory) throws Exception
+	public static TestSuite suite(QuestDatatypeParent.Factory factory) throws Exception
 	{
 		final String manifestFile;
 		final File tmpDir;
 		
-		URL url = ScenarioManifestTest.class.getResource(factory.getMainManifestFile());
+		URL url = ScenarioManifestTestUtils.class.getResource(factory.getMainManifestFile());
 			
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory
@@ -99,7 +99,7 @@ public class ManifestTest {
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile").toString();
-			suite.addTest(QuestDatatypeTest.suite(subManifestFile, factory));
+			suite.addTest(QuestDatatypeParent.suite(subManifestFile, factory));
 		}
 
 		manifestResults.close();

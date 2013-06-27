@@ -44,9 +44,9 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class QuestScenarioTest extends TestCase {
+public abstract class QuestScenarioParent extends TestCase {
 	
-	static final Logger logger = LoggerFactory.getLogger(QuestScenarioTest.class);
+	static final Logger logger = LoggerFactory.getLogger(QuestScenarioParent.class);
 
 	protected final String testURI;
 	protected final String queryFileURL;
@@ -57,21 +57,21 @@ public abstract class QuestScenarioTest extends TestCase {
 	protected Repository dataRep;
 	
 	public interface Factory {
-		QuestScenarioTest createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+		QuestScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
 				String resultFileURL, String owlFileURL, String obdaFileURL);
 		
-		QuestScenarioTest createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+		QuestScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
 				String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
 	
 		String getMainManifestFile();
 	}
 
-	public QuestScenarioTest(String testURI, String name, String queryFileURL, String resultFileURL, 
+	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL, 
 			String owlFileURL, String obdaFileURL) {
 		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
 	}
 
-	public QuestScenarioTest(String testURI, String name, String queryFileURL, String resultFileURL,
+	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL,
 			String owlFileURL, String obdaFileURL, String parameterFileURL) {
 		super(name);
 		this.testURI = testURI;
@@ -271,7 +271,7 @@ public abstract class QuestScenarioTest extends TestCase {
 		manifestRep.initialize();
 		RepositoryConnection con = manifestRep.getConnection();
 
-		ScenarioManifestTest.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
+		ScenarioManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
 
 		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
 
@@ -311,7 +311,7 @@ public abstract class QuestScenarioTest extends TestCase {
 
 			logger.debug("Found test case: {}", testName);
 
-			QuestScenarioTest test = factory.createQuestScenarioTest(testURI.toString(), testName, queryFile,
+			QuestScenarioParent test = factory.createQuestScenarioTest(testURI.toString(), testName, queryFile,
 					resultFile, owlFile, obdaFile, parameterFile);
 			if (test != null) {
 				suite.addTest(test);

@@ -1,4 +1,9 @@
-package it.unibz.krdb.obda.quest.scenarios;
+/*
+ * Copyright Aduna (http://www.aduna-software.com/) (c) 1997-2008.
+ *
+ * Licensed under the Aduna BSD-style license.
+ */
+package it.unibz.krdb.obda.quest.sparql;
 
 import info.aduna.io.FileUtil;
 import info.aduna.io.ZipUtil;
@@ -32,48 +37,53 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ScenarioManifestTest {
+public class QuestManifestTestUtils {
 
-	static final Logger logger = LoggerFactory.getLogger(ScenarioManifestTest.class);
+	static final Logger logger = LoggerFactory.getLogger(QuestManifestTestUtils.class);
 
-	public static TestSuite suite(QuestScenarioTest.Factory factory) throws Exception {
+	public static TestSuite suite(SPARQLQueryParent.Factory factory) throws Exception
+	{
 		final String manifestFile;
 		final File tmpDir;
-
-		URL url = ScenarioManifestTest.class.getResource(factory.getMainManifestFile());
-
+				
+		URL url = QuestManifestTestUtils.class.getResource("/testcases-dawg-quest/data-r2/manifest-evaluation.ttl");
+		
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory
 			try {
-				tmpDir = FileUtil.createTempDir("scenario-evaluation");
-
-				JarURLConnection con = (JarURLConnection) url.openConnection();
+				tmpDir = FileUtil.createTempDir("sparql-evaluation");
+				
+				JarURLConnection con = (JarURLConnection)url.openConnection();
 				JarFile jar = con.getJarFile();
-
+				
 				ZipUtil.extract(jar, tmpDir);
-
+				
 				File localFile = new File(tmpDir, con.getEntryName());
 				manifestFile = localFile.toURI().toURL().toString();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new AssertionError(e);
 			}
-		} else {
+		}
+		else {
 			manifestFile = url.toString();
 			tmpDir = null;
-		}
-
+		}		
+		
 		TestSuite suite = new TestSuite(factory.getClass().getName()) {
+
 			@Override
 			public void run(TestResult result) {
 				try {
 					super.run(result);
-				} finally {
+				}
+				finally {
 					if (tmpDir != null) {
 						try {
 							FileUtil.deleteDir(tmpDir);
-						} catch (IOException e) {
-							System.err.println("Unable to clean up temporary directory '"
-											+ tmpDir + "': " + e.getMessage());
+						}
+						catch (IOException e) {
+							System.err.println("Unable to clean up temporary directory '" + tmpDir + "': " + e.getMessage());
 						}
 					}
 				}
@@ -87,15 +97,15 @@ public class ScenarioManifestTest {
 		addTurtle(con, new URL(manifestFile), manifestFile);
 
 		String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-				+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
-				+ "  qt = <http://obda.org/quest/tests/test-query#>";
+				+ "USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, "
+				+ "  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>";
 
 		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
 
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile").toString();
-			suite.addTest(QuestScenarioTest.suite(subManifestFile, factory));
+			suite.addTest(SPARQLQueryParent.suite(subManifestFile, factory));
 		}
 
 		manifestResults.close();
@@ -107,10 +117,12 @@ public class ScenarioManifestTest {
 	}
 
 	static void addTurtle(RepositoryConnection con, URL url, String baseURI, Resource... contexts)
-			throws IOException, RepositoryException, RDFParseException {
+		throws IOException, RepositoryException, RDFParseException
+	{
 		if (baseURI == null) {
 			baseURI = url.toExternalForm();
 		}
+
 		InputStream in = url.openStream();
 
 		try {
@@ -132,21 +144,25 @@ public class ScenarioManifestTest {
 
 			try {
 				rdfParser.parse(in, baseURI);
-			} catch (RDFHandlerException e) {
+			}
+			catch (RDFHandlerException e) {
 				if (autoCommit) {
 					con.rollback();
 				}
 				// RDFInserter only throws wrapped RepositoryExceptions
-				throw (RepositoryException) e.getCause();
-			} catch (RuntimeException e) {
+				throw (RepositoryException)e.getCause();
+			}
+			catch (RuntimeException e) {
 				if (autoCommit) {
 					con.rollback();
 				}
 				throw e;
-			} finally {
+			}
+			finally {
 				con.setAutoCommit(autoCommit);
 			}
-		} finally {
+		}
+		finally {
 			in.close();
 		}
 	}

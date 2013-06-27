@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.quest.datatypes;
 
 import junit.framework.Test;
 
-public class PgsqlDatatypeTest extends QuestDatatypeTest {
+public class PgsqlDatatypeTest extends QuestDatatypeParent {
 
 	public PgsqlDatatypeTest(String testURI, String name, String queryFileURL, String resultFileURL, 
 			String owlFileURL, String obdaFileURL, String parameterFileURL) {
@@ -10,7 +10,7 @@ public class PgsqlDatatypeTest extends QuestDatatypeTest {
 	}
 
 	public static Test suite() throws Exception {
-		return ManifestTest.suite(new Factory() {
+		return QuestDatatypeTestUtils.suite(new Factory() {
 			@Override
 			public PgsqlDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
 					String resultFileURL, String owlFileURL, String obdaFileURL) {
