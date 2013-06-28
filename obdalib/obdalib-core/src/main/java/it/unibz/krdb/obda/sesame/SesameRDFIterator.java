@@ -21,12 +21,8 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.RDFHandlerBase;
-
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class SesameRDFIterator extends RDFHandlerBase implements
 		Iterator<Assertion> {
@@ -38,12 +34,10 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 	private Iterator<Statement> iterator;
 	private int size = 1;
 	private boolean fromIterator = false, endRdf = false;
-	private ValueFactory fact = ValueFactoryImpl.getInstance();
-	private Statement stm = fact.createStatement(null, null, null),
-			stmt = null;
+
+	private Statement stmt = null;
 
 	public SesameRDFIterator() {
-
 		buffer = new ArrayBlockingQueue<Statement>(size, true);
 	}
 
@@ -58,11 +52,11 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 
 	public void endRDF() throws RDFHandlerException {
 		endRdf = true;
-		try {
-			buffer.put(stm);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			//buffer.put(stm);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		//System.out.println("End rdf");
 	}
 
@@ -96,19 +90,21 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 		else {
 			// check if head is null
 
-			{
-				try {
-					if (((stmt = buffer.take()).equals(stm))) {
+			
+				//try {
+					
+					//if (((stmt = buffer.take()).equals(stm))) {
+					if (endRdf && buffer.isEmpty()) {
 						return false;
 					} else {
 						return true;
 					}
 
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				return buffer.peek() != null;
-			}
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//				return buffer.peek() != null;
+			
 		}
 	}
 
