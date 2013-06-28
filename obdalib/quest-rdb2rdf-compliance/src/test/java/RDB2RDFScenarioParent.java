@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SesameVirtualRepo;
 
-
 public class RDB2RDFScenarioParent extends TestCase {
 
 	protected final String sqlFileURL;
@@ -56,16 +55,16 @@ public class RDB2RDFScenarioParent extends TestCase {
 	}
 
 	
-	public RDB2RDFScenarioParent(String testUri, String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException
-	{
+	public RDB2RDFScenarioParent(String testUri, String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException {
+		super(name);
 		this.testURI = testUri;
 		this.name = name;
-		this.setName(name);
 		this.sqlFileURL = sqlFile;
 		this.mappingFileURL = mappingFile;
 		this.outputFileURL =  outputFile;
-		if (outputFileURL != null)
+		if (outputFileURL != null) {
 			output = new FileOutputStream(new File(outputFile));
+		}
 	}
 	
 	@Override
@@ -95,8 +94,6 @@ public class RDB2RDFScenarioParent extends TestCase {
 				if (output!=null)
 					throw exc;
 			}	
-			
-	    
 	}
 
 	protected Repository createRepository() throws Exception {
@@ -146,7 +143,6 @@ public class RDB2RDFScenarioParent extends TestCase {
 				RDFWriter writer = new NTriplesWriter(System.out);
 				gquery.evaluate(writer);
 			}
-				
 			con.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -316,5 +312,4 @@ public class RDB2RDFScenarioParent extends TestCase {
 		int secLastSlashIdx = manifestFileURL.lastIndexOf('/', lastSlashIdx - 1);
 		return manifestFileURL.substring(secLastSlashIdx + 1, lastSlashIdx);
 	}
-
 }
