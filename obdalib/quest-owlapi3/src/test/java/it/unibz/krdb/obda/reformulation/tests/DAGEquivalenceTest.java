@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.hp.hpl.jena.iri.IRIFactory;
 
-public class DAGEquivalenceTests extends TestCase {
+public class DAGEquivalenceTest extends TestCase {
 
 	/**
 	 * R1 = R2^- = R3, S1 = S2^- = S3, R1 ISA S1

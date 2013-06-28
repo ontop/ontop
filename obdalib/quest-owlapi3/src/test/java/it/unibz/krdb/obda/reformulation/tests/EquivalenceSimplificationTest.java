@@ -19,7 +19,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-public class EquivalenceSimplificationTests extends TestCase {
+public class EquivalenceSimplificationTest extends TestCase {
 
 	final String	path	= "src/test/resources/test/equivalence/";
 
