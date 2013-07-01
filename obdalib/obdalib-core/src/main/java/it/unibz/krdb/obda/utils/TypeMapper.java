@@ -7,6 +7,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import java.sql.Types;
 import java.util.HashMap;
 
+/**
+ * This class maps SQL datatypes to XML datatypes.
+ * Details look at this link: https://docs.google.com/spreadsheet/ccc?key=0AoDXwrYLJ2lvdFAtRXBPcUs2UjMtY08tZ3NYTEp5dVE&usp=sharing
+ */
 public class TypeMapper {
 
 	private static TypeMapper typeMapper;
