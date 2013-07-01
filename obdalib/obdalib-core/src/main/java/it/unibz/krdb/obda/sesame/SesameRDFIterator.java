@@ -12,8 +12,8 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
@@ -21,30 +21,21 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 
-import com.hp.hpl.jena.iri.IRIFactory;
-
-public class SesameRDFIterator extends RDFHandlerBase implements
-		Iterator<Assertion> {
-
+public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
+	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-	private String RDF_TYPE_PREDICATE = OBDAVocabulary.RDF_TYPE;
+	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private BlockingQueue<Statement> buffer;
+	private Queue<Statement> buffer;
 	private Iterator<Statement> iterator;
 	private int size = 1;
-	private boolean fromIterator = false, endRdf = false;
-	private ValueFactory fact = ValueFactoryImpl.getInstance();
-	private Statement stm = fact.createStatement(null, null, null),
-			stmt = null;
+	private boolean fromIterator = false;
 
 	public SesameRDFIterator() {
-
-		buffer = new ArrayBlockingQueue<Statement>(size, true);
+		buffer = new PriorityQueue<Statement>(size);
 	}
 
 	public SesameRDFIterator(Iterator<Statement> it) {
@@ -53,85 +44,45 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 	}
 
 	public void startRDF() throws RDFHandlerException {
-		endRdf = false;
+		// NO-OP
 	}
 
 	public void endRDF() throws RDFHandlerException {
-		endRdf = true;
-		try {
-			buffer.put(stm);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		//System.out.println("End rdf");
+		// NO-OP
 	}
 
 	@Override
 	public void handleStatement(Statement st) throws RDFHandlerException {
-
-		// add to buffer
-	//	System.out.println("Handle statement: "+st.toString());
-//				+ st.getSubject().toString().split("#")[1] + " "
-//				+ st.getPredicate().getLocalName() + " ");
-//		if (st.getObject().toString().split("#").length > 1)
-//			System.out.println(st.getObject().toString().split("#")[1]);
-//		else
-//			System.out.println(st.getObject().toString().split("#")[0]);
-		// add statement to buffer
-		try {
-			// add to the tail of the queue
-			{
-				buffer.put(st);
-
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
+		// Add statement to buffer
+		buffer.add(st);
 	}
 
 	public boolean hasNext() {
-		if (fromIterator)
+		if (fromIterator) {
 			return iterator.hasNext();
+		}
 		else {
-			// check if head is null
-
-			{
-				try {
-					if (((stmt = buffer.take()).equals(stm))) {
-						return false;
-					} else {
-						return true;
-					}
-
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				return buffer.peek() != null;
+			Statement stmt = buffer.peek();
+			if (stmt == null) {
+				return false;
 			}
+			return true;
 		}
 	}
 
 	public Assertion next() {
-
-		if (stmt == null)
-			if (!hasNext())
+		Statement stmt = null;
+		if (fromIterator) {
+			stmt = iterator.next();
+		} else {
+			stmt = buffer.poll();
+		}
+		if (stmt == null) {
+			if (!hasNext()) {
 				throw new NoSuchElementException();
-
-		Statement statement = null;
-		if (fromIterator)
-			statement = iterator.next();
-		else {
-			statement = stmt;
+			}
 		}
-		Assertion assertion = constructAssertion(statement);
-
-		// Owl class assertion
-		if (assertion == null) {
-			if (hasNext())
-				return next();
-		}
-
+		Assertion assertion = constructAssertion(stmt);
 		return assertion;
 	}
 
@@ -141,83 +92,66 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 	 * assertion if the predicate is rdf:type. Its an Object property if the
 	 * predicate is not type and the object is URI or BNode. Its a data property
 	 * if the predicate is not rdf:type and the object is a Literal.
-	 * 
-	 * @return
 	 */
 	private Assertion constructAssertion(Statement st) {
-		Assertion assertion = null;
-
-		if (st == null)
-			return null;
-
-		Predicate currentPredicate = null;
-
 		Resource currSubject = st.getSubject();
-		ObjectConstant c;
-		if (currSubject instanceof URI)
-			c = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currSubject
-					.stringValue()));
-		else if (currSubject instanceof BNode) {
+		
+		ObjectConstant c = null;
+		if (currSubject instanceof URI) {
+			c = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currSubject.stringValue()));
+		} else if (currSubject instanceof BNode) {
 			c = obdafac.getBNodeConstant(currSubject.stringValue());
 		} else {
-			throw new RuntimeException(
-					"Unsupported subject found in triple. Not URI or BNode. Statement: "
-							+ st.toString());
+			throw new RuntimeException("Unsupported subject found in triple: "	+ st.toString() + " (Required URI or BNode)");
 		}
 
 		URI currPredicate = st.getPredicate();
 		Value currObject = st.getObject();
 
+		Predicate currentPredicate = null;
 		if (currObject instanceof Literal) {
-			currentPredicate = obdafac.getDataPropertyPredicate(currPredicate
-					.stringValue());
+			currentPredicate = obdafac.getDataPropertyPredicate(currPredicate.stringValue());
 		} else {
 			String predStringValue = currPredicate.stringValue();
-			if (predStringValue.equals(RDF_TYPE_PREDICATE)) {
+			if (predStringValue.equals(OBDAVocabulary.RDF_TYPE)) {
 				if (!(predStringValue.endsWith("/owl#Thing"))
 						|| predStringValue.endsWith("/owl#Nothing")
-						|| predStringValue.endsWith("/owl#Ontology"))
-					currentPredicate = obdafac.getClassPredicate(currObject
-							.stringValue());
-				else
+						|| predStringValue.endsWith("/owl#Ontology")) {
+					currentPredicate = obdafac.getClassPredicate(currObject.stringValue());
+				} else {
 					return null;
-			} else
-				currentPredicate = obdafac
-						.getObjectPropertyPredicate(currPredicate.stringValue());
-
+				}
+			} else {
+				currentPredicate = obdafac.getObjectPropertyPredicate(currPredicate.stringValue());
+			}
 		}
-
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		
+		// Create the assertion
+		Assertion assertion = null;
 		if (currentPredicate.getArity() == 1) {
-
 			assertion = ofac.createClassAssertion(currentPredicate, c);
-
-		} else {
-
+		} else if (currentPredicate.getArity() == 2) {
 			Constant c2;
-			if (currObject instanceof URI)
-				c2 = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currObject
-						.stringValue()));
-			else if (currObject instanceof BNode) {
+			if (currObject instanceof URI) {
+				c2 = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currObject.stringValue()));
+			} else if (currObject instanceof BNode) {
 				c2 = obdafac.getBNodeConstant(currObject.stringValue());
 			} else if (currObject instanceof Literal) {
 				Literal l = (Literal) currObject;
 				Predicate.COL_TYPE type = getColumnType(l.getDatatype());
 				String lang = l.getLanguage();
-
-				if (lang == null)
+				if (lang == null) {
 					c2 = obdafac.getValueConstant(l.getLabel(), type);
-				else
+				} else {
 					c2 = obdafac.getValueConstant(l.getLabel(), lang);
+				}
 			} else {
-				throw new RuntimeException(
-						"Unsupported object found in triple. Not URI, BNode or Literal. Statement: "
-								+ st.toString());
+				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 			}
-
 			assertion = ofac.createPropertyAssertion(currentPredicate, c, c2);
+		} else {
+			throw new RuntimeException("Unsupported statement: " + st.toString());
 		}
-
 		return assertion;
 	}
 
@@ -226,31 +160,26 @@ public class SesameRDFIterator extends RDFHandlerBase implements
 			return Predicate.COL_TYPE.LITERAL;
 		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_STRING_URI)) {
 			return Predicate.COL_TYPE.STRING;
-		} else if (datatype.stringValue().equals(
-				OBDAVocabulary.RDFS_LITERAL_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 			return Predicate.COL_TYPE.LITERAL;
-		} else if (datatype.stringValue()
-				.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_INTEGER_URI)) {
 			return Predicate.COL_TYPE.INTEGER;
-		} else if (datatype.stringValue()
-				.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
 			return Predicate.COL_TYPE.DECIMAL;
 		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
 			return Predicate.COL_TYPE.DOUBLE;
-		} else if (datatype.stringValue().equals(
-				OBDAVocabulary.XSD_DATETIME_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DATETIME_URI)) {
 			return Predicate.COL_TYPE.DATETIME;
-		} else if (datatype.stringValue()
-				.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 			return Predicate.COL_TYPE.BOOLEAN;
 		}
 		return Predicate.COL_TYPE.UNSUPPORTED;
-
 	}
 
+	/**
+	 * Removes the entry at the beginning in the buffer.
+	 */
 	public void remove() {
-		// remove head
 		buffer.poll();
 	}
-
 }
