@@ -139,6 +139,7 @@ public abstract class CompletenessParent extends TestCase {
 
 	@Override
 	protected void runTest() throws Exception {
+		logger.info("\n\n\n============== " + testId + " ==============\n");
 		RepositoryConnection con = repository.getConnection();
 		try {
 			String queryString = readQueryString();
@@ -161,6 +162,7 @@ public abstract class CompletenessParent extends TestCase {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			assertTrue(false);
 		}
 		finally {
 			con.close();

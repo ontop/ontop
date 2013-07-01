@@ -129,7 +129,7 @@ public abstract class QuestScenarioParent extends TestCase {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			compareTupleQuerySizeResults(null, readExpectedTupleQueryResult());
+			assertTrue(false); // make the test fails
 		}
 		finally {
 			con.close();
