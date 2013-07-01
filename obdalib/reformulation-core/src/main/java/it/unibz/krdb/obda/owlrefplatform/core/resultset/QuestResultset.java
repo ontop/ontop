@@ -4,10 +4,10 @@ import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.TupleResultSet;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import com.hp.hpl.jena.iri.IRI;
@@ -196,10 +193,11 @@ public class QuestResultset implements TupleResultSet {
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
 		Constant result = null;
-		try {
+		String realValue = "";
+		try {	
+			realValue = set.getString(name);
 			COL_TYPE type = getQuestType((byte) set.getInt(name + "QuestType"));
-			String realValue = set.getString(name);
-
+			
 			if (type == null || realValue == null) {
 				return null;
 			} else {
@@ -263,12 +261,23 @@ public class QuestResultset implements TupleResultSet {
 			Throwable cause = e.getCause();
 			if (cause instanceof URISyntaxException) {
 				OBDAException ex = new OBDAException(
-						"Error creating an object's URI. This is often due to mapping with URI templates that refer to columns in which illegal values may appear, e.g., white spaces and special characters. To avoid this error do not use these columns for URI templates in your mappings, or process them using SQL functions (e.g., string replacement) in the SQL queries of your mappings. Note that this last option can be bad for performance, future versions of Quest will allow to string manipulation functions in URI templates to avoid these performance problems."
-								+ "\n\nDetailed message: " + cause.getMessage());
+						"Error creating an object's URI. This is often due to mapping with URI templates that refer to " +
+						"columns in which illegal values may appear, e.g., white spaces and special characters.\n" +
+						"To avoid this error do not use these columns for URI templates in your mappings, or process " +
+						"them using SQL functions (e.g., string replacement) in the SQL queries of your mappings.\n\n" +
+						"Note that this last option can be bad for performance, future versions of Quest will allow to " +
+						"string manipulation functions in URI templates to avoid these performance problems.\n\n" +
+						"Detailed message: " + cause.getMessage());
+				ex.setStackTrace(e.getStackTrace());
+				throw ex;
+			} else {
+				OBDAException ex = new OBDAException(
+						"Quest couldn't parse the data value to Java object: " + realValue + "\n" +
+						"Please review the mapping rules to set the datatype properly. An alternative quick fix is to set " +
+						"the variable to rdfs:Literal in the target query.");
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
 			}
-			throw e;
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}
