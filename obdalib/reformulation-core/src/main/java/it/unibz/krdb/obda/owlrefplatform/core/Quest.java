@@ -1194,7 +1194,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		
 		// TEST connection before using it
 		poolProperties.setTestOnBorrow(keepAlive);
-		if (keepAlive) poolProperties.setInitSQL("SELECT 1");
+		if (keepAlive) poolProperties.setValidationQuery("SELECT 1");
 
 		poolProperties.setTestOnReturn(false);
 		poolProperties.setMaxActive(maxPoolSize);
