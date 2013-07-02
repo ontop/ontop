@@ -274,7 +274,7 @@ public class QuestResultset implements TupleResultSet {
 				OBDAException ex = new OBDAException(
 						"Quest couldn't parse the data value to Java object: " + realValue + "\n" +
 						"Please review the mapping rules to set the datatype properly. An alternative quick fix is to set " +
-						"the variable to rdfs:Literal in the target query.");
+						"the variable to xsd:string in the target query.");
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
 			}
