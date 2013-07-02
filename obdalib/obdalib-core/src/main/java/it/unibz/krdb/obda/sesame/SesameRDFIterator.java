@@ -12,8 +12,8 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
@@ -29,13 +29,15 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private Queue<Statement> buffer;
+	private BlockingQueue<Statement> buffer;
 	private Iterator<Statement> iterator;
 	private int size = 1;
+	
+	private boolean endRDF = false;
 	private boolean fromIterator = false;
 
 	public SesameRDFIterator() {
-		buffer = new PriorityQueue<Statement>(size);
+		buffer = new ArrayBlockingQueue<Statement>(size, true);
 	}
 
 	public SesameRDFIterator(Iterator<Statement> it) {
@@ -44,17 +46,21 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	}
 
 	public void startRDF() throws RDFHandlerException {
-		// NO-OP
+		endRDF = false;
 	}
 
 	public void endRDF() throws RDFHandlerException {
-		// NO-OP
+		endRDF = true;
 	}
 
 	@Override
 	public void handleStatement(Statement st) throws RDFHandlerException {
 		// Add statement to buffer
-		buffer.add(st);
+		try {
+			buffer.put(st);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean hasNext() {
@@ -64,7 +70,11 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		else {
 			Statement stmt = buffer.peek();
 			if (stmt == null) {
-				return false;
+				if (endRDF) {
+					return false;
+				} else {
+					return true;
+				}
 			}
 			return true;
 		}
@@ -75,7 +85,11 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		if (fromIterator) {
 			stmt = iterator.next();
 		} else {
-			stmt = buffer.poll();
+			try {
+				stmt = buffer.take();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		if (stmt == null) {
 			if (!hasNext()) {
