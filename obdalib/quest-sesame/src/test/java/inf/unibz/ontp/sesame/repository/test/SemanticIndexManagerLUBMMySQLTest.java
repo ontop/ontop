@@ -38,11 +38,11 @@ import sesameWrapper.SemanticIndexManager;
 public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 	String driver = "com.mysql.jdbc.Driver";
-	String url = "jdbc:mysql://obdalin3/si_test?sessionVariables=sql_mode='ANSI'";
+	String url = "jdbc:mysql://10.7.20.39/si_test?sessionVariables=sql_mode='ANSI'";
 	String username = "fish";
 	String password = "fish";
 
-	String owlfile = "src/test/resources/merge.owl";
+	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/merge.owl";
 
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
@@ -120,7 +120,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
-		qman.load("src/test/resources/test/treewitness/LUBM-ex-20.q");
+		qman.load("../quest-owlapi3/src/test/resources/test/treewitness/LUBM-ex-20.q");
 
 		for (QueryControllerEntity e : qc.getElements()) {
 			if (!(e instanceof QueryControllerQuery)) {
