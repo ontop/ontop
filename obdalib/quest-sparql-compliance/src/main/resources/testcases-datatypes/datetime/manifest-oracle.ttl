@@ -9,31 +9,57 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date 
-      :dateStr
-      :timestamp 
-      :timestampStr
+      :date :date-bgp
+      :date-str :date-str-bgp
+      :timestamp #:timestamp-str
     ) .
 
+## >>> This test should fail!
 :date rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE - NO IMPLEMENTATION" ;
+    mf:name    "Type: DATE" ;
+    mf:comment	"Oracle JDBC returns java.sql.TIMESTAMP instead of java.sql.DATE, therefore, Quest may fail parsing the data input" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <date.rq> ] ;
-    mf:result <noimpl.ttl> ;
+            [ qt:query <date-oracle.rq> ] ;
+    mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .
 
-:dateStr rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE - cast to STRING" ;
+## >>> This test should fail!
+:date-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - using basic graph pattern" ;
+    mf:comment	"Oracle JDBC returns java.sql.TIMESTAMP instead of java.sql.DATE, therefore, Quest may fail parsing the data input" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <date_oracle-str.rq> ] ;
-    mf:result <date-str.ttl> ;
+            [ qt:query <date-bgp-oracle.rq> ] ;
+    mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .
+    
+:date-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to xsd:string" ;
+    mf:comment	"The column was overriden by xsd:string so that Quest won't parse the data input" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date-oracle.rq> ] ;
+    mf:result <date.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle-jdbcbug.obda> .
+
+## >>> This test should fail!
+:date-str-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to xsd:string and use basic graph pattern" ;
+    mf:comment	"The column was overriden by xsd:string so that Quest won't parse the data input" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date-bgp-oracle.rq> ] ;
+    mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle-jdbcbug.obda> .    
     
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
@@ -45,12 +71,12 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .
     
-:timestampStr rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIMESTAMP - cast to STRING" ;
+:timestamp-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP - cast to Literal" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <timestamp_oracle-str.rq> ] ;
-    mf:result <timestamp-str.ttl> ;
+            [ qt:query <timestamp-str-oracle.rq> ] ;
+    mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .

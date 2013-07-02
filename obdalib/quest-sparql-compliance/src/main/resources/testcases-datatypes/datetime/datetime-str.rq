@@ -1,7 +1,7 @@
 PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 
-SELECT ?x ?y
+SELECT ?x
 WHERE {
    ?x a :Row; :hasDateTimeString ?y
-   FILTER ( ?y = "2013-03-18T10:12:10" ) .
+   FILTER ( ?y = "2013-03-18 10:12:10" ) .
 }

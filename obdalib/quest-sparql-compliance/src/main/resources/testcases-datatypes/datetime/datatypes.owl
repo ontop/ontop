@@ -64,9 +64,6 @@
         <DataProperty IRI="#hasDate"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="#hasDateString"/>
-    </Declaration>
-    <Declaration>
         <DataProperty IRI="#hasDateTime"/>
     </Declaration>
     <Declaration>
@@ -154,9 +151,6 @@
         <DataProperty IRI="#hasTime"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="#hasTimeString"/>
-    </Declaration>
-    <Declaration>
         <DataProperty IRI="#hasTimeTZ"/>
     </Declaration>
     <Declaration>
@@ -167,6 +161,9 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTimestampTZ"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestampTZString"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTinyBlob"/>
@@ -188,9 +185,6 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasYear"/>
-    </Declaration>
-    <Declaration>
-        <DataProperty IRI="#hasYearString"/>
     </Declaration>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasBigInt"/>
@@ -235,6 +229,10 @@
     <SubDataPropertyOf>
         <DataProperty IRI="#hasDateTime"/>
         <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDateTimeString"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
     </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasDec"/>

@@ -19,7 +19,7 @@ target		:character-{id} a :Row ; :hasChar {type_char} ; :hasVarChar {type_varcha
 source		select id, type_char, type_varchar, type_text, type_enum, type_set, type_longtext, type_mediumtext, type_tinytext from Characters
 
 mappingId	Date-Time Types
-target		:datetime-{id} a :Row ; :hasDate {type_date} ; :hasDateTime {type_datetime} ; :hasTimestamp {type_timestamp} ; :hasTime {type_time} ; :hasYear {type_year} . 
+target		:datetime-{id} a :Row ; :hasDate {type_date} ; :hasDateTime {type_datetime} ; :hasTimestamp {type_timestamp} ; :hasTime {type_time} ; :hasYear {type_year} ; :hasDateTimeString {type_datetime}^^xsd:string ; :hasTimestampString {type_timestamp}^^xsd:string . 
 source		select id, type_date, type_datetime, type_timestamp, type_time, type_year from DateTimes
 
 mappingId	Boolean Types
@@ -29,9 +29,5 @@ source		select id, type_bit from Booleans
 mappingId	Binary Types
 target		:binary-{id} a :Row ; :hasBinary {type_binary} ; :hasVarBinary {type_varbinary} ; :hasBlob {type_blob} ; :hasLongBlob {type_longblob} ; :hasMediumBlob {type_mediumblob} ; :hasTinyBlob {type_tinyblob} . 
 source		select id, type_binary, type_varbinary, type_blob, type_longblob, type_mediumblob, type_tinyblob from Binaries
-
-mappingId	Date-Time Types (cast to String)
-target		:datetime-{id} a :Row ; :hasDateString {type_date}^^xsd:string ; :hasDateTimeString {type_datetime}^^xsd:string ; :hasTimestampString {type_timestamp}^^xsd:string ; :hasTimeString {type_time}^^xsd:string ; :hasYearString {type_year}^^xsd:string . 
-source		select id, type_date, type_datetime, type_timestamp, type_time, type_year from DateTimes
 ]]
 

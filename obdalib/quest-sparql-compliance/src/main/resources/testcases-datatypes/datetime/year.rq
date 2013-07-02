@@ -3,5 +3,5 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 SELECT ?x ?y
 WHERE {
    ?x a :Row; :hasYear ?y
-   FILTER ( ?y = "2013"^^<http://www.w3.org/2001/XMLSchema#string> ) .
+   FILTER ( ?y = "2013" ) .
 }

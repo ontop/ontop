@@ -9,61 +9,76 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date :dateStr
-      :time :timeStr
-      :time_tz
-      :timestamp :timestampStr
-      #:timestamp_tz
-      #:interval
+      :date :date-bgp
+      :time :time-bgp
+      :time_tz :time_tz-bgp
+      :timestamp #:timestamp-str
+      :timestamp_tz #:timestamp_tz-str
     ) .
 
+## >>> This test should fail!
 :date rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE - NO IMPLEMENTATION" ;
+    mf:name    "Type: DATE" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
             [ qt:query <date.rq> ] ;
-    mf:result <noimpl.ttl> ;
+    mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
-:dateStr rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE - cast to STRING" ;
+:date-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - using basic graph pattern" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <date-str.rq> ] ;
-    mf:result <date-str.ttl> ;
+            [ qt:query <date-bgp.rq> ] ;
+    mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
-    
+
+## >>> This test should fail!    
 :time rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME - NO IMPLEMENTATION" ;
+    mf:name    "Type: TIME" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
             [ qt:query <time.rq> ] ;
-    mf:result <noimpl.ttl> ;
+    mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
-:timeStr rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME - cast to STRING" ;
+:time-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME - using basic graph pattern" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <time-str.rq> ] ;
-    mf:result <time-str.ttl> ;
+            [ qt:query <time-bgp.rq> ] ;
+    mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
+## >>> This test should fail!
 :time_tz rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME WITH TIMEZONE - NO IMPLEMENTATION" ;
+    mf:name    "Type: TIME WITH TIMEZONE" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
             [ qt:query <time_tz.rq> ] ;
-    mf:result <noimpl.ttl> ;
+    mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:time_tz-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME WITH TIMEZONE - using basic graph pattern" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <time_tz-bgp.rq> ] ;
+    mf:result <time_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
     
@@ -77,13 +92,13 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
-:timestampStr rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIMESTAMP - cast to STRING" ;
+:timestamp-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP - cast to Literal" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
             [ qt:query <timestamp-str.rq> ] ;
-    mf:result <timestamp-str.ttl> ;
+    mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
     
@@ -96,13 +111,13 @@
     mf:result <timestamp_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
-    
-:interval rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: INTERVAL" ;
+
+:timestamp_tz-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP WITH TIMEZONE - cast to Literal" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <interval.rq> ] ;
-    mf:result <interval.ttl> ;
+            [ qt:query <timestamp_tz-str.rq> ] ;
+    mf:result <timestamp_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .

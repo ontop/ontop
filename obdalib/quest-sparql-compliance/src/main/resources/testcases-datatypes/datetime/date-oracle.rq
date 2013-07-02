@@ -2,6 +2,6 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 
 SELECT ?x ?y
 WHERE {
-   ?x a :Row; :hasTime ?y
-   FILTER ( ?y = "10:12:10" ) .
+   ?x a :Row; :hasDate ?y
+   FILTER ( ?y = "18-MAR-13" ) .
 }
