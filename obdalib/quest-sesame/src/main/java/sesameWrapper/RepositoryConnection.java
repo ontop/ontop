@@ -79,26 +79,22 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	}
 
 	
-	public void add(Statement st, Resource... contexts)
-			throws RepositoryException {
-		//Adds the supplied statement to this repository, optionally to one or more named contexts. 
+	public void add(Statement st, Resource... contexts) throws RepositoryException {
+		// Adds the supplied statement to this repository, optionally to one or
+		// more named contexts.
 		OpenRDFUtil.verifyContextNotNull(contexts);
-		 if (contexts != null && contexts.length == 0 && st.getContext() != null) {
-	            contexts = new Resource[] { st.getContext() };
-	        }
-        try {
-        	List<Statement> l = new ArrayList<Statement>();
-    		l.add(st);
-    		Iterator<Statement> iterator = l.iterator();
-          
+		if (contexts != null && contexts.length == 0 && st.getContext() != null) {
+			contexts = new Resource[] { st.getContext() };
+		}
+		try {
+			List<Statement> l = new ArrayList<Statement>();
+			l.add(st);
+			Iterator<Statement> iterator = l.iterator();
 			addWithoutCommit(iterator, contexts);
-			
-			l=null;
-			
 		} catch (Exception e) {
 			throw new RepositoryException(e);
-		} finally{
-        autoCommit();
+		} finally {
+			autoCommit();
 		}
 	}
 
