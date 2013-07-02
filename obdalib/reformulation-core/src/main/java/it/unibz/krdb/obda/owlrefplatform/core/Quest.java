@@ -1194,7 +1194,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		
 		// TEST connection before using it
 		poolProperties.setTestOnBorrow(keepAlive);
-		if (keepAlive) poolProperties.setValidationQuery("SELECT 1");
+		if (keepAlive) 
+			{
+			if (driver.contains("oracle")) 	poolProperties.setValidationQuery("select 1 from dual");
+				else if (driver.contains("db2")) poolProperties.setValidationQuery("select 1 from sysibm.sysdummy1");
+					else poolProperties.setValidationQuery("select 1");
+			}
 
 		poolProperties.setTestOnReturn(false);
 		poolProperties.setMaxActive(maxPoolSize);
