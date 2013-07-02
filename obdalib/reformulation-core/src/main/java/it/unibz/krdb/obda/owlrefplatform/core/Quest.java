@@ -97,6 +97,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected int startPoolSize = 2;
 	protected boolean removeAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
+	protected boolean keepAlive = false;
 
 	/***
 	 * Internal components
@@ -334,6 +335,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public void setPreferences(Properties preferences) {
 		this.preferences = preferences;
 
+		keepAlive = Boolean.valueOf((String) preferences.get(QuestPreferences.KEEP_ALIVE));
 		removeAbandoned = Boolean.valueOf((String) preferences.get(QuestPreferences.REMOVE_ABANDONED));
 		abandonedTimeout = Integer.valueOf((String) preferences.get(QuestPreferences.ABANDONED_TIMEOUT));
 		startPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.INIT_POOL_SIZE));
@@ -1189,7 +1191,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		poolProperties.setUsername(username);
 		poolProperties.setPassword(password);
 		poolProperties.setJmxEnabled(true);
-		poolProperties.setTestOnBorrow(false);
+		
+		// TEST connection before using it
+		poolProperties.setTestOnBorrow(keepAlive);
+		if (keepAlive) poolProperties.setInitSQL("SELECT 1");
+
 		poolProperties.setTestOnReturn(false);
 		poolProperties.setMaxActive(maxPoolSize);
 		poolProperties.setMaxIdle(maxPoolSize);
