@@ -114,14 +114,9 @@ public abstract class CompletenessParent extends TestCase {
 	}
 
 	protected Repository createRepository() throws Exception {
-		try {
-			SesameClassicInMemoryRepo repository = new SesameClassicInMemoryRepo("CompletenessTest", ontologyFile, parameterFile);
-			repository.initialize();
-			return repository;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		SesameClassicInMemoryRepo repository = new SesameClassicInMemoryRepo("CompletenessTest", ontologyFile, parameterFile);
+		repository.initialize();
+		return repository;
 	}
 	
 	@Override
