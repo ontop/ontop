@@ -129,7 +129,14 @@ public abstract class QuestScenarioParent extends TestCase {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			assertTrue(false); // make the test fails
+			
+			/*
+			 * Some of the scenario tests can return an illegal SPARQL syntax exception.
+			 * The method call below will compare a 'null' value (i.e., no valid result
+			 * was produced) with the expected -1 flag. They both are the same in the
+			 * comparison.
+			 */
+			compareTupleQuerySizeResults(null, readExpectedTupleQueryResult());
 		}
 		finally {
 			con.close();
