@@ -16,11 +16,11 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      ontologyIRI="http://ontop.inf.unibz.it/test/datatypes">
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="" IRI="http://ontop.inf.unibz.it/test/datatypes#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
-    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Declaration>
         <Class IRI="#Row"/>
     </Declaration>
@@ -64,7 +64,13 @@
         <DataProperty IRI="#hasDate"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasDateString"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasDateTime"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDateTimeString"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasDateTimeType"/>
@@ -148,10 +154,16 @@
         <DataProperty IRI="#hasTime"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasTimeString"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasTimeTZ"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTimestamp"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestampString"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTimestampTZ"/>
@@ -176,6 +188,9 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasYear"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasYearString"/>
     </Declaration>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasBigInt"/>

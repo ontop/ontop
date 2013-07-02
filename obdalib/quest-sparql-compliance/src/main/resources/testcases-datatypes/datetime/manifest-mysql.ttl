@@ -9,11 +9,11 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date
-      :time
-      :datetime
-      :timestamp
-      #:year
+      :date :dateStr
+      :time :timeStr
+      :datetime :datetimeStr
+      :timestamp :timestampStr
+      :year :yearStr
     ) .
 
 :date rdf:type mf:DatatypeEvaluationTest ;
@@ -23,6 +23,16 @@
     mf:action
             [ qt:query <date.rq> ] ;
     mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:dateStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date-str.rq> ] ;
+    mf:result <date-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .
     
@@ -35,6 +45,16 @@
     mf:result <noimpl.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .
+
+:timeStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <time-str.rq> ] ;
+    mf:result <time-str.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
     
 :datetime rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATETIME" ;
@@ -45,8 +65,18 @@
     mf:result <datetime.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .
+
+:datetimeStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATETIME - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <datetime-str.rq> ] ;
+    mf:result <datetime-str.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> . 
     
- :timestamp rdf:type mf:DatatypeEvaluationTest ;
+:timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
@@ -55,13 +85,33 @@
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .
+
+:timestampStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <timestamp-str.rq> ] ;
+    mf:result <timestamp-str.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
     
- :year rdf:type mf:DatatypeEvaluationTest ;
+:year rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: YEAR - NO IMPLEMENTATION" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
             [ qt:query <year.rq> ] ;
     mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:yearStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: YEAR - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <year-str.rq> ] ;
+    mf:result <year-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .

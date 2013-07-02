@@ -9,8 +9,10 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date
-      :timestamp
+      :date 
+      :dateStr
+      :timestamp 
+      :timestampStr
     ) .
 
 :date rdf:type mf:DatatypeEvaluationTest ;
@@ -22,13 +24,33 @@
     mf:result <noimpl.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .
+
+:dateStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date_oracle-str.rq> ] ;
+    mf:result <date-str.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
     
- :timestamp rdf:type mf:DatatypeEvaluationTest ;
+:timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
             [ qt:query <timestamp.rq> ] ;
     mf:result <timestamp.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:timestampStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <timestamp_oracle-str.rq> ] ;
+    mf:result <timestamp-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .

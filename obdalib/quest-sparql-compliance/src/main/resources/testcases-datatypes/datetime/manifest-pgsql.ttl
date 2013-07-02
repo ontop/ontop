@@ -9,10 +9,10 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date
-      :time
+      :date :dateStr
+      :time :timeStr
       :time_tz
-      :timestamp
+      :timestamp :timestampStr
       #:timestamp_tz
       #:interval
     ) .
@@ -26,6 +26,16 @@
     mf:result <noimpl.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
+
+:dateStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <date-str.rq> ] ;
+    mf:result <date-str.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
     
 :time rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - NO IMPLEMENTATION" ;
@@ -34,6 +44,16 @@
     mf:action
             [ qt:query <time.rq> ] ;
     mf:result <noimpl.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:timeStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <time-str.rq> ] ;
+    mf:result <time-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
@@ -47,7 +67,7 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
     
- :timestamp rdf:type mf:DatatypeEvaluationTest ;
+:timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
@@ -56,8 +76,18 @@
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
+
+:timestampStr rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP - cast to STRING" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <timestamp-str.rq> ] ;
+    mf:result <timestamp-str.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
     
- :timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
+:timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
@@ -67,7 +97,7 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
     
- :interval rdf:type mf:DatatypeEvaluationTest ;
+:interval rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INTERVAL" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
