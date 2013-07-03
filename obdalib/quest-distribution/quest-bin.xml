@@ -39,6 +39,15 @@
 		</fileSet>
 		
 		<fileSet>
+			<directory>${project.basedir}/../obdalib-owlapi3/src/main/resources/
+			</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+		
+		<fileSet>
 			<directory>${project.basedir}/../quest-sesame/src/main/resources/
 			</directory>
 			<outputDirectory>/</outputDirectory>
