@@ -32,14 +32,16 @@ public class DirectMappingAxiom {
 	}
 
 	public DirectMappingAxiom(String baseuri, DataDefinition dd,
-			DBMetadata obda_md) {
+			DBMetadata obda_md) throws Exception {
 		this.table = dd;
 		this.SQLString = new String();
 		this.obda_md = obda_md;
 		if (baseuri != null)
 			this.baseuri = baseuri;
 		else
-			this.baseuri = new String("http://example.org/");
+		{
+			throw new Exception("Base uri must be specified!");
+		}
 	}
 
 	public DirectMappingAxiom(DirectMappingAxiom dmab) {

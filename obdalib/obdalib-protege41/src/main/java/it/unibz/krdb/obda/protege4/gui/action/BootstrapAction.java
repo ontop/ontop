@@ -38,6 +38,7 @@ public class BootstrapAction extends ProtegeAction {
 	private OWLModelManager owlManager;
 	private OBDAModelManager modelManager;
 	private DirectMappingBootstrapper dm = null;
+	private String baseUri = "";
 	private OWLOntology currentOnto;
 	private OBDAModel currentModel;
 	private OBDADataSource currentSource;
@@ -76,6 +77,9 @@ public class BootstrapAction extends ProtegeAction {
 
 			currentSource = currentModel.getSources().get(index);
 			if (currentSource != null) {
+				final String baseUri = JOptionPane.showInputDialog(workspace, "Ontology base URI: ", "Input Base URI", JOptionPane.PLAIN_MESSAGE).trim();
+				if (baseUri != null && !baseUri.isEmpty()) {
+				this.baseUri = baseUri;
 				Thread th = new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -85,7 +89,7 @@ public class BootstrapAction extends ProtegeAction {
 							BootstrapperThread t = new BootstrapperThread();
 							monitor.addProgressListener(t);
 							monitor.start();
-							t.run(currentOnto, currentModel, currentSource);
+							t.run(baseUri, currentOnto, currentModel, currentSource);
 							currentModel = dm.getModel();
 							currentOnto = dm.getOntology();
 							currentModel.fireSourceParametersUpdated();
@@ -104,6 +108,7 @@ public class BootstrapAction extends ProtegeAction {
 						"Task is completed.", "Done",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
+			}
 		}
 	}
 
@@ -116,9 +121,9 @@ public class BootstrapAction extends ProtegeAction {
 			
 		}
 		
-		public void run(OWLOntology currentOnto, OBDAModel currentModel, OBDADataSource currentSource) throws Exception
+		public void run(String baseUri, OWLOntology currentOnto, OBDAModel currentModel, OBDADataSource currentSource) throws Exception
 		{
-			dm = new DirectMappingBootstrapper(currentOnto,
+			dm = new DirectMappingBootstrapper(baseUri, currentOnto,
 					currentModel, currentSource);
 		}
 		

@@ -25,19 +25,19 @@ public class DirectMappingBootstrapper extends AbstractDBMetadata{
 		
 	}
 	
-	public DirectMappingBootstrapper(String uri, String url, String user, String password, String driver) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException, DuplicateMappingException{
+	public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver) throws Exception{
 		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
 		OBDADataSource source = fact.getJDBCDataSource(url, user, password, driver);
 		//create empty ontology and model, add source to model
 		OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
-		OWLOntology onto = mng.createOntology(IRI.create(uri));
+		OWLOntology onto = mng.createOntology(IRI.create(baseuri));
 		OBDAModel model = fact.getOBDAModel();
 		model.addSource(source);
-		getOntologyAndDirectMappings(onto, model, source);
+		getOntologyAndDirectMappings(baseuri, onto, model, source);
 	}
 
-	public DirectMappingBootstrapper(OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
-		getOntologyAndDirectMappings(ontology, model, source);
+	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
+		getOntologyAndDirectMappings(baseUri, ontology, model, source);
 	}
 
 	/***

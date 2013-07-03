@@ -54,9 +54,9 @@ public class DirectMappingEngine {
 	private JDBCConnectionManager conMan;
 	private String baseuri;
 	
-	public DirectMappingEngine(){
+	public DirectMappingEngine(String baseUri){
 		conMan = JDBCConnectionManager.getJDBCConnectionManager();
-		baseuri = new String("http://example.org/");
+		baseuri = baseUri;
 	}
 	
 	
@@ -154,13 +154,14 @@ public class DirectMappingEngine {
 	 * @param source
 	 * 
 	 * @return a new OBDA Model containing all the extracted mappings
+	 * @throws Exception 
 	 */
-	public OBDAModel extractMappings(OBDADataSource source) throws SQLException, DuplicateMappingException{
+	public OBDAModel extractMappings(OBDADataSource source) throws Exception{
 		OBDAModelImpl model = new OBDAModelImpl();
 		return extractMappings(model, source);
 	}
 	
-	public OBDAModel extractMappings(OBDAModel model, OBDADataSource source) throws SQLException, DuplicateMappingException{
+	public OBDAModel extractMappings(OBDAModel model, OBDADataSource source) throws Exception{
 		insertMapping(source, model);
 		return model;
 	}
@@ -176,8 +177,9 @@ public class DirectMappingEngine {
 	 * 
 	 * Duplicate Exception may happen,
 	 * since mapping id is generated randomly and same id may occur
+	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
+	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri =  model.getPrefixManager().getDefaultPrefix();
 		List<TableDefinition> tables = conMan.getMetaData(source).getTableList();
@@ -213,8 +215,9 @@ public class DirectMappingEngine {
 	 * @param source : datasource that the table may refer to, such as foreign keys
 	 * 
 	 *  @return a new OBDAMappingAxiom 
+	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
 		DirectMappingAxiom dma = new DirectMappingAxiom(baseuri, table, conMan.getMetaData(source));
 		dma.setbaseuri(this.baseuri);
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();

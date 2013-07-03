@@ -175,14 +175,11 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	
 	private OBDAModel  getOBDAModelDM() {
 		
-		DirectMappingEngine dm = new DirectMappingEngine();
-		dm.setBaseURI("http://example.com/base");
+		DirectMappingEngine dm = new DirectMappingEngine("http://example.org/base");
 		try {
 			 OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
 			 return model;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (DuplicateMappingException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

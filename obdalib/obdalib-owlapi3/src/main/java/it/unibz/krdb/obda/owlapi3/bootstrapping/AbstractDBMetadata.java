@@ -47,9 +47,9 @@ public abstract class AbstractDBMetadata
 		return metadata;
 	}
 	
-	protected void getOntologyAndDirectMappings(OWLOntology onto, OBDAModel model, OBDADataSource source) throws SQLException, DuplicateMappingException, OWLOntologyCreationException, OWLOntologyStorageException {
+	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
-		DirectMappingEngine engine = new DirectMappingEngine();
+		DirectMappingEngine engine = new DirectMappingEngine(baseuri);
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
