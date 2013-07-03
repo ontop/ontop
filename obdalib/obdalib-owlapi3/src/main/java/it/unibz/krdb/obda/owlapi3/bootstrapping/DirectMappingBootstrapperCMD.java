@@ -46,7 +46,6 @@ public class DirectMappingBootstrapperCMD {
 			if (owlfile != null) {
 				File owl = new File(owlfile);
 				File obda = new File(obdafile);
-				if (owl.canWrite() && obda.canWrite()){
 				DirectMappingBootstrapper dm = new DirectMappingBootstrapper(owl.toURI().toString(), url, 
 						user, passw, driver);
 				OBDAModel model = dm.getModel();
@@ -54,13 +53,12 @@ public class DirectMappingBootstrapperCMD {
 				ModelIOManager mng = new ModelIOManager(model);
 				mng.save(obda);
 				onto.getOWLOntologyManager().saveOntology(onto);
-				}
-				else
-					System.out.println("Cannot write to the specified folder! " +owl.getAbsolutePath()+" "+obda.getAbsolutePath());
 			} else {
 				System.out.println("Output file not found!");
 			}
 		} catch (Exception e) {
+			System.out.println("Error occured during bootstrapping: "+e.getMessage());
+			System.out.println("Debugging information for developers: ");
 			e.printStackTrace();
 		}
 	}
