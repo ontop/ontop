@@ -65,13 +65,15 @@ public class DirectMappingAxiom {
 		if (fks.size() > 0) {
 			Set<String> keys = fks.keySet();
 			for (String key : keys) {
-				refAxioms.put(getRefSQL(key), getRefCQ(key, dfac));
+				CQIE refCQIE = getRefCQ(key, dfac);
+				Set<Variable> refVars = refCQIE.getReferencedVariables();
+				refAxioms.put(getRefSQL(key, refVars), refCQIE);
 			}
 		}
 		return refAxioms;
 	}
 
-	private String getRefSQL(String key) {
+	private String getRefSQL(String key, Set<Variable> refVars) {
 		Map<String, List<Attribute>> fks = ((TableDefinition) table)
 				.getForeignKeys();
 
@@ -108,6 +110,23 @@ public class DirectMappingAxiom {
 				Condition += " AND ";
 			}
 
+		}
+		for (Variable v : refVars) {
+			String varString = v.getName();
+			String extraCol = "";
+			if (varString.contains("_")) {
+				String[] split = varString.split("_");
+				if (split.length == 2) {
+					extraCol += "\""+ split[0] + "\".\"" + split[1] + "\" AS "+ varString;
+				} else {
+					//there is a _ in either table or column name.
+					//TODO: deal with this later!
+				}
+			} else
+				extraCol = varString;
+			if (!Column.contains(varString)) {
+				Column += ", "+extraCol;
+			}
 		}
 		return (String.format(SQLStringTempl, Column, Table, Condition));
 
