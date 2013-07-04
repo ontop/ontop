@@ -85,7 +85,7 @@ public class DirectMappingAxiom {
 		String Condition = "";
 
 		for (Attribute pk : pks)
-			Column += Table + ".\"" + pk.getName() + "\", ";
+			Column += Table + ".\"" + pk.getName() + "\" AS "+this.table.getName()+"_"+pk.getName()+", ";
 
 		// refferring object
 		List<Attribute> attr = fks.get(key);

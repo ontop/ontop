@@ -8,12 +8,13 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -73,7 +74,9 @@ public class BootstrapAction extends ProtegeAction {
 		JComboBox combo = new JComboBox(options.toArray());
 		combo.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(combo);
-		JLabel ouri = new JLabel("Ontology base URI: ");
+		Dimension minsize = new Dimension(10,10);
+		panel.add(new Box.Filler(minsize, minsize, minsize));
+		JLabel ouri = new JLabel("Base URI - the prefix to be used for all generated classes and properties: ");
 		ouri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(ouri);
 		JTextField base_uri = new JTextField();
@@ -96,8 +99,6 @@ public class BootstrapAction extends ProtegeAction {
 							monitor.addProgressListener(t);
 							monitor.start();
 							t.run(baseUri, currentOnto, currentModel, currentSource);
-							currentModel = dm.getModel();
-							currentOnto = dm.getOntology();
 							currentModel.fireSourceParametersUpdated();
 							monitor.stop();
 							JOptionPane.showMessageDialog(workspace,

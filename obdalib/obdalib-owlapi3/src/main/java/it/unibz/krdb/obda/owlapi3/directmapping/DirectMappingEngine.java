@@ -147,7 +147,6 @@ public class DirectMappingEngine {
 	}
 	
 	
-	
 	/***
 	 * extract all the mappings from a datasource
 	 * 
@@ -183,11 +182,12 @@ public class DirectMappingEngine {
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri =  model.getPrefixManager().getDefaultPrefix();
 		List<TableDefinition> tables = conMan.getMetaData(source).getTableList();
+		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
 		for(int i=0;i<tables.size();i++){
 			TableDefinition td = tables.get(i);
-			model.addMappings(source.getSourceID(), getMapping(td, source));
+			mappingAxioms.addAll(getMapping(td, source));
 		}	
-		System.out.println(model.getMappings().toString());
+		model.addMappings(source.getSourceID(), mappingAxioms);
 		for (URI uri : model.getMappings().keySet())
 			for (OBDAMappingAxiom mapping: model.getMappings().get(uri))
 			{
@@ -202,11 +202,8 @@ public class DirectMappingEngine {
 					else
 						model.declareDataProperty(f.getFunctionSymbol());
 				}
-				
 			}
 	}
-	
-	
 	
 	/***
 	 * generate a mapping axiom from a table of some database
@@ -232,15 +229,5 @@ public class DirectMappingEngine {
 		return axioms;
 	}
 
-
-
-	
-	
-
-	
-	
-	
-	
-	
 
 }
