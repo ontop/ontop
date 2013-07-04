@@ -100,7 +100,9 @@ public class BootstrapAction extends ProtegeAction {
 							currentOnto = dm.getOntology();
 							currentModel.fireSourceParametersUpdated();
 							monitor.stop();
-
+							JOptionPane.showMessageDialog(workspace,
+									"Task is completed.", "Done",
+									JOptionPane.INFORMATION_MESSAGE);
 						} catch (Exception e) {
 							log.error(e.getMessage(), e);
 							JOptionPane
@@ -110,9 +112,6 @@ public class BootstrapAction extends ProtegeAction {
 					}
 				});
 				th.start();
-				JOptionPane.showMessageDialog(this.workspace,
-						"Task is completed.", "Done",
-						JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 	}
