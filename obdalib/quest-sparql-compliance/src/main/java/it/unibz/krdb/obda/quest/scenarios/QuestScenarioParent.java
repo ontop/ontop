@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.quest.scenarios;
 
 import info.aduna.io.IOUtil;
-import info.aduna.iteration.Iterations;
-import info.aduna.text.StringUtil;
+import it.unibz.krdb.obda.quest.ResultSetInfo;
+import it.unibz.krdb.obda.quest.ResultSetInfoTupleUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,21 +16,13 @@ import junit.framework.TestSuite;
 
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
-import org.openrdf.model.util.ModelUtil;
 import org.openrdf.query.BindingSet;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.Query;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.dawg.DAWGTestResultSetUtil;
-import org.openrdf.query.impl.TupleQueryResultBuilder;
-import org.openrdf.query.resultio.QueryResultIO;
-import org.openrdf.query.resultio.TupleQueryResultFormat;
-import org.openrdf.query.resultio.TupleQueryResultParser;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -111,41 +103,29 @@ public abstract class QuestScenarioParent extends TestCase {
 
 	@Override
 	protected void runTest() throws Exception {
+		ResultSetInfo expectedResult = readResultSetInfo();
 		RepositoryConnection con = dataRep.getConnection();
 		try {
 			String queryString = readQueryString();
 			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
 			if (query instanceof TupleQuery) {
 				TupleQueryResult queryResult = ((TupleQuery)query).evaluate();
-				TupleQueryResult expectedResult = readExpectedTupleQueryResult();
-				compareTupleQuerySizeResults(queryResult, expectedResult);
-			} else if (query instanceof GraphQuery) {
-				GraphQueryResult gqr = ((GraphQuery)query).evaluate();
-				Set<Statement> queryResult = Iterations.asSet(gqr);
-				Set<Statement> expectedResult = readExpectedGraphQueryResult();
-				compareGraphs(queryResult, expectedResult);
+				compareResultSize(queryResult, expectedResult);
 			} else {
 				throw new RuntimeException("Unexpected query type: " + query.getClass());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			
-			/*
-			 * Some of the scenario tests can return an illegal SPARQL syntax exception.
-			 * The method call below will compare a 'null' value (i.e., no valid result
-			 * was produced) with the expected -1 flag. They both are the same in the
-			 * comparison.
-			 */
-			compareTupleQuerySizeResults(null, readExpectedTupleQueryResult());
+			compareThrownException(e, expectedResult); // compare the thrown exception class
 		}
 		finally {
 			con.close();
 		}
 	}
 
-	private void compareTupleQuerySizeResults(TupleQueryResult queryResult, TupleQueryResult expectedResult) throws Exception {
+	private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
 		int queryResultSize = countTuple(queryResult);
-		int expectedResultSize = attributeValue(expectedResult, "counter");
+		int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
 		if (queryResultSize != expectedResultSize) {
 			StringBuilder message = new StringBuilder(128);
 			message.append("\n============ ");
@@ -164,6 +144,27 @@ public abstract class QuestScenarioParent extends TestCase {
 		}
 	}
 
+	private void compareThrownException(Exception ex, ResultSetInfo expectedResult) throws Exception {
+		String thrownException = ex.getClass().getName();
+		String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
+		if (!thrownException.equals(expectedThrownException)) {
+			StringBuilder message = new StringBuilder(128);
+			message.append("\n============ ");
+			message.append(getName());
+			message.append(" =======================\n");
+			message.append("Expected thrown exception: ");
+			message.append(expectedThrownException);
+			message.append("\n");
+			message.append("Thrown exception: ");
+			message.append(thrownException);
+			message.append("\n");		
+			message.append("=====================================\n");
+
+			logger.error(message.toString());
+			fail(message.toString());
+		}
+	}
+	
 	private int countTuple(TupleQueryResult tuples) throws QueryEvaluationException {
 		if (tuples == null) {
 			return -1;
@@ -171,44 +172,17 @@ public abstract class QuestScenarioParent extends TestCase {
 		int counter = 0;
 		while (tuples.hasNext()) {
 			counter++;
-			tuples.next();
+			BindingSet bs = tuples.next();
+			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
+			logger.info(msg);
 		}
 		return counter;
 	}
 	
-	private int attributeValue(TupleQueryResult tuples, String attribute) throws QueryEvaluationException {
-		BindingSet binding = tuples.next();
-		return Integer.parseInt(binding.getValue(attribute).stringValue());
+	private Object attributeValue(ResultSetInfo rsInfo, String attribute) throws QueryEvaluationException {
+		return rsInfo.get(attribute);
 	}
 	
-	private void compareGraphs(Set<Statement> queryResult, Set<Statement> expectedResult) throws Exception {
-		if (!ModelUtil.equals(expectedResult, queryResult)) {
-			StringBuilder message = new StringBuilder(128);
-			message.append("\n============ ");
-			message.append(getName());
-			message.append(" =======================\n");
-			message.append("Expected result: \n");
-			for (Statement st : expectedResult) {
-				message.append(st.toString());
-				message.append("\n");
-			}
-			message.append("=============");
-			StringUtil.appendN('=', getName().length(), message);
-			message.append("========================\n");
-
-			message.append("Query result: \n");
-			for (Statement st : queryResult) {
-				message.append(st.toString());
-				message.append("\n");
-			}
-			message.append("=============");
-			StringUtil.appendN('=', getName().length(), message);
-			message.append("========================\n");
-
-			logger.error(message.toString());
-			fail(message.toString());
-		}
-	}
 	
 	private String readQueryString() throws IOException {
 		InputStream stream = new URL(queryFileURL).openStream();
@@ -219,29 +193,12 @@ public abstract class QuestScenarioParent extends TestCase {
 		}
 	}
 	
-	private TupleQueryResult readExpectedTupleQueryResult() throws Exception {
-		TupleQueryResultFormat tqrFormat = QueryResultIO.getParserFormatForFileName(resultFileURL);
-		if (tqrFormat != null) {
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
-				TupleQueryResultParser parser = QueryResultIO.createParser(tqrFormat);
-				parser.setValueFactory(dataRep.getValueFactory());
-
-				TupleQueryResultBuilder qrBuilder = new TupleQueryResultBuilder();
-				parser.setTupleQueryResultHandler(qrBuilder);
-
-				parser.parse(in);
-				return qrBuilder.getQueryResult();
-			} finally {
-				in.close();
-			}
-		} else {
-			Set<Statement> resultGraph = readExpectedGraphQueryResult();
-			return DAWGTestResultSetUtil.toTupleQueryResult(resultGraph);
-		}
+	private ResultSetInfo readResultSetInfo() throws Exception {
+		Set<Statement> resultGraph = readGraphResultSetInfo();
+		return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
 	}
 	
-	private Set<Statement> readExpectedGraphQueryResult() throws Exception {
+	private Set<Statement> readGraphResultSetInfo() throws Exception {
 		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
 		if (rdfFormat != null) {
 			RDFParser parser = Rio.createParser(rdfFormat);

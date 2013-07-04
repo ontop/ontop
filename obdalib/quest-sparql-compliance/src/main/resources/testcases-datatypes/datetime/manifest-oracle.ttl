@@ -11,7 +11,7 @@
     ( 
       :date :date-bgp
       :date-str :date-str-bgp
-      :timestamp #:timestamp-str
+      :timestamp :timestamp-str
     ) .
 
 ## >>> This test should fail!

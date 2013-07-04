@@ -23,10 +23,8 @@
       :datetime-1a :datetime-1b :datetime-1c
       :datetime-2a :datetime-2b :datetime-2c
       :datetime-3a :datetime-3b :datetime-3c :datetime-3d # in UTC
-      #:datetime-3e # ERROR: in UTC with minus offset
-      :datetime-3f :datetime-3g
-      #:datetime-3h # ERROR: in UTC with plus offset
-      :datetime-3i :datetime-3j
+      :datetime-3e :datetime-3f :datetime-3g
+      :datetime-3h :datetime-3i :datetime-3j
       :boolean-1a :boolean-1b :boolean-1c :boolean-1d	## DB2 doesnt have boolean data type, therefore we store 0/1 
       :boolean-2a :boolean-2b :boolean-2c :boolean-2d	## and change tests and mappings accordingly
       :boolean-3a :boolean-3b :boolean-3c :boolean-3d	

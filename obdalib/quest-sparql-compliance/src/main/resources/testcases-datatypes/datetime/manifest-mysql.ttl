@@ -11,8 +11,8 @@
     ( 
       :date :date-bgp
       :time :time-bgp
-      :datetime #:datetime-str
-      :timestamp #:timestamp-str
+      :datetime :datetime-str
+      :timestamp :timestamp-str
       :year :year-bgp
     ) .
 

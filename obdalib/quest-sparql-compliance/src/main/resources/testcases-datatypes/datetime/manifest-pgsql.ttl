@@ -12,8 +12,8 @@
       :date :date-bgp
       :time :time-bgp
       :time_tz :time_tz-bgp
-      :timestamp #:timestamp-str
-      :timestamp_tz #:timestamp_tz-str
+      :timestamp :timestamp-str
+      :timestamp_tz :timestamp_tz-str
     ) .
 
 ## >>> This test should fail!
