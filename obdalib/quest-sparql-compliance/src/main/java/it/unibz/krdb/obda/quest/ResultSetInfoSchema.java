@@ -20,7 +20,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * }
  * </pre>
  * 
- * 2. To check the thrown exception:
+ * 2. To check the thrown exception (the <code>rsi:size</code> is optional):
  * <pre>
  * {@code
  * (at)prefix rsi: <http://ontop.inf.unibz.it/tests/rs-info#> .
@@ -28,8 +28,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * (at)prefix :    <http://example.org/#> .
  *
  * []  rdf:type               rsi:ResultSetInfo ;
- *     rsi:size               "-1" .
- *     rsi:thrownException    "java.io.IOException"
+ *     rsi:size               "-1" ;
+ *     rsi:thrownException    "java.io.IOException" .
  * } 
  */
 public class ResultSetInfoSchema {
