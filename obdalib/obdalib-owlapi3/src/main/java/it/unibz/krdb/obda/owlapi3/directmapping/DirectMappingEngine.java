@@ -215,14 +215,14 @@ public class DirectMappingEngine {
 	 * @throws Exception 
 	 */
 	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
-		DirectMappingAxiom dma = new DirectMappingAxiom(baseuri, table, conMan.getMetaData(source));
-		dma.setbaseuri(this.baseuri);
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+		DirectMappingAxiom dma = new DirectMappingAxiom(baseuri, table, conMan.getMetaData(source), dfac);
+		dma.setbaseuri(this.baseuri);
 		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
-		axioms.add(dfac.getRDBMSMappingAxiom(dma.getSQL(), dma.getCQ(dfac)));
+		axioms.add(dfac.getRDBMSMappingAxiom(dma.getSQL(), dma.getCQ()));
 		
-		Map<String, CQIE> refAxioms = dma.getRefAxioms(dfac);
+		Map<String, CQIE> refAxioms = dma.getRefAxioms();
 		for (String refSQL : refAxioms.keySet())
 			axioms.add(dfac.getRDBMSMappingAxiom(refSQL, refAxioms.get(refSQL)));
 		
