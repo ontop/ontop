@@ -53,10 +53,12 @@ public class DirectMappingEngine {
 	
 	private JDBCConnectionManager conMan;
 	private String baseuri;
+	private int mapidx = 1;
 	
-	public DirectMappingEngine(String baseUri){
+	public DirectMappingEngine(String baseUri, int mapnr){
 		conMan = JDBCConnectionManager.getJDBCConnectionManager();
 		baseuri = baseUri;
+		mapidx = mapnr + 1;
 	}
 	
 	
@@ -220,11 +222,14 @@ public class DirectMappingEngine {
 		dma.setbaseuri(this.baseuri);
 		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
-		axioms.add(dfac.getRDBMSMappingAxiom(dma.getSQL(), dma.getCQ()));
+		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx,dma.getSQL(), dma.getCQ()));
+		mapidx++;
 		
 		Map<String, CQIE> refAxioms = dma.getRefAxioms();
-		for (String refSQL : refAxioms.keySet())
-			axioms.add(dfac.getRDBMSMappingAxiom(refSQL, refAxioms.get(refSQL)));
+		for (String refSQL : refAxioms.keySet()) {
+			axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, refSQL, refAxioms.get(refSQL)));
+			mapidx++;
+		}
 		
 		return axioms;
 	}
