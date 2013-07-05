@@ -117,20 +117,24 @@ public class QueryIOManager {
         LineNumberReader reader = new LineNumberReader(new FileReader(file));
         String line = "";
         while ((line = reader.readLine()) != null) {
-            if (isCommentLine(line) || line.isEmpty()) {
-                continue; // skip comment lines and empty lines
-            }
-            if (line.contains(QUERY_GROUP)) {
-                // The group ID is enclosed by a double-quotes sign
-                String groupId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-                readQueryGroup(reader, groupId);
-            } else if (line.contains(QUERY_ITEM)) {
-                // The query ID is enclosed by a double-quotes sign
-                String queryId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-                readQueryContent(reader, "", queryId);
-            } else {
-                throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()));
-            }
+        	try {
+	            if (isCommentLine(line) || line.isEmpty()) {
+	                continue; // skip comment lines and empty lines
+	            }
+	            if (line.contains(QUERY_GROUP)) {
+	                // The group ID is enclosed by a double-quotes sign
+	                String groupId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
+	                readQueryGroup(reader, groupId);
+	            } else if (line.contains(QUERY_ITEM)) {
+	                // The query ID is enclosed by a double-quotes sign
+	                String queryId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
+	                readQueryContent(reader, "", queryId);
+	            } else {
+	            	throw new IOException("Unknown syntax: " + line);
+	            }
+        	} catch (Exception e) {
+        		throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()), e);
+        	}
         }
     }
 

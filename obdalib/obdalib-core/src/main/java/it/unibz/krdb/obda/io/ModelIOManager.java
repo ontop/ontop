@@ -46,9 +46,6 @@ public class ModelIOManager {
     }
 
     private static final String PREFIX_DECLARATION_TAG = "[PrefixDeclaration]";
-    private static final String CLASS_DECLARATION_TAG = "[ClassDeclaration]";
-    private static final String OBJECT_PROPERTY_DECLARATION_TAG = "[ObjectPropertyDeclaration]";
-    private static final String DATA_PROPERTY_DECLARATION_TAG = "[DataPropertyDeclaration]";
     private static final String SOURCE_DECLARATION_TAG = "[SourceDeclaration]";
     private static final String MAPPING_DECLARATION_TAG = "[MappingDeclaration]";
 
@@ -148,7 +145,6 @@ public class ModelIOManager {
      */
     public void load(File file) throws IOException, InvalidMappingException {
         if (!file.exists()) {
-            // NO-OP: Users may not have the OBDA file
             log.warn("WARNING: Cannot locate OBDA file at: " + file.getPath());
             return;
         }
@@ -170,12 +166,6 @@ public class ModelIOManager {
 	            }
 	            if (line.contains(PREFIX_DECLARATION_TAG)) {
 	                readPrefixDeclaration(reader);
-	            } else if (line.contains(CLASS_DECLARATION_TAG)) {
-	                readClassDeclaration(reader);
-	            } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
-	                readObjectPropertyDeclaration(reader);
-	            } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
-	                readDataPropertyDeclaration(reader);
 	            } else if (line.contains(SOURCE_DECLARATION_TAG)) {
 	                sourceUri = readSourceDeclaration(reader);
 	            } else if (line.contains(MAPPING_DECLARATION_TAG)) {
@@ -270,27 +260,6 @@ public class ModelIOManager {
             String[] tokens = line.split("[\t| ]+");
             pm.addPrefix(tokens[0], tokens[1]);
         }
-    }
-
-    private void readClassDeclaration(LineNumberReader reader) throws IOException {
-    	String line;
-        do {
-        	line = reader.readLine(); // Does nothing just iterate the lines
-        } while(!line.equals(END_COLLECTION_SYMBOL));
-    }
-    
-    private void readObjectPropertyDeclaration(LineNumberReader reader) throws IOException {
-    	String line;
-        do {
-        	line = reader.readLine(); // Does nothing just iterate the lines
-        } while(!line.equals(END_COLLECTION_SYMBOL));
-    }
-    
-    private void readDataPropertyDeclaration(LineNumberReader reader) throws IOException {
-    	String line;
-        do {
-        	line = reader.readLine(); // Does nothing just iterate the lines
-        } while(!line.equals(END_COLLECTION_SYMBOL));
     }
     
     private URI readSourceDeclaration(LineNumberReader reader) throws IOException {
