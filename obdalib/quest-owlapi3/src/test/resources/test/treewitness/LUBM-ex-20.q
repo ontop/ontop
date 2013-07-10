@@ -142,7 +142,7 @@ WHERE {
     ?publ lubm:publicationAuthor ?p1 .
     ?p1 a lubm:Professor . 
     ?publ lubm:publicationAuthor ?p2 .
-    ?p2 a lubm:Student
+    ?p2 a lubm:Student .
 	}
 
 [QueryItem="Q6"]
