@@ -26,19 +26,17 @@ WHERE {
 [QueryItem="C1"]
 PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
 
-SELECT ?student ?staff
+SELECT ?x ?z
 WHERE { 
-    ?student a lubm:Student .
-    ?student lubm:takesCourse ?course .
-    ?course a lubm:Subj1Course . 
-    ?staff lubm:teacherOf ?course .
-    ?staff a lubm:Professor .
-    ?staff lubm:headOf ?dept .
-    ?dept a lubm:Department .
-    ?student lubm:memberOf ?dept .
+    ?x a lubm:Student .
+    ?x lubm:takesCourse ?y .
+    ?y a lubm:Subj1Course . 
+    ?z lubm:teacherOf ?y .
+    ?z a lubm:Professor .
+    ?z lubm:headOf ?w .
+    ?w a lubm:Department .
+    ?x lubm:memberOf ?w .
 	}
-
-
 
 [QueryItem="C4"]
 PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
@@ -49,7 +47,7 @@ WHERE {
     ?z lubm:memberOf ?x .
     ?z a lubm:Student . 
     ?z lubm:takesCourse ?v .
-    ?w lubm:teacherOf ?w .
+    ?w lubm:teacherOf ?v .
     ?w a lubm:Professor . 
     ?w lubm:memberOf ?y .
     ?y a lubm:Department .
