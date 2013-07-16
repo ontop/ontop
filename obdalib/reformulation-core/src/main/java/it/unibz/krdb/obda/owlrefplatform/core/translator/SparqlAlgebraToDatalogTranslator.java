@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.openrdf.model.vocabulary.RDF;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -129,6 +130,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	public void setTemplateMatcher(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
 	}
+	
+	
 
 	protected static org.slf4j.Logger log = LoggerFactory
 			.getLogger(SparqlAlgebraToDatalogTranslator.class);
@@ -698,7 +701,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Predicate predicate = null;
 		Vector<NewLiteral> terms = new Vector<NewLiteral>();
 
-		if (p instanceof Node_URI && p.getURI().equals(OBDAVocabulary.RDF_TYPE)) {
+		if (p instanceof Node_URI && ((Node_URI)p).getURI().equals(RDF.TYPE.stringValue())) {
 			// Subject node
 			if (s instanceof Var) {
 				Var subject = (Var) s;
@@ -813,53 +816,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				subjectType = COL_TYPE.OBJECT;
 				
 				String subject_URI = subject.getURI();
-				int length = subject_URI.length();
-				StringBuilder strBuilder = new StringBuilder(length+20);
-				for (int ci = 0; ci < length; ci++) {
-					char c = subject_URI.charAt(ci);
-
-					if (c == ' ') {
-						strBuilder.append("%20");
-					} else if (c == '!') {
-						strBuilder.append("%21");
-					} else if (c == '@') {
-						strBuilder.append("%40");
-					} else if (c == '#') {
-						strBuilder.append("%23");
-					} else if (c == '$') {
-						strBuilder.append("%24");
-					} else if (c == '&') {
-						strBuilder.append("%26");
-					} else if (c == '*') {
-						strBuilder.append("%42");
-					} else if (c == '(') {
-						strBuilder.append("%28");
-					} else if (c == ')') {
-						strBuilder.append("%29");
-					} else if (c == '[') {
-						strBuilder.append("%5B");
-					} else if (c == ']') {
-						strBuilder.append("%5C");
-					} else if (c == ',') {
-						strBuilder.append("%2C");
-					} else if (c == ';') {
-						strBuilder.append("%3B");
-					} else if (c == ':') {
-						strBuilder.append("%3A");
-					} else if (c == '?') {
-						strBuilder.append("%3F");
-					} else if (c == '=') {
-						strBuilder.append("%3D");
-					} else if (c == '+') {
-						strBuilder.append("%2B");
-					} else if (c == '\'') {
-						strBuilder.append("%22");
-					} else if (c == '/') {
-						strBuilder.append("%2F");
-					} else
-						strBuilder.append(c);
-				}
-				subject_URI = strBuilder.toString();
+				subject_URI = decodeURIEscapeCodes(subject_URI);
 				
 
 				if (isSI) {
@@ -936,53 +893,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				objectType = COL_TYPE.OBJECT;
 				
 				String object_URI = object.getURI();
-				int length = object_URI.length();
-				StringBuilder strBuilder = new StringBuilder(length+20);
-				for (int ci = 0; ci < length; ci++) {
-					char c = object_URI.charAt(ci);
-
-					if (c == ' ') {
-						strBuilder.append("%20");
-					} else if (c == '!') {
-						strBuilder.append("%21");
-					} else if (c == '@') {
-						strBuilder.append("%40");
-					} else if (c == '#') {
-						strBuilder.append("%23");
-					} else if (c == '$') {
-						strBuilder.append("%24");
-					} else if (c == '&') {
-						strBuilder.append("%26");
-					} else if (c == '*') {
-						strBuilder.append("%42");
-					} else if (c == '(') {
-						strBuilder.append("%28");
-					} else if (c == ')') {
-						strBuilder.append("%29");
-					} else if (c == '[') {
-						strBuilder.append("%5B");
-					} else if (c == ']') {
-						strBuilder.append("%5C");
-					} else if (c == ',') {
-						strBuilder.append("%2C");
-					} else if (c == ';') {
-						strBuilder.append("%3B");
-					} else if (c == ':') {
-						strBuilder.append("%3A");
-					} else if (c == '?') {
-						strBuilder.append("%3F");
-					} else if (c == '=') {
-						strBuilder.append("%3D");
-					} else if (c == '+') {
-						strBuilder.append("%2B");
-					} else if (c == '\'') {
-						strBuilder.append("%22");
-					} else if (c == '/') {
-						strBuilder.append("%2F");
-					} else
-						strBuilder.append(c);
-				}
-				object_URI = strBuilder.toString();
+				object_URI = decodeURIEscapeCodes(object_URI);
 				
 
 				Function functionURI = uriTemplateMatcher.generateURIFunction(object_URI);
@@ -1029,6 +940,93 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		CQIE newrule = ofac.getCQIE(head, result);
 		pr.appendRule(newrule);
+	}
+	
+	/***
+	 * Given a string representing a URI, this method will return a new String in which all percent encoded characters (e.g., %20) will
+	 * be restored to their original characters (e.g., ' '). This is necessary to transform some URIs into the original dtabase values.
+	 * @param uriStr
+	 * @return
+	 */
+	private String decodeURIEscapeCodes(String encodedURI) {
+		int length = encodedURI.length();
+		StringBuilder strBuilder = new StringBuilder(length+20);
+		
+		char[] codeBuffer = new char[2];
+		
+		for (int ci = 0; ci < length; ci++) {
+			char c = encodedURI.charAt(ci);
+
+			if (c != '%') {
+				// base case, the character is a normal character, just
+				// append
+				strBuilder.append(c);
+				continue;
+			}
+
+			/*
+			 * found a escape, processing the code and replacing it by
+			 * the original value that should be found on the DB. This
+			 * should not be used all the time, only when working in
+			 * virtual mode... we need to fix this with a FLAG.
+			 */
+
+			// First we get the 2 chars next to %
+			codeBuffer[0] = encodedURI.charAt(ci + 1);
+			codeBuffer[1] = encodedURI.charAt(ci + 2);
+
+			// now we check if they match any of our escape wodes, if
+			// they do the char to be inserted is put in codeBuffer
+			// otherwise
+			String code = String.copyValueOf(codeBuffer);
+			if (code.equals("%20")) {
+				strBuilder.append(' ');
+			} else if (code.equals("%21")) {
+				strBuilder.append('!');
+			} else if (code.equals("%40")) {
+				strBuilder.append('@');
+			} else if (code.equals("%23")) {
+				strBuilder.append('#');
+			} else if (code.equals("%24")) {
+				strBuilder.append('$');
+			} else if (code.equals("%26")) {
+				strBuilder.append('&');
+			} else if (code.equals("%42")) {
+				strBuilder.append('*');
+			} else if (code.equals("%28")) {
+				strBuilder.append('(');
+			} else if (code.equals("%29")) {
+				strBuilder.append(')');
+			} else if (code.equals("%5B")) {
+				strBuilder.append('[');
+			} else if (code.equals("%5C")) {
+				strBuilder.append(']');
+			} else if (code.equals("%2C")) {
+				strBuilder.append(',');
+			} else if (code.equals("%3B")) {
+				strBuilder.append(';');
+			} else if (code.equals("%3A")) {
+				strBuilder.append(':');
+			} else if (code.equals("%3F")) {
+				strBuilder.append('?');
+			} else if (code.equals("%3D")) {
+				strBuilder.append('=');
+			} else if (code.equals("%2B")) {
+				strBuilder.append('+');
+			} else if (code.equals("%22")) {
+				strBuilder.append('\'');
+			} else if (code.equals("%2F")) {
+				strBuilder.append('/');
+			} else {
+				// This was not an escape code, so we just append the
+				// characters and continue;
+				strBuilder.append(codeBuffer);
+			}
+			ci += 2;
+
+		}
+		return strBuilder.toString();
+
 	}
 
 	private int indexOfRef(Node s) {
