@@ -140,12 +140,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 	private OBDAModel obdaModel;
 
-	// private HashSet<OWLOntology> loadedOntologies = new
-	// HashSet<OWLOntology>();
-
 	private QuestPreferences preferences = new QuestPreferences();
 
-	private Quest questInstance = new Quest();
+	private Quest questInstance = null;
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
@@ -225,21 +222,11 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		questInstance = new Quest();
+		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
-		// Loading the OBDA Model and TBox ontology to Quest
-		questInstance.loadTBox(translatedOntologyMerge);
-		questInstance.loadOBDAModel(obdaModel);
-
-		// Load the preferences
-		questInstance.setPreferences(preferences);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
-		if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
-			questInstance.setABox(new OWLAPI3ABoxIterator(importsClosure,
-							questInstance.getEquivalenceMap()));
-			
-		}
+		
 
 		try {
 			// pm.reasonerTaskProgressChanged(1, 4);

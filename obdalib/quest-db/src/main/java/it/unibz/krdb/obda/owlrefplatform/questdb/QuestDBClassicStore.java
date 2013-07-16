@@ -124,9 +124,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	private void createInstance(Ontology tbox, QuestPreferences config) throws Exception {
-		questInstance = new Quest();
-		questInstance.setPreferences(config);
-		questInstance.loadTBox(tbox);
+		questInstance = new Quest(tbox,config);
+
 		questInstance.setupRepository();
 		
 		final boolean bObtainFromOntology = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);

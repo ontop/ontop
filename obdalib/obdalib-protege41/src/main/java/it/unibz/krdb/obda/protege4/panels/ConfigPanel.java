@@ -60,7 +60,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         else if (value.equals(QuestConstants.UNIVERSAL)) {
             radUniversal.setSelected(true);
         }
-        else if (value.equals(QuestConstants.SEMANTIC)) {
+        else if (value.equals(QuestConstants.SEMANTIC_INDEX)) {
             radSemanticIndex.setSelected(true);
         }
 
@@ -453,7 +453,7 @@ public class ConfigPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_radRemoteDatabaseActionPerformed
 
     private void radSemanticIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSemanticIndexActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
     }//GEN-LAST:event_radSemanticIndexActionPerformed
 
     private void radUniversalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUniversalActionPerformed
@@ -467,7 +467,7 @@ public class ConfigPanel extends javax.swing.JPanel {
     private void radClassicObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radClassicObdaActionPerformed
         classicModeSelected();
         preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 //    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
     }//GEN-LAST:event_radClassicObdaActionPerformed
 

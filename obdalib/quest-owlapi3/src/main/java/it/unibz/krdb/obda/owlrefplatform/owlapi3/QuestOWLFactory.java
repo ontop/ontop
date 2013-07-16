@@ -2,6 +2,8 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi3.OBDAOWLReasonerFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
 import java.util.Properties;
 
@@ -21,49 +23,23 @@ import org.slf4j.LoggerFactory;
 
 public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 
-	private OBDAModel apic;
+	private OBDAModel mappingManager = null;
 	private Properties preferences = null;
 	private String id = "Quest";
 	private String name = "Quest";
 
 	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
 
-	// /**
-	// * Sets up some prerequirements in order to create the reasoner
-	// *
-	// * @param manager
-	// * the owl ontology manager
-	// * @param id
-	// * the reasoner id
-	// * @param name
-	// * the reasoner name
-	// */
-	// public void setup(OWLOntologyManager manager, String id, String name) {
-	// this.id = id;
-	// this.name = name;
-	// this.owlOntologyManager = manager;
-	// }
-
-	// /**
-	// * Return the current OWLOntologyManager
-	// *
-	// * @return the current OWLOntologyManager
-	// */
-	// public OWLOntologyManager getOWLOntologyManager() {
-	// return owlOntologyManager;
-	// }
-	//
-	// /**
-	// * Returns the current reasoner id
-	// *
-	// * @return the current reasoner id
-	// */
-	// public String getReasonerId() {
-	// return id;
-	// }
-
+	/***
+	 * Sets the mappings that will be used to create instances of Quest. If this
+	 * is not set, mappings will be null and Quest will be started in
+	 * "classic ABox" mode. If the mappings are not null, then the mode must be
+	 * "Virtual ABox" model.
+	 * 
+	 * @param apic
+	 */
 	public void setOBDAController(OBDAModel apic) {
-		this.apic = apic;
+		this.mappingManager = apic;
 	}
 
 	@Override
@@ -75,45 +51,70 @@ public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 		return name;
 	}
 
-	// public void initialise() throws Exception {
-	//
-	// }
-	//
-	// public void dispose() throws Exception {
-	//
-	// }
-
 	/**
-	 * Returns the current api controller
+	 * Returns the current mapping manager.
 	 * 
 	 * @return the current api controller
 	 */
 	public OBDAModel getApiController() {
-		return apic;
+		return mappingManager;
 	}
 
 	@Override
 	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
-		return new QuestOWL(ontology, apic, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
+		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.CLASSIC+"'");
+		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) { 
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.VIRTUAL+"'");
+		}
+		return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		return new QuestOWL(ontology, apic, config, BufferingMode.NON_BUFFERING, preferences);
+	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
+			throws IllegalConfigurationException {
+		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.CLASSIC+"'");
+		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) { 
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.VIRTUAL+"'");
+		}
+		return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
 	public OWLReasoner createReasoner(OWLOntology ontology) {
-		return new QuestOWL(ontology, apic, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
+		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.CLASSIC+"'");
+		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) { 
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.VIRTUAL+"'");
+		}
+		return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 	}
 
 	@Override
 	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		return new QuestOWL(ontology, apic, config, BufferingMode.BUFFERING, preferences);
+		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.CLASSIC+"'");
+		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) { 
+			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"+preferences.get(QuestPreferences.ABOX_MODE)+"'");
+			log.warn("To avoid this warning, set the value of '"+QuestPreferences.ABOX_MODE+"' to '"+QuestConstants.VIRTUAL+"'");
+		}
+		return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
 	}
 
-//	@Override
-//	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
-//		return new QuestOWL(null, apic, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
-//	}
 }

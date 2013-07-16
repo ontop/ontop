@@ -12,7 +12,7 @@ public class QuestConstants {
 	public static final String VIRTUAL = "virtual";
 	
 	// DBtype
-	public static final String SEMANTIC = "semantic";
+	public static final String SEMANTIC_INDEX = "semantic";
 	public static final String UNIVERSAL = "universal";
 	public static final String DIRECT = "direct";
 	

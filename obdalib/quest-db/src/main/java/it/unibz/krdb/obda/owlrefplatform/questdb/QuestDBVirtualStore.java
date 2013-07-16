@@ -43,7 +43,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static final long serialVersionUID = 2495624993519521937L;
 
 	private static Logger log = LoggerFactory.getLogger(QuestDBVirtualStore.class);
-	
+
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
@@ -51,95 +51,80 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
 		this(name, null, obdaURI, null);
 	}
-	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config)
-			throws Exception {
+
+	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config) throws Exception {
 
 		this(name, null, obdaURI, config);
 	}
-	
-	//constructors String, URI, URI, (Config)
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI)
-			throws Exception {
+
+	// constructors String, URI, URI, (Config)
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI) throws Exception {
 
 		this(name, tboxFile, obdaURI, null);
 
 	}
-	
-	public  OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException
-	{
+
+	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException {
 		OBDAModel obdaModel = fac.getOBDAModel();
-	//	System.out.println(obdaURI.toString());
-		if (obdaURI.toString().endsWith(".obda"))
-		{
-				ModelIOManager modelIO = new ModelIOManager(obdaModel);
-					modelIO.load(new File(obdaURI));
-		}
-		else if (obdaURI.toString().endsWith(".ttl"))
-		{
+		// System.out.println(obdaURI.toString());
+		if (obdaURI.toString().endsWith(".obda")) {
+			ModelIOManager modelIO = new ModelIOManager(obdaModel);
+			modelIO.load(new File(obdaURI));
+		} else if (obdaURI.toString().endsWith(".ttl")) {
 			R2RMLReader reader = new R2RMLReader(new File(obdaURI));
 			obdaModel = reader.readModel(obdaURI);
-			
+
 		}
 		return obdaModel;
 	}
 
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri,
-			QuestPreferences config) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
 
 		super(name);
-		
+
 		OBDAModel obdaModel = null;
 		if (obdaUri == null) {
-			throw new RuntimeException("Cannot create a Virtual Triple store without mappings. The mappings where NULL");
+			log.debug("No mappings where given, mappings will be automatically generated.");
+			obdaModel = getOBDAModelDM();
+		} else {
+			obdaModel = getObdaModel(obdaUri);
 		}
-		
-		obdaModel = getObdaModel(obdaUri);
-		
-		
+
 		if (config == null) {
 			config = new QuestPreferences();
 		}
 		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		
-		
-		OWLOntology owlontology = null; 
+
+		OWLOntology owlontology = null;
 		Ontology tbox;
-		if (tboxFile != null)
-		{
+		if (tboxFile != null) {
 			OWLAPI3Translator translator = new OWLAPI3Translator();
 			OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(tboxFile).getParentFile(), false);
 			man.addIRIMapper(iriMapper);
-			owlontology = man
-				.loadOntologyFromOntologyDocument(new File(tboxFile));
+			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 			Set<OWLOntology> clousure = man.getImportsClosure(owlontology);
-			
-			 tbox = translator.mergeTranslateOntologies(clousure);
 
-		}
-		else
-		{	//create empty ontology
-			owlontology = man.createOntology();//createOntology(OBDADataFactoryImpl.getIRI(name));
+			tbox = translator.mergeTranslateOntologies(clousure);
+
+		} else { // create empty ontology
+			owlontology = man.createOntology();// createOntology(OBDADataFactoryImpl.getIRI(name));
 			tbox = OntologyFactoryImpl.getInstance().createOntology();
 			if (obdaModel.getSources().size() == 0)
 				obdaModel.addSource(getMemOBDADataSource("MemH2"));
 		}
-		
-	
+
 		OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
-		
-		questInstance = new Quest();
-		questInstance.setPreferences(config);
-		questInstance.loadTBox(tbox);
-		questInstance.loadOBDAModel(obdaModel);
+
+		questInstance = new Quest(tbox, obdaModel, config);
+
 		questInstance.setupRepository();
 	}
-	
+
 	public QuestDBVirtualStore(String name, QuestPreferences pref) throws Exception {
-		//direct mapping : no tbox, no obda file, repo in-mem h2
+		// direct mapping : no tbox, no obda file, repo in-mem h2
 		this(name, null, null, pref);
 	}
-	
-	
+
 	private static OBDADataSource getMemOBDADataSource(String name) {
 
 		OBDADataSource obdaSource = OBDADataFactoryImpl.getInstance().getDataSource(URI.create(name));
@@ -149,44 +134,36 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		String username = "sa";
 		String password = "";
 
-		obdaSource = fac.getDataSource(URI
-				.create("http://www.obda.org/ABOXDUMP"
-						+ System.currentTimeMillis()));
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER,
-				driver);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD,
-				password);
+		obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME,
-				username);
-		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY,
-				"true");
-		obdaSource.setParameter(
-				RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP,
-				"true");
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		return (obdaSource);
-		
+
 	}
-	
-	private OBDAModel  getOBDAModelDM() {
-		
+
+	private OBDAModel getOBDAModelDM() {
+
 		DirectMappingEngine dm = new DirectMappingEngine("http://example.org/base", 0);
 		try {
-			 OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
-			 return model;
+			OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
+			return model;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public QuestConnection getQuestConnection() {
-			try {
-			//	System.out.println("getquestconn..");
-				questConn = questInstance.getConnection();
-			} catch (OBDAException e) {
-				e.printStackTrace();
-			}
+		try {
+			// System.out.println("getquestconn..");
+			questConn = questInstance.getConnection();
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
 		return questConn;
 	}
 

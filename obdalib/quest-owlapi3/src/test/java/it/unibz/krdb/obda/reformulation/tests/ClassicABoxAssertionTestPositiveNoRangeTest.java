@@ -37,7 +37,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
@@ -48,11 +48,8 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-		OBDAModel apic = obdafac.getOBDAModel();
 		
 		QuestOWLFactory fac = new QuestOWLFactory();
-		fac.setOBDAController(apic);
 		fac.setPreferenceHolder(pref);
 
 		reasoner = (QuestOWL) fac.createReasoner(ontology);

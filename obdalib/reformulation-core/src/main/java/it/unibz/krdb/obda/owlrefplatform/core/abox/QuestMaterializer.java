@@ -125,14 +125,16 @@ public class QuestMaterializer {
 			}
 		}
 		//start a quest instance
-		questInstance = new Quest();
-		questInstance.setPreferences(preferences);
 		if (ontology == null) {
 			ontology = ofac.createOntology();
 			ontology.addEntities(model.getDeclaredPredicates());
 		}
-		questInstance.loadTBox(ontology);
-		questInstance.loadOBDAModel(model);			
+		
+		
+		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+		questInstance = new Quest(ontology, model, preferences);
+					
 		questInstance.setupRepository();
 	}
 	

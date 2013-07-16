@@ -59,7 +59,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
+	private OBDAModel obdaModel = null;
 	private OWLOntology ontology;
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
@@ -217,12 +217,10 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
 
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		// reasoner.loadOBDAModel(obdaModel);
 
 		// Now we are ready for querying
 		OWLStatement st = reasoner.getStatement();
@@ -307,7 +305,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		 */
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
