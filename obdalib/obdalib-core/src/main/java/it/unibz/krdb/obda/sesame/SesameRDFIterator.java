@@ -31,7 +31,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 
 	private BlockingQueue<Statement> buffer;
 	private Iterator<Statement> iterator;
-	private int size = 1;
+	private int size = 50000;
 	
 	private boolean endRDF = false;
 	private boolean fromIterator = false;
@@ -112,7 +112,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		
 		ObjectConstant c = null;
 		if (currSubject instanceof URI) {
-			c = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currSubject.stringValue()));
+			c = obdafac.getURIConstant(currSubject.stringValue());
 		} else if (currSubject instanceof BNode) {
 			c = obdafac.getBNodeConstant(currSubject.stringValue());
 		} else {
@@ -128,13 +128,13 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		} else {
 			String predStringValue = currPredicate.stringValue();
 			if (predStringValue.equals(OBDAVocabulary.RDF_TYPE)) {
-				if (!(predStringValue.endsWith("/owl#Thing"))
-						|| predStringValue.endsWith("/owl#Nothing")
-						|| predStringValue.endsWith("/owl#Ontology")) {
+//				if (!(predStringValue.endsWith("/owl#Thing"))
+//						|| predStringValue.endsWith("/owl#Nothing")
+//						|| predStringValue.endsWith("/owl#Ontology")) {
 					currentPredicate = obdafac.getClassPredicate(currObject.stringValue());
-				} else {
-					return null;
-				}
+//				} else {
+//					return null;
+//				}
 			} else {
 				currentPredicate = obdafac.getObjectPropertyPredicate(currPredicate.stringValue());
 			}
@@ -147,7 +147,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		} else if (currentPredicate.getArity() == 2) {
 			Constant c2;
 			if (currObject instanceof URI) {
-				c2 = obdafac.getURIConstant(OBDADataFactoryImpl.getIRI(currObject.stringValue()));
+				c2 = obdafac.getURIConstant(currObject.stringValue());
 			} else if (currObject instanceof BNode) {
 				c2 = obdafac.getBNodeConstant(currObject.stringValue());
 			} else if (currObject instanceof Literal) {
