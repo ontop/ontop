@@ -75,7 +75,7 @@ public class OWLConstructDescribeTest extends TestCase{
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC); 
+			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
 			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
 			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);

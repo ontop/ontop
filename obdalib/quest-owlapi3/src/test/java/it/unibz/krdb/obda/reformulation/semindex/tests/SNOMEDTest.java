@@ -43,7 +43,7 @@ public class SNOMEDTest {
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 
 		/*
 		 * Loading the queries (we have 11 queries)
