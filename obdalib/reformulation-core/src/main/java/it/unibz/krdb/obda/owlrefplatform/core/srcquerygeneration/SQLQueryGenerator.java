@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A general interface which should be use to implement new source query
@@ -41,7 +42,7 @@ public interface SQLQueryGenerator extends Serializable {
 	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
 	// uris);
 
-	void setUriIds(LinkedHashSet<String> uriid);
+	void setUriIds(Map<String, Integer> uriRefIds);
 
 	// public ViewManager getViewManager();
 }

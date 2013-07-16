@@ -616,7 +616,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		final String PLACEHOLDER = "{}";
 		List<NewLiteral> terms = new LinkedList<NewLiteral>();
 		List<FormatString> tokens = parse(text);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (FormatString token : tokens) {
 			if (token instanceof FixedString) { // if part of URI template
 				sb.append(token.toString());
@@ -687,7 +687,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private String generateSQLString(DataDefinition table) {
-		StringBuffer sb = new StringBuffer("select");
+		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
 			if (needComma) {

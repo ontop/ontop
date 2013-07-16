@@ -175,7 +175,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	public String toString() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("[Ontology info.");
 		if (originalassertions != null) {
 			str.append(String.format(" Axioms: %d", originalassertions.size()));

@@ -168,8 +168,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 			constant = resSet.getConstant(columnName);
 		} else if (node instanceof Node_URI) {
 			String uriString = ((Node_URI) node).getURI();
-			constant = dfac.getURIConstant(OBDADataFactoryImpl
-					.getIRI(uriString));
+			constant = dfac.getURIConstant(uriString);
 		} else if (node instanceof Node_Literal) {
 			String value = ((Node_Literal) node).getLiteralValue().toString();
 			constant = dfac.getValueConstant(value);

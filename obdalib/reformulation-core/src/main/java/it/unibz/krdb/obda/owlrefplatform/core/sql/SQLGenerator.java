@@ -84,7 +84,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
-	private LinkedHashSet<String> uriRefIds = new LinkedHashSet();
+	private Map<String, Integer> uriRefIds;
 	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
@@ -95,7 +95,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 	
 	@Override
-	public void setUriIds (LinkedHashSet<String> uriid){
+	public void setUriIds (Map<String,Integer> uriid){
 		this.isSI = true;
 		this.uriRefIds = uriid;
 	}
@@ -220,7 +220,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		Iterator<String> queryStringIterator = queriesStrings.iterator();
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		if (queryStringIterator.hasNext()) {
 			result.append(queryStringIterator.next());
 		}
@@ -382,7 +382,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * (possibly nested if there are more than 2 table definitions in the
 		 * current list) in case this method was called recursively.
 		 */
-		StringBuffer tableDefinitionsString = new StringBuffer();
+		StringBuilder tableDefinitionsString = new StringBuilder();
 
 		int size = tableDefinitions.size();
 		if (isTopLevel) {
@@ -522,7 +522,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * Collecting all the conditions in a single string for the ON or WHERE
 		 * clause
 		 */
-		StringBuffer conditionsString = new StringBuffer();
+		StringBuilder conditionsString = new StringBuilder();
 		Iterator<String> conditionsIterator = conditions.iterator();
 		if (conditionsIterator.hasNext()) {
 			conditionsString.append(indent);
@@ -1224,15 +1224,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 
+	/***
+	 * We look for the ID in the list of IDs, if its not there, we return -2, which we know will never appear
+	 * on the DB. This is correct because if a constant appears in a query, and that constant was never inserted
+	 * in the DB, the query must be empty (that atom), by putting -2 as id, we will enforce that.
+	 * @param uri
+	 * @return
+	 */
 	private int getUriid(String uri) {
-		int i = 0;
-		for(String el : uriRefIds) {
-		    i++;  
-			if (el.equals(uri)) {
-		          return i;
-		      }
-		 }
-		return 0;
+		
+		Integer id = uriRefIds.get(uri);
+		if (id != null)
+			return id;
+		return -2;
+					
 	}
 
 	/**

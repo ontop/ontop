@@ -397,9 +397,9 @@ public class TestFileGenerator {
 		int i2 = head.indexOf(")");
 		String headvars = head.substring(i1 + 1, i2);
 		String vars[] = headvars.split(",");
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if (headvars.trim().length() > 0) {
-			StringBuffer hv = new StringBuffer();
+			StringBuilder hv = new StringBuilder();
 			for (int i = 0; i < vars.length; i++) {
 				if (hv.length() > 0) {
 					hv.append(" ");
@@ -414,7 +414,7 @@ public class TestFileGenerator {
 		}
 
 		String atoms[] = body.split(" ");
-		StringBuffer sb1 = new StringBuffer();
+		StringBuilder sb1 = new StringBuilder();
 		for (int i = 0; i < atoms.length; i++) {
 			String atom = atoms[i];
 			if (sb1.length() > 0) {
@@ -448,7 +448,7 @@ public class TestFileGenerator {
 	}
 
 	private String getSPARQLTerm(String parameters) {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		if ((parameters.startsWith("<")) && parameters.endsWith(">")) {
 			bf.append(":" + parameters.substring(1, parameters.length() - 1));
 		} else {
@@ -461,7 +461,7 @@ public class TestFileGenerator {
 	}
 
 	private String getDatalogQuery(String query) throws Exception {
-		StringBuffer ds = new StringBuffer(); // datalog string
+		StringBuilder ds = new StringBuilder(); // datalog string
 
 		String[] aux = query.split(":-");
 		if (aux.length != 2)
@@ -476,11 +476,11 @@ public class TestFileGenerator {
 		String headVars = head.substring(i1 + 1, i2);
 		String[] vars = headVars.split(",");
 
-		StringBuffer as = new StringBuffer(); // atom string
+		StringBuilder as = new StringBuilder(); // atom string
 		as.append("ucq:").append(headName);
 		as.append("(");
 		if (headVars.trim().length() > 0) {
-			StringBuffer av = new StringBuffer(); // atom variables
+			StringBuilder av = new StringBuilder(); // atom variables
 			for (String var : vars) {
 				if (av.length() > 0) {
 					av.append(", ");
@@ -497,7 +497,7 @@ public class TestFileGenerator {
 		String body = aux[1].trim();
 		String atoms[] = body.split(" ");
 
-		as = new StringBuffer(); // atom string
+		as = new StringBuilder(); // atom string
 		for (String atom : atoms) {
 			if (as.length() > 0) {
 				as.append(", ");
@@ -512,7 +512,7 @@ public class TestFileGenerator {
 			as.append("dllite:").append(atomName);
 			as.append("(");
 			if (atomVars.trim().length() > 0) {
-				StringBuffer av = new StringBuffer(); // atom variables
+				StringBuilder av = new StringBuilder(); // atom variables
 				for (String var : vars) {
 					if (av.length() > 0) {
 						av.append(", ");

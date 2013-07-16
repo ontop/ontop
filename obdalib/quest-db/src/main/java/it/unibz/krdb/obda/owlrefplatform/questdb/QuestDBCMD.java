@@ -271,7 +271,7 @@ public class QuestDBCMD {
 			for (int i = 1; i < cols + 1; i++) {
 				if (i > 1)
 					System.out.print(" | ");
-				System.out.print(result.getString(i));
+				System.out.print(result.getConstant(i));
 			}
 			System.out.println();
 			count += 1;

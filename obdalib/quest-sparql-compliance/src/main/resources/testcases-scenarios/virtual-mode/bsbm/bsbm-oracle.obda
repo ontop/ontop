@@ -9,20 +9,6 @@ rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 dc:		http://purl.org/dc/elements/1.1/
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[ClassDeclaration] @collection [[
-bsbm:ProductFeature, bsbm:Offer, bsbm:Review, foaf:Person, bsbm:Producer, bsbm:Vendor, bsbm:ProductType, bsbm:Product
-]]
-
-[ObjectPropertyDeclaration] @collection [[
-bsbm:product, bsbm:productFeature, bsbm:type, bsbm:reviewFor, bsbm:subClassOf, rev:reviewer, bsbm:country, bsbm:producer, bsbm:vendor, dc:publisher
-]]
-
-[DataPropertyDeclaration] @collection [[
-bsbm:validTo, foaf:name, bsbm:productPropertyTextual1, bsbm:productPropertyTextual4, bsbm:productPropertyTextual5, bsbm:productPropertyTextual2, bsbm:productPropertyTextual3, bsbm:rating4, foaf:mbox_sha1sum, bsbm:productPropertyNumeric1
-bsbm:productPropertyNumeric2, bsbm:productPropertyNumeric3, bsbm:offerWebpage, bsbm:productPropertyNumeric4, bsbm:productPropertyNumeric5, bsbm:productPropertyNumeric6, rev:text, bsbm:productPropertyTextual6, bsbm:validFrom, bsbm:deliveryDays
-foaf:homepage, rdfs:comment, dc:title, bsbm:price, bsbm:rating1, bsbm:rating2, bsbm:rating3, bsbm:reviewDate, rdfs:label, dc:date
-]]
-
 [SourceDeclaration]
 sourceUri	BSBM-Benchmark
 connectionUrl	

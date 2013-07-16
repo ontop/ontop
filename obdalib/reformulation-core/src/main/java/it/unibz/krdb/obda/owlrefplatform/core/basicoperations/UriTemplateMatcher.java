@@ -45,9 +45,9 @@ public class UriTemplateMatcher {
 	 * have a corresponding function, and the paramters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
-	public Function generateURIFunction(IRI subjectUri) {
+	public Function generateURIFunction(String uriString) {
 		Function functionURI = null;
-		String uriString = subjectUri.toString();
+
 		for (Pattern pattern : uriTemplateMatcher.keySet()) {
 
 			Matcher matcher = pattern.matcher(uriString);
@@ -76,7 +76,7 @@ public class UriTemplateMatcher {
 				 * we need to match x with the subjectURI
 				 */
 				functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), 
-						ofac.getValueConstant(subjectUri.toString()));
+						ofac.getValueConstant(uriString));
 			}
 			break;
 		}
@@ -84,7 +84,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
 			 * generate empty queires later in the query answering process
 			 */
-			functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri));
+			functionURI = ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(uriString));
 		}
 			
 		return functionURI;

@@ -329,7 +329,7 @@ public class R2RMLParser {
 			// System.out.println(parsedString);
 			//uriconstant
 			if(parsedString.startsWith("http://"))
-				objectAtom = fac.getURIConstant(OBDADataFactoryImpl.getIRI(parsedString));
+				objectAtom = fac.getURIConstant(parsedString);
 			else
 			{
 				//valueconstant

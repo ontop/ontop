@@ -86,7 +86,7 @@ public class OWLAPI3IndividualTranslator {
 		if (constant instanceof URIConstant) {
 
 			result = dataFactory.getOWLNamedIndividual(IRI
-					.create(((URIConstant) constant).getURI().toString()));
+					.create(constant.getValue()));
 		} else if (constant instanceof BNode) {
 			result = dataFactory.getOWLAnonymousIndividual(((BNode) constant)
 					.getName());

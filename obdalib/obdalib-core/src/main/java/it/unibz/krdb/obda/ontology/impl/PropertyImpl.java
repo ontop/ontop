@@ -39,7 +39,7 @@ public class PropertyImpl implements Property {
 	}
 
 	public String toString() {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		bf.append(predicate.toString());
 		if (inverse) {
 			bf.append("^-");

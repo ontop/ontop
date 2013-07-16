@@ -26,35 +26,35 @@ public class EmptyQueryResultSet implements TupleResultSet {
 	public void close() throws OBDAException {
 	}
 
-	@Override
-	public double getDouble(int column) throws OBDAException {
-		return 0;
-	}
-
-	@Override
-	public int getInt(int column) throws OBDAException {
-		return 0;
-	}
-
-	@Override
-	public Object getObject(int column) throws OBDAException {
-		return null;
-	}
-
-	@Override
-	public String getString(int column) throws OBDAException {
-		return null;
-	}
-
-	@Override
-	public URI getURI(int column) throws OBDAException {
-		return null;
-	}
-	
-	@Override
-	public IRI getIRI(int column) throws OBDAException {
-		return null;
-	}
+//	@Override
+//	public double getDouble(int column) throws OBDAException {
+//		return 0;
+//	}
+//
+//	@Override
+//	public int getInt(int column) throws OBDAException {
+//		return 0;
+//	}
+//
+//	@Override
+//	public Object getObject(int column) throws OBDAException {
+//		return null;
+//	}
+//
+//	@Override
+//	public String getString(int column) throws OBDAException {
+//		return null;
+//	}
+//
+//	@Override
+//	public URI getURI(int column) throws OBDAException {
+//		return null;
+//	}
+//	
+//	@Override
+//	public IRI getIRI(int column) throws OBDAException {
+//		return null;
+//	}
 
 	@Override
 	public int getColumCount() throws OBDAException {
@@ -86,39 +86,39 @@ public class EmptyQueryResultSet implements TupleResultSet {
 		return null;
 	}
 
-	@Override
-	public ValueConstant getLiteral(int column) throws OBDAException {
-		return null;
-	}
-
-	@Override
-	public BNode getBNode(int column) throws OBDAException {
-		return null;
-	}
-
+//	@Override
+//	public ValueConstant getLiteral(int column) throws OBDAException {
+//		return null;
+//	}
+//
+//	@Override
+//	public BNode getBNode(int column) throws OBDAException {
+//		return null;
+//	}
+//
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
 		return null;
 	}
-
-	@Override
-	public URI getURI(String name) throws OBDAException {
-		return null;
-	}
-	
-	@Override
-	public IRI getIRI(String name) throws OBDAException {
-		return null;
-	}
-
-	@Override
-	public ValueConstant getLiteral(String name) throws OBDAException {
-		return null;
-	}
-
-	@Override
-	public BNode getBNode(String name) throws OBDAException {
-		return null;
-	}
+//
+//	@Override
+//	public URI getURI(String name) throws OBDAException {
+//		return null;
+//	}
+//	
+//	@Override
+//	public IRI getIRI(String name) throws OBDAException {
+//		return null;
+//	}
+//
+//	@Override
+//	public ValueConstant getLiteral(String name) throws OBDAException {
+//		return null;
+//	}
+//
+//	@Override
+//	public BNode getBNode(String name) throws OBDAException {
+//		return null;
+//	}
 
 }

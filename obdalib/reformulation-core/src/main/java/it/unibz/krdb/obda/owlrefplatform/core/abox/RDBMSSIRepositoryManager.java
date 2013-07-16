@@ -18,7 +18,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
@@ -59,8 +58,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +65,6 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 
-import org.antlr.misc.IntervalSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -367,19 +363,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
-	private Map<IRI, Integer> classIndexes = new LinkedHashMap<IRI, Integer>();
+	private Map<IRI, Integer> classIndexes = new HashMap<IRI, Integer>();
 
-	private Map<IRI, Integer> roleIndexes = new LinkedHashMap<IRI, Integer>();
+	private Map<IRI, Integer> roleIndexes = new HashMap<IRI, Integer>();
 
 	private Map<Description, Description> equivalentIndex = new HashMap<Description, Description>();
 
-	private Map<IRI, List<Interval>> classIntervals = new LinkedHashMap<IRI, List<Interval>>();
+	private Map<IRI, List<Interval>> classIntervals = new HashMap<IRI, List<Interval>>();
 
-	private Map<IRI, List<Interval>> roleIntervals = new LinkedHashMap<IRI, List<Interval>>();
+	private Map<IRI, List<Interval>> roleIntervals = new HashMap<IRI, List<Interval>>();
 
 	// Semantic Index URI reference structures
-	private LinkedHashSet<String> uriIds = new LinkedHashSet<String> ();
-	private LinkedHashMap <Integer, String> uriMap = new LinkedHashMap<Integer, String> ();
+	private HashMap<String, Integer> uriIds = new HashMap<String, Integer> (100000);
+	private HashMap <Integer, String> uriMap2 = new HashMap<Integer, String> (100000);
+	
+	private int maxURIId = -1;
 	
 	private Properties config;
 
@@ -1119,7 +1117,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			InsertionMonitor monitor, Assertion ax) throws SQLException {
 		int uri_id = 0;
 		int uri2_id = 0;
-		boolean newUri = false;
+//		boolean newUri = false;
 		if (ax instanceof BinaryAssertion) {
 			// Get the data property assertion
 			BinaryAssertion attributeAssertion = (BinaryAssertion) ax;
@@ -1132,16 +1130,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			ObjectConstant subject = (ObjectConstant) attributeAssertion.getValue1();
 
 			String uri = subject.getValue();
-			newUri = uriIds.add(uri);
-			if (newUri) {
-				uri_id = uriIds.size();
+			 uri_id = idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
 				uriidStm.addBatch();
-			} else {
-				uri_id = idOfURI(uri);
-			}
-			uriMap.put(new Integer(uri_id), uri);
 			
 			boolean c1isBNode = subject instanceof BNode;
 
@@ -1174,26 +1166,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// Construct the database INSERT statement
 				// replace URIs with their ids
 				
-				newUri = uriIds.add(uri);
-				if (newUri) {
-					uri_id = uriIds.size();
-					uriidStm.setInt(1, uri_id);
-					uriidStm.setString(2, uri);
-					uriidStm.addBatch();
-				} else {
-					uri_id = idOfURI(uri);
-				}
-				uriMap.put(new Integer(uri_id), uri);
-				newUri = uriIds.add(uri2);
-				if (newUri) {
-					uri2_id = uriIds.size();
-					uriidStm.setInt(1, uri2_id);
-					uriidStm.setString(2, uri2);
-					uriidStm.addBatch();
-				} else {
-					uri2_id = idOfURI(uri2);
-				}
-				uriMap.put(new Integer(uri2_id), uri2);
+				uri_id = idOfURI(uri);
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+
+				uri2_id = idOfURI(uri2);
+				uriidStm.setInt(1, uri2_id);
+				uriidStm.setString(2, uri2);
+				uriidStm.addBatch();
 				
 				//roleStm.setString(1, uri);
 				//roleStm.setString(2, uri2);
@@ -1271,16 +1252,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				uri = ((URIConstant) c1).getURI().toString();
 
 			// Construct the database INSERT statement
-			newUri = uriIds.add(uri);
-			if (newUri) {
-				uri_id = uriIds.size();
-				uriidStm.setInt(1, uri_id);
-				uriidStm.setString(2, uri);
-				uriidStm.addBatch();
-			} else {
-				uri_id = idOfURI(uri);
-			}
-			uriMap.put(new Integer(uri_id), uri);
+			uri_id = idOfURI(uri);
+			uriidStm.setInt(1, uri_id);
+			uriidStm.setString(2, uri);
+			uriidStm.addBatch();			
 
 			classStm.setInt(1, uri_id);
 			int conceptIndex = getConceptIndex(concept);
@@ -1297,14 +1272,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private int idOfURI(String uri) {
-		int i = 0;
-		for (String s : uriIds) {
-		    ++i;
-		    if (s.equals(uri)) {
-		        break;
-		    }
+		Integer existingID = uriIds.get(uri);
+		if (existingID == null)
+		{
+			existingID = maxURIId + 1;
+			
+			uriIds.put(uri, existingID);
+			uriMap2.put(existingID, uri);
+			
+			maxURIId += 1;
+			
 		}
-		return i;
+		return existingID;
 	}
 
 	private void closeStatement(PreparedStatement statement) throws SQLException {
@@ -2248,14 +2227,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * ranges
 			 */
 
-			StringBuffer sql1 = new StringBuffer();
+			StringBuilder sql1 = new StringBuilder();
 			sql1.append(select_mapping_class);
 			sql1.append(" WHERE ");
 			sql1.append(" ISBNODE = FALSE AND ");
 
 			/* FOR BNODE */
 
-			StringBuffer sql2 = new StringBuffer();
+			StringBuilder sql2 = new StringBuilder();
 			sql2.append(select_mapping_class);
 			sql2.append(" WHERE ");
 			sql2.append(" ISBNODE = TRUE AND ");
@@ -2323,7 +2302,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				CQIE targetQuery = (CQIE) currentMappings.get(0).getTargetQuery();
 
 				/* Computing the merged SQL */
-				StringBuffer newSQL = new StringBuffer();
+				StringBuilder newSQL = new StringBuilder();
 				newSQL.append(((OBDASQLQuery) currentMappings.get(0).getSourceQuery()).toString());
 				for (int mapi = 1; mapi < currentMappings.size(); mapi++) {
 					newSQL.append(" UNION ALL ");
@@ -2493,7 +2472,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private String constructSourceQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) throws OBDAException {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		switch (type2) {
 		case OBJECT:
 			sql.append(select_mapping_role);
@@ -2588,7 +2567,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * otherwise.
 	// */
 	// private boolean createMappingForRole(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasRoleNode = false; // A flag if there is at least one role
 	//
@@ -2644,7 +2623,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * or false otherwise.
 	// */
 	// private boolean createMappingForInverseRole(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasInverseRoleNode = false; // A flag if there is at least one
 	// // inverse role.
@@ -2699,7 +2678,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with rdfs:Literal as the range, or false otherwise.
 	// */
 	// private boolean createMappingForLiteralDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasLiteralNode = false; // A flag if there is at least one DP
 	// // with range rdfs:Literal
@@ -2756,7 +2735,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with xsd:string as the range, or false otherwise.
 	// */
 	// private boolean createMappingForStringDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasStringNode = false; // A flag if there is at least one DP
 	// // with range xsd:string
@@ -2812,7 +2791,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with xsd:int as the range, or false otherwise.
 	// */
 	// private boolean createMappingForIntegerDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasIntegerNode = false; // A flag if there is at least one DP
 	// // with range xsd:int
@@ -2869,7 +2848,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with xsd:decimal as the range, or false otherwise.
 	// */
 	// private boolean createMappingForDecimalDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasDecimalNode = false; // A flag if there is at least one DP
 	// // with range xsd:decimal
@@ -2926,7 +2905,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with xsd:double as the range, or false otherwise.
 	// */
 	// private boolean createMappingForDoubleDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasDoubleNode = false; // A flag if there is at least one DP
 	// // with range xsd:double
@@ -2981,7 +2960,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with xsd:date as the range, or false otherwise.
 	// */
 	// private boolean createMappingForDateDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasDateNode = false; // A flag if there is at least one DP with
 	// // range xsd:date
@@ -3037,7 +3016,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// * with xsd:boolean as the range, or false otherwise.
 	// */
 	// private boolean createMappingForBooleanDataType(Set<DAGNode> nodeList,
-	// StringBuffer buffer) {
+	// StringBuilder buffer) {
 	//
 	// boolean hasBooleanNode = false; // A flag if there is at least one DP
 	// // with range xsd:boolean
@@ -3078,7 +3057,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// return hasBooleanNode;
 	// }
 
-	private void appendIntervalString(Interval interval, StringBuffer out) {
+	private void appendIntervalString(Interval interval, StringBuilder out) {
 		if (interval.getStart() == interval.getEnd()) {
 			out.append(String.format(whereSingleCondition, interval.getStart()));
 		} else {
@@ -3284,7 +3263,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	 */
 
 	private String getQuotedString(String str) {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		bf.append("'");
 		bf.append(str);
 		bf.append("'");
@@ -3292,7 +3271,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private String getQuotedString(URI str) {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		bf.append("'");
 		bf.append(str.toString());
 		bf.append("'");
@@ -3800,12 +3779,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// return empty;
 	// }
 
-	public LinkedHashSet<String> getUriIds(){
+	public Map<String,Integer> getUriIds(){
 		return uriIds;
 	}
 	
-	public LinkedHashMap<Integer, String> getUriMap() {
-		return uriMap;
+	public Map<Integer, String> getUriMap() {
+		return uriMap2;
 	}
 	
 	/***

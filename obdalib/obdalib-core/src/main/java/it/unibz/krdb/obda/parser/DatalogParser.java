@@ -1786,7 +1786,7 @@ public class DatalogParser extends Parser {
 
             if ( state.backtracking==0 ) { 
                   uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);      
-                  value = dfac.getURIConstant(OBDADataFactoryImpl.getIRI(uriText));
+                  value = dfac.getURIConstant(uriText);
                 }
 
             }

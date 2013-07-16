@@ -50,7 +50,7 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 		}
 
 		for (final DriverPropertyInfo info : propInfo) {
-			StringBuffer choices = new StringBuffer();
+			StringBuilder choices = new StringBuilder();
 			if (info.choices != null) {
 				choices.append("[");
 				boolean needComma = false;

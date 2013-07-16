@@ -5,8 +5,10 @@ import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.openrdf.model.Value;
 import org.openrdf.query.Binding;
@@ -29,13 +31,13 @@ public class SesameTupleQuery implements TupleQuery {
 	
 	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
 			throws MalformedQueryException {
-		if (queryString.toLowerCase().contains("select")) {
+//		if (queryString.toLowerCase().contains("select")) {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
 			this.conn = conn;
-		} else {
-			throw new MalformedQueryException("Tuple query expected!");
-		}
+//		} else {
+//			throw new MalformedQueryException("Tuple query expected!");
+//		}
 	}
 	
 	// needed by TupleQuery interface
@@ -47,17 +49,21 @@ public class SesameTupleQuery implements TupleQuery {
 			res = (TupleResultSet) stm.execute(queryString);
 			
 			List<String> signature = res.getSignature();
+			Set<String> bindingNames = new HashSet<String>(signature);
 			List<BindingSet> results = new LinkedList<BindingSet>();
 			while (res.nextRow()) {
 				MapBindingSet set = new MapBindingSet(signature.size() * 2);
 				for (String name : signature) {
-					Binding binding = createBinding(name, res);
+					Binding binding = createBinding(name, res, bindingNames);
 					if (binding != null) {
 						set.addBinding(binding);
 					}
 				}
 				results.add(set);
 			}
+			
+			// TODO this code is suboptimal, we are collecting ALL results from the resultset in memory!!! 
+			// TODO we must make an iterable interace over the resultset that allows to advance through the resultset
 			return new TupleQueryResultImpl(signature, results);
 
 		} catch (OBDAException e) {
@@ -80,8 +86,8 @@ public class SesameTupleQuery implements TupleQuery {
 		}
 	}
 
-	private Binding createBinding(String bindingName, TupleResultSet set) {
-		SesameBindingSet bset = new SesameBindingSet(set);
+	private Binding createBinding(String bindingName, TupleResultSet set, Set<String> bindingnames) {
+		SesameBindingSet bset = new SesameBindingSet(set, bindingnames);
 		return bset.getBinding(bindingName);
 	}
 

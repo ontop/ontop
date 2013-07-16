@@ -116,7 +116,7 @@ public class TargetQueryRenderer {
 	 * Prints the text representation of different terms.
 	 */
 	private static String getDisplayName(NewLiteral term, PrefixManager prefixManager) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
 			Predicate functionSymbol = function.getFunctionSymbol();

@@ -12,11 +12,13 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -25,6 +27,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 
 public class QuestDBStatement implements OBDAStatement {
 
@@ -238,6 +243,10 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getRewriting(String query) throws Exception {
-		return st.getRewriting(query);
-	}
+		Query jenaquery = QueryFactory.create(query);
+		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
+		
+		LinkedList<String> signatureContainer = new LinkedList<String>();
+		tr.getSignature(jenaquery, signatureContainer);
+		return st.getRewriting(jenaquery, signatureContainer);	}
 }

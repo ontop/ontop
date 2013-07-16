@@ -87,9 +87,9 @@ public class DatalogQueryServices {
 				int maxlen = 0;
 				for (Variable v : query.getReferencedVariables())
 					maxlen = Math.max(maxlen, v.getName().length());
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < maxlen; i++)
-					sb.append("t");
+					sb.append('t');
 				String suffix = sb.toString();
 				
 				for (CQIE rule : chosenDefinitions) {				

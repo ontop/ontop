@@ -211,7 +211,7 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public URIConstant getURIConstant(String uri);
 	
-	public URIConstant getURIConstant(IRI uri);
+//	public URIConstant getURIConstant(IRI uri);
 
 	public BNode getBNodeConstant(String name);
 

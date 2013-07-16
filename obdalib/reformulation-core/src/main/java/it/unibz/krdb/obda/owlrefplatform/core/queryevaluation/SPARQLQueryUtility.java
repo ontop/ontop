@@ -96,7 +96,7 @@ public class SPARQLQueryUtility {
 		String strlower = strquery.toLowerCase();
 		if (strlower.contains("describe"))
 		{
-			StringBuffer bf = new StringBuffer();
+			StringBuilder bf = new StringBuilder();
 			
 			int idx1 = strlower.indexOf("describe");
 			int idx2 = idx1 + 8;

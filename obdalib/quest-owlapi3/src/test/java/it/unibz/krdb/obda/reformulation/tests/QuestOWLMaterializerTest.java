@@ -53,7 +53,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	private String readSQLFile(String file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		String line = reader.readLine();
 		while (line != null) {
 			bf.append(line + "\n");

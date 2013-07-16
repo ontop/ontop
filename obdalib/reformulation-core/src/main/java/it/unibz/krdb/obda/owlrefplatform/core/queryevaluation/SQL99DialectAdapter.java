@@ -15,7 +15,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		if (strings.length == 1)
 			return strings[0];
 
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 
 		sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {

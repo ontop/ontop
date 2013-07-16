@@ -295,7 +295,7 @@ public class DBMetadata implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		for (String key : schema.keySet()) {
 			bf.append(key);
 			bf.append("=");

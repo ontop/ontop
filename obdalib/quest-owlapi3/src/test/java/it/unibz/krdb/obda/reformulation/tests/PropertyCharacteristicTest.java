@@ -56,7 +56,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private String readSQLFile(String file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		String line = reader.readLine();
 		while (line != null) {
 			bf.append(line + "\n");

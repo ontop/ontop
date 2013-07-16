@@ -37,7 +37,7 @@ public class InvalidMappingException extends Exception {
     
     @Override
     public String getMessage() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (!indicators.isEmpty()) {
             sb.append("\n");
             sb.append("The plugin cannot load the OBDA model: (REASON: Invalid mappings)\n");

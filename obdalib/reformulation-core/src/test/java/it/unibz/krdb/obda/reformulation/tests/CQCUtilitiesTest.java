@@ -37,7 +37,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 	NewLiteral x = tfac.getVariable("x");
 	NewLiteral y = tfac.getVariable("y");
-	NewLiteral c1 = tfac.getURIConstant(OBDADataFactoryImpl.getIRI("URI1"));
+	NewLiteral c1 = tfac.getURIConstant("URI1");
 	NewLiteral c2 = tfac.getValueConstant("m");
 
 	NewLiteral u1 = tfac.getNondistinguishedVariable();
@@ -92,7 +92,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		List<NewLiteral> head = groundedcq.getHead().getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
-		assertTrue(head.get(1).equals(tfac.getURIConstant(OBDADataFactoryImpl.getIRI("URI1"))));
+		assertTrue(head.get(1).equals(tfac.getURIConstant("URI1")));
 		assertTrue(head.get(2).equals(tfac.getValueConstant("m")));
 		assertTrue(head.get(3).equals(tfac.getValueConstant("CANy2")));
 		FunctionalTermImpl f1 = (FunctionalTermImpl) head.get(4);

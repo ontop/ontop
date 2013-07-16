@@ -66,7 +66,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +80,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.iri.IRI;
+import com.hp.hpl.jena.query.Query;
 
 public class Quest implements Serializable, RepositoryChangedListener {
 
@@ -89,8 +89,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private PoolProperties poolProperties = null;
 	private DataSource tomcatPool = null;
 	private boolean isSemanticIdx = false;
-	private LinkedHashSet<String> uriRefIds = new LinkedHashSet();
-	private LinkedHashMap<Integer, String> uriMap = new LinkedHashMap();
+	private Map<String, Integer> uriRefIds = null;
+	private Map<Integer, String> uriMap = null;;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
 	protected int maxPoolSize = 10;
@@ -211,6 +211,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	Map<String, String> querycache = new ConcurrentHashMap<String, String>();
 
 	Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
+	
+	Map<String, Query> jenaQueryCache = new ConcurrentHashMap<String, Query>();
 
 	Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
 
@@ -228,6 +230,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	protected Map<String, List<String>> getSignatureCache() {
 		return signaturecache;
+	}
+	
+	protected Map<String, Query> getJenaQueryCache() {
+		return jenaQueryCache;
 	}
 
 	protected Map<String, Boolean> getIsBooleanCache() {
@@ -466,7 +472,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
-				
+				isSemanticIdx = true;
 				if (inmemory) {
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
@@ -502,7 +508,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					throw new Exception(dbType
 							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
 				}
-				isSemanticIdx = true;
+				
 				// TODO one of these is redundant??? check
 				connect();
 				// setup connection pool
@@ -995,7 +1001,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * 'SELECT * [...]'.
 				 */
 				if (containSelectAll(sourceString)) {
-					StringBuffer sb = new StringBuffer();
+					StringBuilder sb = new StringBuilder();
 
 					/*
 					 * If the SQL string has sub-queries in its statement
@@ -1153,11 +1159,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				terms.add(currenthead.getTerm(0));
 				Function rdfTypeConstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
-						fac.getURIConstant(OBDADataFactoryImpl.getIRI(OBDAVocabulary.RDF_TYPE)));
+						fac.getURIConstant(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				IRI classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
+				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname.toString())));
 				newhead = fac.getAtom(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
@@ -1168,7 +1174,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 
 				IRI propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
+				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname.toString()));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getAtom(pred, terms);
@@ -1296,11 +1302,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return uriTemplateMatcher;
 	}
 
-	public void setUriRefIds(LinkedHashSet<String> uriIds){
+	public void setUriRefIds(Map<String, Integer> uriIds){
 		this.uriRefIds = uriIds;
 	}
 	
-	public LinkedHashSet<String> getUriRefIds() {
+	public Map<String, Integer> getUriRefIds() {
 		return uriRefIds;
 	}
 	
@@ -1308,7 +1314,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		this.uriMap = uriMap;
 	}
 	
-	public LinkedHashMap<Integer, String> getUriMap() {
+	public Map<Integer, String> getUriMap() {
 		return uriMap;
 	}
 		

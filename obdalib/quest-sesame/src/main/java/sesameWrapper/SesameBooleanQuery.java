@@ -2,6 +2,7 @@ package sesameWrapper;
 
 import java.sql.SQLException;
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
@@ -25,13 +26,13 @@ public class SesameBooleanQuery implements BooleanQuery {
 	
 	public SesameBooleanQuery(String queryString, String baseURI, QuestDBConnection conn) throws MalformedQueryException {
 		// check if valid query string
-		if (queryString.contains("ASK")) {
+//		if (queryString.contains("ASK")) {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
 			this.conn = conn;
 
-		} else
-			throw new MalformedQueryException("Boolean Query expected!");
+//		} else
+//			throw new MalformedQueryException("Boolean Query expected!");
 	}
 
 	public boolean evaluate() throws QueryEvaluationException {
@@ -42,9 +43,8 @@ public class SesameBooleanQuery implements BooleanQuery {
 			rs = (TupleResultSet) stm.execute(queryString);
 			boolean next = rs.nextRow();
 			if (next){
-				if (rs.getInt(1) == 1) {
 				return true;
-				}
+				
 			}
 			return false;
 		} catch (Exception e) {

@@ -1,16 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
-import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,29 +17,26 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Vector;
-
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
+import java.util.Map;
 
 public class QuestResultset implements TupleResultSet {
 
 	private boolean isSemIndex = false;
 	private ResultSet set = null;
-	private OBDAStatement st;
-	private Vector<String> signature;
+	QuestStatement st;
+	private List<String> signature;
+	DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-	private HashMap<String, Integer> columnMap = new HashMap<String, Integer>();
+	private HashMap<String, Integer> columnMap;
 
-	private HashMap<String, String> bnodeMap = new HashMap<String, String>();
+	private HashMap<String, String> bnodeMap;
 
-	private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
+	// private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private LinkedHashMap<Integer, String> uriMap = new LinkedHashMap<Integer, String>();
+	private Map<Integer, String> uriMap; 
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -55,87 +50,24 @@ public class QuestResultset implements TupleResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestResultset(ResultSet set, List<String> signature,
-			OBDAStatement st) throws OBDAException {
-		this(set, signature, st, null);
-
-	}
-
-//	// This ResultSet is used for semantic index case
-//	// It encodes URIs as Integers for faster query performance
-//	// Later in the results we need to replace URI references with actual URIs
-//	public QuestResultset(ResultSet set, List<String> signature,
-//			OBDAStatement st, LinkedHashSet<String> uriRef) throws OBDAException {
-//		this.set = set;
-//		this.st = st;
-//		this.uriRef = uriRef;
-//		if (uriRef != null)
-//			this.isSemIndex = true;
-//		else
-//			this.isSemIndex = false;
-//
-//		this.signature = new Vector<String>(signature);
-//		for (int j = 1; j <= signature.size(); j++) {
-//			columnMap.put(signature.get(j - 1), j - 1);
-//		}
-//
-//	}
-
-	public QuestResultset(ResultSet set, List<String> signature,
-			OBDAStatement st, LinkedHashMap<Integer, String> uriMap) throws OBDAException {
+	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
-		this.uriMap = uriMap;
-		if (uriRef != null)
-			this.isSemIndex = true;
-		else
-			this.isSemIndex = false;
+		this.isSemIndex = st.questInstance.isSemIdx();
+		this.uriMap = st.questInstance.getUriMap();
+		this.signature = signature;
+		
+		columnMap = new HashMap<String, Integer>(signature.size() * 2);
+		bnodeMap = new HashMap<String, String>(1000);
 
-		this.signature = new Vector<String>(signature);
 		for (int j = 1; j <= signature.size(); j++) {
-			columnMap.put(signature.get(j - 1), j - 1);
+			columnMap.put(signature.get(j - 1), j);
 		}
 
-	}
-	
-	public double getDouble(int column) throws OBDAException {
-		try {
-			return set.getDouble(signature.get(column - 1));
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
-		}
-	}
+		DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
+		symbol.setDecimalSeparator('.');
+		formatter.setDecimalFormatSymbols(symbol);
 
-	public int getInt(int column) throws OBDAException {
-		try {
-			return set.getInt(signature.get(column - 1));
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
-		}
-	}
-
-	public Object getObject(int column) throws OBDAException {
-		try {
-			return set.getObject(signature.get(column - 1));
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
-		}
-	}
-
-	public String getString(int column) throws OBDAException {
-		try {
-			return set.getString(signature.get(column - 1));
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
-		}
-	}
-
-	public URI getURI(int column) throws OBDAException {
-		return getURI(signature.get(column - 1));
-	}
-
-	public IRI getIRI(int column) throws OBDAException {
-		return getIRI(signature.get(column - 1));
 	}
 
 	public int getColumCount() throws OBDAException {
@@ -175,40 +107,42 @@ public class QuestResultset implements TupleResultSet {
 		return st;
 	}
 
+	/***
+	 * Returns the constant at column "column" recall that columns start at index 1.
+	 */
 	@Override
 	public Constant getConstant(int column) throws OBDAException {
-		return getConstant(signature.get(column - 1));
-	}
+		column = column * 3; // recall that the real SQL result set has 3
+								// columns per value. From each group of 3 the actual value is the
+								// 3rd column, the 2nd is the language, the 1st is the type code (an integer)
 
-	@Override
-	public ValueConstant getLiteral(int column) throws OBDAException {
-		return getLiteral(signature.get(column - 1));
-	}
-
-	@Override
-	public BNode getBNode(int column) throws OBDAException {
-		return getBNode(signature.get(column - 1));
-	}
-
-	@Override
-	public Constant getConstant(String name) throws OBDAException {
 		Constant result = null;
 		String realValue = "";
-		try {	
-			realValue = set.getString(name);
-			COL_TYPE type = getQuestType((byte) set.getInt(name + "QuestType"));
-			
+
+		try {
+			realValue = set.getString(column);
+			COL_TYPE type = getQuestType((byte) set.getInt(column - 2));
+
 			if (type == null || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
-					// URI value = getURI(name);
-					IRI irivalue = getIRI(name);
-					// result = fac.getURIConstant(value);
-					result = fac.getURIConstant(irivalue);
+					if (isSemIndex) {
+						try {
+							Integer id = Integer.parseInt(realValue);
+							realValue = this.uriMap.get(id);
+						} catch (NumberFormatException e) {
+							/*
+							 * If its not a number, then it has to be a URI, so
+							 * we leave realValue as is.
+							 */
+						}
+					}
+
+					result = fac.getURIConstant(realValue);
 
 				} else if (type == COL_TYPE.BNODE) {
-					String rawLabel = set.getString(name);
+					String rawLabel = set.getString(column);
 					String scopedLabel = this.bnodeMap.get(rawLabel);
 					if (scopedLabel == null) {
 						scopedLabel = "b" + bnodeCounter;
@@ -223,35 +157,30 @@ public class QuestResultset implements TupleResultSet {
 					 * properly.
 					 */
 					if (type == COL_TYPE.LITERAL) {
-						String value = set.getString(name);
-						String language = set.getString(name + "Lang");
+						String value = set.getString(column);
+						String language = set.getString(column - 1);
 						if (language == null || language.trim().equals("")) {
 							result = fac.getValueConstant(value);
 						} else {
 							result = fac.getValueConstant(value, language);
 						}
 					} else if (type == COL_TYPE.BOOLEAN) {
-						boolean value = set.getBoolean(name);
+						boolean value = set.getBoolean(column);
 						if (value) {
 							result = fac.getValueConstant("true", type);
 						} else {
 							result = fac.getValueConstant("false", type);
 						}
 					} else if (type == COL_TYPE.DOUBLE) {
-						double d = set.getDouble(name);
+						double d = set.getDouble(column);
 						// format name into correct double representation
-						DecimalFormat formatter = new DecimalFormat("0.0###E0");
-						DecimalFormatSymbols symbol = DecimalFormatSymbols
-								.getInstance();
-						symbol.setDecimalSeparator('.');
-						formatter.setDecimalFormatSymbols(symbol);
+
 						String s = formatter.format(d);
 						result = fac.getValueConstant(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						Timestamp value = set.getTimestamp(name);
-						result = fac.getValueConstant(
-								value.toString().replace(' ', 'T'), type);
+						Timestamp value = set.getTimestamp(column);
+						result = fac.getValueConstant(value.toString().replace(' ', 'T'), type);
 					} else {
 						result = fac.getValueConstant(realValue, type);
 					}
@@ -261,26 +190,42 @@ public class QuestResultset implements TupleResultSet {
 			Throwable cause = e.getCause();
 			if (cause instanceof URISyntaxException) {
 				OBDAException ex = new OBDAException(
-						"Error creating an object's URI. This is often due to mapping with URI templates that refer to " +
-						"columns in which illegal values may appear, e.g., white spaces and special characters.\n" +
-						"To avoid this error do not use these columns for URI templates in your mappings, or process " +
-						"them using SQL functions (e.g., string replacement) in the SQL queries of your mappings.\n\n" +
-						"Note that this last option can be bad for performance, future versions of Quest will allow to " +
-						"string manipulation functions in URI templates to avoid these performance problems.\n\n" +
-						"Detailed message: " + cause.getMessage());
+						"Error creating an object's URI. This is often due to mapping with URI templates that refer to "
+								+ "columns in which illegal values may appear, e.g., white spaces and special characters.\n"
+								+ "To avoid this error do not use these columns for URI templates in your mappings, or process "
+								+ "them using SQL functions (e.g., string replacement) in the SQL queries of your mappings.\n\n"
+								+ "Note that this last option can be bad for performance, future versions of Quest will allow to "
+								+ "string manipulation functions in URI templates to avoid these performance problems.\n\n"
+								+ "Detailed message: " + cause.getMessage());
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
 			} else {
-				OBDAException ex = new OBDAException(
-						"Quest couldn't parse the data value to Java object: " + realValue + "\n" +
-						"Please review the mapping rules to have the datatype assigned properly.");
+				OBDAException ex = new OBDAException("Quest couldn't parse the data value to Java object: " + realValue + "\n"
+						+ "Please review the mapping rules to have the datatype assigned properly.");
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
 			}
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}
+
 		return result;
+	}
+
+	// @Override
+	// public ValueConstant getLiteral(int column) throws OBDAException {
+	// return getLiteral(signature.get(column - 1));
+	// }
+	//
+	// @Override
+	// public BNode getBNode(int column) throws OBDAException {
+	// return getBNode(signature.get(column - 1));
+	// }
+
+	@Override
+	public Constant getConstant(String name) throws OBDAException {
+		Integer columnIndex = columnMap.get(name);
+		return getConstant(columnIndex);
 	}
 
 	private COL_TYPE getQuestType(byte sqltype) {
@@ -309,59 +254,56 @@ public class QuestResultset implements TupleResultSet {
 		}
 	}
 
-	@Override
-	public URI getURI(String name) throws OBDAException {
-		String result = "";
-		try {
-			result = set.getString(name);
-
-			return URI.create(result);// .replace(' ', '_'));
-
-		} catch (SQLException e) {
-			throw new OBDAException(e);
-		}
-	}
-
-	@Override
-	public IRI getIRI(String name) throws OBDAException {
-		String result = "";
-		int id = 0;
-		try {
-			result = set.getString(name);
-			if (isSemIndex) {
-				try {
-					id = Integer.parseInt(result);
-				} catch (NumberFormatException e) {
-					// its not a number - its a URI
-					IRIFactory irif = new IRIFactory();
-					IRI iri = irif.create(result);
-					return iri;
-				}
-
-				if (id == 0) result = "0";
-				else result = (String) uriMap.get(new Integer(id));
-			}
-			IRIFactory irif = new IRIFactory();
-			IRI iri = irif.create(result);
-			return iri;
-		} catch (SQLException e) {
-			throw new OBDAException(e);
-		}
-	}
-
-	@Override
-	public ValueConstant getLiteral(String name) throws OBDAException {
-		Constant result;
-
-		result = getConstant(name);
-
-		return (ValueConstant) result;
-	}
-
-	@Override
-	public BNode getBNode(String name) throws OBDAException {
-		Constant result;
-		result = getConstant(name);
-		return (BNode) result;
-	}
+	// @Override
+	// public URI getURI(String name) throws OBDAException {
+	// String result = "";
+	// try {
+	// result = set.getString(name);
+	//
+	// return URI.create(result);// .replace(' ', '_'));
+	//
+	// } catch (SQLException e) {
+	// throw new OBDAException(e);
+	// }
+	// }
+	//
+	// @Override
+	// public IRI getIRI(String name) throws OBDAException {
+	// int id = -1;
+	// try {
+	// String result = set.getString(name);
+	// if (isSemIndex) {
+	// try {
+	// id = Integer.parseInt(result);
+	// } catch (NumberFormatException e) {
+	// // its not a number - its a URI
+	// IRI iri = irif.create(result);
+	// return iri;
+	// }
+	//
+	// result = uriMap.get(id);
+	// }
+	//
+	// IRI iri = irif.create(result);
+	// return iri;
+	// } catch (Exception e) {
+	// throw new OBDAException(e);
+	// }
+	// }
+	//
+	// @Override
+	// public ValueConstant getLiteral(String name) throws OBDAException {
+	// Constant result;
+	//
+	// result = getConstant(name);
+	//
+	// return (ValueConstant) result;
+	// }
+	//
+	// @Override
+	// public BNode getBNode(String name) throws OBDAException {
+	// Constant result;
+	// result = getConstant(name);
+	// return (BNode) result;
+	// }
 }

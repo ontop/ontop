@@ -928,7 +928,7 @@ public class ExpressionEvaluator {
 
 	private Function getUriFunctionWithParameters(Function uriFunction) {
 		ValueConstant uriString = (ValueConstant) uriFunction.getTerm(0);
-		return uriTemplateMatcher.generateURIFunction(OBDADataFactoryImpl.getIRI(uriString.getValue()));
+		return uriTemplateMatcher.generateURIFunction(uriString.getValue());
 	}
 	
 	public Function createEqNeqFilter(Variable var, NewLiteral value, boolean isEqual) {

@@ -43,7 +43,7 @@ public class TableDefinition extends DataDefinition {
 	
 	@Override
 	public String toString() {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		bf.append(name);
 		bf.append("[");
 		boolean comma = false;

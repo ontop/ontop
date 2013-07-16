@@ -47,11 +47,11 @@ import org.semanticweb.owlapi.model.SWRLRule;
 
 public class OWLAxiomToTurtleVisitor implements OWLAxiomVisitor {
 
-	private StringBuffer parentBuffer = new StringBuffer();
+	private StringBuilder parentBuffer = new StringBuilder();
 
-	private StringBuffer classAssertionBuffer = new StringBuffer();
-	private StringBuffer objectPropertyAssertionBuffer = new StringBuffer();
-	private StringBuffer dataPropertyAssertionBuffer = new StringBuffer();
+	private StringBuilder classAssertionBuffer = new StringBuilder();
+	private StringBuilder objectPropertyAssertionBuffer = new StringBuilder();
+	private StringBuilder dataPropertyAssertionBuffer = new StringBuilder();
 
 	private PrefixManager prefixManager;
 

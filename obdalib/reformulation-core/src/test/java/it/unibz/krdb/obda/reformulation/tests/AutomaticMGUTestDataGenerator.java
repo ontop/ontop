@@ -150,7 +150,7 @@ public class AutomaticMGUTestDataGenerator {
 		} else if (termstr.charAt(0) == '"') {
 			return termFac.getValueConstant(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return termFac.getURIConstant(OBDADataFactoryImpl.getIRI(termstr.substring(1, termstr.length() - 1)));
+			return termFac.getURIConstant(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.equals("#")) {
 			return termFac.getNondistinguishedVariable();
 		} else {

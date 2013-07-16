@@ -12,7 +12,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		if (strings.length == 1)
 			return strings[0];
 		
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 
 		sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
@@ -53,7 +53,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	public String sqlLimit(String originalString, long limit) {
 		final String limitStmt = String.format("TOP %d ", limit);
-		StringBuffer sb = new StringBuffer(originalString);
+		StringBuilder sb = new StringBuilder(originalString);
 		int insertPosition = originalString.indexOf(" ") + 1;
 		sb.insert(insertPosition, limitStmt);
 		return sb.toString();

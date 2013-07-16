@@ -45,9 +45,9 @@ public class LUBM50Tests {
 //	String url = "jdbc:mysql://obdalin3.inf.unibz.it/lubmex20100?sessionVariables=sql_mode='ANSI'&useCursorFetch=true";
 //	String username = "fish";
 //	String password = "fish";
-	String url = "jdbc:mysql://localhost/lubmex20200?sessionVariables=sql_mode='ANSI'&useCursorFetch=true";
-	String username = "root";
-	String password = "";
+	String url = "jdbc:mysql://obdalin3.inf.unibz.it/lubmex20200?sessionVariables=sql_mode='ANSI'&useCursorFetch=true";
+	String username = "fish";
+	String password = "fish";
 
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
@@ -63,9 +63,9 @@ public class LUBM50Tests {
 			LUBM50Tests t = new LUBM50Tests();
 
 //			 t.test1Setup();
-			t.test2RestoringAndLoading();
+//			t.test2RestoringAndLoading();
 //			t.test4mergeFiles();
-//			 t.test3InitializingQuest();
+			 t.test3InitializingQuest();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -116,7 +116,7 @@ public class LUBM50Tests {
 
 			int insert = 0;
 			
-			for (int i = 0; i < 200; i++) {
+			for (int i = 0; i < 1; i++) {
 				log.info("Started University {}", i);
 				final int index = i;
 
@@ -181,10 +181,10 @@ public class LUBM50Tests {
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
-		qman.load("../quest-owlapi3/src/test/resources/test/treewitness/LUBM-ex-20.q");
+		qman.load("../quest-owlapi3/src/test/resources/test/treewitness/LUBM-ex-20-q3.q");
 
-		BufferedWriter out1 = new BufferedWriter(new FileWriter("/Users/mariano/Desktop/logLUBM200.txt"));
-		BufferedWriter out2 = new BufferedWriter(new FileWriter("/Users/mariano/Desktop/queriesLUBM200.txt"));
+		BufferedWriter out1 = new BufferedWriter(new FileWriter("/Users/mariano/Desktop/logLUBM200-queries2.txt"));
+		BufferedWriter out2 = new BufferedWriter(new FileWriter("/Users/mariano/Desktop/queriesLUBM200-queries2.txt"));
 		
 		for (QueryControllerEntity e : qc.getElements()) {
 			if (!(e instanceof QueryControllerQuery)) {
@@ -197,16 +197,16 @@ public class LUBM50Tests {
 			String querystr = "";
 			
 			QueryControllerQuery query = (QueryControllerQuery) e;
-			
-			if (query.getID().equals("Q1"))
-				continue;
+
 				
 			log.debug("Executing query: {}", query.getID());
 			log.debug("Query: \n{}", query.getQuery());
-
+			int count = 0;
+			long time = 0;
+			long fetchtime = 0;
 //			for (int j = 0; j < 1; j++) {
 				long start = System.nanoTime();
-				QuestOWLResultSet res;
+/*				QuestOWLResultSet res;
 				try {
 					res = (QuestOWLResultSet) st.executeTuple(query.getQuery());
 				} catch (Exception e1) {
@@ -217,23 +217,22 @@ public class LUBM50Tests {
 				long end = System.nanoTime();
 				long time = (end - start);
 				
-//				if (j != 0)
-//					totaltime += (end - start);
+
 				
 				
-				int count = 0;
+				
 				start = System.nanoTime();
 				while (res.nextRow()) {
 					count += 1;
 				}
 				end = System.nanoTime();
-				long fetchtime = end-start;
+				long fetchtime = end-start; */
 				out2.write("Query: " + query.getID() + "\n");
 				out2.write(st.getUnfolding(query.getQuery())+ "\n\n+++++++++++++++++++++++++++\n\n");
 				
-				log.debug("Total result: {}", count);
+				/*log.debug("Total result: {}", count);
 				log.debug("Elapsed time: {} ms", time);
-				res.close();
+				res.close();*/
 				
 //			}
 			out1.write("QUERY: " + query.getID() + "\n");

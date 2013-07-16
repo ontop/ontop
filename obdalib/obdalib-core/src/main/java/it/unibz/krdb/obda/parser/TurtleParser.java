@@ -1043,7 +1043,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = dfac.getURIConstant(resource8); 
+                     value = dfac.getURIConstant(resource8.toString()); 
 
                     }
                     break;
@@ -1294,7 +1294,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = dfac.getURIConstant(resource13); 
+                     value = dfac.getURIConstant(resource13.toString()); 
 
                     }
                     break;

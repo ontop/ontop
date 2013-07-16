@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.owlapi3.OWLConnection;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
 import java.io.BufferedReader;
@@ -25,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +49,9 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 
 public class QuestOWLStatement implements OWLStatement {
 
@@ -402,7 +407,12 @@ public class QuestOWLStatement implements OWLStatement {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			return st.getRewriting(query);
+			Query jenaquery = QueryFactory.create(query);
+			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
+			
+			LinkedList<String> signatureContainer = new LinkedList<String>();
+			tr.getSignature(jenaquery, signatureContainer);
+			return st.getRewriting(jenaquery, signatureContainer);
 		} catch (Exception e) {
 			OWLException owlException = new OWLException(e) {
 			};

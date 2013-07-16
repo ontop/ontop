@@ -59,7 +59,7 @@ public class QuestOWLCMD {
 			/*
 			 * Reading query file:
 			 */
-			StringBuffer query = new StringBuffer();
+			StringBuilder query = new StringBuilder();
 			BufferedReader reader = new BufferedReader(new FileReader(queryfie));
 			String line = null;
 			while ((line = reader.readLine()) != null) {

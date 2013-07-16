@@ -11,7 +11,7 @@ public class TestURIIdentifier extends TestCase {
 		LinkedList<String> sql = new LinkedList<String>();
 		LinkedList<String> cqs = new LinkedList<String>();
 
-		StringBuffer query = new StringBuffer("SELECT * FROM table, etable( est lasldflasd ) table2 WHERE table2.x NOT IN ETABLE   ( some sparql query) asdf;");
+		StringBuilder query = new StringBuilder("SELECT * FROM table, etable( est lasldflasd ) table2 WHERE table2.x NOT IN ETABLE   ( some sparql query) asdf;");
 		while (true) {
 			String[] splitquery = query.toString().split("[eE][tT][aA][bB][lL][eE]\\s*\\(.+?\\)", 2);
 			if (splitquery.length > 1) {
@@ -22,7 +22,7 @@ public class TestURIIdentifier extends TestCase {
 				String regex = query.toString().substring(0,position); 
 				
 				cqs.add(regex.substring(regex.indexOf("(")+1, regex.length()-1));
-				query = new StringBuffer(splitquery[1]);
+				query = new StringBuilder(splitquery[1]);
 				
 			} else {
 				sql.add(splitquery[0]);

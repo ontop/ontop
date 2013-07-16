@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
@@ -8,17 +7,16 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -113,6 +111,7 @@ import com.hp.hpl.jena.sparql.syntax.Template;
  */
 public class SparqlAlgebraToDatalogTranslator {
 
+	
 	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	private IRIFactory irifac = OBDADataFactoryImpl.getIRIFactory();
 
@@ -120,7 +119,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private UriTemplateMatcher uriTemplateMatcher;
 
-	private LinkedHashSet<String> uriRef = null;
+	private Map<String, Integer> uriRef = null;
 	private boolean isSI = false;
 	
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
@@ -134,18 +133,18 @@ public class SparqlAlgebraToDatalogTranslator {
 	protected static org.slf4j.Logger log = LoggerFactory
 			.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
-	/**
-	 * Translate a given SPARQL query string to datalog program.
-	 * 
-	 * @param query
-	 *            The SPARQL query string.
-	 * @return Datalog program that represents the construction of the SPARQL
-	 *         query.
-	 */
-	public DatalogProgram translate(String query) {
-		Query arqQuery = QueryFactory.create(query);
-		return translate(arqQuery);
-	}
+//	/**
+//	 * Translate a given SPARQL query string to datalog program.
+//	 * 
+//	 * @param query
+//	 *            The SPARQL query string.
+//	 * @return Datalog program that represents the construction of the SPARQL
+//	 *         query.
+//	 */
+//	public DatalogProgram translate(String query, List<String> signature) {
+//		Query arqQuery = QueryFactory.create(query);
+//		return translate(arqQuery, signature);
+//	}
 
 	/**
 	 * Translate a given SPARQL query object to datalog program.
@@ -155,7 +154,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	public DatalogProgram translate(Query arqQuery) {
+	public DatalogProgram translate(Query arqQuery, List<String> signature) {
 
 		Op op = Algebra.compile(arqQuery);
 
@@ -165,7 +164,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		// Render the variable names in the signature into Variable object
 		List<Variable> vars = new LinkedList<Variable>();
-		for (String vs : getSignature(arqQuery)) {
+		for (String vs : signature) {
 			vars.add(ofac.getVariable(vs));
 		}
 
@@ -723,9 +722,9 @@ public class SparqlAlgebraToDatalogTranslator {
 				
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
-				subjectUri = irifac.construct(subject.getURI());
+				
 
-				Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
+				Function functionURI = uriTemplateMatcher.generateURIFunction(subject.getURI());
 				functionURI.getTerms();
 				terms.add(functionURI);
 				}
@@ -746,7 +745,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 
 				Function rdfTypeConstant = ofac.getFunctionalTerm(ofac
-						.getUriTemplatePredicate(1), ofac.getURIConstant(irifac.construct(OBDAVocabulary.RDF_TYPE)));
+						.getUriTemplatePredicate(1), ofac.getURIConstant(OBDAVocabulary.RDF_TYPE));
 						//ofac.getURIConstant(URI.create(OBDAVocabulary.RDF_TYPE)));
 				terms.add(rdfTypeConstant);
 				terms.add(ofac.getVariable(((Var) o).getVarName()));
@@ -812,18 +811,56 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (s instanceof Node_URI) {
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
-				String subject_URI = subject.getURI().replaceAll("%20", " ")
-				.replaceAll("%21", "!").replaceAll("%40", "@")
-				.replaceAll("%23", "#").replaceAll("%24", "$")
-				.replaceAll("%26", "&").replaceAll("%42", "*")
-				.replaceAll("%28", "(").replaceAll("%29", ")")
-				.replaceAll("%5B", "[").replaceAll("%5C", "]")
-				.replaceAll("%2C", ",").replaceAll("%3B", ";")
-				.replaceAll("%3A", ":").replaceAll("%3F", "?")
-				.replaceAll("%3D", "=").replaceAll("%2B", "+")
-				.replaceAll("%22", "'").replaceAll("%2F", "/")
-				;
-				subjectUri = irifac.construct(subject_URI);
+				
+				String subject_URI = subject.getURI();
+				int length = subject_URI.length();
+				StringBuilder strBuilder = new StringBuilder(length+20);
+				for (int ci = 0; ci < length; ci++) {
+					char c = subject_URI.charAt(ci);
+
+					if (c == ' ') {
+						strBuilder.append("%20");
+					} else if (c == '!') {
+						strBuilder.append("%21");
+					} else if (c == '@') {
+						strBuilder.append("%40");
+					} else if (c == '#') {
+						strBuilder.append("%23");
+					} else if (c == '$') {
+						strBuilder.append("%24");
+					} else if (c == '&') {
+						strBuilder.append("%26");
+					} else if (c == '*') {
+						strBuilder.append("%42");
+					} else if (c == '(') {
+						strBuilder.append("%28");
+					} else if (c == ')') {
+						strBuilder.append("%29");
+					} else if (c == '[') {
+						strBuilder.append("%5B");
+					} else if (c == ']') {
+						strBuilder.append("%5C");
+					} else if (c == ',') {
+						strBuilder.append("%2C");
+					} else if (c == ';') {
+						strBuilder.append("%3B");
+					} else if (c == ':') {
+						strBuilder.append("%3A");
+					} else if (c == '?') {
+						strBuilder.append("%3F");
+					} else if (c == '=') {
+						strBuilder.append("%3D");
+					} else if (c == '+') {
+						strBuilder.append("%2B");
+					} else if (c == '\'') {
+						strBuilder.append("%22");
+					} else if (c == '/') {
+						strBuilder.append("%2F");
+					} else
+						strBuilder.append(c);
+				}
+				subject_URI = strBuilder.toString();
+				
 
 				if (isSI) {
 					int id = indexOfRef(s);
@@ -832,7 +869,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					return;
 					terms.add(functionURI);
 				} else {
-					Function functionURI = uriTemplateMatcher.generateURIFunction(subjectUri);
+					Function functionURI = uriTemplateMatcher.generateURIFunction(subject_URI);
 					if (functionURI == null)
 					return;
 					terms.add(functionURI);
@@ -897,21 +934,58 @@ public class SparqlAlgebraToDatalogTranslator {
 				
 				Node_URI object = (Node_URI) o;
 				objectType = COL_TYPE.OBJECT;
+				
+				String object_URI = object.getURI();
+				int length = object_URI.length();
+				StringBuilder strBuilder = new StringBuilder(length+20);
+				for (int ci = 0; ci < length; ci++) {
+					char c = object_URI.charAt(ci);
 
-				String object_URI = object.getURI().replaceAll("%20", " ")
-						.replaceAll("%21", "!").replaceAll("%40", "@")
-						.replaceAll("%23", "#").replaceAll("%24", "$")
-						.replaceAll("%26", "&").replaceAll("%42", "*")
-						.replaceAll("%28", "(").replaceAll("%29", ")")
-						.replaceAll("%5B", "[").replaceAll("%5C", "]")
-						.replaceAll("%2C", ",").replaceAll("%3B", ";")
-						.replaceAll("%3A", ":").replaceAll("%3F", "?")
-						.replaceAll("%3D", "=").replaceAll("%2B", "+")
-						.replaceAll("%22", "'").replaceAll("%2F", "/");
-				objectUri = irifac.construct(object_URI);
+					if (c == ' ') {
+						strBuilder.append("%20");
+					} else if (c == '!') {
+						strBuilder.append("%21");
+					} else if (c == '@') {
+						strBuilder.append("%40");
+					} else if (c == '#') {
+						strBuilder.append("%23");
+					} else if (c == '$') {
+						strBuilder.append("%24");
+					} else if (c == '&') {
+						strBuilder.append("%26");
+					} else if (c == '*') {
+						strBuilder.append("%42");
+					} else if (c == '(') {
+						strBuilder.append("%28");
+					} else if (c == ')') {
+						strBuilder.append("%29");
+					} else if (c == '[') {
+						strBuilder.append("%5B");
+					} else if (c == ']') {
+						strBuilder.append("%5C");
+					} else if (c == ',') {
+						strBuilder.append("%2C");
+					} else if (c == ';') {
+						strBuilder.append("%3B");
+					} else if (c == ':') {
+						strBuilder.append("%3A");
+					} else if (c == '?') {
+						strBuilder.append("%3F");
+					} else if (c == '=') {
+						strBuilder.append("%3D");
+					} else if (c == '+') {
+						strBuilder.append("%2B");
+					} else if (c == '\'') {
+						strBuilder.append("%22");
+					} else if (c == '/') {
+						strBuilder.append("%2F");
+					} else
+						strBuilder.append(c);
+				}
+				object_URI = strBuilder.toString();
+				
 
-
-				Function functionURI = uriTemplateMatcher.generateURIFunction(objectUri);
+				Function functionURI = uriTemplateMatcher.generateURIFunction(object_URI);
 				if (functionURI == null)
 					{
 						throw new RuntimeException(object_URI + " cannot be translated into object!");
@@ -958,15 +1032,14 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	private int indexOfRef(Node s) {
+		
 		String uri = s.toString();
-		int i = 0;
-		for(String el : uriRef) {
-		    i++;  
-			if (el.equals(uri)) {
-		          return i;
-		      }
-		 }
-		return 0;
+		Integer index =  this.uriRef.get(uri);
+		if (index != null)
+			return index;
+		
+		return -2;
+		
 	}
 
 	// private class VariableComparator implements Comparator<Variable> {
@@ -1366,10 +1439,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		return builtInFunction;
 	}
 
-	public List<String> getSignature(Query query) {
-		List<String> vars = new ArrayList<String>();
+	public void getSignature(Query query, List<String> signatureContainer) {
+		signatureContainer.clear();
 		if (query.isSelectType() || query.isDescribeType()) {
-			vars = query.getResultVars();
+			signatureContainer.addAll(query.getResultVars());
 
 		} else if (query.isConstructType()) {
 			Template constructTemplate = query.getConstructTemplate();
@@ -1380,29 +1453,27 @@ public class SparqlAlgebraToDatalogTranslator {
 				Node subject = triple.getSubject(); // subject
 				if (subject instanceof Var) {
 					String vs = ((Var) subject).getName();
-					vars.add(vs);
+					signatureContainer.add(vs);
 				}
 				Node predicate = triple.getPredicate(); // predicate
 				if (predicate instanceof Var) {
 					String vs = ((Var) predicate).getName();
-					vars.add(vs);
+					signatureContainer.add(vs);
 				}
 				Node object = triple.getObject(); // object
 				if (object instanceof Var) {
 					String vs = ((Var) object).getName();
-					vars.add(vs);
+					signatureContainer.add(vs);
 				}
 			}
 		}
-		return vars;
 	}
 
-	public boolean isBoolean(String query) {
-		Query q = QueryFactory.create(query);
+	public boolean isBoolean(Query q) {
 		return q.isAskType();
 	}
 
-	public void setUriRef(LinkedHashSet<String> uriR) {
+	public void setUriRef(Map<String,Integer> uriR) {
 		this.uriRef = uriR;
 	}
 	

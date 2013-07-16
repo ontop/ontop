@@ -209,7 +209,7 @@ public class MappingAnalyzer {
 			}
 		}
 		if (errorMessage.size() > 0) {
-			StringBuffer errors = new StringBuffer();
+			StringBuilder errors = new StringBuilder();
 			for (String error: errorMessage) {
 				errors.append(error + "\n");
 			}
@@ -221,7 +221,7 @@ public class MappingAnalyzer {
 	}
 	
 	private void throwInvalidFilterExpressionException(Stack<Function> filterFunctionStack) {
-		StringBuffer filterExpression = new StringBuffer();
+		StringBuilder filterExpression = new StringBuilder();
 		while (!filterFunctionStack.isEmpty()) {
 			filterExpression.append(filterFunctionStack.pop());
 		}

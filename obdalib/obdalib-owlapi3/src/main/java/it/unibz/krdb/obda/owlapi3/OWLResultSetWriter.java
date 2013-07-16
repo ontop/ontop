@@ -10,7 +10,7 @@ public class OWLResultSetWriter {
 
 		// Print the CSV content
 		for (String[] rows : tabularData) {
-			StringBuffer line = new StringBuffer();
+			StringBuilder line = new StringBuilder();
 			boolean needComma = false;
 			for (int i = 0; i < rows.length; i++) {
 				if (needComma) {

@@ -14,13 +14,13 @@ public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 	
 	@Override
 	protected Repository createRepository() throws Exception {
-		try {
+//		try {
 			SesameVirtualRepo repo = new SesameVirtualRepo(getName(), owlFileURL, obdaFileURL, parameterFileURL);
 			repo.initialize();
 			return repo;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return null;
+//		}
 	}
 }

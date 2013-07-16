@@ -880,7 +880,7 @@ public class OWLAPI3Translator {
 			}
 
 			Predicate classproperty = dfac.getClassPredicate(ifac.construct(namedclass.getIRI().toString()));
-			URIConstant c = dfac.getURIConstant(ifac.construct(indv.asOWLNamedIndividual().getIRI().toString()));
+			URIConstant c = dfac.getURIConstant(indv.asOWLNamedIndividual().getIRI().toString());
 
 			Description equivalent = null;
 			if (equivalenceMap != null)
@@ -927,8 +927,8 @@ public class OWLAPI3Translator {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
 			Predicate p = dfac.getObjectPropertyPredicate(property);
-			URIConstant c1 = dfac.getURIConstant(ifac.construct(subject.asOWLNamedIndividual().getIRI().toString()));
-			URIConstant c2 = dfac.getURIConstant(ifac.construct(object.asOWLNamedIndividual().getIRI().toString()));
+			URIConstant c1 = dfac.getURIConstant(subject.asOWLNamedIndividual().getIRI().toString());
+			URIConstant c2 = dfac.getURIConstant(object.asOWLNamedIndividual().getIRI().toString());
 
 			Description equivalent = null;
 			if (equivalenceMap != null)
@@ -970,7 +970,7 @@ public class OWLAPI3Translator {
 			}
 
 			Predicate p = dfac.getDataPropertyPredicate(property);
-			URIConstant c1 = dfac.getURIConstant(ifac.construct(subject.asOWLNamedIndividual().getIRI().toString()));
+			URIConstant c1 = dfac.getURIConstant(subject.asOWLNamedIndividual().getIRI().toString());
 			ValueConstant c2 = dfac.getValueConstant(object.getLiteral(), type);
 
 			Description equivalent = null;

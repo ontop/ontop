@@ -84,7 +84,7 @@ class TurtleWriter {
 	 * @return The Turtle short representation.
 	 */
 	String print() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (String subject : subjectToPredicates.keySet()) {
 			sb.append(subject);
 			sb.append(" ");

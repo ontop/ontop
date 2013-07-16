@@ -73,7 +73,7 @@ public abstract class AbstractSubDescriptionAxiom implements SubDescriptionAxiom
 		if (string != null) {
 			return string;
 		}
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		bf.append(included.toString());
 		bf.append(" ISA ");
 		bf.append(including.toString());

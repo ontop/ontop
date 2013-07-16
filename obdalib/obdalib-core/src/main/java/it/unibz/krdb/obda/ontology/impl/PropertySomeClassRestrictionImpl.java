@@ -47,7 +47,7 @@ public class PropertySomeClassRestrictionImpl implements PropertySomeClassRestri
 	}
 
 	public String toString() {
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		bf.append("E");
 		bf.append(predicate.toString());
 		if (isInverse) {

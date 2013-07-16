@@ -65,20 +65,14 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 	}
 	
-	public  OBDAModel getObdaModel(URI obdaURI)
+	public  OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException
 	{
 		OBDAModel obdaModel = fac.getOBDAModel();
 	//	System.out.println(obdaURI.toString());
 		if (obdaURI.toString().endsWith(".obda"))
 		{
 				ModelIOManager modelIO = new ModelIOManager(obdaModel);
-				try {
 					modelIO.load(new File(obdaURI));
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (InvalidMappingException e) {
-					e.printStackTrace();
-				}
 		}
 		else if (obdaURI.toString().endsWith(".ttl"))
 		{
@@ -96,10 +90,11 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		
 		OBDAModel obdaModel = null;
 		if (obdaUri == null) {
-			obdaModel = getOBDAModelDM();
-		} else {
-			obdaModel = getObdaModel(obdaUri);
+			throw new RuntimeException("Cannot create a Virtual Triple store without mappings. The mappings where NULL");
 		}
+		
+		obdaModel = getObdaModel(obdaUri);
+		
 		
 		if (config == null) {
 			config = new QuestPreferences();

@@ -19,26 +19,25 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	private static final long serialVersionUID = -1263974895010238519L;
 
-	private final IRI iri;
+//	private final IRI iri;
 
 	private final int identifier;
 
 	private final String iristr;
 
-	/**
-	 * The default constructor.
-	 * 
-	 * @param iri
-	 *            URI from a term.
-	 */
-	protected URIConstantImpl(IRI iri) {
-		this.iri = iri;
-		this.iristr = iri.toString();
-		this.identifier = iri.hashCode();
-	}
+//	/**
+//	 * The default constructor.
+//	 * 
+//	 * @param iri
+//	 *            URI from a term.
+//	 */
+//	protected URIConstantImpl(IRI iri) {
+//		this.iri = iri;
+//		this.iristr = iri.toString();
+//		this.identifier = iri.hashCode();
+//	}
 
 	protected URIConstantImpl(String iri) {
-		this.iri = OBDADataFactoryImpl.getIRI(iri);
 		this.iristr = iri;
 		this.identifier = iri.hashCode();
 	}
@@ -59,7 +58,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public IRI getURI() {
-		return iri;
+		return OBDADataFactoryImpl.getIRI(this.iristr);
 	}
 
 	@Override

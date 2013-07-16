@@ -145,7 +145,7 @@ public class MappingVocabularyRepair {
 		// template function(parm1,parm2,...)
 		Predicate uriFunction = dfac.getUriTemplatePredicate(term.getArity() + 1);
 
-		StringBuffer newTemplate = new StringBuffer();
+		StringBuilder newTemplate = new StringBuilder();
 		newTemplate.append(predicate.getName().toString());
 		for (int i = 0; i < term.getArity(); i++) {
 			newTemplate.append("-{}");

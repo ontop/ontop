@@ -18,7 +18,7 @@ public class DatalogProgramRenderer {
 	public static String encode(DatalogProgram input) {
 		List<CQIE> list = input.getRules();
 		Iterator<CQIE> it =list.iterator();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		while(it.hasNext()){
 			CQIE q = it.next();
 			if(sb.length()>0){
