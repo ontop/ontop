@@ -176,7 +176,7 @@ private NewLiteral construct(String text) {
          toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
       }
    } else {
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for(FormatString token : tokens) {
          if (token instanceof FixedString) { // if part of URI template
             sb.append(token.toString());
