@@ -8,21 +8,6 @@ quest:		http://obda.org/quest#
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 iLogOntology:	http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#
 
-[ClassDeclaration] @collection [[
-owl:Thing, :TrainPassage, :TrainEvent, :RequestForWork, :ITU, :ScheduledStop, :Customer, :ITUEvent, :Passing, :Terminal
-:TrainDeparture, :Loading, :TrainArrival, :Route, :Train, :TransportOrder, :Event, :Unloading
-]]
-
-[ObjectPropertyDeclaration] @collection [[
-:containsITU, :happensToITU, :takesPlaceAt, :happensToTrain, :requests, :isAssignedToRoute, :hasITUArrival, :operatesNearby, :hasOrigin, :satisfies
-:relatesToITU, :hasDestination, :passesThrough, :hasScheduledStopTerminal, :hasITUDeparture, :happensOnTrain
-]]
-
-[DataPropertyDeclaration] @collection [[
-:hasCustomerName, :hasRequestDate, :hasEventTime, :hasScheduledTime, :hasTrainSerialNumber, :hasTrainNumber, :hasRouteName, :hasITUID, :hasTerminalName, :hasBeenLate
-:hasCapacity
-]]
-
 [SourceDeclaration]
 sourceUri	iLogDB
 connectionUrl	
