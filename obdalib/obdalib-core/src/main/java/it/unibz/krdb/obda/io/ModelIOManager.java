@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.exception.UnsupportedTagException;
 import it.unibz.krdb.obda.gui.swing.exception.Indicator;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
@@ -46,6 +47,9 @@ public class ModelIOManager {
     }
 
     private static final String PREFIX_DECLARATION_TAG = "[PrefixDeclaration]";
+    private static final String CLASS_DECLARATION_TAG = "[ClassDeclaration]";
+    private static final String OBJECT_PROPERTY_DECLARATION_TAG = "[ObjectPropertyDeclaration]";
+    private static final String DATA_PROPERTY_DECLARATION_TAG = "[DataPropertyDeclaration]";
     private static final String SOURCE_DECLARATION_TAG = "[SourceDeclaration]";
     private static final String MAPPING_DECLARATION_TAG = "[MappingDeclaration]";
 
@@ -166,6 +170,15 @@ public class ModelIOManager {
 	            }
 	            if (line.contains(PREFIX_DECLARATION_TAG)) {
 	                readPrefixDeclaration(reader);
+	            } else if (line.contains(CLASS_DECLARATION_TAG)) {
+	            	// deprecated tag
+	            	throw new UnsupportedTagException(CLASS_DECLARATION_TAG);
+	            } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
+	            	// deprecated tag
+	            	throw new UnsupportedTagException(OBJECT_PROPERTY_DECLARATION_TAG);
+	            } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
+	            	// deprecated tag
+	            	throw new UnsupportedTagException(DATA_PROPERTY_DECLARATION_TAG);
 	            } else if (line.contains(SOURCE_DECLARATION_TAG)) {
 	                sourceUri = readSourceDeclaration(reader);
 	            } else if (line.contains(MAPPING_DECLARATION_TAG)) {
@@ -174,7 +187,7 @@ public class ModelIOManager {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
         	} catch (Exception e) {
-        		throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()), e);
+        		throw new IOException(String.format("Problem at line: %s", reader.getLineNumber()), e);
         	}
         }
         
