@@ -157,7 +157,8 @@ public abstract class QuestScenarioParent extends TestCase {
 			message.append("\n");
 			message.append("Thrown exception: ");
 			message.append(thrownException);
-			message.append("\n");		
+			message.append("\n");
+			message.append("Message:" + ex.getMessage());
 			message.append("=====================================\n");
 
 			logger.error(message.toString());
