@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
-import java.util.ArrayList;
+import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -42,7 +42,6 @@ import com.hp.hpl.jena.iri.IRI;
 import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -98,6 +97,7 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueFloat;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueNode;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueString;
+import com.hp.hpl.jena.sparql.lang.rdql.Q_Var;
 import com.hp.hpl.jena.sparql.syntax.Template;
 
 /***
@@ -510,7 +510,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			DatalogProgram pr, int i, int[] varcount) {
 		Op op;
 		for (SortCondition c : orderOp.getConditions()) {
-			Variable var = ofac.getVariable(c.getExpression().getVarName());
+			
+			Expr expression = c.getExpression();
+			if (!(expression instanceof Q_Var)) {
+				throw new InvalidParameterException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
+			}
+			Variable var = ofac.getVariable(expression.getVarName());
 			int direction = (c.direction == Query.ORDER_DESCENDING ? OrderCondition.ORDER_DESCENDING
 					: OrderCondition.ORDER_ASCENDING);
 			pr.getQueryModifiers().addOrderCondition(var, direction);
