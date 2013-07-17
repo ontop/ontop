@@ -512,7 +512,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		for (SortCondition c : orderOp.getConditions()) {
 			
 			Expr expression = c.getExpression();
-			if (!(expression instanceof Q_Var)) {
+			if (!(expression instanceof ExprVar)) {
 				throw new InvalidParameterException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
 			}
 			Variable var = ofac.getVariable(expression.getVarName());
