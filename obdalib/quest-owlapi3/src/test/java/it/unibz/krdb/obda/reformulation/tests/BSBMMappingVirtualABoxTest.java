@@ -100,7 +100,9 @@ public class BSBMMappingVirtualABoxTest extends TestCase {
 				"    ?offer bsbm:validTo ?date .\n" +
 				"    FILTER (?date > \"2008-06-20T00:00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> )\n" +
 				"}\n" +
-				"ORDER BY xsd:double(str(?price))\n" +
+				"ORDER BY ?price\n" +
+
+//				"ORDER BY xsd:double(str(?price))\n" +
 				"LIMIT 10\n";
 		try {
 			OWLResultSet rs = st.executeTuple(query);
