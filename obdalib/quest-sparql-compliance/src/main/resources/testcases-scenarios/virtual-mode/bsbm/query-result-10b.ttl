@@ -3,4 +3,4 @@
 @prefix xsd:	 <http://www.w3.org/2001/XMLSchema#> .
 
 []    rdf:type      rsi:ResultSetInfo ;
-      rsi:size    "25" .
+      rsi:size    "3" .

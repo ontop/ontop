@@ -4,7 +4,7 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 
 SELECT DISTINCT ?offer ?price
 WHERE {
-	?offer bsbm:product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer7/Product329> .
+	?offer bsbm:product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer5749/Product291706> .
 	?offer bsbm:vendor ?vendor .
     ?offer dc:publisher ?vendor .
 	?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#US> .
@@ -14,5 +14,5 @@ WHERE {
     ?offer bsbm:validTo ?date .
     FILTER (?date > "2008-06-20T00:00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> )
 }
-ORDER BY ?price
+ORDER BY xsd:double(str(?price))
 LIMIT 10

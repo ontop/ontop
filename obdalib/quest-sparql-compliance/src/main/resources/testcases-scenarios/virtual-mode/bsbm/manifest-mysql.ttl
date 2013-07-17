@@ -13,14 +13,17 @@
       :query-2
       :query-3
       :query-4
-      :query-5 :query-5b
+      :query-5  # original query
+      :query-5b # with modification
       :query-6
       :query-7
       :query-8
-      #:query-9
-      :query-10
+      :query-10  # original query
+      :query-10b # with modification, removing casting call xsd:double(str(?price)) in ORDER BY
       :query-11
-      #:query-12
+
+      #:query-9 NOT EXIST! The original test uses DESCRIBE
+      #:query-12 NOT EXIST! The original test uses CONSTRUCT
     ) .
 
 :query-1 rdf:type mf:QueryEvaluationTest ;
@@ -64,7 +67,7 @@
     mf:mappings <bsbm-mysql.obda> .
  
 :query-5 rdf:type mf:QueryEvaluationTest ;
-    mf:name    "Q5: Find products that are similar to a given product" ;
+    mf:name    "Q5: Find products that are similar to a given product [original]" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ5> ;
     mf:action
@@ -113,23 +116,23 @@
     mf:knowledgebase <bsbm.owl> ;
     mf:mappings <bsbm-mysql.obda> .
     
-:query-9 rdf:type mf:QueryEvaluationTest ;
-    mf:name    "Q9: Get information about a reviewer" ;
+:query-10 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10: Get offers for a given product which fulfill specific requirements [original]" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ9> ;
     mf:action
-            [ qt:query <query-9.rq> ] ;
-    mf:result <query-result-9.ttl> ;
+            [ qt:query <query-10.rq> ] ;
+    mf:result <query-result-10.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
     mf:mappings <bsbm-mysql.obda> .
  
-:query-10 rdf:type mf:QueryEvaluationTest ;
-    mf:name    "Q10: Get cheap offers which fulfill the consumer's delivery requirements" ;
+:query-10b rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10B: Get offers for a given product which fulfill specific requirements, without cast function" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ10> ;
     mf:action
-            [ qt:query <query-10.rq> ] ;
-    mf:result <query-result-10.ttl> ;
+            [ qt:query <query-10b.rq> ] ;
+    mf:result <query-result-10b.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
     mf:mappings <bsbm-mysql.obda> .
  
@@ -140,15 +143,5 @@
     mf:action
             [ qt:query <query-11.rq> ] ;
     mf:result <query-result-11.ttl> ;
-    mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-mysql.obda> . 
-    
-:query-12 rdf:type mf:QueryEvaluationTest ;
-    mf:name    "Q12: Export information about an offer into another schema" ;
-    obdat:approval obdat:Approved ;
-    obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ12> ;
-    mf:action
-            [ qt:query <query-12.rq> ] ;
-    mf:result <query-result-12.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
     mf:mappings <bsbm-mysql.obda> . 
