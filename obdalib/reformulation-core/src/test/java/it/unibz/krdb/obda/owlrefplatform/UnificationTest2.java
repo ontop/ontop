@@ -1,4 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform;
+
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -20,16 +21,17 @@ public class UnificationTest2 extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
+	 * {@link DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
 	 * .
-	 *
-	 * Check if MGU generation/application works properly with multiple atoms sharing variables
-	 *
+	 * 
+	 * Check if MGU generation/application works properly with multiple atoms
+	 * sharing variables
+	 * 
 	 * q(x,y) :- R(x,#) R(#,y), S(x,#)
-	 *
+	 * 
 	 * @throws Exception
 	 */
-	
+
 	public void test_1() throws Exception {
 
 		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
@@ -40,10 +42,10 @@ public class UnificationTest2 extends TestCase {
 		NewLiteral t2 = factory.getVariable("y");
 		NewLiteral t3 = factory.getVariable("x");
 
-		Predicate r1 = predFac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
-		Predicate r2 = predFac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
-		Predicate s = predFac.getPredicate(OBDADataFactoryImpl.getIRI("S"), 2);
-		Predicate p = predFac.getPredicate(OBDADataFactoryImpl.getIRI("p"), 2);
+		Predicate r1 = predFac.getPredicate("R", 2);
+		Predicate r2 = predFac.getPredicate("R", 2);
+		Predicate s = predFac.getPredicate("S", 2);
+		Predicate p = predFac.getPredicate("p", 2);
 
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t1);
@@ -71,7 +73,7 @@ public class UnificationTest2 extends TestCase {
 		DatalogProgram prog = tfac.getDatalogProgram();
 		prog.appendRule(query);
 
-//		List<Assertion> list = new Vector<Assertion>();
+		// List<Assertion> list = new Vector<Assertion>();
 		QueryRewriter rew = new DLRPerfectReformulator();
 		DatalogProgram aux = (DatalogProgram) rew.rewrite(prog);
 

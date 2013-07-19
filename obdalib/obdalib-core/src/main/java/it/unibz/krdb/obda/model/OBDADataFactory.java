@@ -7,8 +7,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
-import com.hp.hpl.jena.iri.IRI;
-
 public interface OBDADataFactory extends Serializable {
 
 	public OBDAModel getOBDAModel();
@@ -22,7 +20,7 @@ public interface OBDADataFactory extends Serializable {
 	public CQIE getCQIE(Function head, List<Function> body);
 
 	public CQIE getCQIE(Function head, Function body);
-
+	
 	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
@@ -40,35 +38,25 @@ public interface OBDADataFactory extends Serializable {
 	 *            the number of elements inside the predicate.
 	 * @return a predicate object.
 	 */
-	@Deprecated
-	public Predicate getPredicate(IRI name, int arity);
 
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
-	public Predicate getPredicate(IRI name, int arity, COL_TYPE[] types);
 
 	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types);
 
-	public Predicate getObjectPropertyPredicate(IRI name);
-
 	public Predicate getObjectPropertyPredicate(String name);
-
-	public Predicate getDataPropertyPredicate(IRI name);
 
 	public Predicate getDataPropertyPredicate(String name);
 
 	public Predicate getClassPredicate(String name);
 
-	public Predicate getClassPredicate(IRI name);
 
 	/*
 	 * Data types
 	 */
 
 	public Predicate getDataTypePredicateUnsupported(String uri);
-
-	public Predicate getDataTypePredicateUnsupported(IRI uri);
 
 	public Predicate getDataTypePredicateLiteral();
 
@@ -91,6 +79,8 @@ public interface OBDADataFactory extends Serializable {
 	 */
 
 	public Predicate getUriTemplatePredicate(int arity);
+	
+	public Function getUriTemplate(NewLiteral...terms);
 
 	public Predicate getBNodeTemplatePredicate(int arity);
 
@@ -287,6 +277,8 @@ public interface OBDADataFactory extends Serializable {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
+	
+	
 
 	/**
 	 * Construct a {@link Variable} object with empty name.
@@ -322,4 +314,8 @@ public interface OBDADataFactory extends Serializable {
 	public OBDASQLQuery getSQLQuery(String query);
 
 	public Predicate getTypePredicate(Predicate.COL_TYPE type);
+
+	Predicate getJoinPredicate();
+
+	Predicate getLeftJoinPredicate();
 }

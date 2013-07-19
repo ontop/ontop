@@ -337,7 +337,7 @@ public class TurtleOBDAParser extends Parser {
 
 			      int arity = variableSet.size();
 			      List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
-			      Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
+			      Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 			      
 			      // Create a new rule
 			      List<Function> triples = t1;
@@ -729,7 +729,7 @@ public class TurtleOBDAParser extends Parser {
 			          Predicate predicate = dfac.getClassPredicate(c.getURI());
 			          atom = dfac.getAtom(predicate, subject);
 			        } else {
-			          Predicate predicate = dfac.getPredicate(v1, 2, null); // the data type cannot be determined here!
+			          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
 			          atom = dfac.getAtom(predicate, subject, object);
 			        }
 			        value.add(atom);
@@ -766,7 +766,7 @@ public class TurtleOBDAParser extends Parser {
 					          Predicate predicate = dfac.getClassPredicate(c.getURI());
 					          atom = dfac.getAtom(predicate, subject);
 					        } else {
-					          Predicate predicate = dfac.getPredicate(v2, 2, null); // the data type cannot be determined here!
+					          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
 					          atom = dfac.getAtom(predicate, subject, object);
 					        }
 					        value.add(atom);
@@ -1002,7 +1002,7 @@ public class TurtleOBDAParser extends Parser {
 			      NewLiteral nl = resource10;
 			      if (nl instanceof URIConstant) {
 			        URIConstant c = (URIConstant) nl;
-			        value = c.getURI();
+			        value = iriFactory.construct(c.getURI());
 			      } else {
 			        throw new RuntimeException("Unsupported predicate syntax: " + nl.toString());
 			      }
@@ -1383,7 +1383,7 @@ public class TurtleOBDAParser extends Parser {
 
 			      String functionName = resource20.toString();
 			      int arity = terms21.size();
-			      Predicate functionSymbol = dfac.getPredicate(iriFactory.construct(functionName), arity);
+			      Predicate functionSymbol = dfac.getPredicate(functionName, arity);
 			      value = dfac.getFunctionalTerm(functionSymbol, terms21);
 			    
 			}

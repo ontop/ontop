@@ -513,7 +513,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			
 			Expr expression = c.getExpression();
 			if (!(expression instanceof ExprVar)) {
-				throw new InvalidParameterException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
+				throw new IllegalArgumentException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
 			}
 			Variable var = ofac.getVariable(expression.getVarName());
 			int direction = (c.direction == Query.ORDER_DESCENDING ? OrderCondition.ORDER_DESCENDING
@@ -694,9 +694,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		LinkedList<Function> result = new LinkedList<Function>();
 
 		// Instantiate the subject and object URI
-		IRI subjectUri = null;
-		IRI objectUri = null;
-		IRI propertyUri = null;
+		String subjectUri = null;
+		String objectUri = null;
+		String propertyUri = null;
 
 		// Instantiate the subject and object data type
 		COL_TYPE subjectType = null;
@@ -762,38 +762,38 @@ public class SparqlAlgebraToDatalogTranslator {
 				throw new QueryException("Unsupported query syntax");
 			} else if (o instanceof Node_URI) {
 				Node_URI object = (Node_URI) o;
-				objectUri = irifac.construct(object.getURI());
+				objectUri = object.getURI();
 			}
 
 			// Construct the predicate
-			IRI predicateUri = objectUri;
+			String predicateUri = objectUri;
 			if (predicateUri == null) {
 				// NO OP, already assigned
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.RDFS_LITERAL_URI)) {
 				predicate = OBDAVocabulary.RDFS_LITERAL;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_BOOLEAN_URI)) {
 				predicate = OBDAVocabulary.XSD_BOOLEAN;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_DATETIME_URI)) {
 				predicate = OBDAVocabulary.XSD_DATETIME;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_DECIMAL_URI)) {
 				predicate = OBDAVocabulary.XSD_DECIMAL;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_DOUBLE_URI)) {
 				predicate = OBDAVocabulary.XSD_DOUBLE;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_FLOAT_URI)) {
 				predicate = OBDAVocabulary.XSD_DOUBLE;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_INT_URI)) {
 				predicate = OBDAVocabulary.XSD_INTEGER;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_INTEGER_URI)) {
 				predicate = OBDAVocabulary.XSD_INTEGER;
-			} else if (predicateUri.toString().equals(
+			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_STRING_URI)) {
 				predicate = OBDAVocabulary.XSD_STRING;
 			} else {
@@ -922,7 +922,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			// Construct the predicate
 
 			if (p instanceof Node_URI) {
-				IRI predicateUri = irifac.construct(p.getURI());
+				String predicateUri = p.getURI();
 				predicate = ofac.getPredicate(predicateUri, 2, new COL_TYPE[] {
 						subjectType, objectType });
 			} else if (p instanceof Var) {

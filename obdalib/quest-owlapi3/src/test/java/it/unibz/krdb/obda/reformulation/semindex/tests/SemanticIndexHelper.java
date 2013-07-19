@@ -154,7 +154,7 @@ public class SemanticIndexHelper {
                     inverse = true;
                 }
 
-                p = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI(uri), arity);
+                p = predicateFactory.getPredicate(uri, arity);
 
                 if (type.equals("classes")) {
                     if (exists)

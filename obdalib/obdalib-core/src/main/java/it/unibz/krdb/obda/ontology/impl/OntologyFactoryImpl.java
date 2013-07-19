@@ -22,13 +22,10 @@ import it.unibz.krdb.obda.ontology.PropertySomeDataTypeRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
 	private static OntologyFactoryImpl instance = new OntologyFactoryImpl();
-	private IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
@@ -42,7 +39,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Ontology createOntology(IRI uri) {
+	public Ontology createOntology(String uri) {
 		return new OntologyImpl(uri);
 	}
 
@@ -125,48 +122,30 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public OClass createClass(IRI c) {
+	public OClass createClass(String c) {
 		Predicate classp = ofac.getClassPredicate(c);
 		return createClass(classp);
 	}
 
 	@Override
-	public Property createObjectProperty(IRI uri, boolean inverse) {
+	public Property createObjectProperty(String uri, boolean inverse) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return createProperty(prop, inverse);
 	}
 
 	@Override
-	public Property createObjectProperty(IRI uri) {
+	public Property createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return createProperty(prop);
 	}
 
 	@Override
-	public Property createDataProperty(IRI p) {
+	public Property createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
 		return createProperty(prop);
 	}
 
-	@Override
-	public OClass createClass(String c) {
-		return createClass(ifac.construct(c));
-	}
 
-	@Override
-	public Property createObjectProperty(String uri, boolean inverse) {
-		return createObjectProperty(ifac.construct(uri), inverse);
-	}
-
-	@Override
-	public Property createObjectProperty(String uri) {
-		return createObjectProperty(ifac.construct(uri));
-	}
-
-	@Override
-	public Property createDataProperty(String p) {
-		return createDataProperty(ifac.construct(p));
-	}
 
 	@Override
 	public DataType createDataType(Predicate p) {

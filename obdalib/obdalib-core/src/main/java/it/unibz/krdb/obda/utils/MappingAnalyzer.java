@@ -90,7 +90,7 @@ public class MappingAnalyzer {
 				for (Relation table : tableList) {
 					// Construct the URI from the table name
 					String tableName = table.getName();
-					IRI predicateName = OBDADataFactoryImpl.getIRI(tableName);
+					String predicateName = tableName;
 
 					// Construct the predicate using the table name
 					int arity = dbMetaData.getDefinition(tableName).countAttribute();

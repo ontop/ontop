@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRIFactory;
-
 public class YAGOTest {
 	
     private final static String dataFile = "yago2core_20110315.n3";
@@ -30,7 +28,6 @@ public class YAGOTest {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final OntologyFactory descFactory = new OntologyFactoryImpl();
-    private static final IRIFactory iriFactory = OBDADataFactoryImpl.getIRIFactory();
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         Ontology onto = parse_tbox(dataFile);
@@ -48,7 +45,7 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        Ontology onto = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
+        Ontology onto = OntologyFactoryImpl.getInstance().createOntology("");
 
         long tbox_count = 0;
         while ((line = triples.readLine()) != null) {
@@ -67,38 +64,38 @@ public class YAGOTest {
 
                 if ("rdfs:range".equals(predicate)) {
                     tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 2);
-                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(subject, 2);
+                    Predicate po = predicateFactory.getPredicate(object, 1);
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
                     tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 2);
-                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(subject, 2);
+                    Predicate po = predicateFactory.getPredicate(object, 1);
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
-                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
+                    Predicate po = predicateFactory.getPredicate(object, 1);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addConcept(po);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
                     tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 1);
-                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(subject, 1);
+                    Predicate po = predicateFactory.getPredicate(object, 1);
                     ClassDescription cs = descFactory.createClass(ps);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
                     tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(iriFactory.construct(subject), 1);
-                    Predicate po = predicateFactory.getPredicate(iriFactory.construct(object), 1);
+                    Predicate ps = predicateFactory.getPredicate(subject, 1);
+                    Predicate po = predicateFactory.getPredicate(object, 1);
                     Property rs = descFactory.createProperty(ps);
                     Property ro = descFactory.createProperty(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));

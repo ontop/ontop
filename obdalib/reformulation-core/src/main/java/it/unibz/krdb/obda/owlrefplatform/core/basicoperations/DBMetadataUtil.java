@@ -24,7 +24,6 @@ import com.hp.hpl.jena.iri.IRIFactory;
 public class DBMetadataUtil {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private static IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
 	
@@ -71,8 +70,8 @@ public class DBMetadataUtil {
 						positionMatch.put(pos1, pos2);
 					}
 					// Construct CQIE
-					Predicate p1 = fac.getPredicate(ifac.construct(table1), def.countAttribute());
-					Predicate p2 = fac.getPredicate(ifac.construct(table2), def2.countAttribute());
+					Predicate p1 = fac.getPredicate(table1, def.countAttribute());
+					Predicate p2 = fac.getPredicate(table2, def2.countAttribute());
 					
 					List<NewLiteral> terms1 = new ArrayList<NewLiteral>();
 					for (int i=0; i<def.countAttribute(); i++) {

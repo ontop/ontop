@@ -27,7 +27,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRI;
 
 /**
  * 
@@ -76,8 +75,8 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	}
 	
 	
-	public static IRI getIRI(IRI base, String suffix) {
-		return OBDADataFactoryImpl.getIRI(base.toString() + suffix);
+	public static String getIRI(String base, String suffix) {
+		return base + suffix;
 	}
 
 	
@@ -85,7 +84,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private static Function getHeadAtom(IRI base, String suffix, List<NewLiteral> arguments) {
+	private static Function getHeadAtom(String base, String suffix, List<NewLiteral> arguments) {
 		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
 		return fac.getAtom(predicate, arguments);
 	}
@@ -122,7 +121,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 	
 	private void rewriteCC(QueryConnectedComponent cc, Function headAtom, DatalogProgram output, ExtPredicateCache cache, DatalogProgram edgeDP) {
-		IRI headURI = headAtom.getFunctionSymbol().getName();
+		String headURI = headAtom.getFunctionSymbol().getName();
 		
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
@@ -277,7 +276,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			else {
 				if (ccDP == null)
 					ccDP = fac.getDatalogProgram();
-				IRI cqieURI = cqieAtom.getFunctionSymbol().getName();
+				String cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<Function>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
 					log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());

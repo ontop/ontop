@@ -21,8 +21,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRI;
-
 public class ExtDatalogProgram {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(ExtDatalogProgram.class);
@@ -60,7 +58,7 @@ public class ExtDatalogProgram {
 	public Predicate getEntryForPredicate(Predicate p) {
 		ExtDatalogProgramDef def = extPredicateMap.get(p);
 		if (def == null) {			
-			IRI extName = TreeWitnessRewriter.getIRI(p.getName(), "_EXT");
+			String extName = TreeWitnessRewriter.getIRI(p.getName(), "_EXT");
 			if (p.getArity() == 1) {
 				Predicate extp = fac.getClassPredicate(extName);		
 				def = new ExtDatalogProgramDef(fac.getAtom(extp, x), fac.getAtom(p, x));

@@ -14,20 +14,18 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import junit.framework.TestCase;
 
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class DAGChainTest extends TestCase {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-	private static final IRIFactory iriFactory = OBDADataFactoryImpl.getIRIFactory();
 	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
 	public void test_simple_isa() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
-		Predicate a = predicateFactory.getPredicate(iriFactory.construct("a"), 1);
-		Predicate b = predicateFactory.getPredicate(iriFactory.construct("b"), 1);
-		Predicate c = predicateFactory.getPredicate(iriFactory.construct("c"), 1);
+		Predicate a = predicateFactory.getPredicate("a", 1);
+		Predicate b = predicateFactory.getPredicate("b", 1);
+		Predicate c = predicateFactory.getPredicate("c", 1);
 
 		OClass ac = descFactory.createClass(a);
 		OClass bc = descFactory.createClass(b);
@@ -55,11 +53,11 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void test_exists_simple() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
-		Predicate a = predicateFactory.getClassPredicate(iriFactory.construct("a"));
-		Predicate r = predicateFactory.getObjectPropertyPredicate(iriFactory.construct("r"));
-		Predicate c = predicateFactory.getClassPredicate(iriFactory.construct("c"));
+		Predicate a = predicateFactory.getClassPredicate("a");
+		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
+		Predicate c = predicateFactory.getClassPredicate("c");
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
@@ -96,13 +94,13 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void test_exists_complex() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
-		Predicate a = predicateFactory.getPredicate(iriFactory.construct("a"), 1);
-		Predicate r = predicateFactory.getPredicate(iriFactory.construct("r"), 2);
-		Predicate c = predicateFactory.getPredicate(iriFactory.construct("c"), 1);
-		Predicate b = predicateFactory.getPredicate(iriFactory.construct("b"), 1);
-		Predicate d = predicateFactory.getPredicate(iriFactory.construct("d"), 1);
+		Predicate a = predicateFactory.getPredicate("a", 1);
+		Predicate r = predicateFactory.getPredicate("r", 2);
+		Predicate c = predicateFactory.getPredicate("c", 1);
+		Predicate b = predicateFactory.getPredicate("b", 1);
+		Predicate d = predicateFactory.getPredicate("d", 1);
 
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
@@ -154,10 +152,10 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void disbledtest_exists_complex_2() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(iriFactory.construct(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
-		Predicate a = predicateFactory.getPredicate(iriFactory.construct("a"), 1);
-		Predicate r = predicateFactory.getPredicate(iriFactory.construct("r"), 2);
+		Predicate a = predicateFactory.getPredicate("a", 1);
+		Predicate r = predicateFactory.getPredicate("r", 2);
 
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);

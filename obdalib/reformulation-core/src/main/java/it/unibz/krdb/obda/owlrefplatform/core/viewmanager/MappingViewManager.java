@@ -1,14 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -22,9 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 
 /**
  * The mapping view manager is the module which allows us to translate CQIEs
@@ -47,9 +43,9 @@ public class MappingViewManager implements ViewManager {
 	private Map<String, Vector<OBDAMappingAxiom>>	mappingswithsambodyIndex	= null;
 	private Map<String, Predicate>					mappingToNarysetMap			= null;
 	private Map<String, Integer>					globalAliases				= null;
-	private Map<IRI, AuxSQLMapping>					predicateAuxMappingMap		= null;
+	private Map<String, AuxSQLMapping>					predicateAuxMappingMap		= null;
 	private static final OBDADataFactory							predFactory					= OBDADataFactoryImpl.getInstance();
-	private Map<IRI, String>						predicateToSQLMap			= null;
+	private Map<String, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
 	private Function							head						= null;
 
@@ -58,8 +54,8 @@ public class MappingViewManager implements ViewManager {
 		mappingswithsambodyIndex = new HashMap<String, Vector<OBDAMappingAxiom>>();
 		mappingToNarysetMap = new HashMap<String, Predicate>();
 		globalAliases = new HashMap<String, Integer>();
-		predicateAuxMappingMap = new HashMap<IRI, AuxSQLMapping>();
-		predicateToSQLMap = new HashMap<IRI, String>();
+		predicateAuxMappingMap = new HashMap<String, AuxSQLMapping>();
+		predicateToSQLMap = new HashMap<String, String>();
 		try {
 			prepareIndexes();
 		} catch (Exception e) {
@@ -140,11 +136,10 @@ public class MappingViewManager implements ViewManager {
 				String[] vars = new String[sqlVars.size()];
 				vars = sqlVars.toArray(vars);
 				AuxSQLMapping auxmap = new AuxSQLMapping(vars);
-				IRI preduri = OBDADataFactoryImpl.getIRI(name);
-				Predicate p = predFactory.getPredicate(preduri, vars.length);
+				Predicate p = predFactory.getPredicate(name, vars.length);
 				mappingToNarysetMap.put(sql, p);
-				predicateAuxMappingMap.put(preduri, auxmap);
-				predicateToSQLMap.put(preduri, sql);
+				predicateAuxMappingMap.put(name, auxmap);
+				predicateToSQLMap.put(name, sql);
 				usedSQL.add(sql.trim());
 			}
 		}

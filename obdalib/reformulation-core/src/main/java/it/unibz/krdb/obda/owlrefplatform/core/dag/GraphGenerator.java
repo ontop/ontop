@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
@@ -10,7 +9,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,7 +157,7 @@ public class GraphGenerator {
 	// }
 
 	public static void dumpReducedOnto(List<Axiom> reducedOnto) throws IOException {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(OBDADataFactoryImpl.getIRI(""));
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 		ontology.addAssertions(reducedOnto);
 		DAG reducedIsa = DAGConstructor.getISADAG(ontology);
 		reducedIsa.index();

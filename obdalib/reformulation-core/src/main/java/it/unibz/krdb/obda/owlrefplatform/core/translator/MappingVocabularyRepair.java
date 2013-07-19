@@ -1,22 +1,18 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,8 +21,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hp.hpl.jena.iri.IRI;
 
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
@@ -64,7 +58,7 @@ public class MappingVocabularyRepair {
 	 */
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
 //		log.debug("Reparing/validating {} mappings", originalMappings.size());
-		HashMap<IRI, Predicate> urimap = new HashMap<IRI, Predicate>();
+		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
 		for (Predicate p : vocabulary) {
 			urimap.put(p.getName(), p);
 		}

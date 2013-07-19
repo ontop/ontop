@@ -286,7 +286,7 @@ public class DatalogParser extends Parser {
             	             
             	            // Get the head atom
             	            Function head = rule.getHead();
-            	            IRI name = head.getPredicate().getName();
+            	            String name = head.getPredicate().getName();
             	            int size = variableList.size(); 
             	            
             	            // Get the predicate atom
@@ -1202,7 +1202,7 @@ public class DatalogParser extends Parser {
             match(input,RPAREN,FOLLOW_RPAREN_in_atom438); if (state.failed) return value;
 
             if ( state.backtracking==0 ) {
-                  IRI uri = OBDADataFactoryImpl.getIRI(predicate19);
+                  String uri = predicate19;
                   
                   Vector<NewLiteral> elements = terms20;
                   if (elements == null)
@@ -1740,7 +1740,7 @@ public class DatalogParser extends Parser {
                   } else if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
                     functionSymbol = dfac.getUriTemplatePredicate(arity);
                   } else {
-                    functionSymbol = dfac.getPredicate(OBDADataFactoryImpl.getIRI(functionName), arity);
+                    functionSymbol = dfac.getPredicate(functionName, arity);
                   }
                   value = dfac.getFunctionalTerm(functionSymbol, terms31);
                 }

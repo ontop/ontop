@@ -408,7 +408,7 @@ public class R2RMLParser {
 				// System.out.println(parsedString);
 				
 				//create datatype(object) atom
-				Predicate dtype =  new DataTypePredicateImpl(OBDADataFactoryImpl.getIRI(parsedString), COL_TYPE.OBJECT);
+				Predicate dtype =  new DataTypePredicateImpl(parsedString, COL_TYPE.OBJECT);
 				NewLiteral dtAtom = fac.getFunctionalTerm(dtype, objectAtom);
 				objectAtom = dtAtom;
 			}
@@ -442,7 +442,7 @@ public class R2RMLParser {
 			if (type.endsWith(">"))
 				type = type.substring(0, type.length() - 1);
 
-			DataTypePredicate predicate = new DataTypePredicateImpl(OBDADataFactoryImpl.getIRI(type), COL_TYPE.OBJECT);
+			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
 					//fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI(type));
 			NewLiteral constant = fac.getValueConstant(consts);
 			typedObject = fac.getFunctionalTerm(predicate, constant);

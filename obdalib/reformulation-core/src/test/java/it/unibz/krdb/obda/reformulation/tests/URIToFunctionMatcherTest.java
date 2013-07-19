@@ -2,14 +2,13 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.URIToFunctionMatcher;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 		variables.add(fac.getVariable("y"));
 		
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
-		Predicate p = pfac.getPredicate(OBDADataFactoryImpl.getIRI("http://www.obda.com/onto#individual"), 2);
+		Predicate p = pfac.getPredicate("http://www.obda.com/onto#individual", 2);
 		
 		NewLiteral fterm = fac.getFunctionalTerm(p, variables);
 		

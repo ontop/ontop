@@ -10,8 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.hp.hpl.jena.iri.IRI;
-
 /**
  * Provides a storage to put the URI constant.
  */
@@ -19,23 +17,10 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	private static final long serialVersionUID = -1263974895010238519L;
 
-//	private final IRI iri;
 
 	private final int identifier;
 
 	private final String iristr;
-
-//	/**
-//	 * The default constructor.
-//	 * 
-//	 * @param iri
-//	 *            URI from a term.
-//	 */
-//	protected URIConstantImpl(IRI iri) {
-//		this.iri = iri;
-//		this.iristr = iri.toString();
-//		this.identifier = iri.hashCode();
-//	}
 
 	protected URIConstantImpl(String iri) {
 		this.iristr = iri;
@@ -57,8 +42,8 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	}
 
 	@Override
-	public IRI getURI() {
-		return OBDADataFactoryImpl.getIRI(this.iristr);
+	public String getURI() {
+		return this.iristr;
 	}
 
 	@Override

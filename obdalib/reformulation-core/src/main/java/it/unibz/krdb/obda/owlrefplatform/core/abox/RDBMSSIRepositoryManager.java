@@ -68,9 +68,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
-
 /**
  * Store ABox assertions in the DB
  * 
@@ -361,17 +358,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private static final IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
+	private Map<String, Integer> classIndexes = new HashMap<String, Integer>();
 
-	private Map<IRI, Integer> classIndexes = new HashMap<IRI, Integer>();
-
-	private Map<IRI, Integer> roleIndexes = new HashMap<IRI, Integer>();
+	private Map<String, Integer> roleIndexes = new HashMap<String, Integer>();
 
 	private Map<Description, Description> equivalentIndex = new HashMap<Description, Description>();
 
-	private Map<IRI, List<Interval>> classIntervals = new HashMap<IRI, List<Interval>>();
+	private Map<String, List<Interval>> classIntervals = new HashMap<String, List<Interval>>();
 
-	private Map<IRI, List<Interval>> roleIntervals = new HashMap<IRI, List<Interval>>();
+	private Map<String, List<Interval>> roleIntervals = new HashMap<String, List<Interval>>();
 
 	// Semantic Index URI reference structures
 	private HashMap<String, Integer> uriIds = new HashMap<String, Integer> (100000);
@@ -504,7 +499,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				int idx = node.getIndex();
 				List<Interval> intervals = node.getRange().getIntervals();
 
-				IRI iri = cdesc.getPredicate().getName();
+				String iri = cdesc.getPredicate().getName();
 				classIndexes.put(iri, idx);
 				classIntervals.put(iri, intervals);
 
@@ -520,7 +515,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				int idx = node.getIndex();
 				List<Interval> intervals = node.getRange().getIntervals();
 
-				IRI iri = cdesc.getPredicate().getName();
+				String iri = cdesc.getPredicate().getName();
 				roleIndexes.put(iri, idx);
 				roleIntervals.put(iri, intervals);
 
@@ -691,7 +686,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate.COL_TYPE attributeType = value.getType();
 
 					// Predicate propPred =
-					// dfac.getDataPropertyPredicate(ifac.construct(prop));
+					// dfac.getDataPropertyPredicate(prop);
 					// Property propDesc = ofac.createProperty(propPred);
 
 					int idx = getIndex(attributeABoxAssertion.getPredicate().getName(), 2);
@@ -750,7 +745,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					 * value positions.
 					 */
 
-					Predicate propPred = dfac.getObjectPropertyPredicate(ifac.construct(prop));
+					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
 					if (dag.equi_mappings.containsKey(propDesc)) {
@@ -803,14 +798,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	/***
-	 * Returns the index (semantic index) for a class or property. The IRI
+	 * Returns the index (semantic index) for a class or property. The String
 	 * identifies a class if ype = 1, identifies a property if type = 2.
 	 * 
 	 * @param name
 	 * @param i
 	 * @return
 	 */
-	private int getIndex(IRI name, int type) {
+	private int getIndex(String name, int type) {
 		if (type == 1) {
 			Integer index = classIndexes.get(name);
 		
@@ -848,24 +843,24 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			return index;
 				
 		}
-		throw new RuntimeException("Could not find index for: IRI =  " + name + " type = " + type);
+		throw new RuntimeException("Could not find index for: String =  " + name + " type = " + type);
 	}
 
 	/***
-	 * Returns the intervals (semantic index) for a class or property. The IRI
+	 * Returns the intervals (semantic index) for a class or property. The String
 	 * identifies a class if type = 1, identifies a property if type = 2.
 	 * 
 	 * @param name
 	 * @param i
 	 * @return
 	 */
-	private List<Interval> getIntervals(IRI name, int type) {
+	private List<Interval> getIntervals(String name, int type) {
 		if (type == 1) {
 			return classIntervals.get(name);
 		} else if (type == 2) {
 			return roleIntervals.get(name);
 		}
-		throw new RuntimeException("Could not find semantic index intervals for: IRI =  " + name + " type = " + type);
+		throw new RuntimeException("Could not find semantic index intervals for: String =  " + name + " type = " + type);
 	}
 
 	@Override
@@ -1493,7 +1488,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// }
 	//
 	// Function fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
+	// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
 	// Function fobject = dfac.getFunctionalTerm(typePredicate,
 	// dfac.getURIConstant(p.getName()));
 	//
@@ -1548,7 +1543,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// headDL = dfac.getFunctionalTerm(predicate, fsubject);
 	//
 	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
+	// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
 	// fobject = dfac.getFunctionalTerm(typePredicate,
 	// dfac.getURIConstant(predicate.getName()));
 	//
@@ -1565,7 +1560,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Predicate predicate = className.getPredicate();
 	//
 	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(predicate.toString())));
+	// dfac.getURIConstant(predicate.toString()));
 	// fobject = dfac.getFunctionalTerm(typePredicate, dfac.getVariable("X2"));
 	//
 	// if (!className.isInverse())
@@ -1592,7 +1587,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// dfac.getVariable("X2"));
 	//
 	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(predicate.toString())));
+	// dfac.getURIConstant(predicate.toString()));
 	// fobject = dfac.getFunctionalTerm(typePredicate, dfac.getVariable("X2"));
 	//
 	// // Triple style head
@@ -1758,7 +1753,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		nonEmptyEntityRecord.clear();
 
-		IRIFactory f = IRIFactory.iriImplementation();
 
 		/* Fetching the index data */
 		Statement st = conn.createStatement();
@@ -1767,7 +1761,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			String string = res.getString(1);
 			if (string.startsWith("file:/"))
 				continue;
-			IRI iri = f.construct(string);
+			String iri = string;
 			int idx = res.getInt(2);
 			int type = res.getInt(3);
 			if (type == 1) {
@@ -1775,17 +1769,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			} else if (type == 2) {
 				roleIndexes.put(iri, idx);
 			} else {
-				throw new RuntimeException("Error loading semantic index map. IRI type was " + type
+				throw new RuntimeException("Error loading semantic index map. String type was " + type
 						+ ". Expected 1 for class or 2 for property.");
 			}
 		}
 		res.close();
 
 		/*
-		 * fecthing the intervals data, note that a given IRI can have one ore
+		 * fecthing the intervals data, note that a given String can have one ore
 		 * more intervals (a set) hence we need to go through several rows to
 		 * collect all of them. To do this we sort the table by URI (to get all
-		 * the intervals for a given IRI in sequence), then we collect all the
+		 * the intervals for a given String in sequence), then we collect all the
 		 * intervals row by row until we change URI, at that switch we store the
 		 * interval
 		 */
@@ -1793,45 +1787,45 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		res = st.executeQuery("SELECT * FROM " + interval_table + " ORDER BY URI, ENTITY_TYPE");
 
 		List<Interval> currentSet = new LinkedList<Interval>();
-		String previousIRIStr = null;
+		String previousStringStr = null;
 		int previousType = 0;
-		IRI previousIRI = null;
+		String previousString = null;
 		while (res.next()) {
 
 			String iristr = res.getString(1);
 			if (iristr.startsWith("file:/"))
 				continue;
 
-			IRI iri = f.construct(iristr);
+			String iri = iristr;
 			int low = res.getInt(2);
 			int high = res.getInt(3);
 			int type = res.getInt(4);
 
-			if (previousIRIStr == null) {
+			if (previousStringStr == null) {
 				currentSet = new LinkedList<Interval>();
-				previousIRIStr = iristr;
+				previousStringStr = iristr;
 				previousType = type;
-				previousIRI = iri;
+				previousString = iri;
 			}
 
-			if ((!iristr.equals(previousIRIStr) || previousType != type)) {
+			if ((!iristr.equals(previousStringStr) || previousType != type)) {
 				/*
 				 * we switched URI or type, time to store the collected
 				 * intervals and clear the set
 				 */
 				if (previousType == 1) {
-					classIntervals.put(previousIRI, currentSet);
+					classIntervals.put(previousString, currentSet);
 				} else if (previousType == 2) {
-					roleIntervals.put(previousIRI, currentSet);
+					roleIntervals.put(previousString, currentSet);
 				} else {
-					throw new RuntimeException("Error loading semantic index intervals. IRI type was " + previousType
+					throw new RuntimeException("Error loading semantic index intervals. String type was " + previousType
 							+ ". Expected 1 for class or 2 for property.");
 				}
 
 				currentSet = new LinkedList<Interval>();
-				previousIRIStr = iristr;
+				previousStringStr = iristr;
 				previousType = type;
-				previousIRI = iri;
+				previousString = iri;
 			}
 
 			currentSet.add(new Interval(low, high));
@@ -1839,11 +1833,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 
 		if (previousType == 1) {
-			classIntervals.put(previousIRI, currentSet);
+			classIntervals.put(previousString, currentSet);
 		} else if (previousType == 2) {
-			roleIntervals.put(previousIRI, currentSet);
+			roleIntervals.put(previousString, currentSet);
 		} else {
-			throw new RuntimeException("Error loading semantic index intervals. IRI type was " + previousType
+			throw new RuntimeException("Error loading semantic index intervals. String type was " + previousType
 					+ ". Expected 1 for class or 2 for property.");
 		}
 
@@ -2207,7 +2201,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Mapping head
 
-			Function head = dfac.getAtom(dfac.getPredicate(ifac.construct("m"), 1), dfac.getVariable("X"));
+			Function head = dfac.getAtom(dfac.getPredicate("m", 1), dfac.getVariable("X"));
 			Function body1 = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
 			Function body2 = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
@@ -2338,7 +2332,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	 * @param classPredicate
 	 * @return
 	 */
-	public boolean isMappingEmpty(IRI iri, COL_TYPE type1, COL_TYPE type2, int classPredicate) {
+	public boolean isMappingEmpty(String iri, COL_TYPE type1, COL_TYPE type2, int classPredicate) {
 
 		OBJType t1 = null;
 		OBJType t2 = OBJType.URI;
@@ -2398,7 +2392,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		List<Function> bodyAtoms = new LinkedList<Function>();
 
-		headPredicate = dfac.getPredicate(ifac.construct("m"), 2, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		headPredicate = dfac.getPredicate("m", 2, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
 		headTerms.add(dfac.getVariable("X"));
 		headTerms.add(dfac.getVariable("Y"));
 
@@ -3165,7 +3159,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			/* inserting index data for classes and roeles */
 
-			for (IRI concept : classIndexes.keySet()) {
+			for (String concept : classIndexes.keySet()) {
 				stm.setString(1, concept.toString());
 				stm.setInt(2, classIndexes.get(concept));
 				stm.setInt(3, CLASS_TYPE);
@@ -3173,7 +3167,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 			stm.executeBatch();
 
-			for (IRI role : roleIndexes.keySet()) {
+			for (String role : roleIndexes.keySet()) {
 				stm.setString(1, role.toString());
 				stm.setInt(2, roleIndexes.get(role));
 				stm.setInt(3, ROLE_TYPE);
@@ -3188,7 +3182,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 */
 
 			stm = conn.prepareStatement(insert_interval_query);
-			for (IRI concept : classIntervals.keySet()) {
+			for (String concept : classIntervals.keySet()) {
 				for (Interval it : classIntervals.get(concept)) {
 					stm.setString(1, concept.toString());
 					stm.setInt(2, it.getStart());
@@ -3199,7 +3193,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 			stm.executeBatch();
 
-			for (IRI role : roleIntervals.keySet()) {
+			for (String role : roleIntervals.keySet()) {
 				for (Interval it : roleIntervals.get(role)) {
 					stm.setString(1, role.toString());
 					stm.setInt(2, it.getStart());

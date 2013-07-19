@@ -24,7 +24,7 @@ public interface Predicate extends Cloneable, Serializable {
 	 * 
 	 * @return the resource identifier (URI).
 	 */
-	public IRI getName();
+	public String getName();
 
 	/**
 	 * Get the number of elements of the predicate.

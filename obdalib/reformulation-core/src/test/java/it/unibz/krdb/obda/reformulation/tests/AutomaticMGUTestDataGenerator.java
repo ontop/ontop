@@ -1,13 +1,12 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +127,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Atom atom = this.predFac.getAtom(predFac.getPredicate(OBDADataFactoryImpl.getIRI(atomstr.substring(0, 1)), terms.size()), terms);
+		Atom atom = this.predFac.getAtom(predFac.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
 		return atom;
 	}
 
@@ -145,7 +144,7 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = predFac.getPredicate(OBDADataFactoryImpl.getIRI(termstr.substring(0, 1)), fuctTerms.size());
+			Predicate fs = predFac.getPredicate(termstr.substring(0, 1), fuctTerms.size());
 			return termFac.getFunctionalTerm(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
 			return termFac.getValueConstant(termstr.substring(1, termstr.length() - 1));

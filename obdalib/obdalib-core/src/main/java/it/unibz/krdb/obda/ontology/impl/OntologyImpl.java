@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -23,8 +22,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRI;
-
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
@@ -37,7 +34,7 @@ public class OntologyImpl implements Ontology {
 
 	private Set<Predicate> reserved = null;
 
-	private IRI ontouri = null;
+	private String ontouri = null;
 
 	private Set<Axiom> originalassertions = null;
 
@@ -76,7 +73,7 @@ public class OntologyImpl implements Ontology {
 		}
 	}
 
-	OntologyImpl(IRI uri) {
+	OntologyImpl(String uri) {
 		ontouri = uri;
 		originalassertions = new LinkedHashSet<Axiom>();
 		concepts = new HashSet<Predicate>();
@@ -88,7 +85,7 @@ public class OntologyImpl implements Ontology {
 	public OntologyImpl clone() {
 		OntologyImpl clone = null;
 		if (ontouri != null) {
-			clone = (OntologyImpl) ofac.createOntology(OBDADataFactoryImpl.getIRI(ontouri.toString()));
+			clone = (OntologyImpl) ofac.createOntology(ontouri.toString());
 		}
 		else {
 			clone = (OntologyImpl) ofac.createOntology();
@@ -241,7 +238,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public IRI getUri() {
+	public String getUri() {
 		return ontouri;
 	}
 

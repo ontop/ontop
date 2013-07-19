@@ -1,19 +1,18 @@
 package it.unibz.krdb.obda.partialEvaluation.test;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class ThetaApplicationTest extends TestCase {
 		NewLiteral t4 = termFactory.getVariable("x");
 		List<NewLiteral> vars = new Vector<NewLiteral>();
 		vars.add(t4);
-		Predicate fs = predFactory.getPredicate(OBDADataFactoryImpl.getIRI("p"), vars.size());
+		Predicate fs = predFactory.getPredicate("p", vars.size());
 		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs, vars);
 
 		NewLiteral t5 = termFactory.getValueConstant("con");
@@ -50,10 +49,10 @@ public class ThetaApplicationTest extends TestCase {
 		List<NewLiteral> vars5 = new Vector<NewLiteral>();
 		vars5.add(t5);
 		vars5.add(t51);
-		Predicate fs2 = predFactory.getPredicate(OBDADataFactoryImpl.getIRI("p"), vars5.size());
+		Predicate fs2 = predFactory.getPredicate("p", vars5.size());
 		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs2, vars5);
 
-		Predicate pred1 = predFactory.getPredicate(OBDADataFactoryImpl.getIRI("A"), 5);
+		Predicate pred1 = predFactory.getPredicate("A", 5);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t1);
 		terms1.add(t2);
@@ -73,10 +72,10 @@ public class ThetaApplicationTest extends TestCase {
 		NewLiteral t12 = termFactory.getVariable("p");
 		List<NewLiteral> vars3 = new Vector<NewLiteral>();
 		vars3.add(t12);
-		Predicate fs3 = predFactory.getPredicate(OBDADataFactoryImpl.getIRI("uri"), vars3.size());
+		Predicate fs3 = predFactory.getPredicate("uri", vars3.size());
 		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs3, vars3);
 
-		Predicate head = predFactory.getPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
+		Predicate head = predFactory.getPredicate("q", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(t10);
 		Function h = predFactory.getAtom(head, terms2);
@@ -133,24 +132,24 @@ public class ThetaApplicationTest extends TestCase {
 		// Term qt3 = termFactory.createVariable("c");
 		//
 		//
-		// Predicate pred1 = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("A"), 1);
+		// Predicate pred1 = predFactory.createPredicate("A", 1);
 		// List<Term> terms1 = new Vector<Term>();
 		// terms1.add(qt1);
 		// AtomImpl a1 = new AtomImpl(pred1, terms1);
 		//
-		// Predicate pred2 = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("B"), 1);
+		// Predicate pred2 = predFactory.createPredicate("B", 1);
 		// List<Term> terms2 = new Vector<Term>();
 		// terms1.add(qt2);
 		// AtomImpl a2 = new AtomImpl(pred2, terms2);
 		//
-		// Predicate pred3 = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("C"), 1);
+		// Predicate pred3 = predFactory.createPredicate("C", 1);
 		// List<Term> terms3 = new Vector<Term>();
 		// terms3.add(qt3);
 		// AtomImpl a3 = new AtomImpl(pred3, terms3);
 		//
 		// LinkedList<Function> body = new LinkedList<Function>();
 		//
-		// Predicate predh = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
+		// Predicate predh = predFactory.createPredicate("q", 1);
 		// List<Term> termsh = new Vector<Term>();
 		// termsh.add(qt1);
 		// termsh.add(qt2);
@@ -168,17 +167,17 @@ public class ThetaApplicationTest extends TestCase {
 		// viewMan);
 		//
 		// Term t1 = termFactory.createVariable("x");
-		// Predicate pred1 = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("A"), 1);
+		// Predicate pred1 = predFactory.createPredicate("A", 1);
 		// List<Term> terms1 = new Vector<Term>();
 		// terms1.add(t1);
 		// AtomImpl atom1 = new AtomImpl(pred1, terms1);
 		// Term t2 = termFactory.createVariable("x");
-		// Predicate pred2 = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("A"), 1);
+		// Predicate pred2 = predFactory.createPredicate("A", 1);
 		// List<Term> terms2 = new Vector<Term>();
 		// terms2.add(t2);
 		// AtomImpl atom2 = new AtomImpl(pred2, terms2);
 		// Term ht = termFactory.createVariable("x");
-		// Predicate pred3 = predFactory.createPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
+		// Predicate pred3 = predFactory.createPredicate("q", 1);
 		// List<Term> terms3 = new Vector<Term>();
 		// terms3.add(ht);
 		// AtomImpl head = new AtomImpl(pred3, terms3);

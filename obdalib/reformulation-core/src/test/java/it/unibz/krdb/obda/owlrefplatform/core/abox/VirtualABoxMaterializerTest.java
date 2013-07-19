@@ -89,7 +89,7 @@ try{
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -98,16 +98,16 @@ try{
 
 		Function head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
-		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
+		Predicate person = fac.getPredicate("Person", 1);
+		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate("School", 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -186,7 +186,7 @@ try{
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -195,16 +195,16 @@ try{
 
 		Function head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
-		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
+		Predicate person = fac.getPredicate("Person", 1);
+		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate("School", 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -291,7 +291,7 @@ try{
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -300,16 +300,16 @@ try{
 
 		Function head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
-		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
+		Predicate person = fac.getPredicate("Person", 1);
+		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate("School", 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -463,7 +463,7 @@ try{
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -472,16 +472,16 @@ try{
 
 		Function head = fac.getAtom(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate(OBDADataFactoryImpl.getIRI("http://schools.com/persons"), 2), fac.getVariable("fn"),
+		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate(OBDADataFactoryImpl.getIRI("Person"), 1);
-		Predicate fn = fac.getPredicate(OBDADataFactoryImpl.getIRI("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate(OBDADataFactoryImpl.getIRI("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate(OBDADataFactoryImpl.getIRI("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate(OBDADataFactoryImpl.getIRI("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(OBDADataFactoryImpl.getIRI("School"), 1);
+		Predicate person = fac.getPredicate("Person", 1);
+		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Predicate school = fac.getPredicate("School", 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -549,7 +549,7 @@ try{
 		String sql5 = "SELECT fn, ln, schooluri FROM data";
 		String sql6 = "SELECT fn, ln, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
 		
 		final NewLiteral firstNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("fn"));
@@ -570,12 +570,12 @@ try{
 				lastNameVariable);
 
 //		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getClassPredicate(OBDADataFactoryImpl.getIRI("Person"));
-		Predicate fn = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("firstn"));
-		Predicate ln = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("lastn"));
-		Predicate age = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("agee"));
-		Predicate hasschool = fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI("hasschool"));
-		Predicate school = fac.getClassPredicate(OBDADataFactoryImpl.getIRI("School"));
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("firstn");
+		Predicate ln = fac.getDataPropertyPredicate("lastn");
+		Predicate age = fac.getDataPropertyPredicate("agee");
+		Predicate hasschool = fac.getDataPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 //		body.add(fac.getAtom(person, objectTerm));
 //		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 //		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));

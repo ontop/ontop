@@ -8,7 +8,7 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 
 	public BNodePredicateImpl(int arity) {
 		// TODO: BAD CODE! Predicate shouldn't store the arity and the type.
-		super(OBDADataFactoryImpl.getIRI(OBDAVocabulary.QUEST_BNODE), arity, null);
+		super(OBDAVocabulary.QUEST_BNODE, arity, null);
 	}
 
 	@Override

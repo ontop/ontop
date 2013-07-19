@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -34,7 +33,7 @@ public class DAGConstructor {
 
 	public static DAG getSigma(Ontology ontology) {
 
-		Ontology sigma = descFactory.createOntology(OBDADataFactoryImpl.getIRI(""));
+		Ontology sigma = descFactory.createOntology("");
 		sigma.addConcepts(ontology.getConcepts());
 		sigma.addRoles(ontology.getRoles());
 		for (Axiom assertion : ontology.getAssertions()) {
@@ -64,7 +63,7 @@ public class DAGConstructor {
 	@Deprecated
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
-		Ontology sigma = descFactory.createOntology(OBDADataFactoryImpl.getIRI("sigma"));
+		Ontology sigma = descFactory.createOntology("sigma");
 		sigma.addConcepts(ontology.getConcepts());
 		sigma.addRoles(ontology.getRoles());
 
@@ -85,7 +84,7 @@ public class DAGConstructor {
 
 	public static Ontology getSigmaOntology(DAG dag) {
 
-		Ontology sigma = descFactory.createOntology(OBDADataFactoryImpl.getIRI("sigma"));
+		Ontology sigma = descFactory.createOntology("sigma");
 
 		DAGEdgeIterator edgeiterator = new DAGEdgeIterator(dag);
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();

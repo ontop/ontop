@@ -36,13 +36,13 @@ public class PrefixRendererTest extends TestCase {
 		IRIFactory fact = new IRIFactory();
 
 		List<NewLiteral> terms = new LinkedList<NewLiteral>();
-		terms.add(tfac.getFunctionalTerm(pfac.getPredicate(fact.construct("http://obda.org/onto.owl#person-individual"), 1), innerterms));
+		terms.add(tfac.getFunctionalTerm(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = tfac.getAtom(pfac.getPredicate(fact.construct("http://obda.org/onto.owl#Person"), 1), terms);
+		Function body = tfac.getAtom(pfac.getPredicate("http://obda.org/onto.owl#Person", 1), terms);
 
 		terms = new LinkedList<NewLiteral>();
 		terms.add(tfac.getVariable("id"));
-		Function head = tfac.getAtom(pfac.getPredicate(fact.construct("http://obda.org/predicates#q"), 1), terms);
+		Function head = tfac.getAtom(pfac.getPredicate("http://obda.org/predicates#q", 1), terms);
 
 		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);

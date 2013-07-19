@@ -17,8 +17,6 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import com.hp.hpl.jena.iri.IRIFactory;
-
 /***
  * Extracts all declared Classes, Object and Data properties and translate them
  * into obdalib Predicate objects.
@@ -104,11 +102,11 @@ public class OWLAPI3VocabularyExtractor {
 			OWLClass c = (OWLClass) entity;
 			if (c.isOWLThing() || c.isOWLNothing())
 				return null;
-			predicate = obdaFac.getPredicate(OBDADataFactoryImpl.getIRI(entity.getIRI().toString()), 1, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT });
+			predicate = obdaFac.getPredicate(entity.getIRI().toString(), 1, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT });
 		} else if (entity instanceof OWLObjectProperty) {
-			predicate = obdaFac.getPredicate(OBDADataFactoryImpl.getIRI(entity.getIRI().toString()), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+			predicate = obdaFac.getPredicate(entity.getIRI().toString(), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 		} else if (entity instanceof OWLDataProperty) {
-			predicate = obdaFac.getPredicate(OBDADataFactoryImpl.getIRI(entity.getIRI().toString()), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+			predicate = obdaFac.getPredicate(entity.getIRI().toString(), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		}
 		return predicate;
 	}

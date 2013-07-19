@@ -82,7 +82,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		super(name);
 		Ontology tbox = null;
 		if (tboxFile == null) {
-			tbox = ofac.createOntology(OBDADataFactoryImpl.getIRI(name));
+			tbox = ofac.createOntology(name);
 		} else {
 			tbox = readOntology(tboxFile);
 		}

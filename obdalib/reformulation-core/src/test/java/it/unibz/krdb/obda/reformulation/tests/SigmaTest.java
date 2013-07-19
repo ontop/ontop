@@ -11,9 +11,6 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-
-import java.net.URI;
-
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -22,11 +19,11 @@ public class SigmaTest extends TestCase {
     private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     public void test_exists_simple() {
-        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(OBDADataFactoryImpl.getIRI(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
-        Predicate a = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI("a"), 1);
-        Predicate c = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI("c"), 1);
-        Predicate r = predicateFactory.getPredicate(OBDADataFactoryImpl.getIRI("r"), 2);
+        Predicate a = predicateFactory.getPredicate("a", 1);
+        Predicate c = predicateFactory.getPredicate("c", 1);
+        Predicate r = predicateFactory.getPredicate("r", 2);
         OClass ac = descFactory.createClass(a);
         OClass cc = descFactory.createClass(c);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);

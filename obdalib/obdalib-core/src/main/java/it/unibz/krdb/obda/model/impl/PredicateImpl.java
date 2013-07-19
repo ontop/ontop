@@ -6,20 +6,18 @@ import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 
-import com.hp.hpl.jena.iri.IRI;
-
 public class PredicateImpl implements Predicate {
 
 	private static final long serialVersionUID = -7096056207721170465L;
 
 	private int arity = -1;
-	private IRI name = null;
+	private String name = null;
 	private int identifier = -1;
 	private COL_TYPE[] types = null;
 
-	protected PredicateImpl(IRI name2, int arity, COL_TYPE[] types) {
-		this.name = name2;
-		this.identifier = name2.toString().hashCode();
+	protected PredicateImpl(String name, int arity, COL_TYPE[] types) {
+		this.name = name;
+		this.identifier = name.hashCode();
 		this.arity = arity;
 		this.types = types;
 	}
@@ -30,7 +28,7 @@ public class PredicateImpl implements Predicate {
 	}
 
 	@Override
-	public IRI getName() {
+	public String getName() {
 		return name;
 	}
 
@@ -55,7 +53,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public String toString() {
-		return name.toString();
+		return name;
 	}
 
 	@Override

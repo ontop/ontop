@@ -1,14 +1,13 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,9 +32,9 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	OBDADataFactory				pfac			= OBDADataFactoryImpl.getInstance();
 	OBDADataFactory				tfac			= OBDADataFactoryImpl.getInstance();
 
-	Predicate					r				= pfac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
-	Predicate					s				= pfac.getPredicate(OBDADataFactoryImpl.getIRI("S"), 2);
-	Predicate					q				= pfac.getPredicate(OBDADataFactoryImpl.getIRI("q"), 1);
+	Predicate					r				= pfac.getPredicate("R", 2);
+	Predicate					s				= pfac.getPredicate("S", 2);
+	Predicate					q				= pfac.getPredicate("q", 1);
 
 	NewLiteral						x				= tfac.getVariable("x");
 	NewLiteral						y				= tfac.getVariable("y");

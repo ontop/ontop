@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.model;
 
-import com.hp.hpl.jena.iri.IRI;
 
 /**
  * Provides an interface for storing the URI constant.
@@ -12,5 +11,5 @@ public interface URIConstant extends ObjectConstant {
 	 *
 	 * @return the URI object.
 	 */
-	public IRI getURI();
+	public String getURI();
 }

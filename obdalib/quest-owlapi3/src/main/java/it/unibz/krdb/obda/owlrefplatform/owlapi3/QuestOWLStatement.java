@@ -222,7 +222,7 @@ public class QuestOWLStatement implements OWLStatement {
 			}
 
 		} else {
-			throw new InvalidParameterException(
+			throw new IllegalArgumentException(
 					"Only .owl, .ttl and .nt files are supported for load opertions.");
 		}
 

@@ -207,6 +207,11 @@ public class QueryAnonymizer {
 	 * (enumerated as mentioned before). This step is needed to ensure that the
 	 * algorithm treats each undistinguished variable as a unique variable.
 	 * 
+	 * Needed because the rewriter might generate query bodies like this B(x,_),
+	 * R(x,_), underscores reperesnt uniquie anonymous varaibles. However, the
+	 * SQL generator needs them to be explicitly unique. replacing B(x,newvar1),
+	 * R(x,newvar2)
+	 * 
 	 * @param dp
 	 */
 	public static DatalogProgram deAnonymize(DatalogProgram dp) {

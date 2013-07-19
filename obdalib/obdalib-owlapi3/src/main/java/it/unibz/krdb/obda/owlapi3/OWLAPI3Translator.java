@@ -30,7 +30,6 @@ import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +75,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
@@ -87,8 +85,6 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class OWLAPI3Translator {
 
@@ -96,7 +92,6 @@ public class OWLAPI3Translator {
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	private static final IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private static final Logger log = LoggerFactory.getLogger(OWLAPI3Translator.class);
 
@@ -125,7 +120,7 @@ public class OWLAPI3Translator {
 		 * We will keep track of the loaded ontologies and tranlsate the TBox
 		 * part of them into our internal represntation
 		 */
-		IRI uri = ifac.construct("http://it.unibz.krdb.obda/Quest/auxiliaryontology");
+		String uri = "http://it.unibz.krdb.obda/Quest/auxiliaryontology";
 
 		Ontology translatedOntologyMerge = ofac.createOntology(uri);
 
@@ -207,8 +202,8 @@ public class OWLAPI3Translator {
 			// axiomIgnoresOWL2QL.add(violation.getAxiom());
 		}
 
-		//Ontology dl_onto = ofac.createOntology(ifac.construct(owl.getOntologyID().getOntologyIRI().toString()));
-		Ontology dl_onto = ofac.createOntology(ifac.construct("http://www.unibz.it/ontology"));
+		//Ontology dl_onto = ofac.createOntology((owl.getOntologyID().getOntologyIRI().toString()));
+		Ontology dl_onto = ofac.createOntology("http://www.unibz.it/ontology");
 		
 		HashSet<String> objectproperties = new HashSet<String>();
 		HashSet<String> dataproperties = new HashSet<String>();
@@ -552,7 +547,7 @@ public class OWLAPI3Translator {
 				}
 
 				Property auxRole = ofac
-						.createProperty(dfac.getObjectPropertyPredicate(ifac.construct(OntologyImpl.AUXROLEURI + auxRoleCounter)));
+						.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)));
 				auxRoleCounter += 1;
 
 				PropertySomeRestriction propertySomeRestriction = ofac.getPropertySomeRestriction(auxRole.getPredicate(), isInverse);
@@ -608,12 +603,12 @@ public class OWLAPI3Translator {
 		Property role = null;
 
 		if (rolExpression instanceof OWLObjectProperty) {
-			role = ofac.createObjectProperty(ifac.construct(rolExpression.asOWLObjectProperty().getIRI().toString()));
+			role = ofac.createObjectProperty((rolExpression.asOWLObjectProperty().getIRI().toString()));
 		} else if (rolExpression instanceof OWLObjectInverseOf) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) rolExpression;
-			role = ofac.createProperty(dfac.getObjectPropertyPredicate(ifac.construct(aux.getInverse().asOWLObjectProperty().getIRI().toString())), true);
+			role = ofac.createProperty(dfac.getObjectPropertyPredicate((aux.getInverse().asOWLObjectProperty().getIRI().toString())), true);
 		} else {
 			throw new TranslationException();
 		}
@@ -667,7 +662,7 @@ public class OWLAPI3Translator {
 		Property role = null;
 
 		if (rolExpression instanceof OWLDataProperty) {
-			role = ofac.createDataProperty(ifac.construct(rolExpression.asOWLDataProperty().getIRI().toString()));
+			role = ofac.createDataProperty((rolExpression.asOWLDataProperty().getIRI().toString()));
 		} else {
 			throw new TranslationException();
 		}
@@ -750,7 +745,7 @@ public class OWLAPI3Translator {
 			if (cardinatlity != 1 || range != null) {
 				throw new TranslationException();
 			}
-			IRI uri = ifac.construct(rest.getProperty().asOWLDataProperty().getIRI().toString());
+			String uri = (rest.getProperty().asOWLDataProperty().getIRI().toString());
 			Predicate attribute = dfac.getDataPropertyPredicate(uri);
 			cd = ofac.getPropertySomeRestriction(attribute, false);
 
@@ -768,7 +763,7 @@ public class OWLAPI3Translator {
 				throw new TranslationException();
 			}
 			OWLObjectPropertyExpression propExp = rest.getProperty();
-			IRI uri = ifac.construct(propExp.getNamedProperty().getIRI().toString());
+			String uri = propExp.getNamedProperty().getIRI().toString();
 			Predicate role = dfac.getObjectPropertyPredicate(uri);
 
 			if (propExp instanceof OWLObjectInverseOf) {
@@ -805,7 +800,7 @@ public class OWLAPI3Translator {
 				throw new TranslationException();
 			}
 			OWLDataProperty propExp = (OWLDataProperty) rest.getProperty();
-			IRI uri = ifac.construct(propExp.getIRI().toString());
+			String uri = propExp.getIRI().toString();
 			Predicate role = dfac.getDataPropertyPredicate(uri);
 			cd = ofac.getPropertySomeRestriction(role, false);
 		}
@@ -879,7 +874,7 @@ public class OWLAPI3Translator {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
 
-			Predicate classproperty = dfac.getClassPredicate(ifac.construct(namedclass.getIRI().toString()));
+			Predicate classproperty = dfac.getClassPredicate((namedclass.getIRI().toString()));
 			URIConstant c = dfac.getURIConstant(indv.asOWLNamedIndividual().getIRI().toString());
 
 			Description equivalent = null;
@@ -901,20 +896,20 @@ public class OWLAPI3Translator {
 			OWLObjectPropertyAssertionAxiom assertion = (OWLObjectPropertyAssertionAxiom) axiom;
 			OWLObjectPropertyExpression propertyExperssion = assertion.getProperty();
 
-			IRI property = null;
+			String property = null;
 			OWLIndividual subject = null;
 			OWLIndividual object = null;
 
 			if (propertyExperssion instanceof OWLObjectProperty) {
 				OWLObjectProperty namedclass = (OWLObjectProperty) propertyExperssion;
-				property = ifac.construct(namedclass.getIRI().toString());
+				property = namedclass.getIRI().toString();
 
 				subject = assertion.getSubject();
 				object = assertion.getObject();
 
 			} else if (propertyExperssion instanceof OWLObjectInverseOf) {
 				OWLObjectProperty namedclass = ((OWLObjectInverseOf) propertyExperssion).getInverse().getNamedProperty();
-				property = ifac.construct(namedclass.getIRI().toString());
+				property = namedclass.getIRI().toString();
 				subject = assertion.getObject();
 				object = assertion.getSubject();
 			}
@@ -954,7 +949,7 @@ public class OWLAPI3Translator {
 			OWLDataPropertyAssertionAxiom assertion = (OWLDataPropertyAssertionAxiom) axiom;
 			OWLDataProperty propertyExperssion = (OWLDataProperty) assertion.getProperty();
 
-			IRI property = ifac.construct(propertyExperssion.getIRI().toString());
+			String property = propertyExperssion.getIRI().toString();
 			OWLIndividual subject = assertion.getSubject();
 			OWLLiteral object = assertion.getObject();
 

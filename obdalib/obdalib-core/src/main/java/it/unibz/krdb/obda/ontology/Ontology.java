@@ -6,8 +6,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
-import com.hp.hpl.jena.iri.IRI;
-
 public interface Ontology extends Cloneable, Serializable {
 
 	public void addAssertion(Axiom assertion);
@@ -52,7 +50,7 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred);
 
-	public IRI getUri();
+	public String getUri();
 
 	/**
 	 * This will saturate the ontology, i.e. it will make sure that all axioms

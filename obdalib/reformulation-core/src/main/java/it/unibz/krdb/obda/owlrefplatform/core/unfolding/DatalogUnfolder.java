@@ -18,11 +18,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -74,9 +75,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * (either cause of lack of MGU, or because of a rule for the predicate of
 	 * the atom) is logically empty w.r.t. to the program.
 	 */
-	private Set<Predicate> leafPredicates = new HashSet<Predicate>();
+	private Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
 
-	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) throws Exception {
+	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
+		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
+	}
+
+	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
 		this.primaryKeys = primaryKeys;
 		this.unfoldingProgram = unfoldingProgram;
 
@@ -109,29 +114,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * predicates
 		 */
 		allPredicates.removeAll(ruleIndex.keySet());
-		leafPredicates.addAll(allPredicates);
+		extensionalPredicates.addAll(allPredicates);
 	}
-
-	// private void generateURITemplateMatchers() {
-	// }
-
-	// private void collectPrimaryKeyData() {
-	// for (CQIE mapping : unfoldingProgram.getRules()) {
-	// for (Function newatom : mapping.getBody()) {
-	// Predicate newAtomPredicate = newatom.getPredicate();
-	// if (newAtomPredicate instanceof BooleanOperationPredicate) {
-	// continue;
-	// }
-	// String newAtomName = newAtomPredicate.toString();
-	// DataDefinition def = metadata.getDefinition(newAtomName);
-	// List<Integer> pkeyIdx = new LinkedList<Integer>();
-	// for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
-	// Attribute column = def.getAttribute(columnidx);
-	// if (column.isPrimaryKey()) {
-	// pkeyIdx.add(columnidx);
-	// }
-	//
-	// }
 
 	private Set<Predicate> getPredicates(Function atom) {
 		Set<Predicate> predicates = new HashSet<Predicate>();
@@ -151,10 +135,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	/***
-	 * Computes a UCQ unfolding. This is will resolve each atom of each CQ in
-	 * the input with the rules of the unfolding program. The original queries
-	 * get removed from the result if their bodies contain atoms that have no
-	 * matching rule the unfolding program.
+	 * Given a query q and the {@link #unfoldingProgram}, this method will try
+	 * to flatten the query as much as possible by applying resolution steps
+	 * exaustively to every atom in the query against the rules in
+	 * 'unfoldingProgram'. This will is exactly to computing a partial
+	 * evaluation of q w.r.t. unfolding program, that is, an specialized verion
+	 * of q w.r.t. to unfolding program that requires less steps to execute.
+	 * <p>
+	 * This is used to translate ontological queries to database queries in the
+	 * when the unfolding program is a set of mapppings, and also to flatten the
+	 * Datalog queries that are produced by the
+	 * {@link SparqlAlgebraToDatalogTranslator} and in some other palces.
+	 * 
+	 * <p>
+	 * Example: matching rule the unfolding program.
 	 * <p>
 	 * Unfolding Program<br>
 	 * <br>
@@ -179,33 +173,33 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * 
 	 * <p>
 	 * The strategy of this unfolding is simple, we cycle through all the
-	 * queries and attempt to unfold atom 0 in the body. The resolution engine
-	 * will generate 1 or more CQs as result. The original atom is removed, and
-	 * the results are appended to the end of each query (hence its always safe
-	 * to unfold atom 0). The new queries are kept for a next cycle. We stop
-	 * when no new queries are produced.
-	 * 
+	 * queries and attempt to resolve atom 0 in the body againts the rules in
+	 * unfoldng program. The resolution engine will generate 1 or more CQs as
+	 * result. The original atom is removed, and the results are appended to the
+	 * end of each query (hence its always safe to unfold atom 0). The new
+	 * queries are kept for a next cycle. We stop when no new queries are
+	 * produced.
 	 * <p>
-	 * We need to extend this procedure optimizations to avoid unnecessary self
-	 * joins and redundant CQs.
+	 * The right side of left joins will never be touched.
+	 * <p>
+	 * Currently the method also is aware of functional dependencies (Primary
+	 * keys) and will produce queres in which redundant joins w.r.t. to these
+	 * are avoided.
 	 * 
 	 * @param inputquery
 	 * @return
 	 */
-	private DatalogProgram unfoldToUCQ(DatalogProgram inputquery, String targetPredicate) throws OBDAException {
-
-		// LinkedHashSet<CQIE> evaluation = new LinkedHashSet<CQIE>();
-		// evaluation.addAll(inputquery.getRules());
+	private DatalogProgram flattenUCQ(DatalogProgram inputquery, String targetPredicate) {
 
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
-//		log.debug("Unfolding started. Intial CQs: {}", workingSet.size());
-//		log.debug("Pusing URI constants before unfolding. Result ");
+		// log.debug("Unfolding started. Intial CQs: {}", workingSet.size());
+		// log.debug("Pusing URI constants before unfolding. Result ");
 		for (CQIE query : workingSet) {
-			DatalogNormalizer.pushEqualities(query, false);
+			DatalogNormalizer.enforceEqualities(query, false);
 
-//			log.debug("{}", query);
+			// log.debug("{}", query);
 		}
 
 		int failedAtempts = computePartialEvaluation(workingSet);
@@ -217,14 +211,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
 
-//		log.debug("Initial unfolding size: {} cqs", resultdp.getRules().size());
+		// log.debug("Initial unfolding size: {} cqs",
+		// resultdp.getRules().size());
 		// TODO make this a switch
 		resultdp = CQCUtilities.removeContainedQueriesSorted(resultdp, true);
-//		log.debug("Resulting unfolding size: {} cqs", resultdp.getRules().size());
-//		log.debug("Failed resolution attempts: {}", failedAtempts);
+		// log.debug("Resulting unfolding size: {} cqs",
+		// resultdp.getRules().size());
+		// log.debug("Failed resolution attempts: {}", failedAtempts);
 		// System.out.println(failedAtempts);
 
-//		log.debug("Result:\n{} ", resultdp);
+		// log.debug("Result:\n{} ", resultdp);
 
 		return resultdp;
 	}
@@ -275,27 +271,26 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	@Override
-	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) throws OBDAException {
+	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
 
-//		log.debug("Unfolding mode: {}. Initial query size: {}", unfoldingMode, inputquery.getRules().size());
+		// log.debug("Unfolding mode: {}. Initial query size: {}",
+		// unfoldingMode, inputquery.getRules().size());
 
 		// inputquery = replaceURIsForFunctions(inputquery);
 
 		long startime = System.nanoTime();
 
-		// log.debug("Computing partial evaluation for: \n{}", inputquery);
+		/*
+		 * Needed because the rewriter might generate query bodies like this
+		 * B(x,_), R(x,_), underscores reperesnt uniquie anonymous varaibles.
+		 * However, the SQL generator needs them to be explicitly unique.
+		 * replacing B(x,newvar1), R(x,newvar2)
+		 */
 		inputquery = QueryAnonymizer.deAnonymize(inputquery);
 
-		inputquery = DatalogNormalizer.pushEqualities(inputquery);
+		inputquery = DatalogNormalizer.enforceEqualities(inputquery);
 
-		DatalogProgram partialEvaluation = null;
-		if (unfoldingMode == UnfoldingMode.UCQ) {
-			partialEvaluation = unfoldToUCQ(inputquery, targetPredicate);
-		} else if (unfoldingMode == UnfoldingMode.DATALOG) {
-			partialEvaluation = unfoldToDatalog(inputquery);
-		} else {
-			throw new RuntimeException("Unknown unfolding mode");
-		}
+		DatalogProgram partialEvaluation = flattenUCQ(inputquery, targetPredicate);
 
 		DatalogProgram dp = termFactory.getDatalogProgram();
 		QueryUtils.copyQueryModifiers(inputquery, dp);
@@ -303,7 +298,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		long endtime = System.nanoTime();
 		long timeelapsedseconds = (endtime - startime) / 1000000;
-//		log.debug("Unfolding size: {}   Time elapsed: {} ms", dp.getRules().size(), timeelapsedseconds);
+		// log.debug("Unfolding size: {}   Time elapsed: {} ms",
+		// dp.getRules().size(), timeelapsedseconds);
 		return dp;
 	}
 
@@ -1024,6 +1020,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * Replaces each variable 'v' in the query for a new variable constructed
 	 * using the name of the original variable plus the counter. For example
 	 * 
+	 * <pre>
 	 * q(x) :- C(x)
 	 * 
 	 * results in
@@ -1031,12 +1028,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * q(x_1) :- C(x_1)
 	 * 
 	 * if counter = 1.
+	 * </pre>
 	 * 
+	 * <p>
 	 * This method can be used to generate "fresh" rules from a datalog program
-	 * that is going to be used during a resolution procedure.
+	 * so that it can be used during a resolution step.
 	 * 
 	 * @param rule
 	 * @param suffix
+	 *            The integer that will be apended to every variable name
 	 * @return
 	 */
 	public static CQIE getFreshRule(CQIE rule, int suffix) {
@@ -1116,7 +1116,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	public int computePartialEvaluation(List<CQIE> workingList) {
 
-
 		int[] rcount = { 0, 0 };
 
 		for (int queryIdx = 0; queryIdx < workingList.size(); queryIdx++) {
@@ -1131,7 +1130,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				tempList.add(a);
 			}
 
-			List<CQIE> result = computePartialEvaluation(tempList, rule, rcount, termidx);
+			List<CQIE> result = computePartialEvaluation(tempList, rule, rcount, termidx, false);
 
 			if (result == null) {
 
@@ -1182,262 +1181,86 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 
-private List<CQIE> computePartialEvaluation(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx) {
+	private List<CQIE> computePartialEvaluation(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
+			boolean parentIsLeftJoin) {
 
-	for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
-		termidx.push(atomIdx);
+		int nonBooleanAtomCounter = 0;
 
-		Function focusLiteral = (Function) currentTerms.get(atomIdx);
+		for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
+			termidx.push(atomIdx);
 
-		if (focusLiteral.isBooleanFunction()) {
-			termidx.pop();
-			continue;
-		}
+			Function focusLiteral = (Function) currentTerms.get(atomIdx);
 
-		if (focusLiteral.isAlgebraFunction()) {
-			/*
-			 * These may contain data atoms that need to be unfolded, we
-			 * need to recursively unfold each term.
-			 */
-
-			// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
-
-		
-			Predicate predicate = focusLiteral.getPredicate();
-			boolean isLJ =predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
-			List<CQIE> result = new LinkedList<CQIE>();
-			if (!isLJ)
-			result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx);
-			else
-			result = computePartialEvaluationLeftJoin(focusLiteral.getTerms(), rule, resolutionCount, termidx);
-			
-			if (result == null)
-				return null;
-
-			if (result.size() > 0)
-				return result;
-
-			// // }
-			// // if we finish and havent returned, it means
-			// // no change, so we return an empty list
-			// if (result.size() == 0)
-			// return new LinkedList<CQIE>();
-
-		} else if (focusLiteral.isDataFunction()) {
-
-			/*
-			 * This is a data atom, it should be unfolded with the usual
-			 * resolution algorithm.
-			 */
-
-			List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount);
-
-			if (result == null)
-				return null;
-
-			if (result.size() > 0)
-				return result;
-		}
-		termidx.pop();
-	}
-
-	return new LinkedList<CQIE>();
-}
-
-private List<CQIE> computePartialEvaluationLeftJoin(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx) {
-
-	//This variabl is used to check when I am in the second argument of the LJ
-	int ArgumentAtomCount = 0;
-
-	for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
-		termidx.push(atomIdx);
-
-		Function focusLiteral = (Function) currentTerms.get(atomIdx);
-
-		if (focusLiteral.isBooleanFunction()) {
-			termidx.pop();
-			continue;
-		}
-
-		if (focusLiteral.isAlgebraFunction()) {
-			
-			
-			ArgumentAtomCount++;
-			
-			Predicate predicate = focusLiteral.getPredicate();
-			boolean isLJ =predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
-			List<CQIE> result = new LinkedList<CQIE>();
-			if (!isLJ)
-			result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx);
-			else
-			result = computePartialEvaluationLeftJoin(focusLiteral.getTerms(), rule, resolutionCount, termidx);
-			
-			if (result == null && ArgumentAtomCount!=2)
-				return null;
-			
-			if (result == null && ArgumentAtomCount==2) 
-			{
-				log.debug("Empty evaluation - Algebra Func "+ focusLiteral.toString());
-				CQIE freshRule = rule.clone();
-				Stack<Integer> termidx1 = new Stack<Integer>();
-				termidx1.addAll(termidx); 
-					
-				
-				
+			if (focusLiteral.isBooleanFunction() || focusLiteral.isArithmeticFunction() || focusLiteral.isDataTypeFunction()) {
+				termidx.pop();
+				continue;
+			} else if (focusLiteral.isAlgebraFunction()) {
+				nonBooleanAtomCounter += 1;
 				/*
-				LeftJoin(trainevent(t1_2,t2_2,t3_2,t4_2,t5_2,t6_2),IS_NOT_NULL(t4_2),IS_NOT_NULL(t1_2),IS_NOT_NULL(t3_2),
-						Join(trainevent(t1_6,t2_6,t3_6,t4_2,t5_6,t6_6),IS_NOT_NULL(t1_6),IS_NOT_NULL(t4_2),IS_NOT_NULL(t1_6),IS_NOT_NULL(t3_6),http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Passing(URI("http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#trainevent/{}",t1_6))),AND(GT(http://www.w3.org/2001/XMLSchema#dateTime(t3_6),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T14:00:00Z"^^DATETIME)),LTE(http://www.w3.org/2001/XMLSchema#dateTime(t3_6),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T15:00:00Z"^^DATETIME)))), AND(GT(http://www.w3.org/2001/XMLSchema#dateTime(t3_2),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T14:00:00Z"^^DATETIME)),LTE(http://www.w3.org/2001/XMLSchema#dateTime(t3_2),http://www.w3.org/2001/XMLSchema#dateTime("2011-11-11T15:00:00Z"^^DATETIME))), NOT(IS_NOT_NULL(URI("http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#trainevent/{}",t1_6)))
-*/
+				 * These may contain data atoms that need to be unfolded, we
+				 * need to recursively unfold each term.
+				 */
 
+				// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
 
-				
-				
-				
-				termidx1.pop();
-				termidx1.add(0);
-				List<Function> innerAtoms = (List<Function>) getNestedList(termidx1, freshRule);
-				
-				int ArgumentAtoms =0;
-				List<Function> newbody = new LinkedList<Function>();
-				HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
-				HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
+				Predicate predicate = focusLiteral.getFunctionSymbol();
+				boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+				List<CQIE> result = new LinkedList<CQIE>();
+				result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin);
 
-				//Here we build the new  LJ body where we remove the 2nd data atom
-				for (Function atom : innerAtoms) {
-					if (atom.isDataFunction() || atom.isAlgebraFunction()){
-						ArgumentAtoms ++;
-						//we found the first argument of the LJ, we need the variables
-						if (ArgumentAtoms==1){
-							variablesArg1 =	(HashSet<Variable>) atom.getReferencedVariables();
-							newbody.add(atom);
-						}else if (ArgumentAtoms!=2){
-							newbody.add(atom);
-						} else {
-							//Here we keep the variables of the second LJ data argument
-							variablesArg2 =	(HashSet<Variable>) atom.getReferencedVariables();
-							
-							//and we remove the variables that are in both arguments
-							for (Variable var : variablesArg1) {	
-								if (variablesArg2.contains(var)){
-									variablesArg2.remove(var);
-								}
-							} //end for removing variables
-							continue;
-						}
-					} else{
-						//boolean atom
-						newbody.add(atom);
-					}
-					
-				}// end for body
-				freshRule.updateBody(newbody);
-				HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
-				
-				OBDAVocabulary myNull = new OBDAVocabulary();
-				for (Variable var : variablesArg2) {	
-					unifier.put(var, myNull.NULL);
+				if (result == null)
+					return null;
+
+				if (result.size() > 0) {
+					return result;
 				}
-				//Now I need to add the null to the variables of the second LJ data argument
-				freshRule=	Unifier.applyUnifier(freshRule, unifier,false);
 
-				List<CQIE> newRules = new LinkedList<CQIE>();
-				newRules.add(freshRule);
-				return newRules;
+			} else if (focusLiteral.isDataFunction()) {
+				nonBooleanAtomCounter += 1;
+
+				/*
+				 * This is a data atom, it should be unfolded with the usual
+				 * resolution algorithm.
+				 */
+
+				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
+				List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount, isLeftJoinSecondArgument);
+
+				if (result == null)
+					return null;
+
+				if (result.size() > 0)
+					return result;
+			} else {
+				throw new IllegalArgumentException(
+						"Error during unfolding, trying to unfold a non-algrbra/non-data function. Offending atom: "
+								+ focusLiteral.toString());
 			}
-
-			if (result.size() > 0)
-				return result;
-
-		} else if (focusLiteral.isDataFunction()) {
-
-			/*
-			 * This is a data atom, it should be unfolded with the usual
-			 * resolution algorithm.
-			 */
-			
-			ArgumentAtomCount += 1;
-
-			List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount);
-
-			if (result == null && ArgumentAtomCount!=2)
-				return null;
-			
-			if (result == null && ArgumentAtomCount==2) 
-			{
-				log.debug("Empty evaluation - Data Atom "+focusLiteral.toString());
-				CQIE freshRule = rule.clone();
-				//List<Function> body = freshRule.getBody();
-				
-				Stack<Integer> termidx1 = new Stack<Integer>();
-				termidx1.addAll(termidx); 
-					
-				termidx1.pop();
-				termidx1.add(0);
-				List<Function> innerAtoms = (List<Function>) getNestedList(termidx1, freshRule);
-				
-				int ArgumentAtoms =0;
-				List<Function> newbody = new LinkedList<Function>();
-				HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
-				HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
-
-				//Here we build the new  LJ body where we remove the 2nd data atom
-				for (Function atom : innerAtoms) {
-					if (atom.isDataFunction() || atom.isAlgebraFunction()){
-						ArgumentAtoms ++;
-						//we found the first argument of the LJ, we need the variables
-						if (ArgumentAtoms==1){
-							variablesArg1 =	(HashSet<Variable>) atom.getReferencedVariables();
-							newbody.add(atom);
-						}else if (ArgumentAtoms!=2){
-							newbody.add(atom);
-						} else {
-							//Here we keep the variables of the second LJ data argument
-							variablesArg2 =	(HashSet<Variable>) atom.getReferencedVariables();
-							
-							//and we remove the variables that are in both arguments
-							for (Variable var : variablesArg1) {	
-								if (variablesArg2.contains(var)){
-									variablesArg2.remove(var);
-								}
-							} //end for removing variables
-							continue;
-						}
-					} else{
-						newbody.add(atom);
-					}
-					
-				}// end for rule body
-				freshRule.updateBody(newbody);
-				HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
-				
-				OBDAVocabulary myNull = new OBDAVocabulary();
-				for (Variable var : variablesArg2) {	
-					unifier.put(var, myNull.NULL);
-				}
-				//Now I need to add the null to the variables of the second LJ data argument
-				freshRule=	Unifier.applyUnifier(freshRule, unifier,false);
-
-				List<CQIE> newRules = new LinkedList<CQIE>();
-				newRules.add(freshRule);
-				return newRules;
-
-			} //enf if checking the second null argument of the LJ
-			if (result.size() > 0)
-				return result;
+			termidx.pop();
 		}
-		termidx.pop();
+
+		return new LinkedList<CQIE>();
 	}
-
-	return new LinkedList<CQIE>();
-}
-
 
 	/***
-	 * This resolves one single data atom againts the set of rules of the
-	 * program. It will return null if the atom is logically empty, an empty
-	 * list if the atom marks the end of a resolution branch and hence its part
-	 * of a partial evaluation, or a list of rule that resulted from one or more
-	 * successfull unifications with the rules from the program.
+	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
+	 * atoms). The resolution step will will try to match the <strong>focus atom
+	 * a</strong> in the input <strong>rule r</strong> againts the rules in
+	 * {@link #unfoldingProgram}.
+	 * <p>
+	 * For each <strong>rule s</strong>, if the <strong>head h</strong> of s is
+	 * unifiable with a, then this method will do the following:
+	 * <ul>
+	 * <li>Compute a most general unifier <strong>mgu</strong> for h and a (see
+	 * {@link Unifier#getMGU(Function, Function)})</li>
+	 * <li>Create a clone r' of r</li>
+	 * <li>We replace a in r' with the body of s
+	 * <li>
+	 * <li>We apply mgu to r' (see {@link Unifier#applyUnifier(CQIE, Map)})</li>
+	 * <li>return r'
+	 * </ul>
+	 * 
+	 * 
 	 * 
 	 * @param focusAtom
 	 *            The atom to be resolved.
@@ -1453,9 +1276,18 @@ private List<CQIE> computePartialEvaluationLeftJoin(List<NewLiteral> currentTerm
 	 *            fresh variables.
 	 * @param atomindx
 	 *            The location of the focustAtom in the currentlist
-	 * @return
+	 * @return <ul>
+	 *         <li>null if there is no s whos head unifies with a, we return
+	 *         null. </li><li>An empty list if the atom a is <strong>extensional
+	 *         predicate (those that have no defining rules)</strong> or the
+	 *         second data atom in a left join </li><li>a list with one ore more
+	 *         rules otherwise</li>
+	 *         <ul>
+	 * 
+	 * @see Unifier
 	 */
-	public List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount) {
+	public List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount,
+			boolean isSecondAtomInLeftJoin) {
 
 		if (!focusAtom.isDataFunction())
 			throw new RuntimeException("Cannot unfold a non-data atom: " + focusAtom);
@@ -1464,27 +1296,91 @@ private List<CQIE> computePartialEvaluationLeftJoin(List<NewLiteral> currentTerm
 		 * Leaf predicates are ignored (as boolean or algebra predicates)
 		 */
 		Predicate pred = focusAtom.getFunctionSymbol();
-		if (leafPredicates.contains(pred))
+		if (extensionalPredicates.contains(pred)) {
 			// The atom is a leaf, that means that is a data atom that
 			// has no resolvent rule, and marks the end points to compute
 			// partial evaluations
 
 			return new LinkedList<CQIE>();
-
+		}
 		/*
 		 * This is a real data atom, it either generates something, or null
 		 * (empty)
 		 */
 
-		List<CQIE> result = new LinkedList<CQIE>();
-		List<CQIE> currentList = ruleIndex.get(focusAtom.getFunctionSymbol());
-		if (currentList == null)
-			return null;
-		List<CQIE> candidateMatches = new LinkedList<CQIE>(currentList);
+		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(focusAtom.getFunctionSymbol());
 
+		/*
+		 * If there are none, the atom is logically empty, careful, LEFT JOIN
+		 * alert!
+		 */
+
+		List<CQIE> result;
+		if (rulesDefiningTheAtom == null) {
+			if (!isSecondAtomInLeftJoin)
+				return null;
+			else {
+				CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
+				result = new ArrayList<CQIE>(1);
+				result.add(0, newRuleWithNullBindings);
+			}
+		} else {
+			// Note, in this step result may get new CQIEs inside
+			result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isSecondAtomInLeftJoin);
+		}
+
+		if (result == null) {
+			// this is the case for second atom in leaft join generating more
+			// than one rull, we
+			// must reutrn an empty result i ndicating its already a partial
+			// evaluation.
+			result = new ArrayList<CQIE>();
+		} else if (result.size() == 0) {
+			if (!isSecondAtomInLeftJoin)
+				return null;
+			else {
+				CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
+				result = new ArrayList<CQIE>(4);
+				result.add(newRuleWithNullBindings);
+			}
+		}
+		return result;
+	}
+
+	/***
+	 * Helper method for resolveDataAtom. Do not use anywhere else. This method
+	 * returns a list with all the succesfull resolutions againts focusAtom. It
+	 * will return a list with 0 ore more elements that result from successfull
+	 * resolution steps, or null if there are more than 1 successfull resoluiton
+	 * steps but focusAtom is the second atom of a left join (that is,
+	 * isSecondAtomOfLeftJoin is true).
+	 * 
+	 * <p>
+	 * Note the meaning of NULL in this method is different than the meaning of null
+	 * and empty list in {@link #resolveDataAtom(Function, CQIE, Stack, int[], boolean)}
+	 * which is the caller method. The job of interpreting correctly the output of
+	 * this method is done in the caller.
+	 * 
+	 * 
+	 * @param focusAtom
+	 * @param rule
+	 * @param termidx
+	 * @param resolutionCount
+	 * @param rulesDefiningTheAtom
+	 * @param isSecondAtomOfLeftJoin
+	 * @return
+	 */
+	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount,
+			List<CQIE> rulesDefiningTheAtom, boolean isSecondAtomOfLeftJoin) {
+
+		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
+		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
+
+		int rulesGeneratedSoFar = 0;
 		for (CQIE candidateRule : candidateMatches) {
 
 			resolutionCount[0] += 1;
+			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
 			Map<Variable, NewLiteral> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
@@ -1523,54 +1419,121 @@ private List<CQIE> computePartialEvaluationLeftJoin(List<NewLiteral> currentTerm
 			 * OPTIMIZING
 			 */
 
-			/*
-			 * OPTIMIZATION 1: PRIMARY KEYS
-			 * 
-			 * We now take into account Primary Key constraints on the database
-			 * to avoid adding redundant atoms to the query. This could also be
-			 * done as an afterstep, using unification and CQC checks, however,
-			 * its is much more expensive that way.
-			 */
-
-			/*
-			 * Given a primary Key on A, on columns 1,2, and an atom A(x,y,z)
-			 * added by the resolution engine (always added at the end of the CQ
-			 * body), we will look for other atom A(x,y,z') if the atom exists,
-			 * we can unify both atoms, apply the MGU to the query and remove
-			 * one of the atoms.
-			 */
-
 			int newatomcount = freshRule.getBody().size();
 			joinEliminationPKBased(termidx, newatomcount, partialEvalution);
 
 			/***
 			 * DONE OPTIMIZING RETURN THE RESULT
 			 */
+
+			rulesGeneratedSoFar += 1;
+
+			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
+				/*
+				 * We had disjunction on the second atom of the lejoin, that is,
+				 * more than two rules that unified. LeftJoin is not
+				 * distributable on the right component, hence, we cannot simply
+				 * generate 2 rules for the seocnd atom.
+				 * 
+				 * The rules must be untouched, no partial evaluation is
+				 * possible. We must return the original rule.
+				 */
+				return null;
+
+			}
+
 			result.add(partialEvalution);
-		}
+		}// end for candidate matches
 
-		if (result.size() == 0) {
-//			if (candidateMatches.isEmpty()) {
-//				log.debug("Empty unfolding due to empty predicates (using emptyness index)");
-//			}
-			return null;
-
-			// No unification atempt was successfull, retur null (empty query,
-			// no data for the atom)
-		}
 		return result;
+	}
+
+	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
+
+		log.debug("Empty evaluation - Data Atom {}", focusLiteral);
+
+		CQIE freshRule = originalRuleWithLeftJoin.clone();
+		// List<Function> body = freshRule.getBody();
+
+		Stack<Integer> termidx1 = new Stack<Integer>();
+		termidx1.addAll(termidx);
+
+		termidx1.pop();
+		termidx1.add(0);
+		List<Function> innerAtoms = (List<Function>) getNestedList(termidx1, freshRule);
+
+		int ArgumentAtoms = 0;
+		List<Function> newbody = new LinkedList<Function>();
+		HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
+		HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
+
+		// Here we build the new LJ body where we remove the 2nd
+		// data atom
+		for (Function atom : innerAtoms) {
+			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
+				ArgumentAtoms++;
+				// we found the first argument of the LJ, we need
+				// the variables
+				if (ArgumentAtoms == 1) {
+					variablesArg1 = (HashSet<Variable>) atom.getReferencedVariables();
+					newbody.add(atom);
+				} else if (ArgumentAtoms != 2) {
+					newbody.add(atom);
+				} else {
+					// Here we keep the variables of the second LJ
+					// data argument
+					variablesArg2 = (HashSet<Variable>) atom.getReferencedVariables();
+
+					// and we remove the variables that are in both
+					// arguments
+					for (Variable var : variablesArg1) {
+						if (variablesArg2.contains(var)) {
+							variablesArg2.remove(var);
+						}
+					} // end for removing variables
+					continue;
+				}
+			} else {
+				newbody.add(atom);
+			}
+
+		}// end for rule body
+		freshRule.updateBody(newbody);
+		HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
+
+		OBDAVocabulary myNull = new OBDAVocabulary();
+		for (Variable var : variablesArg2) {
+			unifier.put(var, myNull.NULL);
+		}
+		// Now I need to add the null to the variables of the second
+		// LJ data argument
+		freshRule = Unifier.applyUnifier(freshRule, unifier, false);
+		return freshRule;
 	}
 
 	/***
 	 * 
+	 * We now take into account Primary Key constraints on the database to avoid
+	 * adding redundant atoms to the query. This could also be done as an
+	 * afterstep, using unification and CQC checks, however, its is much more
+	 * expensive that way. Given a primary Key on A, on columns 1,2, and an atom
+	 * A(x,y,z) added by the resolution engine (always added at the end of the
+	 * CQ body), we will look for another atom A(x,y,z') if the atom exists, we
+	 * can unify both atoms, apply the MGU to the query and remove one of the
+	 * atoms.
+	 * 
+	 * 
 	 * @param termidx
+	 * 
 	 * @param newatomcount
 	 *            The number of new atoms introduced by this resolution step
 	 *            (the body size of the fresh rule used for this resolution
 	 *            step)
+	 * 
 	 * @param partialEvalution
 	 *            The CQIE currently being optimized, i.e., the result of the
 	 *            resolution step.
+	 * 
 	 * @param innerAtoms
 	 */
 	private void joinEliminationPKBased(Stack<Integer> termidx, int newatomcount, CQIE partialEvalution) {

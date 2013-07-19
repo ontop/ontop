@@ -78,7 +78,6 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRI;
 import com.hp.hpl.jena.query.Query;
 
 public class Quest implements Serializable, RepositoryChangedListener {
@@ -264,11 +263,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		setPreferences(config);
 
 		if (mappings == null && !aboxMode.equals(QuestConstants.CLASSIC)) {
-			throw new InvalidParameterException(
+			throw new IllegalArgumentException(
 					"When working without mappings, you must set the ABox mode to \""+QuestConstants.CLASSIC+"\". If you want to work with no mappings in virtual ABox mode you must at least provide an empty but not null OBDAModel");
 		}
 		if (mappings != null && !aboxMode.equals(QuestConstants.VIRTUAL)) {
-			throw new InvalidParameterException(
+			throw new IllegalArgumentException(
 					"When working with mappings, you must set the ABox mode to \""+QuestConstants.VIRTUAL+"\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
@@ -680,7 +679,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Normalizing equalities
 				 */
 
-				DatalogNormalizer.pushEqualities(unfoldingProgram);
+				DatalogNormalizer.enforceEqualities(unfoldingProgram);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
 
@@ -894,7 +893,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		/*
 		 * Eliminating redundancy from the unfolding program
 		 */
-		unfoldingProgram = DatalogNormalizer.pushEqualities(unfoldingProgram);
+		unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
 		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 
 		if (optimizeMap) {
@@ -1197,8 +1196,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						fac.getURIConstant(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
-				IRI classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname.toString())));
+				String classname = currenthead.getFunctionSymbol().getName();
+				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
 				newhead = fac.getAtom(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
@@ -1208,8 +1207,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				terms.add(currenthead.getTerm(0));
 
-				IRI propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname.toString()));
+				String propname = currenthead.getFunctionSymbol().getName();
+				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getAtom(pred, terms);

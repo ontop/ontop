@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.reformulation.tests;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -12,7 +12,6 @@ import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Vector;
 
@@ -42,10 +41,10 @@ public class UnificationTest2 extends TestCase {
 		NewLiteral t2 = factory.getVariable("y");
 		NewLiteral t3 = factory.getVariable("x");
 
-		Predicate r1 = predFac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
-		Predicate r2 = predFac.getPredicate(OBDADataFactoryImpl.getIRI("R"), 2);
-		Predicate s = predFac.getPredicate(OBDADataFactoryImpl.getIRI("S"), 2);
-		Predicate p = predFac.getPredicate(OBDADataFactoryImpl.getIRI("p"), 2);
+		Predicate r1 = predFac.getPredicate("R", 2);
+		Predicate r2 = predFac.getPredicate("R", 2);
+		Predicate s = predFac.getPredicate("S", 2);
+		Predicate p = predFac.getPredicate("p", 2);
 
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t1);
