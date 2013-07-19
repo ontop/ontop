@@ -19,6 +19,7 @@ export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME
 export PROTEGE_COPY_PATH=$ONTOP_DEP_HOME
 export PROTEGE_COPY_FILENAME=protege-4.2-beta.284
 export PROTEGE_MAIN_FOLDER_NAME=Protege_4.2
+export PROTEGE_MAIN_PLUGIN=ontoProPlugin
 
 # location and name for jetty distribution (should be ZIP)
 export JETTY_COPY_PATH=$ONTOP_DEP_HOME
@@ -39,6 +40,7 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
+export VERSION=1.8
 export REVISION=2557
 
 #svn update
@@ -50,7 +52,7 @@ echo ""
 echo "========================================="
 echo " Making -ontopPro- distribution package"
 echo "-----------------------------------------"
-echo "pluginVersion=1.7-alpha2.b$REVISION" >  obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
+echo "pluginVersion=$VERSION-b$REVISION" >  obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
 rm -fr obdalib-protege41/dist
 mvn install -DskipTests
 cd obdalib-protege41/
@@ -58,18 +60,19 @@ mvn bundle:bundle -DskipTests
 
 rm -fr ../quest-distribution/$PROTEGE_DIST
 mkdir ../quest-distribution/$PROTEGE_DIST
-cp target/it.unibz.inf.obda.p4plugin-1.7-alpha2.jar ../quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-1.7-alpha2-b$REVISION.jar
+cp target/it.unibz.inf.obda.p4plugin-$VERSION.jar ../quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION-b$REVISION.jar
 cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip ../quest-distribution/$PROTEGE_DIST/
 
 cd ../quest-distribution/$PROTEGE_DIST/
 
 mkdir -p $PROTEGE_MAIN_FOLDER_NAME/plugins
-cp it.unibz.inf.obda.p4plugin-1.7-alpha2-b$REVISION.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
+cp it.unibz.inf.obda.p4plugin-$VERSION-b$REVISION.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.prefs.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
+zip ../$PROTEGE_DIST/$PROTEGE_MAIN_PLUGIN.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*.*
 
 zip $PROTEGE_COPY_FILENAME.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*
-mv $PROTEGE_COPY_FILENAME.zip $PROTEGE_COPY_FILENAME-ontop-1.7-alpha2-b$REVISION.zip
+mv $PROTEGE_COPY_FILENAME.zip $PROTEGE_COPY_FILENAME-ontop-$VERSION-b$REVISION.zip
 
 rm -fr $PROTEGE_COPY_FILENAME
 cd ..
@@ -83,8 +86,8 @@ echo "-----------------------------------------"
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
 mvn assembly:assembly -DskipTests
-cp target/quest-distribution-1.7-alpha2-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/quest-distribution-1.7-alpha2-sesame-b$REVISION.jar
-unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-1.7-alpha2-dependencies.zip
+cp target/quest-distribution-$VERSION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/quest-distribution-$VERSION-sesame-b$REVISION.jar
+unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-$VERSION-dependencies.zip
 cp $OPENRDF_SESAME_PATH/$OPENRDF_SESAME_FILENAME.war $QUEST_SESAME_DIST/
 cp $OPENRDF_WORKBENCH_PATH/$OPENRDF_WORKBENCH_FILENAME.war $QUEST_SESAME_DIST/
 
@@ -129,7 +132,7 @@ echo "-----------------------------------------"
 rm -fr $OWL_API_DIST
 mkdir $OWL_API_DIST
 echo "[INFO] Copying files..."
-cp target/quest-distribution-1.7-alpha2-bin.zip $OWL_API_DIST/quest-distribution-1.7-alpha2-b$REVISION.zip
+cp target/quest-distribution-$VERSION-bin.zip $OWL_API_DIST/quest-distribution-$VERSION-b$REVISION.zip
 
 echo ""
 echo "Done."
