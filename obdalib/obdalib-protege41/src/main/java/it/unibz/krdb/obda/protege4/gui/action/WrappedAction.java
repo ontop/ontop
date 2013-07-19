@@ -32,11 +32,9 @@ abstract class WrappedAction implements Action {
 	public WrappedAction(JComponent component, KeyStroke keyStroke) {
 		this.component = component;
 		Object actionKey = getKeyForActionMap(component, keyStroke);
-		if (actionKey == null) {
-			String message = "no input mapping for KeyStroke: " + keyStroke;
-			throw new IllegalArgumentException(message);
-		}
-		setActionForKey(actionKey);
+		if (actionKey != null) {
+			setActionForKey(actionKey);
+		}		
 	}
 
 	/**

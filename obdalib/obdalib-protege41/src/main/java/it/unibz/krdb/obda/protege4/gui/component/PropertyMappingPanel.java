@@ -192,8 +192,8 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
                 lstPropertiesKeyPressed(evt);
             }
         });
-        new EditableCellFocusAction(lstProperties, KeyStroke.getKeyStroke("ENTER"));
-        new EditableCellFocusAction(lstProperties, KeyStroke.getKeyStroke("F2"));
+        new EditableCellFocusAction(lstProperties, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+        new EditableCellFocusAction(lstProperties, KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
         scrPropertyList.setViewportView(lstProperties);
 
         pnlPropertyMapping.add(scrPropertyList, java.awt.BorderLayout.CENTER);
