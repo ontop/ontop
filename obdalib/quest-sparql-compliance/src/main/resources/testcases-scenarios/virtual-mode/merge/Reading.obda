@@ -3,18 +3,6 @@ person:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology13558196
 book:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#
 :		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355821406833.owl#
 
-[ClassDeclaration] @collection [[
-book:Novel, book:Book, person:Person
-]]
-
-[ObjectPropertyDeclaration] @collection [[
-book:isReading, person:owns
-]]
-
-[DataPropertyDeclaration] @collection [[
-book:author, book:title, person:name
-]]
-
 [SourceDeclaration]
 sourceUri	simple-h2
 connectionUrl	jdbc:h2:tcp://localhost/test
