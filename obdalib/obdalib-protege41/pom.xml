@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha2</version>
+		<version>1.8</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-protege41</artifactId>
@@ -48,12 +48,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
@@ -63,25 +63,22 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-db</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 
 		<!--
@@ -173,7 +170,6 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-api</artifactId>
@@ -323,7 +319,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-1.7-alpha2</finalName>
+		<finalName>it.unibz.inf.obda.p4plugin-1.8</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -412,7 +408,7 @@
 						<Implementation-Version>${project.version}.b2039</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.7-alpha2</Bundle-Version>
+						<Bundle-Version>1.8</Bundle-Version>
 						<Build-Number>2157</Build-Number>
 						<!--
 							<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
@@ -478,8 +474,6 @@
 						-->
 						<!-- <Export-Package>it.unibz.krdb.*</Export-Package> -->
 
-
-
 						<!--
 							Not needed anymore, it was necessary when we were not using
 							import-package
@@ -501,7 +495,6 @@
 				<artifactId>maven-deploy-plugin</artifactId> <configuration>
 				<skip>false</skip> </configuration> </plugin>
 			-->
-
 
 		</plugins>
 	</build>

@@ -4,18 +4,17 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha2</version>
+		<version>1.8</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-owlapi3</artifactId>
 	<name>obdalib-owlapi3</name>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -28,13 +27,8 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
-			</dependency> <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-core</artifactId> 
-			</dependency> -->		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
-			<type>jar</type> <scope>compile</scope> </dependency> -->
 	</dependencies>
-
-
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -43,29 +37,12 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-					
-					
 				</configuration>
-				
 			</plugin>
-	<!-- 		<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin> -->
-
-	<!-- 		<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
-
-
 		</plugins>
 	</build>
-
 </project>

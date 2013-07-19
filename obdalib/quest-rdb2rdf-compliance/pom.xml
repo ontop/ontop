@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>obdalib-parent</artifactId>
-    <groupId>inf.unibz.it.obda</groupId>
-    <version>1.7-alpha2</version>
-  </parent>
-  <groupId>inf.unibz.it.obda</groupId>
-  <artifactId>quest-rdb2rdf-compliance</artifactId>
-  <version>1.7-alpha2</version>
-  <name>rdb2rdf-compliance-tests</name>
+	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+    	<artifactId>obdalib-parent</artifactId>
+    	<groupId>inf.unibz.it.obda</groupId>
+    	<version>1.8</version>
+  	</parent>
+  	<groupId>inf.unibz.it.obda</groupId>
+  	<artifactId>quest-rdb2rdf-compliance</artifactId>
+  	<version>1.8</version>
+  	<name>rdb2rdf-compliance-tests</name>
   
-  <dependencies>
+  	<dependencies>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -22,29 +22,24 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency> 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-		
-		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
-       
-       
 	</dependencies>
-                          
+	             
 	<repositories>
 		<repository>
 			<id>sesame-official-repository</id>
@@ -52,9 +47,9 @@
 			<releases>
 				<enabled>true</enabled>
 			</releases> 
-			 <snapshots>
-    				<enabled>true</enabled>
-    			</snapshots>
+			<snapshots>
+    			<enabled>true</enabled>
+    		</snapshots>
 		</repository>
 		<repository>
 			<id>bolzano-nexus-public</id>
@@ -67,6 +62,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
+	
 	<build>
 		<plugins>
 			<plugin>

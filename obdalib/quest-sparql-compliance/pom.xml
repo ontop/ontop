@@ -4,11 +4,12 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha2</version>
+		<version>1.8</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>quest-sparql-compliance</artifactId>
-
+	<name>sparql-compliance-tests</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -21,22 +22,22 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency> 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -66,9 +67,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.ibm</groupId>
 			<artifactId>db2jcc4.jar</artifactId>
-			<version>10.1</version>
+			<scope>test</scope>		
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
@@ -109,8 +115,6 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
-	<name>sparql-compliance-tests</name>
 	<build>
 		<plugins>
 			<plugin>

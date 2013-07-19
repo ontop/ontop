@@ -4,11 +4,9 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha2</version>
+		<version>1.8</version>
 	</parent>
-	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>quest-sesame</artifactId>
-	<!-- <version>1.6.1</version> -->
 	<name>quest-sesame</name>
 	<description>This is the Sesame API implementation basedon Quest</description>
 
@@ -21,11 +19,10 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 		</dependency>
-
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -33,31 +30,26 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
- 
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency> 
-
 		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<!-- this includes ALL seasame -->
 			<groupId>org.openrdf.sesame</groupId>
@@ -69,12 +61,10 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
 		</dependency>     
-		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-api</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-text</artifactId>
@@ -99,12 +89,10 @@
 			<artifactId>sesame-rio-n3</artifactId>
 			<version>2.6.9</version>
 		</dependency>
-
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.directory.studio</groupId>
 			<artifactId>org.apache.commons.logging</artifactId>
@@ -113,6 +101,7 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -123,10 +112,6 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>

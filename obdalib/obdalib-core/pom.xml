@@ -3,14 +3,13 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha2</version>
+		<version>1.8</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>obdalib-core</artifactId>
-
 	<packaging>jar</packaging>
 	<name>obdalib-core</name>
 	<url>http://maven.apache.org</url>
@@ -84,7 +83,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+	
 	<build>
 		<plugins>
 			<plugin>

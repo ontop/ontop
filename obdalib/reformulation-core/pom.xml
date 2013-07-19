@@ -6,39 +6,31 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha2</version>
+		<version>1.8</version>
 	</parent>
-
-	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>reformulation-core</artifactId>
-	<!-- <version>1.7-alpha2</version> -->
 	<name>quest-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha2</version>
+			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<!-- <version>4.8.2</version> -->
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>arq</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -54,25 +46,21 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgrapht</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgraph</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
 			<version>7.0.37</version>
-		</dependency>
-            
-                
+		</dependency>     
 	</dependencies>
+	
 	<repositories>
 		<repository>
 		  <releases>
@@ -128,16 +116,10 @@
 					</descriptors>
 				</configuration>
 			</plugin>
-
-			<!-- <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

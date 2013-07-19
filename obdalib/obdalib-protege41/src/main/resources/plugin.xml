@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?eclipse version="3.0"?>
 <plugin>
-
 	<!-- Datasource Manager Views -->
 	
 	<extension id="DatasourcesManagerViewComponent"
@@ -25,16 +24,6 @@
 		<navigates value="@org.protege.classcategory"/>
 	</extension>
 	
-	<!-- <extension id="RDBMSInspectorViewComponent"
-		point="org.protege.editor.core.application.ViewComponent">
-		<label value="RDBMS inspector"></label>
-		<class
-			value="it.unibz.krdb.obda.protege4.views.RDBMSInspectorView">
-		</class>
-		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
-	</extension> -->
-	
 	<extension id="MappingAssistantViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping assistant"></label>
@@ -44,8 +33,6 @@
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
 	</extension>
-	
-	
 	
 	<!-- Individuals queries views -->
 	
@@ -68,18 +55,6 @@
 		<headerColor value="8C1717"/>
 		<category value="Data Query"></category>
 	</extension>
-	
-	
-	<!--
-	<extension id="QueryHistoryViewComponent"
-		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Query history"></label>
-		<class
-			value="it.unibz.krdb.obda.protege4.views.QueryHistoryView">
-		</class>
-		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
-	</extension> -->
 	
 	<!-- Tabs -->
 	
@@ -107,7 +82,6 @@
 		</defaultViewConfigFileName>
 	</extension>
 
-
 	<!-- Editor Kit setup extensions -->	
 
   <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
@@ -115,28 +89,11 @@
   	<editorKitId value="OWLEditorKit"/>
   </extension>
   
- 	<!-- A type of plugin which defines a new assertion controller type which should 
-	be taken into account by the main APIController when it is setup during the 
-	creation of an OWLEditorKit -->
-    
-  <!-- <extension-point id="obda.controller" name="Assertion Controller"/> -->
-    
-    
-  <!-- OBDA preferences -->
-    
-  <!-- <extension id="preferences.obdaplugin"
-             point="org.protege.editor.core.application.preferencespanel">
-    <label value="OBDA"/>
-    <class value="it.unibz.krdb.obda.protege4.gui.preferences.OBDAPluginPreferencesPanel"/>
-  </extension> -->
-  
-  <extension id="reformulation-configuration"
-             point="org.protege.editor.core.application.preferencespanel">
+  <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
     <label value="Quest"/>
     <class value="it.unibz.krdb.obda.protege4.gui.preferences.OBDAOWLReformulationPlatformConfigPanel"/>
   </extension>
   
-    
   <!-- MENUS -->
 	
 	<extension id="menu.obda" point="org.protege.editor.core.application.EditorKitMenuAction">
@@ -185,22 +142,11 @@
 		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotD-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
-	
-  <!-- <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
-    <name value="Load OWL individuals (ABox) to a DB..."/> 
-    <toolTip value="Stores all ABox data in a database"/>
-    <class value="it.unibz.krdb.obda.protege4.gui.action.LoadOWLIndividualsToDBAction"/>
-    <path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-C"></path>
-    <editorKitId value="OWLEditorKit"/>
-  </extension> -->
 
 	<!-- Reasoner plugins -->
-
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
-    <name value="Quest 1.7-alpha2"/>
+    <name value="Quest 1.8"/>
     <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
-
-	
 </plugin>
