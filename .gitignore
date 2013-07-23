@@ -1,0 +1,14 @@
+.DS_Store
+target
+.settings
+*~
+catalog-v*.xml
+.classpath
+.projecttmp.*
+tmp.*
+.project
+.pydevproject
+bin
+
+*.iml
+.idea
