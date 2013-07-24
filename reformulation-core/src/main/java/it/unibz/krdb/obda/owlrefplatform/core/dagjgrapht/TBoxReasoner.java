@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Ontology;
 
 import java.util.Set;
 
@@ -12,15 +13,19 @@ import java.util.Set;
  */
 public interface TBoxReasoner {
 
-	public Set<Set<Description>> getDirectChildren(Description desc);
+	public Set<Set<Description>> getDirectChildren(Description desc, boolean named);
 
-	public Set<Set<Description>> getDirectParents(Description desc);
+	public Set<Set<Description>> getDirectParents(Description desc, boolean named);
 
-	public Set<Set<Description>> getDescendants(Description desc);
+	public Set<Set<Description>> getDescendants(Description desc, boolean named);
 
-	public Set<Set<Description>> getAncestors(Description desc);
+	public Set<Set<Description>> getAncestors(Description desc, boolean named);
 
-	public Set<Description> getEquivalences(Description description);
+	public Set<Description> getEquivalences(Description desc, boolean named);
+	
+	public DAG getDAG ();
 
-	public void getNode();
+	public Ontology getSigmaOntology();
+
+	
 }

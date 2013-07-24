@@ -3,7 +3,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -11,10 +10,8 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultEdge;
@@ -26,12 +23,11 @@ import org.jgrapht.graph.DefaultEdge;
  */
 
 
-
 public class TBoxGraphImpl implements TBoxGraph{
 	
 
-	GraphImpl<Description, DefaultEdge> graph = new  GraphImpl<Description, DefaultEdge>(DefaultEdge.class);
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+	private final GraphImpl graph = new  GraphImpl(DefaultEdge.class);
+	private final OntologyFactory descFactory = new OntologyFactoryImpl();
 	
 
 	/**
@@ -83,6 +79,35 @@ public class TBoxGraphImpl implements TBoxGraph{
 				graph.addVertex(parentInv);
 				graph.addEdge(child, parent);
 				graph.addEdge(childInv, parentInv);
+				
+				//add also edges between the existential
+				ClassDescription existsParent = descFactory.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
+				ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
+				ClassDescription existsParentInv = descFactory.getPropertySomeRestriction(parent.getPredicate(), !parent.isInverse());
+				ClassDescription existChildInv = descFactory.getPropertySomeRestriction(child.getPredicate(), !child.isInverse());
+				if(!graph.containsVertex(existChild)){
+					
+						graph.addVertex(existChild);
+				}
+				if(!graph.containsVertex(existsParent)){
+					
+					 graph.addVertex(existsParent);
+					
+					
+				}
+				graph.addEdge(existChild, existsParent);
+				
+				if(!graph.containsVertex(existChildInv)){
+					
+					graph.addVertex(existChildInv);
+			}
+			if(!graph.containsVertex(existsParentInv)){
+				
+				 graph.addVertex(existsParentInv);
+				
+				
+			}
+				graph.addEdge(existChildInv, existsParentInv);
 				
 			}
 		}
@@ -145,8 +170,8 @@ public class TBoxGraphImpl implements TBoxGraph{
 
 	}
 
-
-	public  GraphImpl<Description, DefaultEdge>  getGraph(){
+@Override
+	public  Graph  getGraph(){
 
 		return graph;
 	}

@@ -1,8 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.krdb.obda.ontology.Description;
-
-import org.jgrapht.graph.DefaultEdge;
 
 
 
@@ -16,6 +13,6 @@ public interface TBoxGraph {
 
 
 	//obtain the graph built
-	public GraphImpl<Description, DefaultEdge> getGraph();
+	public Graph getGraph();
 
 }
