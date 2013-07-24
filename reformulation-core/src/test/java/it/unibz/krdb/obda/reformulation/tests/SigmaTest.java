@@ -11,6 +11,11 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
+import java.net.URI;
+
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -34,16 +39,19 @@ public class SigmaTest extends TestCase {
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, er));
 
-        DAG res = DAGConstructor.getSigma(ontology);
-        res.clean();
+        
+       
+        Ontology ontologySigma =  TBoxReasonerImpl.getSigma(ontology);
+        TBoxReasonerImpl sigma= new TBoxReasonerImpl(ontologySigma, false);
+        DAGImpl res= sigma.getDAG();
 
-        assertTrue(res.getClassNode(ac).getDescendants().contains(res.getClassNode(er)));
+        assertTrue(sigma.getDescendants(ac, false).contains(sigma.getEquivalences(er, false)));
 
-        assertEquals(1, res.getClassNode(ac).getDescendants().size());
+        assertEquals(1, sigma.getDescendants(ac, false).size());
 
-        assertEquals(0, res.getClassNode(er).getDescendants().size());
+        assertEquals(0, sigma.getDescendants(er, false).size());
 
-        assertEquals(0, res.getClassNode(cc).getDescendants().size());
+        assertEquals(0, sigma.getDescendants(cc, false).size());
 
     }
 }

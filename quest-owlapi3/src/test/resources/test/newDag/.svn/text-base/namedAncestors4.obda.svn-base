@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY xsd: 'http://www.w3.org/2001/XMLSchema#'>
+   <!ENTITY owl: 'http://www.w3.org/2002/07/owl#'>
+   <!ENTITY quest: 'http://obda.org/quest#'>
+   <!ENTITY : 'http://www.kro.com/ontologies/ancestors4.owl#'>
+   <!ENTITY ancestors4: 'http://www.kro.com/ontologies/ancestors4.owl#'>
+   <!ENTITY rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+   <!ENTITY rdfs: 'http://www.w3.org/2000/01/rdf-schema#'>
+]>
+<OBDA version="1.0" xml:base="http://www.kro.com/ontologies/ancestors4.owl#" xmlns="http://www.kro.com/ontologies/ancestors4.owl#" xmlns::="http://www.kro.com/ontologies/ancestors4.owl#" xmlns:ancestors4:="http://www.kro.com/ontologies/ancestors4.owl#" xmlns:owl:="http://www.w3.org/2002/07/owl#" xmlns:quest:="http://obda.org/quest#" xmlns:rdf:="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs:="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd:="http://www.w3.org/2001/XMLSchema#">
+  <SavedQueries/>
+</OBDA>
