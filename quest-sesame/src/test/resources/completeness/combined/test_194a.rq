@@ -2,4 +2,4 @@ PREFIX : <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dllite: <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>
 
-SELECT ?x ?y ?z WHERE {?x dllite:R?y1 . ?x dllite:R?y2 . ?x dllite:R?y3 . ?m dllite:P?n . ?o dllite:R?y . ?y dllite:S?p . ?o dllite:R?z . ?z dllite:S?p}
+SELECT ?x ?y ?z WHERE {?x dllite:R ?y1 . ?x dllite:R ?y2 . ?x dllite:R ?y3 . ?m dllite:P ?n . ?o dllite:R ?y . ?y dllite:S ?p . ?o dllite:R ?z . ?z dllite:S ?p}
