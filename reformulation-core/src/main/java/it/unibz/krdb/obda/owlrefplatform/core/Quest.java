@@ -168,7 +168,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * Configuration
 	 */
 
-	private boolean reformulate = false;
+	public boolean reformulate = false;
 
 	private String reformulationTechnique = QuestConstants.UCQBASED;
 

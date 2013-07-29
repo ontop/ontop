@@ -193,15 +193,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
-		// log.debug("Unfolding started. Intial CQs: {}", workingSet.size());
-		// log.debug("Pusing URI constants before unfolding. Result ");
 		for (CQIE query : workingSet) {
 			DatalogNormalizer.enforceEqualities(query, false);
-
-			// log.debug("{}", query);
 		}
 
-		int failedAtempts = computePartialEvaluation(workingSet);
+		computePartialEvaluation(workingSet);
 
 		LinkedHashSet<CQIE> result = new LinkedHashSet<CQIE>();
 		for (CQIE query : workingSet) {
@@ -209,17 +205,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 
 		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
-
-		// log.debug("Initial unfolding size: {} cqs",
-		// resultdp.getRules().size());
-		// TODO make this a switch
-		resultdp = CQCUtilities.removeContainedQueriesSorted(resultdp, true);
-		// log.debug("Resulting unfolding size: {} cqs",
-		// resultdp.getRules().size());
-		// log.debug("Failed resolution attempts: {}", failedAtempts);
-		// System.out.println(failedAtempts);
-
-		// log.debug("Result:\n{} ", resultdp);
 
 		return resultdp;
 	}
@@ -269,7 +254,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return termFactory.getDatalogProgram(result);
 	}
 
+
 	@Override
+	/***
+	 * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
+	 * with respect to the program given when this unfolder was initialized. The goal for
+	 * this partial evaluation is the predicate <b>ans1</b>
+	 * 
+	 */
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
 
 		// log.debug("Unfolding mode: {}. Initial query size: {}",
@@ -277,7 +269,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		// inputquery = replaceURIsForFunctions(inputquery);
 
-		long startime = System.nanoTime();
 
 		/*
 		 * Needed because the rewriter might generate query bodies like this
@@ -287,18 +278,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 */
 		inputquery = QueryAnonymizer.deAnonymize(inputquery);
 
-		inputquery = DatalogNormalizer.enforceEqualities(inputquery);
-
 		DatalogProgram partialEvaluation = flattenUCQ(inputquery, targetPredicate);
 
 		DatalogProgram dp = termFactory.getDatalogProgram();
+		
 		QueryUtils.copyQueryModifiers(inputquery, dp);
+		
 		dp.appendRule(partialEvaluation.getRules());
 
-		long endtime = System.nanoTime();
-		long timeelapsedseconds = (endtime - startime) / 1000000;
-		// log.debug("Unfolding size: {}   Time elapsed: {} ms",
-		// dp.getRules().size(), timeelapsedseconds);
+
 		return dp;
 	}
 
@@ -1471,9 +1459,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			// if we are in a left join, we need to make sure the fresh rule
 			// has only one data atom
+			if (isLeftJoin) {
 			CQIE foldedJoinsRule = foldJOIN(freshRule);
 			if (foldedJoinsRule != null)
 				freshRule = foldedJoinsRule;
+			}
 
 			/*
 			 * generating the new body of the rule
