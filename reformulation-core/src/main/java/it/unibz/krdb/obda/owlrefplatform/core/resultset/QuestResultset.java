@@ -131,12 +131,16 @@ public class QuestResultset implements TupleResultSet {
 						try {
 							Integer id = Integer.parseInt(realValue);
 							realValue = this.uriMap.get(id);
+
+							
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
 							 * we leave realValue as is.
 							 */
 						}
+						// here we should check if it is HSQL and trim, but since its already semantic index then most of the time it is HSQL
+						realValue = realValue.trim();
 					}
 
 					result = fac.getURIConstant(realValue);

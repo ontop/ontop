@@ -26,7 +26,7 @@ public class JDBCUtility implements Serializable {
 	private static final long serialVersionUID = 5218570087742414646L;
 
 	private enum Driver {
-		PGSQL, MYSQL, H2, DB2, ORACLE, SQLSERVER, TEIID
+		PGSQL, MYSQL, H2, HSQL, DB2, ORACLE, SQLSERVER, TEIID
 	}
 
 	private Driver driver = null;
@@ -50,6 +50,8 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.MYSQL;
 		} else if (className.equals("org.h2.Driver")) {
 			driver = Driver.H2;
+		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+			driver = Driver.HSQL;
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			driver = Driver.DB2;
 		} else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
@@ -167,7 +169,7 @@ public class JDBCUtility implements Serializable {
 			}
 			bf.replace(dotlocation, endlocation, "");
 		}
-		if ((driver == Driver.H2 
+		if ((driver == Driver.H2 || driver == Driver.HSQL
 				|| driver == Driver.SQLSERVER
 				|| driver == Driver.ORACLE 
 				|| driver == Driver.DB2) && bf.length() > 19) {
@@ -195,6 +197,7 @@ public class JDBCUtility implements Serializable {
 			switch (driver) {
 			case MYSQL:
 			case H2:
+			case HSQL:
 			case PGSQL:
 			case DB2:
 			case TEIID:
@@ -211,6 +214,7 @@ public class JDBCUtility implements Serializable {
 			switch (driver) {
 			case MYSQL:
 			case H2:
+			case HSQL:
 			case PGSQL:
 			case DB2:
 			case TEIID:

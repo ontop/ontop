@@ -46,6 +46,7 @@ import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,16 +116,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  *  CREATE metadata tables
  */
 	
-	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(400), "
+	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(500), "
 			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
 
-	private final static String create_interval = "CREATE TABLE " + interval_table + " ( " + "URI VARCHAR(400), " + "IDX_FROM INTEGER, "
+	private final static String create_interval = "CREATE TABLE " + interval_table + " ( " + "URI VARCHAR(500), " + "IDX_FROM INTEGER, "
 			+ "IDX_TO INTEGER, " + "ENTITY_TYPE INTEGER" + ")";
 
 	private final static String create_emptyness_index = "CREATE TABLE " + emptyness_index_table + " ( TABLEID INTEGER, IDX INTEGER, "
 			+ " TYPE1 INTEGER, TYPE2 INTEGER )";
 	
-	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(400) " + ")";
+	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(500) " + ")";
 
 /**
  * DROP metadata tables 	
@@ -149,33 +150,33 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  */
 	
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
-			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
+			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 
 	public static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" INTEGER NOT NULL, "
-			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, "
-			+ "ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE)";
+			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN DEFAULT FALSE NOT NULL, "
+			+ "ISBNODE2 BOOLEAN DEFAULT FALSE NOT NULL)";
 
 	public static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VALUE VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DECIMAL(10, 2) NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DOUBLE NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VALUE TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VALUE BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 
 /**
  *  DROP data tables	
@@ -1042,16 +1043,56 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Check if the batch count is already in the batch limit
 			if (batchCount == batchLimit) {
+				try {
 				executeBatch(uriidStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(roleStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeLiteralStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeStringStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeIntegerStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeDecimalStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeDoubleStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeDateStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(attributeBooleanStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
+				try {
 				executeBatch(classStm);
+				} catch (SQLException e) {
+					if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+				}
 				batchCount = 0; // reset the counter
 			}
 
@@ -1063,17 +1104,56 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 
 		// Execute the rest of the batch
+		try {
 		executeBatch(uriidStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(roleStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeLiteralStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeStringStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeIntegerStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeDecimalStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeDoubleStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeDateStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(attributeBooleanStm);
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
+		try {
 		executeBatch(classStm);
-
+		} catch (SQLException e) {
+			if (!e.getMessage().contains("statement is not in batch mode")) throw e;
+		}
 	
 		// Close all open statements
 		closeStatement(uriidStm);
@@ -1286,6 +1366,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private void executeBatch(PreparedStatement statement) throws SQLException {
+
 		statement.executeBatch();
 		statement.clearBatch();
 	}
@@ -3139,7 +3220,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	 */
 	@Override
 	public void insertMetadata(Connection conn) throws SQLException {
-
+		int bc = 0;
 		log.debug("Inserting semantic index metadata. This will allow the repository to reconstruct itself afterwards.");
 
 		boolean commitval = conn.getAutoCommit();
@@ -3152,7 +3233,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		try {
 
 			/* dropping previous metadata */
-
+			st.executeUpdate("DELETE FROM " + uri_id_table);
 			st.executeUpdate("DELETE FROM " + index_table);
 			st.executeUpdate("DELETE FROM " + interval_table);
 			st.executeUpdate("DELETE FROM " + emptyness_index_table);
@@ -3164,23 +3245,26 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				stm.setInt(2, classIndexes.get(concept));
 				stm.setInt(3, CLASS_TYPE);
 				stm.addBatch();
+				bc++;
 			}
-			stm.executeBatch();
-
+			if (bc > 0) stm.executeBatch();
+			bc = 0;
+			
 			for (String role : roleIndexes.keySet()) {
 				stm.setString(1, role.toString());
 				stm.setInt(2, roleIndexes.get(role));
 				stm.setInt(3, ROLE_TYPE);
 				stm.addBatch();
+				bc++;
 			}
-			stm.executeBatch();
+			if (bc > 0)	stm.executeBatch();
 			stm.clearBatch();
 			stm.close();
 
 			/*
 			 * Inserting interval metadata
 			 */
-
+			bc = 0;
 			stm = conn.prepareStatement(insert_interval_query);
 			for (String concept : classIntervals.keySet()) {
 				for (Interval it : classIntervals.get(concept)) {
@@ -3189,9 +3273,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					stm.setInt(3, it.getEnd());
 					stm.setInt(4, CLASS_TYPE);
 					stm.addBatch();
+					bc++;
 				}
 			}
-			stm.executeBatch();
+			if (bc > 0)	stm.executeBatch();
+			bc = 0;
 
 			for (String role : roleIntervals.keySet()) {
 				for (Interval it : roleIntervals.get(role)) {
@@ -3200,10 +3286,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					stm.setInt(3, it.getEnd());
 					stm.setInt(4, ROLE_TYPE);
 					stm.addBatch();
+					bc++;
 				}
 			}
-			stm.executeBatch();
-
+			if (bc > 0)	stm.executeBatch();
+			bc = 0;
 			/* Inserting emptyness index metadata */
 
 			stm = conn.prepareStatement("INSERT INTO " + emptyness_index_table + " (TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)");
@@ -3213,8 +3300,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				stm.setInt(3, record.type1.ordinal());
 				stm.setInt(4, record.type2.ordinal());
 				stm.addBatch();
+				bc++;
 			}
-			stm.executeBatch();
+			if (bc > 0)	stm.executeBatch();
 
 			stm.close();
 
