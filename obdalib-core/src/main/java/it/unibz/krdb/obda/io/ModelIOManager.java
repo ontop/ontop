@@ -187,7 +187,7 @@ public class ModelIOManager {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
         	} catch (Exception e) {
-        		throw new IOException(String.format("Problem at line: %s", reader.getLineNumber()), e);
+        		throw new IOException(String.format("ERROR reading .obda file at line: %s", reader.getLineNumber() + " \nMESSAGE: " + e.getMessage()), e);
         	}
         }
         
