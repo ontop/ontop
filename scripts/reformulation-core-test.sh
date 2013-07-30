@@ -2,7 +2,7 @@
 
 # Usage: ./reformulation-core-test.sh 
 
-cd $ONTOP_BUILD_PATH/obdalib/reformulation-core
+cd $ONTOP_BUILD_PATH/reformulation-core
 mvn clean
 mvn site
 rm -rf $ONTOP_REPORT_PATH/reformulation-core

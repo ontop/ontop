@@ -187,7 +187,7 @@ public class ModelIOManager {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
         	} catch (Exception e) {
-        		throw new IOException(String.format("Problem at line: %s", reader.getLineNumber()), e);
+        		throw new IOException(String.format("ERROR reading .obda file at line: %s", reader.getLineNumber() + " \nMESSAGE: " + e.getMessage()), e);
         	}
         }
         
@@ -318,9 +318,6 @@ public class ModelIOManager {
         
         while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
             int lineNumber = reader.getLineNumber();
-            if (isCommentLine(line)) {
-            	continue; // skip the comment line
-            }
             if (line.isEmpty()) {
             	if (!mappingId.isEmpty()) {
 	            	// Save the mapping to the model (if valid) at this point
@@ -329,11 +326,17 @@ public class ModelIOManager {
 	                    mappingId = "";
 	                    sourceQuery = null;
 	                    targetQuery = null;
-	                } else {
-	                	isMappingValid = true;
 	                }
             	}
+            	isMappingValid = true;
             	continue;
+            }
+
+            if (isCommentLine(line)) {
+            	continue; // skip the comment line
+            }
+            if (!isMappingValid) {
+            	continue; // skip if the mapping is invalid
             }
             
             String[] tokens = line.split("[\t| ]+", 2);
@@ -360,22 +363,24 @@ public class ModelIOManager {
                 if (targetString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.TARGET_QUERY_IS_BLANK));
                     isMappingValid = false;
+                } else {
+	                // Load the target query
+	                targetQuery = loadTargetQuery(targetString);
                 }
-                // Load the target query
-                targetQuery = loadTargetQuery(targetString);
             } else if (currentLabel.equals(Label.source.name())) {
                 String sourceString = value;
                 if (sourceString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.SOURCE_QUERY_IS_BLANK));
                     isMappingValid = false;
-                }
-                // Build the source query string.
-                if (sourceQuery == null) {
-                	sourceQuery = new StringBuffer();
-                	sourceQuery.append(sourceString);
                 } else {
-                	sourceQuery.append("\n");
-                	sourceQuery.append(sourceString);
+	                // Build the source query string.
+	                if (sourceQuery == null) {
+	                	sourceQuery = new StringBuffer();
+	                	sourceQuery.append(sourceString);
+	                } else {
+	                	sourceQuery.append("\n");
+	                	sourceQuery.append(sourceString);
+	                }
                 }
             } else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);

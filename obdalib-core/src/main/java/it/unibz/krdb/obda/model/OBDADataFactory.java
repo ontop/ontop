@@ -17,6 +17,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Atom getAtom(Predicate predicate, NewLiteral term1, NewLiteral term2);
 
+	public CQIE getCQIE(Function head, Function... body );
+	
 	public CQIE getCQIE(Function head, List<Function> body);
 
 	public CQIE getCQIE(Function head, Function body);
