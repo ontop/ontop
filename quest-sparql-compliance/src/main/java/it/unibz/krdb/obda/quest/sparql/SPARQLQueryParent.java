@@ -61,10 +61,12 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.repository.util.RDFInserter;
+import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.RDFParser.DatatypeHandling;
 import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
@@ -617,12 +619,19 @@ public abstract class SPARQLQueryParent extends TestCase {
 		throws Exception
 	{
 		RepositoryConnection con = dataRep.getConnection();
-		con.setAutoCommit(false);
+		con.begin();
 		try {
 			RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString(), RDFFormat.TURTLE);
 			RDFParser rdfParser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
-			rdfParser.setVerifyData(false);
-			rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
+			ParserConfig config = rdfParser.getParserConfig();
+			// To emulate DatatypeHandling.IGNORE 
+			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+//			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+			
+//			rdfParser.setVerifyData(false);
+//			rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
 			// rdfParser.setPreserveBNodeIDs(true);
 
 			RDFInserter rdfInserter = new RDFInserter(con);
@@ -711,10 +720,15 @@ public abstract class SPARQLQueryParent extends TestCase {
 		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
 
 		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat);
-			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
-			parser.setPreserveBNodeIDs(true);
-			parser.setValueFactory(dataRep.getValueFactory());
+			RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
+			ParserConfig config = parser.getParserConfig();
+			// To emulate DatatypeHandling.IGNORE 
+			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+//			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
+//			parser.setPreserveBNodeIDs(true);
 
 			Set<Statement> result = new LinkedHashSet<Statement>();
 			parser.setRDFHandler(new StatementCollector(result));

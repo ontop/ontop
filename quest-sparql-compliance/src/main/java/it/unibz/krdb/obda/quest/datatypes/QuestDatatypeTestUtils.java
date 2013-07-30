@@ -25,9 +25,13 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.repository.util.RDFInserter;
+import org.openrdf.rio.ParserConfig;
+import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.turtle.TurtleParser;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
@@ -122,38 +126,36 @@ public class QuestDatatypeTestUtils {
 		try {
 			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
-			RDFParser rdfParser = new TurtleParser();
-			rdfParser.setValueFactory(vf);
-
-			rdfParser.setVerifyData(false);
-			rdfParser.setStopAtFirstError(true);
-			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
+			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
+			ParserConfig config = rdfParser.getParserConfig();
+			// To emulate DatatypeHandling.IGNORE 
+			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+//			rdfParser.setVerifyData(false);
+//			rdfParser.setStopAtFirstError(true);
+//			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
 
 			RDFInserter rdfInserter = new RDFInserter(con);
 			rdfInserter.enforceContext(contexts);
 			rdfParser.setRDFHandler(rdfInserter);
 
-			boolean autoCommit = con.isAutoCommit();
-			con.setAutoCommit(false);
+			con.begin();
 
 			try {
 				rdfParser.parse(in, baseURI);
 			}
 			catch (RDFHandlerException e) {
-				if (autoCommit) {
 					con.rollback();
-				}
 				// RDFInserter only throws wrapped RepositoryExceptions
 				throw (RepositoryException)e.getCause();
 			}
 			catch (RuntimeException e) {
-				if (autoCommit) {
 					con.rollback();
-				}
 				throw e;
 			}
 			finally {
-				con.setAutoCommit(autoCommit);
+				con.commit();
 			}
 		}
 		finally {

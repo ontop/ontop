@@ -35,11 +35,12 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.Dataset;
+import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.RDFParser.DatatypeHandling;
 import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -199,9 +200,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	private Ontology getOntology(URI graphURI, Resource context) throws Exception {
 		RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString(), RDFFormat.TURTLE);
 		RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
-		rdfParser.setVerifyData(false);
-		rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
-		rdfParser.setPreserveBNodeIDs(true);
+		ParserConfig config = rdfParser.getParserConfig();
+
+		// To emulate DatatypeHandling.IGNORE 
+		config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+		config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+		config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+//		rdfParser.setVerifyData(false);
+//		rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
+//		rdfParser.setPreserveBNodeIDs(true);
 
 		RDFTBoxReader reader = new RDFTBoxReader();
 		rdfParser.setRDFHandler(reader);

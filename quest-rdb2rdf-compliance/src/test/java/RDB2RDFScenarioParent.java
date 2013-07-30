@@ -24,7 +24,9 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriter;
+import org.openrdf.rio.Rio;
 import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
@@ -135,7 +137,7 @@ public class RDB2RDFScenarioParent extends TestCase {
 			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, graphq);
 			if (output!= null)
 			{
-				RDFWriter writer = new NTriplesWriter(output);
+				RDFWriter writer = Rio.createWriter(RDFFormat.NTRIPLES, output);
 				gquery.evaluate(writer);
 			}
 			else
