@@ -82,6 +82,16 @@
 			<version>10.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgrapht</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+		</dependency>
+		
 	</dependencies>
 	
 	<build>
