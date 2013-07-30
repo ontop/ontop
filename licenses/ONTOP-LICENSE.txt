@@ -1,29 +1,17 @@
--ontop- - Limited Use License v1.1
+==== Framework ==== 
 
-This Limited Use License (License) is the legal agreement between you
-and the authors of the -ontop- framework for OBDA, covering the
-executable java binaries of the -ontop- framework for OBDA (Binaries)
-that you have downloaded from our web site or that you have acquired
-by other means. Your use of the Binaries constitutes your acceptance
-of this License. This License grants to you non-transferable,
-non-exclusive rights for using the Binaries without any charge for
-educational, research and non-profit purposes. Code decompilation (or
-any other means of extracting SOURCE CODE) from the Binaries, or the
-use of these in any “for profit” activity constitute a violation of
-this license. If you distribute the Binaries you must also distribute
-this license. The Binaries are provided AS IS, with no warranties.
-Neither the authors, nor any organization/person related to the
-authors may be held liable for any damages, whether direct, indirect,
-consequential or incidental, arising out of the use or the inability
-to use the software. Your violation of any of the terms of this
-License shall result in the termination of this License without
-notice to you. Upon such termination, all use of the software by you
-or any of your clients must cease.
+The -ontop- framework is available under a dual licensing:
 
-Please direct any questions regarding this License to:
+ * Free Software Foundation’s GNU AGPL v3.0 
+ * Alternative licenses are also available, please contact the authors for
+   further information. 
+   
+==== Documentation ==== 
 
-Mariano Rodriguez-Muro
-Piazza Domenicani 3
-Bolzano, 39100. Italy
-Telephone: +39-04710-16228
-v. 1.1
+All documentation is licensed under the Creative Commons license.
+
+====  Contributing to the ontop project ==== 
+
+Soon we will start accepting code contributions. We are now preparing the
+contribution agreement to enable you to do this and still be able to maintain
+our dual license scheme.
