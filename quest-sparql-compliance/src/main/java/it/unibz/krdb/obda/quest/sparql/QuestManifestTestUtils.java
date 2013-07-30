@@ -1,7 +1,10 @@
 /*
- * Copyright Aduna (http://www.aduna-software.com/) (c) 1997-2008.
- *
- * Licensed under the Aduna BSD-style license.
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
  */
 package it.unibz.krdb.obda.quest.sparql;
 
