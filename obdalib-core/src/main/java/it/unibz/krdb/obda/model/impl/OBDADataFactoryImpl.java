@@ -115,6 +115,19 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Variable getVariable(String name) {
 		return new VariableImpl(name);
 	}
+	
+	@Override
+	public Function getStringVariable(String name) {
+		Function funvar =   getFunctionalTerm(getDataTypePredicateString(), getVariable(name));
+		return funvar;
+	}
+
+	@Override
+	public Function getIntegerVariable(String name) {
+		Function funvar =  getFunctionalTerm(getDataTypePredicateInteger(), getVariable(name));
+		return  funvar;
+	}
+
 
 	@Override
 	public Variable getNondistinguishedVariable() {

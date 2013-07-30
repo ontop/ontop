@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
+import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -9,8 +10,12 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AbstractLiteral;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
@@ -313,6 +318,7 @@ public class DatalogNormalizer {
 		Set<Function> booleanAtoms = new HashSet<Function>();
 		List<Function> equalities = new LinkedList<Function>();
 		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
+		@SuppressWarnings("rawtypes")
 		List body = query.getBody();
 		body.addAll(equalities);
 
@@ -405,6 +411,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
+	@SuppressWarnings("unchecked")
 	private static void pullOutEqualities(List currentTerms, Map<Variable, NewLiteral> substitutions, List<Function> eqList,
 			int[] newVarCounter, boolean isLeftJoin) {
 
@@ -440,41 +447,8 @@ public class DatalogNormalizer {
 				NewLiteral subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
-					Variable var1 = (Variable) subTerm;
-					Variable var2 = (Variable) substitutions.get(var1);
-
-					if (var2 == null) {
-						/*
-						 * No substitution exists, hence, no action but generate
-						 * a new variable and register in the substitutions, and
-						 * replace the current value with a fresh one.
-						 */
-						var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
-
-						substitutions.put(var1, var2);
-						subterms.set(j, var2);
-
-					} else {
-
-						/*
-						 * There already exists one, so we generate a fresh,
-						 * replace the current value, and add an equality
-						 * between the substitution and the new value.
-						 */
-
-						if (atom.isDataFunction()) {
-							Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
-
-							subterms.set(j, newVariable);
-							Function equality = fac.getEQFunction(var2, newVariable);
-							eqList.add(equality);
-
-						} else { // if its not data function, just replace
-									// variable
-							subterms.set(j, var2);
-						}
-					}
-					newVarCounter[0] += 1;
+					renameVariable(substitutions, eqList, newVarCounter, atom,	subterms, j, (Variable) subTerm);
+					
 				} else if (subTerm instanceof Constant) {
 					/*
 					 * This case was necessary for query 7 in BSBM
@@ -492,13 +466,118 @@ public class DatalogNormalizer {
 						eqList.add(equality);
 					}
 
+				} else if (subTerm instanceof Function) {
+					Predicate head = ((Function) subTerm).getFunctionSymbol();
+
+					if (head.isDataTypePredicate()) {
+
+						// This case is for the ans atoms that might have
+						// functions in the head. Check if it is needed.
+						Set<Variable> subtermsset = subTerm
+								.getReferencedVariables();
+
+						// Right now we support only unary functions!!
+						for (Variable var : subtermsset) {
+							renameTerm(substitutions, eqList, newVarCounter,
+									atom, subterms, j, (Function) subTerm, var);
+						}
+					}
 				}
-			}
+			} // end for subterms
 
 			currentTerms.addAll(i + 1, eqList);
 			i = i + eqList.size();
 			eqList.clear();
 		}
+	}
+
+	private static void renameTerm(Map<Variable, NewLiteral> substitutions,
+			List<Function> eqList, int[] newVarCounter, Function atom,
+			List<NewLiteral> subterms, int j, Function  subTerm, Variable var1) 
+	{
+		Predicate head =  subTerm.getFunctionSymbol();
+		Variable var2 = (Variable) substitutions.get(var1);
+
+		if (var2 == null) {
+			/*
+			 * No substitution exists, hence, no action but generate
+			 * a new variable and register in the substitutions, and
+			 * replace the current value with a fresh one.
+			 */
+			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+			
+			
+			FunctionalTermImpl newFuncTerm = (FunctionalTermImpl) fac.getFunctionalTerm(head, var1);
+			subterms.set(j, var2);
+			
+			Function equality = fac.getEQFunction(var2, newFuncTerm);
+			eqList.add(equality);
+
+		} else {
+
+			/*
+			 * There already exists one, so we generate a fresh,
+			 * replace the current value, and add an equality
+			 * between the substitution and the new value.
+			 */
+
+			if (atom.isDataFunction()) {
+				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+
+				subterms.set(j, newVariable);
+				FunctionalTermImpl newFuncTerm = (FunctionalTermImpl) fac.getFunctionalTerm(head, var2);
+				
+				
+				Function equality = fac.getEQFunction(newVariable, newFuncTerm);
+				eqList.add(equality);
+
+			} else { // if its not data function, just replace
+						// variable
+				subterms.set(j, var2);
+			}
+		}
+		newVarCounter[0] += 1;
+		
+	}
+
+	private static void renameVariable(Map<Variable, NewLiteral> substitutions,
+			List<Function> eqList, int[] newVarCounter, Function atom,
+			List<NewLiteral> subterms, int j, NewLiteral subTerm) {
+		Variable var1 = (Variable) subTerm;
+		Variable var2 = (Variable) substitutions.get(var1);
+
+		if (var2 == null) {
+			/*
+			 * No substitution exists, hence, no action but generate
+			 * a new variable and register in the substitutions, and
+			 * replace the current value with a fresh one.
+			 */
+			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+
+			substitutions.put(var1, var2);
+			subterms.set(j, var2);
+
+		} else {
+
+			/*
+			 * There already exists one, so we generate a fresh,
+			 * replace the current value, and add an equality
+			 * between the substitution and the new value.
+			 */
+
+			if (atom.isDataFunction()) {
+				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+
+				subterms.set(j, newVariable);
+				Function equality = fac.getEQFunction(var2, newVariable);
+				eqList.add(equality);
+
+			} else { // if its not data function, just replace
+						// variable
+				subterms.set(j, var2);
+			}
+		}
+		newVarCounter[0] += 1;
 	}
 
 	// Saturate equalities list to explicitly state JOIN conditions and
@@ -914,7 +993,9 @@ public class DatalogNormalizer {
 					firstDataAtomFound = true;
 				}
 
-				if (secondDataAtomFound && isLeftJoin) {
+				//I changed this, booleans were not being added !!
+				if (secondDataAtomFound && !isLeftJoin) {
+					System.err.println("DatalogNormalizer: I changed this!!");
 					tempTerms.addAll(currentBooleans);
 				}
 
@@ -933,7 +1014,10 @@ public class DatalogNormalizer {
 				}
 			}
 
-		}
+		} //end for current terms
+		
+		
+		
 		// tempTerms is currentTerms with "bad" boolean conditions removed
 		// now add all these removed conditions at the end
 		// and update current terms
@@ -945,6 +1029,7 @@ public class DatalogNormalizer {
 		// if we are in a Join that is a second data atom, then dont push it all
 		// the way up
 		if (!isSecondJoin) {
+			System.err.println("DatalogNormalizer: THIS LINE DOES NOT WORK !!");
 			leftConditionBooleans.addAll(tempConditionBooleans);
 		}
 		currentTerms.clear();

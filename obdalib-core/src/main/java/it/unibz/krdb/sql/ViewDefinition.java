@@ -5,8 +5,18 @@ public class ViewDefinition extends DataDefinition {
 	private static final long serialVersionUID = 3312336193514797486L;
 
 	private String statement;
+	
+	public ViewDefinition(String name) {
+		super(name);
+	}
+	
 
+	@Deprecated
 	public void copy(String statement) {
+		this.statement = statement;
+	}
+	
+	public void setSQL(String statement) {
 		this.statement = statement;
 	}
 

@@ -66,8 +66,8 @@ public class SQLQueryTranslator {
 		String projection = query.substring(start, end).trim();
 		String[] columns = projection.split(",");
 		
-		ViewDefinition viewDefinition = new ViewDefinition();
-		viewDefinition.setName(viewName);
+		ViewDefinition viewDefinition = new ViewDefinition(viewName);
+		//viewDefinition.setName(viewName);
 		viewDefinition.copy(query);		
 		for (int i = 0; i < columns.length; i++) {
 			String columnName = columns[i].trim();
