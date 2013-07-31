@@ -529,7 +529,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Function concept = dfac.getAtom(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			Function concept = dfac.getFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
@@ -538,18 +538,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				NewLiteral objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				Function attribute = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function attribute = dfac.getFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 				distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				Function role = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				Function role = dfac.getFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				body.add(role);
 			}
 		}
 		// Create the head
 		int arity = distinguishVariables.size();
-		Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		Function head = dfac.getFunctionalTerm(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);

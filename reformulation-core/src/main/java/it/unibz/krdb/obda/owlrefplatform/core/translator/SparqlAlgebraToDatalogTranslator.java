@@ -251,7 +251,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Collections.sort(atom1VarsList, comparator);
 		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
 				atom1VarsList.size());
-		Function leftAtom = ofac.getAtom(leftAtomPred, atom1VarsList);
+		Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 		Set<Variable> atom2VarsSet = getVariables(right);
 		List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
@@ -259,7 +259,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Collections.sort(atom2VarsList, comparator);
 		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
 				atom2VarsList.size());
-		Function rightAtom = ofac.getAtom(rightAtomPred, atom2VarsList);
+		Function rightAtom = ofac.getFunctionalTerm(rightAtomPred, atom2VarsList);
 
 		/* Preparing the head of the Union rules (2 rules) */
 		// Collections.sort(vars, comparator);
@@ -268,7 +268,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			headVars.add(var);
 		}
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
-		Function head = ofac.getAtom(answerPred, headVars);
+		Function head = ofac.getFunctionalTerm(answerPred, headVars);
 
 		/*
 		 * Adding the UNION to the program, i.e., two rules Note, we need to
@@ -341,7 +341,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Collections.sort(atom1VarsList, comparator);
 		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
 				atom1VarsList.size());
-		Function leftAtom = ofac.getAtom(leftAtomPred, atom1VarsList);
+		Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 		Set<Variable> atom2VarsSet = getVariables(right);
 		List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
@@ -349,12 +349,12 @@ public class SparqlAlgebraToDatalogTranslator {
 		Collections.sort(atom2VarsList, comparator);
 		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
 				atom2VarsList.size());
-		Function rightAtom = ofac.getAtom(rightAtomPred, atom2VarsList);
+		Function rightAtom = ofac.getFunctionalTerm(rightAtomPred, atom2VarsList);
 
 		/* The join, this is no longer necessary, we will try to avoid explicit joins
 		as much as poosible, just use comma */
 //		Predicate joinp = OBDAVocabulary.SPARQL_JOIN;
-//		Function joinAtom = ofac.getAtom(joinp, leftAtom, rightAtom);
+//		Function joinAtom = ofac.getFunctionalTerm(joinp, leftAtom, rightAtom);
 
 		/* Preparing the head of the Join rule */
 		// Collections.sort(vars, comparator);
@@ -363,7 +363,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			headVars.add(var);
 		}
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
-		Function head = ofac.getAtom(answerPred, headVars);
+		Function head = ofac.getFunctionalTerm(answerPred, headVars);
 
 		/*
 		 * Adding the join to the program
@@ -403,7 +403,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Collections.sort(atom1VarsList, comparator);
 		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
 				atom1VarsList.size());
-		Function leftAtom = ofac.getAtom(leftAtomPred, atom1VarsList);
+		Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 		Set<Variable> atom2VarsSet = getVariables(right);
 		List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
@@ -411,18 +411,18 @@ public class SparqlAlgebraToDatalogTranslator {
 		Collections.sort(atom2VarsList, comparator);
 		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
 				atom2VarsList.size());
-		Function rightAtom = ofac.getAtom(rightAtomPred, atom2VarsList);
+		Function rightAtom = ofac.getFunctionalTerm(rightAtomPred, atom2VarsList);
 
 		/* The join */
 		Predicate joinp = OBDAVocabulary.SPARQL_LEFTJOIN;
 
-		Function joinAtom = ofac.getAtom(joinp, leftAtom, rightAtom);
+		Function joinAtom = ofac.getFunctionalTerm(joinp, leftAtom, rightAtom);
 
 		/* adding the conditions of the filter for the LeftJoin */
 		if (filter != null) {
 			List joinTerms = joinAtom.getTerms();
 			for (Expr expr : filter.getList()) {
-				joinTerms.add(((Function) getBooleanTerm(expr)).asAtom());
+				joinTerms.add(((Function) getBooleanTerm(expr)));
 			}
 		}
 
@@ -433,7 +433,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			headVars.add(var);
 		}
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
-		Function head = ofac.getAtom(answerPred, headVars);
+		Function head = ofac.getFunctionalTerm(answerPred, headVars);
 
 		/*
 		 * Adding the join to the program
@@ -475,7 +475,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		Predicate predicate = ofac.getPredicate("ans" + i,
 				projectedVariables.size());
-		Function head = ofac.getAtom(predicate, projectedVariables);
+		Function head = ofac.getFunctionalTerm(predicate, projectedVariables);
 
 		Predicate pbody = ofac.getPredicate("ans" + (i + 1), nestedVars.size());
 		;
@@ -485,7 +485,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		bodyatomVarsList.addAll(bodyatomVarsSet);
 		Collections.sort(bodyatomVarsList, comparator);
 
-		Function bodyAtom = ofac.getAtom(pbody, bodyatomVarsList);
+		Function bodyAtom = ofac.getFunctionalTerm(pbody, bodyatomVarsList);
 		CQIE cq = ofac.getCQIE(head, bodyAtom);
 		pr.appendRule(cq);
 
@@ -547,7 +547,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				a = (Function) getBooleanTerm(expr);
 			}
 			if (a != null) {
-				Function filterAtom = ofac.getAtom(a.getFunctionSymbol(),
+				Function filterAtom = ofac.getFunctionalTerm(a.getFunctionSymbol(),
 						a.getTerms());
 				filterAtoms.add(filterAtom);
 				filteredVariables.addAll(filterAtom.getReferencedVariables());
@@ -557,7 +557,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Predicate predicate = ofac.getPredicate("ans" + (i), var.size());
 		List<NewLiteral> vars = new LinkedList<NewLiteral>();
 		vars.addAll(var);
-		Function head = ofac.getAtom(predicate, vars);
+		Function head = ofac.getFunctionalTerm(predicate, vars);
 
 		Predicate pbody;
 		Function bodyAtom;
@@ -583,10 +583,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		// expressions
 		if (vars.size() == 0 && filteredVariables.size() > 0) {
 			pbody = ofac.getPredicate("ans" + (i * 2), innerProjection.size());
-			bodyAtom = ofac.getAtom(pbody, innerProjection);
+			bodyAtom = ofac.getFunctionalTerm(pbody, innerProjection);
 		} else {
 			pbody = ofac.getPredicate("ans" + (i * 2), vars.size());
-			bodyAtom = ofac.getAtom(pbody, vars);
+			bodyAtom = ofac.getFunctionalTerm(pbody, vars);
 		}
 
 		LinkedList<Function> body = new LinkedList<Function>();
@@ -636,7 +636,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				headVars.add(var);
 			}
 			Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
-			Function head = ofac.getAtom(answerPred, headVars);
+			Function head = ofac.getFunctionalTerm(answerPred, headVars);
 
 			/* Preparing the two atoms */
 			Set<Variable> atom1VarsSet = getVariables(triples.get(0));
@@ -645,7 +645,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Collections.sort(atom1VarsList, comparator);
 			Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
 					atom1VarsList.size());
-			Function leftAtom = ofac.getAtom(leftAtomPred, atom1VarsList);
+			Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 			Set<Variable> atom2VarsSet = getVariables(triples.subList(1,
 					triples.size()));
@@ -654,11 +654,11 @@ public class SparqlAlgebraToDatalogTranslator {
 			Collections.sort(atom2VarsList, comparator);
 			Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
 					atom2VarsList.size());
-			Function rightAtom = ofac.getAtom(rightAtomPred, atom2VarsList);
+			Function rightAtom = ofac.getFunctionalTerm(rightAtomPred, atom2VarsList);
 
 			/* The join */
 //			Predicate join = OBDAVocabulary.SPARQL_JOIN;
-//			Function joinAtom = ofac.getAtom(join, leftAtom, rightAtom);
+//			Function joinAtom = ofac.getFunctionalTerm(join, leftAtom, rightAtom);
 
 			CQIE newrule = ofac.getCQIE(head, leftAtom, rightAtom);
 			pr.appendRule(newrule);
@@ -940,7 +940,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			}
 		}
 		// Construct the atom
-		Function atom = ofac.getAtom(predicate, terms);
+		Function atom = ofac.getFunctionalTerm(predicate, terms);
 		result.addFirst(atom);
 
 		// Collections.sort(vars, comparator);
@@ -950,7 +950,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
-		Function head = ofac.getAtom(answerPred, newvars);
+		Function head = ofac.getFunctionalTerm(answerPred, newvars);
 
 		CQIE newrule = ofac.getCQIE(head, result);
 		pr.appendRule(newrule);

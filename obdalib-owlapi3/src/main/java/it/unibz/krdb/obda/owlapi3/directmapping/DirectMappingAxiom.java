@@ -153,7 +153,7 @@ public class DirectMappingAxiom {
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
-		atoms.add(df.getAtom(df.getClassPredicate(generateClassURI(table.getName())), sub));
+		atoms.add(df.getFunctionalTerm(df.getClassPredicate(generateClassURI(table.getName())), sub));
 		
 		
 		//DataType Atoms
@@ -163,13 +163,13 @@ public class DirectMappingAxiom {
 			Predicate type = typeMapper.getPredicate(att.getType());
 			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
 				Variable objV = df.getVariable(att.getName());
-				atoms.add(df.getAtom(
+				atoms.add(df.getFunctionalTerm(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
 			} else {
 				Function obj = df.getFunctionalTerm(type,
 						df.getVariable(att.getName()));
-				atoms.add(df.getAtom(
+				atoms.add(df.getFunctionalTerm(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));
 			}
@@ -181,7 +181,7 @@ public class DirectMappingAxiom {
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
-		Function head = df.getAtom(headPredicate, headTerms);
+		Function head = df.getFunctionalTerm(headPredicate, headTerms);
 		
 		
 		return df.getCQIE(head, atoms);
@@ -204,7 +204,7 @@ public class DirectMappingAxiom {
 							.getDefinition(pkTableReference);
 					NewLiteral obj = generateSubject(tdRef, true);
 
-					atom = (df.getAtom(
+					atom = (df.getFunctionalTerm(
 							df.getObjectPropertyPredicate(generateOPURI(
 									table.getName(), table.getAttributes())),
 							sub, obj));
@@ -216,7 +216,7 @@ public class DirectMappingAxiom {
 					Predicate headPredicate = df.getPredicate(
 							"http://obda.inf.unibz.it/quest/vocabulary#q",
 							headTerms.size());
-					Function head = df.getAtom(headPredicate, headTerms);
+					Function head = df.getFunctionalTerm(headPredicate, headTerms);
 					return df.getCQIE(head, atom);
 				}
 			}

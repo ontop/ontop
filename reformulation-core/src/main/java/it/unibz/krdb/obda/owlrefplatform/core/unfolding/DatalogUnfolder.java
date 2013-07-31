@@ -615,7 +615,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			body.remove(atomIdx);
 			for (int subtermidx = function.getTerms().size() - 1; subtermidx >= 0; subtermidx--) {
 				NewLiteral atom = function.getTerm(subtermidx);
-				body.add(atomIdx, atom.asAtom());
+				body.add(atomIdx, (Function)atom);
 			}
 			atomIdx += -1;
 		}
@@ -1530,7 +1530,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
-		log.debug("Empty evaluation - Data Atom {}", focusLiteral);
+		log.debug("Empty evaluation - Data Function {}", focusLiteral);
 
 		CQIE freshRule = originalRuleWithLeftJoin.clone();
 		// List<Function> body = freshRule.getBody();

@@ -580,7 +580,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (asFunction.isBooleanFunction()) {
 				continue;
 			}
-			innerVariables.addAll(getVariableReferencesWithLeftJoin(asFunction.asAtom()));
+			innerVariables.addAll(getVariableReferencesWithLeftJoin(asFunction));
 			foundFirstDataAtom = true;
 		}
 		return innerVariables;

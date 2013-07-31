@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -99,8 +98,4 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		return new HashMap<Variable, Integer>();
 	}
 
-	@Override
-	public Atom asAtom() {
-		throw new RuntimeException("Impossible to cast as atom: " + this.getClass());
-	}
 }

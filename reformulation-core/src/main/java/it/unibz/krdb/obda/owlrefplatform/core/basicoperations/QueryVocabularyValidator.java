@@ -154,13 +154,13 @@ public class QueryVocabularyValidator implements Serializable {
 			Function newatom = null;
 
 			if (equivalent instanceof OClass) {
-				newatom = fac.getAtom(((OClass) equivalent).getPredicate(), atom.getTerm(0));
+				newatom = fac.getFunctionalTerm(((OClass) equivalent).getPredicate(), atom.getTerm(0));
 			} else if (equivalent instanceof Property) {
 				Property equiproperty = (Property) equivalent;
 				if (!equiproperty.isInverse()) {
-					newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
+					newatom = fac.getFunctionalTerm(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
 				} else {
-					newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+					newatom = fac.getFunctionalTerm(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 				}
 			}
 			body.set(i, newatom);

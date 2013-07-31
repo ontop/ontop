@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.HashMap;
@@ -69,8 +68,4 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 		return count;
 	}
 
-	@Override
-	public Atom asAtom() {
-		throw new RuntimeException("Impossible to cast as atom: " + this.getClass()); 
-	}
 }

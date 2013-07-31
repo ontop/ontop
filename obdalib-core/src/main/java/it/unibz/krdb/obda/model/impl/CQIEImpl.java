@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
@@ -150,7 +149,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public CQIEImpl clone() {
-		Function copyHead = (Atom) head.clone();
+		Function copyHead = (Function)head.clone();
 		List<Function> copyBody = new ArrayList<Function>(body.size() + 10);
 
 		for (Function atom : body) {

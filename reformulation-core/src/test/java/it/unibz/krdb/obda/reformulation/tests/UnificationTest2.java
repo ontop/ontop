@@ -67,10 +67,10 @@ public class UnificationTest2 extends TestCase {
 		terms4.add(t3.clone());
 		terms4.add(t2.clone());
 
-		Function a1 = tfac.getAtom(r1, terms1);
-		Function a2 = tfac.getAtom(r2, terms2);
-		Function a3 = tfac.getAtom(s, terms3);
-		Function head = tfac.getAtom(p, terms4);
+		Function a1 = tfac.getFunctionalTerm(r1, terms1);
+		Function a2 = tfac.getFunctionalTerm(r2, terms2);
+		Function a3 = tfac.getFunctionalTerm(s, terms3);
+		Function head = tfac.getFunctionalTerm(p, terms4);
 
 		Vector<Function> body = new Vector<Function>();
 		body.add(a1);

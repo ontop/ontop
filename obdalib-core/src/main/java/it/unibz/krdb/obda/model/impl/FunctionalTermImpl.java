@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Predicate;
@@ -39,7 +38,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	// null when the list of terms has been modified
 	protected String string = null;
 
-	protected Atom asAtom = null;
+	protected Function asAtom = null;
 
 	/**
 	 * The default constructor.
@@ -263,14 +262,6 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 			}
 		}
 		listChanged();
-	}
-
-	@Override
-	public Atom asAtom() {
-		if (asAtom == null) {
-			asAtom = new AtomWrapperImpl(this);
-		}
-		return asAtom;
 	}
 
 	@Override

@@ -19,18 +19,10 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDAModel getOBDAModel();
 
-	public Atom getAtom(Predicate predicate, List<NewLiteral> terms);
-
-	public Atom getAtom(Predicate predicate, NewLiteral term1);
-
-	public Atom getAtom(Predicate predicate, NewLiteral term1, NewLiteral term2);
-
 	public CQIE getCQIE(Function head, Function... body );
 	
 	public CQIE getCQIE(Function head, List<Function> body);
 
-	public CQIE getCQIE(Function head, Function body);
-	
 	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
@@ -94,39 +86,6 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getBNodeTemplatePredicate(int arity);
 
-	/*
-	 * Boolean atoms
-	 */
-
-	public Atom getEQAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getGTEAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getGTAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getLTEAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getLTAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getNEQAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getNOTAtom(NewLiteral term);
-
-	public Atom getANDAtom(NewLiteral term1, NewLiteral term2);
-
-	public Atom getANDAtom(NewLiteral term1, NewLiteral term2, NewLiteral term3);
-
-	public Atom getANDAtom(List<NewLiteral> terms);
-
-	public Atom getORAtom(NewLiteral term1, NewLiteral term2);
-
-	public Atom getORAtom(NewLiteral term1, NewLiteral term2, NewLiteral term3);
-
-	public Atom getORAtom(List<NewLiteral> terms);
-
-	public Atom getIsNullAtom(NewLiteral term);
-
-	public Atom getIsNotNullAtom(NewLiteral term);
 
 	/*
 	 * Boolean function terms
@@ -211,8 +170,6 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public URIConstant getURIConstant(String uri);
 	
-//	public URIConstant getURIConstant(IRI uri);
-
 	public BNode getBNodeConstant(String name);
 
 	public Constant getNULL();
@@ -310,10 +267,6 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionalTerm(Predicate functor, NewLiteral... terms);
 
 	public Function getFunctionalTerm(Predicate functor, List<NewLiteral> terms);
-
-	public Function getFunctionalTerm(Predicate functor, NewLiteral term1);
-
-	public Function getFunctionalTerm(Predicate functor, NewLiteral term1, NewLiteral term2);
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

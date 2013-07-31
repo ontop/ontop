@@ -67,7 +67,7 @@ public class ThetaApplicationTest extends TestCase {
 		terms1.add(t3);
 		terms1.add(ot);
 		terms1.add(ot2);
-		Function atom1 = predFactory.getAtom(pred1, terms1);
+		Function atom1 = predFactory.getFunctionalTerm(pred1, terms1);
 		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
@@ -86,7 +86,7 @@ public class ThetaApplicationTest extends TestCase {
 		Predicate head = predFactory.getPredicate("q", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(t10);
-		Function h = predFactory.getAtom(head, terms2);
+		Function h = predFactory.getFunctionalTerm(head, terms2);
 
 		CQIE query = predFactory.getCQIE(h, body);
 

@@ -60,26 +60,26 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		List<NewLiteral> terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(y);
-		Function a1 = tfac.getAtom(r, terms1);
+		Function a1 = tfac.getFunctionalTerm(r, terms1);
 
 		List<NewLiteral> terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(z);
-		Function a2 = tfac.getAtom(r, terms2);
+		Function a2 = tfac.getFunctionalTerm(r, terms2);
 
 		List<NewLiteral> terms3 = new LinkedList<NewLiteral>();
 		terms3.add(y);
 		terms3.add(m);
-		Function a3 = tfac.getAtom(s, terms3);
+		Function a3 = tfac.getFunctionalTerm(s, terms3);
 
 		List<NewLiteral> terms4 = new LinkedList<NewLiteral>();
 		terms4.add(z);
 		terms4.add(m);
-		Function a4 = tfac.getAtom(s, terms4);
+		Function a4 = tfac.getFunctionalTerm(s, terms4);
 
 		List<NewLiteral> termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
-		Function head = tfac.getAtom(q, termshead);
+		Function head = tfac.getFunctionalTerm(q, termshead);
 
 		LinkedList<Function> body = new LinkedList<Function>();
 		body.add(a1);
@@ -92,12 +92,12 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(u1);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunctionalTerm(r, terms1);
 
 		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(u2);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunctionalTerm(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
@@ -105,19 +105,19 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunctionalTerm(q, termshead);
 
 		initialquery2 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(u1);
 		terms1.add(x);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunctionalTerm(r, terms1);
 
 		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(u2);
 		terms2.add(x);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunctionalTerm(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
@@ -125,19 +125,19 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunctionalTerm(q, termshead);
 
 		initialquery3 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(x);
 		terms1.add(u1);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunctionalTerm(r, terms1);
 
 		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(x);
 		terms2.add(y);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunctionalTerm(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
@@ -145,19 +145,19 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunctionalTerm(q, termshead);
 
 		initialquery4 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<NewLiteral>();
 		terms1.add(u1);
 		terms1.add(x);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunctionalTerm(r, terms1);
 
 		terms2 = new LinkedList<NewLiteral>();
 		terms2.add(y);
 		terms2.add(x);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunctionalTerm(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
@@ -165,7 +165,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<NewLiteral>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunctionalTerm(q, termshead);
 
 		initialquery5 = tfac.getCQIE(head, body);
 

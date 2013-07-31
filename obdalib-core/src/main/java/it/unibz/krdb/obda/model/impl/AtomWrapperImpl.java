@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Predicate;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class AtomWrapperImpl implements Atom {
+public class AtomWrapperImpl implements Function {
 
 	private static final long serialVersionUID = -1036381325035396595L;
 
@@ -88,13 +87,9 @@ public class AtomWrapperImpl implements Atom {
 		return f.getVariableCount();
 	}
 
-	@Override
-	public Atom asAtom() {
-		return this;
-	}
 
 	@Override
-	public Atom clone() {
+	public Function clone() {
 		Function fclone = null;
 		if (f instanceof AtomWrapperImpl) {
 			((AtomWrapperImpl) f).f.clone();

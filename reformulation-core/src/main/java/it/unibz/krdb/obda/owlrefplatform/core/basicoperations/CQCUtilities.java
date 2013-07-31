@@ -239,12 +239,12 @@ public class CQCUtilities {
 							newTerm1 = oldTerm1;
 							newTerm2 = oldTerm2;
 						}
-						newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+						newAtom = fac.getFunctionalTerm(newPredicate, newTerm1, newTerm2);
 					} else if (right instanceof OClass) {
 						OClass rightAtomicConcept = (OClass) right;
 						newTerm1 = oldTerm1;
 						newPredicate = rightAtomicConcept.getPredicate();
-						newAtom = fac.getAtom(newPredicate, newTerm1);
+						newAtom = fac.getFunctionalTerm(newPredicate, newTerm1);
 
 					} else if (right instanceof PropertySomeRestriction) {
 						// Here we need to introduce new variables, for the
@@ -259,13 +259,13 @@ public class CQCUtilities {
 								continue;
 							newTerm1 = fac.getNondistinguishedVariable();
 							newTerm2 = oldTerm1;
-							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+							newAtom = fac.getFunctionalTerm(newPredicate, newTerm1, newTerm2);
 						} else {
 							if (newTerm1 instanceof AnonymousVariable)
 								continue;
 							newTerm1 = oldTerm1;
 							newTerm2 = fac.getNondistinguishedVariable();
-							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+							newAtom = fac.getFunctionalTerm(newPredicate, newTerm1, newTerm2);
 						}
 					} else if (right instanceof DataType) {
 						// Does nothing
@@ -279,7 +279,7 @@ public class CQCUtilities {
 								continue;
 							newTerm1 = oldTerm1;
 							newTerm2 = fac.getNondistinguishedVariable();
-							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+							newAtom = fac.getFunctionalTerm(newPredicate, newTerm1, newTerm2);
 						}
 					}
 

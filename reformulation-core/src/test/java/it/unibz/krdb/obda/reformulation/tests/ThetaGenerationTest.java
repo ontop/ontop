@@ -8,7 +8,7 @@
  */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -58,12 +58,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -85,12 +85,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -118,12 +118,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -151,12 +151,12 @@ public class ThetaGenerationTest extends TestCase {
 //			Predicate pred1 = predFactory.createPredicate("A", 1);
 //			List<Term> terms1 = new Vector<Term>();
 //			terms1.add(t1);
-//			Atom atom1 = tfac.getAtom(pred1, terms1);
+//			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 //
 //			Predicate pred2 = predFactory.createPredicate("A", 1);
 //			List<Term> terms2 = new Vector<Term>();
 //			terms2.add(ft);
-//			Atom atom2 = tfac.getAtom(pred2, terms2);
+//			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 //
 //			AtomUnifier unifier = new AtomUnifier();
 //			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -183,12 +183,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -212,12 +212,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -240,12 +240,12 @@ public class ThetaGenerationTest extends TestCase {
 //			Predicate pred1 = predFactory.createPredicate("A", 1);
 //			List<Term> terms1 = new Vector<Term>();
 //			terms1.add(t1);
-//			Atom atom1 = tfac.getAtom(pred1, terms1);
+//			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 //
 //			Predicate pred2 = predFactory.createPredicate("A", 1);
 //			List<Term> terms2 = new Vector<Term>();
 //			terms2.add(ft);
-//			Atom atom2 = tfac.getAtom(pred2, terms2);
+//			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 //
 //			AtomUnifier unifier = new AtomUnifier();
 //			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -267,12 +267,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -296,12 +296,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(ot);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -325,12 +325,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(t2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -350,12 +350,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(t2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -389,12 +389,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -418,12 +418,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -447,12 +447,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -485,12 +485,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -514,12 +514,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -552,12 +552,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -581,12 +581,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -613,12 +613,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot1);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot2);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -639,12 +639,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -664,12 +664,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(t2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -703,12 +703,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -732,12 +732,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -770,12 +770,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -799,12 +799,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -837,12 +837,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -866,12 +866,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -898,12 +898,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms1 = new Vector<NewLiteral>();
 		terms1.add(ot2);
-		Atom atom1 = tfac.getAtom(pred1, terms1);
+		Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate("A", 1);
 		List<NewLiteral> terms2 = new Vector<NewLiteral>();
 		terms2.add(ot1);
-		Atom atom2 = tfac.getAtom(pred2, terms2);
+		Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 		Unifier unifier = new Unifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -921,12 +921,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -948,12 +948,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms1 = new Vector<NewLiteral>();
 			terms1.add(t1);
-			Atom atom1 = tfac.getAtom(pred1, terms1);
+			Function atom1 = tfac.getFunctionalTerm(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate("A", 1);
 			List<NewLiteral> terms2 = new Vector<NewLiteral>();
 			terms2.add(t2);
-			Atom atom2 = tfac.getAtom(pred2, terms2);
+			Function atom2 = tfac.getFunctionalTerm(pred2, terms2);
 
 			Unifier unifier = new Unifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));

@@ -160,7 +160,7 @@ public class QueryAnonymizer {
 				}
 			}
 			Function newatom = termFactory
-					.getAtom(atom.getPredicate().clone(), vex);
+					.getFunctionalTerm(atom.getPredicate().clone(), vex);
 			newBody.add(newatom);
 		}
 		CQIE query = termFactory.getCQIE(q.getHead(), newBody);

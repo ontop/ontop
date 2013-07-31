@@ -854,7 +854,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
-				Function notnull = fac.getIsNotNullAtom(var);
+				Function notnull = fac.getIsNotNullFunction(var);
 				mapping.getBody().add(notnull);
 			}
 		}
@@ -1166,7 +1166,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				String classname = currenthead.getFunctionSymbol().getName();
 				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
-				newhead = fac.getAtom(pred, terms);
+				newhead = fac.getFunctionalTerm(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
 				/*
@@ -1179,7 +1179,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
-				newhead = fac.getAtom(pred, terms);
+				newhead = fac.getFunctionalTerm(pred, terms);
 			}
 			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());
 			newmappings.add(newmapping);

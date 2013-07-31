@@ -101,7 +101,7 @@ public class MappingVocabularyRepair {
 				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
 					newTerms.set(1, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
 				}
-				newatom = dfac.getAtom(predicate, newTerms);
+				newatom = dfac.getFunctionalTerm(predicate, newTerms);
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);

@@ -104,7 +104,7 @@ try{
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = fac.getAtom(q, headTerms);
+		Function head = fac.getFunctionalTerm(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -116,12 +116,12 @@ try{
 		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 		Predicate school = fac.getPredicate("School", 1);
-		body.add(fac.getAtom(person, objectTerm));
-		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
-		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
-		body.add(fac.getAtom(age, objectTerm, fac.getVariable("age")));
-		body.add(fac.getAtom(hasschool, objectTerm, fac.getVariable("schooluri")));
-		body.add(fac.getAtom(school, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(person, objectTerm));
+		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunctionalTerm(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunctionalTerm(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunctionalTerm(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
@@ -201,7 +201,7 @@ try{
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = fac.getAtom(q, headTerms);
+		Function head = fac.getFunctionalTerm(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -213,12 +213,12 @@ try{
 		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 		Predicate school = fac.getPredicate("School", 1);
-		body.add(fac.getAtom(person, objectTerm));
-		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
-		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
-		body.add(fac.getAtom(age, objectTerm, fac.getVariable("age")));
-		body.add(fac.getAtom(hasschool, objectTerm, fac.getVariable("schooluri")));
-		body.add(fac.getAtom(school, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(person, objectTerm));
+		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunctionalTerm(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunctionalTerm(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunctionalTerm(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
@@ -306,7 +306,7 @@ try{
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = fac.getAtom(q, headTerms);
+		Function head = fac.getFunctionalTerm(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -318,12 +318,12 @@ try{
 		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 		Predicate school = fac.getPredicate("School", 1);
-		body.add(fac.getAtom(person, objectTerm));
-		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
-		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
-		body.add(fac.getAtom(age, objectTerm, fac.getVariable("age")));
-		body.add(fac.getAtom(hasschool, objectTerm, fac.getVariable("schooluri")));
-		body.add(fac.getAtom(school, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(person, objectTerm));
+		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunctionalTerm(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunctionalTerm(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunctionalTerm(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
@@ -478,7 +478,7 @@ try{
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = fac.getAtom(q, headTerms);
+		Function head = fac.getFunctionalTerm(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -490,12 +490,12 @@ try{
 		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 		Predicate school = fac.getPredicate("School", 1);
-		body.add(fac.getAtom(person, objectTerm));
-		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
-		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
-		body.add(fac.getAtom(age, objectTerm, fac.getVariable("age")));
-		body.add(fac.getAtom(hasschool, objectTerm, fac.getVariable("schooluri")));
-		body.add(fac.getAtom(school, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(person, objectTerm));
+		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunctionalTerm(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunctionalTerm(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunctionalTerm(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
@@ -570,7 +570,7 @@ try{
 		headTerms.add(ageVariable);
 		headTerms.add(schoolUriVariable);
 
-		Function head = fac.getAtom(q, headTerms);
+		Function head = fac.getFunctionalTerm(q, headTerms);
 
 		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getUriTemplatePredicate(2),
 				fac.getValueConstant("http://schools.com/persons{}{}"), 
@@ -584,20 +584,20 @@ try{
 		Predicate age = fac.getDataPropertyPredicate("agee");
 		Predicate hasschool = fac.getDataPropertyPredicate("hasschool");
 		Predicate school = fac.getClassPredicate("School");
-//		body.add(fac.getAtom(person, objectTerm));
-//		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
-//		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
-//		body.add(fac.getAtom(age, objectTerm, fac.getVariable("age")));
-//		body.add(fac.getAtom(hasschool, objectTerm, fac.getVariable("schooluri")));
-//		body.add(fac.getAtom(school, fac.getVariable("schooluri")));
+//		body.add(fac.getFunctionalTerm(person, objectTerm));
+//		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
+//		body.add(fac.getFunctionalTerm(ln, objectTerm, fac.getVariable("ln")));
+//		body.add(fac.getFunctionalTerm(age, objectTerm, fac.getVariable("age")));
+//		body.add(fac.getFunctionalTerm(hasschool, objectTerm, fac.getVariable("schooluri")));
+//		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql1, fac.getCQIE(head, fac.getAtom(person, objectTerm)));
-		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getAtom(fn, objectTerm, firstNameVariable)));
-		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getAtom(ln, objectTerm, lastNameVariable)));
-		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getAtom(age, objectTerm, ageVariable)));
-		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getAtom(hasschool, objectTerm, schoolUriVariable)));
-		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getAtom(school, schoolUriVariable)));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql1, fac.getCQIE(head, fac.getFunctionalTerm(person, objectTerm)));
+		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getFunctionalTerm(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getFunctionalTerm(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getFunctionalTerm(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getFunctionalTerm(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getFunctionalTerm(school, schoolUriVariable)));
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);

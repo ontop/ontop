@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.io;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
@@ -24,7 +23,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
@@ -239,7 +237,7 @@ public class R2RMLWriter {
 			NewLiteral term = it.next();
 			if (term instanceof AtomWrapperImpl)
 			{
-				Atom atom = term.asAtom();
+				Function atom = (Function)term;
 				int arity = atom.getTerms().size();
 				if (arity == 1) {
 					// class
@@ -364,7 +362,7 @@ public class R2RMLWriter {
 			}
 			else if (term instanceof AtomWrapperImpl)
 			{
-				Atom atom = term.asAtom();
+				Function atom = (Function)term;
 				//not class atoms
 				if (atom.getTerms().size() > 1)
 				{
@@ -393,7 +391,7 @@ public class R2RMLWriter {
 					else
 						object = "\t\t rr:objectMap \t[ rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"; rr:datatype "+ p.toString() + " ]";
 				} else
-					object = "\t\t rr:object \t "+obj.asAtom().getTerm(0).toString();
+					object = "\t\t rr:object \t "+((Function)obj).getTerm(0).toString();
 				return object;
 			}
 			else
@@ -426,11 +424,11 @@ public class R2RMLWriter {
 			System.out.println("URIConst: "+obj.toString());
 		else if (obj instanceof ValueConstant)
 			System.out.println("ValueConst: "+obj.toString());
-		else if (obj.asAtom().isDataFunction())
+		else if (((Function)obj).isDataFunction())
 		{
-			Iterator<Variable> varcol = obj.asAtom().getVariables().iterator();
+			Iterator<Variable> varcol = ((Function)obj).getVariables().iterator();
 			object = "\t\t rr:objectMap \t[ rr:column \"\\\""+varcol.next().toString()+"\\\"\";  rr:datatype xsd:"+
-			obj.asAtom().getFunctionSymbol().toString().split("#")[1]+"]";
+					((Function)obj).getFunctionSymbol().toString().split("#")[1]+"]";
 		}
 		else
 			System.out.println("Found: "+obj.toString());

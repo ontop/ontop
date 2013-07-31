@@ -47,8 +47,8 @@ public class ABoxToFactConverter {
 			ObjectConstant c = ca.getObject();
 			Predicate p = ca.getConcept();
 			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			head = factory.getAtom(p, factory.getFunctionalTerm(urifuction, c));
-			// head = factory.getAtom(p, c);
+			head = factory.getFunctionalTerm(p, factory.getFunctionalTerm(urifuction, c));
+			// head = factory.getFunctionalTerm(p, c);
 		} else {
 			return null;
 		}

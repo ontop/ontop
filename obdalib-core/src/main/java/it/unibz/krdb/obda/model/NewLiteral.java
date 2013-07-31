@@ -26,5 +26,4 @@ public interface NewLiteral extends Serializable {
 
 	public Map<Variable, Integer> getVariableCount();
 
-	public Atom asAtom();
 }

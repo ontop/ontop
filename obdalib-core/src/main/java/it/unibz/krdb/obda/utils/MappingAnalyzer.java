@@ -116,7 +116,7 @@ public class MappingAnalyzer {
 						terms.add(term);
 					}
 					// Create an atom for a particular table
-					Function atom = dfac.getAtom(predicate, terms);
+					Function atom = dfac.getFunctionalTerm(predicate, terms);
 					atoms.add(atom);
 				}
 
@@ -136,7 +136,7 @@ public class MappingAnalyzer {
 					NewLiteral t1 = dfac.getVariable(lookup1);
 					NewLiteral t2 = dfac.getVariable(lookup2);
 
-					Function atom = dfac.getEQAtom(t1, t2);
+					Function atom = dfac.getEQFunction(t1, t2);
 					atoms.add(atom);
 				}
 
@@ -191,7 +191,7 @@ public class MappingAnalyzer {
 					// The filter function stack must have 1 element left
 					if (filterFunctionStack.size() == 1) {
 						Function filterFunction = filterFunctionStack.pop();
-						Function atom = dfac.getAtom(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
+						Function atom = dfac.getFunctionalTerm(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
 						atoms.add(atom);
 					} else {						
 						throwInvalidFilterExpressionException(filterFunctionStack);
@@ -206,7 +206,7 @@ public class MappingAnalyzer {
 					for (NewLiteral term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
-					Function newhead = dfac.getAtom(atom.getPredicate(), newterms);
+					Function newhead = dfac.getFunctionalTerm(atom.getPredicate(), newterms);
 					CQIE rule = dfac.getCQIE(newhead, atoms);
 					datalog.appendRule(rule);
 				}

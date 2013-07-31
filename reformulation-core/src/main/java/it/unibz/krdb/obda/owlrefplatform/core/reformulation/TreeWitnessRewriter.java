@@ -94,7 +94,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	
 	private static Function getHeadAtom(String base, String suffix, List<NewLiteral> arguments) {
 		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
-		return fac.getAtom(predicate, arguments);
+		return fac.getFunctionalTerm(predicate, arguments);
 	}
 	
 	/*
@@ -111,11 +111,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
-				atom = fac.getAtom(((OClass)con).getPredicate(), r0);
+				atom = fac.getFunctionalTerm(((OClass)con).getPredicate(), r0);
 			}
 			else {
 				PropertySomeRestriction some = (PropertySomeRestriction)con;
-				atom = (!some.isInverse()) ?  fac.getAtom(some.getPredicate(), r0, x) : fac.getAtom(some.getPredicate(), x, r0);  						 
+				atom = (!some.isInverse()) ?  fac.getFunctionalTerm(some.getPredicate(), r0, x) : fac.getFunctionalTerm(some.getPredicate(), x, r0);  						 
 			}
 			genAtoms.add(atom);
 		}
@@ -148,12 +148,12 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			Iterator<NewLiteral> i = tw.getRoots().iterator();
 			NewLiteral r0 = i.next();
 			while (i.hasNext()) 
-				twf.addNoCheck(fac.getEQAtom(i.next(), r0));
+				twf.addNoCheck(fac.getEQFunction(i.next(), r0));
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
 				Predicate predicate = a.getFunctionSymbol();
-				twf.add((predicate.getArity() == 1) ? fac.getAtom(predicate, r0) : fac.getAtom(predicate, r0, r0));
+				twf.add((predicate.getArity() == 1) ? fac.getFunctionalTerm(predicate, r0) : fac.getFunctionalTerm(predicate, r0, r0));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
@@ -363,10 +363,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			if (ext != null) {
 				usedExts = true;        // usedExts.add(ext);
 				if (a.getArity() == 1) 
-					return fac.getAtom(ext, a.getTerm(0));
+					return fac.getFunctionalTerm(ext, a.getTerm(0));
 				else {
 					assert (a.getArity() == 2);
-					return fac.getAtom(ext, a.getTerm(0), a.getTerm(1));
+					return fac.getFunctionalTerm(ext, a.getTerm(0), a.getTerm(1));
 				}
 			}
 			return a;

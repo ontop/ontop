@@ -76,7 +76,7 @@ public class ExpressionEvaluator {
 				return true;
 			}
 			q.getBody().remove(atomidx);
-			q.getBody().add(atomidx, newatom.asAtom());
+			q.getBody().add(atomidx, (Function)newatom);
 		}
 		return false;
 	}
@@ -448,7 +448,7 @@ public class ExpressionEvaluator {
 	private Predicate getDatatypePredicate(NewLiteral term) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
-			return function.asAtom().getFunctionSymbol();
+			return function.getFunctionSymbol();
 		} else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
 			COL_TYPE type = constant.getType();
@@ -843,9 +843,9 @@ public class ExpressionEvaluator {
 
 		/* eval2 is not a function */
 		if (eq) {
-			return fac.getEQAtom(eval1, eval2);
+			return fac.getEQFunction(eval1, eval2);
 		} else {
-			return fac.getNEQAtom(eval1, eval2);
+			return fac.getNEQFunction(eval1, eval2);
 		}
 	}
 
@@ -878,9 +878,9 @@ public class ExpressionEvaluator {
 		}
 		if (term2 instanceof Variable) {
 			if (isEqual) {
-				return fac.getEQAtom(term2, term1);
+				return fac.getEQFunction(term2, term1);
 			} else {
-				return fac.getNEQAtom(term2, term1);
+				return fac.getNEQFunction(term2, term1);
 			}
 		} else if (term2 instanceof ValueConstant) {
 			if (term1.equals(term2)) {
@@ -1017,9 +1017,9 @@ public class ExpressionEvaluator {
 		 */
 		// TODO check if we can further optimize this
 		if (and) {
-			return fac.getANDAtom(eval1, eval2);
+			return fac.getANDFunction(eval1, eval2);
 		} else {
-			return fac.getORAtom(eval1, eval2);
+			return fac.getORFunction(eval1, eval2);
 		}
 	}
 }

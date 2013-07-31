@@ -2209,10 +2209,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Mapping head
 
-			Function head = dfac.getAtom(dfac.getPredicate("m", 1), dfac.getVariable("X"));
-			Function body1 = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
+			Function head = dfac.getFunctionalTerm(dfac.getPredicate("m", 1), dfac.getVariable("X"));
+			Function body1 = dfac.getFunctionalTerm(classuri, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
-			Function body2 = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
+			Function body2 = dfac.getFunctionalTerm(classuri, dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 
 			/*
 			 * This target query is shared by all mappings for this class
@@ -2467,8 +2467,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 		bodyTerms.add(objectTerm);
 
-		Function head = dfac.getAtom(headPredicate, headTerms);
-		Function body = dfac.getAtom(bodyPredicate, bodyTerms);
+		Function head = dfac.getFunctionalTerm(headPredicate, headTerms);
+		Function body = dfac.getFunctionalTerm(bodyPredicate, bodyTerms);
 		bodyAtoms.add(0, body);
 		return dfac.getCQIE(head, bodyAtoms);
 	}

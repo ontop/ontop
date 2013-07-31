@@ -143,7 +143,7 @@ public class DatalogNormalizer {
 					body.remove(i);
 					for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
 						NewLiteral term = currentAtom.getTerm(j);
-						Function asAtom = term.asAtom();
+						Function asAtom = (Function)term;
 						if (!body.contains(asAtom))
 							body.add(i, asAtom);
 					}
@@ -650,7 +650,7 @@ public class DatalogNormalizer {
 		 * Adding any remiding boolean conditions to the top level.
 		 */
 		for (Function condition : resultingBooleanConditions) {
-			body.add(condition.asAtom());
+			body.add(condition);
 		}
 
 		return query;
@@ -821,7 +821,7 @@ public class DatalogNormalizer {
 		List<Function> newatoms = new LinkedList<Function>();
 		for (NewLiteral innerterm : innerFunctionalTerms) {
 			Function f = (Function) innerterm;
-			Function newatom = fac.getAtom(f.getFunctionSymbol(), f.getTerms());
+			Function newatom = fac.getFunctionalTerm(f.getFunctionSymbol(), f.getTerms());
 			newatoms.add(newatom);
 		}
 		return newatoms;
