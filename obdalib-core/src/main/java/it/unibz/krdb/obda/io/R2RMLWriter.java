@@ -1,6 +1,13 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
@@ -17,7 +24,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
@@ -81,7 +87,7 @@ public class R2RMLWriter {
 			if (mapping.getId().contains("join"))
 				getJoinMapping(mapping);
 			else{
-			out.write("<"+mapping.getId().replaceAll(" ", "_")+">\n\t a rr:TriplesMap;\n");
+				out.write("<"+mapping.getId().replaceAll(" ", "_")+">\n\t a rr:TriplesMap;\n");
 			
 			//write sql table
 			out.write("\trr:logicalTable "+getSQL(mapping.getSourceQuery().toString()));
@@ -433,30 +439,13 @@ public class R2RMLWriter {
 	
 	public static void main(String args[])
 	{
-//		String file = "C:/Project/Test Cases/mapping2.ttl";
-//		//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/r2rmlb.ttl";
-//		R2RMLReader reader = new R2RMLReader(file);
-//		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("blah")),URI.create("blah"));
-//		File out = new File("C:/Project/Test Cases/mapping1.ttl");
-//				//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl");
-//		writer.write(out);
-//		
-		File in = new File("/Users/timi/Downloads/boots_statoil.obda");
-		OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-	 ModelIOManager iom = new ModelIOManager(model);
-	 
-	 try {
-		iom.load(in);
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (InvalidMappingException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-		R2RMLWriter writer = new R2RMLWriter(model, URI.create("9ee88e96-6960-46c1-be8d-4319aca7ccf7"));
-		File out = new File("/Users/timi/Downloads/statoilmaps.ttl");
+		String file = "C:/Project/Test Cases/mapping2.ttl";
+		//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/r2rmlb.ttl";
+		R2RMLReader reader = new R2RMLReader(file);
+		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("blah")),URI.create("blah"));
+		File out = new File("C:/Project/Test Cases/mapping1.ttl");
 				//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl");
 		writer.write(out);
+		
 	}
 }

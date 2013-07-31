@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,7 +35,6 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
-import org.openrdf.rio.ntriples.NTriplesWriter;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +149,7 @@ public class RDB2RDFScenarioParent extends TestCase {
 			}
 			else
 			{
-				RDFWriter writer = new NTriplesWriter(System.out);
+				RDFWriter writer = Rio.createWriter(RDFFormat.NTRIPLES, System.out);
 				gquery.evaluate(writer);
 			}
 			con.close();
@@ -315,3 +322,4 @@ public class RDB2RDFScenarioParent extends TestCase {
 		return manifestFileURL.substring(secLastSlashIdx + 1, lastSlashIdx);
 	}
 }
+

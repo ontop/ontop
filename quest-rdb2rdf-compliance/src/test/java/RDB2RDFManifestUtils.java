@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 import info.aduna.io.FileUtil;
 import info.aduna.io.ZipUtil;
 
@@ -92,9 +100,9 @@ public class RDB2RDFManifestUtils {
 				+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
 				+ "  qt = <http://obda.org/quest/tests/test-query#>";
 
-		TupleQueryResult manifestResults = (con.prepareTupleQuery(
-				QueryLanguage.SERQL, query, manifestFile)).evaluate();
-		
+		TupleQueryResult manifestResults = con.prepareTupleQuery(
+				QueryLanguage.SERQL, query, manifestFile).evaluate();
+
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile")
