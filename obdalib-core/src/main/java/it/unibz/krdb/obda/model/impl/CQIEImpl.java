@@ -40,28 +40,39 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(Function head, List<Function> body) {
+		this(head, body.toArray(new Function[body.size()]));
+	}
+
+	// TODO Remove isBoolean from the signature and from any method
+	protected CQIEImpl(Function head, Function[] body) {
 
 		// The syntax for CQ may contain no body, thus, this condition will
 		// check whether the construction of the link list is possible or not.
 		if (body != null) {
-			EventGeneratingArrayList<Function> eventbody = new EventGeneratingArrayList<Function>(body.size()*20);
-			eventbody.addAll(body);
+			EventGeneratingArrayList<Function> eventbody = new EventGeneratingArrayList<Function>(
+					body.length * 20);
+			for (int i = 0; i < body.length; i++) {
+				eventbody.add(body[i]);
+			}
 			this.body = eventbody;
 
 			registerListeners(eventbody);
-			// TODO possible memory leak!!! we should also de-register when objects are removed
+			// TODO possible memory leak!!! we should also de-register when
+			// objects are removed
 		}
 
 		// The syntax for CQ may also contain no head, thus, this condition
 		// will check whether we can look for the head terms or not.
 		if (head != null) {
 			this.head = head;
-			EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
+			EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head
+					.getTerms();
 			headterms.addListener(this);
 		}
 	}
 
-	private void registerListeners(EventGeneratingArrayList<? extends NewLiteral> functions) {
+	private void registerListeners(
+			EventGeneratingArrayList<? extends NewLiteral> functions) {
 
 		functions.addListener(this);
 
@@ -70,7 +81,8 @@ public class CQIEImpl implements CQIE, ListListener {
 				continue;
 			}
 			Function f = (Function) o;
-			EventGeneratingArrayList<NewLiteral> list = (EventGeneratingArrayList<NewLiteral>) f.getTerms();
+			EventGeneratingArrayList<NewLiteral> list = (EventGeneratingArrayList<NewLiteral>) f
+					.getTerms();
 			list.addListener(this);
 			registerListeners(list);
 		}
@@ -87,7 +99,8 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void updateHead(Function head) {
 		this.head = head;
 
-		EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
+		EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head
+				.getTerms();
 		headterms.removeListener(this);
 		headterms.addListener(this);
 		listChanged();
@@ -139,7 +152,7 @@ public class CQIEImpl implements CQIE, ListListener {
 				copyBody.add((Function) atom.clone());
 			}
 		}
-		
+
 		CQIEImpl newquery = new CQIEImpl(copyHead, copyBody);
 		newquery.rehash = this.rehash;
 		newquery.string = this.string;
