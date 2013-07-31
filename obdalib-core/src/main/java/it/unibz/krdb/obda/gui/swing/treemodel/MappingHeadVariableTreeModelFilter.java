@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
 import java.util.List;
@@ -52,9 +52,9 @@ public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMapp
 		}
 
 		// If the predicate name is mismatch, perhaps the terms.
-		final List<NewLiteral> queryTerms = predicate.getTerms();
+		final List<Term> queryTerms = predicate.getTerms();
 		for (int j = 0; j < queryTerms.size(); j++) {
-			NewLiteral term = queryTerms.get(j);
+			Term term = queryTerms.get(j);
 			if (term.toString().indexOf(keyword) != -1) { // match found!
 				return true;
 			}

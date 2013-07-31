@@ -14,7 +14,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
@@ -130,7 +130,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (currentpred instanceof BooleanOperationPredicate)
 			return predicates;
 		else if (currentpred instanceof AlgebraOperatorPredicate) {
-			for (NewLiteral innerTerm : atom.getTerms()) {
+			for (Term innerTerm : atom.getTerms()) {
 				if (!(innerTerm instanceof Function))
 					continue;
 				predicates.addAll(getPredicates((Function) innerTerm));
@@ -614,7 +614,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List<Function> body = currentQuery.getBody();
 			body.remove(atomIdx);
 			for (int subtermidx = function.getTerms().size() - 1; subtermidx >= 0; subtermidx--) {
-				NewLiteral atom = function.getTerm(subtermidx);
+				Term atom = function.getTerm(subtermidx);
 				body.add(atomIdx, (Function)atom);
 			}
 			atomIdx += -1;
@@ -1038,10 +1038,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		// This method doesn't support nested functional terms
 		CQIE freshRule = rule.clone();
 		Function head = freshRule.getHead();
-		List<NewLiteral> headTerms = head.getTerms();
+		List<Term> headTerms = head.getTerms();
 		for (int i = 0; i < headTerms.size(); i++) {
-			NewLiteral term = headTerms.get(i);
-			NewLiteral newTerm = getFreshTerm(term, suffix);
+			Term term = headTerms.get(i);
+			Term newTerm = getFreshTerm(term, suffix);
 			if (newTerm != null)
 				headTerms.set(i, newTerm);
 		}
@@ -1049,10 +1049,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Function> body = freshRule.getBody();
 		for (Function atom : body) {
 
-			List<NewLiteral> atomTerms = ((Function) atom).getTerms();
+			List<Term> atomTerms = ((Function) atom).getTerms();
 			for (int i = 0; i < atomTerms.size(); i++) {
-				NewLiteral term = atomTerms.get(i);
-				NewLiteral newTerm = getFreshTerm(term, suffix);
+				Term term = atomTerms.get(i);
+				Term newTerm = getFreshTerm(term, suffix);
 				if (newTerm != null)
 					atomTerms.set(i, newTerm);
 			}
@@ -1061,17 +1061,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	}
 
-	public static NewLiteral getFreshTerm(NewLiteral term, int suffix) {
-		NewLiteral newTerm = null;
+	public static Term getFreshTerm(Term term, int suffix) {
+		Term newTerm = null;
 		if (term instanceof VariableImpl) {
 			VariableImpl variable = (VariableImpl) term;
 			newTerm = termFactory.getVariable(variable.getName() + "_" + suffix);
 		} else if (term instanceof Function) {
 			Function functionalTerm = (Function) term;
-			List<NewLiteral> innerTerms = functionalTerm.getTerms();
-			List<NewLiteral> newInnerTerms = new LinkedList<NewLiteral>();
+			List<Term> innerTerms = functionalTerm.getTerms();
+			List<Term> newInnerTerms = new LinkedList<Term>();
 			for (int j = 0; j < innerTerms.size(); j++) {
-				NewLiteral innerTerm = innerTerms.get(j);
+				Term innerTerm = innerTerms.get(j);
 				newInnerTerms.add(getFreshTerm(innerTerm, suffix));
 			}
 			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
@@ -1120,7 +1120,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			Stack<Integer> termidx = new Stack<Integer>();
 
 			List<Function> currentTerms = rule.getBody();
-			List<NewLiteral> tempList = new LinkedList<NewLiteral>();
+			List<Term> tempList = new LinkedList<Term>();
 			for (Function a : currentTerms) {
 				tempList.add(a);
 			}
@@ -1176,7 +1176,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 
-	private List<CQIE> computePartialEvaluation(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
+	private List<CQIE> computePartialEvaluation(List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
 			boolean parentIsLeftJoin) {
 
 		int nonBooleanAtomCounter = 0;
@@ -1399,8 +1399,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		Function foldedJoinAtom = null;
 
 		while (dataAtomsList.size() > 1) {
-			foldedJoinAtom = termFactory.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, (NewLiteral) dataAtomsList.remove(0),
-					(NewLiteral) dataAtomsList.remove(0));
+			foldedJoinAtom = termFactory.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, (Term) dataAtomsList.remove(0),
+					(Term) dataAtomsList.remove(0));
 			dataAtomsList.add(0, foldedJoinAtom);
 		}
 
@@ -1451,7 +1451,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Map<Variable, NewLiteral> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
+			Map<Variable, Term> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1579,7 +1579,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		}// end for rule body
 		freshRule.updateBody(newbody);
-		HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
+		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
 
 		OBDAVocabulary myNull = new OBDAVocabulary();
 		for (Variable var : variablesArg2) {
@@ -1645,7 +1645,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 			Function replacement = null;
 
-			Map<Variable, NewLiteral> mgu1 = null;
+			Map<Variable, Term> mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
 				Function tempatom = (Function) innerAtoms.get(idx2);
 
@@ -1795,7 +1795,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/*
 			 * Its a nested term
 			 */
-			NewLiteral nestedTerm = null;
+			Term nestedTerm = null;
 			for (int y = 0; y < termidx.size() - 1; y++) {
 				int i = termidx.get(y);
 				if (nestedTerm == null)

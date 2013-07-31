@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
@@ -78,7 +78,7 @@ public class MappingDataTypeRepair {
 				continue;
 			}
 			// If the predicate is a data property
-			NewLiteral term = atom.getTerm(1);
+			Term term = atom.getTerm(1);
 
 			if (term instanceof Function) {
 				Function function = (Function) term;
@@ -105,7 +105,7 @@ public class MappingDataTypeRepair {
 				// column type.
 				Variable variable = (Variable) term;
 				Predicate functor = getDataTypeFunctor(variable);
-				NewLiteral newTerm = dfac.getFunctionalTerm(functor, variable);
+				Term newTerm = dfac.getFunctionalTerm(functor, variable);
 				atom.setTerm(1, newTerm);
 			}
 		}
@@ -141,9 +141,9 @@ public class MappingDataTypeRepair {
 		Iterator<Function> it = body.iterator();
 		while (it.hasNext()) {
 			Function a = (Function) it.next();
-			List<NewLiteral> terms = a.getTerms();
+			List<Term> terms = a.getTerms();
 			int i = 1; // position index
-			for (NewLiteral t : terms) {
+			for (Term t : terms) {
 				if (t instanceof AnonymousVariable) {
 					i++; // increase the position index to evaluate the next
 							// variable

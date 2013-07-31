@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDALibConstants;
@@ -534,10 +534,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		
 		// Store attributes and roles in the body
-		List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>();
+		List<Term> distinguishVariables = new ArrayList<Term>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
-				NewLiteral objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
+				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
 				Function attribute = dfac.getFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 				distinguishVariables.add(objectTerm);
@@ -566,7 +566,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return getUriFunctionTerm(subjectUriTemplate);
 	}
 
-	private NewLiteral createObjectTerm(String column, Predicate datatype) {
+	private Term createObjectTerm(String column, Predicate datatype) {
 		List<FormatString> columnStrings = parse(column);
 		if (columnStrings.size() > 1) {
 			throw new RuntimeException("Invalid column mapping: " + column);
@@ -622,7 +622,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private Function getUriFunctionTerm(String text) {
 		final String PLACEHOLDER = "{}";
-		List<NewLiteral> terms = new LinkedList<NewLiteral>();
+		List<Term> terms = new LinkedList<Term>();
 		List<FormatString> tokens = parse(text);
 		StringBuilder sb = new StringBuilder();
 		for (FormatString token : tokens) {

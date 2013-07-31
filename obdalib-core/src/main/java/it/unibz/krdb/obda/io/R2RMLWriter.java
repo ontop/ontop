@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.io;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
@@ -169,7 +169,7 @@ public class R2RMLWriter {
 
 	private String getJoinPredicate(OBDAQuery targetQuery) {
 		//there's only one term in the body
-		NewLiteral term = ((CQIE)targetQuery).getBody().get(0);
+		Term term = ((CQIE)targetQuery).getBody().get(0);
 		if (term instanceof FunctionalTermImpl)
 		{
 			Function atom = (FunctionalTermImpl) term;
@@ -233,7 +233,7 @@ public class R2RMLWriter {
 		Iterator<Function> it = body.iterator();
 		while(it.hasNext())
 		{
-			NewLiteral term = it.next();
+			Term term = it.next();
 			if (term instanceof Function)
 			{	
 				Function atom = (Function) term;
@@ -249,7 +249,7 @@ public class R2RMLWriter {
 		}
 		
 			//get first term = subject
-			NewLiteral term = body.get(0).getTerm(0);
+			Term term = body.get(0).getTerm(0);
 			if (term instanceof FunctionalTermImpl)
 			{
 				Function atom = (FunctionalTermImpl) term;
@@ -290,7 +290,7 @@ public class R2RMLWriter {
 		
 		return subject;
 	}
-	private String removeJoinKeyword(NewLiteral atom)
+	private String removeJoinKeyword(Term atom)
 	{
 		String str = atom.toString();
 		if (str.startsWith("CHILD_"))
@@ -339,7 +339,7 @@ public class R2RMLWriter {
 		Iterator<Function> it = body.iterator();
 		while(it.hasNext())
 		{
-			NewLiteral term = it.next();
+			Term term = it.next();
 			if (term instanceof Function)
 			{
 				Function atom = (Function) term;
@@ -355,7 +355,7 @@ public class R2RMLWriter {
 		return predobj;
 	}
 	
-	private String getObject(NewLiteral obj)
+	private String getObject(Term obj)
 	{
 		String object = "";
 		if(obj instanceof FunctionalTermImpl)

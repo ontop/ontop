@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
@@ -105,14 +105,14 @@ public class MappingAnalyzer {
 					Predicate predicate = dfac.getPredicate(predicateName, arity);
 
 					// Swap the column name with a new variable from the lookup table
-					List<NewLiteral> terms = new ArrayList<NewLiteral>();
+					List<Term> terms = new ArrayList<Term>();
 					for (int i = 1; i <= arity; i++) {
 						String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, table.getAlias(), i);
 						String termName = lookupTable.lookup(columnName);
 						if (termName == null) {
 							throw new RuntimeException("Column '" + columnName + "'was not found in the lookup table: ");
 						}
-						NewLiteral term = dfac.getVariable(termName);
+						Term term = dfac.getVariable(termName);
 						terms.add(term);
 					}
 					// Create an atom for a particular table
@@ -133,8 +133,8 @@ public class MappingAnalyzer {
 					if (lookup2 == null)
 						throw new RuntimeException("Unable to get column name for variable: " + rightValue);
 
-					NewLiteral t1 = dfac.getVariable(lookup1);
-					NewLiteral t2 = dfac.getVariable(lookup2);
+					Term t1 = dfac.getVariable(lookup1);
+					Term t2 = dfac.getVariable(lookup2);
 
 					Function atom = dfac.getEQFunction(t1, t2);
 					atoms.add(atom);
@@ -201,9 +201,9 @@ public class MappingAnalyzer {
 				// Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
 				for (Function atom : atomList) {
-					List<NewLiteral> terms = atom.getTerms();
-					List<NewLiteral> newterms = new LinkedList<NewLiteral>();
-					for (NewLiteral term : terms) {
+					List<Term> terms = atom.getTerms();
+					List<Term> newterms = new LinkedList<Term>();
+					for (Term term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
 					Function newhead = dfac.getFunctionalTerm(atom.getPredicate(), newterms);
@@ -288,7 +288,7 @@ public class MappingAnalyzer {
 		if (variableName == null) {
 			throw new RuntimeException("Unable to find column name for variable: " + columnName);
 		}
-		NewLiteral var = dfac.getVariable(variableName);
+		Term var = dfac.getVariable(variableName);
 
 		if (pred.useIsNullOperator()) {
 			return dfac.getIsNullFunction(var);
@@ -306,10 +306,10 @@ public class MappingAnalyzer {
 		if (termLeftName == null) {
 			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
 		}
-		NewLiteral t1 = dfac.getVariable(termLeftName);
+		Term t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
-		NewLiteral t2 = null;
+		Term t2 = null;
 		if (right instanceof ReferenceValueExpression) {
 			String rightValueName = right.toString();
 			termRightName = lookupTable.lookup(rightValueName);
@@ -375,8 +375,8 @@ public class MappingAnalyzer {
 	/**
 	 * Returns a new term with the updated references.
 	 */
-	private NewLiteral updateTerm(NewLiteral term, LookupTable lookupTable) {
-		NewLiteral result = null;
+	private Term updateTerm(Term term, LookupTable lookupTable) {
+		Term result = null;
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			String varName = var.getName();
@@ -388,9 +388,9 @@ public class MappingAnalyzer {
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
 			Function func = (Function) term;
-			List<NewLiteral> terms = func.getTerms();
-			List<NewLiteral> newterms = new LinkedList<NewLiteral>();
-			for (NewLiteral innerTerm : terms) {
+			List<Term> terms = func.getTerms();
+			List<Term> newterms = new LinkedList<Term>();
+			for (Term innerTerm : terms) {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 			}
 			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);

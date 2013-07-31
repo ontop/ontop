@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -38,17 +38,17 @@ public class PrefixRendererTest extends TestCase {
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 		query = tfac.getDatalogProgram();
 
-		LinkedList<NewLiteral> innerterms = new LinkedList<NewLiteral>();
+		LinkedList<Term> innerterms = new LinkedList<Term>();
 		innerterms.add(tfac.getVariable("id"));
 		
 		IRIFactory fact = new IRIFactory();
 
-		List<NewLiteral> terms = new LinkedList<NewLiteral>();
+		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.getFunctionalTerm(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
 		Function body = tfac.getFunctionalTerm(pfac.getPredicate("http://obda.org/onto.owl#Person", 1), terms);
 
-		terms = new LinkedList<NewLiteral>();
+		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("id"));
 		Function head = tfac.getFunctionalTerm(pfac.getPredicate("http://obda.org/predicates#q", 1), terms);
 

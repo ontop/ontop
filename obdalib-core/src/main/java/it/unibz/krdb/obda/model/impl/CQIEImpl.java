@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
@@ -72,14 +72,14 @@ public class CQIEImpl implements CQIE, ListListener {
 			// will check whether we can look for the head terms or not.
 			if (head != null) {
 				this.head = head;
-				EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
+				EventGeneratingArrayList<Term> headterms = (EventGeneratingArrayList<Term>) head.getTerms();
 				headterms.addListener(this);
 			}
 		}
 		
 		
 
-	private void registerListeners(EventGeneratingArrayList<? extends NewLiteral> functions) {
+	private void registerListeners(EventGeneratingArrayList<? extends Term> functions) {
 
 		functions.addListener(this);
 
@@ -88,7 +88,7 @@ public class CQIEImpl implements CQIE, ListListener {
 				continue;
 			}
 			Function f = (Function) o;
-			EventGeneratingArrayList<NewLiteral> list = (EventGeneratingArrayList<NewLiteral>) f.getTerms();
+			EventGeneratingArrayList<Term> list = (EventGeneratingArrayList<Term>) f.getTerms();
 			list.addListener(this);
 			registerListeners(list);
 		}
@@ -105,7 +105,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void updateHead(Function head) {
 		this.head = head;
 
-		EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
+		EventGeneratingArrayList<Term> headterms = (EventGeneratingArrayList<Term>) head.getTerms();
 		headterms.removeListener(this);
 		headterms.addListener(this);
 		listChanged();
@@ -196,7 +196,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
 		for (Function atom : body)
-			for (NewLiteral t : atom.getTerms()) {
+			for (Term t : atom.getTerms()) {
 				for (Variable v : t.getReferencedVariables())
 					vars.add(v);
 			}

@@ -14,7 +14,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -142,7 +142,7 @@ public class DatalogNormalizer {
 				if (isJoin || dataAtoms == 1) {
 					body.remove(i);
 					for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
-						NewLiteral term = currentAtom.getTerm(j);
+						Term term = currentAtom.getTerm(j);
 						Function asAtom = (Function)term;
 						if (!body.contains(asAtom))
 							body.add(i, asAtom);
@@ -210,9 +210,9 @@ public class DatalogNormalizer {
 	 * @param terms
 	 * @return
 	 */
-	public static int countDataItems(List<NewLiteral> terms) {
+	public static int countDataItems(List<Term> terms) {
 		int count = 0;
-		for (NewLiteral lit : terms) {
+		for (Term lit : terms) {
 			Function currentAtom = (Function) lit;
 			if (!currentAtom.isBooleanFunction())
 				count += 1;
@@ -245,7 +245,7 @@ public class DatalogNormalizer {
 			result = result.clone();
 
 		List<Function> body = result.getBody();
-		Map<Variable, NewLiteral> mgu = new HashMap<Variable, NewLiteral>();
+		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
 
 		/* collecting all equalities as substitutions */
 
@@ -315,7 +315,7 @@ public class DatalogNormalizer {
 	 * @param substitutions
 	 */
 	public static void pullOutEqualities(CQIE query) {
-		Map<Variable, NewLiteral> substitutions = new HashMap<Variable, NewLiteral>();
+		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
 		int[] newVarCounter = { 1 };
 
 		Set<Function> booleanAtoms = new HashSet<Function>();
@@ -351,9 +351,9 @@ public class DatalogNormalizer {
 			if (term.isDataFunction() || term.isBooleanFunction() || term.isDataTypeFunction()) {
 				return 0;
 			} else {
-				List<NewLiteral> innerTerms = term.getTerms();
+				List<Term> innerTerms = term.getTerms();
 
-				for (NewLiteral innerTerm : innerTerms) {
+				for (Term innerTerm : innerTerms) {
 					int depth = getDepth((Function) innerTerm);
 					max = Math.max(max, depth);
 				}
@@ -380,7 +380,7 @@ public class DatalogNormalizer {
 	private static void addMinimalEqualityToLeftJoin(Function leftJoin) {
 		int booleanAtoms = 0;
 		boolean isLeftJoin = leftJoin.isAlgebraFunction();
-		for (NewLiteral term : leftJoin.getTerms()) {
+		for (Term term : leftJoin.getTerms()) {
 			Function f = (Function) term;
 			if (f.isAlgebraFunction()) {
 				addMinimalEqualityToLeftJoin(f);
@@ -413,12 +413,12 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	private static void pullOutEqualities(List currentTerms, Map<Variable, NewLiteral> substitutions, List<Function> eqList,
+	private static void pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList,
 			int[] newVarCounter, boolean isLeftJoin) {
 
 		for (int i = 0; i < currentTerms.size(); i++) {
 
-			NewLiteral term = (NewLiteral) currentTerms.get(i);
+			Term term = (Term) currentTerms.get(i);
 
 			/*
 			 * We don't expect any functions as terms, data atoms will only have
@@ -429,7 +429,7 @@ public class DatalogNormalizer {
 				throw new RuntimeException("Unexpected term found while normalizing (pulling out equalities) the query.");
 
 			Function atom = (Function) term;
-			List<NewLiteral> subterms = atom.getTerms();
+			List<Term> subterms = atom.getTerms();
 
 			if (atom.isAlgebraFunction()) {
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
@@ -445,7 +445,7 @@ public class DatalogNormalizer {
 			// rename/substitute variables
 
 			for (int j = 0; j < subterms.size(); j++) {
-				NewLiteral subTerm = subterms.get(j);
+				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
 					Variable var1 = (Variable) subTerm;
@@ -520,8 +520,8 @@ public class DatalogNormalizer {
 			Function eq = iter.next();
 			if (eq.getFunctionSymbol() != OBDAVocabulary.EQ)
 				continue;
-			NewLiteral v1 = eq.getTerm(0);
-			NewLiteral v2 = eq.getTerm(1);
+			Term v1 = eq.getTerm(0);
+			Term v2 = eq.getTerm(1);
 			if (equalitySets.size() == 0) {
 				Set firstSet = new LinkedHashSet();
 				firstSet.add(v1);
@@ -554,7 +554,7 @@ public class DatalogNormalizer {
 			List varList = new ArrayList(equalitySets.get(k));
 			for (int i = 0; i < varList.size() - 1; i++) {
 				for (int j = i + 1; j < varList.size(); j++) {
-					Function equality = fac.getEQFunction((NewLiteral) varList.get(i), (NewLiteral) varList.get(j));
+					Function equality = fac.getEQFunction((Term) varList.get(i), (Term) varList.get(j));
 					boolSet.add(equality);
 				}
 			}
@@ -672,7 +672,7 @@ public class DatalogNormalizer {
 			// System.out
 			// .println("======================== INTO ALGEBRA =====================");
 
-			List<NewLiteral> terms = atom.getTerms();
+			List<Term> terms = atom.getTerms();
 
 			Set<Variable> nestedProblemVariables = new HashSet<Variable>();
 
@@ -734,7 +734,7 @@ public class DatalogNormalizer {
 		for (int index = 0; index < currentLevelAtoms.size(); index++) {
 			// System.out.println(index);
 			// System.out.println(currentLevelAtoms.size());
-			NewLiteral l = (NewLiteral) currentLevelAtoms.get(index);
+			Term l = (Term) currentLevelAtoms.get(index);
 			Function atom = (Function) l;
 			// System.out
 			// .println(atom.getFunctionSymbol().getClass() + " " + atom);
@@ -814,12 +814,12 @@ public class DatalogNormalizer {
 		if (atom.getPredicate() != OBDAVocabulary.AND) {
 			throw new InvalidParameterException();
 		}
-		List<NewLiteral> innerFunctionalTerms = new LinkedList<NewLiteral>();
-		for (NewLiteral term : atom.getTerms()) {
+		List<Term> innerFunctionalTerms = new LinkedList<Term>();
+		for (Term term : atom.getTerms()) {
 			innerFunctionalTerms.addAll(getUnfolderTermList((Function) term));
 		}
 		List<Function> newatoms = new LinkedList<Function>();
-		for (NewLiteral innerterm : innerFunctionalTerms) {
+		for (Term innerterm : innerFunctionalTerms) {
 			Function f = (Function) innerterm;
 			Function newatom = fac.getFunctionalTerm(f.getFunctionSymbol(), f.getTerms());
 			newatoms.add(newatom);
@@ -834,15 +834,15 @@ public class DatalogNormalizer {
 	 * @param atom
 	 * @return
 	 */
-	public static List<NewLiteral> getUnfolderTermList(Function term) {
+	public static List<Term> getUnfolderTermList(Function term) {
 
-		List<NewLiteral> result = new LinkedList<NewLiteral>();
+		List<Term> result = new LinkedList<Term>();
 
 		if (term.getFunctionSymbol() != OBDAVocabulary.AND) {
 			result.add(term);
 		} else {
-			List<NewLiteral> terms = term.getTerms();
-			for (NewLiteral currentterm : terms) {
+			List<Term> terms = term.getTerms();
+			for (Term currentterm : terms) {
 				if (currentterm instanceof Function) {
 					result.addAll(getUnfolderTermList((Function) currentterm));
 				} else {
@@ -886,17 +886,17 @@ public class DatalogNormalizer {
 		List tempTerms = new LinkedList();
 		tempTerms.addAll(currentTerms);
 		Set<Function> tempConditionBooleans = new HashSet<Function>();
-		NewLiteral firstT = (NewLiteral) currentTerms.get(0);
+		Term firstT = (Term) currentTerms.get(0);
 		if (!(firstT instanceof Function))
 			throw new RuntimeException("Unexpected term found while normalizing (pulling out conditions) the query.");
 
 		Function f = (Function) firstT;
 
 		for (int i = 0; i < currentTerms.size(); i++) {
-			NewLiteral term = (NewLiteral) currentTerms.get(i);
+			Term term = (Term) currentTerms.get(i);
 
 			Function atom = (Function) term;
-			List<NewLiteral> subterms = atom.getTerms();
+			List<Term> subterms = atom.getTerms();
 
 			// if we are in left join then pull out boolean conditions that
 			// correspond to first data atom

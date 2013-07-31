@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -59,9 +59,9 @@ public class ExtDatalogProgram {
 		return fullDP;
 	}
 	
-	private final NewLiteral x = fac.getVariable("x");			
-	private final NewLiteral y = fac.getVariable("y");
-	private final NewLiteral w = fac.getNondistinguishedVariable(); 
+	private final Term x = fac.getVariable("x");			
+	private final Term y = fac.getVariable("y");
+	private final Term w = fac.getNondistinguishedVariable(); 
 	
 	public Predicate getEntryForPredicate(Predicate p) {
 		ExtDatalogProgramDef def = extPredicateMap.get(p);

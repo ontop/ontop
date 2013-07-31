@@ -82,7 +82,7 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getUriTemplatePredicate(int arity);
 	
-	public Function getUriTemplate(NewLiteral...terms);
+	public Function getUriTemplate(Term...terms);
 
 	public Predicate getBNodeTemplatePredicate(int arity);
 
@@ -91,49 +91,49 @@ public interface OBDADataFactory extends Serializable {
 	 * Boolean function terms
 	 */
 
-	public Function getEQFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getEQFunction(Term firstTerm, Term secondTerm);
 
-	public Function getGTEFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getGTEFunction(Term firstTerm, Term secondTerm);
 
-	public Function getGTFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getGTFunction(Term firstTerm, Term secondTerm);
 
-	public Function getLTEFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getLTEFunction(Term firstTerm, Term secondTerm);
 
-	public Function getLTFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getLTFunction(Term firstTerm, Term secondTerm);
 
-	public Function getNEQFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getNEQFunction(Term firstTerm, Term secondTerm);
 
-	public Function getNOTFunction(NewLiteral term);
+	public Function getNOTFunction(Term term);
 
-	public Function getANDFunction(NewLiteral term1, NewLiteral term2);
+	public Function getANDFunction(Term term1, Term term2);
 
-	public Function getANDFunction(NewLiteral term1, NewLiteral term2, NewLiteral term3);
+	public Function getANDFunction(Term term1, Term term2, Term term3);
 
-	public Function getANDFunction(List<NewLiteral> terms);
+	public Function getANDFunction(List<Term> terms);
 
-	public Function getORFunction(NewLiteral term1, NewLiteral term2);
+	public Function getORFunction(Term term1, Term term2);
 
-	public Function getORFunction(NewLiteral term1, NewLiteral term2, NewLiteral term3);
+	public Function getORFunction(Term term1, Term term2, Term term3);
 
-	public Function getORFunction(List<NewLiteral> terms);
+	public Function getORFunction(List<Term> terms);
 
-	public Function getIsNullFunction(NewLiteral term);
+	public Function getIsNullFunction(Term term);
 
-	public Function getIsNotNullFunction(NewLiteral term);
+	public Function getIsNotNullFunction(Term term);
 
-	public Function getLANGMATCHESFunction(NewLiteral term1, NewLiteral term2);
+	public Function getLANGMATCHESFunction(Term term1, Term term2);
 
 	/*
 	 * Numerical operation functions
 	 */
 
-	public Function getMinusFunction(NewLiteral term1);
+	public Function getMinusFunction(Term term1);
 
-	public Function getAddFunction(NewLiteral term1, NewLiteral term2);
+	public Function getAddFunction(Term term1, Term term2);
 
-	public Function getSubstractFunction(NewLiteral term1, NewLiteral term2);
+	public Function getSubstractFunction(Term term1, Term term2);
 
-	public Function getMultiplyFunction(NewLiteral term1, NewLiteral term2);
+	public Function getMultiplyFunction(Term term1, Term term2);
 
 	/*
 	 * JDBC objects
@@ -264,9 +264,9 @@ public interface OBDADataFactory extends Serializable {
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
-	public Function getFunctionalTerm(Predicate functor, NewLiteral... terms);
+	public Function getFunctionalTerm(Predicate functor, Term... terms);
 
-	public Function getFunctionalTerm(Predicate functor, List<NewLiteral> terms);
+	public Function getFunctionalTerm(Predicate functor, List<Term> terms);
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

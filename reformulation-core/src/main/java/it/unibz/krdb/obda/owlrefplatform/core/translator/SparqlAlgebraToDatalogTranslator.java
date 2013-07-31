@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate;
@@ -246,7 +246,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		/* Preparing the two atoms */
 
 		Set<Variable> atom1VarsSet = getVariables(left);
-		List<NewLiteral> atom1VarsList = new LinkedList<NewLiteral>();
+		List<Term> atom1VarsList = new LinkedList<Term>();
 		atom1VarsList.addAll(atom1VarsSet);
 		Collections.sort(atom1VarsList, comparator);
 		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
@@ -254,7 +254,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 		Set<Variable> atom2VarsSet = getVariables(right);
-		List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
+		List<Term> atom2VarsList = new LinkedList<Term>();
 		atom2VarsList.addAll(atom2VarsSet);
 		Collections.sort(atom2VarsList, comparator);
 		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
@@ -263,7 +263,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		/* Preparing the head of the Union rules (2 rules) */
 		// Collections.sort(vars, comparator);
-		List<NewLiteral> headVars = new LinkedList<NewLiteral>();
+		List<Term> headVars = new LinkedList<Term>();
 		for (Variable var : vars) {
 			headVars.add(var);
 		}
@@ -288,7 +288,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom1VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		Map<Variable, NewLiteral> nullifier = new HashMap<Variable, NewLiteral>();
+		Map<Variable, Term> nullifier = new HashMap<Variable, Term>();
 		for (Variable var : nullVars) {
 			nullifier.put(var, OBDAVocabulary.NULL);
 		}
@@ -302,7 +302,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom2VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		nullifier = new HashMap<Variable, NewLiteral>();
+		nullifier = new HashMap<Variable, Term>();
 		for (Variable var : nullVars) {
 			nullifier.put(var, OBDAVocabulary.NULL);
 		}
@@ -315,13 +315,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		{
 			List<Variable> vars1 = new LinkedList<Variable>();
-			for (NewLiteral var : atom1VarsList)
+			for (Term var : atom1VarsList)
 				vars1.add((Variable) var);
 			translate(vars1, left, pr, 2 * i, varcount);
 		}
 		{
 			List<Variable> vars2 = new LinkedList<Variable>();
-			for (NewLiteral var : atom2VarsList)
+			for (Term var : atom2VarsList)
 				vars2.add((Variable) var);
 			translate(vars2, right, pr, 2 * i + 1, varcount);
 		}
@@ -336,7 +336,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		/* Preparing the two atoms */
 
 		Set<Variable> atom1VarsSet = getVariables(left);
-		List<NewLiteral> atom1VarsList = new LinkedList<NewLiteral>();
+		List<Term> atom1VarsList = new LinkedList<Term>();
 		atom1VarsList.addAll(atom1VarsSet);
 		Collections.sort(atom1VarsList, comparator);
 		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
@@ -344,7 +344,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 		Set<Variable> atom2VarsSet = getVariables(right);
-		List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
+		List<Term> atom2VarsList = new LinkedList<Term>();
 		atom2VarsList.addAll(atom2VarsSet);
 		Collections.sort(atom2VarsList, comparator);
 		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
@@ -358,7 +358,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		/* Preparing the head of the Join rule */
 		// Collections.sort(vars, comparator);
-		List<NewLiteral> headVars = new LinkedList<NewLiteral>();
+		List<Term> headVars = new LinkedList<Term>();
 		for (Variable var : vars) {
 			headVars.add(var);
 		}
@@ -377,13 +377,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		{
 			List<Variable> vars1 = new LinkedList<Variable>();
-			for (NewLiteral var : atom1VarsList)
+			for (Term var : atom1VarsList)
 				vars1.add((Variable) var);
 			translate(vars1, left, pr, 2 * i, varcount);
 		}
 		{
 			List<Variable> vars2 = new LinkedList<Variable>();
-			for (NewLiteral var : atom2VarsList)
+			for (Term var : atom2VarsList)
 				vars2.add((Variable) var);
 			translate(vars2, right, pr, 2 * i + 1, varcount);
 		}
@@ -398,7 +398,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		/* Preparing the two atoms */
 
 		Set<Variable> atom1VarsSet = getVariables(left);
-		List<NewLiteral> atom1VarsList = new LinkedList<NewLiteral>();
+		List<Term> atom1VarsList = new LinkedList<Term>();
 		atom1VarsList.addAll(atom1VarsSet);
 		Collections.sort(atom1VarsList, comparator);
 		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
@@ -406,7 +406,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function leftAtom = ofac.getFunctionalTerm(leftAtomPred, atom1VarsList);
 
 		Set<Variable> atom2VarsSet = getVariables(right);
-		List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
+		List<Term> atom2VarsList = new LinkedList<Term>();
 		atom2VarsList.addAll(atom2VarsSet);
 		Collections.sort(atom2VarsList, comparator);
 		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
@@ -428,7 +428,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		/* Preparing the head of the LeftJoin rule */
 		// Collections.sort(vars, comparator);
-		List<NewLiteral> headVars = new LinkedList<NewLiteral>();
+		List<Term> headVars = new LinkedList<Term>();
 		for (Variable var : vars) {
 			headVars.add(var);
 		}
@@ -450,13 +450,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		{
 			List<Variable> vars1 = new LinkedList<Variable>();
-			for (NewLiteral var : atom1VarsList)
+			for (Term var : atom1VarsList)
 				vars1.add((Variable) var);
 			translate(vars1, left, pr, 2 * i, varcount);
 		}
 		{
 			List<Variable> vars2 = new LinkedList<Variable>();
-			for (NewLiteral var : atom2VarsList)
+			for (Term var : atom2VarsList)
 				vars2.add((Variable) var);
 			translate(vars2, right, pr, 2 * i + 1, varcount);
 		}
@@ -468,7 +468,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Op op = projectOp.getSubOp();
 		Set<Variable> nestedVars = getVariables(op);
 
-		List<NewLiteral> projectedVariables = new LinkedList<NewLiteral>();
+		List<Term> projectedVariables = new LinkedList<Term>();
 		for (Var var : projectOp.getVars()) {
 			projectedVariables.add(ofac.getVariable(var.getVarName()));
 		}
@@ -481,7 +481,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		;
 
 		Set<Variable> bodyatomVarsSet = getVariables(op);
-		List<NewLiteral> bodyatomVarsList = new LinkedList<NewLiteral>();
+		List<Term> bodyatomVarsList = new LinkedList<Term>();
 		bodyatomVarsList.addAll(bodyatomVarsSet);
 		Collections.sort(bodyatomVarsList, comparator);
 
@@ -492,7 +492,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		/* Continue the nested tree */
 
 		vars = new LinkedList<Variable>();
-		for (NewLiteral var : bodyatomVarsList) {
+		for (Term var : bodyatomVarsList) {
 			vars.add((Variable) var);
 		}
 		translate(vars, op, pr, i + 1, varcount);
@@ -555,14 +555,14 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 
 		Predicate predicate = ofac.getPredicate("ans" + (i), var.size());
-		List<NewLiteral> vars = new LinkedList<NewLiteral>();
+		List<Term> vars = new LinkedList<Term>();
 		vars.addAll(var);
 		Function head = ofac.getFunctionalTerm(predicate, vars);
 
 		Predicate pbody;
 		Function bodyAtom;
 
-		List<NewLiteral> innerProjection = new LinkedList<NewLiteral>();
+		List<Term> innerProjection = new LinkedList<Term>();
 		innerProjection.addAll(filteredVariables);
 		Collections.sort(innerProjection, comparator);
 
@@ -600,7 +600,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		if (vars.size() == 0 && filteredVariables.size() > 0) {
 			List<Variable> newvars = new LinkedList<Variable>();
-			for (NewLiteral l : innerProjection)
+			for (Term l : innerProjection)
 				newvars.add((Variable) l);
 			translate(newvars, sub, pr, (i * 2), varcount);
 		} else
@@ -631,7 +631,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		} else if (triples.size() >= 2) {
 			/* Preparing the head of the Join rule */
-			List<NewLiteral> headVars = new LinkedList<NewLiteral>();
+			List<Term> headVars = new LinkedList<Term>();
 			for (Variable var : vars) {
 				headVars.add(var);
 			}
@@ -640,7 +640,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			/* Preparing the two atoms */
 			Set<Variable> atom1VarsSet = getVariables(triples.get(0));
-			List<NewLiteral> atom1VarsList = new LinkedList<NewLiteral>();
+			List<Term> atom1VarsList = new LinkedList<Term>();
 			atom1VarsList.addAll(atom1VarsSet);
 			Collections.sort(atom1VarsList, comparator);
 			Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
@@ -649,7 +649,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			Set<Variable> atom2VarsSet = getVariables(triples.subList(1,
 					triples.size()));
-			List<NewLiteral> atom2VarsList = new LinkedList<NewLiteral>();
+			List<Term> atom2VarsList = new LinkedList<Term>();
 			atom2VarsList.addAll(atom2VarsSet);
 			Collections.sort(atom2VarsList, comparator);
 			Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
@@ -664,12 +664,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			pr.appendRule(newrule);
 
 			List<Variable> newvars = new LinkedList<Variable>();
-			for (NewLiteral var : atom1VarsList) {
+			for (Term var : atom1VarsList) {
 				newvars.add((Variable) var);
 			}
 			translate(newvars, triples.get(0), pr, 2 * i, varcount);
 			newvars.clear();
-			for (NewLiteral var : atom2VarsList) {
+			for (Term var : atom2VarsList) {
 				newvars.add((Variable) var);
 			}
 			translate(newvars, triples.subList(1, triples.size()), pr,
@@ -713,7 +713,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		// / Instantiate the atom components: predicate and terms.
 		Predicate predicate = null;
-		Vector<NewLiteral> terms = new Vector<NewLiteral>();
+		Vector<Term> terms = new Vector<Term>();
 
 		if (p instanceof Node_URI && ((Node_URI)p).getURI().equals(RDF.TYPE.stringValue())) {
 			// Subject node
@@ -944,7 +944,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		result.addFirst(atom);
 
 		// Collections.sort(vars, comparator);
-		List<NewLiteral> newvars = new LinkedList<NewLiteral>();
+		List<Term> newvars = new LinkedList<Term>();
 		for (Variable var : vars) {
 			newvars.add(var);
 		}
@@ -1063,10 +1063,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	//
 	// }
 
-	private class NewLiteralComparator implements Comparator<NewLiteral> {
+	private class NewLiteralComparator implements Comparator<Term> {
 
 		@Override
-		public int compare(NewLiteral arg0, NewLiteral arg1) {
+		public int compare(Term arg0, Term arg1) {
 			return arg0.toString().compareTo(arg1.toString());
 		}
 
@@ -1242,7 +1242,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		return dataType;
 	}
 
-	private NewLiteral getBooleanTerm(Expr expr) {
+	private Term getBooleanTerm(Expr expr) {
 		if (expr instanceof ExprVar) {
 			return getVariableTerm((ExprVar) expr);
 		} else if (expr instanceof NodeValue) {
@@ -1253,8 +1253,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			ExprFunction2 function = (ExprFunction2) expr;
 			Expr arg1 = function.getArg1(); // get the first argument
 			Expr arg2 = function.getArg2(); // get the second argument
-			NewLiteral term1 = getBooleanTerm(arg1);
-			NewLiteral term2 = getBooleanTerm(arg2);
+			Term term1 = getBooleanTerm(arg1);
+			Term term2 = getBooleanTerm(arg2);
 			// Construct the boolean function
 			// TODO Change the method name because ExprFunction2 is not only for
 			// boolean functions
@@ -1327,7 +1327,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function builtInFunction = null;
 		if (expr instanceof E_LogicalNot) {
 			Expr arg = expr.getArg();
-			NewLiteral term = getBooleanTerm(arg);
+			Term term = getBooleanTerm(arg);
 			builtInFunction = ofac.getFunctionalTerm(OBDAVocabulary.NOT, term);
 		}
 		/*
@@ -1335,8 +1335,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		else if (expr instanceof E_UnaryMinus) {
 			Expr arg = expr.getArg();
-			NewLiteral term = getBooleanTerm(arg);
-			NewLiteral minusOneConstant = ofac.getValueConstant("-1", COL_TYPE.INTEGER);
+			Term term = getBooleanTerm(arg);
+			Term minusOneConstant = ofac.getValueConstant("-1", COL_TYPE.INTEGER);
 			builtInFunction = ofac.getFunctionalTerm(OBDAVocabulary.MULTIPLY, minusOneConstant, term);
 		} else if (expr instanceof E_Bound) {
 			Expr arg = expr.getArg();
@@ -1377,8 +1377,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		return builtInFunction;
 	}
 
-	private Function getBooleanFunction(ExprFunction2 expr, NewLiteral term1,
-			NewLiteral term2) {
+	private Function getBooleanFunction(ExprFunction2 expr, Term term1,
+			Term term2) {
 		Function function = null;
 		// The AND and OR expression
 		if (expr instanceof E_LogicalAnd) {
@@ -1413,13 +1413,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		return function;
 	}
 
-	private NewLiteral toLowerCase(NewLiteral term) {
-		NewLiteral output = term;
+	private Term toLowerCase(Term term) {
+		Term output = term;
 		if (term instanceof Function) {
 			Function f = (Function) term;
 			Predicate functor = f.getFunctionSymbol();
 			if (functor instanceof DataTypePredicate) {
-				NewLiteral functionTerm = f.getTerm(0);
+				Term functionTerm = f.getTerm(0);
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
 					output = ofac.getFunctionalTerm(functor, 
@@ -1431,16 +1431,16 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 
-	private NewLiteral getOtherFunctionTerm(ExprFunctionN expr) {
+	private Term getOtherFunctionTerm(ExprFunctionN expr) {
 		Function builtInFunction = null;
 		if (expr instanceof E_Regex) {
 			E_Regex function = (E_Regex) expr;
 			Expr arg1 = function.getArg(1); // get the first argument
 			Expr arg2 = function.getArg(2); // get the second argument
 			Expr arg3 = function.getArg(3); // get the third argument (optional)
-			NewLiteral term1 = getBooleanTerm(arg1);
-			NewLiteral term2 = getBooleanTerm(arg2);
-			NewLiteral term3 = (arg3 != null) ? getBooleanTerm(arg3) : ofac
+			Term term1 = getBooleanTerm(arg1);
+			Term term2 = getBooleanTerm(arg2);
+			Term term3 = (arg3 != null) ? getBooleanTerm(arg3) : ofac
 					.getNULL();
 			builtInFunction = ofac.getFunctionalTerm(
 					OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);

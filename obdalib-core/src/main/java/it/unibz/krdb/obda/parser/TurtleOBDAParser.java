@@ -12,7 +12,7 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
@@ -170,10 +170,10 @@ public class TurtleOBDAParser extends Parser {
 	private HashMap<String, String> directives = new HashMap<String, String>();
 
 	/** The current subject term */
-	private NewLiteral subject;
+	private Term subject;
 
 	/** All variables */
-	private Set<NewLiteral> variableSet = new HashSet<NewLiteral>();
+	private Set<Term> variableSet = new HashSet<Term>();
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -219,10 +219,10 @@ public class TurtleOBDAParser extends Parser {
 	   return text.substring(1, text.length()-1);
 	}
 
-	private NewLiteral construct(String text) {
-	   NewLiteral toReturn = null;
+	private Term construct(String text) {
+	   Term toReturn = null;
 	   final String PLACEHOLDER = "{}"; 
-	   List<NewLiteral> terms = new LinkedList<NewLiteral>();
+	   List<Term> terms = new LinkedList<Term>();
 	   List<FormatString> tokens = parse(text);
 	   int size = tokens.size();
 	   if (size == 1) {
@@ -344,7 +344,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 			      int arity = variableSet.size();
-			      List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
+			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
 			      Function head = dfac.getFunctionalTerm(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 			      
 			      // Create a new rule
@@ -667,7 +667,7 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> value = null;
 
 
-		NewLiteral subject5 =null;
+		Term subject5 =null;
 		List<Function> predicateObjectList6 =null;
 
 		try {
@@ -709,9 +709,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 		IRI v1 =null;
-		List<NewLiteral> l1 =null;
+		List<Term> l1 =null;
 		IRI v2 =null;
-		List<NewLiteral> l2 =null;
+		List<Term> l2 =null;
 
 
 		   value = new LinkedList<Function>();
@@ -729,7 +729,7 @@ public class TurtleOBDAParser extends Parser {
 			state._fsp--;
 
 
-			      for (NewLiteral object : l1) {
+			      for (Term object : l1) {
 			        Function atom = null;
 			        String p = v1.toString();
 			        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
@@ -766,7 +766,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					      for (NewLiteral object : l2) {
+					      for (Term object : l2) {
 					        Function atom = null;
 					        String p = v2.toString();
 					        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
@@ -865,15 +865,15 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "objectList"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:340:1: objectList returns [List<NewLiteral> value] : o1= object ( COMMA o2= object )* ;
-	public final List<NewLiteral> objectList() throws RecognitionException {
-		List<NewLiteral> value = null;
+	public final List<Term> objectList() throws RecognitionException {
+		List<Term> value = null;
 
 
-		NewLiteral o1 =null;
-		NewLiteral o2 =null;
+		Term o1 =null;
+		Term o2 =null;
 
 
-		  value = new ArrayList<NewLiteral>();
+		  value = new ArrayList<Term>();
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:344:3: (o1= object ( COMMA o2= object )* )
@@ -929,11 +929,11 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "subject"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:347:1: subject returns [NewLiteral value] : ( resource | variable );
-	public final NewLiteral subject() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term subject() throws RecognitionException {
+		Term value = null;
 
 
-		NewLiteral resource8 =null;
+		Term resource8 =null;
 		Variable variable9 =null;
 
 		try {
@@ -996,7 +996,7 @@ public class TurtleOBDAParser extends Parser {
 		IRI value = null;
 
 
-		NewLiteral resource10 =null;
+		Term resource10 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:354:3: ( resource )
@@ -1007,7 +1007,7 @@ public class TurtleOBDAParser extends Parser {
 			state._fsp--;
 
 			 
-			      NewLiteral nl = resource10;
+			      Term nl = resource10;
 			      if (nl instanceof URIConstant) {
 			        URIConstant c = (URIConstant) nl;
 			        value = iriFactory.construct(c.getURI());
@@ -1033,12 +1033,12 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "object"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:365:1: object returns [NewLiteral value] : ( resource | literal | typedLiteral | variable );
-	public final NewLiteral object() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term object() throws RecognitionException {
+		Term value = null;
 
 
-		NewLiteral resource11 =null;
-		NewLiteral literal12 =null;
+		Term resource11 =null;
+		Term literal12 =null;
 		Function typedLiteral13 =null;
 		Variable variable14 =null;
 
@@ -1156,8 +1156,8 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "resource"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:373:1: resource returns [NewLiteral value] : ( uriref | qname );
-	public final NewLiteral resource() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term resource() throws RecognitionException {
+		Term value = null;
 
 
 		String uriref15 =null;
@@ -1371,8 +1371,8 @@ public class TurtleOBDAParser extends Parser {
 		Function value = null;
 
 
-		NewLiteral resource20 =null;
-		Vector<NewLiteral> terms21 =null;
+		Term resource20 =null;
+		Vector<Term> terms21 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:403:3: ( resource LPAREN terms RPAREN )
@@ -1417,9 +1417,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 		Variable variable22 =null;
-		NewLiteral language23 =null;
+		Term language23 =null;
 		Variable variable24 =null;
-		NewLiteral resource25 =null;
+		Term resource25 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:412:3: ( variable AT language | variable REFERENCE resource )
@@ -1470,7 +1470,7 @@ public class TurtleOBDAParser extends Parser {
 
 					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
 					      Variable var = variable22;
-					      NewLiteral lang = language23;   
+					      Term lang = language23;   
 					      value = dfac.getFunctionalTerm(functionSymbol, var, lang);
 					    
 					}
@@ -1530,8 +1530,8 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "language"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:443:1: language returns [NewLiteral value] : ( languageTag | variable );
-	public final NewLiteral language() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term language() throws RecognitionException {
+		Term value = null;
 
 
 		ParserRuleReturnScope languageTag26 =null;
@@ -1597,15 +1597,15 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "terms"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:452:1: terms returns [Vector<NewLiteral> value] : t1= term ( COMMA t2= term )* ;
-	public final Vector<NewLiteral> terms() throws RecognitionException {
-		Vector<NewLiteral> value = null;
+	public final Vector<Term> terms() throws RecognitionException {
+		Vector<Term> value = null;
 
 
-		NewLiteral t1 =null;
-		NewLiteral t2 =null;
+		Term t1 =null;
+		Term t2 =null;
 
 
-		  value = new Vector<NewLiteral>();
+		  value = new Vector<Term>();
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:456:3: (t1= term ( COMMA t2= term )* )
@@ -1661,13 +1661,13 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "term"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:459:1: term returns [NewLiteral value] : ( function | variable | literal );
-	public final NewLiteral term() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term term() throws RecognitionException {
+		Term value = null;
 
 
 		Function function28 =null;
 		Variable variable29 =null;
-		NewLiteral literal30 =null;
+		Term literal30 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:460:3: ( function | variable | literal )
@@ -1754,13 +1754,13 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "literal"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:465:1: literal returns [NewLiteral value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
-	public final NewLiteral literal() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term literal() throws RecognitionException {
+		Term value = null;
 
 
 		ValueConstant stringLiteral31 =null;
-		NewLiteral language32 =null;
-		NewLiteral dataTypeString33 =null;
+		Term language32 =null;
+		Term dataTypeString33 =null;
 		ValueConstant numericLiteral34 =null;
 		ValueConstant booleanLiteral35 =null;
 
@@ -1846,7 +1846,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 					       ValueConstant constant = stringLiteral31;
-					       NewLiteral lang = language32;
+					       Term lang = language32;
 					       if (lang != null) {
 					         value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
 					       } else {
@@ -1936,12 +1936,12 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "dataTypeString"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:487:1: dataTypeString returns [NewLiteral value] : stringLiteral REFERENCE resource ;
-	public final NewLiteral dataTypeString() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term dataTypeString() throws RecognitionException {
+		Term value = null;
 
 
 		ValueConstant stringLiteral37 =null;
-		NewLiteral resource38 =null;
+		Term resource38 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:488:3: ( stringLiteral REFERENCE resource )

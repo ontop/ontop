@@ -16,7 +16,7 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
@@ -256,7 +256,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private LinkedHashSet<String> getBooleanConditionsString(List<Function> atoms, QueryAliasIndex index) {
 		LinkedHashSet<String> conditions = new LinkedHashSet<String>();
 		for (int atomidx = 0; atomidx < atoms.size(); atomidx++) {
-			NewLiteral innerAtom = atoms.get(atomidx);
+			Term innerAtom = atoms.get(atomidx);
 			Function innerAtomAsFunction = (Function) innerAtom;
 			if (innerAtomAsFunction.isBooleanFunction()) {
 				String condition = getSQLCondition(innerAtomAsFunction, index);
@@ -275,7 +275,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
 			// added also for IS TRUE
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
-			NewLiteral term = atom.getTerm(0);
+			Term term = atom.getTerm(0);
 			String column = getSQLString(term, index, false);
 			if (expressionFormat.contains("NOT %s") ) {
 				// find data type of term and evaluate accordingly
@@ -306,16 +306,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (atom.isBooleanFunction()) {
 				// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc. _
 				String expressionFormat = getBooleanOperatorString(functionSymbol);
-				NewLiteral left = atom.getTerm(0);
-				NewLiteral right = atom.getTerm(1);
+				Term left = atom.getTerm(0);
+				Term right = atom.getTerm(1);
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
 			} else if (atom.isArithmeticFunction()) {
 				// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
 				String expressionFormat = getNumericalOperatorString(functionSymbol);
-				NewLiteral left = atom.getTerm(0);
-				NewLiteral right = atom.getTerm(1);
+				Term left = atom.getTerm(0);
+				Term right = atom.getTerm(1);
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
@@ -331,8 +331,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 						caseinSensitive = true;
 					} 
 				}
-				NewLiteral p1 = atom.getTerm(0);
-				NewLiteral p2 = atom.getTerm(1);
+				Term p1 = atom.getTerm(0);
+				Term p2 = atom.getTerm(1);
 				
 				String column = getSQLString(p1, index, false);
 				String pattern = getSQLString(p2, index, false);
@@ -376,7 +376,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		List<String> tableDefinitions = new LinkedList<String>();
 		for (int atomidx = 0; atomidx < inneratoms.size(); atomidx++) {
-			NewLiteral innerAtom = inneratoms.get(atomidx);
+			Term innerAtom = inneratoms.get(atomidx);
 			Function innerAtomAsFunction = (Function) innerAtom;
 			String definition = getTableDefinition(innerAtomAsFunction, index, indent + INDENT);
 			if (!definition.isEmpty()) {
@@ -478,7 +478,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return "";
 		} else if (predicate instanceof AlgebraOperatorPredicate) {
 			List<Function> innerTerms = new LinkedList<Function>();
-			for (NewLiteral innerTerm : atom.getTerms()) {
+			for (Term innerTerm : atom.getTerms()) {
 				innerTerms.add((Function) innerTerm);
 			}
 			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
@@ -572,7 +572,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			isLeftJoin = true;
 		}
 		LinkedHashSet<Variable> innerVariables = new LinkedHashSet<Variable>();
-		for (NewLiteral t : atom.getTerms()) {
+		for (Term t : atom.getTerms()) {
 			if (isLeftJoin && foundFirstDataAtom) {
 				break;
 			}
@@ -638,7 +638,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				continue;
 			}
 			for (int idx = 0; idx < atom.getArity(); idx++) {
-				NewLiteral l = atom.getTerm(idx);
+				Term l = atom.getTerm(idx);
 				if (l instanceof Constant) {
 					String value = getSQLString(l, index, false);
 					String columnReference = index.getColumnReference(atom, idx);
@@ -651,7 +651,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	// return variable SQL data type
-	private int getVariableDataType (NewLiteral term, QueryAliasIndex idx) {
+	private int getVariableDataType (Term term, QueryAliasIndex idx) {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
@@ -690,7 +690,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
-		List<NewLiteral> headterms = query.getHead().getTerms();
+		List<Term> headterms = query.getHead().getTerms();
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
@@ -702,10 +702,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return sb.toString();
 		}
 
-		Iterator<NewLiteral> hit = headterms.iterator();
+		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 		while (hit.hasNext()) {
-			NewLiteral ht = hit.next();
+			Term ht = hit.next();
 			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos);
 			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index);
 			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index);
@@ -724,7 +724,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return sb.toString();
 	}
 
-	private String getMainColumnForSELECT(NewLiteral ht,
+	private String getMainColumnForSELECT(Term ht,
 			List<String> signature, int hpos, QueryAliasIndex index) {
 
 		String mainColumn = null;
@@ -760,7 +760,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					termStr = getSQLStringForTemplateFunction(ov, index);
 				}
 				else {
-					NewLiteral term = ov.getTerms().get(0);
+					Term term = ov.getTerms().get(0);
 					if (term instanceof ValueConstant) {
 						termStr = jdbcutil.getSQLLexicalForm((ValueConstant) term);
 					} else {
@@ -803,7 +803,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
 	}
 
-	private String getLangColumnForSELECT(NewLiteral ht, List<String> signature, int hpos, QueryAliasIndex index) {
+	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
 
 		String langStr = "%s AS \"%sLang\"";
 
@@ -824,7 +824,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 				String lang = null;
 				int last = ov.getTerms().size()-1;
-				NewLiteral langTerm = ov.getTerms().get(last);
+				Term langTerm = ov.getTerms().get(last);
 				if (langTerm == OBDAVocabulary.NULL) {
 					lang = "NULL";
 				} else if (langTerm instanceof ValueConstant) {
@@ -839,7 +839,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
-	private String getTypeColumnForSELECT(NewLiteral ht, List<String> signature, int hpos) {
+	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
 
 		String typeStr = "%s AS \"%sQuestType\"";
 
@@ -884,8 +884,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		/*
 		 * The first inner term determines the form of the result
 		 */
-		NewLiteral t = ov.getTerms().get(0);
-		NewLiteral c;
+		Term t = ov.getTerms().get(0);
+		Term c;
 	
 		String literalValue = "";
 		
@@ -945,7 +945,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
-					NewLiteral currentTerm = ov.getTerms().get(termIndex);
+					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl = "";
 					if (isStringColType(currentTerm, index)) {
 						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
@@ -1008,7 +1008,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return toReturn;
 	}
 
-	private boolean isStringColType(NewLiteral term, QueryAliasIndex index) {
+	private boolean isStringColType(Term term, QueryAliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
@@ -1105,7 +1105,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * <p>
 	 * If its a boolean comparison, it returns the corresponding SQL comparison.
 	 */
-	public String getSQLString(NewLiteral term, QueryAliasIndex index, boolean useBrackets) {
+	public String getSQLString(Term term, QueryAliasIndex index, boolean useBrackets) {
 		if (term == null) {
 			return "";
 		}
@@ -1137,7 +1137,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Function function = (Function) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
-		NewLiteral term1 = function.getTerms().get(0);
+		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
 		if (functionSymbol instanceof DataTypePredicate) {
@@ -1172,7 +1172,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else if (isBinary(function)) {
 				// for binary functions, e.g., AND, OR, EQ, NEQ, GT, etc.
 				String leftOp = getSQLString(term1, index, true);
-				NewLiteral term2 = function.getTerms().get(1);
+				Term term2 = function.getTerms().get(1);
 				String rightOp = getSQLString(term2, index, true);
 				String result = String.format(expressionFormat, leftOp, rightOp);
 				if (useBrackets) {
@@ -1187,7 +1187,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
 			String expressionFormat = getNumericalOperatorString(functionSymbol);
 			String leftOp = getSQLString(term1, index, true);
-			NewLiteral term2 = function.getTerms().get(1);
+			Term term2 = function.getTerms().get(1);
 			String rightOp = getSQLString(term2, index, true);
 			String result = String.format(expressionFormat, leftOp, rightOp);
 			if (useBrackets) {
@@ -1347,8 +1347,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (atom.getFunctionSymbol() instanceof BooleanOperationPredicate) {
 				return;
 			} else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {
-				List<NewLiteral> lit = atom.getTerms();
-				for (NewLiteral subatom : lit) {
+				List<Term> lit = atom.getTerms();
+				for (Term subatom : lit) {
 					if (subatom instanceof Function) {
 						generateViewsIndexVariables((Function) subatom);
 					}
@@ -1378,7 +1378,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			DataDefinition def = dataDefinitions.get(atom);
 			String viewName = viewNames.get(atom);
 			for (int index = 0; index < atom.getTerms().size(); index++) {
-				NewLiteral term = atom.getTerms().get(index);
+				Term term = atom.getTerms().get(index);
 				if (!(term instanceof Variable)) {
 					continue;
 				}

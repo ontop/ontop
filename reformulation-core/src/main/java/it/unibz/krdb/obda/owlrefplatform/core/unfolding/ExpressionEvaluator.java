@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -67,7 +67,7 @@ public class ExpressionEvaluator {
 	public boolean evaluateExpressions(CQIE q) {
 		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
 			Function atom = q.getBody().get(atomidx);
-			NewLiteral newatom = eval(atom);
+			Term newatom = eval(atom);
 			if (newatom == fac.getTrue()) {
 				q.getBody().remove(atomidx);
 				atomidx -= 1;
@@ -81,7 +81,7 @@ public class ExpressionEvaluator {
 		return false;
 	}
 
-	public NewLiteral eval(NewLiteral expr) {
+	public Term eval(Term expr) {
 		if (expr instanceof Variable) {
 			return eval((Variable) expr);
 		} else if (expr instanceof Constant) {
@@ -93,15 +93,15 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	public NewLiteral eval(Variable expr) {
+	public Term eval(Variable expr) {
 		return expr;
 	}
 
-	public NewLiteral eval(Constant expr) {
+	public Term eval(Constant expr) {
 		return expr;
 	}
 
-	public NewLiteral eval(Function expr) {
+	public Term eval(Function expr) {
 		Predicate p = expr.getFunctionSymbol();
 		if (p instanceof BooleanOperationPredicate) {
 			return evalBoolean(expr);
@@ -195,7 +195,7 @@ public class ExpressionEvaluator {
 		return regexFlag;
 	}
 
-	public NewLiteral evalBoolean(Function term) {
+	public Term evalBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.AND) {
 			return evalAndOr(term, true);
@@ -240,7 +240,7 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	private NewLiteral evalNonBoolean(Function term) {
+	private Term evalNonBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.SPARQL_STR) {
 			return evalStr(term);
@@ -255,7 +255,7 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	private NewLiteral evalNumericalOperation(Function term) {
+	private Term evalNumericalOperation(Function term) {
 		Function returnedDatatype = (Function) getDatatype(term.getFunctionSymbol(), term);
 		if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) {
 			Predicate pred = term.getFunctionSymbol();
@@ -276,8 +276,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for isLiteral() function
 	 */
-	private NewLiteral evalIsLiteral(Function term) {
-		NewLiteral innerTerm = term.getTerm(0);
+	private Term evalIsLiteral(Function term) {
+		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
@@ -294,8 +294,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for isBlank() function
 	 */
-	private NewLiteral evalIsBlank(Function term) {
-		NewLiteral teval = eval(term.getTerm(0));
+	private Term evalIsBlank(Function term) {
+		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
@@ -311,8 +311,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for isURI() function
 	 */
-	private NewLiteral evalIsUri(Function term) {
-		NewLiteral teval = eval(term.getTerm(0));
+	private Term evalIsUri(Function term) {
+		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
@@ -328,8 +328,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for isIRI() function
 	 */
-	private NewLiteral evalIsIri(Function term) {
-		NewLiteral teval = eval(term.getTerm(0));
+	private Term evalIsIri(Function term) {
+		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
@@ -345,12 +345,12 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for str() function
 	 */
-	private NewLiteral evalStr(Function term) {
-		NewLiteral innerTerm = term.getTerm(0);
+	private Term evalStr(Function term) {
+		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
-			NewLiteral parameter = function.getTerm(0);
+			Term parameter = function.getTerm(0);
 			if (predicate instanceof DataTypePredicate) {
 				String datatype = predicate.toString();
 				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
@@ -381,8 +381,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for datatype() function
 	 */
-	private NewLiteral evalDatatype(Function term) {
-		NewLiteral innerTerm = term.getTerm(0);
+	private Term evalDatatype(Function term) {
+		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
@@ -391,7 +391,7 @@ public class ExpressionEvaluator {
 		return term;
 	}
 	
-	private NewLiteral getDatatype(Predicate predicate, NewLiteral lit)
+	private Term getDatatype(Predicate predicate, Term lit)
 	{
 		if (predicate instanceof DataTypePredicate) {
 			return fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
@@ -418,9 +418,9 @@ public class ExpressionEvaluator {
 				//return numerical if arguments have same type
 				if (lit instanceof Function) {
 					Function func = (Function) lit;
-					NewLiteral arg1 = func.getTerm(0);
+					Term arg1 = func.getTerm(0);
 					Predicate pred1 = getDatatypePredicate(arg1);
-					NewLiteral arg2 = func.getTerm(1);
+					Term arg2 = func.getTerm(1);
 					Predicate pred2 = getDatatypePredicate(arg2);
 					if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
 						return fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
@@ -445,7 +445,7 @@ public class ExpressionEvaluator {
 		return null;
 	}
 	
-	private Predicate getDatatypePredicate(NewLiteral term) {
+	private Predicate getDatatypePredicate(Term term) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
 			return function.getFunctionSymbol();
@@ -496,11 +496,11 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for lang() function
 	 */
-	private NewLiteral evalLang(Function term) {
-		NewLiteral innerTerm = term.getTerm(0);
+	private Term evalLang(Function term) {
+		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		NewLiteral emptyconstant = fac.getFunctionalTerm(
+		Term emptyconstant = fac.getFunctionalTerm(
 				fac.getDataTypePredicateString(), fac.getValueConstant("", COL_TYPE.STRING));
 
 		if (!(innerTerm instanceof Function)) {
@@ -521,7 +521,7 @@ public class ExpressionEvaluator {
 		if (function.getTerms().size() != 2) {
 			return emptyconstant;
 		} else {
-			NewLiteral parameter = function.getTerm(1);
+			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
 				return fac.getFunctionalTerm(fac.getDataTypePredicateString(),
 						parameter.clone());
@@ -536,20 +536,20 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for langMatches() function
 	 */
-	private NewLiteral evalLangMatches(Function term) {
+	private Term evalLangMatches(Function term) {
 		final String SELECT_ALL = "*";
 		
 		/*
 		 * Evaluate the first term
 		 */
-		NewLiteral teval1 = eval(term.getTerm(0));
+		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
 			return fac.getFalse();
 		}
 		/*
 		 * Evaluate the second term
 		 */
-		NewLiteral innerTerm2 = term.getTerm(1);
+		Term innerTerm2 = term.getTerm(1);
 		if (innerTerm2 == null) {
 			return fac.getFalse();
 		}
@@ -592,8 +592,8 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	private NewLiteral evalRegex(Function term) {
-		NewLiteral innerTerm = term.getTerm(0);
+	private Term evalRegex(Function term) {
+		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function f = (Function) innerTerm;
 			Predicate functionSymbol = f.getFunctionSymbol();
@@ -609,13 +609,13 @@ public class ExpressionEvaluator {
 		return term;
 	}
 
-	public NewLiteral evalIsNullNotNull(Function term, boolean isnull) {
-		NewLiteral innerTerm = term.getTerms().get(0);
+	public Term evalIsNullNotNull(Function term, boolean isnull) {
+		Term innerTerm = term.getTerms().get(0);
 		if (innerTerm instanceof Function) {
 			Function f = (Function) innerTerm;
 			if (f.isDataTypeFunction()) return innerTerm;
 		}
-		NewLiteral result = eval(innerTerm);
+		Term result = eval(innerTerm);
 		if (result == OBDAVocabulary.NULL) {
 			if (isnull) {
 				return fac.getTrue();
@@ -642,8 +642,8 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	private NewLiteral evalIsTrue(Function term) {
-		NewLiteral teval = eval(term.getTerm(0));
+	private Term evalIsTrue(Function term) {
+		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
 			Function f = (Function) teval;
 			Predicate predicate = f.getFunctionSymbol();
@@ -663,8 +663,8 @@ public class ExpressionEvaluator {
 	}
 	
 	
-	private NewLiteral evalNot(Function term) {
-		NewLiteral teval = eval(term.getTerm(0));
+	private Term evalNot(Function term) {
+		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
 			Function f = (Function) teval;
 			Predicate predicate = f.getFunctionSymbol();
@@ -683,14 +683,14 @@ public class ExpressionEvaluator {
 		return term;
 	}
 
-	public NewLiteral evalEqNeq(Function term, boolean eq) {
+	public Term evalEqNeq(Function term, boolean eq) {
 		/*
 		 * Evaluate the first term
 		 */
 		
 		// Do not eval if term is DataTypeFunction, e.g. integer(10)
-		NewLiteral teval1 = null;
-		NewLiteral teval2 = null;
+		Term teval1 = null;
+		Term teval2 = null;
 		
 		if (term.getTerm(0) instanceof Function) {
 			Function t1 = (Function) term.getTerm(0);
@@ -729,8 +729,8 @@ public class ExpressionEvaluator {
 		/* 
 		 * Normalizing the location of terms, functions first 
 		 */
-		NewLiteral eval1 = teval1 instanceof Function ? teval1 : teval2;
-		NewLiteral eval2 = teval1 instanceof Function ? teval2 : teval1;
+		Term eval1 = teval1 instanceof Function ? teval1 : teval2;
+		Term eval2 = teval1 instanceof Function ? teval2 : teval1;
 
 		if (eval1 instanceof Variable || eval2 instanceof Variable) {
 			// no - op
@@ -849,7 +849,7 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	private NewLiteral evalUriTemplateEqNeq(Function uriFunction1, Function uriFunction2, boolean isEqual) {
+	private Term evalUriTemplateEqNeq(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		int arityForFunction1 = uriFunction1.getArity();
 		int arityForFunction2 = uriFunction2.getArity();		
 		if (arityForFunction1 == 1) {
@@ -870,9 +870,9 @@ public class ExpressionEvaluator {
 		return null;
 	}
 	
-	private NewLiteral evalUriFunctionsWithSingleTerm(Function uriFunction1, Function uriFunction2, boolean isEqual) {
-		NewLiteral term1 = uriFunction1.getTerm(0);
-		NewLiteral term2 = uriFunction2.getTerm(0);
+	private Term evalUriFunctionsWithSingleTerm(Function uriFunction1, Function uriFunction2, boolean isEqual) {
+		Term term1 = uriFunction1.getTerm(0);
+		Term term2 = uriFunction2.getTerm(0);
 		if (!(term1 instanceof ValueConstant)) {
 			return null;
 		}
@@ -900,8 +900,8 @@ public class ExpressionEvaluator {
 		return null;
 	}
 
-	private NewLiteral evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
-		Map<Variable, NewLiteral> theta = Unifier.getMGU(uriFunction1, uriFunction2);
+	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
+		Map<Variable, Term> theta = Unifier.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
 			if (isEqual) {
 				return fac.getTrue();
@@ -939,7 +939,7 @@ public class ExpressionEvaluator {
 		return uriTemplateMatcher.generateURIFunction(uriString.getValue());
 	}
 	
-	public Function createEqNeqFilter(Variable var, NewLiteral value, boolean isEqual) {
+	public Function createEqNeqFilter(Variable var, Term value, boolean isEqual) {
 		if (isEqual) {
 			return fac.getEQFunction(var, value);
 		} else {
@@ -951,15 +951,15 @@ public class ExpressionEvaluator {
 		return fac.getANDFunction(function1, function2);
 	}
 
-	public NewLiteral evalAndOr(Function term, boolean and) {
-		NewLiteral teval1 = eval(term.getTerm(0));
-		NewLiteral teval2 = eval(term.getTerm(1));
+	public Term evalAndOr(Function term, boolean and) {
+		Term teval1 = eval(term.getTerm(0));
+		Term teval2 = eval(term.getTerm(1));
 
 		/*
 		 * Normalizing the location of terms, constants first
 		 */
-		NewLiteral eval1 = teval1 instanceof Constant ? teval1 : teval2;
-		NewLiteral eval2 = teval1 instanceof Constant ? teval2 : teval1;
+		Term eval1 = teval1 instanceof Constant ? teval1 : teval2;
+		Term eval2 = teval1 instanceof Constant ? teval2 : teval1;
 
 		/*
 		 * Implementing boolean logic

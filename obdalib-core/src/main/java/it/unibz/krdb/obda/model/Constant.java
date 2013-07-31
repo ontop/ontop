@@ -9,10 +9,10 @@
 package it.unibz.krdb.obda.model;
 
 /**
- * This class defines a type of {@link NewLiteral} in which it has a constant
+ * This class defines a type of {@link Term} in which it has a constant
  * value.
  */
-public interface Constant extends NewLiteral {
+public interface Constant extends Term {
 
 	public Predicate.COL_TYPE getType();
 

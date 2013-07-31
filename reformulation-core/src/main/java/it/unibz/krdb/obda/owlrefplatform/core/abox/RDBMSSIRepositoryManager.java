@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -2395,8 +2395,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 		// Initialize the predicate and term objects.
 		Predicate headPredicate, bodyPredicate = null;
-		List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
-		List<NewLiteral> bodyTerms = new ArrayList<NewLiteral>();
+		List<Term> headTerms = new ArrayList<Term>();
+		List<Term> bodyTerms = new ArrayList<Term>();
 
 		List<Function> bodyAtoms = new LinkedList<Function>();
 
@@ -3800,7 +3800,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		hash = f.getPredicate().hashCode() * (31 ^ f.getArity());
 		for (int i = 0; i < f.getArity(); i++) {
-			NewLiteral term = f.getTerm(i);
+			Term term = f.getTerm(i);
 			int termhash = getHash((Function) term);
 			hash += termhash * (31 ^ (f.getArity() - (i + 1)));
 		}

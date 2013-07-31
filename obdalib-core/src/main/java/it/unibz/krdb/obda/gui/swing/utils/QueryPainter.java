@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
@@ -384,8 +384,8 @@ public class QueryPainter {
 				tasks.add(task);
 			}
 
-			NewLiteral term1 = null;
-			NewLiteral term2 = null;
+			Term term1 = null;
+			Term term2 = null;
 			term1 = atom.getTerm(0);
 			if (atom.getArity() == 2) {
 				term2 = atom.getTerm(1);

@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -864,7 +864,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private void normalizeLanguageTagsinMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			Function head = mapping.getHead();
-			for (NewLiteral term : head.getTerms()) {
+			for (Term term : head.getTerms()) {
 				if (!(term instanceof Function)) {
 					continue;
 				}
@@ -877,8 +877,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * changing the language, its always the second inner term
 				 * (literal,lang)
 				 */
-				NewLiteral originalLangTag = typedTerm.getTerm(1);
-				NewLiteral normalizedLangTag = null;
+				Term originalLangTag = typedTerm.getTerm(1);
+				Term normalizedLangTag = null;
 
 				if (originalLangTag instanceof Constant) {
 					ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
@@ -934,7 +934,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Collecting URI templates and making pattern matchers for them.
 			 */
-			for (NewLiteral term : head.getTerms()) {
+			for (Term term : head.getTerms()) {
 				if (!(term instanceof Function)) {
 					continue;
 				}
@@ -1153,7 +1153,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			Function newhead = null;
 			Function currenthead = mapping.getHead();
 			Predicate pred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-			LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
+			LinkedList<Term> terms = new LinkedList<Term>();
 			if (currenthead.getArity() == 1) {
 				/*
 				 * head is Class(x) Forming head as triple(x,uri(rdf:type),

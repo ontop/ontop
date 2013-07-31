@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -56,7 +56,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		unfoldingProgram = fac.getDatalogProgram();
 
 		Function head = fac.getFunctionalTerm(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
-		List<NewLiteral> bodyTerms = new LinkedList<NewLiteral>();
+		List<Term> bodyTerms = new LinkedList<Term>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
@@ -66,7 +66,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		unfoldingProgram.appendRule(rule);
 
 		head = fac.getFunctionalTerm(fac.getDataPropertyPredicate("lastname"), fac.getVariable("x"), fac.getVariable("z"));
-		bodyTerms = new LinkedList<NewLiteral>();
+		bodyTerms = new LinkedList<Term>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
@@ -76,7 +76,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		unfoldingProgram.appendRule(rule);
 
 		head = fac.getFunctionalTerm(fac.getDataPropertyPredicate("id"), fac.getVariable("x"), fac.getVariable("m"));
-		bodyTerms = new LinkedList<NewLiteral>();
+		bodyTerms = new LinkedList<Term>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
@@ -86,7 +86,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		unfoldingProgram.appendRule(rule);
 		
 		head = fac.getFunctionalTerm(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
-		bodyTerms = new LinkedList<NewLiteral>();
+		bodyTerms = new LinkedList<Term>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
@@ -96,7 +96,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		unfoldingProgram.appendRule(rule);
 
 		head = fac.getFunctionalTerm(fac.getDataPropertyPredicate("lastname"), fac.getVariable("x"), fac.getVariable("z"));
-		bodyTerms = new LinkedList<NewLiteral>();
+		bodyTerms = new LinkedList<Term>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
@@ -106,7 +106,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		unfoldingProgram.appendRule(rule);
 
 		head = fac.getFunctionalTerm(fac.getDataPropertyPredicate("id"), fac.getVariable("x"), fac.getVariable("m"));
-		bodyTerms = new LinkedList<NewLiteral>();
+		bodyTerms = new LinkedList<Term>();
 		bodyTerms.add(fac.getVariable("x"));
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
@@ -120,7 +120,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
-		LinkedList<NewLiteral> headterms = new LinkedList<NewLiteral>();
+		LinkedList<Term> headterms = new LinkedList<Term>();
 		headterms.add(fac.getVariable("m"));
 		headterms.add(fac.getVariable("n"));
 		headterms.add(fac.getVariable("o"));
@@ -148,7 +148,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		assertTrue(output.toString(), atomcount == 14);
 		
 		
-		headterms = new LinkedList<NewLiteral>();
+		headterms = new LinkedList<Term>();
 		headterms.add(fac.getVariable("x"));
 		headterms.add(fac.getVariable("y"));
 		headterms.add(fac.getVariable("m"));

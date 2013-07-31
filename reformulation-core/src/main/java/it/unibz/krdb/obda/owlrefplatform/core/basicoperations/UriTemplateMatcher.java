@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -64,14 +64,14 @@ public class UriTemplateMatcher {
 				continue;
 			}
 			Function matchingFunction = uriTemplateMatcher.get(pattern);
-			NewLiteral baseParameter = matchingFunction.getTerms().get(0);
+			Term baseParameter = matchingFunction.getTerms().get(0);
 			if (baseParameter instanceof Constant) {
 				/*
 				 * This is a general tempalte function of the form
 				 * uri("http://....", var1, var2,...) <p> we need to match var1,
 				 * var2, etc with substrings from the subjectURI
 				 */
-				List<NewLiteral> values = new LinkedList<NewLiteral>();
+				List<Term> values = new LinkedList<Term>();
 				values.add(baseParameter);
 				for (int i = 0; i < matcher.groupCount(); i++) {
 					String value = matcher.group(i + 1);

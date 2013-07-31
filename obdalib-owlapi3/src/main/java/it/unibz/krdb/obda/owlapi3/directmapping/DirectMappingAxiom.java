@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
@@ -149,7 +149,7 @@ public class DirectMappingAxiom {
 	}
 
 	public CQIE getCQ(){
-		NewLiteral sub = generateSubject((TableDefinition)table, false);
+		Term sub = generateSubject((TableDefinition)table, false);
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
@@ -176,7 +176,7 @@ public class DirectMappingAxiom {
 		}
 	
 		//To construct the head, there is no static field about this predicate
-		List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
+		List<Term> headTerms = new ArrayList<Term>();
 		for(int i=0;i<table.countAttribute();i++){
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
@@ -189,7 +189,7 @@ public class DirectMappingAxiom {
 
 	private CQIE getRefCQ(String fk) {
 
-		NewLiteral sub = generateSubject((TableDefinition) table, true);
+		Term sub = generateSubject((TableDefinition) table, true);
 		Function atom = null;
 
 		// Object Atoms
@@ -202,7 +202,7 @@ public class DirectMappingAxiom {
 					String pkTableReference = ref.getTableReference();
 					TableDefinition tdRef = (TableDefinition) metadata
 							.getDefinition(pkTableReference);
-					NewLiteral obj = generateSubject(tdRef, true);
+					Term obj = generateSubject(tdRef, true);
 
 					atom = (df.getFunctionalTerm(
 							df.getObjectPropertyPredicate(generateOPURI(
@@ -210,7 +210,7 @@ public class DirectMappingAxiom {
 							sub, obj));
 
 					// construct the head
-					List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
+					List<Term> headTerms = new ArrayList<Term>();
 					headTerms.addAll(atom.getReferencedVariables());
 
 					Predicate headPredicate = df.getPredicate(
@@ -257,7 +257,7 @@ public class DirectMappingAxiom {
 	 * TODO replace URI predicate to BNode predicate for tables without PKs in
 	 * the following method after 'else'
 	 */
-	private NewLiteral generateSubject(TableDefinition td,
+	private Term generateSubject(TableDefinition td,
 			boolean ref) {
 		String tableName = "";
 		if (ref)
@@ -266,7 +266,7 @@ public class DirectMappingAxiom {
 		if (td.getPrimaryKeys().size() > 0) {
 			Predicate uritemple = df.getUriTemplatePredicate(td
 					.getPrimaryKeys().size() + 1);
-			List<NewLiteral> terms = new ArrayList<NewLiteral>();
+			List<Term> terms = new ArrayList<Term>();
 			terms.add(df.getValueConstant(subjectTemple(td, td.getPrimaryKeys()
 					.size())));
 			for (int i = 0; i < td.getPrimaryKeys().size(); i++) {
@@ -276,7 +276,7 @@ public class DirectMappingAxiom {
 			return df.getFunctionalTerm(uritemple, terms);
 
 		} else {
-			List<NewLiteral> vars = new ArrayList<NewLiteral>();
+			List<Term> vars = new ArrayList<Term>();
 			for (int i = 0; i < td.countAttribute(); i++) {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}

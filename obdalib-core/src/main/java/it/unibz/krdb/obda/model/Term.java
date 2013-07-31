@@ -18,9 +18,9 @@ import java.util.Set;
  * In this scenario, term means the subject (or sometimes can be the object) of
  * a preposition.
  */
-public interface NewLiteral extends Serializable {
+public interface Term extends Serializable {
 
-	public NewLiteral clone();
+	public Term clone();
 
 	public Set<Variable> getReferencedVariables();
 

@@ -13,7 +13,7 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
@@ -274,7 +274,7 @@ public class DatalogParser extends Parser {
             	    if ( state.backtracking==0 ) {
             	          rule = rule2;
             	          if (isSelectAll) {
-            	            List<NewLiteral> variableList = new Vector<NewLiteral>();
+            	            List<Term> variableList = new Vector<Term>();
             	            variableList.addAll(variables); // Import all the data from the Set to a Vector.
             	             
             	            // Get the head atom
@@ -1154,7 +1154,7 @@ public class DatalogParser extends Parser {
 
         String predicate19 =null;
 
-        Vector<NewLiteral> terms20 =null;
+        Vector<Term> terms20 =null;
 
 
         try {
@@ -1197,14 +1197,14 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
                   String uri = predicate19;
                   
-                  Vector<NewLiteral> elements = terms20;
+                  Vector<Term> elements = terms20;
                   if (elements == null)
-                    elements = new Vector<NewLiteral>();
+                    elements = new Vector<Term>();
                   Predicate predicate = dfac.getPredicate(uri, elements.size());
                   
-                  Vector<NewLiteral> terms = terms20;
+                  Vector<Term> terms = terms20;
                   if (terms == null)
-                    terms = new Vector<NewLiteral>();
+                    terms = new Vector<Term>();
                     
                   value = dfac.getFunctionalTerm(predicate, terms);
                 }
@@ -1327,17 +1327,17 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "terms"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:255:1: terms returns [Vector<Term> elements] : t1= term ( COMMA t2= term )* ;
-    public final Vector<NewLiteral> terms() throws RecognitionException {
-        Vector<NewLiteral> elements = null;
+    public final Vector<Term> terms() throws RecognitionException {
+        Vector<Term> elements = null;
 
 
-        NewLiteral t1 =null;
+        Term t1 =null;
 
-        NewLiteral t2 =null;
+        Term t2 =null;
 
 
 
-          elements = new Vector<NewLiteral>();
+          elements = new Vector<Term>();
 
         try {
             // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:259:3: (t1= term ( COMMA t2= term )* )
@@ -1404,8 +1404,8 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "term"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:262:1: term returns [Term value] : ( variable_term | literal_term | object_term | uri_term );
-    public final NewLiteral term() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term term() throws RecognitionException {
+        Term value = null;
 
 
         Variable variable_term24 =null;
@@ -1688,7 +1688,7 @@ public class DatalogParser extends Parser {
 
         String function30 =null;
 
-        Vector<NewLiteral> terms31 =null;
+        Vector<Term> terms31 =null;
 
 
         try {

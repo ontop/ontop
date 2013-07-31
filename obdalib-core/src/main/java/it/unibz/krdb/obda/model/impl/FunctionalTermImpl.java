@@ -9,7 +9,7 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
@@ -29,7 +29,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	protected static final long serialVersionUID = 2832481815465364535L;
 	
 	protected Predicate functor = null;
-	protected EventGeneratingArrayList<NewLiteral> terms = null;
+	protected EventGeneratingArrayList<Term> terms = null;
 	protected int identifier = -1;
 
 	// true when the list of terms has been modified
@@ -49,44 +49,44 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	 * @param terms
 	 *            the list of arguments.
 	 */
-	protected FunctionalTermImpl(Predicate functor, NewLiteral... terms) {
+	protected FunctionalTermImpl(Predicate functor, Term... terms) {
 		this.functor = functor;
 
-		EventGeneratingArrayList<NewLiteral> eventlist = new EventGeneratingArrayList<NewLiteral>(
+		EventGeneratingArrayList<Term> eventlist = new EventGeneratingArrayList<Term>(
 				terms.length * 10);
-		for (NewLiteral term : terms) {
+		for (Term term : terms) {
 			eventlist.add(term);
 		}
 		this.terms = eventlist;
 		registerListeners(eventlist);
 	}
 
-	protected FunctionalTermImpl(Predicate functor, List<NewLiteral> terms) {
+	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
 		this.functor = functor;
 
-		EventGeneratingArrayList<NewLiteral> eventlist = new EventGeneratingArrayList<NewLiteral>(
+		EventGeneratingArrayList<Term> eventlist = new EventGeneratingArrayList<Term>(
 				terms.size() * 10);
-		for (NewLiteral term : terms) {
+		for (Term term : terms) {
 			eventlist.add(term);
 		}
 		this.terms = eventlist;
 		registerListeners(eventlist);
 	}
 
-	protected FunctionalTermImpl(Predicate functor, EventGeneratingArrayList<NewLiteral> terms) {
+	protected FunctionalTermImpl(Predicate functor, EventGeneratingArrayList<Term> terms) {
 		this.functor = functor;
 		this.terms = terms;
 		registerListeners(terms);
 	}
 	
-	private void registerListeners(EventGeneratingArrayList<? extends NewLiteral> functions) {
+	private void registerListeners(EventGeneratingArrayList<? extends Term> functions) {
 		functions.addListener(this);
 		for (Object o : functions) {
 			if (!(o instanceof Function)) {
 				continue;
 			}
 			Function f = (Function) o;
-			EventGeneratingArrayList<NewLiteral> list = (EventGeneratingArrayList<NewLiteral>) f.getTerms();
+			EventGeneratingArrayList<Term> list = (EventGeneratingArrayList<Term>) f.getTerms();
 			list.addListener(this);
 			registerListeners(list);
 		}
@@ -119,7 +119,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	@Override
 	public Set<Variable> getVariables() {
 		HashSet<Variable> variables = new LinkedHashSet<Variable>();
-		for (NewLiteral t : terms) {
+		for (Term t : terms) {
 			for (Variable v : t.getReferencedVariables())
 				variables.add(v);
 		}
@@ -137,7 +137,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	}
 
 	@Override
-	public List<NewLiteral> getTerms() {
+	public List<Term> getTerms() {
 		return terms;
 	}
 
@@ -148,8 +148,8 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public FunctionalTermImpl clone() {
-		EventGeneratingLinkedList<NewLiteral> copyTerms = new EventGeneratingLinkedList<NewLiteral>();
-		Iterator<NewLiteral> it = terms.iterator();
+		EventGeneratingLinkedList<Term> copyTerms = new EventGeneratingLinkedList<Term>();
+		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {
 			copyTerms.add(it.next().clone());
 		}
@@ -172,9 +172,9 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	 *            the term in question.
 	 * @return true if the function contains the term, or false otherwise.
 	 */
-	public boolean containsTerm(NewLiteral t) {
+	public boolean containsTerm(Term t) {
 		for (int i = 0; i < terms.size(); i++) {
-			NewLiteral t2 = terms.get(i);
+			Term t2 = terms.get(i);
 			if (t2.equals(t))
 				return true;
 		}
@@ -182,10 +182,10 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	}
 
 	@Override
-	public int getFirstOcurrance(NewLiteral t, int i) {
+	public int getFirstOcurrance(Term t, int i) {
 		int size = terms.size();
 		for (int j = 0; j < size; j++) {
-			NewLiteral t2 = terms.get(j);
+			Term t2 = terms.get(j);
 			if (t2 instanceof FunctionalTermImpl) {
 				FunctionalTermImpl f = (FunctionalTermImpl) t2;
 				int newindex = f.getFirstOcurrance(t, 0);
@@ -208,7 +208,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (NewLiteral t : terms) {
+		for (Term t : terms) {
 			for (Variable v : t.getReferencedVariables())
 				vars.add(v);
 		}
@@ -218,7 +218,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		Map<Variable, Integer> currentcount = new HashMap<Variable, Integer>();
-		for (NewLiteral t : terms) {
+		for (Term t : terms) {
 			Map<Variable, Integer> atomCount = t.getVariableCount();
 			for (Variable var : atomCount.keySet()) {
 				Integer count = currentcount.get(var);
@@ -233,31 +233,31 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	}
 
 	@Override
-	public NewLiteral getTerm(int index) {
+	public Term getTerm(int index) {
 		return terms.get(index);
 	}
 
 	@Override
-	public void setTerm(int index, NewLiteral newTerm) {
+	public void setTerm(int index, Term newTerm) {
 		listChanged();
 		terms.set(index, newTerm);
 	}
 
-	public void updateTerms(List<NewLiteral> newterms) {
-		for (NewLiteral term : terms) {
+	public void updateTerms(List<Term> newterms) {
+		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingArrayList<NewLiteral> innertermlist = (EventGeneratingArrayList<NewLiteral>) function.getTerms();
+				EventGeneratingArrayList<Term> innertermlist = (EventGeneratingArrayList<Term>) function.getTerms();
 				innertermlist.removeListener(this);
 			}
 		}
 		terms.clear();
 		terms.addAll(newterms);
 
-		for (NewLiteral term : terms) {
+		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingArrayList<NewLiteral> innertermlist = (EventGeneratingArrayList<NewLiteral>) function.getTerms();
+				EventGeneratingArrayList<Term> innertermlist = (EventGeneratingArrayList<Term>) function.getTerms();
 				innertermlist.addListener(this);
 			}
 		}

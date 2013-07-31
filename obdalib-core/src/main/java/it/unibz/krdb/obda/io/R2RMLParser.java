@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.io;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -213,14 +213,14 @@ public class R2RMLParser {
 		return predobjs;
 	}
 	
-	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj)
+	public Term getSubjectAtom(Graph myGraph, Resource subj)
 			throws Exception {
 		return getSubjectAtom(myGraph, subj, "");
 	}
 	
-	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj, String joinCond)
+	public Term getSubjectAtom(Graph myGraph, Resource subj, String joinCond)
 			throws Exception {
-		NewLiteral subjectAtom = null;
+		Term subjectAtom = null;
 
 		// process SUBJECT
 		Set<Value> objects = GraphUtil.getObjects(myGraph, subj, subjectMap);
@@ -320,14 +320,14 @@ public class R2RMLParser {
 		return bodyPredicates;
 	}
 	
-	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt)
+	public Term getObjectAtom(Graph myGraph, Resource objectt)
 			throws Exception {
 		return getObjectAtom(myGraph, objectt, "");
 	}
 	
-	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt, String joinCond)
+	public Term getObjectAtom(Graph myGraph, Resource objectt, String joinCond)
 			throws Exception {
-		NewLiteral objectAtom = null;
+		Term objectAtom = null;
 
 		// process OBJECT
 		// look for the object
@@ -342,7 +342,7 @@ public class R2RMLParser {
 			{
 				//valueconstant
 				Predicate pred = fac.getUriTemplatePredicate(1);
-				NewLiteral newlit = fac.getValueConstant(trim(parsedString));
+				Term newlit = fac.getValueConstant(trim(parsedString));
 				objectAtom = fac.getFunctionalTerm(pred, newlit);
 			}
 				
@@ -402,10 +402,10 @@ public class R2RMLParser {
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
-				NewLiteral lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
+				Term lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
 				//create literal(object, lang) atom
 				Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
-				NewLiteral langAtom = fac.getFunctionalTerm(literal, objectAtom, lang);
+				Term langAtom = fac.getFunctionalTerm(literal, objectAtom, lang);
 				objectAtom = langAtom;
 			}
 			
@@ -417,7 +417,7 @@ public class R2RMLParser {
 				
 				//create datatype(object) atom
 				Predicate dtype =  new DataTypePredicateImpl(parsedString, COL_TYPE.OBJECT);
-				NewLiteral dtAtom = fac.getFunctionalTerm(dtype, objectAtom);
+				Term dtAtom = fac.getFunctionalTerm(dtype, objectAtom);
 				objectAtom = dtAtom;
 			}
 		}
@@ -426,7 +426,7 @@ public class R2RMLParser {
 	}
 	
 	
-	private NewLiteral getConstantObject(String objectString) {
+	private Term getConstantObject(String objectString) {
 		if (objectString.startsWith("http:"))
 			return getURIFunction(objectString);
 		else
@@ -438,9 +438,9 @@ public class R2RMLParser {
 		}
 	}
 
-	private NewLiteral getExplicitTypedObject(String string) {
+	private Term getExplicitTypedObject(String string) {
 		
-		NewLiteral typedObject = null;
+		Term typedObject = null;
 		String[] strings = string.split("<");
 		if (strings.length > 1) {
 			String consts = strings[0];
@@ -452,7 +452,7 @@ public class R2RMLParser {
 
 			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
 					//fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI(type));
-			NewLiteral constant = fac.getValueConstant(consts);
+			Term constant = fac.getValueConstant(consts);
 			typedObject = fac.getFunctionalTerm(predicate, constant);
 		}
 		return typedObject;
@@ -515,7 +515,7 @@ public class R2RMLParser {
 	
 	public Function getTypedFunction(String parsedString, int type, String joinCond) {
 
-		List<NewLiteral> terms = new ArrayList<NewLiteral>();
+		List<Term> terms = new ArrayList<Term>();
 		String string = (parsedString);
 		if (!string.contains("{"))
 			if (!string.startsWith("http://")) 
@@ -550,7 +550,7 @@ public class R2RMLParser {
 		string = string.replace("]", "}");
 	
 
-		NewLiteral uriTemplate = null;
+		Term uriTemplate = null;
 		Predicate pred = null;
 		switch (type) {
 		//constant uri

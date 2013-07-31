@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -101,8 +101,8 @@ public class SemanticQueryOptimizer {
 				if (!(focusAtom.getTerms().get(0) instanceof AnonymousVariable || focusAtom.getTerms().get(1) instanceof AnonymousVariable))
 					continue;
 
-				NewLiteral t1 = focusAtom.getTerms().get(0);
-				NewLiteral t2 = focusAtom.getTerms().get(1);
+				Term t1 = focusAtom.getTerms().get(0);
+				Term t2 = focusAtom.getTerms().get(1);
 
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
@@ -173,11 +173,11 @@ public class SemanticQueryOptimizer {
 							/* Case left side of inclusion is B */
 							PropertySomeRestriction left = (PropertySomeRestriction) included;
 							if (!left.isInverse()) {
-								List<NewLiteral> terms = new LinkedList<NewLiteral>(focusAtom.getTerms());
+								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
 								terms.add(fac.getNondistinguishedVariable());
 								checkAtom = fac.getFunctionalTerm(left.getPredicate(), terms);
 							} else {
-								List<NewLiteral> terms = new LinkedList<NewLiteral>(focusAtom.getTerms());
+								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
 								terms.add(0, fac.getNondistinguishedVariable());
 								checkAtom = fac.getFunctionalTerm(left.getPredicate(), terms);
 							}
@@ -268,7 +268,7 @@ public class SemanticQueryOptimizer {
 					if (rightrole.isInverse() == leftrole.isInverse()) {
 						checkAtom = fac.getFunctionalTerm(leftrole.getPredicate(), focusAtom.getTerms());
 					} else {
-						LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
+						LinkedList<Term> terms = new LinkedList<Term>();
 						terms.add(focusAtom.getTerms().get(1));
 						terms.add(focusAtom.getTerms().get(0));
 						checkAtom = fac.getFunctionalTerm(leftrole.getPredicate(), terms);

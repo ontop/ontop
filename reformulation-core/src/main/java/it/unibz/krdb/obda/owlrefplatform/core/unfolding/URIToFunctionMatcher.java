@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -85,7 +85,7 @@ public class URIToFunctionMatcher implements Serializable {
 		if (existing.getFunctionSymbol().getArity() != constanturis.length)
 			return null;
 
-		List<NewLiteral> constantTerms = new LinkedList<NewLiteral>();
+		List<Term> constantTerms = new LinkedList<Term>();
 		for (String constantstr : constanturis) {
 			constantTerms.add(tFact.getValueConstant(constantstr));
 		}

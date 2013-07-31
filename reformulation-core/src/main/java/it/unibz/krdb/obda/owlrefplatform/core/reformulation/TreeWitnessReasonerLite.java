@@ -9,7 +9,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -300,7 +300,7 @@ public class TreeWitnessReasonerLite {
 			}
 		}
 		else if ((a1.getArity() == 2) && (a2.getArity() == 1)) { // MOST USEFUL
-			NewLiteral a2term = a2.getTerm(0);
+			Term a2term = a2.getTerm(0);
 			if (a1.getTerm(0).equals(a2term)) {
 				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getFunctionSymbol(), false);
 				if (getSubConcepts(a2.getFunctionSymbol()).contains(prop)) {

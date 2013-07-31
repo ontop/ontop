@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -81,11 +81,11 @@ public class DBMetadataUtil {
 					Predicate p1 = fac.getPredicate(table1, def.countAttribute());
 					Predicate p2 = fac.getPredicate(table2, def2.countAttribute());
 					
-					List<NewLiteral> terms1 = new ArrayList<NewLiteral>();
+					List<Term> terms1 = new ArrayList<Term>();
 					for (int i=0; i<def.countAttribute(); i++) {
 						 terms1.add(fac.getVariable("t"+(i+1)));
 					}
-					List<NewLiteral> terms2 = new ArrayList<NewLiteral>();
+					List<Term> terms2 = new ArrayList<Term>();
 					for (int i=0; i<def2.countAttribute(); i++) {
 						 terms2.add(fac.getVariable("p"+(i+1)));
 					}

@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
@@ -92,7 +92,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private static Function getHeadAtom(String base, String suffix, List<NewLiteral> arguments) {
+	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
 		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
 		return fac.getFunctionalTerm(predicate, arguments);
 	}
@@ -102,10 +102,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, NewLiteral r0)  {
+	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
 		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
-		NewLiteral x = fac.getNondistinguishedVariable(); 
+		Term x = fac.getNondistinguishedVariable(); 
 		
 		for (BasicClassDescription con : concepts) {
 			log.debug("  BASIC CONCEPT: {}", con);
@@ -145,8 +145,8 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			MinimalCQProducer twf = new MinimalCQProducer(reasoner); 
 			
 			// equality atoms
-			Iterator<NewLiteral> i = tw.getRoots().iterator();
-			NewLiteral r0 = i.next();
+			Iterator<Term> i = tw.getRoots().iterator();
+			Term r0 = i.next();
 			while (i.hasNext()) 
 				twf.addNoCheck(fac.getEQFunction(i.next(), r0));
 			

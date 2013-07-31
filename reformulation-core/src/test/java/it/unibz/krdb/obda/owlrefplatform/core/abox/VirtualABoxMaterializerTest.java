@@ -9,7 +9,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDALibConstants;
@@ -98,7 +98,7 @@ try{
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
-		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
+		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -106,7 +106,7 @@ try{
 
 		Function head = fac.getFunctionalTerm(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
@@ -195,7 +195,7 @@ try{
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
-		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
+		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -203,7 +203,7 @@ try{
 
 		Function head = fac.getFunctionalTerm(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
@@ -300,7 +300,7 @@ try{
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
-		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
+		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -308,7 +308,7 @@ try{
 
 		Function head = fac.getFunctionalTerm(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
@@ -472,7 +472,7 @@ try{
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
-		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
+		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
 		headTerms.add(fac.getVariable("age"));
@@ -480,7 +480,7 @@ try{
 
 		Function head = fac.getFunctionalTerm(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
@@ -558,12 +558,12 @@ try{
 		String sql6 = "SELECT fn, ln, schooluri FROM data";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
-		List<NewLiteral> headTerms = new LinkedList<NewLiteral>();
+		List<Term> headTerms = new LinkedList<Term>();
 		
-		final NewLiteral firstNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("fn"));
-		final NewLiteral lastNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("ln"));
-		final NewLiteral ageVariable = fac.getFunctionalTerm(fac.getDataTypePredicateInteger(), fac.getVariable("age"));
-		final NewLiteral schoolUriVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("schooluri"));
+		final Term firstNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("fn"));
+		final Term lastNameVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("ln"));
+		final Term ageVariable = fac.getFunctionalTerm(fac.getDataTypePredicateInteger(), fac.getVariable("age"));
+		final Term schoolUriVariable = fac.getFunctionalTerm(fac.getDataTypePredicateString(), fac.getVariable("schooluri"));
 		
 		headTerms.add(firstNameVariable);
 		headTerms.add(lastNameVariable);
@@ -572,7 +572,7 @@ try{
 
 		Function head = fac.getFunctionalTerm(q, headTerms);
 
-		NewLiteral objectTerm = fac.getFunctionalTerm(fac.getUriTemplatePredicate(2),
+		Term objectTerm = fac.getFunctionalTerm(fac.getUriTemplatePredicate(2),
 				fac.getValueConstant("http://schools.com/persons{}{}"), 
 				firstNameVariable,
 				lastNameVariable);
