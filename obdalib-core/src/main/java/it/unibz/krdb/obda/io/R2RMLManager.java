@@ -164,7 +164,7 @@ public class R2RMLManager {
 				
 				//for each predicate construct an atom and add to body
 				for (Predicate pred : joinPredicates) {
-					Function bodyAtom = fac.getFunctionalTerm(pred, terms);
+					Function bodyAtom = fac.getFunction(pred, terms);
 					body.add(bodyAtom);
 				}
 				//get head and construct cqie
@@ -196,7 +196,7 @@ public class R2RMLManager {
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = fac.getFunctionalTerm(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), dvars);
+		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), dvars);
 		return head;
 	}
 	
@@ -213,7 +213,7 @@ public class R2RMLManager {
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates) {
-			body.add(fac.getFunctionalTerm(classPred, subjectAtom));
+			body.add(fac.getFunction(classPred, subjectAtom));
 		}		
 		//get predicate-object nodes
 		Set<Resource> predicateObjectNodes = r2rmlParser.getPredicateObjects(myGraph, subj);	
@@ -243,11 +243,11 @@ public class R2RMLManager {
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
 					if(objectAtom.getReferencedVariables().size()<1) {
 						Predicate newpred = fac.getClassPredicate(objectAtom.toString());
-						body.add(fac.getFunctionalTerm(newpred, subjectAtom));
+						body.add(fac.getFunction(newpred, subjectAtom));
 					}
 				} else {
 					// create predicate(subject, object) and add it to the body
-					Function bodyAtom = fac.getFunctionalTerm(bodyPred, terms);
+					Function bodyAtom = fac.getFunction(bodyPred, terms);
 					body.add(bodyAtom);
 				}
 			}

@@ -71,7 +71,7 @@ public class MappingVocabularyTranslator {
 					if (equivalent == null)
 						newatom = atom;
 					else {
-						newatom = dfac.getFunctionalTerm(((OClass) equivalent).getPredicate(), atom.getTerms());
+						newatom = dfac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerms());
 
 					}
 				} else {
@@ -82,9 +82,9 @@ public class MappingVocabularyTranslator {
 					else {
 						Property equiprop = (Property) equivalent;
 						if (!equiprop.isInverse()) {
-							newatom = dfac.getFunctionalTerm(equiprop.getPredicate(), atom.getTerms());
+							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms());
 						} else {
-							newatom = dfac.getFunctionalTerm(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
+							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
 						}
 					}
 				}

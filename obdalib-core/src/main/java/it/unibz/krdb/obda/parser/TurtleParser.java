@@ -264,7 +264,7 @@ public class TurtleParser extends Parser {
 
                   int arity = variableSet.size();
                   List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-                  Function head = dfac.getFunctionalTerm(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+                  Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
                   
                   // Create a new rule
                   List<Function> triples = t1;
@@ -720,10 +720,10 @@ public class TurtleParser extends Parser {
                     if (v1.equals(RDF_TYPE_URI)) {
                       URIConstant c = (URIConstant) object;  // it has to be a URI constant
                       Predicate predicate = dfac.getClassPredicate(c.getURI());
-                      atom = dfac.getFunctionalTerm(predicate, subject);
+                      atom = dfac.getFunction(predicate, subject);
                     } else {
                       Predicate predicate = dfac.getPredicate(v1.toString(), 2, null); // the data type cannot be determined here!
-                      atom = dfac.getFunctionalTerm(predicate, subject, object);
+                      atom = dfac.getFunction(predicate, subject, object);
                     }
                     value.add(atom);
                   }
@@ -764,10 +764,10 @@ public class TurtleParser extends Parser {
             	            if (v2.equals(RDF_TYPE_URI)) {
             	              URIConstant c = (URIConstant) object;  // it has to be a URI constant
             	              Predicate predicate = dfac.getClassPredicate(c.getURI());
-            	              atom = dfac.getFunctionalTerm(predicate, subject);
+            	              atom = dfac.getFunction(predicate, subject);
             	            } else {
             	              Predicate predicate = dfac.getPredicate(v2.toString(), 2, null); // the data type cannot be determined here!
-            	              atom = dfac.getFunctionalTerm(predicate, subject, object);
+            	              atom = dfac.getFunction(predicate, subject, object);
             	            }
             	            value.add(atom);
             	          }
@@ -1683,7 +1683,7 @@ public class TurtleParser extends Parser {
                   String functionName = resource24.toString();
                   int arity = terms25.size();
                   Predicate functionSymbol = dfac.getPredicate(functionName, arity);
-                  value = dfac.getFunctionalTerm(functionSymbol, terms25);
+                  value = dfac.getFunction(functionSymbol, terms25);
                 
 
             }
@@ -1780,7 +1780,7 @@ public class TurtleParser extends Parser {
                           Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
                           Variable var = variable26;
                           Term lang = language27;   
-                          value = dfac.getFunctionalTerm(functionSymbol, var, lang);
+                          value = dfac.getFunction(functionSymbol, var, lang);
                         
 
                     }
@@ -1823,7 +1823,7 @@ public class TurtleParser extends Parser {
                           } else {
                             throw new RecognitionException();
                           }
-                          value = dfac.getFunctionalTerm(functionSymbol, var);
+                          value = dfac.getFunction(functionSymbol, var);
                         
 
                     }
@@ -1992,7 +1992,7 @@ public class TurtleParser extends Parser {
                   
                   // the URI template is always on the first position in the term list
                   terms.add(0, uriTemplate);
-                  value = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+                  value = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
                 
 
             }
@@ -2305,9 +2305,9 @@ public class TurtleParser extends Parser {
                            ValueConstant constant = stringLiteral36;
                            Term lang = language37;
                            if (lang != null) {
-                             value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+                             value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
                            } else {
-                           	 value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), constant);
+                           	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
                            }
                         
 
@@ -2455,7 +2455,7 @@ public class TurtleParser extends Parser {
                   } else {
                     throw new RuntimeException("Unknown datatype: " + functionName);
                   }
-                  value = dfac.getFunctionalTerm(functionSymbol, constant);
+                  value = dfac.getFunction(functionSymbol, constant);
                 
 
             }

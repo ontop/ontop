@@ -53,7 +53,7 @@ public class DatalogQueryServices {
 			else
 				termscopy.add(t.clone());
 		}
-		return fac.getFunctionalTerm(a.getPredicate(), termscopy);
+		return fac.getFunction(a.getPredicate(), termscopy);
 		
 	}
 	

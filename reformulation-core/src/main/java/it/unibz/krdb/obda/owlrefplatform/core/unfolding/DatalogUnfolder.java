@@ -1075,7 +1075,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				newInnerTerms.add(getFreshTerm(innerTerm, suffix));
 			}
 			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-			Function newFunctionalTerm = (Function) termFactory.getFunctionalTerm(newFunctionSymbol, newInnerTerms);
+			Function newFunctionalTerm = (Function) termFactory.getFunction(newFunctionSymbol, newInnerTerms);
 			newTerm = newFunctionalTerm;
 		} else if (term instanceof Constant) {
 			newTerm = term.clone();
@@ -1399,7 +1399,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		Function foldedJoinAtom = null;
 
 		while (dataAtomsList.size() > 1) {
-			foldedJoinAtom = termFactory.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, (Term) dataAtomsList.remove(0),
+			foldedJoinAtom = termFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, (Term) dataAtomsList.remove(0),
 					(Term) dataAtomsList.remove(0));
 			dataAtomsList.add(0, foldedJoinAtom);
 		}

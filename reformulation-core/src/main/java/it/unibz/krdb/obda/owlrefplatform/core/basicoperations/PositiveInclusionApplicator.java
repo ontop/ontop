@@ -497,7 +497,7 @@ public class PositiveInclusionApplicator {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 
-					Function newatom = termFactory.getFunctionalTerm(predicate.clone(), v);
+					Function newatom = termFactory.getFunction(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
@@ -523,7 +523,7 @@ public class PositiveInclusionApplicator {
 						} else if (lefthandside instanceof PropertySomeRestriction) {
 							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
-						newatom = termFactory.getFunctionalTerm(predicate.clone(), v);
+						newatom = termFactory.getFunction(predicate.clone(), v);
 					} else {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, t);
@@ -536,7 +536,7 @@ public class PositiveInclusionApplicator {
 						} else if (lefthandside instanceof PropertySomeRestriction) {
 							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
-						newatom = termFactory.getFunctionalTerm(predicate.clone(), v);
+						newatom = termFactory.getFunction(predicate.clone(), v);
 					}
 
 					body.set(atomindex, newatom);
@@ -577,7 +577,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getFunctionalTerm(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
@@ -591,7 +591,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getFunctionalTerm(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (!((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
@@ -605,7 +605,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getFunctionalTerm(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				}
 			} else if (t1 instanceof AnonymousVariable && righthandside.isInverse()) {
@@ -623,7 +623,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getFunctionalTerm(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
@@ -637,7 +637,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getFunctionalTerm(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (!((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
@@ -651,7 +651,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getFunctionalTerm(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				}
 			}
@@ -680,13 +680,13 @@ public class PositiveInclusionApplicator {
 				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t1);
 				v.add(1, t2);
-				newatom = termFactory.getFunctionalTerm(lefthandside.getPredicate(), v);
+				newatom = termFactory.getFunction(lefthandside.getPredicate(), v);
 
 			} else {
 				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t2);
 				v.add(1, t1);
-				newatom = termFactory.getFunctionalTerm(lefthandside.getPredicate(), v);
+				newatom = termFactory.getFunction(lefthandside.getPredicate(), v);
 
 			}
 

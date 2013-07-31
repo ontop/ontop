@@ -436,7 +436,7 @@ public class OBDAModelImpl implements OBDAModel {
 						continue;
 					}
 					modifiedCount += 1;
-					Function newatom = dfac.getFunctionalTerm(newName, oldatom.getTerms());
+					Function newatom = dfac.getFunction(newName, oldatom.getTerms());
 					body.set(idx, newatom);
 				}
 				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);

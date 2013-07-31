@@ -69,27 +69,27 @@ public class ExtDatalogProgram {
 			String extName = TreeWitnessRewriter.getIRI(p.getName(), "_EXT");
 			if (p.getArity() == 1) {
 				Predicate extp = fac.getClassPredicate(extName);		
-				def = new ExtDatalogProgramDef(fac.getFunctionalTerm(extp, x), fac.getFunctionalTerm(p, x));
+				def = new ExtDatalogProgramDef(fac.getFunction(extp, x), fac.getFunction(p, x));
 				
 				// add a rule for each of the sub-concepts
 				for (BasicClassDescription c : reasoner.getSubConcepts(p)) {
 					if (c instanceof OClass) 
-						def.add(fac.getFunctionalTerm(((OClass)c).getPredicate(), x));
+						def.add(fac.getFunction(((OClass)c).getPredicate(), x));
 					else {     
 						PropertySomeRestriction some = (PropertySomeRestriction)c;
 						def.add((!some.isInverse()) ? 
-								fac.getFunctionalTerm(some.getPredicate(), x, w) : fac.getFunctionalTerm(some.getPredicate(), w, x)); 
+								fac.getFunction(some.getPredicate(), x, w) : fac.getFunction(some.getPredicate(), w, x)); 
 					}						
 				}
 			}
 			else  {
 				Predicate extp = fac.getObjectPropertyPredicate(extName);
-				def = new ExtDatalogProgramDef(fac.getFunctionalTerm(extp, x, y), fac.getFunctionalTerm(p, x, y));
+				def = new ExtDatalogProgramDef(fac.getFunction(extp, x, y), fac.getFunction(p, x, y));
 				
 				// add a rule for each of the sub-roles
 				for (Property sub: reasoner.getSubProperties(p, false))
 					def.add((!sub.isInverse()) ? 
-						fac.getFunctionalTerm(sub.getPredicate(), x, y) : fac.getFunctionalTerm(sub.getPredicate(), y, x)); 
+						fac.getFunction(sub.getPredicate(), x, y) : fac.getFunction(sub.getPredicate(), y, x)); 
 			}
 	
 			def.minimise();			

@@ -234,7 +234,7 @@ public class TurtleOBDAParser extends Parser {
 	         Variable column = dfac.getVariable(token.toString());
 	         terms.add(0, uriTemplate);
 	         terms.add(column);
-	         toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+	         toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	      }
 	   } else {
 	      StringBuilder sb = new StringBuilder();
@@ -249,7 +249,7 @@ public class TurtleOBDAParser extends Parser {
 	      }
 	      ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
 	      terms.add(0, uriTemplate);
-	      toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+	      toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	   }
 	   return toReturn;
 	}
@@ -345,7 +345,7 @@ public class TurtleOBDAParser extends Parser {
 
 			      int arity = variableSet.size();
 			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-			      Function head = dfac.getFunctionalTerm(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 			      
 			      // Create a new rule
 			      List<Function> triples = t1;
@@ -735,10 +735,10 @@ public class TurtleOBDAParser extends Parser {
 			        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
 			          URIConstant c = (URIConstant) object;  // it has to be a URI constant
 			          Predicate predicate = dfac.getClassPredicate(c.getURI());
-			          atom = dfac.getFunctionalTerm(predicate, subject);
+			          atom = dfac.getFunction(predicate, subject);
 			        } else {
 			          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
-			          atom = dfac.getFunctionalTerm(predicate, subject, object);
+			          atom = dfac.getFunction(predicate, subject, object);
 			        }
 			        value.add(atom);
 			      }
@@ -772,10 +772,10 @@ public class TurtleOBDAParser extends Parser {
 					        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
 					          URIConstant c = (URIConstant) object;  // it has to be a URI constant
 					          Predicate predicate = dfac.getClassPredicate(c.getURI());
-					          atom = dfac.getFunctionalTerm(predicate, subject);
+					          atom = dfac.getFunction(predicate, subject);
 					        } else {
 					          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
-					          atom = dfac.getFunctionalTerm(predicate, subject, object);
+					          atom = dfac.getFunction(predicate, subject, object);
 					        }
 					        value.add(atom);
 					      }
@@ -1392,7 +1392,7 @@ public class TurtleOBDAParser extends Parser {
 			      String functionName = resource20.toString();
 			      int arity = terms21.size();
 			      Predicate functionSymbol = dfac.getPredicate(functionName, arity);
-			      value = dfac.getFunctionalTerm(functionSymbol, terms21);
+			      value = dfac.getFunction(functionSymbol, terms21);
 			    
 			}
 
@@ -1471,7 +1471,7 @@ public class TurtleOBDAParser extends Parser {
 					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
 					      Variable var = variable22;
 					      Term lang = language23;   
-					      value = dfac.getFunctionalTerm(functionSymbol, var, lang);
+					      value = dfac.getFunction(functionSymbol, var, lang);
 					    
 					}
 					break;
@@ -1508,7 +1508,7 @@ public class TurtleOBDAParser extends Parser {
 					      } else {
 					          throw new RecognitionException();
 					      }
-					      value = dfac.getFunctionalTerm(functionSymbol, var);
+					      value = dfac.getFunction(functionSymbol, var);
 					     
 					}
 					break;
@@ -1848,9 +1848,9 @@ public class TurtleOBDAParser extends Parser {
 					       ValueConstant constant = stringLiteral31;
 					       Term lang = language32;
 					       if (lang != null) {
-					         value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
 					       } else {
-					       	 value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
 					       }
 					    
 					}
@@ -1977,7 +1977,7 @@ public class TurtleOBDAParser extends Parser {
 			      } else {
 			        throw new RuntimeException("Unknown datatype: " + functionName);
 			      }
-			      value = dfac.getFunctionalTerm(functionSymbol, constant);
+			      value = dfac.getFunction(functionSymbol, constant);
 			    
 			}
 

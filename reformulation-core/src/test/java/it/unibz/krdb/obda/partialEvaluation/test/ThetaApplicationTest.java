@@ -50,7 +50,7 @@ public class ThetaApplicationTest extends TestCase {
 		List<Term> vars = new Vector<Term>();
 		vars.add(t4);
 		Predicate fs = predFactory.getPredicate("p", vars.size());
-		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs, vars);
+		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunction(fs, vars);
 
 		Term t5 = termFactory.getValueConstant("con");
 		Term t51 = termFactory.getValueConstant("st");
@@ -58,7 +58,7 @@ public class ThetaApplicationTest extends TestCase {
 		vars5.add(t5);
 		vars5.add(t51);
 		Predicate fs2 = predFactory.getPredicate("p", vars5.size());
-		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs2, vars5);
+		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.getFunction(fs2, vars5);
 
 		Predicate pred1 = predFactory.getPredicate("A", 5);
 		List<Term> terms1 = new Vector<Term>();
@@ -67,7 +67,7 @@ public class ThetaApplicationTest extends TestCase {
 		terms1.add(t3);
 		terms1.add(ot);
 		terms1.add(ot2);
-		Function atom1 = predFactory.getFunctionalTerm(pred1, terms1);
+		Function atom1 = predFactory.getFunction(pred1, terms1);
 		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
@@ -81,12 +81,12 @@ public class ThetaApplicationTest extends TestCase {
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);
 		Predicate fs3 = predFactory.getPredicate("uri", vars3.size());
-		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs3, vars3);
+		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.getFunction(fs3, vars3);
 
 		Predicate head = predFactory.getPredicate("q", 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t10);
-		Function h = predFactory.getFunctionalTerm(head, terms2);
+		Function h = predFactory.getFunction(head, terms2);
 
 		CQIE query = predFactory.getCQIE(h, body);
 

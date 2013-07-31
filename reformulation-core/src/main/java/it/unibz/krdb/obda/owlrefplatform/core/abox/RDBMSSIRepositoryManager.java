@@ -2209,10 +2209,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Mapping head
 
-			Function head = dfac.getFunctionalTerm(dfac.getPredicate("m", 1), dfac.getVariable("X"));
-			Function body1 = dfac.getFunctionalTerm(classuri, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
+			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
+			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
-			Function body2 = dfac.getFunctionalTerm(classuri, dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
+			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 
 			/*
 			 * This target query is shared by all mappings for this class
@@ -2409,11 +2409,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) {
 
-			subjectTerm = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X"));
 
 		} else if (type1 == COL_TYPE.BNODE) {
 
-			subjectTerm = dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X"));
 
 		} else {
 			throw new RuntimeException("Unsupported object type: " + type1);
@@ -2423,52 +2423,52 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function objectTerm;
 		if (type2 == COL_TYPE.BNODE) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.OBJECT) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.LITERAL) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.LITERAL_LANG) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
 
 		} else if (type2 == COL_TYPE.BOOLEAN) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateBoolean(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateBoolean(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.DATETIME) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateDateTime(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDateTime(), dfac.getVariable("Y"));
 			bodyTerms.add(objectTerm);
 
 		} else if (type2 == COL_TYPE.DECIMAL) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateDecimal(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDecimal(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.DOUBLE) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateDouble(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDouble(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.INTEGER) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateInteger(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateInteger(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.STRING) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateString(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateString(), dfac.getVariable("Y"));
 
 		} else {
 			throw new RuntimeException("Unsuported type: " + type2);
 		}
 		bodyTerms.add(objectTerm);
 
-		Function head = dfac.getFunctionalTerm(headPredicate, headTerms);
-		Function body = dfac.getFunctionalTerm(bodyPredicate, bodyTerms);
+		Function head = dfac.getFunction(headPredicate, headTerms);
+		Function body = dfac.getFunction(bodyPredicate, bodyTerms);
 		bodyAtoms.add(0, body);
 		return dfac.getCQIE(head, bodyAtoms);
 	}

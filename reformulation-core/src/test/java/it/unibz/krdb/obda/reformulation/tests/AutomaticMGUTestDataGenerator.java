@@ -135,7 +135,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Function atom = this.predFac.getFunctionalTerm(predFac.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
+		Function atom = this.predFac.getFunction(predFac.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
 		return atom;
 	}
 
@@ -153,7 +153,7 @@ public class AutomaticMGUTestDataGenerator {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
 			Predicate fs = predFac.getPredicate(termstr.substring(0, 1), fuctTerms.size());
-			return termFac.getFunctionalTerm(fs, fuctTerms);
+			return termFac.getFunction(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
 			return termFac.getValueConstant(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {

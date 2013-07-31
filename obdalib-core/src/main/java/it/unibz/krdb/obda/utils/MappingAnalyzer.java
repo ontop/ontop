@@ -116,7 +116,7 @@ public class MappingAnalyzer {
 						terms.add(term);
 					}
 					// Create an atom for a particular table
-					Function atom = dfac.getFunctionalTerm(predicate, terms);
+					Function atom = dfac.getFunction(predicate, terms);
 					atoms.add(atom);
 				}
 
@@ -136,7 +136,7 @@ public class MappingAnalyzer {
 					Term t1 = dfac.getVariable(lookup1);
 					Term t2 = dfac.getVariable(lookup2);
 
-					Function atom = dfac.getEQFunction(t1, t2);
+					Function atom = dfac.getFunctionEQ(t1, t2);
 					atoms.add(atom);
 				}
 
@@ -191,7 +191,7 @@ public class MappingAnalyzer {
 					// The filter function stack must have 1 element left
 					if (filterFunctionStack.size() == 1) {
 						Function filterFunction = filterFunctionStack.pop();
-						Function atom = dfac.getFunctionalTerm(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
+						Function atom = dfac.getFunction(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
 						atoms.add(atom);
 					} else {						
 						throwInvalidFilterExpressionException(filterFunctionStack);
@@ -206,7 +206,7 @@ public class MappingAnalyzer {
 					for (Term term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
-					Function newhead = dfac.getFunctionalTerm(atom.getPredicate(), newterms);
+					Function newhead = dfac.getFunction(atom.getPredicate(), newterms);
 					CQIE rule = dfac.getCQIE(newhead, atoms);
 					datalog.appendRule(rule);
 				}
@@ -265,9 +265,9 @@ public class MappingAnalyzer {
 	private Function createBooleanFunction(Function leftFunction, Function rightFunction, BooleanOperator op) {
 		Function booleanFunction = null;
 		if (op instanceof AndOperator) {
-			booleanFunction = dfac.getANDFunction(leftFunction, rightFunction);
+			booleanFunction = dfac.getFunctionAND(leftFunction, rightFunction);
 		} else if (op instanceof OrOperator) {
-			booleanFunction = dfac.getORFunction(leftFunction, rightFunction);
+			booleanFunction = dfac.getFunctionOR(leftFunction, rightFunction);
 		}
 		return booleanFunction;
 	}
@@ -291,9 +291,9 @@ public class MappingAnalyzer {
 		Term var = dfac.getVariable(variableName);
 
 		if (pred.useIsNullOperator()) {
-			return dfac.getIsNullFunction(var);
+			return dfac.getFunctionIsNull(var);
 		} else {
-			return dfac.getIsNotNullFunction(var);
+			return dfac.getFunctionIsNotNull(var);
 		}
 	}
 
@@ -342,12 +342,12 @@ public class MappingAnalyzer {
 
 		Function funct = null;
 		switch (op) {
-		case EQ: funct = dfac.getEQFunction(t1, t2); break;
-		case GT: funct = dfac.getGTFunction(t1, t2); break;
-		case LT: funct = dfac.getLTFunction(t1, t2); break;
-		case GE: funct = dfac.getGTEFunction(t1, t2); break;
-		case LE: funct = dfac.getLTEFunction(t1, t2); break;
-		case NE: funct = dfac.getNEQFunction(t1, t2); break;
+		case EQ: funct = dfac.getFunctionEQ(t1, t2); break;
+		case GT: funct = dfac.getFunctionGT(t1, t2); break;
+		case LT: funct = dfac.getFunctionLT(t1, t2); break;
+		case GE: funct = dfac.getFunctionGTE(t1, t2); break;
+		case LE: funct = dfac.getFunctionLTE(t1, t2); break;
+		case NE: funct = dfac.getFunctionNEQ(t1, t2); break;
 		default:
 			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
 		}
@@ -393,7 +393,7 @@ public class MappingAnalyzer {
 			for (Term innerTerm : terms) {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 			}
-			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);
+			result = dfac.getFunction(func.getFunctionSymbol(), newterms);
 		} else if (term instanceof Constant) {
 			result = term.clone();
 		}

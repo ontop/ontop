@@ -207,9 +207,9 @@ public class TMappingProcessor implements Serializable {
 				}			
 				Function newconditions = mergeConditions(strippedNewConditions);
 				Function existingconditions = mergeConditions(strippedExistingConditions);
-				Term newconditionsTerm = fac.getFunctionalTerm(newconditions.getPredicate(), newconditions.getTerms());
-				Term existingconditionsTerm = fac.getFunctionalTerm(existingconditions.getPredicate(), existingconditions.getTerms());
-				Function orAtom = fac.getORFunction(existingconditionsTerm, newconditionsTerm);
+				Term newconditionsTerm = fac.getFunction(newconditions.getPredicate(), newconditions.getTerms());
+				Term existingconditionsTerm = fac.getFunction(existingconditions.getPredicate(), existingconditions.getTerms());
+				Function orAtom = fac.getFunctionOR(existingconditionsTerm, newconditionsTerm);
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
 				newmapping = strippedCurrentMapping;
@@ -236,14 +236,14 @@ public class TMappingProcessor implements Serializable {
 			return conditions.get(0);
 		Function atom0 = conditions.remove(0);
 		Function atom1 = conditions.remove(0);
-		Term f0 = fac.getFunctionalTerm(atom0.getPredicate(), atom0.getTerms());
-		Term f1 = fac.getFunctionalTerm(atom1.getPredicate(), atom1.getTerms());
-		Function nestedAnd = fac.getANDFunction(f0, f1);
+		Term f0 = fac.getFunction(atom0.getPredicate(), atom0.getTerms());
+		Term f1 = fac.getFunction(atom1.getPredicate(), atom1.getTerms());
+		Function nestedAnd = fac.getFunctionAND(f0, f1);
 		while (conditions.size() != 0) {
 			Function condition = conditions.remove(0);
 			Term term0 = nestedAnd.getTerm(1);
-			Term term1 = fac.getFunctionalTerm(condition.getPredicate(), condition.getTerms());
-			Term newAND = fac.getANDFunction(term0, term1);
+			Term term1 = fac.getFunction(condition.getPredicate(), condition.getTerms());
+			Term newAND = fac.getFunctionAND(term0, term1);
 			nestedAnd.setTerm(1, newAND);
 		}
 		return nestedAnd;
@@ -320,7 +320,7 @@ public class TMappingProcessor implements Serializable {
 							 */
 							freshVarCount += 1;
 							Variable freshVariable = fac.getVariable("?FreshVar" + freshVarCount);
-							newBody.add(fac.getEQFunction(freshVariable, term));
+							newBody.add(fac.getFunctionEQ(freshVariable, term));
 							clone.setTerm(i, freshVariable);
 						}
 					}
@@ -402,11 +402,11 @@ public class TMappingProcessor implements Serializable {
 						if (!full)
 							continue;
 						
-						newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms());
+						newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
 					} else {
 						Term term0 = oldMappingHead.getTerms().get(1);
 						Term term1 = oldMappingHead.getTerms().get(0);
-						newMappingHead = fac.getFunctionalTerm(currentPredicate, term0, term1);
+						newMappingHead = fac.getFunction(currentPredicate, term0, term1);
 					}
 					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
 
@@ -433,7 +433,7 @@ public class TMappingProcessor implements Serializable {
 				for (CQIE currentNodeMapping : currentNodeMappings) {
 
 					if (equivProperty.isInverse() == currentProperty.isInverse()) {
-						Function newhead = fac.getFunctionalTerm(p, currentNodeMapping.getHead().getTerms());
+						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 
 						if (optimize)
@@ -443,7 +443,7 @@ public class TMappingProcessor implements Serializable {
 					} else {
 						Term term0 = currentNodeMapping.getHead().getTerms().get(1);
 						Term term1 = currentNodeMapping.getHead().getTerms().get(0);
-						Function newhead = fac.getFunctionalTerm(p, term0, term1);
+						Function newhead = fac.getFunction(p, term0, term1);
 						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 						if (optimize)
 							mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
@@ -505,12 +505,12 @@ public class TMappingProcessor implements Serializable {
 					Function oldMappingHead = childmapping.getHead();
 
 					if (isClass) {
-						newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms());
+						newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
 					} else {
 						if (!isInverse) {
-							newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms().get(0));
+							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(0));
 						} else {
-							newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms().get(1));
+							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
 						}
 					}
 					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
@@ -557,12 +557,12 @@ public class TMappingProcessor implements Serializable {
 							Function oldMappingHead = childmapping.getHead();
 
 							if (isClass) {
-								newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms());
+								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
 							} else {
 								if (!isInverse) {
-									newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms().get(0));
+									newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(0));
 								} else {
-									newMappingHead = fac.getFunctionalTerm(currentPredicate, oldMappingHead.getTerms().get(1));
+									newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
 								}
 							}
 							newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
@@ -587,7 +587,7 @@ public class TMappingProcessor implements Serializable {
 				}
 
 				for (CQIE currentNodeMapping : currentNodeMappings) {
-					Function newhead = fac.getFunctionalTerm(p, currentNodeMapping.getHead().getTerms());
+					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
 					CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
 					
 					if (optimize)

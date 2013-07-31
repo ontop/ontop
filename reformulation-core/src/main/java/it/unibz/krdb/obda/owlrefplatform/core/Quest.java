@@ -854,7 +854,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
-				Function notnull = fac.getIsNotNullFunction(var);
+				Function notnull = fac.getFunctionIsNotNull(var);
 				mapping.getBody().add(notnull);
 			}
 		}
@@ -957,7 +957,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					if (templateStrings.contains("(.+)")) {
 						continue;
 					}
-					Function templateFunction = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
+					Function templateFunction = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
 					getUriTemplateMatcher().put(matcher, templateFunction);
 					templateStrings.add("(.+)");
@@ -1160,13 +1160,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * uri(Class))
 				 */
 				terms.add(currenthead.getTerm(0));
-				Function rdfTypeConstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
+				Function rdfTypeConstant = fac.getFunction(fac.getUriTemplatePredicate(1),
 						fac.getURIConstant(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
-				newhead = fac.getFunctionalTerm(pred, terms);
+				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
+				newhead = fac.getFunction(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
 				/*
@@ -1176,10 +1176,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
+				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
-				newhead = fac.getFunctionalTerm(pred, terms);
+				newhead = fac.getFunction(pred, terms);
 			}
 			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());
 			newmappings.add(newmapping);

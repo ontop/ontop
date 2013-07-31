@@ -529,7 +529,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Function concept = dfac.getFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			Function concept = dfac.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
@@ -538,18 +538,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				Function attribute = dfac.getFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 				distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				Function role = dfac.getFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				body.add(role);
 			}
 		}
 		// Create the head
 		int arity = distinguishVariables.size();
-		Function head = dfac.getFunctionalTerm(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);
@@ -576,7 +576,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		if (datatype == null) {
 			return var;
 		} else {
-			return dfac.getFunctionalTerm(datatype, var);
+			return dfac.getFunction(datatype, var);
 		}
 	}
 	
@@ -636,7 +636,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+		return dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	}
 
 	// Column placeholder pattern

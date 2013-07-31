@@ -105,7 +105,7 @@ public class MappingDataTypeRepair {
 				// column type.
 				Variable variable = (Variable) term;
 				Predicate functor = getDataTypeFunctor(variable);
-				Term newTerm = dfac.getFunctionalTerm(functor, variable);
+				Term newTerm = dfac.getFunction(functor, variable);
 				atom.setTerm(1, newTerm);
 			}
 		}

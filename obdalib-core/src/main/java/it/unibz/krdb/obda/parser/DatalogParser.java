@@ -284,7 +284,7 @@ public class DatalogParser extends Parser {
             	            
             	            // Get the predicate atom
             	            Predicate predicate = dfac.getPredicate(name, size);
-            	            Function newhead = dfac.getFunctionalTerm(predicate, variableList);
+            	            Function newhead = dfac.getFunction(predicate, variableList);
             	            rule.updateHead(newhead);
             	            
             	            isSelectAll = false;  
@@ -1206,7 +1206,7 @@ public class DatalogParser extends Parser {
                   if (terms == null)
                     terms = new Vector<Term>();
                     
-                  value = dfac.getFunctionalTerm(predicate, terms);
+                  value = dfac.getFunction(predicate, terms);
                 }
 
             }
@@ -1735,7 +1735,7 @@ public class DatalogParser extends Parser {
                   } else {
                     functionSymbol = dfac.getPredicate(functionName, arity);
                   }
-                  value = dfac.getFunctionalTerm(functionSymbol, terms31);
+                  value = dfac.getFunction(functionSymbol, terms31);
                 }
 
             }

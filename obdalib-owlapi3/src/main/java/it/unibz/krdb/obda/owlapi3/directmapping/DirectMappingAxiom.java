@@ -153,7 +153,7 @@ public class DirectMappingAxiom {
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
-		atoms.add(df.getFunctionalTerm(df.getClassPredicate(generateClassURI(table.getName())), sub));
+		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getName())), sub));
 		
 		
 		//DataType Atoms
@@ -163,13 +163,13 @@ public class DirectMappingAxiom {
 			Predicate type = typeMapper.getPredicate(att.getType());
 			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
 				Variable objV = df.getVariable(att.getName());
-				atoms.add(df.getFunctionalTerm(
+				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
 			} else {
-				Function obj = df.getFunctionalTerm(type,
+				Function obj = df.getFunction(type,
 						df.getVariable(att.getName()));
-				atoms.add(df.getFunctionalTerm(
+				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));
 			}
@@ -181,7 +181,7 @@ public class DirectMappingAxiom {
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
-		Function head = df.getFunctionalTerm(headPredicate, headTerms);
+		Function head = df.getFunction(headPredicate, headTerms);
 		
 		
 		return df.getCQIE(head, atoms);
@@ -204,7 +204,7 @@ public class DirectMappingAxiom {
 							.getDefinition(pkTableReference);
 					Term obj = generateSubject(tdRef, true);
 
-					atom = (df.getFunctionalTerm(
+					atom = (df.getFunction(
 							df.getObjectPropertyPredicate(generateOPURI(
 									table.getName(), table.getAttributes())),
 							sub, obj));
@@ -216,7 +216,7 @@ public class DirectMappingAxiom {
 					Predicate headPredicate = df.getPredicate(
 							"http://obda.inf.unibz.it/quest/vocabulary#q",
 							headTerms.size());
-					Function head = df.getFunctionalTerm(headPredicate, headTerms);
+					Function head = df.getFunction(headPredicate, headTerms);
 					return df.getCQIE(head, atom);
 				}
 			}
@@ -273,7 +273,7 @@ public class DirectMappingAxiom {
 				terms.add(df.getVariable(tableName
 						+ td.getPrimaryKeys().get(i).getName()));
 			}
-			return df.getFunctionalTerm(uritemple, terms);
+			return df.getFunction(uritemple, terms);
 
 		} else {
 			List<Term> vars = new ArrayList<Term>();
@@ -282,7 +282,7 @@ public class DirectMappingAxiom {
 			}
 
 			Predicate bNode = df.getBNodeTemplatePredicate(1);
-			return df.getFunctionalTerm(bNode, vars);
+			return df.getFunction(bNode, vars);
 		}
 	}
 

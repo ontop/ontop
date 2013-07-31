@@ -128,12 +128,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionalTerm(Predicate functor, Term... arguments) {
+	public Function getFunction(Predicate functor, Term... arguments) {
 		return new FunctionalTermImpl(functor, arguments);
 	}
 	
 	@Override
-	public Function getFunctionalTerm(Predicate functor, List<Term> arguments) {
+	public Function getFunction(Predicate functor, List<Term> arguments) {
 		return new FunctionalTermImpl(functor, arguments);
 	}
 
@@ -242,7 +242,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getUriTemplate(Term... terms) {
 		Predicate uriPred = getUriTemplatePredicate(terms.length);
-		return getFunctionalTerm(uriPred, terms);		
+		return getFunction(uriPred, terms);		
 	}
 
 	@Override
@@ -251,116 +251,99 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getEQFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.EQ, firstTerm, secondTerm);
+	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getGTEFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.GTE, firstTerm, secondTerm);
+	public Function getFunctionGTE(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getGTFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.GT, firstTerm, secondTerm);
+	public Function getFunctionGT(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getLTEFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.LTE, firstTerm, secondTerm);
+	public Function getFunctionLTE(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getLTFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.LT, firstTerm, secondTerm);
+	public Function getFunctionLT(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getNEQFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.NEQ, firstTerm, secondTerm);
+	public Function getFunctionNEQ(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getNOTFunction(Term term) {
-		return getFunctionalTerm(OBDAVocabulary.NOT, term);
+	public Function getFunctionNOT(Term term) {
+		return getFunction(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public Function getANDFunction(Term term1, Term term2) {
-		return getFunctionalTerm(OBDAVocabulary.AND, term1, term2);
+	public Function getFunctionAND(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.AND, term1, term2);
+	}
+
+//	@Override
+//	public Function getANDFunction(List<Term> terms) {
+//		if (terms.size() < 2) {
+//			throw new IllegalArgumentException("AND requires at least 2 terms");
+//		}
+//		LinkedList<Term> auxTerms = new LinkedList<Term>();
+//
+//		if (terms.size() == 2) {
+//			return getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+//		}
+//		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+//		terms.remove(0);
+//		terms.remove(0);
+//		while (auxTerms.size() > 1) {
+//			nested = getFunctionalTerm(OBDAVocabulary.AND, nested, terms.get(0));
+//			terms.remove(0);
+//		}
+//		return getFunctionalTerm(OBDAVocabulary.AND, nested, terms.get(0));
+//	}
+
+	@Override
+	public Function getFunctionOR(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.OR, term1, term2);
+	}
+
+	
+//	@Override
+//	public Function getORFunction(List<Term> terms) {
+//		if (terms.size() < 2) {
+//			throw new IllegalArgumentException("OR requires at least 2 terms");
+//		}
+//		LinkedList<Term> auxTerms = new LinkedList<Term>();
+//
+//		if (terms.size() == 2) {
+//			return getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+//		}
+//		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+//		terms.remove(0);
+//		terms.remove(0);
+//		while (auxTerms.size() > 1) {
+//			nested = getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
+//			terms.remove(0);
+//		}
+//		return getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
+//	}
+
+	@Override
+	public Function getFunctionIsNull(Term term) {
+		return getFunction(OBDAVocabulary.IS_NULL, term);
 	}
 
 	@Override
-	public Function getANDFunction(Term term1, Term term2, Term term3) {
-		List<Term> terms = new LinkedList<Term>();
-		terms.add(term1);
-		terms.add(term2);
-		terms.add(term3);
-		return getANDFunction(terms);
-	}
-
-	@Override
-	public Function getANDFunction(List<Term> terms) {
-		if (terms.size() < 2) {
-			throw new IllegalArgumentException("AND requires at least 2 terms");
-		}
-		LinkedList<Term> auxTerms = new LinkedList<Term>();
-
-		if (terms.size() == 2) {
-			return getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
-		}
-		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
-		terms.remove(0);
-		terms.remove(0);
-		while (auxTerms.size() > 1) {
-			nested = getFunctionalTerm(OBDAVocabulary.AND, nested, terms.get(0));
-			terms.remove(0);
-		}
-		return getFunctionalTerm(OBDAVocabulary.AND, nested, terms.get(0));
-	}
-
-	@Override
-	public Function getORFunction(Term term1, Term term2) {
-		return getFunctionalTerm(OBDAVocabulary.OR, term1, term2);
-	}
-
-	@Override
-	public Function getORFunction(Term term1, Term term2, Term term3) {
-		List<Term> terms = new LinkedList<Term>();
-		terms.add(term1);
-		terms.add(term2);
-		terms.add(term3);
-		return getANDFunction(terms);
-	}
-
-	@Override
-	public Function getORFunction(List<Term> terms) {
-		if (terms.size() < 2) {
-			throw new IllegalArgumentException("OR requires at least 2 terms");
-		}
-		LinkedList<Term> auxTerms = new LinkedList<Term>();
-
-		if (terms.size() == 2) {
-			return getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
-		}
-		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
-		terms.remove(0);
-		terms.remove(0);
-		while (auxTerms.size() > 1) {
-			nested = getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
-			terms.remove(0);
-		}
-		return getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
-	}
-
-	@Override
-	public Function getIsNullFunction(Term term) {
-		return getFunctionalTerm(OBDAVocabulary.IS_NULL, term);
-	}
-
-	@Override
-	public Function getIsNotNullFunction(Term term) {
-		return getFunctionalTerm(OBDAVocabulary.IS_NOT_NULL, term);
+	public Function getFunctionIsNotNull(Term term) {
+		return getFunction(OBDAVocabulary.IS_NOT_NULL, term);
 	}
 
 
@@ -376,27 +359,27 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public Function getLANGMATCHESFunction(Term term1, Term term2) {
-		return getFunctionalTerm(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
+		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
 
 	@Override
-	public Function getMinusFunction(Term term1) {
-		return getFunctionalTerm(OBDAVocabulary.MINUS, term1);
+	public Function getFunctionMinus(Term term1) {
+		return getFunction(OBDAVocabulary.MINUS, term1);
 	}
 
 	@Override
-	public Function getAddFunction(Term term1, Term term2) {
-		return getFunctionalTerm(OBDAVocabulary.ADD, term1, term2);
+	public Function getFunctionAdd(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.ADD, term1, term2);
 	}
 
 	@Override
-	public Function getSubstractFunction(Term term1, Term term2) {
-		return getFunctionalTerm(OBDAVocabulary.SUBSTRACT, term1, term2);
+	public Function getFunctionSubstract(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.SUBSTRACT, term1, term2);
 	}
 
 	@Override
-	public Function getMultiplyFunction(Term term1, Term term2) {
-		return getFunctionalTerm(OBDAVocabulary.MULTIPLY, term1, term2);
+	public Function getFunctionMultiply(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
 	}
 
 	@Override

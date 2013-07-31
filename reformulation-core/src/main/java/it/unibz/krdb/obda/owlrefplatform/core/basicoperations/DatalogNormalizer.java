@@ -193,7 +193,7 @@ public class DatalogNormalizer {
 		 * generated. It always merges from the left to the right.
 		 */
 		while (dataAtoms.size() > 2) {
-			Function joinAtom = fac.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, dataAtoms.remove(0), dataAtoms.remove(0));
+			Function joinAtom = fac.getFunction(OBDAVocabulary.SPARQL_JOIN, dataAtoms.remove(0), dataAtoms.remove(0));
 			joinAtom.getTerms().addAll(booleanAtoms);
 			booleanAtoms.clear();
 
@@ -389,7 +389,7 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = fac.getEQFunction(fac.getValueConstant("1", COL_TYPE.INTEGER),
+			Function trivialEquality = fac.getFunctionEQ(fac.getValueConstant("1", COL_TYPE.INTEGER),
 					fac.getValueConstant("1", COL_TYPE.INTEGER));
 			leftJoin.getTerms().add(trivialEquality);
 		}
@@ -474,7 +474,7 @@ public class DatalogNormalizer {
 							Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
 
 							subterms.set(j, newVariable);
-							Function equality = fac.getEQFunction(var2, newVariable);
+							Function equality = fac.getFunctionEQ(var2, newVariable);
 							eqList.add(equality);
 
 						} else { // if its not data function, just replace
@@ -495,7 +495,7 @@ public class DatalogNormalizer {
 					if (atom.isDataFunction()) {
 						Variable var = fac.getVariable("f" + newVarCounter[0]);
 						newVarCounter[0] += 1;
-						Function equality = fac.getEQFunction(var, subTerm);
+						Function equality = fac.getFunctionEQ(var, subTerm);
 						subterms.set(j, var);
 						eqList.add(equality);
 					}
@@ -554,7 +554,7 @@ public class DatalogNormalizer {
 			List varList = new ArrayList(equalitySets.get(k));
 			for (int i = 0; i < varList.size() - 1; i++) {
 				for (int j = i + 1; j < varList.size(); j++) {
-					Function equality = fac.getEQFunction((Term) varList.get(i), (Term) varList.get(j));
+					Function equality = fac.getFunctionEQ((Term) varList.get(i), (Term) varList.get(j));
 					boolSet.add(equality);
 				}
 			}
@@ -821,7 +821,7 @@ public class DatalogNormalizer {
 		List<Function> newatoms = new LinkedList<Function>();
 		for (Term innerterm : innerFunctionalTerms) {
 			Function f = (Function) innerterm;
-			Function newatom = fac.getFunctionalTerm(f.getFunctionSymbol(), f.getTerms());
+			Function newatom = fac.getFunction(f.getFunctionSymbol(), f.getTerms());
 			newatoms.add(newatom);
 		}
 		return newatoms;

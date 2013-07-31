@@ -343,7 +343,7 @@ public class R2RMLParser {
 				//valueconstant
 				Predicate pred = fac.getUriTemplatePredicate(1);
 				Term newlit = fac.getValueConstant(trim(parsedString));
-				objectAtom = fac.getFunctionalTerm(pred, newlit);
+				objectAtom = fac.getFunction(pred, newlit);
 			}
 				
 			
@@ -405,7 +405,7 @@ public class R2RMLParser {
 				Term lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
 				//create literal(object, lang) atom
 				Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
-				Term langAtom = fac.getFunctionalTerm(literal, objectAtom, lang);
+				Term langAtom = fac.getFunction(literal, objectAtom, lang);
 				objectAtom = langAtom;
 			}
 			
@@ -417,7 +417,7 @@ public class R2RMLParser {
 				
 				//create datatype(object) atom
 				Predicate dtype =  new DataTypePredicateImpl(parsedString, COL_TYPE.OBJECT);
-				Term dtAtom = fac.getFunctionalTerm(dtype, objectAtom);
+				Term dtAtom = fac.getFunction(dtype, objectAtom);
 				objectAtom = dtAtom;
 			}
 		}
@@ -433,7 +433,7 @@ public class R2RMLParser {
 		{	//literal
 			Constant constt = fac.getValueConstant(objectString);
 			Predicate pred = fac.getDataTypePredicateLiteral();
-			return fac.getFunctionalTerm(pred, constt);
+			return fac.getFunction(pred, constt);
 		
 		}
 	}
@@ -453,7 +453,7 @@ public class R2RMLParser {
 			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
 					//fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI(type));
 			Term constant = fac.getValueConstant(consts);
-			typedObject = fac.getFunctionalTerm(predicate, constant);
+			typedObject = fac.getFunction(predicate, constant);
 		}
 		return typedObject;
 	}
@@ -578,7 +578,7 @@ public class R2RMLParser {
 
 		// the URI template is always on the first position in the term list
 		terms.add(0, uriTemplate);
-		return fac.getFunctionalTerm(pred, terms);
+		return fac.getFunction(pred, terms);
 
 	}
 

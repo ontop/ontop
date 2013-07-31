@@ -96,12 +96,12 @@ public class MappingVocabularyRepair {
 				 */
 				Term t0 = newTerms.get(0);
 				if (!(t0 instanceof Function)){
-					newTerms.set(0, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), t0));
+					newTerms.set(0, dfac.getFunction(dfac.getUriTemplatePredicate(1), t0));
 				}
 				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
-					newTerms.set(1, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
+					newTerms.set(1, dfac.getFunction(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
 				}
-				newatom = dfac.getFunctionalTerm(predicate, newTerms);
+				newatom = dfac.getFunction(predicate, newTerms);
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
@@ -157,6 +157,6 @@ public class MappingVocabularyRepair {
 		newTerms.add(dfac.getValueConstant(newTemplate.toString()));
 		newTerms.addAll(term.getTerms());
 
-		return dfac.getFunctionalTerm(uriFunction, newTerms);
+		return dfac.getFunction(uriFunction, newTerms);
 	}
 }

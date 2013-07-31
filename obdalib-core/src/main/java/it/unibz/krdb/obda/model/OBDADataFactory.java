@@ -87,53 +87,59 @@ public interface OBDADataFactory extends Serializable {
 	public Predicate getBNodeTemplatePredicate(int arity);
 
 
+	
+	/**
+	 * Construct a {@link Function} object. A function expression consists of
+	 * functional symbol (or functor) and one or more arguments.
+	 * 
+	 * @param functor
+	 *            the function symbol name.
+	 * @param arguments
+	 *            a list of arguments.
+	 * @return the function object.
+	 */
+	public Function getFunction(Predicate functor, Term... terms);
+
+	public Function getFunction(Predicate functor, List<Term> terms);
 	/*
 	 * Boolean function terms
 	 */
 
-	public Function getEQFunction(Term firstTerm, Term secondTerm);
+	public Function getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Function getGTEFunction(Term firstTerm, Term secondTerm);
+	public Function getFunctionGTE(Term firstTerm, Term secondTerm);
 
-	public Function getGTFunction(Term firstTerm, Term secondTerm);
+	public Function getFunctionGT(Term firstTerm, Term secondTerm);
 
-	public Function getLTEFunction(Term firstTerm, Term secondTerm);
+	public Function getFunctionLTE(Term firstTerm, Term secondTerm);
 
-	public Function getLTFunction(Term firstTerm, Term secondTerm);
+	public Function getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public Function getNEQFunction(Term firstTerm, Term secondTerm);
+	public Function getFunctionNEQ(Term firstTerm, Term secondTerm);
 
-	public Function getNOTFunction(Term term);
+	public Function getFunctionNOT(Term term);
 
-	public Function getANDFunction(Term term1, Term term2);
+	public Function getFunctionAND(Term term1, Term term2);
 
-	public Function getANDFunction(Term term1, Term term2, Term term3);
+	public Function getFunctionOR(Term term1, Term term2);
 
-	public Function getANDFunction(List<Term> terms);
+	public Function getFunctionIsNull(Term term);
 
-	public Function getORFunction(Term term1, Term term2);
-
-	public Function getORFunction(Term term1, Term term2, Term term3);
-
-	public Function getORFunction(List<Term> terms);
-
-	public Function getIsNullFunction(Term term);
-
-	public Function getIsNotNullFunction(Term term);
+	public Function getFunctionIsNotNull(Term term);
 
 	public Function getLANGMATCHESFunction(Term term1, Term term2);
 
 	/*
-	 * Numerical operation functions
+	 * Numerical arithmethic functions
 	 */
 
-	public Function getMinusFunction(Term term1);
+	public Function getFunctionMinus(Term term1);
 
-	public Function getAddFunction(Term term1, Term term2);
+	public Function getFunctionAdd(Term term1, Term term2);
 
-	public Function getSubstractFunction(Term term1, Term term2);
+	public Function getFunctionSubstract(Term term1, Term term2);
 
-	public Function getMultiplyFunction(Term term1, Term term2);
+	public Function getFunctionMultiply(Term term1, Term term2);
 
 	/*
 	 * JDBC objects
@@ -253,20 +259,6 @@ public interface OBDADataFactory extends Serializable {
 	 * @return the variable object.
 	 */
 	public Variable getNondistinguishedVariable();
-
-	/**
-	 * Construct a {@link Function} object. A function expression consists of
-	 * functional symbol (or functor) and one or more arguments.
-	 * 
-	 * @param functor
-	 *            the function symbol name.
-	 * @param arguments
-	 *            a list of arguments.
-	 * @return the function object.
-	 */
-	public Function getFunctionalTerm(Predicate functor, Term... terms);
-
-	public Function getFunctionalTerm(Predicate functor, List<Term> terms);
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

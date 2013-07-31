@@ -38,7 +38,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		Predicate p = pfac.getPredicate("http://www.obda.com/onto#individual", 2);
 		
-		Term fterm = fac.getFunctionalTerm(p, variables);
+		Term fterm = fac.getFunction(p, variables);
 		
 		Map<String,Function> termList = new HashMap<String, Function>();
 		termList.put(p.getName().toString(), (Function)fterm);

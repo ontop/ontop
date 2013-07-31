@@ -44,20 +44,20 @@ public class AxiomToRuleTranslator {
 		final Variable varY = ofac.getVariable("y");
 		if (description instanceof OClass) {
 			OClass klass = (OClass) description;
-			return ofac.getFunctionalTerm(klass.getPredicate(), varX);
+			return ofac.getFunction(klass.getPredicate(), varX);
 		} else if (description instanceof Property) {
 			Property property = (Property) description;
 			if (property.isInverse()) {
-				return ofac.getFunctionalTerm(property.getPredicate(), varY, varX);
+				return ofac.getFunction(property.getPredicate(), varY, varX);
 			} else {
-				return ofac.getFunctionalTerm(property.getPredicate(), varX, varY);
+				return ofac.getFunction(property.getPredicate(), varX, varY);
 			}
 		} else if (description instanceof PropertySomeRestriction) {
 			PropertySomeRestriction property = (PropertySomeRestriction) description;
 			if (property.isInverse()) {
-				return ofac.getFunctionalTerm(property.getPredicate(), varY, varX);
+				return ofac.getFunction(property.getPredicate(), varY, varX);
 			} else {
-				return ofac.getFunctionalTerm(property.getPredicate(), varX, varY);
+				return ofac.getFunction(property.getPredicate(), varX, varY);
 			}
 		} else {
 			throw new UnsupportedOperationException("Unsupported type of description: " + description.toString());

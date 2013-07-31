@@ -89,7 +89,7 @@ public class URIToFunctionMatcher implements Serializable {
 		for (String constantstr : constanturis) {
 			constantTerms.add(tFact.getValueConstant(constantstr));
 		}
-		return tFact.getFunctionalTerm(existing.getFunctionSymbol(), constantTerms);
+		return tFact.getFunction(existing.getFunctionSymbol(), constantTerms);
 
 	}
 }

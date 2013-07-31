@@ -94,8 +94,8 @@ public class DBMetadataUtil {
 						Integer pos2 = positionMatch.get(pos1);
 						terms1.set(pos1, terms2.get(pos2));
 					}
-					Function head = fac.getFunctionalTerm(p2, terms2);
-					Function body1 = fac.getFunctionalTerm(p1, terms1);
+					Function head = fac.getFunction(p2, terms2);
+					Function body1 = fac.getFunction(p1, terms1);
 					List<Function> body = new ArrayList<Function>();
 					body.add(body1);
 					
