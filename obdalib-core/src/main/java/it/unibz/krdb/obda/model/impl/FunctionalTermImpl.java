@@ -9,16 +9,18 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
+import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	protected static final long serialVersionUID = 2832481815465364535L;
 	
 	protected Predicate functor = null;
-	protected EventGeneratingArrayList<Term> terms = null;
+	protected EventGeneratingList<Term> terms = null;
 	protected int identifier = -1;
 
 	// true when the list of terms has been modified
@@ -52,11 +54,9 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	protected FunctionalTermImpl(Predicate functor, Term... terms) {
 		this.functor = functor;
 
-		EventGeneratingArrayList<Term> eventlist = new EventGeneratingArrayList<Term>(
-				terms.length * 10);
-		for (Term term : terms) {
-			eventlist.add(term);
-		}
+		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<Term>();
+		Collections.addAll(eventlist, terms);
+		
 		this.terms = eventlist;
 		registerListeners(eventlist);
 	}
@@ -64,29 +64,22 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
 		this.functor = functor;
 
-		EventGeneratingArrayList<Term> eventlist = new EventGeneratingArrayList<Term>(
-				terms.size() * 10);
-		for (Term term : terms) {
-			eventlist.add(term);
-		}
-		this.terms = eventlist;
+		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<Term>();
+		eventlist.addAll(terms);	
+		
+		this.terms = eventlist;		
 		registerListeners(eventlist);
 	}
 
-	protected FunctionalTermImpl(Predicate functor, EventGeneratingArrayList<Term> terms) {
-		this.functor = functor;
-		this.terms = terms;
-		registerListeners(terms);
-	}
 	
-	private void registerListeners(EventGeneratingArrayList<? extends Term> functions) {
+	private void registerListeners(EventGeneratingList<? extends Term> functions) {
 		functions.addListener(this);
 		for (Object o : functions) {
 			if (!(o instanceof Function)) {
 				continue;
 			}
 			Function f = (Function) o;
-			EventGeneratingArrayList<Term> list = (EventGeneratingArrayList<Term>) f.getTerms();
+			EventGeneratingList<Term> list = (EventGeneratingList<Term>) f.getTerms();
 			list.addListener(this);
 			registerListeners(list);
 		}
@@ -148,10 +141,10 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public FunctionalTermImpl clone() {
-		EventGeneratingLinkedList<Term> copyTerms = new EventGeneratingLinkedList<Term>();
-		Iterator<Term> it = terms.iterator();
-		while (it.hasNext()) {
-			copyTerms.add(it.next().clone());
+		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size()+10);
+		
+		for (Term term: terms) {
+			copyTerms.add(term.clone());
 		}
 		FunctionalTermImpl clone = new FunctionalTermImpl(functor, copyTerms);
 		clone.identifier = identifier;

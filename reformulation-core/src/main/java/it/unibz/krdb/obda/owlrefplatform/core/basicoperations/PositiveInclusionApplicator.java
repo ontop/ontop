@@ -508,7 +508,7 @@ public class PositiveInclusionApplicator {
 					 * A(x,#)
 					 */
 					Term t = a.getTerms().get(0);
-					Term anonym = termFactory.getNondistinguishedVariable();
+					Term anonym = termFactory.getVariableNondistinguished();
 					Function newatom = null;
 
 					if (((PropertySomeRestrictionImpl) lefthandside).isInverse()) {

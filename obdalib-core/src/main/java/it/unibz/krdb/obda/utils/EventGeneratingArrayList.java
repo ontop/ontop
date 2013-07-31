@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * implementations of the methods are the original LinkedList methods. We just
  * wrap them to be able to rise the event.
  */
-public class EventGeneratingArrayList<E> extends ArrayList<E> {
+public class EventGeneratingArrayList<E> extends ArrayList<E> implements EventGeneratingList<E>{
 
 	private static final long serialVersionUID = -6352076117258356066L;
 

@@ -154,7 +154,7 @@ public class MappingVocabularyRepair {
 		}
 
 		LinkedList<Term> newTerms = new LinkedList<Term>();
-		newTerms.add(dfac.getValueConstant(newTemplate.toString()));
+		newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
 		newTerms.addAll(term.getTerms());
 
 		return dfac.getFunction(uriFunction, newTerms);

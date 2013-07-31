@@ -120,9 +120,9 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		
 		ObjectConstant c = null;
 		if (currSubject instanceof URI) {
-			c = obdafac.getURIConstant(currSubject.stringValue());
+			c = obdafac.getConstantURI(currSubject.stringValue());
 		} else if (currSubject instanceof BNode) {
-			c = obdafac.getBNodeConstant(currSubject.stringValue());
+			c = obdafac.getConstantBNode(currSubject.stringValue());
 		} else {
 			throw new RuntimeException("Unsupported subject found in triple: "	+ st.toString() + " (Required URI or BNode)");
 		}
@@ -155,17 +155,17 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		} else if (currentPredicate.getArity() == 2) {
 			Constant c2;
 			if (currObject instanceof URI) {
-				c2 = obdafac.getURIConstant(currObject.stringValue());
+				c2 = obdafac.getConstantURI(currObject.stringValue());
 			} else if (currObject instanceof BNode) {
-				c2 = obdafac.getBNodeConstant(currObject.stringValue());
+				c2 = obdafac.getConstantBNode(currObject.stringValue());
 			} else if (currObject instanceof Literal) {
 				Literal l = (Literal) currObject;
 				Predicate.COL_TYPE type = getColumnType(l.getDatatype());
 				String lang = l.getLanguage();
 				if (lang == null) {
-					c2 = obdafac.getValueConstant(l.getLabel(), type);
+					c2 = obdafac.getConstantLiteral(l.getLabel(), type);
 				} else {
-					c2 = obdafac.getValueConstant(l.getLabel(), lang);
+					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
 				}
 			} else {
 				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");

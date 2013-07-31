@@ -323,18 +323,18 @@ public class MappingAnalyzer {
 			if (literal instanceof StringLiteral) {
 				boolean isDateTime = containDateTimeString(termRightName);
 				if (isDateTime) {
-					t2 = dfac.getValueConstant(termRightName, COL_TYPE.DATETIME);
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 				} else {
-					t2 = dfac.getValueConstant(termRightName, COL_TYPE.STRING);
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
 				}
 			} else if (literal instanceof IntegerLiteral) {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.INTEGER);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
 			} else if (literal instanceof DecimalLiteral) {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.DOUBLE);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
 			} else if (literal instanceof BooleanLiteral) {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.BOOLEAN);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
 			} else {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.LITERAL);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 			}
 		}
 

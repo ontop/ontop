@@ -106,7 +106,7 @@ public class QueryAnonymizer {
 				 */
 				if (!isSharedTerm) {
 					atom.getTerms().set(i,
-							termFactory.getNondistinguishedVariable());
+							termFactory.getVariableNondistinguished());
 				}
 			}
 		}
@@ -154,7 +154,7 @@ public class QueryAnonymizer {
 					list = auxmap.get(((VariableImpl) t).getName());
 				}
 				if (list != null && list.size() < 2 && !isVariableInHead(q, t)) {
-					vex.add(termFactory.getNondistinguishedVariable());
+					vex.add(termFactory.getVariableNondistinguished());
 				} else {
 					vex.add(t);
 				}

@@ -228,9 +228,9 @@ public class TurtleOBDAParser extends Parser {
 	   if (size == 1) {
 	      FormatString token = tokens.get(0);
 	      if (token instanceof FixedString) {
-	         toReturn = dfac.getURIConstant(token.toString());
+	         toReturn = dfac.getConstantURI(token.toString());
 	      } else if (token instanceof ColumnString) {
-	         ValueConstant uriTemplate = dfac.getValueConstant(PLACEHOLDER); // a single URI template
+	         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
 	         Variable column = dfac.getVariable(token.toString());
 	         terms.add(0, uriTemplate);
 	         terms.add(column);
@@ -247,7 +247,7 @@ public class TurtleOBDAParser extends Parser {
 	            terms.add(column);
 	         }
 	      }
-	      ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
+	      ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 	      terms.add(0, uriTemplate);
 	      toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	   }
@@ -1563,7 +1563,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					    	value = dfac.getValueConstant((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
+					    	value = dfac.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
 					    
 					}
 					break;
@@ -1916,7 +1916,7 @@ public class TurtleOBDAParser extends Parser {
 			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral751); 
 
 			      String str = (STRING_WITH_QUOTE_DOUBLE36!=null?STRING_WITH_QUOTE_DOUBLE36.getText():null);
-			      value = dfac.getValueConstant(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+			      value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
 			    
 			}
 
@@ -2282,14 +2282,14 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:544:5: TRUE
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral912); 
-					 value = dfac.getValueConstant((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
+					 value = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:545:5: FALSE
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral921); 
-					 value = dfac.getValueConstant((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
+					 value = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 
@@ -2347,21 +2347,21 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:549:5: INTEGER
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned940); 
-					 value = dfac.getValueConstant((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
+					 value = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:550:5: DOUBLE
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned948); 
-					 value = dfac.getValueConstant((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
+					 value = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:551:5: DECIMAL
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned957); 
-					 value = dfac.getValueConstant((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
+					 value = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
 
@@ -2419,21 +2419,21 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:555:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive976); 
-					 value = dfac.getValueConstant((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
+					 value = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:556:5: DOUBLE_POSITIVE
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive984); 
-					 value = dfac.getValueConstant((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
+					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:557:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive993); 
-					 value = dfac.getValueConstant((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
+					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
 
@@ -2491,21 +2491,21 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:561:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1012); 
-					 value = dfac.getValueConstant((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
+					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:5: DOUBLE_NEGATIVE
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1020); 
-					 value = dfac.getValueConstant((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
+					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:563:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1029); 
-					 value = dfac.getValueConstant((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 
+					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
 

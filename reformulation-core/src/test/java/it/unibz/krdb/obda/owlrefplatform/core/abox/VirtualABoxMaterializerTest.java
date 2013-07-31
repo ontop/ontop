@@ -573,7 +573,7 @@ try{
 		Function head = fac.getFunction(q, headTerms);
 
 		Term objectTerm = fac.getFunction(fac.getUriTemplatePredicate(2),
-				fac.getValueConstant("http://schools.com/persons{}{}"), 
+				fac.getConstantLiteral("http://schools.com/persons{}{}"), 
 				firstNameVariable,
 				lastNameVariable);
 

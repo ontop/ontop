@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -147,8 +148,17 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		OWLConnection conn = reasoner.getConnection();
 		OWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z }";
+		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
+		StringBuilder bf = new StringBuilder(query);
 		try {
+			long start = System.currentTimeMillis();
+			for (int i = 0; i < 3000; i++) {
+				QuestOWLStatement sto = (QuestOWLStatement)st;
+				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
+			}
+			long end = System.currentTimeMillis();
+			long elapsed = end-start;
+			log.info("Elapsed time: {}", elapsed);
 			OWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");

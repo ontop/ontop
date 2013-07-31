@@ -733,7 +733,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 				if (isSI) {
 					int id = indexOfRef(s);
-					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getValueConstant(String.valueOf(id), COL_TYPE.INTEGER));
+					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 					terms.add(functionURI);
 				} else {
 				
@@ -762,7 +762,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 
 				Function rdfTypeConstant = ofac.getFunction(ofac
-						.getUriTemplatePredicate(1), ofac.getURIConstant(OBDAVocabulary.RDF_TYPE));
+						.getUriTemplatePredicate(1), ofac.getConstantURI(OBDAVocabulary.RDF_TYPE));
 						//ofac.getURIConstant(URI.create(OBDAVocabulary.RDF_TYPE)));
 				terms.add(rdfTypeConstant);
 				terms.add(ofac.getVariable(((Var) o).getVarName()));
@@ -835,7 +835,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 				if (isSI) {
 					int id = indexOfRef(s);
-					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getValueConstant(String.valueOf(id), COL_TYPE.INTEGER));
+					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 					if (functionURI == null)
 					return;
 					terms.add(functionURI);
@@ -877,7 +877,7 @@ public class SparqlAlgebraToDatalogTranslator {
 							.getDataTypePredicateLiteral();
 					Constant languageConstant = null;
 					if (lang != null && !lang.equals("")) {
-						languageConstant = ofac.getValueConstant(lang,
+						languageConstant = ofac.getConstantLiteral(lang,
 								COL_TYPE.LITERAL);
 						dataTypeFunction = ofac.getFunction(
 								functionSymbol, constant, languageConstant);
@@ -898,7 +898,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				
 				if (isSI) {
 					int id = indexOfRef(o);
-					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getValueConstant(String.valueOf(id), COL_TYPE.INTEGER));
+					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 					terms.add(functionURI);
 				} else {
 					
@@ -1133,7 +1133,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		COL_TYPE objectType = getDataType(literal);
 
 		String value = literal.getLiteralLexicalForm();
-		ValueConstant constant = ofac.getValueConstant(value, objectType);
+		ValueConstant constant = ofac.getConstantLiteral(value, objectType);
 
 		/*
 		 * Validating that the value is correct (lexically) with respect to the
@@ -1280,38 +1280,38 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (expr instanceof NodeValueString) {
 			constantFunction = ofac.getFunction(
 					ofac.getDataTypePredicateString(),
-					ofac.getValueConstant(expr.getString(), COL_TYPE.STRING));
+					ofac.getConstantLiteral(expr.getString(), COL_TYPE.STRING));
 		} else if (expr instanceof NodeValueInteger) {
 			constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateInteger(), ofac.getValueConstant(
+					.getDataTypePredicateInteger(), ofac.getConstantLiteral(
 					expr.getInteger() + "", COL_TYPE.INTEGER));
 		} else if (expr instanceof NodeValueDecimal) {
 			constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateDecimal(), ofac.getValueConstant(
+					.getDataTypePredicateDecimal(), ofac.getConstantLiteral(
 					expr.getDecimal() + "", COL_TYPE.DECIMAL));
 		} else if (expr instanceof NodeValueDouble
 				|| expr instanceof NodeValueFloat) {
 			constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateDouble(), ofac.getValueConstant(
+					.getDataTypePredicateDouble(), ofac.getConstantLiteral(
 					expr.getDouble() + "", COL_TYPE.DOUBLE));
 		} else if (expr instanceof NodeValueDateTime) {
 			constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateDateTime(), ofac.getValueConstant(
+					.getDataTypePredicateDateTime(), ofac.getConstantLiteral(
 					expr.getDateTime() + "", COL_TYPE.DATETIME));
 		} else if (expr instanceof NodeValueBoolean) {
 			constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateBoolean(), ofac.getValueConstant(
+					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
 					expr.getBoolean() + "", COL_TYPE.BOOLEAN));
 		} else if (expr instanceof NodeValueNode) {
 			NodeValueNode nodeValue = (NodeValueNode) expr;
 			Node node = nodeValue.getNode();
 			if (node instanceof Node_Literal) {
 				constantFunction = ofac.getFunction(ofac
-						.getDataTypePredicateLiteral(), ofac.getValueConstant(
+						.getDataTypePredicateLiteral(), ofac.getConstantLiteral(
 						node.getLiteralLexicalForm(), COL_TYPE.STRING));
 			} else if (node instanceof Node_URI) {
 				constantFunction = ofac.getFunction(ofac
-						.getUriTemplatePredicate(1), ofac.getValueConstant(
+						.getUriTemplatePredicate(1), ofac.getConstantLiteral(
 						node.toString(), COL_TYPE.OBJECT));
 			} else {
 				throw new RuntimeException("Unsupported node: "
@@ -1336,7 +1336,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		else if (expr instanceof E_UnaryMinus) {
 			Expr arg = expr.getArg();
 			Term term = getBooleanTerm(arg);
-			Term minusOneConstant = ofac.getValueConstant("-1", COL_TYPE.INTEGER);
+			Term minusOneConstant = ofac.getConstantLiteral("-1", COL_TYPE.INTEGER);
 			builtInFunction = ofac.getFunction(OBDAVocabulary.MULTIPLY, minusOneConstant, term);
 		} else if (expr instanceof E_Bound) {
 			Expr arg = expr.getArg();
@@ -1423,7 +1423,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
 					output = ofac.getFunction(functor, 
-							 ofac.getValueConstant(c.getValue().toLowerCase(), 
+							 ofac.getConstantLiteral(c.getValue().toLowerCase(), 
 							 c.getType()));
 				}
 			}
@@ -1441,7 +1441,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Term term1 = getBooleanTerm(arg1);
 			Term term2 = getBooleanTerm(arg2);
 			Term term3 = (arg3 != null) ? getBooleanTerm(arg3) : ofac
-					.getNULL();
+					.getConstantNULL();
 			builtInFunction = ofac.getFunction(
 					OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
 		} else {

@@ -44,11 +44,11 @@ public class CQCUtilitiesTest extends TestCase {
 
 	Term x = tfac.getVariable("x");
 	Term y = tfac.getVariable("y");
-	Term c1 = tfac.getURIConstant("URI1");
-	Term c2 = tfac.getValueConstant("m");
+	Term c1 = tfac.getConstantURI("URI1");
+	Term c2 = tfac.getConstantLiteral("m");
 
-	Term u1 = tfac.getNondistinguishedVariable();
-	Term u2 = tfac.getNondistinguishedVariable();
+	Term u1 = tfac.getVariableNondistinguished();
+	Term u2 = tfac.getVariableNondistinguished();
 
 	public void setUp() throws Exception {
 		/*
@@ -98,23 +98,23 @@ public class CQCUtilitiesTest extends TestCase {
 		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
 
 		List<Term> head = groundedcq.getHead().getTerms();
-		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
-		assertTrue(head.get(1).equals(tfac.getURIConstant("URI1")));
-		assertTrue(head.get(2).equals(tfac.getValueConstant("m")));
-		assertTrue(head.get(3).equals(tfac.getValueConstant("CANy2")));
+		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
+		assertTrue(head.get(1).equals(tfac.getConstantURI("URI1")));
+		assertTrue(head.get(2).equals(tfac.getConstantLiteral("m")));
+		assertTrue(head.get(3).equals(tfac.getConstantLiteral("CANy2")));
 		FunctionalTermImpl f1 = (FunctionalTermImpl) head.get(4);
-		assertTrue(f1.getTerms().get(0).equals(tfac.getValueConstant("CANx1")));
-		assertTrue(f1.getTerms().get(1).equals(tfac.getValueConstant("CANy2")));
+		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral("CANx1")));
+		assertTrue(f1.getTerms().get(1).equals(tfac.getConstantLiteral("CANy2")));
 
 		head = ((Function) groundedcq.getBody().get(0)).getTerms();
-		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
-		assertTrue(head.get(1).equals(tfac.getValueConstant("CANy2")));
+		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
+		assertTrue(head.get(1).equals(tfac.getConstantLiteral("CANy2")));
 
 		head = ((Function) groundedcq.getBody().get(1)).getTerms();
-		assertTrue(head.get(0).equals(tfac.getValueConstant("m")));
+		assertTrue(head.get(0).equals(tfac.getConstantLiteral("m")));
 		f1 = (FunctionalTermImpl) head.get(1);
-		assertTrue(f1.getTerms().get(0).equals(tfac.getValueConstant("CANx1")));
-		assertTrue(head.get(2).equals(tfac.getValueConstant("CANy2")));
+		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral("CANx1")));
+		assertTrue(head.get(2).equals(tfac.getConstantLiteral("CANy2")));
 	}
 
 	public void testContainment1() {
@@ -211,7 +211,7 @@ public class CQCUtilitiesTest extends TestCase {
 		head = pfac.getFunction(pfac.getPredicate("q", 0, null), new LinkedList<Term>());
 		body = new LinkedList<Function>();
 		body.add(pfac.getFunction(pfac.getPredicate("S", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
-				pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
+				pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
 
 		CQIE q6 = pfac.getCQIE(head, body);
 
@@ -223,7 +223,7 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(pfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				pfac.getVariable("x"), pfac.getVariable("y")));
 		body.add(pfac.getFunction(pfac.getPredicate("P", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
-				pfac.getVariable("y"), pfac.getNondistinguishedVariable()));
+				pfac.getVariable("y"), pfac.getVariableNondistinguished()));
 
 		CQIE q7 = pfac.getCQIE(head, body);
 
@@ -235,7 +235,7 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(pfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				pfac.getVariable("x"), pfac.getVariable("y")));
 		body.add(pfac.getFunction(pfac.getPredicate("P", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
-				pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
+				pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
 
 		CQIE q8 = pfac.getCQIE(head, body);
 

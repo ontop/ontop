@@ -389,8 +389,8 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = fac.getFunctionEQ(fac.getValueConstant("1", COL_TYPE.INTEGER),
-					fac.getValueConstant("1", COL_TYPE.INTEGER));
+			Function trivialEquality = fac.getFunctionEQ(fac.getConstantLiteral("1", COL_TYPE.INTEGER),
+					fac.getConstantLiteral("1", COL_TYPE.INTEGER));
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}

@@ -61,7 +61,7 @@ public class ExtDatalogProgram {
 	
 	private final Term x = fac.getVariable("x");			
 	private final Term y = fac.getVariable("y");
-	private final Term w = fac.getNondistinguishedVariable(); 
+	private final Term w = fac.getVariableNondistinguished(); 
 	
 	public Predicate getEntryForPredicate(Predicate p) {
 		ExtDatalogProgramDef def = extPredicateMap.get(p);

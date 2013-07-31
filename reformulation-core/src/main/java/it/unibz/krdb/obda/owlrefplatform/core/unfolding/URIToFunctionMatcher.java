@@ -87,7 +87,7 @@ public class URIToFunctionMatcher implements Serializable {
 
 		List<Term> constantTerms = new LinkedList<Term>();
 		for (String constantstr : constanturis) {
-			constantTerms.add(tFact.getValueConstant(constantstr));
+			constantTerms.add(tFact.getConstantLiteral(constantstr));
 		}
 		return tFact.getFunction(existing.getFunctionSymbol(), constantTerms);
 

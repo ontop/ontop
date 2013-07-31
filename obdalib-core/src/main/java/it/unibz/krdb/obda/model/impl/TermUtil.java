@@ -10,9 +10,9 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -25,12 +25,15 @@ public class TermUtil {
 	public static String toString(Term term) {
 		if (term instanceof Variable) {
 			Variable variable = (Variable) term;
-			return String.format("%s", variable.getName());
+			return variable.getName();
 		} 
 		else if (term instanceof ValueConstant) {
 			ValueConstant constant = (ValueConstant) term;
-			StringBuffer bf = new StringBuffer();
-			bf.append(String.format("\"%s\"", constant.getValue()));
+			StringBuilder bf = new StringBuilder();
+			bf.append("\"");
+			bf.append(constant.getValue());
+			bf.append("\"");
+			
 			
 		    final COL_TYPE datatype = constant.getType();
 			if (datatype == COL_TYPE.LITERAL_LANG) {
@@ -46,13 +49,15 @@ public class TermUtil {
 		}
 		else if (term instanceof URIConstant) {
 			URIConstant constant = (URIConstant) term;
-			return String.format("%s", constant.getValue());
+			return constant.getValue();
 		} 
 		else if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
 			
-			StringBuffer args = new StringBuffer();
+			StringBuilder args = new StringBuilder();
+			args.append(functionSymbol.toString());
+			args.append("(");
 			boolean separator = false;
 			for (Term innerTerm : function.getTerms()) {
 				if (separator) {
@@ -61,7 +66,8 @@ public class TermUtil {
 				args.append(toString(innerTerm));
 				separator = true;
 			}
-			return String.format("%s(%s)", functionSymbol.toString(), args.toString());
+			args.append(")");
+			return args.toString();
 		}
 		else if (term instanceof BNode) {
 			BNode bnode = (BNode) term;

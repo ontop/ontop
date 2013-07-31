@@ -174,15 +174,15 @@ public interface OBDADataFactory extends Serializable {
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public URIConstant getURIConstant(String uri);
+	public URIConstant getConstantURI(String uri);
 	
-	public BNode getBNodeConstant(String name);
+	public BNode getConstantBNode(String name);
 
-	public Constant getNULL();
+	public Constant getConstantNULL();
 
-	public Constant getTrue();
+	public Constant getConstantTrue();
 
-	public Constant getFalse();
+	public Constant getConstantFalse();
 
 	/**
 	 * Construct a {@link ValueConstant} object.
@@ -191,7 +191,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the value of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value);
+	public ValueConstant getConstantLiteral(String value);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a type definition.
@@ -209,7 +209,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value, Predicate.COL_TYPE type);
+	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a language tag.
@@ -226,7 +226,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the language tag for the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value, String language);
+	public ValueConstant getConstantLiteral(String value, String language);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name
@@ -234,7 +234,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the value constant.
 	 */
-	public ValueConstant getFreshValueConstant();
+	public ValueConstant getConstantFreshLiteral();
 	
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -258,7 +258,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the variable object.
 	 */
-	public Variable getNondistinguishedVariable();
+	public Variable getVariableNondistinguished();
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

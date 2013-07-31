@@ -93,28 +93,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
-	public URIConstant getURIConstant(String uriString) {
+	public URIConstant getConstantURI(String uriString) {
 		return new URIConstantImpl(uriString);
 	}
 	
 	@Override
-	public ValueConstant getValueConstant(String value) {
+	public ValueConstant getConstantLiteral(String value) {
 		return new ValueConstantImpl(value, COL_TYPE.LITERAL);
 	}
 
 	@Override
-	public ValueConstant getValueConstant(String value, COL_TYPE type) {
+	public ValueConstant getConstantLiteral(String value, COL_TYPE type) {
 		return new ValueConstantImpl(value, type);
 	}
 
 	@Override
-	public ValueConstant getValueConstant(String value, String language) {
+	public ValueConstant getConstantLiteral(String value, String language) {
 		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
 	}
 	
 	@Override
-	public ValueConstant getFreshValueConstant() {
-		return new ValueConstantImpl("fresh" + (counter++), COL_TYPE.LITERAL);
+	public ValueConstant getConstantFreshLiteral() {
+		return new ValueConstantImpl("f" + (counter++), COL_TYPE.LITERAL);
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Variable getNondistinguishedVariable() {
+	public Variable getVariableNondistinguished() {
 		return new AnonymousVariable();
 	}
 
@@ -407,22 +407,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public BNode getBNodeConstant(String name) {
+	public BNode getConstantBNode(String name) {
 		return new BNodeConstantImpl(name);
 	}
 
 	@Override
-	public Constant getNULL() {
+	public Constant getConstantNULL() {
 		return OBDAVocabulary.NULL;
 	}
 
 	@Override
-	public Constant getTrue() {
+	public Constant getConstantTrue() {
 		return OBDAVocabulary.TRUE;
 	}
 
 	@Override
-	public Constant getFalse() {
+	public Constant getConstantFalse() {
 		return OBDAVocabulary.FALSE;
 	}
 

@@ -213,7 +213,7 @@ public class DatalogQueryServices {
 				while (i.hasNext()) {
 					Term t = i.next();
 					if (t.equals(e.getKey()))
-						i.set(fac.getNondistinguishedVariable());
+						i.set(fac.getVariableNondistinguished());
 				}
 //				((PredicateAtomImpl)e.getValue()).listChanged();
 		}

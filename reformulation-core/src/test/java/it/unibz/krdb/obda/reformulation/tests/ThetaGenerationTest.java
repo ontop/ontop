@@ -113,7 +113,7 @@ public class ThetaGenerationTest extends TestCase {
 
 		
 			Term t1 = termFactory.getVariable("x");
-			Term t2 = termFactory.getValueConstant("y");
+			Term t2 = termFactory.getConstantLiteral("y");
 
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<Term> terms1 = new Vector<Term>();
@@ -178,7 +178,7 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_5(){
 
 			Term t2 = termFactory.getVariable("x");
-			Term t1 = termFactory.getValueConstant("y");
+			Term t1 = termFactory.getConstantLiteral("y");
 
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<Term> terms1 = new Vector<Term>();
@@ -206,8 +206,8 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_6(){
 
 
-			Term t2 = termFactory.getValueConstant("y");
-			Term t1 = termFactory.getValueConstant("y");
+			Term t2 = termFactory.getConstantLiteral("y");
+			Term t1 = termFactory.getConstantLiteral("y");
 
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<Term> terms1 = new Vector<Term>();
@@ -261,8 +261,8 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_8(){
 
 		try {
-			Term t2 = termFactory.getValueConstant("x");
-			Term t1 = termFactory.getValueConstant("y");
+			Term t2 = termFactory.getConstantLiteral("x");
+			Term t1 = termFactory.getConstantLiteral("y");
 
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<Term> terms1 = new Vector<Term>();
@@ -287,7 +287,7 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_9(){
 
 		try {
-			Term t1 = termFactory.getValueConstant("y");
+			Term t1 = termFactory.getConstantLiteral("y");
 			Term t2 = termFactory.getVariable("y");
 			List<Term> vars = new Vector<Term>();
 			vars.add(t2);
@@ -505,7 +505,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = predFactory.getPredicate("p", vars2.size());
@@ -541,7 +541,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		Term t3 = termFactory.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
@@ -572,7 +572,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = predFactory.getPredicate("q", vars2.size());
@@ -604,7 +604,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t3);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = predFactory.getPredicate("q", vars2.size());
@@ -790,7 +790,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = predFactory.getPredicate("p", vars2.size());
@@ -826,7 +826,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		Term t3 = termFactory.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
@@ -857,7 +857,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = predFactory.getPredicate("q", vars2.size());
@@ -889,7 +889,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t3);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
-		Term t2 = termFactory.getValueConstant("123");
+		Term t2 = termFactory.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = predFactory.getPredicate("q", vars2.size());
@@ -915,8 +915,8 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_32(){
 
 		try {
-			Term t1 = termFactory.getNondistinguishedVariable();
-			Term t2 = termFactory.getNondistinguishedVariable();
+			Term t1 = termFactory.getVariableNondistinguished();
+			Term t2 = termFactory.getVariableNondistinguished();
 
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<Term> terms1 = new Vector<Term>();
@@ -943,7 +943,7 @@ public class ThetaGenerationTest extends TestCase {
 
 		try {
 			Term t1 = termFactory.getVariable("x");
-			Term t2 = termFactory.getNondistinguishedVariable();
+			Term t2 = termFactory.getVariableNondistinguished();
 
 			Predicate pred1 = predFactory.getPredicate("A", 1);
 			List<Term> terms1 = new Vector<Term>();

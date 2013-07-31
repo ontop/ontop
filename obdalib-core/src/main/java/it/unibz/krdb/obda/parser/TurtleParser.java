@@ -1051,7 +1051,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = dfac.getURIConstant(resource8.toString()); 
+                     value = dfac.getConstantURI(resource8.toString()); 
 
                     }
                     break;
@@ -1302,7 +1302,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = dfac.getURIConstant(resource13.toString()); 
+                     value = dfac.getConstantURI(resource13.toString()); 
 
                     }
                     break;
@@ -1885,7 +1885,7 @@ public class TurtleParser extends Parser {
 
 
 
-                        	value = dfac.getValueConstant((languageTag30!=null?input.toString(languageTag30.start,languageTag30.stop):null).toLowerCase(), COL_TYPE.STRING);
+                        	value = dfac.getConstantLiteral((languageTag30!=null?input.toString(languageTag30.start,languageTag30.stop):null).toLowerCase(), COL_TYPE.STRING);
                         
 
                     }
@@ -1988,7 +1988,7 @@ public class TurtleParser extends Parser {
                   }
                   // replace the placeholder string to the original. The current string becomes the template
                   template = template.replace("[]", "{}");
-                  ValueConstant uriTemplate = dfac.getValueConstant(template);
+                  ValueConstant uriTemplate = dfac.getConstantLiteral(template);
                   
                   // the URI template is always on the first position in the term list
                   terms.add(0, uriTemplate);
@@ -2385,7 +2385,7 @@ public class TurtleParser extends Parser {
 
 
                   String str = (STRING_WITH_QUOTE_DOUBLE41!=null?STRING_WITH_QUOTE_DOUBLE41.getText():null);
-                  value = dfac.getValueConstant(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+                  value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
                 
 
             }
@@ -2823,7 +2823,7 @@ public class TurtleParser extends Parser {
                     {
                     TRUE47=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral975); 
 
-                     value = dfac.getValueConstant((TRUE47!=null?TRUE47.getText():null), COL_TYPE.BOOLEAN); 
+                     value = dfac.getConstantLiteral((TRUE47!=null?TRUE47.getText():null), COL_TYPE.BOOLEAN); 
 
                     }
                     break;
@@ -2832,7 +2832,7 @@ public class TurtleParser extends Parser {
                     {
                     FALSE48=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral984); 
 
-                     value = dfac.getValueConstant((FALSE48!=null?FALSE48.getText():null), COL_TYPE.BOOLEAN); 
+                     value = dfac.getConstantLiteral((FALSE48!=null?FALSE48.getText():null), COL_TYPE.BOOLEAN); 
 
                     }
                     break;
@@ -2896,7 +2896,7 @@ public class TurtleParser extends Parser {
                     {
                     INTEGER49=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned1003); 
 
-                     value = dfac.getValueConstant((INTEGER49!=null?INTEGER49.getText():null), COL_TYPE.INTEGER); 
+                     value = dfac.getConstantLiteral((INTEGER49!=null?INTEGER49.getText():null), COL_TYPE.INTEGER); 
 
                     }
                     break;
@@ -2905,7 +2905,7 @@ public class TurtleParser extends Parser {
                     {
                     DOUBLE50=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned1011); 
 
-                     value = dfac.getValueConstant((DOUBLE50!=null?DOUBLE50.getText():null), COL_TYPE.DOUBLE); 
+                     value = dfac.getConstantLiteral((DOUBLE50!=null?DOUBLE50.getText():null), COL_TYPE.DOUBLE); 
 
                     }
                     break;
@@ -2914,7 +2914,7 @@ public class TurtleParser extends Parser {
                     {
                     DECIMAL51=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned1020); 
 
-                     value = dfac.getValueConstant((DECIMAL51!=null?DECIMAL51.getText():null), COL_TYPE.DECIMAL); 
+                     value = dfac.getConstantLiteral((DECIMAL51!=null?DECIMAL51.getText():null), COL_TYPE.DECIMAL); 
 
                     }
                     break;
@@ -2978,7 +2978,7 @@ public class TurtleParser extends Parser {
                     {
                     INTEGER_POSITIVE52=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive1039); 
 
-                     value = dfac.getValueConstant((INTEGER_POSITIVE52!=null?INTEGER_POSITIVE52.getText():null), COL_TYPE.INTEGER); 
+                     value = dfac.getConstantLiteral((INTEGER_POSITIVE52!=null?INTEGER_POSITIVE52.getText():null), COL_TYPE.INTEGER); 
 
                     }
                     break;
@@ -2987,7 +2987,7 @@ public class TurtleParser extends Parser {
                     {
                     DOUBLE_POSITIVE53=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive1047); 
 
-                     value = dfac.getValueConstant((DOUBLE_POSITIVE53!=null?DOUBLE_POSITIVE53.getText():null), COL_TYPE.DOUBLE); 
+                     value = dfac.getConstantLiteral((DOUBLE_POSITIVE53!=null?DOUBLE_POSITIVE53.getText():null), COL_TYPE.DOUBLE); 
 
                     }
                     break;
@@ -2996,7 +2996,7 @@ public class TurtleParser extends Parser {
                     {
                     DECIMAL_POSITIVE54=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1056); 
 
-                     value = dfac.getValueConstant((DECIMAL_POSITIVE54!=null?DECIMAL_POSITIVE54.getText():null), COL_TYPE.DECIMAL); 
+                     value = dfac.getConstantLiteral((DECIMAL_POSITIVE54!=null?DECIMAL_POSITIVE54.getText():null), COL_TYPE.DECIMAL); 
 
                     }
                     break;
@@ -3060,7 +3060,7 @@ public class TurtleParser extends Parser {
                     {
                     INTEGER_NEGATIVE55=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1075); 
 
-                     value = dfac.getValueConstant((INTEGER_NEGATIVE55!=null?INTEGER_NEGATIVE55.getText():null), COL_TYPE.INTEGER); 
+                     value = dfac.getConstantLiteral((INTEGER_NEGATIVE55!=null?INTEGER_NEGATIVE55.getText():null), COL_TYPE.INTEGER); 
 
                     }
                     break;
@@ -3069,7 +3069,7 @@ public class TurtleParser extends Parser {
                     {
                     DOUBLE_NEGATIVE56=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1083); 
 
-                     value = dfac.getValueConstant((DOUBLE_NEGATIVE56!=null?DOUBLE_NEGATIVE56.getText():null), COL_TYPE.DOUBLE); 
+                     value = dfac.getConstantLiteral((DOUBLE_NEGATIVE56!=null?DOUBLE_NEGATIVE56.getText():null), COL_TYPE.DOUBLE); 
 
                     }
                     break;
@@ -3078,7 +3078,7 @@ public class TurtleParser extends Parser {
                     {
                     DECIMAL_NEGATIVE57=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1092); 
 
-                     value = dfac.getValueConstant((DECIMAL_NEGATIVE57!=null?DECIMAL_NEGATIVE57.getText():null), COL_TYPE.DECIMAL); 
+                     value = dfac.getConstantLiteral((DECIMAL_NEGATIVE57!=null?DECIMAL_NEGATIVE57.getText():null), COL_TYPE.DECIMAL); 
 
                     }
                     break;

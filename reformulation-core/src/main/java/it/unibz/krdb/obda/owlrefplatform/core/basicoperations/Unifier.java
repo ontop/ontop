@@ -234,7 +234,7 @@ public class Unifier {
 				if (replacement != null) {
 					terms.set(i, replacement);
 				} else {
-					terms.set(i, ofac.getFreshValueConstant());
+					terms.set(i, ofac.getConstantFreshLiteral());
 				}
 			} else if (t instanceof Function) {
 				Function t2 = (Function) t;

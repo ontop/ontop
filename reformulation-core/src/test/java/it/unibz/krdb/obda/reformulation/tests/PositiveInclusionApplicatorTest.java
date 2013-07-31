@@ -49,8 +49,8 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	Term						z				= tfac.getVariable("z");
 	Term						m				= tfac.getVariable("m");
 
-	Term						u1				= tfac.getNondistinguishedVariable();
-	Term						u2				= tfac.getNondistinguishedVariable();
+	Term						u1				= tfac.getVariableNondistinguished();
+	Term						u2				= tfac.getVariableNondistinguished();
 
 	
 	public void setUp() throws Exception {

@@ -257,14 +257,14 @@ public class CQCUtilities {
 						if (rightExistential.isInverse()) {
 							if (newTerm2 instanceof AnonymousVariable)
 								continue;
-							newTerm1 = fac.getNondistinguishedVariable();
+							newTerm1 = fac.getVariableNondistinguished();
 							newTerm2 = oldTerm1;
 							newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 						} else {
 							if (newTerm1 instanceof AnonymousVariable)
 								continue;
 							newTerm1 = oldTerm1;
-							newTerm2 = fac.getNondistinguishedVariable();
+							newTerm2 = fac.getVariableNondistinguished();
 							newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 						}
 					} else if (right instanceof DataType) {
@@ -278,7 +278,7 @@ public class CQCUtilities {
 							if (newTerm1 instanceof AnonymousVariable)
 								continue;
 							newTerm1 = oldTerm1;
-							newTerm2 = fac.getNondistinguishedVariable();
+							newTerm2 = fac.getVariableNondistinguished();
 							newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 						}
 					}
@@ -384,17 +384,17 @@ public class CQCUtilities {
 				if (term instanceof Variable) {
 					substitution = currentMap.get(term);
 					if (substitution == null) {
-						ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((Variable) term).getName() + constantcounter);
+						ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((Variable) term).getName() + constantcounter);
 						constantcounter += 1;
 						currentMap.put((Variable) term, newconstant);
 						substitution = newconstant;
 					}
 				} else if (term instanceof ValueConstant) {
-					ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((ValueConstant) term).getValue() + constantcounter);
+					ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((ValueConstant) term).getValue() + constantcounter);
 					constantcounter += 1;
 					substitution = newconstant;
 				} else if (term instanceof URIConstant) {
-					ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((URIConstant) term).getURI() + constantcounter);
+					ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((URIConstant) term).getURI() + constantcounter);
 					constantcounter += 1;
 					substitution = newconstant;
 				}
@@ -409,7 +409,7 @@ public class CQCUtilities {
 						if (fterm instanceof VariableImpl) {
 							substitution = currentMap.get(fterm);
 							if (substitution == null) {
-								ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((VariableImpl) fterm).getName()
+								ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((VariableImpl) fterm).getName()
 										+ constantcounter);
 								constantcounter += 1;
 								currentMap.put((Variable) fterm, newconstant);
@@ -417,7 +417,7 @@ public class CQCUtilities {
 
 							}
 						} else {
-							ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((ValueConstant) fterm).getValue()
+							ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((ValueConstant) fterm).getValue()
 									+ constantcounter);
 							constantcounter += 1;
 							substitution = newconstant;

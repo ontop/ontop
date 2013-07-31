@@ -56,13 +56,13 @@ public class UnificationTest2 extends TestCase {
 
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
-		terms1.add(factory.getNondistinguishedVariable());
+		terms1.add(factory.getVariableNondistinguished());
 		List<Term> terms2 = new Vector<Term>();
-		terms2.add(factory.getNondistinguishedVariable());
+		terms2.add(factory.getVariableNondistinguished());
 		terms2.add(t2);
 		List<Term> terms3 = new Vector<Term>();
 		terms3.add(t3);
-		terms3.add(factory.getNondistinguishedVariable());
+		terms3.add(factory.getVariableNondistinguished());
 		List<Term> terms4 = new Vector<Term>();
 		terms4.add(t3.clone());
 		terms4.add(t2.clone());

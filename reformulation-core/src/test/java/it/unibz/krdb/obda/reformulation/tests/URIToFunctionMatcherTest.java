@@ -48,7 +48,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 	
 	public void testMatchURI() {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		Function matchedTerm = matcher.getPossibleFunctionalTermMatch(fac.getURIConstant("http://www.obda.com/onto#individual-mariano-rodriguez"));
+		Function matchedTerm = matcher.getPossibleFunctionalTermMatch(fac.getConstantURI("http://www.obda.com/onto#individual-mariano-rodriguez"));
 		assertTrue(matchedTerm != null);
 		assertTrue(matchedTerm.toString(), matchedTerm.getFunctionSymbol().toString().equals("http://www.obda.com/onto#individual"));
 		assertTrue(matchedTerm.toString(), matchedTerm.getTerms().get(0) instanceof ValueConstant);

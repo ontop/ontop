@@ -73,7 +73,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 		if (currentPredicate.getArity() == 1) {
-			URIConstant c = obdafac.getURIConstant(currSubject);
+			URIConstant c = obdafac.getConstantURI(currSubject);
 			if (replacementDescription == null) {
 				assertion = ofac.createClassAssertion(currentPredicate, c);
 			} else {
@@ -81,8 +81,8 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 				assertion = ofac.createClassAssertion(replacementc.getPredicate(), c);
 			}
 		} else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
-			URIConstant c1 = obdafac.getURIConstant(currSubject);
-			URIConstant c2 = obdafac.getURIConstant(currObject);
+			URIConstant c1 = obdafac.getConstantURI(currSubject);
+			URIConstant c2 = obdafac.getConstantURI(currObject);
 			if (replacementDescription == null) {
 				assertion = ofac.createObjectPropertyAssertion(currentPredicate, c1, c2);
 			} else {
@@ -94,8 +94,8 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 				}
 			}
 		} else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
-			URIConstant c1 = obdafac.getURIConstant(currSubject);
-			ValueConstant c2 = obdafac.getValueConstant(currObject);
+			URIConstant c1 = obdafac.getConstantURI(currSubject);
+			ValueConstant c2 = obdafac.getConstantLiteral(currObject);
 			if (replacementDescription == null) {
 				assertion = ofac.createDataPropertyAssertion(currentPredicate, c1, c2);
 			} else {

@@ -882,7 +882,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				if (originalLangTag instanceof Constant) {
 					ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-					normalizedLangTag = fac.getValueConstant(originalLangConstant.getValue().toLowerCase(), originalLangConstant.getType());
+					normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(), originalLangConstant.getType());
 				} else {
 					normalizedLangTag = originalLangTag;
 				}
@@ -1161,11 +1161,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				terms.add(currenthead.getTerm(0));
 				Function rdfTypeConstant = fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getURIConstant(OBDAVocabulary.RDF_TYPE));
+						fac.getConstantURI(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
+				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantURI(classname)));
 				newhead = fac.getFunction(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
@@ -1176,7 +1176,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
+				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantURI(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getFunction(pred, terms);

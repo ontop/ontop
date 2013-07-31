@@ -337,12 +337,12 @@ public class R2RMLParser {
 			// System.out.println(parsedString);
 			//uriconstant
 			if(parsedString.startsWith("http://"))
-				objectAtom = fac.getURIConstant(parsedString);
+				objectAtom = fac.getConstantURI(parsedString);
 			else
 			{
 				//valueconstant
 				Predicate pred = fac.getUriTemplatePredicate(1);
-				Term newlit = fac.getValueConstant(trim(parsedString));
+				Term newlit = fac.getConstantLiteral(trim(parsedString));
 				objectAtom = fac.getFunction(pred, newlit);
 			}
 				
@@ -402,7 +402,7 @@ public class R2RMLParser {
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
-				Term lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
+				Term lang = fac.getConstantLiteral(trim(parsedString.toLowerCase()));
 				//create literal(object, lang) atom
 				Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
 				Term langAtom = fac.getFunction(literal, objectAtom, lang);
@@ -431,7 +431,7 @@ public class R2RMLParser {
 			return getURIFunction(objectString);
 		else
 		{	//literal
-			Constant constt = fac.getValueConstant(objectString);
+			Constant constt = fac.getConstantLiteral(objectString);
 			Predicate pred = fac.getDataTypePredicateLiteral();
 			return fac.getFunction(pred, constt);
 		
@@ -452,7 +452,7 @@ public class R2RMLParser {
 
 			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
 					//fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI(type));
-			Term constant = fac.getValueConstant(consts);
+			Term constant = fac.getConstantLiteral(consts);
 			typedObject = fac.getFunction(predicate, constant);
 		}
 		return typedObject;
@@ -555,22 +555,22 @@ public class R2RMLParser {
 		switch (type) {
 		//constant uri
 		case 0:
-			uriTemplate = fac.getURIConstant(string);
+			uriTemplate = fac.getConstantURI(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// URI or IRI
 		case 1:
-			uriTemplate = fac.getValueConstant(string);
+			uriTemplate = fac.getConstantLiteral(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// BNODE
 		case 2:
-			uriTemplate = fac.getBNodeConstant(string);
+			uriTemplate = fac.getConstantBNode(string);
 			pred = fac.getBNodeTemplatePredicate(terms.size());
 			break;
 		// LITERAL
 		case 3:
-			uriTemplate = fac.getValueConstant(string);
+			uriTemplate = fac.getConstantLiteral(string);
 			pred = OBDAVocabulary.RDFS_LITERAL_LANG;//lang?
 			terms.add(OBDAVocabulary.NULL);
 			break;

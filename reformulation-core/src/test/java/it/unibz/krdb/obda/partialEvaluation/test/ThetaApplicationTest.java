@@ -52,8 +52,8 @@ public class ThetaApplicationTest extends TestCase {
 		Predicate fs = predFactory.getPredicate("p", vars.size());
 		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunction(fs, vars);
 
-		Term t5 = termFactory.getValueConstant("con");
-		Term t51 = termFactory.getValueConstant("st");
+		Term t5 = termFactory.getConstantLiteral("con");
+		Term t51 = termFactory.getConstantLiteral("st");
 		List<Term> vars5 = new Vector<Term>();
 		vars5.add(t5);
 		vars5.add(t51);
@@ -74,7 +74,7 @@ public class ThetaApplicationTest extends TestCase {
 		Term t7 = termFactory.getVariable("x");
 		Term t6 = termFactory.getVariable("t");
 		Term t8 = termFactory.getVariable("z");
-		Term t9 = termFactory.getValueConstant("elf");
+		Term t9 = termFactory.getConstantLiteral("elf");
 		Term t10 = termFactory.getVariable("x");
 		Term t11 = termFactory.getVariable("y");
 		Term t12 = termFactory.getVariable("p");

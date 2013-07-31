@@ -82,7 +82,7 @@ public class SPARQLQueryUtility {
 		int firstIdx = strquery.indexOf('<');
 		int lastIdx = strquery.indexOf('>');
 		String uri = strquery.substring(firstIdx+1, lastIdx);
-		return OBDADataFactoryImpl.getInstance().getURIConstant(uri);
+		return OBDADataFactoryImpl.getInstance().getConstantURI(uri);
 	}
 
 	public static boolean isURIDescribe(String strquery) {

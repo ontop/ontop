@@ -105,7 +105,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
 		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
-		Term x = fac.getNondistinguishedVariable(); 
+		Term x = fac.getVariableNondistinguished(); 
 		
 		for (BasicClassDescription con : concepts) {
 			log.debug("  BASIC CONCEPT: {}", con);
@@ -134,7 +134,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
 		if (cc.hasNoFreeTerms()) {  
-			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getNondistinguishedVariable())) {
+			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {
 				output.appendRule(fac.getCQIE(headAtom, cache.getExtAtom(a))); 
 			}
 		}

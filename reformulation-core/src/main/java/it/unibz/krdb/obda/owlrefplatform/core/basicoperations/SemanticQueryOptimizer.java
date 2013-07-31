@@ -174,11 +174,11 @@ public class SemanticQueryOptimizer {
 							PropertySomeRestriction left = (PropertySomeRestriction) included;
 							if (!left.isInverse()) {
 								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
-								terms.add(fac.getNondistinguishedVariable());
+								terms.add(fac.getVariableNondistinguished());
 								checkAtom = fac.getFunction(left.getPredicate(), terms);
 							} else {
 								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
-								terms.add(0, fac.getNondistinguishedVariable());
+								terms.add(0, fac.getVariableNondistinguished());
 								checkAtom = fac.getFunction(left.getPredicate(), terms);
 							}
 						} else {
@@ -225,17 +225,17 @@ public class SemanticQueryOptimizer {
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
 									checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms().get(0),
-											fac.getNondistinguishedVariable());
+											fac.getVariableNondistinguished());
 								} else {
-									checkAtom = fac.getFunction(left.getPredicate(), fac.getNondistinguishedVariable(), focusAtom.getTerms()
+									checkAtom = fac.getFunction(left.getPredicate(), fac.getVariableNondistinguished(), focusAtom.getTerms()
 											.get(0));
 								}
 							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
 									checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms().get(1),
-											fac.getNondistinguishedVariable());
+											fac.getVariableNondistinguished());
 								} else {
-									checkAtom = fac.getFunction(left.getPredicate(), fac.getNondistinguishedVariable(), focusAtom.getTerms()
+									checkAtom = fac.getFunction(left.getPredicate(), fac.getVariableNondistinguished(), focusAtom.getTerms()
 											.get(1));
 								}
 							} else {

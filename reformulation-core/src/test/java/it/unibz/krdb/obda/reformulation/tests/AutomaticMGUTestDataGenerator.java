@@ -155,11 +155,11 @@ public class AutomaticMGUTestDataGenerator {
 			Predicate fs = predFac.getPredicate(termstr.substring(0, 1), fuctTerms.size());
 			return termFac.getFunction(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
-			return termFac.getValueConstant(termstr.substring(1, termstr.length() - 1));
+			return termFac.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return termFac.getURIConstant(termstr.substring(1, termstr.length() - 1));
+			return termFac.getConstantURI(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.equals("#")) {
-			return termFac.getNondistinguishedVariable();
+			return termFac.getVariableNondistinguished();
 		} else {
 			return termFac.getVariable(termstr);
 			/* variable */
