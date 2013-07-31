@@ -20,7 +20,6 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -235,19 +234,9 @@ public class R2RMLWriter {
 		while(it.hasNext())
 		{
 			NewLiteral term = it.next();
-			if (term instanceof AtomWrapperImpl)
-			{
-				Function atom = (Function)term;
-				int arity = atom.getTerms().size();
-				if (arity == 1) {
-					// class
-					if (atom.getPredicate().isClass())
-						classes.add(atom.getFunctionSymbol().toString());
-				}
-			}
-			else if (term instanceof FunctionalTermImpl)
+			if (term instanceof Function)
 			{	
-				Function atom = (FunctionalTermImpl) term;
+				Function atom = (Function) term;
 				int arity = atom.getTerms().size();
 				
 				if (arity == 1) {
@@ -351,24 +340,16 @@ public class R2RMLWriter {
 		while(it.hasNext())
 		{
 			NewLiteral term = it.next();
-			if (term instanceof FunctionalTermImpl)
+			if (term instanceof Function)
 			{
-				Function atom = (FunctionalTermImpl) term;
+				Function atom = (Function) term;
 				//not class atoms
 				if (atom.getTerms().size() > 1)
 				{
 					predobj.add("\t\t rr:predicate \t<"+atom.getFunctionSymbol().toString()+"> ;\n"+getObject(atom.getTerm(1)));
 				}
 			}
-			else if (term instanceof AtomWrapperImpl)
-			{
-				Function atom = (Function)term;
-				//not class atoms
-				if (atom.getTerms().size() > 1)
-				{
-					predobj.add("\t\t rr:predicate \t<"+atom.getFunctionSymbol().toString()+"> ;\n"+getObject(atom.getTerm(1)));
-				}
-			}
+			
 		}
 		
 		return predobj;

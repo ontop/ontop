@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
@@ -534,10 +533,6 @@ public class Unifier {
 		} else if (t1 instanceof AlgebraOperatorPredicateImpl) {
 			AlgebraOperatorPredicateImpl ct1 = (AlgebraOperatorPredicateImpl) t1;
 			AlgebraOperatorPredicateImpl ct2 = (AlgebraOperatorPredicateImpl) t2;
-			return ct1.equals(ct2);
-		} else if (t1 instanceof AtomWrapperImpl) {
-			AtomWrapperImpl ct1 = (AtomWrapperImpl) t1;
-			AtomWrapperImpl ct2 = (AtomWrapperImpl) t2;
 			return ct1.equals(ct2);
 		} else {
 			throw new RuntimeException(
