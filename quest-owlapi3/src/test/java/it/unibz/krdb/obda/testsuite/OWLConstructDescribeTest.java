@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.testsuite;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -53,21 +61,21 @@ public class OWLConstructDescribeTest extends TestCase{
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
 
-			String driver = "org.h2.Driver";
-			String url = "jdbc:h2:mem:aboxdumptestx1";
-			String username = "sa";
-			String password = "";
-
-			OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
-			source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-			source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-			source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-			source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-			source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-			source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-
-			obdaModel = fac.getOBDAModel();
-			obdaModel.addSource(source);
+//			String driver = "org.h2.Driver";
+//			String url = "jdbc:h2:mem:aboxdumptestx1";
+//			String username = "sa";
+//			String password = "";
+//
+//			OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+//			source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+//			source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+//			source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+//			source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+//			source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+//			source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+//
+//			obdaModel = fac.getOBDAModel();
+//			obdaModel.addSource(source);
 			
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -80,7 +88,7 @@ public class OWLConstructDescribeTest extends TestCase{
 			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
 			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 			QuestOWLFactory factory = new QuestOWLFactory();
-			factory.setOBDAController(obdaModel);
+//			factory.setOBDAController(obdaModel);
 			factory.setPreferenceHolder(p);
 			//reasoner.setPreferences(preferences);
 			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());

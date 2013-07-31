@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -17,6 +25,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Atom getAtom(Predicate predicate, NewLiteral term1, NewLiteral term2);
 
+	public CQIE getCQIE(Function head, Function... body );
+	
 	public CQIE getCQIE(Function head, List<Function> body);
 
 	public CQIE getCQIE(Function head, Function body);

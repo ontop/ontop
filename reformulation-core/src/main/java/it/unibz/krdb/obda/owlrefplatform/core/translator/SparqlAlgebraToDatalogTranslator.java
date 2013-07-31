@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -343,9 +351,10 @@ public class SparqlAlgebraToDatalogTranslator {
 				atom2VarsList.size());
 		Function rightAtom = ofac.getAtom(rightAtomPred, atom2VarsList);
 
-		/* The join */
-		Predicate joinp = OBDAVocabulary.SPARQL_JOIN;
-		Function joinAtom = ofac.getAtom(joinp, leftAtom, rightAtom);
+		/* The join, this is no longer necessary, we will try to avoid explicit joins
+		as much as poosible, just use comma */
+//		Predicate joinp = OBDAVocabulary.SPARQL_JOIN;
+//		Function joinAtom = ofac.getAtom(joinp, leftAtom, rightAtom);
 
 		/* Preparing the head of the Join rule */
 		// Collections.sort(vars, comparator);
@@ -360,7 +369,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		 * Adding the join to the program
 		 */
 
-		CQIE newrule = ofac.getCQIE(head, joinAtom);
+		CQIE newrule = ofac.getCQIE(head, leftAtom, rightAtom);
 		pr.appendRule(newrule);
 
 		/*
@@ -648,10 +657,10 @@ public class SparqlAlgebraToDatalogTranslator {
 			Function rightAtom = ofac.getAtom(rightAtomPred, atom2VarsList);
 
 			/* The join */
-			Predicate join = OBDAVocabulary.SPARQL_JOIN;
-			Function joinAtom = ofac.getAtom(join, leftAtom, rightAtom);
+//			Predicate join = OBDAVocabulary.SPARQL_JOIN;
+//			Function joinAtom = ofac.getAtom(join, leftAtom, rightAtom);
 
-			CQIE newrule = ofac.getCQIE(head, joinAtom);
+			CQIE newrule = ofac.getCQIE(head, leftAtom, rightAtom);
 			pr.appendRule(newrule);
 
 			List<Variable> newvars = new LinkedList<Variable>();

@@ -1,0 +1,17 @@
+==== Framework ==== 
+
+The -ontop- framework is available under a dual licensing:
+
+ * Free Software Foundation’s GNU AGPL v3.0 
+ * Alternative licenses are also available, please contact the authors for
+   further information. 
+   
+==== Documentation ==== 
+
+All documentation is licensed under the Creative Commons license.
+
+====  Contributing to the ontop project ==== 
+
+Soon we will start accepting code contributions. We are now preparing the
+contribution agreement to enable you to do this and still be able to maintain
+our dual license scheme.

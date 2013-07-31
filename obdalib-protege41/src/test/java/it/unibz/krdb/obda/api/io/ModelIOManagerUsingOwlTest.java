@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.api.io;
 
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
@@ -12,7 +20,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
+import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,22 +47,22 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private ModelIOManager ioManager;
 
-    private TurtleSyntaxParser parser;
+    private TurtleOBDASyntaxParser parser;
 
     private String[][] mappings = {
             { "M1", "select id, fname, lname, age from student",
-                    "<\"&:;P{$id}\"> a :Student; :firstName $fname; :lastName $lname; :age $age^^xsd:int ." },
+                    ":P{id} a :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:int ." },
             { "M2", "select id, title, lecturer, description from course",
-                    "<\"&:;C{$id}\"> a :Course; :title $title; :hasLecturer <\"&:;L{$id}\">; :description $description@en-US ." },
+                    ":C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; :description {description}@en-US ." },
             { "M3", "select sid, cid from enrollment",
-                    "<\"&:;P{$sid}\"> :hasEnrollment <\"&:;C{$cid}\"> ." },
+                    ":P{sid} :hasEnrollment :C{cid} ." },
                     
             { "M4", "select id, nome, cognome, eta from studenti",
-                    "<\"&:;P{$id}\"> a :Student; :firstName $nome; :lastName $cognome; :age $eta^^xsd:int ." },
+                    ":P{id} a :Student ; :firstName {nome} ; :lastName {cognome} ; :age {eta}^^xsd:int ." },
             { "M5", "select id, titolo, professore, descrizione from corso",
-                    "<\"&:;C{$id}\"> a :Course; :title $titolo; :hasLecturer <\"&:;L{$id}\">; :description $decrizione@it ." },
+                    ":C{id} a :Course ; :title {titolo} ; :hasLecturer :L{id} ; :description {decrizione}@it ." },
             { "M6", "select sid, cid from registrare", 
-                    "<\"&:;P{$sid}\"> :hasEnrollment <\"&:;C{$cid}\"> ." }
+                    ":P{sid} :hasEnrollment :C{cid} ." }
     };
 
     @Override
@@ -63,7 +71,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         OBDADataSource datasource = setupSampleDataSource();
 
         // Setting up the CQ parser
-        parser = new TurtleSyntaxParser(prefixManager);
+        parser = new TurtleOBDASyntaxParser(prefixManager);
 
         // Construct the model
         model = dfac.getOBDAModel();
@@ -105,66 +113,14 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         loadFileWithMultipleDataSources();
     }
 
-    public void testLoadWithUndeclaredClass() {
-        resetCurrentModel();
-        try {
-            loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile1.obda");
-        } catch (IOException e) {
-            assertTrue(false);
-        } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(true); // should goes here
-        } catch (InvalidMappingException e) {
-            assertTrue(false);
-        }
-    }
-
-    public void testLoadWithUndeclaredObjectProperty() {
-        resetCurrentModel();
-        try {
-            loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile2.obda");
-        } catch (IOException e) {
-            assertTrue(false);
-        } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(true); // should goes here
-        } catch (InvalidMappingException e) {
-            assertTrue(false);
-        }
-    }
-
-    public void testLoadWithUndeclaredDataProperty() {
-        resetCurrentModel();
-        try {
-            loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile3.obda");
-        } catch (IOException e) {
-            assertTrue(false);
-        } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(true); // should goes here
-        } catch (InvalidMappingException e) {
-            assertTrue(false);
-        }
-    }
-
-    public void testLoadWithAllUndeclared() {
-        resetCurrentModel();
-        try {
-            loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile4.obda");
-        } catch (IOException e) {
-            assertTrue(false);
-        } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(true); // should goes here
-        } catch (InvalidMappingException e) {
-            assertTrue(false);
-        }
-    }
-
     public void testLoadWithBlankMappingId() {
         resetCurrentModel();
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile5.obda");
         } catch (IOException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidMappingException e) {
             // The wrong mapping doesn't get loaded.
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
@@ -176,9 +132,9 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile6.obda");
         } catch (IOException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidMappingException e) {
             // The wrong mapping doesn't get loaded.
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
@@ -190,40 +146,38 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile7.obda");
         } catch (IOException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidMappingException e) {
             // The wrong mapping doesn't get loaded.
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
         }
     }
     
-    public void testLoadWithBadQuery() {
+    public void testLoadWithBadTargetQuery() {
         resetCurrentModel();
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile8.obda");
         } catch (IOException e) {
-            assertTrue(false);
+        	assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidMappingException e) {
-            // The wrong mapping doesn't get loaded.
-            assertTrue(e.getMessage(), (countElement(model.getMappings()) == 1));
+            assertFalse(true);
         }
     }
     
-    public void testLoadWithUndeclaredPredicates() {
+    public void testLoadWithPredicateDeclarations() {
         resetCurrentModel();
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile9.obda");
         } catch (IOException e) {
-            assertTrue(false);
+        	assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidMappingException e) {
-            // The wrong mapping doesn't get loaded.
-            assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
+            assertFalse(true);
         }
     }
     
@@ -232,9 +186,9 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile10.obda");
         } catch (IOException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
-            assertTrue(false);
+            assertFalse(true);
         } catch (InvalidMappingException e) {
             // The wrong mapping doesn't get loaded, i.e., all of them
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 0));
