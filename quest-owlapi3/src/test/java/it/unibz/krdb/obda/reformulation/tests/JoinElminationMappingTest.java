@@ -116,7 +116,6 @@ public class JoinElminationMappingTest extends TestCase {
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
 		reasoner.flush();
 
 		// Now we are ready for querying

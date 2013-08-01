@@ -151,14 +151,18 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
-			long start = System.currentTimeMillis();
-			for (int i = 0; i < 3000; i++) {
-				QuestOWLStatement sto = (QuestOWLStatement)st;
-				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
-			}
-			long end = System.currentTimeMillis();
-			long elapsed = end-start;
-			log.info("Elapsed time: {}", elapsed);
+			
+			/*
+			 * Enable this if you want to test performance, it will run several cycles
+			 */
+//			long start = System.currentTimeMillis();
+//			for (int i = 0; i < 3000; i++) {
+//				QuestOWLStatement sto = (QuestOWLStatement)st;
+//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
+//			}
+//			long end = System.currentTimeMillis();
+//			long elapsed = end-start;
+//			log.info("Elapsed time: {}", elapsed);
 			OWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");

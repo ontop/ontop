@@ -21,7 +21,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OBDAModelRefactorer;
+import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.querymanager.QueryController;
@@ -469,7 +469,7 @@ public class OBDAModelManager implements Disposable {
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
-					OBDAModelRefactorer refactorer = new OBDAModelRefactorer(activeOBDAModel, activeOntology);
+					OBDAModelValidator refactorer = new OBDAModelValidator(activeOBDAModel, activeOntology);
 					refactorer.run(); // adding type information to the mapping predicates.
 				} catch (Exception e) {
 					OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());

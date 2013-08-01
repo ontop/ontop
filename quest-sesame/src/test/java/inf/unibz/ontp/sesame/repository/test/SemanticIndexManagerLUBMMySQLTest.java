@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
+import java.beans.Statement;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
@@ -72,7 +73,8 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 	}
 
-	public void test1Setup() throws Exception {
+	@Override
+	public void setUp() throws Exception {
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
@@ -86,6 +88,27 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 			}
 		}
 	}
+	
+	@Override
+	public void tearDown() {
+		Connection conn = null;
+		try {
+			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			simanager.dropRepository();
+		} catch (Exception e) {
+			
+		} finally {
+			if (conn != null) {
+				try {
+				conn.close();
+				} catch (Exception e) {
+					
+				}
+			} 
+		}
+	}
 
 	public void test2RestoringAndLoading() throws Exception {
 		Connection conn = null;
@@ -94,7 +117,6 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
 			//simanager.restoreRepository();
 			int inserts = simanager.insertData(ontology, 20000, 5000);
-			
 			simanager.updateMetadata();
 			log.debug("Inserts: {}", inserts);
 //			assertEquals(30033, inserts);

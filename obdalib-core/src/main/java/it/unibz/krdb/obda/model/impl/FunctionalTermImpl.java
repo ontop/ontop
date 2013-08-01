@@ -240,7 +240,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingArrayList<Term> innertermlist = (EventGeneratingArrayList<Term>) function.getTerms();
+				EventGeneratingList<Term> innertermlist = (EventGeneratingList<Term>) function.getTerms();
 				innertermlist.removeListener(this);
 			}
 		}
@@ -250,7 +250,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingArrayList<Term> innertermlist = (EventGeneratingArrayList<Term>) function.getTerms();
+				EventGeneratingList<Term> innertermlist = (EventGeneratingList<Term>) function.getTerms();
 				innertermlist.addListener(this);
 			}
 		}

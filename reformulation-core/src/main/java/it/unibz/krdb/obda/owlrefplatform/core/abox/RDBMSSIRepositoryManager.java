@@ -908,6 +908,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_datetime_create);
 		st.addBatch(attribute_table_boolean_create);
 
+		
+		
+		
 		st.executeBatch();
 		st.close();
 	}
@@ -968,25 +971,27 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
-//		Statement st = conn.createStatement();
-//
-//		st.addBatch(drop_idx);
-//		st.addBatch(drop_interval);
-//		st.addBatch(drop_emptyness);
-//
-//		st.addBatch(class_table_drop);
-//		st.addBatch(role_table_drop);
-//
-//		st.addBatch(attribute_table_literal_drop);
-//		st.addBatch(attribute_table_string_drop);
-//		st.addBatch(attribute_table_integer_drop);
-//		st.addBatch(attribute_table_decimal_drop);
-//		st.addBatch(attribute_table_double_drop);
-//		st.addBatch(attribute_table_datetime_drop);
-//		st.addBatch(attribute_table_boolean_drop);
-//
-//		st.executeBatch();
-//		st.close();
+		Statement st = conn.createStatement();
+
+		st.addBatch(drop_idx);
+		st.addBatch(drop_interval);
+		st.addBatch(drop_emptyness);
+
+		st.addBatch(class_table_drop);
+		st.addBatch(role_table_drop);
+
+		st.addBatch(attribute_table_literal_drop);
+		st.addBatch(attribute_table_string_drop);
+		st.addBatch(attribute_table_integer_drop);
+		st.addBatch(attribute_table_decimal_drop);
+		st.addBatch(attribute_table_double_drop);
+		st.addBatch(attribute_table_datetime_drop);
+		st.addBatch(attribute_table_boolean_drop);
+		
+		st.addBatch("DROP TABLE " + uri_id_table);
+
+		st.executeBatch();
+		st.close();
 	}
 
 	@Override

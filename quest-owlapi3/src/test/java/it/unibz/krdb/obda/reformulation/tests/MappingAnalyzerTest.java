@@ -117,11 +117,9 @@ public class MappingAnalyzerTest extends TestCase {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
-
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
 
 		// Get ready for querying
 		reasoner.getStatement();
