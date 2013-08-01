@@ -8,8 +8,8 @@
  */
 package it.unibz.krdb.obda.api.io;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;

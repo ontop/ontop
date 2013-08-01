@@ -8,7 +8,7 @@
  */
 package inf.unibz.ontp.sesame.repository.test;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;

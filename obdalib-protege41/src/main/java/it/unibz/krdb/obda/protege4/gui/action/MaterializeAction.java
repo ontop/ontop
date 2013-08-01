@@ -8,8 +8,8 @@
  */
 package it.unibz.krdb.obda.protege4.gui.action;
 
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 
 import java.awt.Container;
 import java.util.Iterator;

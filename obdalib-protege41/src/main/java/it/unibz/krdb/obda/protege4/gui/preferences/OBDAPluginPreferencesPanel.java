@@ -8,7 +8,7 @@
  */
 package it.unibz.krdb.obda.protege4.gui.preferences;
 
-import it.unibz.krdb.obda.gui.swing.panel.OBDAPreferencesPanel;
+import it.unibz.krdb.obda.protege4.panels.OBDAPreferencesPanel;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.GridBagConstraints;

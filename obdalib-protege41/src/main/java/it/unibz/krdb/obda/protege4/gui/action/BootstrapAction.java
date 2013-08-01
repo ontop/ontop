@@ -8,13 +8,13 @@
  */
 package it.unibz.krdb.obda.protege4.gui.action;
 
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 
 import java.awt.Component;
 import java.awt.Dimension;

@@ -9,10 +9,10 @@
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.exception.Indicator;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.exception.UnsupportedTagException;
-import it.unibz.krdb.obda.gui.swing.exception.Indicator;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;

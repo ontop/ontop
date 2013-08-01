@@ -8,9 +8,9 @@
  */
 package it.unibz.krdb.obda.owlapi3;
 
-import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -18,9 +18,6 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.util.Vector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	

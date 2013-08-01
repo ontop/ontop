@@ -375,6 +375,7 @@ public class JDBCConnectionManager {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;
+				
 		try {
 			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();

@@ -8,15 +8,6 @@
  */
 package it.unibz.krdb.obda.protege4.views;
 
-import it.unibz.krdb.obda.gui.swing.OBDADataQueryAction;
-import it.unibz.krdb.obda.gui.swing.OBDASaveQueryResultToFileAction;
-import it.unibz.krdb.obda.gui.swing.panel.QueryInterfacePanel;
-import it.unibz.krdb.obda.gui.swing.panel.ResultViewTablePanel;
-import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
-import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.gui.swing.utils.TextMessageFrame;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
@@ -29,6 +20,15 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.gui.action.OBDADataQueryAction;
+import it.unibz.krdb.obda.protege4.gui.action.OBDASaveQueryResultToFileAction;
+import it.unibz.krdb.obda.protege4.panels.QueryInterfacePanel;
+import it.unibz.krdb.obda.protege4.panels.ResultViewTablePanel;
+import it.unibz.krdb.obda.protege4.panels.SavedQueriesPanelListener;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
+import it.unibz.krdb.obda.protege4.utils.TextMessageFrame;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

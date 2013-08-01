@@ -8,11 +8,11 @@
  */
 package it.unibz.krdb.obda.protege4.views;
 
-import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanel;
-import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.panels.SavedQueriesPanel;
+import it.unibz.krdb.obda.protege4.panels.SavedQueriesPanelListener;
 
 import java.awt.BorderLayout;
 

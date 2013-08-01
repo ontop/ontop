@@ -19,11 +19,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.panels.DatasourceSelector;
 import it.unibz.krdb.obda.protege4.panels.MappingAssistantPanel;
 
 import org.apache.log4j.Logger;
