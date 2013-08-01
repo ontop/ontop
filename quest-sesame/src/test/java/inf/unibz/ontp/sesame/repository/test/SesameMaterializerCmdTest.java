@@ -89,6 +89,9 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			writer.close();
+		
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelTurtle() throws Exception {
@@ -114,7 +117,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 
 	public void testModelRdfXml() throws Exception {
@@ -140,7 +144,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelOntoN3() throws Exception {
@@ -165,6 +170,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			writer.close();
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelOntoTurtle() throws Exception {
@@ -191,7 +198,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 
 	public void testModelOntoRdfXml() throws Exception {
@@ -218,7 +226,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testOWLApiModel() throws Exception {
@@ -247,6 +256,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			output.close();
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testOWLApiModeOnto() throws Exception {
@@ -272,5 +283,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			output.close();
+		if (out.exists())
+			out.delete();
 	}
 }
