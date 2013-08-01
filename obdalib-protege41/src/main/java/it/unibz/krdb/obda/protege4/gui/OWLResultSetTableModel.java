@@ -6,9 +6,10 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package it.unibz.krdb.obda.owlapi3;
+package it.unibz.krdb.obda.protege4.gui;
 
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
 public class OWLResultSetTableModel implements TableModel {
 
-	private OWLResultSet results;
+	private QuestOWLResultSet results;
 	private int numcols;
 	private int numrows;
 	private int fetchSizeLimit;
@@ -48,7 +49,7 @@ public class OWLResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public OWLResultSetTableModel(OWLResultSet results, PrefixManager prefixman, 
+	public OWLResultSetTableModel(QuestOWLResultSet results, PrefixManager prefixman, 
 			boolean hideUri, boolean fetchAll, int fetchSizeLimit) throws OWLException {
 		this.results = results;
 		this.prefixman = prefixman;

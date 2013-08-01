@@ -8,16 +8,13 @@
  */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
@@ -39,8 +36,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 	QuestOWL reasoner = null;
-	private OWLConnection conn;
-	private OWLStatement st;
+	private QuestOWLConnection conn;
+	private QuestOWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		QuestPreferences pref = new QuestPreferences();
@@ -71,7 +68,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		String prefix = "PREFIX : <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
-		OWLResultSet res = st.executeTuple(query);
+		QuestOWLResultSet res = st.executeTuple(query);
 		int count = 0;
 		int columns = res.getColumCount();
 		while (res.nextRow()) {

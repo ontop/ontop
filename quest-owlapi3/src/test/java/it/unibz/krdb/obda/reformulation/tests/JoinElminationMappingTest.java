@@ -12,11 +12,11 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
@@ -128,7 +128,7 @@ public class JoinElminationMappingTest extends TestCase {
 				"SELECT ?x WHERE {?x :R ?y. ?y a :A}";
 		try {
 			System.out.println("\n\nSQL:\n" + st.getUnfolding(query));
-			OWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeTuple(query);
 			rs.nextRow();
 		} catch (Exception e) {
 			log.debug(e.getMessage(), e);

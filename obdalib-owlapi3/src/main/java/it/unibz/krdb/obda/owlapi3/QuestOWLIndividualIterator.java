@@ -6,10 +6,9 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package it.unibz.krdb.obda.owlrefplatform.owlapi3;
+package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 
 import java.util.Iterator;
 

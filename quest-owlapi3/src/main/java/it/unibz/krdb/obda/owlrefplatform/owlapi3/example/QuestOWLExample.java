@@ -12,13 +12,12 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
@@ -72,8 +71,8 @@ public class QuestOWLExample {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
+		QuestOWLConnection conn = reasoner.getConnection();
+		QuestOWLStatement st = conn.createStatement();
 
 		/*
 		 * Get the book information that is stored in the database
@@ -86,7 +85,7 @@ public class QuestOWLExample {
 				"		 ?z a :Edition; :editionNumber ?edition }";
 
 		try {
-			OWLResultSet rs = st.executeTuple(sparqlQuery);
+			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 			int columnSize = rs.getColumCount();
 			while (rs.nextRow()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
