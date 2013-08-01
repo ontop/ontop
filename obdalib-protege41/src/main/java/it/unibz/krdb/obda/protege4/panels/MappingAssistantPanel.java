@@ -9,11 +9,6 @@
 package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
-import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
-import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
@@ -39,6 +34,11 @@ import it.unibz.krdb.obda.protege4.gui.SQLResultSetTableModel;
 import it.unibz.krdb.obda.protege4.gui.component.AutoSuggestComboBox;
 import it.unibz.krdb.obda.protege4.gui.component.PropertyMappingPanel;
 import it.unibz.krdb.obda.protege4.gui.component.SQLResultTable;
+import it.unibz.krdb.obda.protege4.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;

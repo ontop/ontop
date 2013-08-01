@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.protege4.core;
 
-import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
@@ -24,6 +23,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;

@@ -7,7 +7,7 @@
  */
 package it.unibz.krdb.obda.owlapi3;
 
-import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
+import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;

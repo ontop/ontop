@@ -8,14 +8,14 @@
  */
 package it.unibz.krdb.obda.protege4.views;
 
-import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
-import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
-import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
+import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.TargetQueryValidator;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.panels.DatasourceSelector;
+import it.unibz.krdb.obda.protege4.panels.MappingManagerPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

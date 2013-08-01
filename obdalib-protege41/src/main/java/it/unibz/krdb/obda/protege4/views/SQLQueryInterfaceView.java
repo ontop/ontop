@@ -8,12 +8,12 @@
  */
 package it.unibz.krdb.obda.protege4.views;
 
-import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
-import it.unibz.krdb.obda.gui.swing.panel.SQLQueryPanel;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.panels.DatasourceSelector;
+import it.unibz.krdb.obda.protege4.panels.SQLQueryPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
