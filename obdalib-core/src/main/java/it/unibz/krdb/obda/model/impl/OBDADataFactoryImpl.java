@@ -124,13 +124,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public Function getStringVariable(String name) {
-		Function funvar =   getFunctionalTerm(getDataTypePredicateString(), getVariable(name));
+		Function funvar =   getFunction(getDataTypePredicateString(), getVariable(name));
 		return funvar;
 	}
 
 	@Override
 	public Function getIntegerVariable(String name) {
-		Function funvar =  getFunctionalTerm(getDataTypePredicateInteger(), getVariable(name));
+		Function funvar =  getFunction(getDataTypePredicateInteger(), getVariable(name));
 		return  funvar;
 	}
 

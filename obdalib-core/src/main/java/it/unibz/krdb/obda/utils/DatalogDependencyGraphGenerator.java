@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 
 import java.lang.reflect.Array;
@@ -233,17 +233,17 @@ public class DatalogDependencyGraphGenerator {
 	private void generatePredicateDependency_traverseBodyAtom(
 			List<Predicate> dependentList, Function bodyAtom) {
 
-		Queue<NewLiteral> queueInAtom = new LinkedList<NewLiteral>();
+		Queue<Term> queueInAtom = new LinkedList<Term>();
 
 		queueInAtom.add(bodyAtom);
 		while (!queueInAtom.isEmpty()) {
-			NewLiteral queueHead = queueInAtom.poll();
+			Term queueHead = queueInAtom.poll();
 			if (queueHead instanceof Function) {
 				Function funcRoot = (Function) queueHead;
 				
 				if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
 						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
-					for (NewLiteral term : funcRoot.getTerms()) {
+					for (Term term : funcRoot.getTerms()) {
 						queueInAtom.add(term);
 					}
 				}  else if (funcRoot.isDataFunction()) {

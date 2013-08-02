@@ -1,47 +1,27 @@
 package it.unibz.krdb.obda.unfolding;
 
-import it.unibz.krdb.obda.io.QueryIOManager;
-import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
-import java.io.File;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.mysql.jdbc.Statement;
 
@@ -131,20 +111,20 @@ public class LeftJoinAwareSQLGeneratorTests extends TestCase {
 		Function intvary = fac.getIntegerVariable("y");
 		Function intvarz = fac.getIntegerVariable("z");
 		
-		List<NewLiteral> intterms = new LinkedList<NewLiteral>();
+		List<Term> intterms = new LinkedList<Term>();
 		intterms.add(intvarx);
 		intterms.add(intvary);
 		intterms.add(intvarz);
 
 
 		/**
-		 * ANS Atoms 
+		 * ANS Functions 
 		 */
-		Atom ans1Atom = fac.getAtom(fac.getPredicate("ans1", 1),
+		Function ans1Function = fac.getFunction(fac.getPredicate("ans1", 1),
 				intvarx);
 
-		Atom ans2Atom = fac.getAtom(fac.getPredicate("ans2", 2), intterms);
-		Atom ans3Atom = fac.getAtom(fac.getPredicate("ans3", 2),	intvarx, intvarz);
+		Function ans2Function = fac.getFunction(fac.getPredicate("ans2", 2), intterms);
+		Function ans3Function = fac.getFunction(fac.getPredicate("ans3", 2),	intvarx, intvarz);
 		
 		
 	
@@ -157,23 +137,23 @@ public class LeftJoinAwareSQLGeneratorTests extends TestCase {
 		Variable vary = fac.getVariable("y");
 		Variable varz = fac.getVariable("z");
 		
-		List<NewLiteral> terms = new LinkedList<NewLiteral>();
+		List<Term> terms = new LinkedList<Term>();
 		terms.add(varx);
 		terms.add(vary);
 		terms.add(varz);
 		
-		Atom t1 = fac.getAtom(fac.getPredicate("T1", 2),varx , varz);
-		Atom t2 = fac.getAtom(fac.getPredicate("T2", 2), varx,varz);
-		Atom t3 = fac.getAtom(fac.getPredicate("T3", 2),varx,vary);
-		Atom t4 = fac.getAtom(fac.getPredicate("T4", 3), terms);
-		Atom t5 = fac.getAtom(fac.getPredicate("T5", 3), terms);
-		Atom t6 = fac.getAtom(fac.getPredicate("T6", 3), terms);
+		Function t1 = fac.getFunction(fac.getPredicate("T1", 2),varx , varz);
+		Function t2 = fac.getFunction(fac.getPredicate("T2", 2), varx,varz);
+		Function t3 = fac.getFunction(fac.getPredicate("T3", 2),varx,vary);
+		Function t4 = fac.getFunction(fac.getPredicate("T4", 3), terms);
+		Function t5 = fac.getFunction(fac.getPredicate("T5", 3), terms);
+		Function t6 = fac.getFunction(fac.getPredicate("T6", 3), terms);
 		
 
 		
-		Atom lj1 = fac.getAtom(fac.getLeftJoinPredicate(), t6, ans2Atom);
-		Atom lj2 = fac.getAtom(fac.getLeftJoinPredicate(), t3, ans3Atom);
-		Atom jn = fac.getAtom(fac.getJoinPredicate(), t4, lj2);
+		Function lj1 = fac.getFunction(fac.getLeftJoinPredicate(), t6, ans2Function);
+		Function lj2 = fac.getFunction(fac.getLeftJoinPredicate(), t3, ans3Function);
+		Function jn = fac.getFunction(fac.getJoinPredicate(), t4, lj2);
 
 		//ans1(x, y)  :- LJ(T6(x,y,z), ans2(x,y,z))
 		//ans2(x,y,z) :- T5(x,y,z)
@@ -181,11 +161,11 @@ public class LeftJoinAwareSQLGeneratorTests extends TestCase {
 		//ans3(x,z)   :- T1(x,z)
 		//ans3(x,z)   :- T2(x,z)
 
-		CQIE rule1 = fac.getCQIE(ans1Atom, lj1);
-		CQIE rule2 = fac.getCQIE(ans2Atom, t5);
-		CQIE rule3 = fac.getCQIE(ans2Atom, jn);
-		CQIE rule4 = fac.getCQIE(ans3Atom, t1);
-		CQIE rule5 = fac.getCQIE(ans3Atom, t2);
+		CQIE rule1 = fac.getCQIE(ans1Function, lj1);
+		CQIE rule2 = fac.getCQIE(ans2Function, t5);
+		CQIE rule3 = fac.getCQIE(ans2Function, jn);
+		CQIE rule4 = fac.getCQIE(ans3Function, t1);
+		CQIE rule5 = fac.getCQIE(ans3Function, t2);
 		
 		program.appendRule(rule1);
 		program.appendRule(rule2);

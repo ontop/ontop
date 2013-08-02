@@ -16,20 +16,17 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -53,9 +50,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -450,22 +444,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private void getVariablesFromAtom(
 			Function atom, List<String> varContainer) {
 
-		Queue<NewLiteral> queueInAtom = new LinkedList<NewLiteral>();
+		Queue<Term> queueInAtom = new LinkedList<Term>();
 
 		queueInAtom.add(atom);
 		while (!queueInAtom.isEmpty()) {
-			NewLiteral queueHead = queueInAtom.poll();
+			Term queueHead = queueInAtom.poll();
 			
 			if (queueHead instanceof Function) {
 				Function funcRoot = (Function) queueHead;
 				
 				if ( funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction() || funcRoot.isDataFunction()) {
-					for (NewLiteral term : funcRoot.getTerms()) {
+					for (Term term : funcRoot.getTerms()) {
 						queueInAtom.add(term);
 					}
 				}
 			} else 	if (queueHead instanceof Variable) {
-				NewLiteral var =  queueHead.clone();
+				Term var =  queueHead.clone();
 				varContainer.add(var.toString());
 			}
 			
