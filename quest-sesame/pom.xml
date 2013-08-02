@@ -55,7 +55,10 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
-
+	<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
+		</dependency>
 		<!-- These will download some of the sources -->
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>

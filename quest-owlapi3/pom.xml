@@ -36,7 +36,11 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi</artifactId>
+			<artifactId>owlapi-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>

@@ -252,8 +252,13 @@
 		<!--  OWL API -->
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.4.3</version>
+			<artifactId>owlapi-api</artifactId>
+			<version>3.4.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
+			<version>3.4.5</version>
 		</dependency>
 		
 			<!-- Sesame API-->
