@@ -85,7 +85,7 @@ public class R2RMLWriter {
 			if (mapping.getId().contains("join"))
 				getJoinMapping(mapping);
 			else{
-			out.write("<"+mapping.getId()+">\n\t a rr:TriplesMap;\n");
+				out.write("<"+mapping.getId().replaceAll(" ", "_")+">\n\t a rr:TriplesMap;\n");
 			
 			//write sql table
 			out.write("\trr:logicalTable "+getSQL(mapping.getSourceQuery().toString()));

@@ -30,7 +30,9 @@ import java.util.Set;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
+import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
 public class R2RMLManager {
@@ -48,7 +50,7 @@ public class R2RMLManager {
 	public R2RMLManager(File file) {
 		try {
 			r2rmlParser = new R2RMLParser();
-			RDFParser parser = new org.openrdf.rio.turtle.TurtleParser();
+			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
 			URL documentUrl = new URL("file://" + file);
 			myGraph = new org.openrdf.model.impl.GraphImpl();

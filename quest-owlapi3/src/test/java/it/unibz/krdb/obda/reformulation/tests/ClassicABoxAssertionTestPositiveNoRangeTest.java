@@ -103,7 +103,11 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsBoolean() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :uboolean ?y}";
 		int count = executeQuery(query);
-		assertEquals(4, count);
+		// asserting 0 and false will result in only one axiom 
+		// same for 1 and true
+		// the result is a set of axioms
+		// hence we expect only 2
+		assertEquals(2, count);
 	}
 
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
@@ -121,13 +125,15 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsDouble() throws OWLException{
 		String query = "SELECT ?y WHERE {?x :udouble ?y}";
 		int count = executeQuery(query);
-		assertEquals(7, count);
+		// values 0 and -0 produce equivalent axioms
+		assertEquals(6, count);
 	}
 
 	public void testDataPropertyAssertionsFloat() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :ufloat ?y}";
 		int count = executeQuery(query);
-		assertEquals(7, count);
+		// values 0 and -0 produce equivalent axioms
+		assertEquals(6, count);
 	}
 
 	public void testDataPropertyAssertionsInt() throws OWLException{

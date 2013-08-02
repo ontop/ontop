@@ -34,9 +34,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.BasicParserSettings;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -163,9 +165,14 @@ public class QuestOWLStatement {
 				rdfParser = Rio.createParser(RDFFormat.TURTLE);
 			}
 
-			rdfParser.setVerifyData(true);
-			rdfParser.setStopAtFirstError(true);
-			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
+			ParserConfig config = rdfParser.getParserConfig();
+			// To emulate DatatypeHandling.IGNORE 
+			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+//
+//			rdfParser.setVerifyData(true);
+//			rdfParser.setStopAtFirstError(true);
 
 			boolean autoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
