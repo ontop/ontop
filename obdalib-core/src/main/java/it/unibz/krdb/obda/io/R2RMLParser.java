@@ -1,9 +1,17 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -205,14 +213,14 @@ public class R2RMLParser {
 		return predobjs;
 	}
 	
-	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj)
+	public Term getSubjectAtom(Graph myGraph, Resource subj)
 			throws Exception {
 		return getSubjectAtom(myGraph, subj, "");
 	}
 	
-	public NewLiteral getSubjectAtom(Graph myGraph, Resource subj, String joinCond)
+	public Term getSubjectAtom(Graph myGraph, Resource subj, String joinCond)
 			throws Exception {
-		NewLiteral subjectAtom = null;
+		Term subjectAtom = null;
 
 		// process SUBJECT
 		Set<Value> objects = GraphUtil.getObjects(myGraph, subj, subjectMap);
@@ -312,14 +320,14 @@ public class R2RMLParser {
 		return bodyPredicates;
 	}
 	
-	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt)
+	public Term getObjectAtom(Graph myGraph, Resource objectt)
 			throws Exception {
 		return getObjectAtom(myGraph, objectt, "");
 	}
 	
-	public NewLiteral getObjectAtom(Graph myGraph, Resource objectt, String joinCond)
+	public Term getObjectAtom(Graph myGraph, Resource objectt, String joinCond)
 			throws Exception {
-		NewLiteral objectAtom = null;
+		Term objectAtom = null;
 
 		// process OBJECT
 		// look for the object
@@ -329,13 +337,13 @@ public class R2RMLParser {
 			// System.out.println(parsedString);
 			//uriconstant
 			if(parsedString.startsWith("http://"))
-				objectAtom = fac.getURIConstant(parsedString);
+				objectAtom = fac.getConstantURI(parsedString);
 			else
 			{
 				//valueconstant
 				Predicate pred = fac.getUriTemplatePredicate(1);
-				NewLiteral newlit = fac.getValueConstant(trim(parsedString));
-				objectAtom = fac.getFunctionalTerm(pred, newlit);
+				Term newlit = fac.getConstantLiteral(trim(parsedString));
+				objectAtom = fac.getFunction(pred, newlit);
 			}
 				
 			
@@ -394,10 +402,10 @@ public class R2RMLParser {
 			if (newiterator.hasNext()) {
 				parsedString = newiterator.next().getObject().toString();
 				// System.out.println(parsedString);
-				NewLiteral lang = fac.getValueConstant(trim(parsedString.toLowerCase()));
+				Term lang = fac.getConstantLiteral(trim(parsedString.toLowerCase()));
 				//create literal(object, lang) atom
 				Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
-				NewLiteral langAtom = fac.getFunctionalTerm(literal, objectAtom, lang);
+				Term langAtom = fac.getFunction(literal, objectAtom, lang);
 				objectAtom = langAtom;
 			}
 			
@@ -409,7 +417,7 @@ public class R2RMLParser {
 				
 				//create datatype(object) atom
 				Predicate dtype =  new DataTypePredicateImpl(parsedString, COL_TYPE.OBJECT);
-				NewLiteral dtAtom = fac.getFunctionalTerm(dtype, objectAtom);
+				Term dtAtom = fac.getFunction(dtype, objectAtom);
 				objectAtom = dtAtom;
 			}
 		}
@@ -418,21 +426,21 @@ public class R2RMLParser {
 	}
 	
 	
-	private NewLiteral getConstantObject(String objectString) {
+	private Term getConstantObject(String objectString) {
 		if (objectString.startsWith("http:"))
 			return getURIFunction(objectString);
 		else
 		{	//literal
-			Constant constt = fac.getValueConstant(objectString);
+			Constant constt = fac.getConstantLiteral(objectString);
 			Predicate pred = fac.getDataTypePredicateLiteral();
-			return fac.getFunctionalTerm(pred, constt);
+			return fac.getFunction(pred, constt);
 		
 		}
 	}
 
-	private NewLiteral getExplicitTypedObject(String string) {
+	private Term getExplicitTypedObject(String string) {
 		
-		NewLiteral typedObject = null;
+		Term typedObject = null;
 		String[] strings = string.split("<");
 		if (strings.length > 1) {
 			String consts = strings[0];
@@ -444,8 +452,8 @@ public class R2RMLParser {
 
 			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
 					//fac.getDataPropertyPredicate(OBDADataFactoryImpl.getIRI(type));
-			NewLiteral constant = fac.getValueConstant(consts);
-			typedObject = fac.getFunctionalTerm(predicate, constant);
+			Term constant = fac.getConstantLiteral(consts);
+			typedObject = fac.getFunction(predicate, constant);
 		}
 		return typedObject;
 	}
@@ -507,7 +515,7 @@ public class R2RMLParser {
 	
 	public Function getTypedFunction(String parsedString, int type, String joinCond) {
 
-		List<NewLiteral> terms = new ArrayList<NewLiteral>();
+		List<Term> terms = new ArrayList<Term>();
 		String string = (parsedString);
 		if (!string.contains("{"))
 			if (!string.startsWith("http://")) 
@@ -542,27 +550,27 @@ public class R2RMLParser {
 		string = string.replace("]", "}");
 	
 
-		NewLiteral uriTemplate = null;
+		Term uriTemplate = null;
 		Predicate pred = null;
 		switch (type) {
 		//constant uri
 		case 0:
-			uriTemplate = fac.getURIConstant(string);
+			uriTemplate = fac.getConstantURI(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// URI or IRI
 		case 1:
-			uriTemplate = fac.getValueConstant(string);
+			uriTemplate = fac.getConstantLiteral(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// BNODE
 		case 2:
-			uriTemplate = fac.getBNodeConstant(string);
+			uriTemplate = fac.getConstantBNode(string);
 			pred = fac.getBNodeTemplatePredicate(terms.size());
 			break;
 		// LITERAL
 		case 3:
-			uriTemplate = fac.getValueConstant(string);
+			uriTemplate = fac.getConstantLiteral(string);
 			pred = OBDAVocabulary.RDFS_LITERAL_LANG;//lang?
 			terms.add(OBDAVocabulary.NULL);
 			break;
@@ -570,7 +578,7 @@ public class R2RMLParser {
 
 		// the URI template is always on the first position in the term list
 		terms.add(0, uriTemplate);
-		return fac.getFunctionalTerm(pred, terms);
+		return fac.getFunction(pred, terms);
 
 	}
 

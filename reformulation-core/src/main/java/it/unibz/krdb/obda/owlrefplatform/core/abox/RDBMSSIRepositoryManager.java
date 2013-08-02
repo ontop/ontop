@@ -1,10 +1,18 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -900,6 +908,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_datetime_create);
 		st.addBatch(attribute_table_boolean_create);
 
+		
+		
+		
 		st.executeBatch();
 		st.close();
 	}
@@ -960,25 +971,27 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
-//		Statement st = conn.createStatement();
-//
-//		st.addBatch(drop_idx);
-//		st.addBatch(drop_interval);
-//		st.addBatch(drop_emptyness);
-//
-//		st.addBatch(class_table_drop);
-//		st.addBatch(role_table_drop);
-//
-//		st.addBatch(attribute_table_literal_drop);
-//		st.addBatch(attribute_table_string_drop);
-//		st.addBatch(attribute_table_integer_drop);
-//		st.addBatch(attribute_table_decimal_drop);
-//		st.addBatch(attribute_table_double_drop);
-//		st.addBatch(attribute_table_datetime_drop);
-//		st.addBatch(attribute_table_boolean_drop);
-//
-//		st.executeBatch();
-//		st.close();
+		Statement st = conn.createStatement();
+
+		st.addBatch(drop_idx);
+		st.addBatch(drop_interval);
+		st.addBatch(drop_emptyness);
+
+		st.addBatch(class_table_drop);
+		st.addBatch(role_table_drop);
+
+		st.addBatch(attribute_table_literal_drop);
+		st.addBatch(attribute_table_string_drop);
+		st.addBatch(attribute_table_integer_drop);
+		st.addBatch(attribute_table_decimal_drop);
+		st.addBatch(attribute_table_double_drop);
+		st.addBatch(attribute_table_datetime_drop);
+		st.addBatch(attribute_table_boolean_drop);
+		
+		st.addBatch("DROP TABLE " + uri_id_table);
+
+		st.executeBatch();
+		st.close();
 	}
 
 	@Override
@@ -2201,10 +2214,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Mapping head
 
-			Function head = dfac.getAtom(dfac.getPredicate("m", 1), dfac.getVariable("X"));
-			Function body1 = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
+			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
+			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
-			Function body2 = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
+			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 
 			/*
 			 * This target query is shared by all mappings for this class
@@ -2387,8 +2400,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 		// Initialize the predicate and term objects.
 		Predicate headPredicate, bodyPredicate = null;
-		List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
-		List<NewLiteral> bodyTerms = new ArrayList<NewLiteral>();
+		List<Term> headTerms = new ArrayList<Term>();
+		List<Term> bodyTerms = new ArrayList<Term>();
 
 		List<Function> bodyAtoms = new LinkedList<Function>();
 
@@ -2401,11 +2414,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) {
 
-			subjectTerm = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X"));
 
 		} else if (type1 == COL_TYPE.BNODE) {
 
-			subjectTerm = dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X"));
 
 		} else {
 			throw new RuntimeException("Unsupported object type: " + type1);
@@ -2415,52 +2428,52 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function objectTerm;
 		if (type2 == COL_TYPE.BNODE) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.OBJECT) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.LITERAL) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.LITERAL_LANG) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
 
 		} else if (type2 == COL_TYPE.BOOLEAN) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateBoolean(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateBoolean(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.DATETIME) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateDateTime(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDateTime(), dfac.getVariable("Y"));
 			bodyTerms.add(objectTerm);
 
 		} else if (type2 == COL_TYPE.DECIMAL) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateDecimal(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDecimal(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.DOUBLE) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateDouble(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDouble(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.INTEGER) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateInteger(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateInteger(), dfac.getVariable("Y"));
 
 		} else if (type2 == COL_TYPE.STRING) {
 
-			objectTerm = dfac.getFunctionalTerm(dfac.getDataTypePredicateString(), dfac.getVariable("Y"));
+			objectTerm = dfac.getFunction(dfac.getDataTypePredicateString(), dfac.getVariable("Y"));
 
 		} else {
 			throw new RuntimeException("Unsuported type: " + type2);
 		}
 		bodyTerms.add(objectTerm);
 
-		Function head = dfac.getAtom(headPredicate, headTerms);
-		Function body = dfac.getAtom(bodyPredicate, bodyTerms);
+		Function head = dfac.getFunction(headPredicate, headTerms);
+		Function body = dfac.getFunction(bodyPredicate, bodyTerms);
 		bodyAtoms.add(0, body);
 		return dfac.getCQIE(head, bodyAtoms);
 	}
@@ -3792,7 +3805,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		hash = f.getPredicate().hashCode() * (31 ^ f.getArity());
 		for (int i = 0; i < f.getArity(); i++) {
-			NewLiteral term = f.getTerm(i);
+			Term term = f.getTerm(i);
 			int termhash = getHash((Function) term);
 			hash += termhash * (31 ^ (f.getArity() - (i + 1)));
 		}

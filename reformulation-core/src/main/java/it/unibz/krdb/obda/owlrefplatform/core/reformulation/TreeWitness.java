@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import java.util.Collection;
@@ -6,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
 
@@ -65,7 +73,7 @@ public class TreeWitness {
 	 * 
 	 * @return set of roots of the tree witness
 	 */
-	public Set<NewLiteral> getRoots() {
+	public Set<Term> getRoots() {
 		return terms.roots;
 	}
 	
@@ -84,7 +92,7 @@ public class TreeWitness {
 	 * @return the domain (set of NewLiterals) of the tree witness
 	 */
 	
-	public Set<NewLiteral> getDomain() {
+	public Set<Term> getDomain() {
 		return terms.domain;
 	}
 	
@@ -141,7 +149,7 @@ public class TreeWitness {
 	 */
 	
 	public static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {
-		Set<NewLiteral> commonTerms = new HashSet<NewLiteral>(tw1.getDomain());
+		Set<Term> commonTerms = new HashSet<Term>(tw1.getDomain());
 		commonTerms.retainAll(tw2.getDomain());
 		if (!commonTerms.isEmpty()) {
 			if (!tw1.getRoots().containsAll(commonTerms) || !tw2.getRoots().containsAll(commonTerms))
@@ -165,19 +173,19 @@ public class TreeWitness {
 	 */
 	
 	public static class TermCover {
-		private final Set<NewLiteral> domain; // terms that are covered by the tree witness
-		private final Set<NewLiteral> roots;   // terms that are mapped onto the root of the tree witness
+		private final Set<Term> domain; // terms that are covered by the tree witness
+		private final Set<Term> roots;   // terms that are mapped onto the root of the tree witness
 		
-		public TermCover(Set<NewLiteral> domain, Set<NewLiteral> roots) {
+		public TermCover(Set<Term> domain, Set<Term> roots) {
 			this.domain = domain;
 			this.roots = roots;
 		}
 		
-		public Set<NewLiteral> getDomain() {
+		public Set<Term> getDomain() {
 			return domain;
 		}
 		
-		public Set<NewLiteral> getRoots() {
+		public Set<Term> getRoots() {
 			return roots;
 		}
 		

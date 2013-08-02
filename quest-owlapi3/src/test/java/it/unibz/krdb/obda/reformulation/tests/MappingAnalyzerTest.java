@@ -1,7 +1,15 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -109,11 +117,9 @@ public class MappingAnalyzerTest extends TestCase {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
-
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
 
 		// Get ready for querying
 		reasoner.getStatement();

@@ -41,9 +41,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.2.3-r1824</version>
-			<classifier>jar</classifier>
+			<artifactId>owlapi-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>postgresql</groupId>
@@ -80,16 +78,26 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-api</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sparql-compliance</artifactId>
-            <version>2.6.9</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sparql-testsuite</artifactId>
-            <version>2.6.9</version>
         </dependency>      
 	</dependencies>
                           

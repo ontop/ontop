@@ -1,10 +1,17 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
@@ -13,10 +20,8 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AtomWrapperImpl;
 import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
@@ -80,7 +85,7 @@ public class R2RMLWriter {
 			if (mapping.getId().contains("join"))
 				getJoinMapping(mapping);
 			else{
-			out.write("<"+mapping.getId()+">\n\t a rr:TriplesMap;\n");
+				out.write("<"+mapping.getId().replaceAll(" ", "_")+">\n\t a rr:TriplesMap;\n");
 			
 			//write sql table
 			out.write("\trr:logicalTable "+getSQL(mapping.getSourceQuery().toString()));
@@ -164,7 +169,7 @@ public class R2RMLWriter {
 
 	private String getJoinPredicate(OBDAQuery targetQuery) {
 		//there's only one term in the body
-		NewLiteral term = ((CQIE)targetQuery).getBody().get(0);
+		Term term = ((CQIE)targetQuery).getBody().get(0);
 		if (term instanceof FunctionalTermImpl)
 		{
 			Function atom = (FunctionalTermImpl) term;
@@ -228,20 +233,10 @@ public class R2RMLWriter {
 		Iterator<Function> it = body.iterator();
 		while(it.hasNext())
 		{
-			NewLiteral term = it.next();
-			if (term instanceof AtomWrapperImpl)
-			{
-				Atom atom = term.asAtom();
-				int arity = atom.getTerms().size();
-				if (arity == 1) {
-					// class
-					if (atom.getPredicate().isClass())
-						classes.add(atom.getFunctionSymbol().toString());
-				}
-			}
-			else if (term instanceof FunctionalTermImpl)
+			Term term = it.next();
+			if (term instanceof Function)
 			{	
-				Function atom = (FunctionalTermImpl) term;
+				Function atom = (Function) term;
 				int arity = atom.getTerms().size();
 				
 				if (arity == 1) {
@@ -254,7 +249,7 @@ public class R2RMLWriter {
 		}
 		
 			//get first term = subject
-			NewLiteral term = body.get(0).getTerm(0);
+			Term term = body.get(0).getTerm(0);
 			if (term instanceof FunctionalTermImpl)
 			{
 				Function atom = (FunctionalTermImpl) term;
@@ -295,7 +290,7 @@ public class R2RMLWriter {
 		
 		return subject;
 	}
-	private String removeJoinKeyword(NewLiteral atom)
+	private String removeJoinKeyword(Term atom)
 	{
 		String str = atom.toString();
 		if (str.startsWith("CHILD_"))
@@ -344,31 +339,23 @@ public class R2RMLWriter {
 		Iterator<Function> it = body.iterator();
 		while(it.hasNext())
 		{
-			NewLiteral term = it.next();
-			if (term instanceof FunctionalTermImpl)
+			Term term = it.next();
+			if (term instanceof Function)
 			{
-				Function atom = (FunctionalTermImpl) term;
+				Function atom = (Function) term;
 				//not class atoms
 				if (atom.getTerms().size() > 1)
 				{
 					predobj.add("\t\t rr:predicate \t<"+atom.getFunctionSymbol().toString()+"> ;\n"+getObject(atom.getTerm(1)));
 				}
 			}
-			else if (term instanceof AtomWrapperImpl)
-			{
-				Atom atom = term.asAtom();
-				//not class atoms
-				if (atom.getTerms().size() > 1)
-				{
-					predobj.add("\t\t rr:predicate \t<"+atom.getFunctionSymbol().toString()+"> ;\n"+getObject(atom.getTerm(1)));
-				}
-			}
+			
 		}
 		
 		return predobj;
 	}
 	
-	private String getObject(NewLiteral obj)
+	private String getObject(Term obj)
 	{
 		String object = "";
 		if(obj instanceof FunctionalTermImpl)
@@ -385,7 +372,7 @@ public class R2RMLWriter {
 					else
 						object = "\t\t rr:objectMap \t[ rr:column \"\\\""+fobj.getTerm(0).toString()+"\\\"\"; rr:datatype "+ p.toString() + " ]";
 				} else
-					object = "\t\t rr:object \t "+obj.asAtom().getTerm(0).toString();
+					object = "\t\t rr:object \t "+((Function)obj).getTerm(0).toString();
 				return object;
 			}
 			else
@@ -418,11 +405,11 @@ public class R2RMLWriter {
 			System.out.println("URIConst: "+obj.toString());
 		else if (obj instanceof ValueConstant)
 			System.out.println("ValueConst: "+obj.toString());
-		else if (obj.asAtom().isDataFunction())
+		else if (((Function)obj).isDataFunction())
 		{
-			Iterator<Variable> varcol = obj.asAtom().getVariables().iterator();
+			Iterator<Variable> varcol = ((Function)obj).getVariables().iterator();
 			object = "\t\t rr:objectMap \t[ rr:column \"\\\""+varcol.next().toString()+"\\\"\";  rr:datatype xsd:"+
-			obj.asAtom().getFunctionSymbol().toString().split("#")[1]+"]";
+					((Function)obj).getFunctionSymbol().toString().split("#")[1]+"]";
 		}
 		else
 			System.out.println("Found: "+obj.toString());

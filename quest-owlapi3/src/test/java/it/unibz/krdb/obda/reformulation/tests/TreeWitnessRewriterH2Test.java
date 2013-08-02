@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
@@ -5,12 +13,12 @@ import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -223,7 +231,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
-		OWLStatement st = reasoner.getStatement();
+		QuestOWLStatement st = reasoner.getStatement();
 
 		List<Result> summaries = new LinkedList<TreeWitnessRewriterH2Test.Result>();
 
@@ -243,7 +251,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 			try {
 
 				if (query.toLowerCase().contains("select")) {
-					OWLResultSet rs = st.executeTuple(query);
+					QuestOWLResultSet rs = st.executeTuple(query);
 
 					end = System.currentTimeMillis();
 					while (rs.nextRow()) {

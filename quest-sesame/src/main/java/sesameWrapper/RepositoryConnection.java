@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package sesameWrapper;
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.CloseableIteratorIteration;
@@ -50,6 +58,7 @@ import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
+import org.openrdf.repository.UnknownTransactionStateException;
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandler;
@@ -58,6 +67,7 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.UnsupportedRDFormatException;
+import org.openrdf.rio.helpers.BasicParserSettings;
 
 public class RepositoryConnection implements org.openrdf.repository.RepositoryConnection {
 
@@ -65,6 +75,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	private QuestDBConnection questConn;
     private boolean isOpen;
     private boolean autoCommit;
+    private boolean isActive;
     private  RDFParser rdfParser;
     private QuestDBStatement questStm;
 
@@ -74,6 +85,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		this.repository = rep;
 		this.questConn = connection;
 		this.isOpen = true;
+		this.isActive = false;
 		this.autoCommit = connection.getAutoCommit();
 		
 	}
@@ -87,6 +99,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			contexts = new Resource[] { st.getContext() };
 		}
 		try {
+			begin();
 			List<Statement> l = new ArrayList<Statement>();
 			l.add(st);
 			Iterator<Statement> iterator = l.iterator();
@@ -103,8 +116,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		//Adds the supplied statements to this repository, optionally to one or more named contexts. 
 		 OpenRDFUtil.verifyContextNotNull(contexts);
 
-         boolean autoCommit = isAutoCommit();
-         setAutoCommit(false);
+         begin();
 
          try {
                  addWithoutCommit((Iterator<Statement>) statements, contexts);
@@ -122,7 +134,6 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
          } catch (Exception e) {
         	 throw new RepositoryException(e);
 		} finally {
-             setAutoCommit(autoCommit);
              autoCommit();
          }
 
@@ -261,14 +272,19 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
         rdfParser = Rio.createParser(dataFormat,
                 getRepository().getValueFactory());
 
-        rdfParser.setVerifyData(true);
-        rdfParser.setStopAtFirstError(true);
-        rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
-        
+        ParserConfig config = rdfParser.getParserConfig();
+		// To emulate DatatypeHandling.IGNORE 
+		config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+		config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+		config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+//		config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+		
+//        rdfParser.setVerifyData(true);
+//        rdfParser.setStopAtFirstError(true);
+//        rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
 
         boolean autoCommit = isAutoCommit();
-        setAutoCommit(false);
-	
+        begin();        
         
         SesameRDFIterator rdfHandler = new SesameRDFIterator();
         rdfParser.setRDFHandler(rdfHandler);
@@ -288,14 +304,11 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
             }
             
            // System.out.println("Parsing... ");
-                    
             questStm = questConn.createStatement();
     		
             Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseURI));
             Thread process = new Thread(new Process(rdfHandler, questStm));
             
-           
-          
             //start threads
             insert.start();
             process.start();
@@ -308,15 +321,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
      
         } catch (RuntimeException e) {
         	//System.out.println("exception, rolling back!");
-        	
-        	
             if (autoCommit) {
                 rollback();
             }
             throw new RepositoryException(e);
         } catch (OBDAException e)
         {
-        	
         	 if (autoCommit) {
                  rollback();
              }
@@ -455,6 +465,7 @@ throw new RuntimeException(e);
 		//Closes the connection, freeing resources. 
 		//If the connection is not in autoCommit mode, 
 		//all non-committed operations will be lost. 
+		isOpen = false;
 			try {
 				questConn.close();
 			} catch (Exception e) {
@@ -462,14 +473,20 @@ throw new RuntimeException(e);
 			}
 	} 
 	
-
 	public void commit() throws RepositoryException {
-		//Commits all updates that have been performed as part of this connection sofar. 
-		try {
-			//System.out.println("QuestConn commit..");
-			questConn.commit();
-		} catch (OBDAException e) {
-			throw new RepositoryException(e);
+		// Commits all updates that have been performed as part of this
+		// connection sofar.
+		if (isActive()) {
+			try {
+				// System.out.println("QuestConn commit..");
+				questConn.commit();
+				this.isActive = false;
+			} catch (OBDAException e) {
+				throw new RepositoryException(e);
+			}
+		} else {
+			throw new RepositoryException(
+					"Connection does not have an active transaction.");
 		}
 	}
 
@@ -756,8 +773,7 @@ throw new RuntimeException(e);
 		//Removes the supplied statements from the specified contexts in this repository. 
 		 OpenRDFUtil.verifyContextNotNull(contexts);
 
-         boolean autoCommit = isAutoCommit();
-         setAutoCommit(false);
+         begin();
 
          try {
              for (Statement st : statements) {
@@ -774,7 +790,7 @@ throw new RuntimeException(e);
              }
              throw e;
          } finally {
-             setAutoCommit(autoCommit);
+             autoCommit();
          }
 
 	}
@@ -784,8 +800,7 @@ throw new RuntimeException(e);
 			throws RepositoryException, E {
 		//Removes the supplied statements from a specific context in this repository, 
 		//ignoring any context information carried by the statements themselves. 
-		boolean autoCommit = isAutoCommit();
-        setAutoCommit(false);
+		begin();
 
         try {
             while (statementIter.hasNext()) {
@@ -802,7 +817,7 @@ throw new RuntimeException(e);
             }
             throw e;
         } finally {
-            setAutoCommit(autoCommit);
+            autoCommit();
         }
 
 	}
@@ -824,12 +839,18 @@ throw new RuntimeException(e);
 	}
 
 	public void rollback() throws RepositoryException {
-		//Rolls back all updates that have been performed as part of this connection sofar. 
-		try {
-			this.questConn.rollBack();
-		} catch (OBDAException e) {
-			throw new RepositoryException(e);
-
+		// Rolls back all updates that have been performed as part of this
+		// connection sofar.
+		if (isActive()) {
+			try {
+				this.questConn.rollBack();
+				this.isActive = false;
+			} catch (OBDAException e) {
+				throw new RepositoryException(e);
+			}
+		} else {
+			throw new RepositoryException(
+					"Connection does not have an active transaction.");
 		}
 	}
 
@@ -838,27 +859,31 @@ throw new RuntimeException(e);
 		//If a connection is in auto-commit mode, then all updates 
 		//will be executed and committed as individual transactions. 
 		//Otherwise, the updates are grouped into transactions that are 
-		//terminated by a call to either commit() or rollback(). 
-		//By default, new connections are in auto-commit mode. 
-		 if (autoCommit == this.autoCommit) {
-             return;
-         }
-
-         this.autoCommit = autoCommit;
-         try {
-			this.questConn.setAutoCommit(autoCommit);
-		} catch (OBDAException e) {
-			throw new RepositoryException(e);
-
+		// terminated by a call to either commit() or rollback().
+		// By default, new connections are in auto-commit mode.
+		if (autoCommit == this.autoCommit) {
+			return;
 		}
-         
-         // if we are switching from non-autocommit to autocommit mode, commit any
-         // pending updates
-         if (autoCommit) {
-             commit();
-         }
+		if (isActive()) {
+			this.autoCommit = autoCommit;
+			try {
+				this.questConn.setAutoCommit(autoCommit);
+			} catch (OBDAException e) {
+				throw new RepositoryException(e);
 
-		
+			}
+
+			// if we are switching from non-autocommit to autocommit mode,
+			// commit any
+			// pending updates
+			if (autoCommit) {
+				commit();
+			}
+		} else if (!autoCommit) {
+			// begin a transaction
+			begin();
+		}
+
 	}
 
 	public void setNamespace(String key, String value)
@@ -877,6 +902,31 @@ throw new RuntimeException(e);
 	public long size(Resource... contexts) throws RepositoryException {
 		//Returns the number of (explicit) statements that are in the specified contexts in this repository. 
 		return 0;
+	}
+
+
+	/**
+	 * Call this method to start a transaction. Have to call commit() or
+	 * rollback() to mark end of transaction.
+	 */
+	@Override
+	public void begin() throws RepositoryException {
+		// TODO Auto-generated method stub
+		if (!isOpen()) {
+				throw new RepositoryException("Connection was closed.");
+		}
+		isActive = true;
+	}
+
+
+	/**
+	 * A boolean flag signaling when a transaction is active.
+	 */
+	@Override
+	public boolean isActive() throws UnknownTransactionStateException,
+			RepositoryException {
+		// TODO Auto-generated method stub
+		return this.isActive;
 	}
 
 

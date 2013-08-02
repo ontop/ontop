@@ -1,8 +1,16 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -22,7 +30,9 @@ import java.util.Set;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
+import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
 public class R2RMLManager {
@@ -40,7 +50,7 @@ public class R2RMLManager {
 	public R2RMLManager(File file) {
 		try {
 			r2rmlParser = new R2RMLParser();
-			RDFParser parser = new org.openrdf.rio.turtle.TurtleParser();
+			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
 			URL documentUrl = new URL("file://" + file);
 			myGraph = new org.openrdf.model.impl.GraphImpl();
@@ -115,8 +125,8 @@ public class R2RMLManager {
 			
 			//get subject sql string and newliteral of given node
 			String sourceQuery1 = r2rmlParser.getSQLQuery(myGraph, tripleMap);
-			NewLiteral joinSubject1 = r2rmlParser.getSubjectAtom(myGraph, tripleMap);
-			NewLiteral joinSubject1Child = r2rmlParser.getSubjectAtom(myGraph, tripleMap, "CHILD_");
+			Term joinSubject1 = r2rmlParser.getSubjectAtom(myGraph, tripleMap);
+			Term joinSubject1Child = r2rmlParser.getSubjectAtom(myGraph, tripleMap, "CHILD_");
 			
 			
 			//for each predicateobject map that contains a join
@@ -129,8 +139,8 @@ public class R2RMLManager {
 				
 				//get the referenced triple map sql query and subject atom
 				String sourceQuery2 = r2rmlParser.getSQLQuery(myGraph, referencedTripleMap);
-				NewLiteral joinSubject2 = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap);
-				NewLiteral joinSubject2Parent = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap, "PARENT_");
+				Term joinSubject2 = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap);
+				Term joinSubject2Parent = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap, "PARENT_");
 				
 				//get join condition
 				String childCol = r2rmlParser.getChildColumn(myGraph, joinPredObjNode);
@@ -139,7 +149,7 @@ public class R2RMLManager {
 				
 				List<Function> body = new ArrayList<Function>();
 				// construct the atom from subject 1 and 2
-				List<NewLiteral> terms = new ArrayList<NewLiteral>();
+				List<Term> terms = new ArrayList<Term>();
 				
 				
 				//if join condition is empty, the two sql queries are the same
@@ -156,7 +166,7 @@ public class R2RMLManager {
 				
 				//for each predicate construct an atom and add to body
 				for (Predicate pred : joinPredicates) {
-					Function bodyAtom = fac.getFunctionalTerm(pred, terms);
+					Function bodyAtom = fac.getFunction(pred, terms);
 					body.add(bodyAtom);
 				}
 				//get head and construct cqie
@@ -187,8 +197,8 @@ public class R2RMLManager {
 			 vars.addAll(bodyAtom.getReferencedVariables());
 		}
 		int arity = vars.size();
-		List<NewLiteral> dvars = new ArrayList<NewLiteral>(vars);
-		Function head = fac.getAtom(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), dvars);
+		List<Term> dvars = new ArrayList<Term>(vars);
+		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), dvars);
 		return head;
 	}
 	
@@ -200,12 +210,12 @@ public class R2RMLManager {
 		List<Function> body = new ArrayList<Function>();
 				
 		//get subject
-		NewLiteral subjectAtom = r2rmlParser.getSubjectAtom(myGraph, subj);		
+		Term subjectAtom = r2rmlParser.getSubjectAtom(myGraph, subj);		
 		
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates) {
-			body.add(fac.getFunctionalTerm(classPred, subjectAtom));
+			body.add(fac.getFunction(classPred, subjectAtom));
 		}		
 		//get predicate-object nodes
 		Set<Resource> predicateObjectNodes = r2rmlParser.getPredicateObjects(myGraph, subj);	
@@ -217,14 +227,14 @@ public class R2RMLManager {
 			List<Predicate> bodyPredicates = r2rmlParser.getBodyPredicates(myGraph, predobj);
 			
 			//get object atom
-			NewLiteral objectAtom = r2rmlParser.getObjectAtom(myGraph, predobj);
+			Term objectAtom = r2rmlParser.getObjectAtom(myGraph, predobj);
 			if (objectAtom == null) {
 				// skip, object is a join
 				continue;
 			}
 			
 			// construct the atom, add it to the body
-			List<NewLiteral> terms = new ArrayList<NewLiteral>();
+			List<Term> terms = new ArrayList<Term>();
 			terms.add(subjectAtom);
 			terms.add(objectAtom);
 			
@@ -235,11 +245,11 @@ public class R2RMLManager {
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
 					if(objectAtom.getReferencedVariables().size()<1) {
 						Predicate newpred = fac.getClassPredicate(objectAtom.toString());
-						body.add(fac.getFunctionalTerm(newpred, subjectAtom));
+						body.add(fac.getFunction(newpred, subjectAtom));
 					}
 				} else {
 					// create predicate(subject, object) and add it to the body
-					Function bodyAtom = fac.getFunctionalTerm(bodyPred, terms);
+					Function bodyAtom = fac.getFunction(bodyPred, terms);
 					body.add(bodyAtom);
 				}
 			}

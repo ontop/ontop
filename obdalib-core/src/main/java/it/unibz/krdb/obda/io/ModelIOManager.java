@@ -1,10 +1,18 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.exception.Indicator;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.exception.UnsupportedTagException;
-import it.unibz.krdb.obda.gui.swing.exception.Indicator;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -187,7 +195,7 @@ public class ModelIOManager {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
         	} catch (Exception e) {
-        		throw new IOException(String.format("Problem at line: %s", reader.getLineNumber()), e);
+        		throw new IOException(String.format("ERROR reading .obda file at line: %s", reader.getLineNumber() + " \nMESSAGE: " + e.getMessage()), e);
         	}
         }
         

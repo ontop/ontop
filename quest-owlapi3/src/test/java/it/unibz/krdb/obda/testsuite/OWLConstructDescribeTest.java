@@ -1,19 +1,24 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.testsuite;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
-import java.net.URI;
 import java.sql.Connection;
 import java.util.List;
 
@@ -41,8 +46,8 @@ public class OWLConstructDescribeTest extends TestCase{
 	OWLOntology ontology = null;
 	OBDAModel obdaModel = null;
 	QuestOWL reasoner = null;
-	OWLConnection conn = null;
-	OWLStatement st = null;
+	QuestOWLConnection conn = null;
+	QuestOWLStatement st = null;
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	String owlFile = "src/test/resources/describeConstruct.owl";
 	

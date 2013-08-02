@@ -1,12 +1,20 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.protege4.gui.action;
 
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 
 import java.awt.Component;
 import java.awt.Dimension;

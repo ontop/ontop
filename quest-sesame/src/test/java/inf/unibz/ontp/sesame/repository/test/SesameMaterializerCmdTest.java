@@ -1,14 +1,22 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package inf.unibz.ontp.sesame.repository.test;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLIndividualIterator;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -81,6 +89,9 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			writer.close();
+		
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelTurtle() throws Exception {
@@ -106,7 +117,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 
 	public void testModelRdfXml() throws Exception {
@@ -132,7 +144,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelOntoN3() throws Exception {
@@ -157,6 +170,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			writer.close();
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelOntoTurtle() throws Exception {
@@ -183,7 +198,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 
 	public void testModelOntoRdfXml() throws Exception {
@@ -210,7 +226,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testOWLApiModel() throws Exception {
@@ -239,6 +256,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			output.close();
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testOWLApiModeOnto() throws Exception {
@@ -264,5 +283,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			output.close();
+		if (out.exists())
+			out.delete();
 	}
 }

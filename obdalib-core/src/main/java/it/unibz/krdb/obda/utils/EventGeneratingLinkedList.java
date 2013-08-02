@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.utils;
 
 import java.util.Collection;
@@ -12,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * implementations of the methods are the original LinkedList methods. We just
  * wrap them to be able to rise the event.
  */
-public class EventGeneratingLinkedList<E> extends LinkedList<E> {
+public class EventGeneratingLinkedList<E> extends LinkedList<E> implements EventGeneratingList<E> {
 
 	private static final long serialVersionUID = 893780365770320662L;
 	
@@ -20,10 +28,18 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> {
 
 	private static Logger log = LoggerFactory.getLogger(EventGeneratingLinkedList.class);
 
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.utils.EventGeneratingList#addListener(it.unibz.krdb.obda.utils.ListListener)
+	 */
+	@Override
 	public void addListener(ListListener listener) {
 		listeners.add(listener);
 	}
 
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.utils.EventGeneratingList#removeListener(it.unibz.krdb.obda.utils.ListListener)
+	 */
+	@Override
 	public void removeListener(ListListener listener) {
 		listeners.remove(listener);
 	}
@@ -89,6 +105,10 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> {
 		return r;
 	}
 
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.utils.EventGeneratingList#riseListChanged()
+	 */
+	@Override
 	public void riseListChanged() {
 		for (ListListener listener : listeners) {
 			try {

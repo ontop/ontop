@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.renderer;
 
 import it.unibz.krdb.obda.io.PrefixManager;
@@ -5,7 +13,7 @@ import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
@@ -39,7 +47,7 @@ public class TargetQueryRenderer {
 			String subject, predicate, object = "";
 			String originalString = atom.getFunctionSymbol().toString();
 			if (isUnary(atom)) {
-				NewLiteral subjectTerm = atom.getTerm(0);
+				Term subjectTerm = atom.getTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = "a";
 				object = getAbbreviatedName(originalString, prefixManager, false);
@@ -47,13 +55,13 @@ public class TargetQueryRenderer {
 					object = "<" + object + ">";
 				}
 			} else {
-				NewLiteral subjectTerm = atom.getTerm(0);
+				Term subjectTerm = atom.getTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = getAbbreviatedName(originalString, prefixManager, false);
 				if (originalString.equals(predicate)) {
 					predicate = "<" + predicate + ">";
 				}
-				NewLiteral objectTerm = atom.getTerm(1);
+				Term objectTerm = atom.getTerm(1);
 				object = getDisplayName(objectTerm, prefixManager);
 			}
 			turtleWriter.put(subject, predicate, object);
@@ -115,7 +123,7 @@ public class TargetQueryRenderer {
 	/**
 	 * Prints the text representation of different terms.
 	 */
-	private static String getDisplayName(NewLiteral term, PrefixManager prefixManager) {
+	private static String getDisplayName(Term term, PrefixManager prefixManager) {
 		StringBuilder sb = new StringBuilder();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
@@ -128,13 +136,13 @@ public class TargetQueryRenderer {
 					int arity = function.getArity();
 					if (arity == 1) {
 						// without the language tag
-						NewLiteral var = function.getTerms().get(0);
+						Term var = function.getTerms().get(0);
 						sb.append(getDisplayName(var, prefixManager));
 						sb.append("^^rdfs:Literal");
 					} else if (arity == 2) {
 						// with the language tag
-						NewLiteral var = function.getTerms().get(0);
-						NewLiteral lang = function.getTerms().get(1);
+						Term var = function.getTerms().get(0);
+						Term lang = function.getTerms().get(1);
 						sb.append(getDisplayName(var, prefixManager));
 						sb.append("@");
 						if (lang instanceof ValueConstant) {
@@ -146,7 +154,7 @@ public class TargetQueryRenderer {
 						}
 					}
 				} else { // for the other data types
-					NewLiteral var = function.getTerms().get(0);
+					Term var = function.getTerms().get(0);
 					sb.append(getDisplayName(var, prefixManager));
 					sb.append("^^");
 					sb.append(fname);
@@ -157,7 +165,7 @@ public class TargetQueryRenderer {
 				// Utilize the String.format() method so we replaced placeholders '{}' with '%s'
 				String templateFormat = template.replace("{}", "%s");
 				List<String> varNames = new ArrayList<String>();
-				for (NewLiteral innerTerm : function.getTerms()) {
+				for (Term innerTerm : function.getTerms()) {
 					if (innerTerm instanceof Variable) {
 						varNames.add(getDisplayName(innerTerm, prefixManager));
 					}
@@ -176,7 +184,7 @@ public class TargetQueryRenderer {
 				sb.append(fname);
 				sb.append("(");
 				boolean separator = false;
-				for (NewLiteral innerTerm : function.getTerms()) {
+				for (Term innerTerm : function.getTerms()) {
 					if (separator) {
 						sb.append(", ");
 					}

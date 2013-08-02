@@ -1,8 +1,27 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 // $ANTLR 3.4 C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g 2012-06-20 10:08:55
 
 package it.unibz.krdb.obda.parser;
 
-import java.net.URI;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -18,32 +37,6 @@ import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-
-
-import org.antlr.runtime.*;
-
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
-
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class DatalogParser extends Parser {
@@ -281,7 +274,7 @@ public class DatalogParser extends Parser {
             	    if ( state.backtracking==0 ) {
             	          rule = rule2;
             	          if (isSelectAll) {
-            	            List<NewLiteral> variableList = new Vector<NewLiteral>();
+            	            List<Term> variableList = new Vector<Term>();
             	            variableList.addAll(variables); // Import all the data from the Set to a Vector.
             	             
             	            // Get the head atom
@@ -291,7 +284,7 @@ public class DatalogParser extends Parser {
             	            
             	            // Get the predicate atom
             	            Predicate predicate = dfac.getPredicate(name, size);
-            	            Atom newhead = dfac.getAtom(predicate, variableList);
+            	            Function newhead = dfac.getFunction(predicate, variableList);
             	            rule.updateHead(newhead);
             	            
             	            isSelectAll = false;  
@@ -804,7 +797,7 @@ public class DatalogParser extends Parser {
         CQIE value = null;
 
 
-        Atom head13 =null;
+        Function head13 =null;
 
         CQIE swirl_syntax_alt14 =null;
 
@@ -1025,11 +1018,11 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "head"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:216:1: head returns [Atom value] : atom ;
-    public final Atom head() throws RecognitionException {
-        Atom value = null;
+    public final Function head() throws RecognitionException {
+        Function value = null;
 
 
-        Atom atom18 =null;
+        Function atom18 =null;
 
 
 
@@ -1067,7 +1060,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "body"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:225:1: body returns [List<Atom> value] : a1= atom ( ( COMMA | CARET ) a2= atom )* ;
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:225:1: body returns [List<Function> value] : a1= atom ( ( COMMA | CARET ) a2= atom )* ;
     public final List<Function> body() throws RecognitionException {
         List<Function> value = null;
 
@@ -1155,13 +1148,13 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "atom"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:232:1: atom returns [Atom value] : predicate LPAREN ( terms )? RPAREN ;
-    public final Atom atom() throws RecognitionException {
-        Atom value = null;
+    public final Function atom() throws RecognitionException {
+        Function value = null;
 
 
         String predicate19 =null;
 
-        Vector<NewLiteral> terms20 =null;
+        Vector<Term> terms20 =null;
 
 
         try {
@@ -1204,16 +1197,16 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
                   String uri = predicate19;
                   
-                  Vector<NewLiteral> elements = terms20;
+                  Vector<Term> elements = terms20;
                   if (elements == null)
-                    elements = new Vector<NewLiteral>();
+                    elements = new Vector<Term>();
                   Predicate predicate = dfac.getPredicate(uri, elements.size());
                   
-                  Vector<NewLiteral> terms = terms20;
+                  Vector<Term> terms = terms20;
                   if (terms == null)
-                    terms = new Vector<NewLiteral>();
+                    terms = new Vector<Term>();
                     
-                  value = dfac.getAtom(predicate, terms);
+                  value = dfac.getFunction(predicate, terms);
                 }
 
             }
@@ -1334,17 +1327,17 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "terms"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:255:1: terms returns [Vector<Term> elements] : t1= term ( COMMA t2= term )* ;
-    public final Vector<NewLiteral> terms() throws RecognitionException {
-        Vector<NewLiteral> elements = null;
+    public final Vector<Term> terms() throws RecognitionException {
+        Vector<Term> elements = null;
 
 
-        NewLiteral t1 =null;
+        Term t1 =null;
 
-        NewLiteral t2 =null;
+        Term t2 =null;
 
 
 
-          elements = new Vector<NewLiteral>();
+          elements = new Vector<Term>();
 
         try {
             // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:259:3: (t1= term ( COMMA t2= term )* )
@@ -1411,8 +1404,8 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "term"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Datalog.g:262:1: term returns [Term value] : ( variable_term | literal_term | object_term | uri_term );
-    public final NewLiteral term() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term term() throws RecognitionException {
+        Term value = null;
 
 
         Variable variable_term24 =null;
@@ -1667,7 +1660,7 @@ public class DatalogParser extends Parser {
                   	}
                   }
                   
-                  value = dfac.getValueConstant(literal);
+                  value = dfac.getConstantLiteral(literal);
                 }
 
             }
@@ -1695,7 +1688,7 @@ public class DatalogParser extends Parser {
 
         String function30 =null;
 
-        Vector<NewLiteral> terms31 =null;
+        Vector<Term> terms31 =null;
 
 
         try {
@@ -1742,7 +1735,7 @@ public class DatalogParser extends Parser {
                   } else {
                     functionSymbol = dfac.getPredicate(functionName, arity);
                   }
-                  value = dfac.getFunctionalTerm(functionSymbol, terms31);
+                  value = dfac.getFunction(functionSymbol, terms31);
                 }
 
             }
@@ -1786,7 +1779,7 @@ public class DatalogParser extends Parser {
 
             if ( state.backtracking==0 ) { 
                   uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);      
-                  value = dfac.getURIConstant(uriText);
+                  value = dfac.getConstantURI(uriText);
                 }
 
             }
