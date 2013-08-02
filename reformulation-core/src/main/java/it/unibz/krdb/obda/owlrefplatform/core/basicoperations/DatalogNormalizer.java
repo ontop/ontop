@@ -458,44 +458,8 @@ public class DatalogNormalizer {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
-					renameVariable(substitutions, eqList, newVarCounter, atom, subterms, j, (Variable) subTerm);
-
-					Variable var1 = (Variable) subTerm;
-					Variable var2 = (Variable) substitutions.get(var1);
-
-					if (var2 == null) {
-						/*
-						 * No substitution exists, hence, no action but generate
-						 * a new variable and register in the substitutions, and
-						 * replace the current value with a fresh one.
-						 */
-						var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
-
-						substitutions.put(var1, var2);
-						subterms.set(j, var2);
-
-					} else {
-
-						/*
-						 * There already exists one, so we generate a fresh,
-						 * replace the current value, and add an equality
-						 * between the substitution and the new value.
-						 */
-
-						if (atom.isDataFunction()) {
-							Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
-
-							subterms.set(j, newVariable);
-							Function equality = fac.getFunctionEQ(var2, newVariable);
-							eqList.add(equality);
-
-						} else { // if its not data function, just replace
-									// variable
-							subterms.set(j, var2);
-						}
-					}
-					newVarCounter[0] += 1;
-
+					renameVariable(substitutions, eqList, newVarCounter, atom,	subterms, j, (Variable) subTerm);
+					
 				} else if (subTerm instanceof Constant) {
 					/*
 					 * This case was necessary for query 7 in BSBM
@@ -520,11 +484,13 @@ public class DatalogNormalizer {
 
 						// This case is for the ans atoms that might have
 						// functions in the head. Check if it is needed.
-						Set<Variable> subtermsset = subTerm.getReferencedVariables();
+						Set<Variable> subtermsset = subTerm
+								.getReferencedVariables();
 
 						// Right now we support only unary functions!!
 						for (Variable var : subtermsset) {
-							renameTerm(substitutions, eqList, newVarCounter, atom, subterms, j, (Function) subTerm, var);
+							renameTerm(substitutions, eqList, newVarCounter,
+									atom, subterms, j, (Function) subTerm, var);
 						}
 					}
 				}
