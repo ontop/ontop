@@ -52,7 +52,10 @@ export OWL_API_DIST=QuestOWL
 export VERSION=1.8
 export REVISION=0
 
-#svn update
+
+# Start building the packages
+#
+cd $BUILD_ROOT
 mvn clean
 
 # Packing the -ontopPro- distribution
