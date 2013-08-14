@@ -205,6 +205,8 @@ public class OBDAVocabulary {
 
 	public static final Predicate QUEST_CAST = new PredicateImpl(
 			QUEST_CAST_STR, 2, new COL_TYPE[2]);
+	
+	public static final String QUEST_QUERY = "ans1";
 
 	/* SPARQL Algebra vocabulary */
 
