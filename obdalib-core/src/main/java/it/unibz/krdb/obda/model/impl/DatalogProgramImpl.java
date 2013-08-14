@@ -124,7 +124,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	public String toString() {
 		StringBuffer bf = new StringBuffer();
-		for (CQIE rule : this.rules) {
+		for (CQIE rule : rules) {
 			bf.append(rule.toString());
 			bf.append("\n");
 		}
@@ -133,7 +133,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	@Override
 	public List<CQIE> getRules(Predicate headPredicate) {
-		List<CQIE> rules = this.predicateIndex.get(headPredicate);
+		List<CQIE> rules = predicateIndex.get(headPredicate);
 		if (rules == null) {
 			rules = new LinkedList<CQIE>();
 		}
@@ -148,5 +148,10 @@ public class DatalogProgramImpl implements DatalogProgram {
 	@Override
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
+	}
+	
+	@Override
+	public boolean hasModifiers() {
+		return modifiers.hasModifiers();
 	}
 }
