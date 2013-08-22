@@ -118,13 +118,15 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
 				else{
-				for (Description equivalent: equivalences){
-					//I search for the first named description
-					if(!namedEquivalences.contains(equivalent) ){
-						
-						result.addAll( getNamedChildren(equivalent));
-					}	
-				}
+					
+					result.addAll( getNamedChildren(source));
+//				for (Description equivalent: equivalences){
+//					//I search for the first named description
+//					if(!namedEquivalences.contains(equivalent) ){
+//						
+//						result.addAll( getNamedChildren(equivalent));
+//					}	
+//				}
 				}
 			}
 			
@@ -196,7 +198,10 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 			//get equivalences of the current node
 			Set<Description> equivalenceSet= getEquivalences(desc, false);
 			//I want to consider also the children of the equivalent nodes
-			
+			if(!dag.containsVertex(desc)){
+				System.out.println(desc);
+				System.out.println(equivalenceSet);
+			}
 			Set<DefaultEdge> edges = dag.incomingEdgesOf(desc);
 			for (DefaultEdge edge : edges) {
 				Description source = dag.getEdgeSource(edge);
@@ -214,13 +219,14 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 					if (!namedEquivalences.isEmpty())
 						result.add(namedEquivalences);
 					else{
-					for (Description node: equivalences){
-						//I search for the first named description
-						if(!namedEquivalences.contains(node) ){
-							
-							result.addAll( getNamedChildren(node));
-						}	
-					}
+						result.addAll( getNamedChildren(source));
+//					for (Description node: equivalences){
+//						//I search for the first named description
+//						if(!namedEquivalences.contains(node) ){
+//							
+//							result.addAll( getNamedChildren(node));
+//						}	
+//					}
 					}
 			}
 			return result;
@@ -293,13 +299,14 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
 				else{
-				for (Description equivalent: equivalences){
-					//I search for the first named description
-					if(!namedEquivalences.contains(equivalent) ){
-						
-						result.addAll(getNamedParents(equivalent));
-					}	
-				}
+					result.addAll(getNamedParents(target));
+//				for (Description equivalent: equivalences){
+//					//I search for the first named description
+//					if(!namedEquivalences.contains(equivalent) ){
+//						
+//						result.addAll(getNamedParents(equivalent));
+//					}	
+//				}
 				}
 				
 			}
@@ -388,13 +395,14 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 						if (!namedEquivalences.isEmpty())
 							result.add(namedEquivalences);
 						else{
-						for (Description node: equivalences){
-							//I search for the first named description
-							if(!namedEquivalences.contains(node) ){
-								
-								result.addAll(getNamedParents(node));
-							}	
-						}
+							result.addAll(getNamedParents(target));
+//						for (Description node: equivalences){
+//							//I search for the first named description
+//							if(!namedEquivalences.contains(node) ){
+//								
+//								result.addAll(getNamedParents(node));
+//							}	
+//						}
 						}
 					}
 				return result;

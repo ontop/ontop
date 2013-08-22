@@ -220,17 +220,7 @@ public class GraphDAGImpl implements GraphDAG{
 			boolean ignore = false;
 			for (Description node : equivalenceSet) {
 				
-				if(node.equals(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument")))
-					System.out.println("Here!");
-				
-				if(node.equals(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#isTradedIn", true)))
-					System.out.println("Here!");
-				
-				if( node.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument").getPredicate(), false)))
-					System.out.println("Here!");
-				
-				if( node.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#isTradedIn").getPredicate(), true)))
-					System.out.println("Here!");
+				equivalencesMap.put(node, equivalenceSet);
 					
 				if (!ignore && processedNodes.contains(node)) {
 					ignore = true;
@@ -277,7 +267,7 @@ public class GraphDAGImpl implements GraphDAG{
 								
 
 
-			equivalencesMap.put(representative, equivalenceSet);
+//			equivalencesMap.put(representative, equivalenceSet);
 			
 
 			if(representative==null)
@@ -312,9 +302,12 @@ public class GraphDAGImpl implements GraphDAG{
 					eliminatedNode=notRepresentative;
 				replacements.put(eliminatedNode, representative);
 
-				equivalencesMap.put(eliminatedNode, equivalenceSet);
+//				equivalencesMap.put(eliminatedNode, equivalenceSet);
 				
-				
+				if(fac.createProperty(((Property) eliminatedNode).getPredicate(), !((Property) eliminatedNode).isInverse()).equals((Property)representative)){
+					System.out.println("Inverse case in GraphDAGImpl");
+					System.exit(0);
+				}
 				/*
 				 * Re-pointing all links to and from the eliminated node to the
 				 * representative node
@@ -488,6 +481,9 @@ public class GraphDAGImpl implements GraphDAG{
 					
 			
 					replacements.put(equivinverseNode, inverse);
+					
+					if(modifiedGraph.containsVertex(inverse))
+						System.out.println("ok");
 					replacements.put(equivDomainNode, domain);
 					replacements.put(equivRangeNode, range);
 
@@ -496,18 +492,18 @@ public class GraphDAGImpl implements GraphDAG{
 
 			}
 			
-			//equivalentMap for the inverse
+//			//equivalentMap for the inverse
 //			for(Description nodeInverse:inverseMap ){
 //				equivalencesMap.put(nodeInverse, inverseMap);
 //			}
-			
-			for(Description nodeExist:existMap ){
-				equivalencesMap.put(nodeExist, existMap);
-			}
-			
-			for(Description nodeExistInverse:existInverseMap){
-				equivalencesMap.put(nodeExistInverse, existInverseMap);
-			}
+//			
+//			for(Description nodeExist:existMap ){
+//				equivalencesMap.put(nodeExist, existMap);
+//			}
+//			
+//			for(Description nodeExistInverse:existInverseMap){
+//				equivalencesMap.put(nodeExistInverse, existInverseMap);
+//			}
 		}
 
 //		StrongConnectivityInspector<Description, DefaultEdge> inspector2 = new StrongConnectivityInspector<Description, DefaultEdge>(modifiedGraph);
@@ -574,7 +570,7 @@ public class GraphDAGImpl implements GraphDAG{
 				continue;
 
 			processedNodes.add(representative);
-			equivalencesMap.put(representative, equivalenceClassSet);
+//			equivalencesMap.put(representative, equivalenceClassSet);
 			
 			while (iterator.hasNext()) {
 				
@@ -592,7 +588,7 @@ public class GraphDAGImpl implements GraphDAG{
 					eliminatedNode=notRepresentative;
 				replacements.put(eliminatedNode, representative);
 
-				equivalencesMap.put(eliminatedNode, equivalenceClassSet);
+//				equivalencesMap.put(eliminatedNode, equivalenceClassSet);
 				
 				
 				if(!modifiedGraph.containsVertex(eliminatedNode)){
@@ -634,7 +630,7 @@ public class GraphDAGImpl implements GraphDAG{
 						if(value.equals(eliminatedNode)){
 						replacements.put(target, representative);
 
-						equivalencesMap.put(target, equivalenceClassSet);
+//						equivalencesMap.put(target, equivalenceClassSet);
 					}
 					modifiedGraph.addEdge(representative, target);
 

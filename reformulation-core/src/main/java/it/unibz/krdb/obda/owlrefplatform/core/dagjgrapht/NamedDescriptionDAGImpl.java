@@ -89,7 +89,7 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 
 		/** if the node is not named and it's representative delete it and repoint all links */
 
-			if(!equivalences.isEmpty()){
+			if(!equivalences.isEmpty()){ //node is not named and there are equivalent named classes
 			
 			
 			//change the representative node
@@ -183,7 +183,7 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 		
 		while(e.hasNext()){
 			Description node =e.next();
-			if(namedEquivalences.contains(node) & namedEquivalences.size()>1){
+			if(namedEquivalences.contains(node) && namedEquivalences.size()>1){
 				equivalencesMap.put(node, namedEquivalences);
 			}
 			else{
