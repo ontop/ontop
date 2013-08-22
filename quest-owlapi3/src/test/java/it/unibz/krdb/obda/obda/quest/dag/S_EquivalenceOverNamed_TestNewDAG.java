@@ -29,8 +29,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 	public void setUp(){
 		
-//		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
-//		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
+		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
+		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		/** C = B -> ER -> A*/
 		input.add("src/test/resources/test/newDag/equivalents1.owl");
@@ -85,14 +85,14 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", namedDag2);
 
-			assertTrue(testDescendants(graph1,namedDag2,true));
-			assertTrue(testDescendants(namedDag2,graph1,true));
-			assertTrue(testChildren(graph1,namedDag2,true));
-			assertTrue(testChildren(namedDag2, graph1,true));
-			assertTrue(testAncestors(graph1,namedDag2,true));
-			assertTrue(testAncestors(namedDag2,graph1,true));
-			assertTrue(testParents(graph1,namedDag2,true));
-			assertTrue(testParents(namedDag2, graph1,true));
+			assertTrue(testDescendants(dag2,namedDag2,true));
+			assertTrue(testDescendants(namedDag2,dag2,true));
+			assertTrue(testChildren(dag2,namedDag2,true));
+			assertTrue(testChildren(namedDag2, dag2,true));
+			assertTrue(testAncestors(dag2,namedDag2,true));
+			assertTrue(testAncestors(namedDag2,dag2,true));
+			assertTrue(testParents(dag2,namedDag2,true));
+			assertTrue(testParents(namedDag2, dag2,true));
 			assertTrue(checkVertexReduction(graph1, namedDag2, true));
 			//check only if the number of edges is smaller
 			assertTrue(checkEdgeReduction(graph1, namedDag2, true));
@@ -102,7 +102,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		}
 	}
 
-			private boolean testDescendants(GraphImpl d1, DAGImpl d2, boolean named){
+			private boolean testDescendants(DAGImpl d1, DAGImpl d2, boolean named){
 				
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
@@ -262,7 +262,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testChildren( DAGImpl d1, GraphImpl d2, boolean named){
+			private boolean testChildren( DAGImpl d1, DAGImpl d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -365,7 +365,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testAncestors( DAGImpl d1, GraphImpl d2, boolean named){
+			private boolean testAncestors( DAGImpl d1, DAGImpl d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -467,7 +467,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testParents( DAGImpl d1, GraphImpl d2, boolean named){
+			private boolean testParents( DAGImpl d1, DAGImpl d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -522,6 +522,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 					for (Description v: d1.vertexSet()){
 						if(d1.getRoles().contains(v)| d1.getClasses().contains(v)){	
 							numberVertexesD1++;
+							System.out.println(v);
 						}
 					}
 				}

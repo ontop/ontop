@@ -304,10 +304,7 @@ public class GraphDAGImpl implements GraphDAG{
 
 //				equivalencesMap.put(eliminatedNode, equivalenceSet);
 				
-				if(fac.createProperty(((Property) eliminatedNode).getPredicate(), !((Property) eliminatedNode).isInverse()).equals((Property)representative)){
-					System.out.println("Inverse case in GraphDAGImpl");
-					System.exit(0);
-				}
+				
 				/*
 				 * Re-pointing all links to and from the eliminated node to the
 				 * representative node
@@ -366,25 +363,59 @@ public class GraphDAGImpl implements GraphDAG{
 //						replacements.put(equivDomainNode, domain);
 //						if(d!=null)
 //							equivDomainNode=  d;
-						if( equivDomainNode.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument").getPredicate(), false)))
-							System.out.println("Here!");
+						
 						
 						Description equivRangeNode = fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse());
 //						Description r= replacements.get(equivRangeNode);
 //						replacements.put(equivRangeNode, range);
 //						if(r!=null)
 //							equivRangeNode=  r;
-						if( equivRangeNode.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument").getPredicate(), false)))
-							System.out.println("Here!");
+						
+						
+						if(equivinverseNode.equals((Property)representative)){
+							
+							
+							processedNodes.add(equivDomainNode);
+							
+							//this for domain
+							Set<DefaultEdge> edgesDomain = new HashSet<DefaultEdge>(modifiedGraph.incomingEdgesOf(equivDomainNode));
+
+							for (DefaultEdge incEdge : edgesDomain) {
+								Description source = modifiedGraph.getEdgeSource(incEdge);
+
+								modifiedGraph.removeAllEdges(source, equivDomainNode);
+
+								if (source.equals(domain))
+									continue;
+
+								modifiedGraph.addEdge(source, domain);
+							}
+
+							edgesDomain = new HashSet<DefaultEdge>(modifiedGraph.outgoingEdgesOf(equivDomainNode));
+
+							for (DefaultEdge outEdge : edgesDomain) {
+								Description target = modifiedGraph.getEdgeTarget(outEdge);
+
+								modifiedGraph.removeAllEdges(equivDomainNode, target);
+
+								if (target.equals(domain))
+									continue;
+								modifiedGraph.addEdge(domain, target);
+
+							}
+
+							modifiedGraph.removeVertex(equivDomainNode);
+							
+							replacements.put(equivDomainNode, domain);
+						}
+						
+						else{
 //						
 						processedNodes.add(equivRangeNode);
-						existInverseMap.add(equivRangeNode);
 						
 						processedNodes.add(equivDomainNode);
-						existMap.add(equivDomainNode);
 						
 						processedNodes.add(equivinverseNode);
-						inverseMap.add(equivinverseNode);
 						
 						
 						//this for inverse
@@ -482,11 +513,10 @@ public class GraphDAGImpl implements GraphDAG{
 			
 					replacements.put(equivinverseNode, inverse);
 					
-					if(modifiedGraph.containsVertex(inverse))
-						System.out.println("ok");
 					replacements.put(equivDomainNode, domain);
 					replacements.put(equivRangeNode, range);
 
+						}
 					}
 				
 
@@ -521,8 +551,7 @@ public class GraphDAGImpl implements GraphDAG{
 			 */
 			boolean ignore = false;
 			for (Description node : equivalenceClassSet) {
-				if( node.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument").getPredicate(), false)))
-					System.out.println("Here!");
+				
 				
 
 				if (!ignore 

@@ -150,6 +150,8 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 					Description target = copyDAG.getEdgeTarget(outEdge);
 					namedDag.removeAllEdges(vertex, target);
 				
+					if (source.equals(target))
+						continue;
 					namedDag.addEdge(source, target);
 				}
 				

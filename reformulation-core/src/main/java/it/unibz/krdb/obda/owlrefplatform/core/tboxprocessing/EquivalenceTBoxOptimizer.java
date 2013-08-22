@@ -107,24 +107,30 @@ public class EquivalenceTBoxOptimizer {
 					continue;
 				}
 
+				//we skip when is the case in which the inverse of the equivalent is the reference node
 				/*
 				 * each of the equivalents is redundant, we need to deal with
 				 * them and with their inverses!
 				 */
 
 				Property equiProp = (Property) equivalent;
+				Property inverseProp = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
+				if(equiProp.equals(inverseProp))
+					continue;
 
 				if (equiProp.isInverse()) {
 					/*
 					 * We need to invert the equivalent and the good property
 					 */
-					Property inverseProp = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
-
+					
+					
+					
 					equivalenceMap.put(equiProp.getPredicate(), inverseProp);
 				} else {
 					equivalenceMap.put(equiProp.getPredicate(), prop);
 				}
 
+				
 				/*
 				 * Dealing with the inverses
 				 * 
