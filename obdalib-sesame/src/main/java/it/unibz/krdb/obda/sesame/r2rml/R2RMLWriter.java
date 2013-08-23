@@ -6,16 +6,17 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package it.unibz.krdb.obda.io;
+package it.unibz.krdb.obda.sesame.r2rml;
 
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -31,9 +32,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.openrdf.model.Graph;
+import org.openrdf.model.Statement;
+import org.openrdf.model.impl.GraphImpl;
 
 
 public class R2RMLWriter {
@@ -64,6 +72,16 @@ public class R2RMLWriter {
 		this.prefixmng = obdamodel.getPrefixManager(); 
 	}
 
+	public Graph getGraph() {
+		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+		Set<Statement> statements = new HashSet<Statement>();
+		for (OBDAMappingAxiom axiom: this.mappings) {
+			statements.addAll(transformer.getStatements(axiom));
+		}
+		Graph g = new GraphImpl(); 
+		g.addAll(statements);
+		return g;
+	}
 	
 	public void write(File file)
 	{
@@ -419,13 +437,17 @@ public class R2RMLWriter {
 	
 	public static void main(String args[])
 	{
-		String file = "C:/Project/Test Cases/mapping2.ttl";
-		//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/r2rmlb.ttl";
+		String file = "/Users/timi/Documents/hdd/Project/Test Cases/mapping1.ttl";
 		R2RMLReader reader = new R2RMLReader(file);
+		
 		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("blah")),URI.create("blah"));
-		File out = new File("C:/Project/Test Cases/mapping1.ttl");
+	//	File out = new File("C:/Project/Test Cases/mapping1.ttl");
 				//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl");
-		writer.write(out);
+		Graph g = writer.getGraph();
+		Iterator<Statement> st = g.iterator();
+		while (st.hasNext())
+			System.out.println(st.next());
+		//writer.write(out);
 		
 	}
 }

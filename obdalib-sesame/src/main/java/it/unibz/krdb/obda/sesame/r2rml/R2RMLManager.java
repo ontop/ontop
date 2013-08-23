@@ -6,15 +6,15 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package it.unibz.krdb.obda.io;
+package it.unibz.krdb.obda.sesame.r2rml;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -25,11 +25,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
@@ -62,7 +64,16 @@ public class R2RMLManager {
 		}
 	}
 	
+	public R2RMLManager(Graph graph){
+		myGraph = graph;
+		r2rmlParser = new R2RMLParser();
+		
+	}
+	
 	public Graph getGraph() {
+		Iterator<Statement> it = myGraph.iterator();
+		while (it.hasNext())
+			System.out.println(it.next());
 		return myGraph;
 	}
 	
@@ -128,7 +139,7 @@ public class R2RMLManager {
 			Term joinSubject1 = r2rmlParser.getSubjectAtom(myGraph, tripleMap);
 			Term joinSubject1Child = r2rmlParser.getSubjectAtom(myGraph, tripleMap, "CHILD_");
 			
-			
+			int idx = 1;
 			//for each predicateobject map that contains a join
 			for (Resource joinPredObjNode : joinNodes) {
 				//get the predicates
@@ -177,9 +188,10 @@ public class R2RMLManager {
 					throw new Exception("Could not create source query for join in "+tripleMap.stringValue());
 				}
 				//finally, create mapping and add it to the list
-				OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+tripleMap.stringValue(), sourceQuery, targetQuery);
-				
-				System.out.println("joinMapping: "+mapping.toString());
+				OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join"+idx+"-"+tripleMap.stringValue(), sourceQuery, targetQuery);
+				idx++;
+				System.out.println("WARNING joinMapping introduced : "+mapping.toString());
+				System.out.println("Renaming of variables as CHILD_ and PARENT_ introduced!");
 				
 				joinMappings.add(mapping);
 			}

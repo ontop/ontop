@@ -8,8 +8,8 @@
  */
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.io.PrefixManager;
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;
