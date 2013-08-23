@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:			http://meraka/moss/exampleBooks.owl#
+:		http://meraka/moss/exampleBooks.owl#
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xsd:		http://www.w3.org/2001/XMLSchema#
@@ -8,10 +8,10 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	Books
-connectionUrl	jdbc:h2:tcp://localhost/books
-username	sa
-password	
-driverClass	org.h2.Driver
+connectionUrl	jdbc:postgresql://10.7.20.39/books
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	cl_Authors

@@ -35,6 +35,11 @@
 			<version>1.8</version>
 		</dependency>
 		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-sesame</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-api</artifactId>
 		</dependency>

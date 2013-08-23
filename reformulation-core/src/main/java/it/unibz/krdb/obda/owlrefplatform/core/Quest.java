@@ -285,6 +285,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		loadOBDAModel(mappings);
 	}
+	
+	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
+		this(tbox, mappings, config);
+		this.metadata = metadata;
+	}
 
 	protected Map<String, String> getSQLCache() {
 		return querycache;
@@ -652,13 +657,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-			metadata = JDBCConnectionManager.getMetaData(localConnection);
+			//if the metadata was not already set
+			if (metadata == null) {
 
-			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource
-					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+				metadata = JDBCConnectionManager.getMetaData(localConnection);
+			}
+		
+			SQLDialectAdapter sqladapter = SQLAdapterFactory
+					.getSQLDialectAdapter(datasource
+							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 
-			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
+			JDBCUtility jdbcutil = new JDBCUtility(
+					datasource
+							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
+					sqladapter);
 			if (isSemanticIdx) {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
@@ -1005,9 +1018,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				if (containSelectAll(sourceString)) {
 					StringBuilder sb = new StringBuilder();
 
-					/*
-					 * If the SQL string has sub-queries in its statement
-					 */
+					 // If the SQL string has sub-queries in its statement
 					if (containChildParentSubQueries(sourceString)) {
 						int childquery1 = sourceString.indexOf("(");
 						int childquery2 = sourceString.indexOf(") as CHILD");
@@ -1022,6 +1033,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 									sb.append(", ");
 								}
 								String col = rsm.getColumnName(pos);
+								//sb.append("CHILD." + col );
 								sb.append("CHILD.\"" + col + "\" as CHILD_" + (col));
 								needComma = true;
 							}
@@ -1041,15 +1053,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 									sb.append(", ");
 								}
 								String col = rsm.getColumnName(pos);
+								//sb.append("PARENT." + col);
 								sb.append("PARENT.\"" + col + "\" as PARENT_" + (col));
 								needComma = true;
 							}
 						}
 
-						/*
-						 * If the SQL string doesn't have sub-queries
-						 */
-					} else {
+						 //If the SQL string doesn't have sub-queries
+					} else 
+					
+					{
 						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
 						if (st.execute(copySourceQuery)) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();

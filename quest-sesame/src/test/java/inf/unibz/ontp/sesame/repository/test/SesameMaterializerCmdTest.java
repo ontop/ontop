@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.sesame.SesameStatementIterator;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -41,7 +42,6 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import sesameWrapper.SesameMaterializer;
-import sesameWrapper.SesameStatementIterator;
 
 public class SesameMaterializerCmdTest extends TestCase {
 	

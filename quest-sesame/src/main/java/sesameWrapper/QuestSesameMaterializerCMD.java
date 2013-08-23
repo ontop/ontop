@@ -10,13 +10,14 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.R2RMLReader;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
+import it.unibz.krdb.obda.sesame.SesameStatementIterator;
+import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 
 import java.io.BufferedWriter;
 import java.io.File;

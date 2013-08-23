@@ -22,12 +22,14 @@
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-protege41</module>
+		<module>obdalib-sesame</module>
 		<module>quest-owlapi3</module>
 		<module>quest-distribution</module>
 		<module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
 		<module>quest-db</module>
 		<module>quest-rdb2rdf-compliance</module>
+
 	</modules>
 
 	<profiles>

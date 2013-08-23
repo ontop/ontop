@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>quest-sesame</artifactId>
 	<name>quest-sesame</name>
-	<description>This is the Sesame API implementation basedon Quest</description>
+	<description>This is the Sesame API implementation based on Quest</description>
 
 	<dependencies>
 		<dependency>
@@ -32,6 +32,11 @@
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
+			<groupId>inf.unibz.it.obda</groupId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<artifactId>obdalib-sesame</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.8</version>
 		</dependency>

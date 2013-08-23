@@ -38,8 +38,8 @@ public class SesameVirtualTest extends TestCase {
 		
 		try {
 			
-			String owlfile = "C:/Project/Test Cases/Book.owl";
-			String obdafile = "C:/Project/Test Cases/Book.obda";
+			String owlfile = "/Users/timi/Documents/hdd/Project/Test Cases/Book.owl";
+			String obdafile = "/Users/timi/Documents/hdd/Project/Test Cases/Books-mappings.ttl";
 				//"/home/timi/ontologies/helloworld/helloworld.owl";
 			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
 	
@@ -49,7 +49,7 @@ public class SesameVirtualTest extends TestCase {
 			
 			///query repo
 			 try {
-			      String queryString = "select * where {<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#book/History%20of%20Art>  ?z ?y }";
+			      String queryString = "select * where {?x ?z ?y }";
 			      		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
 			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 			      TupleQueryResult result = tupleQuery.evaluate();
