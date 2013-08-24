@@ -66,6 +66,7 @@ public class GraphDAGImpl implements GraphDAG{
 	           
 	            modifiedGraph.addEdge(s, t, e);
 	        }
+		 
 		eliminateCycles(graph);
 		eliminateRedundantEdges();
 		
@@ -194,20 +195,22 @@ public class GraphDAGImpl implements GraphDAG{
 		
 		//each set contains vertices which together form a strongly connected component within the given graph
 		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
+		
 
-
-//		List<Set<Description>> equivalenceClassSets = new LinkedList<Set<Description>>();
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 		
 		/*
-		 * A set with all the nodes that have been proceesed as participating in
+		 * A set with all the nodes that have been processed as participating in
 		 * an equivalence cycle. If a component contains any of these nodes, the
 		 * component should be ignored, since a cycle involving the same nodes
 		 * or nodes for inverse descriptions has already been processed.
 		 */
 		Set<Description> processedNodes = new HashSet<Description>();
+		
+		Set<Property> namedRoles= graph.getRoles();
 
+		namedRoles.toArray();
 		for (Set<Description> equivalenceSet : equivalenceSets) {
 
 			if (equivalenceSet.size() < 2)
@@ -217,10 +220,11 @@ public class GraphDAGImpl implements GraphDAG{
 			/*
 			 * Avoiding processing nodes two times, but assign the equivalentMap
 			 */
-			boolean ignore = false;
+			boolean ignore= false, correct = false;
+			
 			for (Description node : equivalenceSet) {
 				
-				equivalencesMap.put(node, equivalenceSet);
+				
 					
 				if (!ignore && processedNodes.contains(node)) {
 					ignore = true;
@@ -230,12 +234,31 @@ public class GraphDAGImpl implements GraphDAG{
 					
 					
 				}
+				equivalencesMap.put(node, equivalenceSet);
 				
-				if(!(node instanceof Property)){
+				if(!ignore && !(node instanceof Property)){
 					ignore = true;
 //					break;
 				}
+				
+					
+				
 
+			}
+			
+			if(!ignore){ //I try to consider first the element that are connected
+				
+				for(Property p: namedRoles){
+					Description inverse = fac.createProperty(p.getPredicate(), !p.isInverse());
+					if(equivalenceSet.contains(p)){
+						correct=true;
+						break;
+					}
+					if(equivalenceSet.contains(inverse)){
+						ignore=true;
+						break;
+					}
+				}
 			}
 			if (ignore)
 				continue;

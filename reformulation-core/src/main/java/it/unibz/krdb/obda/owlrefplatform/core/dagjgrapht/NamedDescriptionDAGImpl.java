@@ -89,50 +89,50 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 
 		/** if the node is not named and it's representative delete it and repoint all links */
 
-			if(!equivalences.isEmpty()){ //node is not named and there are equivalent named classes
-			
-			
-			//change the representative node
-			Iterator<Description> e=equivalences.iterator();
-			Description newReference=  e.next();
-			replacements.remove(newReference);
-			namedDag.addVertex(newReference);
-			
-			while(e.hasNext()){
-				Description node =e.next();
-				replacements.put(node, newReference);
-			}
+//			if(!equivalences.isEmpty()){ //node is not named and there are equivalent named classes
+//			
+//			
+//			//change the representative node
+//			Iterator<Description> e=equivalences.iterator();
+//			Description newReference=  e.next();
+//			replacements.remove(newReference);
+//			namedDag.addVertex(newReference);
+//			
+//			while(e.hasNext()){
+//				Description node =e.next();
+//				replacements.put(node, newReference);
+//			}
 			
 			/*
 			 * Re-pointing all links to and from the eliminated node to the new
 			 * representative node
 			 */
 			
-			Set<DefaultEdge> edges = new HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
-			for (DefaultEdge incEdge : edges) {
-				Description source = namedDag.getEdgeSource(incEdge);
-				namedDag.removeAllEdges(source, vertex);
-				
-				if (source.equals(newReference))
-					continue;
-				
-				namedDag.addEdge(source, newReference);
-			}
-
-			edges = new HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(vertex));
-			for (DefaultEdge outEdge : edges) {
-				Description target = namedDag.getEdgeTarget(outEdge);
-				namedDag.removeAllEdges(vertex, target);
-				
-				if (target.equals(newReference))
-					continue;
-				namedDag.addEdge(newReference, target);
-			}
-			
-			namedDag.removeVertex(vertex);
-			}
-			
-			else{ //representative node without equivalents
+//			Set<DefaultEdge> edges = new HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
+//			for (DefaultEdge incEdge : edges) {
+//				Description source = namedDag.getEdgeSource(incEdge);
+//				namedDag.removeAllEdges(source, vertex);
+//				
+//				if (source.equals(newReference))
+//					continue;
+//				
+//				namedDag.addEdge(source, newReference);
+//			}
+//
+//			edges = new HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(vertex));
+//			for (DefaultEdge outEdge : edges) {
+//				Description target = namedDag.getEdgeTarget(outEdge);
+//				namedDag.removeAllEdges(vertex, target);
+//				
+//				if (target.equals(newReference))
+//					continue;
+//				namedDag.addEdge(newReference, target);
+//			}
+//			
+//			namedDag.removeVertex(vertex);
+//			}
+//			
+//			else{ //representative node without equivalents
 			//add edge between the first of the ancestor that it's still present and its child
 			
 			Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
@@ -163,7 +163,7 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 			
 			
 
-			}
+//			}
 			
 					
 		

@@ -29,9 +29,9 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	public void setUp(){
 //		
-//		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
-//		input.add("src/test/resources/test/stockexchange-unittest.owl");
-//		input.add("src/test/resources/test/dag/role-equivalence.owl");
+		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
+		input.add("src/test/resources/test/stockexchange-unittest.owl");
+		input.add("src/test/resources/test/dag/role-equivalence.owl");
 		/** C = B -> ER -> A*/
 		input.add("src/test/resources/test/newDag/equivalents1.owl");
 		/** B -> A -> ER=C */
