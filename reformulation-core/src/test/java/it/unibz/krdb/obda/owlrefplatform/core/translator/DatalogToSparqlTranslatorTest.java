@@ -22,41 +22,30 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
 
-	private DatalogToSparqlTranslator datalogUtils;
+	private DatalogToSparqlTranslator datalogTranslator;
+	private PrefixManager prefixManager;
 
-	private static PrefixManager prefixManager;
 	private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
-	@BeforeClass
-	public static void setup() {
-		prefixManager = null;
-	}
-
-	private void initPrefixManager() {
+	@Before
+	public void setup() {
 		prefixManager = new SimplePrefixManager();
 		prefixManager.addPrefix(":", "http://example.org/");
-		DatalogToSparqlTranslator.init(prefixManager);
-	}
-
-	private void initDatalogUtils() {
-		datalogUtils = DatalogToSparqlTranslator.getInstance();
+		datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
 	}
 
 	@Test
 	public void testSimpleQuery() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x);
 		
@@ -72,8 +61,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testAnotherSimpleQuery() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a);
 		
@@ -89,8 +76,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSimpleRule() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a);
 		Function ans2 = createRule(ANS2, x, a);
@@ -109,8 +94,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testTwoSimpleRules() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a, b);
@@ -133,8 +116,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSimpleQueryWithCondition() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a);
 		Function cond = dataFactory.getFunctionEQ(a, c1);
@@ -151,8 +132,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSimpleQueryWithMoreConditions() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
@@ -174,8 +153,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSimpleRuleWithCondition() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a);
 		Function ans2 = createRule(ANS2, x, a);
@@ -195,8 +172,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testFiveSimpleRulesWithCondition() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x, a);
@@ -233,8 +208,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSimpleQueryWithNestedConditions() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
@@ -259,8 +232,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameRules() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
@@ -284,8 +255,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testMultipleSameRules() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, y);
 		Function ans2 = createRule(ANS2, x);
@@ -314,8 +283,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameQueries() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
@@ -345,8 +312,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testJoinPredicate() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
@@ -370,8 +335,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testNestedJoinPredicate() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
@@ -402,8 +365,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testLeftJoinPredicate() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
@@ -427,8 +388,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testNestedLeftJoinPredicate() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
@@ -459,8 +418,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testMixedJoinPredicates() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
@@ -491,8 +448,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameRulesWithJoin() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
@@ -520,8 +475,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameRulesWithNestedJoins() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x);
@@ -556,8 +509,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameRulesWithLeftJoin() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
@@ -585,8 +536,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameRulesWithNestedLeftJoins() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x);
@@ -621,8 +570,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testSameRulesWithMixedJoins() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x);
@@ -657,8 +604,6 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Test
 	public void testQueryModifiers() {
-		initPrefixManager();
-		initDatalogUtils();
 		
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a, b);
@@ -704,7 +649,7 @@ public class DatalogToSparqlTranslatorTest {
 	}
 
 	private void translateAndDisplayOutput(String title, DatalogProgram datalog) {
-		final String sparqlOutput = datalogUtils.toSparql(datalog);
+		final String sparqlOutput = datalogTranslator.translate(datalog);
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n\n" + title);
 		sb.append("\n====================================================================================\n");
