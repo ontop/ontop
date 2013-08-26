@@ -30,9 +30,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.UnknownBooleanSymbolExc
 
 import java.util.List;
 
+/**
+ * This class provides the translation service from Datalog Program to SPARQL string.
+ * The pre-condition for the Datalog Program is that the queries locate at the beginning
+ * in the program followed by the rules.
+ */
 public class DatalogToSparqlTranslator {
-
-	private static DatalogToSparqlTranslator instance = null;
 
 	private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 	
@@ -42,27 +45,28 @@ public class DatalogToSparqlTranslator {
 
 	private OBDAQueryModifiers queryModifiers;
 
-	// Prevent external instantiation
-	private DatalogToSparqlTranslator(PrefixManager pm) {
-		prefixManager = pm;
-	}
-
-	private DatalogToSparqlTranslator() {
+	/**
+	 * Creates the translator with a default prefix manager. The default prefix
+	 * manager contains the common prefixes (e.g., RDF, RDFS, OWL)
+	 */
+	public DatalogToSparqlTranslator() {
 		this(new SimplePrefixManager());
 	}
 
-	public static void init(PrefixManager pm) {
-		instance = new DatalogToSparqlTranslator(pm);
+	/**
+	 * Creates the translator with a given prefix manager.
+	 * 
+	 * @param prefixManager
+	 *            the given prefix manager.
+	 */
+	public DatalogToSparqlTranslator(PrefixManager prefixManager) {
+		this.prefixManager = prefixManager;
 	}
 
-	public static DatalogToSparqlTranslator getInstance() {
-		if (instance == null) {
-			instance = new DatalogToSparqlTranslator();
-		}
-		return instance;
-	}
-
-	public String toSparql(DatalogProgram datalog) {
+	/**
+	 * Produces SPARQL string given a valid datalog program.
+	 */
+	public String translate(DatalogProgram datalog) {
 		StringBuilder sb = new StringBuilder();
 		
 		// Print the prefix declaration, if possible
@@ -84,7 +88,11 @@ public class DatalogToSparqlTranslator {
 		return sb.toString();
 	}
 
-	public String toSparql(Term term) {
+	/*
+	 * Other utility and private methods.
+	 */
+
+	protected String toSparql(Term term) {
 		if (term instanceof Variable) {
 			return "?" + TermUtil.toString(term);
 		} else if (term instanceof URIConstant) {
@@ -95,10 +103,10 @@ public class DatalogToSparqlTranslator {
 		return TermUtil.toString(term); // for the other types of term
 	}
 
-	// TODO: The current OBDA model should be refactored. The current structure prevents 
-	// utilizing Java polymorphism in the implementation of the following methods.
+	// TODO: The current OBDA model should be refactored. The current API design prevents 
+	// utilizing Java polymorphism for implementing the following methods.
 
-	public String toSparql(Function function) {
+	protected String toSparql(Function function) {
 		StringBuilder sb = new StringBuilder();
 		
 		Predicate functionSymbol = function.getFunctionSymbol();
@@ -135,18 +143,18 @@ public class DatalogToSparqlTranslator {
 		return sb.toString();
 	}
 
-	protected static String printTripleGraph(String subject, String predicate, String object) {
+	private String printTripleGraph(String subject, String predicate, String object) {
 		return subject + " " + predicate + " " + object;
 	}
 
-	protected static String enclosedBrackets(String expression) {
+	private String enclosedBrackets(String expression) {
 		return "( " + expression + " )";
 	}
 
 	/**
 	 * Returns the arithmetic symbols for binary operations given its function symbol.
 	 */
-	public static String getArithmeticSymbol(Predicate functionSymbol) {
+	private String getArithmeticSymbol(Predicate functionSymbol) {
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			return SparqlKeyword.ADD;
 		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
@@ -160,7 +168,7 @@ public class DatalogToSparqlTranslator {
 	/**
 	 * Returns the boolean symbols for binary operations given its function symbol.
 	 */
-	public static String getBooleanSymbol(Predicate functionSymbol) {
+	private String getBooleanSymbol(Predicate functionSymbol) {
 		if (functionSymbol.equals(OBDAVocabulary.AND)) {
 			return SparqlKeyword.AND;
 		} else if (functionSymbol.equals(OBDAVocabulary.OR)) {
@@ -195,31 +203,31 @@ public class DatalogToSparqlTranslator {
 	/*
 	 * For Triple function, i.e., triple(s, p, o)
 	 */
-	public static Term getTripleSubject(Function function) {
+	private Term getTripleSubject(Function function) {
 		return function.getTerm(0);
 	}
 
-	public static Term getTriplePredicate(Function function) {
+	private Term getTriplePredicate(Function function) {
 		return function.getTerm(1);
 	}
 
-	public static Term getTripleObject(Function function) {
+	private Term getTripleObject(Function function) {
 		return function.getTerm(2);
 	}
 
 	/*
 	 * For binary function, e.g., Person(x), hasName(x, y)
 	 */
-	public static Term getSubject(Function function) {
+	private Term getSubject(Function function) {
 		return function.getTerm(0);
 	}
 
-	public static Term getPredicate(Function function) {
+	private Term getPredicate(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
 		return dataFactory.getConstantURI(predicate.getName());
 	}
 
-	public static Term getObject(Function function) {
+	private Term getObject(Function function) {
 		return function.getTerm(1);
 	}
 
@@ -375,16 +383,18 @@ public class DatalogToSparqlTranslator {
 	}
 
 	private List<CQIE> getMainQueries(DatalogProgram datalog) {
-		// TODO: Predicate and DatalogProgram need a code refactor.
-		
-		/* Unusual method implementation. Getting rules from DatalogProgram
-		 * requires a Predicate object. And creating a Predicate object requires
-		 * the arity number and types in advanced, which are sometimes impossible
-		 * to get.
+		/*
+		 * TODO: Predicate and DatalogProgram need a code refactor: predicate
+		 * shouldn't store the arity and data-types.
+		 * 
+		 * Implementation hack. Getting rules from DatalogProgram requires a
+		 * Predicate object. And creating a Predicate object requires the arity
+		 * number and data-types, which are sometimes impossible to get in
+		 * advanced.
 		 * 
 		 * This method uses a way around such that it gets the first rule
-		 * (Assumption: the first position is always the main query). And
-		 * then getting the predicate to get the other main queries, if available.
+		 * (Assumption: the first position is always the main query). And then
+		 * getting the predicate to get the other main queries, if available.
 		 */
 		CQIE mainQuery = datalog.getRules().get(0);
 		Predicate mainQueryPredicate = mainQuery.getHead().getFunctionSymbol();
