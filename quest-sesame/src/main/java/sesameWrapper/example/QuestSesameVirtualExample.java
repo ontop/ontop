@@ -152,6 +152,7 @@ public class QuestSesameVirtualExample {
 		
 		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myGraph, pref);
 
+		System.out.println(myGraph);
 		/*
 		 * Repository must be always initialized first
 		 */
@@ -168,7 +169,7 @@ public class QuestSesameVirtualExample {
 		String sparqlQuery = 
 				"PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" + 
 				"SELECT ?x ?y \n" +
-				"WHERE {?x a :Book; :title ?y}";
+				"WHERE {?x a :Book; :hasEdition ?y}";
 			
 		try {
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery);
