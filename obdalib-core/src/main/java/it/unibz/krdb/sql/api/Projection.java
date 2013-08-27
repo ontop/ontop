@@ -16,9 +16,9 @@ public class Projection implements Serializable {
 
 	private static final long serialVersionUID = -1926279507915359040L;
 	
-	private static final int SELECT_DEFAULT = 0;
-	private static final int SELECT_ALL = 1;
-	private static final int SELECT_DISTINCT = 2;
+	public static final int SELECT_DEFAULT = 0;
+	public static final int SELECT_ALL = 1;
+	public static final int SELECT_DISTINCT = 2;
 
 	private int type;
 

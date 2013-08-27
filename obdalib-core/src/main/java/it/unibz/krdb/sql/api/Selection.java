@@ -155,4 +155,10 @@ public class Selection implements Serializable{
 		}
 		return str;
 	}
+	
+	public Selection clone(){
+		 Selection newSelection = new Selection();
+		 newSelection.conditions = new LinkedList<ICondition>(conditions);
+		 return newSelection;
+	}
 }

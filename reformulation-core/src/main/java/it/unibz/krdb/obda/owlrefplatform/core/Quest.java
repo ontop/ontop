@@ -57,6 +57,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -665,11 +666,24 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
+			/**
+			 * Expand the meta mapping 
+			 */
+			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
+			
+			List<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(unfoldingOBDAModel.getMappings(sourceId));
+			
+			unfoldingOBDAModel.removeAllMappings();
+			for(OBDAMappingAxiom mapping : expandedMappings){
+				unfoldingOBDAModel.addMapping(sourceId, mapping);
+			}
+			
+			
 			/***
 			 * Starting mapping processing
 			 */
 
-			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
+			MappingAnalyzer analyzer = new MappingAnalyzer(expandedMappings, metadata);
 
 			unfoldingProgram = analyzer.constructDatalogProgram();
 

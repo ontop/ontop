@@ -14,13 +14,11 @@ import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.exception.UnsupportedTagException;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.parser.TargetQueryParser;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
@@ -38,14 +36,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.net.URI;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +68,6 @@ public class ModelIOManager {
     private OBDAModel model;
     private PrefixManager prefixManager;
     private OBDADataFactory dataFactory;
-    private  Connection localConnection;
     
     private List<Indicator> invalidMappingIndicators = new ArrayList<Indicator>();
     
@@ -208,66 +199,16 @@ public class ModelIOManager {
         	}
         }
         
-        try{
-        	expandTemplateMappings(sourceUri);
-        } catch (Exception e) {
-        	System.out.println("Error" + e);
-        }
-        
-        
-        
-        
-        
         // Throw some validation exceptions
         if (!invalidMappingIndicators.isEmpty()) {
             throw new InvalidMappingException(invalidMappingIndicators);
         }
     }
 
-    private void expandTemplateMappings(URI sourceUri) throws SQLException {
-		
-    	
-    	Hashtable<URI,ArrayList<OBDAMappingAxiom>> mappingsList= model.getMappings();
-    	ArrayList<OBDAMappingAxiom> mappings = mappingsList.get(sourceUri);
-    	ArrayList<OBDAMappingAxiom> tripleMappings =null;
-    	
-    	for (OBDAMappingAxiom axiom : mappings) {
-
-    		CQIE target=(CQIE) axiom.getTargetQuery();
-    		List<Function> body = target.getBody();
-    		
-    		OBDAQuery source = axiom.getSourceQuery();
-    		System.out.println("hola");
-    		
-    	}
-    	
-    	try{
-    	Statement st = localConnection.createStatement();
-    	} catch (SQLException e) {
-    		System.out.println("Error" + e );
-    	}
-    	
-    	
-    	//for (OBDAMappingAxiom axiom : tripleMappings) {
-			
-			/*
-			if (triple)
-				
-			String sourceString = axiom.getSourceQuery().toString();
-			st.execute(sourceString)
-			ResultSet classesRaw = st.getResultSet()
-			
-			
-			while classesRae
-			   saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);
-			*/
-	 // }//end for methods
-
-	/*
+    /*
      * Helper methods related to save file.
      */
-    }
-    
+
     private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
         final Map<String, String> prefixMap = model.getPrefixManager().getPrefixMap();
 
@@ -504,53 +445,4 @@ public class ModelIOManager {
         // A comment line is always started by semi-colon
         return line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0;
     }
-    
-    
-    
-    /*
-     * I am repeating this code, took it from QUEST
-     */
-    
-	/***
-	 * Starts the local connection that Quest maintains to the DBMS. This
-	 * connection belongs only to Quest and is used to get information from the
-	 * DBMS. At the moment this connection is mainly used during initialization,
-	 * to get metadata about the DBMS or to create repositories in classic mode.
-	 * 
-	 * @return
-	 * @throws SQLException
-	 */
-	private boolean connect(URI name) throws SQLException {
-
-		OBDADataSource obdaSource = model.getSource(name);
-		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
-		}
-		 localConnection = DriverManager.getConnection(url, username, password);
-
-		if (localConnection != null) {
-			return true;
-		}
-		return false;
-	}
-
-	public void disconnect() throws SQLException {
-		try {
-			localConnection.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-	}
-    
-    
-    
-    
-    
 }
