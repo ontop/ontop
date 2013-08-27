@@ -191,6 +191,7 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 			else{
 			replacements.remove(node);
 			equivalencesMap.remove(node);
+			
 			}
 		}
 		return namedEquivalences;
