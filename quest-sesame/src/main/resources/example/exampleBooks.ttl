@@ -11,9 +11,7 @@
 
 <cl_Authors>
 	 a rr:TriplesMap;
-	rr:logicalTable [ rr:sqlQuery """
-		select wr_code, wr_name from tb_affiliated_writers
-	""" ];
+	rr:logicalTable [ rr:tableName "tb_affiliated_writers" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#author/{\"wr_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Author>
  ];
@@ -24,9 +22,7 @@
 
 <cl_Books>
 	 a rr:TriplesMap;
-	rr:logicalTable [ rr:sqlQuery """
-		select bk_code, bk_title from tb_books
-	""" ];
+	rr:logicalTable [ rr:tableName "tb_books" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#book/{\"bk_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Book>
  ];
@@ -37,9 +33,7 @@
 
 <cl_Editors>
 	 a rr:TriplesMap;
-	rr:logicalTable [ rr:sqlQuery """
-		select ed_code, ed_name from tb_editor
-	""" ];
+	rr:logicalTable [ rr:tableName "tb_editor" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#editor/{\"ed_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Editor>
  ];
@@ -50,9 +44,7 @@
 
 <cl_Editions>
 	 a rr:TriplesMap;
-	rr:logicalTable [ rr:sqlQuery """
-		select ed_code,pub_date,n_edt from tb_edition
-	""" ];
+	rr:logicalTable [ rr:tableName "tb_edition" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#edition/{\"ed_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Edition>
  ];

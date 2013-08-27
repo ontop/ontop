@@ -1034,7 +1034,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("CHILD." + col );
-								sb.append("CHILD.\"" + col + "\" as CHILD_" + (col));
+								sb.append("CHILD.\"" + col + "\" as \"CHILD_" + (col)+"\"");
 								needComma = true;
 							}
 						}
@@ -1054,7 +1054,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("PARENT." + col);
-								sb.append("PARENT.\"" + col + "\" as PARENT_" + (col));
+								sb.append("PARENT.\"" + col + "\" as \"PARENT_" + (col)+"\"");
 								needComma = true;
 							}
 						}

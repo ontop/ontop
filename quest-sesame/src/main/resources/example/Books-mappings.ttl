@@ -24,9 +24,7 @@
 
 <cl_Books>
 	 a rr:TriplesMap;
-	rr:logicalTable [ rr:sqlQuery """
-		select bk_code, bk_title from tb_books
-	""" ];
+	rr:logicalTable [ rr:tableName "tb_books" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#book/{\"bk_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Book>
  ];
@@ -45,18 +43,6 @@
        				   rr:parent "\"bk_id\"";
       			  ];
 		];
-	];
-	rr:predicateObjectMap [
-		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#writtenBy> ;
- 		rr:objectMap 	[  
-			a rr:RefObjectMap;
-        		rr:parentTriplesMap <cl_Authors>;
-       			 rr:joinCondition [
-        			  rr:child "\"bk_code\"";
-       				   rr:parent "\"bk_code\"";
-      			  ];
-		];
-
 	].
 
 
@@ -75,9 +61,7 @@
 
 <cl_Editions>
 	 a rr:TriplesMap;
-	rr:logicalTable [ rr:sqlQuery """
-		select ed_code,pub_date,n_edt from tb_edition
-	""" ];
+	rr:logicalTable [ rr:tableName "tb_edition" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#edition/{\"ed_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Edition>
  ];
