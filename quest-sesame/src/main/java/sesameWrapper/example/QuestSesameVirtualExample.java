@@ -144,11 +144,11 @@ public class QuestSesameVirtualExample {
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		//set jdbc params in config
-		pref.setCurrentValueOf(QuestPreferences.DBNAME, "bookExample");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:postgresql://10.7.20.39/books");
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, "postgres");
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "postgres");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.postgresql.Driver");
+		pref.setCurrentValueOf(QuestPreferences.DBNAME, "books");
+		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
+		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
+		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
+		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 		
 		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myGraph, pref);
 
