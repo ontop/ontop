@@ -16,10 +16,15 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.ColumnReference;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
 import it.unibz.krdb.sql.api.DerivedColumn;
@@ -33,14 +38,12 @@ import it.unibz.krdb.sql.api.StringLiteral;
 
 public class MetaMappingExpander {
 
-	private DBMetadata metadata;
 	private Connection connection;
 	private SQLQueryTranslator translator;
 	private List<OBDAMappingAxiom> expandedMappings;
 
 	public MetaMappingExpander(Connection connection, DBMetadata metadata) {
 		this.connection = connection;
-		this.metadata = metadata;
 		translator = new SQLQueryTranslator(metadata);
 		expandedMappings = new ArrayList<OBDAMappingAxiom>();
 
@@ -52,6 +55,7 @@ public class MetaMappingExpander {
 
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			List<Function> body = targetQuery.getBody();
+			Function bodyAtom = targetQuery.getBody().get(0);
 
 			OBDASQLQuery sourceQuery = (OBDASQLQuery)mapping.getSourceQuery();
 
@@ -59,13 +63,16 @@ public class MetaMappingExpander {
 			
 			if (!firstBodyAtom.getFunctionSymbol().equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
 				/**
-				 * for normal mappings, we do not need to expand.
+				 * for normal mappings, we do not need to expand it.
 				 */
 				expandedMappings.add(mapping);
+				System.err.println("Normal mapping: " + mapping);
+				
 			} else {
-				/*
-				 * q(X, Class) :- triple(X, a, Class).
-				 */
+				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom);
+				
+				System.err.println("Meta mapping: " + mapping);
+			
 				
 				// Construct the SQL query tree from the source query
 				QueryTree sourceQueryTree = translator.contructQueryTree(sourceQuery.toString());
@@ -75,10 +82,16 @@ public class MetaMappingExpander {
 				Projection distinctClassesProject = new Projection();
 				
 				distinctClassesProject.setType(Projection.SELECT_DISTINCT);
-				/**
-				 * 'Class' is at position 1 of 'q(X, Class)'.
-				 */
-				distinctClassesProject.add(columnList.get(1));
+				
+				List<DerivedColumn> columnsForTemplate = new ArrayList<DerivedColumn>();
+
+				columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
+				
+				distinctClassesProject.addAll(columnsForTemplate);
+				
+				List<DerivedColumn> columnsForValues = new ArrayList<DerivedColumn>(columnList);
+
+				columnsForValues.removeAll(columnsForTemplate);
 				
 				RelationalAlgebra ra = sourceQueryTree.value().clone();
 				ra.setProjection(distinctClassesProject);
@@ -87,15 +100,19 @@ public class MetaMappingExpander {
 				
 				String distinctClassesSQL = distinctQueryTree.toString();
 
-				Set<String> classes = new HashSet<String>();
+				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
 				
 				Statement st;
 				try {
 					st = connection.createStatement();
 					ResultSet rs = st.executeQuery(distinctClassesSQL);
 					while(rs.next()){
-						String cls = rs.getString(1);
-						classes.add(cls);
+						ArrayList<String> row = new ArrayList<String>(varsInTemplate.size());
+						for(int i = 1 ; i <= varsInTemplate.size(); i++){
+							 row.add(rs.getString(i));
+						}
+						paramsForClassTemplate.add(row);
+						
 					}
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -104,9 +121,11 @@ public class MetaMappingExpander {
 				
 				OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();  
 				
-				for(String cls : classes) {
-					Function newTargetHead = dfac.getFunction(targetQuery.getHead().getFunctionSymbol(), targetQuery.getHead().getTerm(0));
-					Function newTargetBody = dfac.getFunction(dfac.getPredicate(cls,1), targetQuery.getBody().get(0).getTerm(0));
+				for(List<String> params : paramsForClassTemplate) {
+					Function newTargetHead = targetQuery.getHead();
+					
+					Function newTargetBody = expandHigherOrderAtom(bodyAtom, params);
+					
 					CQIE newTargetQuery = dfac.getCQIE(newTargetHead, newTargetBody);
 					
 					Selection selection = sourceQueryTree.getSelection();
@@ -117,12 +136,26 @@ public class MetaMappingExpander {
 						newSelection = new Selection();
 					}
 					
-					IValueExpression columnRefExpression = columnList.get(1).getValueExpression();
-					StringLiteral clsStringLiteral = new StringLiteral(cls);
+					
 					try {
-						newSelection.addCondition(new ComparisonPredicate(columnRefExpression, clsStringLiteral, ComparisonPredicate.Operator.EQ));
+						int j = 0;
+						
+						for(DerivedColumn column : columnsForTemplate){
+							IValueExpression columnRefExpression;
+							columnRefExpression = column.getValueExpression();
+							
+							StringLiteral clsStringLiteral = new StringLiteral(params.get(j));
+							if(j != 0){
+								newSelection.addOperator(new AndOperator());
+							}
+							newSelection.addCondition(new ComparisonPredicate(columnRefExpression, clsStringLiteral, ComparisonPredicate.Operator.EQ));
+							j++;
+							
+						}
+						
+						
 					} catch (Exception e) {
-						e.printStackTrace();
+						throw new RuntimeException(e);
 					}
 					
 					ra = sourceQueryTree.value().clone();
@@ -133,7 +166,8 @@ public class MetaMappingExpander {
 					/**
 					 * 'X' is at position 0 of 'q(X, Class)'.
 					 */
-					valueProject.add(columnList.get(0));
+					//valueProject.add(columnList.get(0));
+					valueProject.addAll(columnsForValues);
 					
 					ra = sourceQueryTree.value().clone();
 					ra.setProjection(valueProject);
@@ -156,6 +190,91 @@ public class MetaMappingExpander {
 		
 	
 		return expandedMappings;
+	}
+
+	private List<DerivedColumn> getColumnsForTemplate(List<Variable> varsInTemplate,
+			ArrayList<DerivedColumn> columnList) {
+		List<DerivedColumn> columnsForTemplate = new ArrayList<DerivedColumn>();
+
+		for (Variable var : varsInTemplate) {
+			boolean found = false;
+			for (DerivedColumn column : columnList) {
+				if ((column.hasAlias() && column.getAlias().equals(var.getName())) //
+						|| (!column.hasAlias() && column.getName().equals(var.getName()))) {
+					//distinctClassesProject.add(column);
+					columnsForTemplate.add(column);
+					found = true;
+					break;
+				}
+			}
+			if(!found){
+				throw new IllegalStateException();
+			}
+		}
+		
+		return columnsForTemplate;
+		
+		
+	}
+
+	/**
+	 * 
+	 * This method extracts the variables in the template from the atom 
+	 * 
+	 * Example:
+	 * Input Atom:
+	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}/{}", X, Y))</pre>
+	 * 
+	 * Output: [X, Y]
+	 * 
+	 * @param atom
+	 * @return
+	 */
+	private List<Variable> getVariablesInTemplate(Function atom) {
+		Function funcTerm = (Function)atom.getTerm(2);
+		List<Variable> vars = new ArrayList<Variable>();
+		for(int i = 1; i < funcTerm.getArity(); i++){
+			vars.add((Variable) funcTerm.getTerm(i));
+		}
+		return vars;
+	}
+
+	
+	/***
+	 * This method expands the higher order atom 
+	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
+	 *  to 
+	 *  <pre>http://example.org/cls(t1)</pre>, if X is t1
+	 * 
+	 * @param atom 
+	 * 			a Function in form of triple(t1, 'rdf:type', X)
+	 * @param values
+	 * 			the concrete name of the X 
+	 * @return
+	 * 			expanded atom in form of <pre>http://example.org/cls(t1)</pre>
+	 */
+	private Function expandHigherOrderAtom(Function atom, List<String> values) {
+		// if(term2 instanceof Function){
+		Term term2 = atom.getTerm(2);
+		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+
+		Function functionTerm2 = (Function) term2;
+		String uriTemplate = ((ValueConstant) functionTerm2.getTerm(0))
+				.getValue();
+
+		String predName = uriTemplate;
+		
+		int j = 0;
+
+		for (int i = 1; i < functionTerm2.getArity(); i++) {
+			predName = predName.replace("{}", values.get(j));
+			j++;
+		}
+
+		Predicate p = dfac.getPredicate(predName, 1);
+
+		return dfac.getFunction(p, atom.getTerm(0));
+
 	}
 
 }

@@ -165,9 +165,13 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 //			long end = System.currentTimeMillis();
 //			long elapsed = end-start;
 //			log.info("Elapsed time: {}", elapsed);
+			
+
+			//org.h2.tools.Server.startWebServer(this.conn);
+
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
-			OWLIndividual ind1 = rs.getOWLIndividual("uri1");
+			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind1.toString());

@@ -300,20 +300,31 @@ predicateObjectList returns [List<Function> value]
 @init {
    $value = new LinkedList<Function>();
 }
-  : v1=verb  l1=objectList {
+  : v1=verb  l1= objectList{
       for (Term object : $l1.value) {
         Function atom = null;
         String p = $v1.value.toString();
         if (p.equals(OBDAVocabulary.RDF_TYPE)) {
           if (object instanceof  URIConstant) {
-	URIConstant c = (URIConstant) object;  // it has to be a URI constant
+            URIConstant c = (URIConstant) object;  // it has to be a URI constant
           	Predicate predicate = dfac.getClassPredicate(c.getURI());
           	atom = dfac.getFunction(predicate, subject);
           } else if (object instanceof  Variable){
-	 Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
-	 Term rdftype = dfac.getConstantURI(p);
-          	atom = dfac.getFunction(triplepredicate, subject, rdftype,   object);
+            Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
+            Term rdftype = dfac.getConstantURI(p);
+            Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+            Term uriOfObject = dfac.getFunction(uriPredicate, object);
+            atom = dfac.getFunction(triplepredicate, subject, rdftype,  uriOfObject);
+            // TODO:
+            //System.err.println("some warning of using varible in danger")
+          } else if (object instanceof Function){
+            Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
+            Term rdftype = dfac.getConstantURI(p);
+            atom = dfac.getFunction(triplepredicate, subject, rdftype,   object);          	
+          } else {
+            throw new IllegalStateException();
           }
+
         } else {
           Predicate predicate = dfac.getPredicate($v1.value, 2); // the data type cannot be determined here!
           atom = dfac.getFunction(predicate, subject, object);
@@ -326,14 +337,22 @@ predicateObjectList returns [List<Function> value]
         Function atom = null;
         String p = $v2.value.toString();
         if (p.equals(OBDAVocabulary.RDF_TYPE)) {
-            if (object instanceof  URIConstant) {
-	URIConstant c = (URIConstant) object;  // it has to be a URI constant
-          	Predicate predicate = dfac.getClassPredicate(c.getURI());
-          	atom = dfac.getFunction(predicate, subject);
+          if (object instanceof  URIConstant) {
+            URIConstant c = (URIConstant) object;  // it has to be a URI constant
+            Predicate predicate = dfac.getClassPredicate(c.getURI());
+            atom = dfac.getFunction(predicate, subject);
           } else if (object instanceof  Variable){
-	 Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
-	 Term rdftype = dfac.getConstantURI(p);
-          	atom = dfac.getFunction(triplepredicate, subject, rdftype,   object);
+            Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
+            Term rdftype = dfac.getConstantURI(p);
+            Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+            Term uriOfObject = dfac.getFunction(uriPredicate, object);
+            atom = dfac.getFunction(triplepredicate, subject, rdftype,  uriOfObject);
+            // TODO:
+            //System.err.println("some warning of using varible in danger")
+          } else if (object instanceof Function){
+            Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
+            Term rdftype = dfac.getConstantURI(p);
+            atom = dfac.getFunction(triplepredicate, subject, rdftype,   object);           
           }
         } else {
           Predicate predicate = dfac.getPredicate($v2.value, 2); // the data type cannot be determined here!
