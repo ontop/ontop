@@ -121,8 +121,8 @@ public class DatalogToSparqlTranslator {
 		} else {
 			// For non-triple predicates
 			final Term subject = getSubject(function);
-			final Term predicate = (functionSymbol.isClass() ? RDF_TYPE : getPredicate(function));
-			final Term object = (functionSymbol.isClass() ? getPredicate(function) : getObject(function));
+			final Term predicate = (isClass(function) ? RDF_TYPE : getPredicate(function));
+			final Term object = (isClass(function) ? getPredicate(function) : getObject(function));
 
 			// Check the function symbols
 			if (functionSymbol.isArithmeticPredicate()) {
@@ -149,6 +149,10 @@ public class DatalogToSparqlTranslator {
 
 	private String enclosedBrackets(String expression) {
 		return "( " + expression + " )";
+	}
+
+	private boolean isClass(Function function) {
+		return (function.getArity() == 1);
 	}
 
 	/**
@@ -216,7 +220,7 @@ public class DatalogToSparqlTranslator {
 	}
 
 	/*
-	 * For binary function, e.g., Person(x), hasName(x, y)
+	 * For binary function, e.g., hasName(x, y)
 	 */
 	private Term getSubject(Function function) {
 		return function.getTerm(0);
