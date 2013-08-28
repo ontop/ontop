@@ -537,7 +537,7 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public String getSPARQLRewriting(String sparql) throws OBDAException {
 		if (!SPARQLQueryUtility.isSelectQuery(sparql)) {
-			throw new UnsupportedOperationException("Support only SELECT query");
+			throw new OBDAException("Support only SELECT query");
 		}
 		// Parse the SPARQL string into SPARQL algebra object
 		Query query = QueryFactory.create(sparql);

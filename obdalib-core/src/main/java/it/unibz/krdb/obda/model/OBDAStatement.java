@@ -36,7 +36,7 @@ public interface OBDAStatement {
 
 	public boolean isClosed() throws OBDAException;
 
-	/***
+	/**
 	 * Sets the number of seconds the driver will wait for a Statement object to
 	 * execute to the given number of seconds. If the limit is exceeded, an
 	 * SQLException is thrown.
@@ -46,4 +46,15 @@ public interface OBDAStatement {
 	 * @throws Exception
 	 */
 	public void setQueryTimeout(int seconds) throws Exception;
+	
+	/**
+	 * Produces an expanded SPARQL string given the initial <code>query</code> input.
+	 * The expansion utilizes Quest rewriter over an ontology.
+	 * 
+	 * @param query
+	 * 			The initial SPARQL query string.
+	 * @return SPARQL query expansion.
+	 * @throws OBDAException
+	 */
+	public String getSPARQLRewriting(String query) throws OBDAException;
 }
