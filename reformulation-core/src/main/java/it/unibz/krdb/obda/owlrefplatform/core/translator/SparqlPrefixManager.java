@@ -11,6 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
 import it.unibz.krdb.obda.io.AbstractPrefixManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class SparqlPrefixManager extends AbstractPrefixManager {
 	public SparqlPrefixManager(PrefixMapping prefixMapping) {
 		this.prefixMapping = prefixMapping;
 	}
-	
+
 	@Override
 	public void addPrefix(String prefix, String uri) {
 		throw new UnsupportedOperationException("This is a read-only prefix manager. Addition operation is not permitted");
@@ -36,21 +37,40 @@ public class SparqlPrefixManager extends AbstractPrefixManager {
 
 	@Override
 	public String getURIDefinition(String prefix) {
+		if (prefix.equals(":")) {
+			prefix = ""; // to conform with Ontop prefix manager
+		}
 		return prefixMapping.getNsPrefixURI(prefix);
 	}
 
 	@Override
 	public String getPrefix(String uri) {
-		return prefixMapping.getNsURIPrefix(uri);
+		String prefix = prefixMapping.getNsURIPrefix(uri);
+		if (prefix.equals("")) {
+			prefix = ":"; // to conform with Ontop prefix manager
+		}
+		return prefix;
 	}
 
 	@Override
 	public Map<String, String> getPrefixMap() {
-		return prefixMapping.getNsPrefixMap();
+		Map<String, String> newPrefixMap = new HashMap<String, String>();
+		Map<String, String> jenaPrefixMap = prefixMapping.getNsPrefixMap();
+		for (String prefix : jenaPrefixMap.keySet()) {
+			if (prefix.isEmpty()) {
+				newPrefixMap.put(":", jenaPrefixMap.get(prefix));
+			} else {
+				newPrefixMap.put(prefix, jenaPrefixMap.get(prefix));
+			}
+		}
+		return newPrefixMap;
 	}
 
 	@Override
 	public boolean contains(String prefix) {
+		if (prefix.equals(":")) {
+			prefix = ""; // to conform with Ontop prefix manager
+		}
 		return getPrefixMap().containsKey(prefix);
 	}
 
