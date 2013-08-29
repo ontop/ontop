@@ -65,12 +65,20 @@ public class OBDAQueryModifiers {
 		return limit;
 	}
 
+	public boolean hasLimit() {
+		return limit != -1 ? true : false;
+	}
+
 	public void setOffset(long offset) {
 		this.offset = offset;
 	}
 
 	public long getOffset() {
 		return offset;
+	}
+
+	public boolean hasOffset() {
+		return offset != -1 ? true : false;
 	}
 
 	public void addOrderCondition(Variable var, int direction) {
@@ -82,8 +90,12 @@ public class OBDAQueryModifiers {
 		return orderConditions;
 	}
 
+	public boolean hasOrder() {
+		return !orderConditions.isEmpty() ? true : false;
+	}
+
 	public boolean hasModifiers() {
-		return isDistinct || limit != -1 || offset != -1 || !orderConditions.isEmpty();
+		return isDistinct || hasLimit() || hasOffset() || hasOrder();
 	}
 
 	/**

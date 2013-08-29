@@ -96,27 +96,6 @@ public class TargetQueryRenderer {
 		for (String prefix: currentMap.keySet()) {
 			prefManClone.addPrefix(prefix, pm.getURIDefinition(prefix));
 		}
-		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
-		boolean containsRDFPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDF);
-		boolean containsRDFSPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDFS);
-		boolean containsOWLPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_OWL);
-		boolean containsQUESTPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_QUEST);
-
-		if (!containsXSDPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
-		}
-		if (!containsRDFPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDF, OBDAVocabulary.NS_RDF);
-		}
-		if (!containsRDFSPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
-		}
-		if (!containsOWLPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
-		}
-		if (!containsQUESTPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
-		}
 		return prefManClone.getShortForm(uri, insideQuotes);
 	}
 

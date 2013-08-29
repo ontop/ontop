@@ -50,4 +50,9 @@ public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		// NO-OP
 	}
+
+	@Override
+	public boolean hasModifiers() {
+		return false;
+	}
 }
