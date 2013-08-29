@@ -29,8 +29,6 @@ import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
 
-import junit.framework.TestCase;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

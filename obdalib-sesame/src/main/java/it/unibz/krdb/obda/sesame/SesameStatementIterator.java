@@ -6,7 +6,7 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package sesameWrapper;
+package it.unibz.krdb.obda.sesame;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -34,19 +34,16 @@ public class SesameStatementIterator implements Iterator<Statement> {
 		this.iterator = it;
 	}
 
-	@Override
 	public boolean hasNext() {
 		return iterator.hasNext();
 	}
 
-	@Override
 	public Statement next() {
 		Assertion assertion = iterator.next();
 		Statement individual = new SesameStatement(assertion);
 		return individual;
 	}
 
-	@Override
 	public void remove() {
 		throw new UnsupportedOperationException("This iterator is read-only");
 	}

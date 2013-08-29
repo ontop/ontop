@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
+import it.unibz.krdb.obda.sesame.SesameStatement;
 
 import java.util.HashMap;
 import java.util.LinkedList;

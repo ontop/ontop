@@ -1,25 +1,16 @@
 #!/bin/sh
 
-########################################################################################################################
-# README:                                                                                                              #
-#                                                                                                                      #
-# The required components for building the release can be found: http://obda.inf.unibz.it/files/dev/Dependencies.zip   #
-# Unzip it and locate the folder in ONTOP_DEP_HOME variable.                                                           #
-#                                                                                                                      #
-# Clone the repository from GitHub: https://github.com/ontop/ontop. Locate the source folder in BUILD_ROOT variable    #
-# Update the repository to the TAG release for stable version.                                                         #
-#                                                                                                                      #
-########################################################################################################################
+###
+# README:
+#
+# The required components for building the release can be found: http://obda.inf.unibz.it/files/dev/Dependencies.zip
+# 
+# - In UNIX system, locate the dependencies folder in ONTOP_DEP_HOME variable.
+#
+###
 
-# location for the build ROOT folder
-export BUILD_ROOT=/build/ontop-1.8
-
-# location for the build dependencies home 
-export ONTOP_DEP_HOME=/build/dependencies
-
-#------------------------------------------# 
-# DO NOT touch the following command lines #
-#------------------------------------------#
+# location for the build dependencies home
+export ONTOP_DEP_HOME=/Users/timi/Documents/Dependencies
 
 # location for the JDBC plugin jars
 export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME
@@ -52,10 +43,7 @@ export OWL_API_DIST=QuestOWL
 export VERSION=1.8
 export REVISION=0
 
-
-# Start building the packages
-#
-cd $BUILD_ROOT
+#svn update
 mvn clean
 
 # Packing the -ontopPro- distribution
@@ -64,30 +52,30 @@ echo ""
 echo "========================================="
 echo " Making -ontopPro- distribution package"
 echo "-----------------------------------------"
-echo "pluginVersion=$VERSION.$REVISION" >  $BUILD_ROOT/obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
-rm -fr $BUILD_ROOT/obdalib-protege41/dist
+echo "pluginVersion=$VERSION.$REVISION" >  obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
+rm -fr obdalib-protege41/dist
 mvn install -DskipTests
-cd $BUILD_ROOT/obdalib-protege41/
+cd obdalib-protege41/
 mvn bundle:bundle -DskipTests
 
-rm -fr $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
-mkdir $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
-cp target/it.unibz.inf.obda.p4plugin-$VERSION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
-cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
+rm -fr ../quest-distribution/$PROTEGE_DIST
+mkdir ../quest-distribution/$PROTEGE_DIST
+cp target/it.unibz.inf.obda.p4plugin-$VERSION.jar ../quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
+cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip ../quest-distribution/$PROTEGE_DIST/
 
-cd $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
+cd ../quest-distribution/$PROTEGE_DIST/
 
 mkdir -p $PROTEGE_MAIN_FOLDER_NAME/plugins
 cp it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.prefs.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
-zip $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/$PROTEGE_MAIN_PLUGIN-$VERSION.$REVISION.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*.*
+zip ../$PROTEGE_DIST/$PROTEGE_MAIN_PLUGIN-$VERSION.$REVISION.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*.*
 
 zip $PROTEGE_COPY_FILENAME.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*
 mv $PROTEGE_COPY_FILENAME.zip $PROTEGE_MAIN_PLUGIN-with-protege-$VERSION.$REVISION.zip
 
 rm -fr $PROTEGE_MAIN_FOLDER_NAME
-cd $BUILD_ROOT/quest-distribution
+cd ..
 
 # Packing the sesame distribution
 #
@@ -112,7 +100,7 @@ echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
 jar -uf $OPENRDF_WORKBENCH_FILENAME.war WEB-INF/lib/*
 
 rm -fr WEB-INF
-cd $BUILD_ROOT/quest-distribution
+cd ..
 
 # Packaging the sesame jetty distribution
 #
@@ -127,13 +115,13 @@ cp $JETTY_COPY_PATH/$JETTY_COPY_FILENAME.zip $QUEST_JETTY_DIST/ontop-with-jetty-
 export JETTY_FOLDER=$JETTY_INNER_FOLDERNAME
 cd $QUEST_JETTY_DIST
 mkdir -p $JETTY_INNER_FOLDERNAME/webapps
-cp $BUILD_ROOT/quest-distribution/$QUEST_SESAME_DIST/$OPENRDF_SESAME_FILENAME.war $JETTY_FOLDER/webapps
-cp $BUILD_ROOT/quest-distribution/$QUEST_SESAME_DIST/$OPENRDF_WORKBENCH_FILENAME.war $JETTY_FOLDER/webapps
+cp ../$QUEST_SESAME_DIST/$OPENRDF_SESAME_FILENAME.war $JETTY_FOLDER/webapps
+cp ../$QUEST_SESAME_DIST/$OPENRDF_WORKBENCH_FILENAME.war $JETTY_FOLDER/webapps
 
 zip ontop-with-jetty-$VERSION.$REVISION.zip $JETTY_FOLDER/webapps/*
 
 rm -fr $JETTY_FOLDER
-cd $BUILD_ROOT/quest-distribution
+cd ..
 
 # Packaging the OWL-API distribution
 #

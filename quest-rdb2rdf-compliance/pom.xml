@@ -20,6 +20,11 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 		<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.8</version>

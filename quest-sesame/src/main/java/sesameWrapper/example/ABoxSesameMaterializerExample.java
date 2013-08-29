@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.sesame.SesameStatementIterator;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +24,6 @@ import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
 
 import sesameWrapper.SesameMaterializer;
-import sesameWrapper.SesameStatementIterator;
 
 public class ABoxSesameMaterializerExample {
 
