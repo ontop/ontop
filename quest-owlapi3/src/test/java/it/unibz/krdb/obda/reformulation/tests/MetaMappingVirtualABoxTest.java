@@ -150,18 +150,27 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-		StringBuilder bf = new StringBuilder(query);
+		String query1 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
+		String query2 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
 		try {
 
-			QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeTuple(query1);
+			assertTrue(rs.nextRow());
+			OWLIndividual ind = rs.getOWLIndividual("x");
+			//OWLIndividual ind2 = rs.getOWLIndividual("y");
+			//OWLLiteral val = rs.getOWLLiteral("z");
+			assertEquals("<uri1>", ind.toString());
+			//assertEquals("<uri1>", ind2.toString());
+			//assertEquals("\"value1\"", val.toString());
+			
+			rs = st.executeTuple(query2);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
-			//OWLLiteral val = rs.getOWLLiteral("z");
+			OWLLiteral val = rs.getOWLLiteral("y");
 			assertEquals("<uri1>", ind1.toString());
 			//assertEquals("<uri1>", ind2.toString());
-			//assertEquals("\"value1\"", val.toString());
+			assertEquals("\"B\"", val.toString());
 			
 
 		} catch (Exception e) {

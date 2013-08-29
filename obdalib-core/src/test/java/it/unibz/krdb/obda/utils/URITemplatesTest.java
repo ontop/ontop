@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 
 public class URITemplatesTest extends TestCase {
 	
+	@SuppressWarnings("unchecked")
 	public void testFormat(){
 		assertEquals("http://example.org/A/1", URITemplates.format("http://example.org/{}/{}", "A", 1));
 		

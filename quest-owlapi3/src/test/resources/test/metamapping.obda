@@ -10,9 +10,13 @@ password
 driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	mapping2
+mappingId	mapping1
 target	{uri} a :{value}_{code}. 
 source	SELECT value, uri, code FROM table1
+
+mappingId	mapping2
+target	{uri} :{role}_{code} :{value}. 
+source	SELECT value, uri, code, role FROM table1 
 
 ]]
 
