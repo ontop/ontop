@@ -482,11 +482,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		/*
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
-//
-//		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
-//			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-//			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
-//		}
+		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
+			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
+			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
+		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
 
@@ -683,25 +682,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			/**
 			 * Expand the meta mapping 
-			 * 
-			 * TODO: example
 			 */
 			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
 			
-			List<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(unfoldingOBDAModel.getMappings(sourceId));
-			
-			unfoldingOBDAModel.removeAllMappings();
-			for(OBDAMappingAxiom mapping : expandedMappings){
-				unfoldingOBDAModel.addMapping(sourceId, mapping);
-			}
-			
-			
-			
-			
-			
+			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
-			MappingAnalyzer analyzer = new MappingAnalyzer(expandedMappings, metadata);
+			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
 
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
