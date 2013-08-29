@@ -70,9 +70,33 @@
     
 
 
+    <!-- http://it.unibz.krdb/obda/test/simple#A_1 -->
+
+    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A_1"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/test/simple#A_2 -->
+
+    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A_2"/>
+    
+
+
     <!-- http://it.unibz.krdb/obda/test/simple#B -->
 
     <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/test/simple#B_1 -->
+
+    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B_1"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/test/simple#B_2 -->
+
+    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B_2"/>
     
 
 

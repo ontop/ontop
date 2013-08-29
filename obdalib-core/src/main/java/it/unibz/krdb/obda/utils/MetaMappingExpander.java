@@ -35,6 +35,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * 
@@ -43,6 +46,8 @@ import java.util.List;
  */
 public class MetaMappingExpander {
 
+	Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	private Connection connection;
 	private SQLQueryTranslator translator;
 	private List<OBDAMappingAxiom> expandedMappings;
@@ -88,6 +93,11 @@ public class MetaMappingExpander {
 				expandedMappings.add(mapping);
 				
 			} else {
+				
+				
+				
+				
+				
 				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom);
 				
 				// Construct the SQL query tree from the source query
@@ -144,6 +154,8 @@ public class MetaMappingExpander {
 							columnsForValues, params);
 										
 					expandedMappings.add(newMapping);	
+					
+					log.debug("Expanded Mapping: {}", newMapping);
 				}
 				
 			}
@@ -304,15 +316,10 @@ public class MetaMappingExpander {
 
 		Term term2 = atom.getTerm(2);
 		Function functionTerm2 = (Function) term2;
-		String uriTemplate = ((ValueConstant) functionTerm2.getTerm(0))
-				.getValue();
+		String uriTemplate = ((ValueConstant) functionTerm2.getTerm(0)).getValue();
 
-		String predName = uriTemplate;
+		String predName = URITemplates.format(uriTemplate, values);
 		
-		for (int i = 1; i < functionTerm2.getArity(); i++) {
-			predName = predName.replace("{}", values.get(i - 1));
-		}
-
 		Predicate p = dfac.getPredicate(predName, 1, new COL_TYPE[]{COL_TYPE.OBJECT});
 
 		return dfac.getFunction(p, atom.getTerm(0));

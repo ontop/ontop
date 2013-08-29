@@ -150,24 +150,9 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A }";
+		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
-			
-			/*
-			 * Enable this if you want to test performance, it will run several cycles
-			 */
-//			long start = System.currentTimeMillis();
-//			for (int i = 0; i < 3000; i++) {
-//				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
-//			}
-//			long end = System.currentTimeMillis();
-//			long elapsed = end-start;
-//			log.info("Elapsed time: {}", elapsed);
-			
-
-			//org.h2.tools.Server.startWebServer(this.conn);
 
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
