@@ -57,6 +57,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -477,14 +478,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
 
+		//TODO: check and remove this block
 		/*
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
-
-		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
-			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
-		}
+//
+//		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
+//			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
+//			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
+//		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
 
@@ -666,8 +668,23 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
+			/***
+			 * Starting mapping processing
+			 */
+			
+			
+			/**
+			 * Split the mapping
+			 */
+			MappingSplitter mappingSplitler = new MappingSplitter();
+			
+			mappingSplitler.splitMappings(unfoldingOBDAModel, sourceId);
+			
+			
 			/**
 			 * Expand the meta mapping 
+			 * 
+			 * TODO: example
 			 */
 			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
 			
@@ -679,9 +696,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 			
 			
-			/***
-			 * Starting mapping processing
-			 */
+			
+			
+			
+			
 
 			MappingAnalyzer analyzer = new MappingAnalyzer(expandedMappings, metadata);
 

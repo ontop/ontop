@@ -44,6 +44,12 @@ public class MetaMappingExpander {
 	private List<OBDAMappingAxiom> expandedMappings;
 	private OBDADataFactory dfac;
 
+	/**
+	 * TODO
+	 * 
+	 * @param connection
+	 * @param metadata
+	 */
 	public MetaMappingExpander(Connection connection, DBMetadata metadata) {
 		this.connection = connection;
 		translator = new SQLQueryTranslator(metadata);
@@ -237,7 +243,6 @@ public class MetaMappingExpander {
 			for (DerivedColumn column : columnList) {
 				if ((column.hasAlias() && column.getAlias().equals(var.getName())) //
 						|| (!column.hasAlias() && column.getName().equals(var.getName()))) {
-					//distinctClassesProject.add(column);
 					columnsForTemplate.add(column);
 					found = true;
 					break;

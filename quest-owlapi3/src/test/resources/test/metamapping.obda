@@ -11,7 +11,7 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping2
-target	{uri} a :{value} . 
+target	{uri} a :{value} ; a :C . 
 source	SELECT value, uri FROM table1
 
 ]]
