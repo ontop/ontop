@@ -237,6 +237,8 @@ public class R2RMLManager {
 			
 			//get body predicate
 			List<Predicate> bodyPredicates = r2rmlParser.getBodyPredicates(myGraph, predobj);
+			//predicates that contain a variable are separately treated
+			List<Function> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(myGraph, predobj);
 			
 			//get object atom
 			Term objectAtom = r2rmlParser.getObjectAtom(myGraph, predobj);
@@ -248,22 +250,35 @@ public class R2RMLManager {
 			// construct the atom, add it to the body
 			List<Term> terms = new ArrayList<Term>();
 			terms.add(subjectAtom);
-			terms.add(objectAtom);
+			
 			
 			for (Predicate bodyPred : bodyPredicates) {
 				//for each predicate if there are more in the same node
 				
 				//check if predicate = rdf:type
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
-					if(objectAtom.getReferencedVariables().size()<1) {
-						Predicate newpred = fac.getClassPredicate(objectAtom.toString());
-						body.add(fac.getFunction(newpred, subjectAtom));
-					}
+					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
+						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+						Predicate uriPred = fac.getUriTemplatePredicate(1);
+						Function rdftype = fac.getFunction(uriPred, fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+						terms.add(rdftype);
+						terms.add(objectAtom);
+						body.add(fac.getFunction(newpred, terms));
 				} else {
 					// create predicate(subject, object) and add it to the body
+					terms.add(objectAtom);
 					Function bodyAtom = fac.getFunction(bodyPred, terms);
 					body.add(bodyAtom);
 				}
+			}
+			
+			//treat predicates that contain a variable (column or template declarations)
+			for (Function predFunction : bodyURIPredicates) {
+				//create triple(subj, predURIFunction, objAtom) terms
+				Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+				terms.add(predFunction);
+				terms.add(objectAtom);
+				body.add(fac.getFunction(newpred, terms));
 			}
 		}
 		return body;

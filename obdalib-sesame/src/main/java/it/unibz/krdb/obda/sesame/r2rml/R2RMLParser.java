@@ -261,27 +261,58 @@ public class R2RMLParser {
 			bodyPredicates.add(bodyPredicate);
 		}
 
+//		if (bodyPredicate == null)
+//			throw new Exception("Error in parsing the predicate");
+
+		return bodyPredicates;
+	}
+	
+	public List<Function> getBodyURIPredicates(Graph myGraph, Resource object)
+			throws Exception {
+		List<Function> predicateAtoms = new ArrayList<Function>();
+		Function predicateAtom;
+		String predicateString = "";
+
 		// process PREDICATEMAP
 		// look for the predicateMap
 		iterator = myGraph.match(object, R2RMLVocabulary.predicateMap, null);
 		while (iterator.hasNext()) {
 			Resource objectt = (Resource) (iterator.next().getObject());
 
-			// process constant declaration
-			Iterator<Statement> newiterator = myGraph.match(objectt, R2RMLVocabulary.constant, null);
-			if (newiterator.hasNext()) {
-				parsedString = newiterator.next().getObject().toString();
+			// process template declaration
+			iterator = myGraph.match(objectt, R2RMLVocabulary.template, null);
+			if (iterator.hasNext()) {
+				parsedString = iterator.next().getObject().toString();
 				// System.out.println(parsedString);
-				bodyPredicate = fac.getPredicate(parsedString, 2);
-				bodyPredicates.add(bodyPredicate);
+				predicateString = trim(parsedString);
+				// craete uri("...",var)
+				predicateAtom = getURIFunction((predicateString));
+				predicateAtoms.add(predicateAtom);
+			}
 
+			// process column declaration
+			iterator = myGraph.match(objectt, R2RMLVocabulary.column, null);
+			if (iterator.hasNext()) {
+				parsedString = iterator.next().getObject().toString();
+				// System.out.println(parsedString);
+				predicateString = trim(parsedString);
+				predicateAtom = getURIFunction((predicateString));
+				predicateAtoms.add(predicateAtom);
+			}
+			
+			// process constant declaration
+			iterator = myGraph.match(objectt, R2RMLVocabulary.constant, null);
+			if (iterator.hasNext()) {
+				parsedString = iterator.next().getObject().toString();
+				// System.out.println(parsedString);
+				predicateString = trim(parsedString);
+				// craete uri("...",var)
+				predicateAtom = getURIFunction((predicateString));
+				predicateAtoms.add(predicateAtom);
 			}
 		}
+		return predicateAtoms;
 
-		if (bodyPredicate == null)
-			throw new Exception("Error in parsing the predicate");
-
-		return bodyPredicates;
 	}
 	
 	public Term getObjectAtom(Graph myGraph, Resource objectt)
