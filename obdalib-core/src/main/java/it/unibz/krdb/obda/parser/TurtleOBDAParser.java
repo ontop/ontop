@@ -1,10 +1,18 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 // $ANTLR 3.5 /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2013-05-28 14:14:28
 
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
@@ -162,10 +170,10 @@ public class TurtleOBDAParser extends Parser {
 	private HashMap<String, String> directives = new HashMap<String, String>();
 
 	/** The current subject term */
-	private NewLiteral subject;
+	private Term subject;
 
 	/** All variables */
-	private Set<NewLiteral> variableSet = new HashSet<NewLiteral>();
+	private Set<Term> variableSet = new HashSet<Term>();
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -211,22 +219,22 @@ public class TurtleOBDAParser extends Parser {
 	   return text.substring(1, text.length()-1);
 	}
 
-	private NewLiteral construct(String text) {
-	   NewLiteral toReturn = null;
+	private Term construct(String text) {
+	   Term toReturn = null;
 	   final String PLACEHOLDER = "{}"; 
-	   List<NewLiteral> terms = new LinkedList<NewLiteral>();
+	   List<Term> terms = new LinkedList<Term>();
 	   List<FormatString> tokens = parse(text);
 	   int size = tokens.size();
 	   if (size == 1) {
 	      FormatString token = tokens.get(0);
 	      if (token instanceof FixedString) {
-	         toReturn = dfac.getURIConstant(token.toString());
+	         toReturn = dfac.getConstantURI(token.toString());
 	      } else if (token instanceof ColumnString) {
-	         ValueConstant uriTemplate = dfac.getValueConstant(PLACEHOLDER); // a single URI template
+	         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
 	         Variable column = dfac.getVariable(token.toString());
 	         terms.add(0, uriTemplate);
 	         terms.add(column);
-	         toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+	         toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	      }
 	   } else {
 	      StringBuilder sb = new StringBuilder();
@@ -239,9 +247,9 @@ public class TurtleOBDAParser extends Parser {
 	            terms.add(column);
 	         }
 	      }
-	      ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
+	      ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 	      terms.add(0, uriTemplate);
-	      toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+	      toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	   }
 	   return toReturn;
 	}
@@ -336,8 +344,8 @@ public class TurtleOBDAParser extends Parser {
 
 
 			      int arity = variableSet.size();
-			      List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
-			      Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
+			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 			      
 			      // Create a new rule
 			      List<Function> triples = t1;
@@ -659,7 +667,7 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> value = null;
 
 
-		NewLiteral subject5 =null;
+		Term subject5 =null;
 		List<Function> predicateObjectList6 =null;
 
 		try {
@@ -701,9 +709,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 		IRI v1 =null;
-		List<NewLiteral> l1 =null;
+		List<Term> l1 =null;
 		IRI v2 =null;
-		List<NewLiteral> l2 =null;
+		List<Term> l2 =null;
 
 
 		   value = new LinkedList<Function>();
@@ -721,16 +729,16 @@ public class TurtleOBDAParser extends Parser {
 			state._fsp--;
 
 
-			      for (NewLiteral object : l1) {
+			      for (Term object : l1) {
 			        Function atom = null;
 			        String p = v1.toString();
 			        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
 			          URIConstant c = (URIConstant) object;  // it has to be a URI constant
 			          Predicate predicate = dfac.getClassPredicate(c.getURI());
-			          atom = dfac.getAtom(predicate, subject);
+			          atom = dfac.getFunction(predicate, subject);
 			        } else {
 			          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
-			          atom = dfac.getAtom(predicate, subject, object);
+			          atom = dfac.getFunction(predicate, subject, object);
 			        }
 			        value.add(atom);
 			      }
@@ -758,16 +766,16 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					      for (NewLiteral object : l2) {
+					      for (Term object : l2) {
 					        Function atom = null;
 					        String p = v2.toString();
 					        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
 					          URIConstant c = (URIConstant) object;  // it has to be a URI constant
 					          Predicate predicate = dfac.getClassPredicate(c.getURI());
-					          atom = dfac.getAtom(predicate, subject);
+					          atom = dfac.getFunction(predicate, subject);
 					        } else {
 					          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
-					          atom = dfac.getAtom(predicate, subject, object);
+					          atom = dfac.getFunction(predicate, subject, object);
 					        }
 					        value.add(atom);
 					      }
@@ -857,15 +865,15 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "objectList"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:340:1: objectList returns [List<NewLiteral> value] : o1= object ( COMMA o2= object )* ;
-	public final List<NewLiteral> objectList() throws RecognitionException {
-		List<NewLiteral> value = null;
+	public final List<Term> objectList() throws RecognitionException {
+		List<Term> value = null;
 
 
-		NewLiteral o1 =null;
-		NewLiteral o2 =null;
+		Term o1 =null;
+		Term o2 =null;
 
 
-		  value = new ArrayList<NewLiteral>();
+		  value = new ArrayList<Term>();
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:344:3: (o1= object ( COMMA o2= object )* )
@@ -921,11 +929,11 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "subject"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:347:1: subject returns [NewLiteral value] : ( resource | variable );
-	public final NewLiteral subject() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term subject() throws RecognitionException {
+		Term value = null;
 
 
-		NewLiteral resource8 =null;
+		Term resource8 =null;
 		Variable variable9 =null;
 
 		try {
@@ -988,7 +996,7 @@ public class TurtleOBDAParser extends Parser {
 		IRI value = null;
 
 
-		NewLiteral resource10 =null;
+		Term resource10 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:354:3: ( resource )
@@ -999,7 +1007,7 @@ public class TurtleOBDAParser extends Parser {
 			state._fsp--;
 
 			 
-			      NewLiteral nl = resource10;
+			      Term nl = resource10;
 			      if (nl instanceof URIConstant) {
 			        URIConstant c = (URIConstant) nl;
 			        value = iriFactory.construct(c.getURI());
@@ -1025,12 +1033,12 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "object"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:365:1: object returns [NewLiteral value] : ( resource | literal | typedLiteral | variable );
-	public final NewLiteral object() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term object() throws RecognitionException {
+		Term value = null;
 
 
-		NewLiteral resource11 =null;
-		NewLiteral literal12 =null;
+		Term resource11 =null;
+		Term literal12 =null;
 		Function typedLiteral13 =null;
 		Variable variable14 =null;
 
@@ -1148,8 +1156,8 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "resource"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:373:1: resource returns [NewLiteral value] : ( uriref | qname );
-	public final NewLiteral resource() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term resource() throws RecognitionException {
+		Term value = null;
 
 
 		String uriref15 =null;
@@ -1363,8 +1371,8 @@ public class TurtleOBDAParser extends Parser {
 		Function value = null;
 
 
-		NewLiteral resource20 =null;
-		Vector<NewLiteral> terms21 =null;
+		Term resource20 =null;
+		Vector<Term> terms21 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:403:3: ( resource LPAREN terms RPAREN )
@@ -1384,7 +1392,7 @@ public class TurtleOBDAParser extends Parser {
 			      String functionName = resource20.toString();
 			      int arity = terms21.size();
 			      Predicate functionSymbol = dfac.getPredicate(functionName, arity);
-			      value = dfac.getFunctionalTerm(functionSymbol, terms21);
+			      value = dfac.getFunction(functionSymbol, terms21);
 			    
 			}
 
@@ -1409,9 +1417,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 		Variable variable22 =null;
-		NewLiteral language23 =null;
+		Term language23 =null;
 		Variable variable24 =null;
-		NewLiteral resource25 =null;
+		Term resource25 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:412:3: ( variable AT language | variable REFERENCE resource )
@@ -1462,8 +1470,8 @@ public class TurtleOBDAParser extends Parser {
 
 					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
 					      Variable var = variable22;
-					      NewLiteral lang = language23;   
-					      value = dfac.getFunctionalTerm(functionSymbol, var, lang);
+					      Term lang = language23;   
+					      value = dfac.getFunction(functionSymbol, var, lang);
 					    
 					}
 					break;
@@ -1500,7 +1508,7 @@ public class TurtleOBDAParser extends Parser {
 					      } else {
 					          throw new RecognitionException();
 					      }
-					      value = dfac.getFunctionalTerm(functionSymbol, var);
+					      value = dfac.getFunction(functionSymbol, var);
 					     
 					}
 					break;
@@ -1522,8 +1530,8 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "language"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:443:1: language returns [NewLiteral value] : ( languageTag | variable );
-	public final NewLiteral language() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term language() throws RecognitionException {
+		Term value = null;
 
 
 		ParserRuleReturnScope languageTag26 =null;
@@ -1555,7 +1563,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					    	value = dfac.getValueConstant((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
+					    	value = dfac.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
 					    
 					}
 					break;
@@ -1589,15 +1597,15 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "terms"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:452:1: terms returns [Vector<NewLiteral> value] : t1= term ( COMMA t2= term )* ;
-	public final Vector<NewLiteral> terms() throws RecognitionException {
-		Vector<NewLiteral> value = null;
+	public final Vector<Term> terms() throws RecognitionException {
+		Vector<Term> value = null;
 
 
-		NewLiteral t1 =null;
-		NewLiteral t2 =null;
+		Term t1 =null;
+		Term t2 =null;
 
 
-		  value = new Vector<NewLiteral>();
+		  value = new Vector<Term>();
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:456:3: (t1= term ( COMMA t2= term )* )
@@ -1653,13 +1661,13 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "term"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:459:1: term returns [NewLiteral value] : ( function | variable | literal );
-	public final NewLiteral term() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term term() throws RecognitionException {
+		Term value = null;
 
 
 		Function function28 =null;
 		Variable variable29 =null;
-		NewLiteral literal30 =null;
+		Term literal30 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:460:3: ( function | variable | literal )
@@ -1746,13 +1754,13 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "literal"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:465:1: literal returns [NewLiteral value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
-	public final NewLiteral literal() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term literal() throws RecognitionException {
+		Term value = null;
 
 
 		ValueConstant stringLiteral31 =null;
-		NewLiteral language32 =null;
-		NewLiteral dataTypeString33 =null;
+		Term language32 =null;
+		Term dataTypeString33 =null;
 		ValueConstant numericLiteral34 =null;
 		ValueConstant booleanLiteral35 =null;
 
@@ -1838,11 +1846,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 					       ValueConstant constant = stringLiteral31;
-					       NewLiteral lang = language32;
+					       Term lang = language32;
 					       if (lang != null) {
-					         value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
 					       } else {
-					       	 value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
 					       }
 					    
 					}
@@ -1908,7 +1916,7 @@ public class TurtleOBDAParser extends Parser {
 			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral751); 
 
 			      String str = (STRING_WITH_QUOTE_DOUBLE36!=null?STRING_WITH_QUOTE_DOUBLE36.getText():null);
-			      value = dfac.getValueConstant(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+			      value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
 			    
 			}
 
@@ -1928,12 +1936,12 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "dataTypeString"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:487:1: dataTypeString returns [NewLiteral value] : stringLiteral REFERENCE resource ;
-	public final NewLiteral dataTypeString() throws RecognitionException {
-		NewLiteral value = null;
+	public final Term dataTypeString() throws RecognitionException {
+		Term value = null;
 
 
 		ValueConstant stringLiteral37 =null;
-		NewLiteral resource38 =null;
+		Term resource38 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:488:3: ( stringLiteral REFERENCE resource )
@@ -1969,7 +1977,7 @@ public class TurtleOBDAParser extends Parser {
 			      } else {
 			        throw new RuntimeException("Unknown datatype: " + functionName);
 			      }
-			      value = dfac.getFunctionalTerm(functionSymbol, constant);
+			      value = dfac.getFunction(functionSymbol, constant);
 			    
 			}
 
@@ -2274,14 +2282,14 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:544:5: TRUE
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral912); 
-					 value = dfac.getValueConstant((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
+					 value = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:545:5: FALSE
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral921); 
-					 value = dfac.getValueConstant((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
+					 value = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 
@@ -2339,21 +2347,21 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:549:5: INTEGER
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned940); 
-					 value = dfac.getValueConstant((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
+					 value = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:550:5: DOUBLE
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned948); 
-					 value = dfac.getValueConstant((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
+					 value = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:551:5: DECIMAL
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned957); 
-					 value = dfac.getValueConstant((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
+					 value = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
 
@@ -2411,21 +2419,21 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:555:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive976); 
-					 value = dfac.getValueConstant((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
+					 value = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:556:5: DOUBLE_POSITIVE
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive984); 
-					 value = dfac.getValueConstant((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
+					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:557:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive993); 
-					 value = dfac.getValueConstant((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
+					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
 
@@ -2483,21 +2491,21 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:561:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1012); 
-					 value = dfac.getValueConstant((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
+					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:5: DOUBLE_NEGATIVE
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1020); 
-					 value = dfac.getValueConstant((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
+					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:563:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1029); 
-					 value = dfac.getValueConstant((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 
+					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
 

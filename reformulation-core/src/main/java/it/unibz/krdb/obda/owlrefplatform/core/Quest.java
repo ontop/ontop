@@ -1,10 +1,18 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -168,7 +176,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * Configuration
 	 */
 
-	private boolean reformulate = false;
+	public boolean reformulate = false;
 
 	private String reformulationTechnique = QuestConstants.UCQBASED;
 
@@ -264,14 +272,23 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		if (mappings == null && !aboxMode.equals(QuestConstants.CLASSIC)) {
 			throw new IllegalArgumentException(
-					"When working without mappings, you must set the ABox mode to \""+QuestConstants.CLASSIC+"\". If you want to work with no mappings in virtual ABox mode you must at least provide an empty but not null OBDAModel");
+					"When working without mappings, you must set the ABox mode to \""
+							+ QuestConstants.CLASSIC
+							+ "\". If you want to work with no mappings in virtual ABox mode you must at least provide an empty but not null OBDAModel");
 		}
 		if (mappings != null && !aboxMode.equals(QuestConstants.VIRTUAL)) {
 			throw new IllegalArgumentException(
-					"When working with mappings, you must set the ABox mode to \""+QuestConstants.VIRTUAL+"\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
+					"When working with mappings, you must set the ABox mode to \""
+							+ QuestConstants.VIRTUAL
+							+ "\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
 		loadOBDAModel(mappings);
+	}
+	
+	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
+		this(tbox, mappings, config);
+		this.metadata = metadata;
 	}
 
 	protected Map<String, String> getSQLCache() {
@@ -640,13 +657,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-			metadata = JDBCConnectionManager.getMetaData(localConnection);
+			//if the metadata was not already set
+			if (metadata == null) {
 
-			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource
-					.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+				metadata = JDBCConnectionManager.getMetaData(localConnection);
+			}
+		
+			SQLDialectAdapter sqladapter = SQLAdapterFactory
+					.getSQLDialectAdapter(datasource
+							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 
-			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil, sqladapter);
+			JDBCUtility jdbcutil = new JDBCUtility(
+					datasource
+							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
+					sqladapter);
 			if (isSemanticIdx) {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
@@ -694,7 +719,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				addNOTNULLToMappings(fac, unfoldingProgram);
 
-				normalizeMappingsToJOIN(fac, unfoldingProgram);
 			}
 
 			/*
@@ -843,7 +867,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
-				Function notnull = fac.getIsNotNullAtom(var);
+				Function notnull = fac.getFunctionIsNotNull(var);
 				mapping.getBody().add(notnull);
 			}
 		}
@@ -853,7 +877,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private void normalizeLanguageTagsinMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			Function head = mapping.getHead();
-			for (NewLiteral term : head.getTerms()) {
+			for (Term term : head.getTerms()) {
 				if (!(term instanceof Function)) {
 					continue;
 				}
@@ -866,12 +890,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * changing the language, its always the second inner term
 				 * (literal,lang)
 				 */
-				NewLiteral originalLangTag = typedTerm.getTerm(1);
-				NewLiteral normalizedLangTag = null;
+				Term originalLangTag = typedTerm.getTerm(1);
+				Term normalizedLangTag = null;
 
 				if (originalLangTag instanceof Constant) {
 					ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-					normalizedLangTag = fac.getValueConstant(originalLangConstant.getValue().toLowerCase(), originalLangConstant.getType());
+					normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(), originalLangConstant.getType());
 				} else {
 					normalizedLangTag = originalLangTag;
 				}
@@ -923,7 +947,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Collecting URI templates and making pattern matchers for them.
 			 */
-			for (NewLiteral term : head.getTerms()) {
+			for (Term term : head.getTerms()) {
 				if (!(term instanceof Function)) {
 					continue;
 				}
@@ -946,7 +970,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					if (templateStrings.contains("(.+)")) {
 						continue;
 					}
-					Function templateFunction = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
+					Function templateFunction = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
 					getUriTemplateMatcher().put(matcher, templateFunction);
 					templateStrings.add("(.+)");
@@ -966,54 +990,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-	private void normalizeMappingsToJOIN(OBDADataFactory fac, DatalogProgram currentMappingRules) {
-		/*
-		 * Transforming body of mappings with 2 atoms into JOINs
-		 */
-		for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
-			// Looking for mappings with exactly 2 data atoms
-			CQIE mapping = currentMappingRules.getRules().get(i);
-			int dataAtoms = 0;
-
-			LinkedList<Function> dataAtomsList = new LinkedList<Function>();
-			LinkedList<Function> otherAtomsList = new LinkedList<Function>();
-
-			for (Function subAtom : mapping.getBody()) {
-				if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
-					dataAtoms += 1;
-					dataAtomsList.add(subAtom);
-				} else {
-					otherAtomsList.add(subAtom);
-				}
-			}
-			if (dataAtoms == 1) {
-				continue;
-			}
-
-			/*
-			 * This mapping can be transformed into a normal join with ON
-			 * conditions. Doing so.
-			 */
-			Function foldedJoinAtom = null;
-
-			while (dataAtomsList.size() > 1) {
-				foldedJoinAtom = fac.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, (NewLiteral) dataAtomsList.remove(0),
-						(NewLiteral) dataAtomsList.remove(0));
-				dataAtomsList.add(0, foldedJoinAtom);
-			}
-
-			List<Function> newBodyMapping = new LinkedList<Function>();
-			newBodyMapping.add(foldedJoinAtom.asAtom());
-			newBodyMapping.addAll(otherAtomsList);
-
-			CQIE newmapping = fac.getCQIE(mapping.getHead(), newBodyMapping);
-
-			unfoldingProgram.removeRule(mapping);
-			unfoldingProgram.appendRule(newmapping);
-			i -= 1;
-		}
-	}
-
 	/***
 	 * Expands a SELECT * into a SELECT with all columns implicit in the *
 	 * 
@@ -1024,6 +1000,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private void preprocessProjection(Connection localConnection, ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory,
 			SQLDialectAdapter adapter) throws SQLException {
+
+		// TODO this code seems buggy, it will probably break easily (check the
+		// part with
+		// parenthesis in the beggining of the for loop.
+
 		Statement st = null;
 		try {
 			st = localConnection.createStatement();
@@ -1037,9 +1018,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				if (containSelectAll(sourceString)) {
 					StringBuilder sb = new StringBuilder();
 
-					/*
-					 * If the SQL string has sub-queries in its statement
-					 */
+					 // If the SQL string has sub-queries in its statement
 					if (containChildParentSubQueries(sourceString)) {
 						int childquery1 = sourceString.indexOf("(");
 						int childquery2 = sourceString.indexOf(") as CHILD");
@@ -1054,7 +1033,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 									sb.append(", ");
 								}
 								String col = rsm.getColumnName(pos);
-								sb.append("CHILD.\"" + col + "\" as CHILD_" + (col));
+								//sb.append("CHILD." + col );
+								sb.append("CHILD.\"" + col + "\" as \"CHILD_" + (col)+"\"");
 								needComma = true;
 							}
 						}
@@ -1073,15 +1053,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 									sb.append(", ");
 								}
 								String col = rsm.getColumnName(pos);
-								sb.append("PARENT.\"" + col + "\" as PARENT_" + (col));
+								//sb.append("PARENT." + col);
+								sb.append("PARENT.\"" + col + "\" as \"PARENT_" + (col)+"\"");
 								needComma = true;
 							}
 						}
 
-						/*
-						 * If the SQL string doesn't have sub-queries
-						 */
-					} else {
+						 //If the SQL string doesn't have sub-queries
+					} else 
+					
+					{
 						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
 						if (st.execute(copySourceQuery)) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();
@@ -1185,20 +1166,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			Function newhead = null;
 			Function currenthead = mapping.getHead();
 			Predicate pred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-			LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
+			LinkedList<Term> terms = new LinkedList<Term>();
 			if (currenthead.getArity() == 1) {
 				/*
 				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
 				 * uri(Class))
 				 */
 				terms.add(currenthead.getTerm(0));
-				Function rdfTypeConstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1),
-						fac.getURIConstant(OBDAVocabulary.RDF_TYPE));
+				Function rdfTypeConstant = fac.getFunction(fac.getUriTemplatePredicate(1),
+						fac.getConstantURI(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(classname)));
-				newhead = fac.getAtom(pred, terms);
+				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantURI(classname)));
+				newhead = fac.getFunction(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
 				/*
@@ -1208,10 +1189,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunctionalTerm(fac.getUriTemplatePredicate(1), fac.getURIConstant(propname));
+				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantURI(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
-				newhead = fac.getAtom(pred, terms);
+				newhead = fac.getFunction(pred, terms);
 			}
 			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());
 			newmappings.add(newmapping);

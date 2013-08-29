@@ -1,10 +1,18 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model;
 
 /**
- * This class defines a type of {@link NewLiteral} in which it has a constant
+ * This class defines a type of {@link Term} in which it has a constant
  * value.
  */
-public interface Constant extends NewLiteral {
+public interface Constant extends Term {
 
 	public Predicate.COL_TYPE getType();
 

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 // $ANTLR 3.4 C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g 2012-11-30 10:44:47
 
 package it.unibz.krdb.obda.parser;
@@ -9,7 +17,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -153,9 +161,9 @@ public class TurtleParser extends Parser {
     private HashMap<String, String> directives = new HashMap<String, String>();
 
     /** The current subject term */
-    private NewLiteral subject;
+    private Term subject;
 
-    private Set<NewLiteral> variableSet = new HashSet<NewLiteral>();
+    private Set<Term> variableSet = new HashSet<Term>();
 
     /** A factory to construct the predicates and terms */
     private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -255,8 +263,8 @@ public class TurtleParser extends Parser {
 
 
                   int arity = variableSet.size();
-                  List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
-                  Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+                  List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
+                  Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
                   
                   // Create a new rule
                   List<Function> triples = t1;
@@ -628,7 +636,7 @@ public class TurtleParser extends Parser {
         List<Function> value = null;
 
 
-        NewLiteral subject5 =null;
+        Term subject5 =null;
 
         List<Function> predicateObjectList6 =null;
 
@@ -680,11 +688,11 @@ public class TurtleParser extends Parser {
 
         IRI v1 =null;
 
-        List<NewLiteral> l1 =null;
+        List<Term> l1 =null;
 
         IRI v2 =null;
 
-        List<NewLiteral> l2 =null;
+        List<Term> l2 =null;
 
 
 
@@ -707,15 +715,15 @@ public class TurtleParser extends Parser {
 
 
 
-                  for (NewLiteral object : l1) {
+                  for (Term object : l1) {
                     Function atom = null;
                     if (v1.equals(RDF_TYPE_URI)) {
                       URIConstant c = (URIConstant) object;  // it has to be a URI constant
                       Predicate predicate = dfac.getClassPredicate(c.getURI());
-                      atom = dfac.getAtom(predicate, subject);
+                      atom = dfac.getFunction(predicate, subject);
                     } else {
                       Predicate predicate = dfac.getPredicate(v1.toString(), 2, null); // the data type cannot be determined here!
-                      atom = dfac.getAtom(predicate, subject, object);
+                      atom = dfac.getFunction(predicate, subject, object);
                     }
                     value.add(atom);
                   }
@@ -751,15 +759,15 @@ public class TurtleParser extends Parser {
 
 
 
-            	          for (NewLiteral object : l2) {
+            	          for (Term object : l2) {
             	            Function atom = null;
             	            if (v2.equals(RDF_TYPE_URI)) {
             	              URIConstant c = (URIConstant) object;  // it has to be a URI constant
             	              Predicate predicate = dfac.getClassPredicate(c.getURI());
-            	              atom = dfac.getAtom(predicate, subject);
+            	              atom = dfac.getFunction(predicate, subject);
             	            } else {
             	              Predicate predicate = dfac.getPredicate(v2.toString(), 2, null); // the data type cannot be determined here!
-            	              atom = dfac.getAtom(predicate, subject, object);
+            	              atom = dfac.getFunction(predicate, subject, object);
             	            }
             	            value.add(atom);
             	          }
@@ -860,17 +868,17 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "objectList"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:260:1: objectList returns [List<NewLiteral> value] : o1= object ( COMMA o2= object )* ;
-    public final List<NewLiteral> objectList() throws RecognitionException {
-        List<NewLiteral> value = null;
+    public final List<Term> objectList() throws RecognitionException {
+        List<Term> value = null;
 
 
-        NewLiteral o1 =null;
+        Term o1 =null;
 
-        NewLiteral o2 =null;
+        Term o2 =null;
 
 
 
-          value = new ArrayList<NewLiteral>();
+          value = new ArrayList<Term>();
 
         try {
             // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:264:3: (o1= object ( COMMA o2= object )* )
@@ -937,8 +945,8 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "subject"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:267:1: subject returns [NewLiteral value] : ( resource | variable | function | uriTemplateFunction );
-    public final NewLiteral subject() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term subject() throws RecognitionException {
+        Term value = null;
 
 
         IRI resource8 =null;
@@ -1043,7 +1051,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = dfac.getURIConstant(resource8.toString()); 
+                     value = dfac.getConstantURI(resource8.toString()); 
 
                     }
                     break;
@@ -1143,15 +1151,15 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "object"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:279:1: object returns [NewLiteral value] : ( resource | function | literal | variable | dataTypeFunction | uriTemplateFunction );
-    public final NewLiteral object() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term object() throws RecognitionException {
+        Term value = null;
 
 
         IRI resource13 =null;
 
         Function function14 =null;
 
-        NewLiteral literal15 =null;
+        Term literal15 =null;
 
         Variable variable16 =null;
 
@@ -1294,7 +1302,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = dfac.getURIConstant(resource13.toString()); 
+                     value = dfac.getConstantURI(resource13.toString()); 
 
                     }
                     break;
@@ -1648,7 +1656,7 @@ public class TurtleParser extends Parser {
 
         IRI resource24 =null;
 
-        Vector<NewLiteral> terms25 =null;
+        Vector<Term> terms25 =null;
 
 
         try {
@@ -1675,7 +1683,7 @@ public class TurtleParser extends Parser {
                   String functionName = resource24.toString();
                   int arity = terms25.size();
                   Predicate functionSymbol = dfac.getPredicate(functionName, arity);
-                  value = dfac.getFunctionalTerm(functionSymbol, terms25);
+                  value = dfac.getFunction(functionSymbol, terms25);
                 
 
             }
@@ -1703,7 +1711,7 @@ public class TurtleParser extends Parser {
 
         Variable variable26 =null;
 
-        NewLiteral language27 =null;
+        Term language27 =null;
 
         Variable variable28 =null;
 
@@ -1771,8 +1779,8 @@ public class TurtleParser extends Parser {
 
                           Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
                           Variable var = variable26;
-                          NewLiteral lang = language27;   
-                          value = dfac.getFunctionalTerm(functionSymbol, var, lang);
+                          Term lang = language27;   
+                          value = dfac.getFunction(functionSymbol, var, lang);
                         
 
                     }
@@ -1815,7 +1823,7 @@ public class TurtleParser extends Parser {
                           } else {
                             throw new RecognitionException();
                           }
-                          value = dfac.getFunctionalTerm(functionSymbol, var);
+                          value = dfac.getFunction(functionSymbol, var);
                         
 
                     }
@@ -1839,8 +1847,8 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "language"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:359:1: language returns [NewLiteral value] : ( languageTag | variable );
-    public final NewLiteral language() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term language() throws RecognitionException {
+        Term value = null;
 
 
         TurtleParser.languageTag_return languageTag30 =null;
@@ -1877,7 +1885,7 @@ public class TurtleParser extends Parser {
 
 
 
-                        	value = dfac.getValueConstant((languageTag30!=null?input.toString(languageTag30.start,languageTag30.stop):null).toLowerCase(), COL_TYPE.STRING);
+                        	value = dfac.getConstantLiteral((languageTag30!=null?input.toString(languageTag30.start,languageTag30.stop):null).toLowerCase(), COL_TYPE.STRING);
                         
 
                     }
@@ -1923,7 +1931,7 @@ public class TurtleParser extends Parser {
         Token STRING_WITH_TEMPLATE_SIGN32=null;
 
 
-          List<NewLiteral> terms = new ArrayList<NewLiteral>();
+          List<Term> terms = new ArrayList<Term>();
 
         try {
             // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:372:3: ( STRING_WITH_TEMPLATE_SIGN )
@@ -1980,11 +1988,11 @@ public class TurtleParser extends Parser {
                   }
                   // replace the placeholder string to the original. The current string becomes the template
                   template = template.replace("[]", "{}");
-                  ValueConstant uriTemplate = dfac.getValueConstant(template);
+                  ValueConstant uriTemplate = dfac.getConstantLiteral(template);
                   
                   // the URI template is always on the first position in the term list
                   terms.add(0, uriTemplate);
-                  value = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+                  value = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
                 
 
             }
@@ -2006,17 +2014,17 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "terms"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:429:1: terms returns [Vector<NewLiteral> value] : t1= term ( COMMA t2= term )* ;
-    public final Vector<NewLiteral> terms() throws RecognitionException {
-        Vector<NewLiteral> value = null;
+    public final Vector<Term> terms() throws RecognitionException {
+        Vector<Term> value = null;
 
 
-        NewLiteral t1 =null;
+        Term t1 =null;
 
-        NewLiteral t2 =null;
+        Term t2 =null;
 
 
 
-          value = new Vector<NewLiteral>();
+          value = new Vector<Term>();
 
         try {
             // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:433:3: (t1= term ( COMMA t2= term )* )
@@ -2083,15 +2091,15 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "term"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:436:1: term returns [NewLiteral value] : ( function | variable | literal );
-    public final NewLiteral term() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term term() throws RecognitionException {
+        Term value = null;
 
 
         Function function33 =null;
 
         Variable variable34 =null;
 
-        NewLiteral literal35 =null;
+        Term literal35 =null;
 
 
         try {
@@ -2193,15 +2201,15 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "literal"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:442:1: literal returns [NewLiteral value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
-    public final NewLiteral literal() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term literal() throws RecognitionException {
+        Term value = null;
 
 
         ValueConstant stringLiteral36 =null;
 
-        NewLiteral language37 =null;
+        Term language37 =null;
 
-        NewLiteral dataTypeString38 =null;
+        Term dataTypeString38 =null;
 
         ValueConstant numericLiteral39 =null;
 
@@ -2295,11 +2303,11 @@ public class TurtleParser extends Parser {
 
 
                            ValueConstant constant = stringLiteral36;
-                           NewLiteral lang = language37;
+                           Term lang = language37;
                            if (lang != null) {
-                             value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+                             value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
                            } else {
-                           	 value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), constant);
+                           	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
                            }
                         
 
@@ -2377,7 +2385,7 @@ public class TurtleParser extends Parser {
 
 
                   String str = (STRING_WITH_QUOTE_DOUBLE41!=null?STRING_WITH_QUOTE_DOUBLE41.getText():null);
-                  value = dfac.getValueConstant(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+                  value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
                 
 
             }
@@ -2399,8 +2407,8 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "dataTypeString"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:464:1: dataTypeString returns [NewLiteral value] : stringLiteral REFERENCE resource ;
-    public final NewLiteral dataTypeString() throws RecognitionException {
-        NewLiteral value = null;
+    public final Term dataTypeString() throws RecognitionException {
+        Term value = null;
 
 
         ValueConstant stringLiteral42 =null;
@@ -2447,7 +2455,7 @@ public class TurtleParser extends Parser {
                   } else {
                     throw new RuntimeException("Unknown datatype: " + functionName);
                   }
-                  value = dfac.getFunctionalTerm(functionSymbol, constant);
+                  value = dfac.getFunction(functionSymbol, constant);
                 
 
             }
@@ -2815,7 +2823,7 @@ public class TurtleParser extends Parser {
                     {
                     TRUE47=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral975); 
 
-                     value = dfac.getValueConstant((TRUE47!=null?TRUE47.getText():null), COL_TYPE.BOOLEAN); 
+                     value = dfac.getConstantLiteral((TRUE47!=null?TRUE47.getText():null), COL_TYPE.BOOLEAN); 
 
                     }
                     break;
@@ -2824,7 +2832,7 @@ public class TurtleParser extends Parser {
                     {
                     FALSE48=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral984); 
 
-                     value = dfac.getValueConstant((FALSE48!=null?FALSE48.getText():null), COL_TYPE.BOOLEAN); 
+                     value = dfac.getConstantLiteral((FALSE48!=null?FALSE48.getText():null), COL_TYPE.BOOLEAN); 
 
                     }
                     break;
@@ -2888,7 +2896,7 @@ public class TurtleParser extends Parser {
                     {
                     INTEGER49=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned1003); 
 
-                     value = dfac.getValueConstant((INTEGER49!=null?INTEGER49.getText():null), COL_TYPE.INTEGER); 
+                     value = dfac.getConstantLiteral((INTEGER49!=null?INTEGER49.getText():null), COL_TYPE.INTEGER); 
 
                     }
                     break;
@@ -2897,7 +2905,7 @@ public class TurtleParser extends Parser {
                     {
                     DOUBLE50=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned1011); 
 
-                     value = dfac.getValueConstant((DOUBLE50!=null?DOUBLE50.getText():null), COL_TYPE.DOUBLE); 
+                     value = dfac.getConstantLiteral((DOUBLE50!=null?DOUBLE50.getText():null), COL_TYPE.DOUBLE); 
 
                     }
                     break;
@@ -2906,7 +2914,7 @@ public class TurtleParser extends Parser {
                     {
                     DECIMAL51=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned1020); 
 
-                     value = dfac.getValueConstant((DECIMAL51!=null?DECIMAL51.getText():null), COL_TYPE.DECIMAL); 
+                     value = dfac.getConstantLiteral((DECIMAL51!=null?DECIMAL51.getText():null), COL_TYPE.DECIMAL); 
 
                     }
                     break;
@@ -2970,7 +2978,7 @@ public class TurtleParser extends Parser {
                     {
                     INTEGER_POSITIVE52=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive1039); 
 
-                     value = dfac.getValueConstant((INTEGER_POSITIVE52!=null?INTEGER_POSITIVE52.getText():null), COL_TYPE.INTEGER); 
+                     value = dfac.getConstantLiteral((INTEGER_POSITIVE52!=null?INTEGER_POSITIVE52.getText():null), COL_TYPE.INTEGER); 
 
                     }
                     break;
@@ -2979,7 +2987,7 @@ public class TurtleParser extends Parser {
                     {
                     DOUBLE_POSITIVE53=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive1047); 
 
-                     value = dfac.getValueConstant((DOUBLE_POSITIVE53!=null?DOUBLE_POSITIVE53.getText():null), COL_TYPE.DOUBLE); 
+                     value = dfac.getConstantLiteral((DOUBLE_POSITIVE53!=null?DOUBLE_POSITIVE53.getText():null), COL_TYPE.DOUBLE); 
 
                     }
                     break;
@@ -2988,7 +2996,7 @@ public class TurtleParser extends Parser {
                     {
                     DECIMAL_POSITIVE54=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1056); 
 
-                     value = dfac.getValueConstant((DECIMAL_POSITIVE54!=null?DECIMAL_POSITIVE54.getText():null), COL_TYPE.DECIMAL); 
+                     value = dfac.getConstantLiteral((DECIMAL_POSITIVE54!=null?DECIMAL_POSITIVE54.getText():null), COL_TYPE.DECIMAL); 
 
                     }
                     break;
@@ -3052,7 +3060,7 @@ public class TurtleParser extends Parser {
                     {
                     INTEGER_NEGATIVE55=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1075); 
 
-                     value = dfac.getValueConstant((INTEGER_NEGATIVE55!=null?INTEGER_NEGATIVE55.getText():null), COL_TYPE.INTEGER); 
+                     value = dfac.getConstantLiteral((INTEGER_NEGATIVE55!=null?INTEGER_NEGATIVE55.getText():null), COL_TYPE.INTEGER); 
 
                     }
                     break;
@@ -3061,7 +3069,7 @@ public class TurtleParser extends Parser {
                     {
                     DOUBLE_NEGATIVE56=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1083); 
 
-                     value = dfac.getValueConstant((DOUBLE_NEGATIVE56!=null?DOUBLE_NEGATIVE56.getText():null), COL_TYPE.DOUBLE); 
+                     value = dfac.getConstantLiteral((DOUBLE_NEGATIVE56!=null?DOUBLE_NEGATIVE56.getText():null), COL_TYPE.DOUBLE); 
 
                     }
                     break;
@@ -3070,7 +3078,7 @@ public class TurtleParser extends Parser {
                     {
                     DECIMAL_NEGATIVE57=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1092); 
 
-                     value = dfac.getValueConstant((DECIMAL_NEGATIVE57!=null?DECIMAL_NEGATIVE57.getText():null), COL_TYPE.DECIMAL); 
+                     value = dfac.getConstantLiteral((DECIMAL_NEGATIVE57!=null?DECIMAL_NEGATIVE57.getText():null), COL_TYPE.DECIMAL); 
 
                     }
                     break;

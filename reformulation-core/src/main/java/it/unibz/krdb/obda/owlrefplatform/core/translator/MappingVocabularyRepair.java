@@ -1,9 +1,17 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -77,8 +85,8 @@ public class MappingVocabularyRepair {
 					throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
 				}
 				/* Fixing terms */
-				LinkedList<NewLiteral> newTerms = new LinkedList<NewLiteral>();
-				for (NewLiteral term : atom.getTerms()) {
+				LinkedList<Term> newTerms = new LinkedList<Term>();
+				for (Term term : atom.getTerms()) {
 					newTerms.add(fixTerm(term));
 				}
 
@@ -86,14 +94,14 @@ public class MappingVocabularyRepair {
 				 * Fixing wrapping each variable with a URI function if the
 				 * position corresponds to an URI only position
 				 */
-				NewLiteral t0 = newTerms.get(0);
+				Term t0 = newTerms.get(0);
 				if (!(t0 instanceof Function)){
-					newTerms.set(0, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), t0));
+					newTerms.set(0, dfac.getFunction(dfac.getUriTemplatePredicate(1), t0));
 				}
 				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
-					newTerms.set(1, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
+					newTerms.set(1, dfac.getFunction(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
 				}
-				newatom = dfac.getAtom(predicate, newTerms);
+				newatom = dfac.getFunction(predicate, newTerms);
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
@@ -109,8 +117,8 @@ public class MappingVocabularyRepair {
 	 * @param term
 	 * @return
 	 */
-	public NewLiteral fixTerm(NewLiteral term) {
-		NewLiteral result = term;
+	public Term fixTerm(Term term) {
+		Term result = term;
 		if (term instanceof Function) {
 			result = fixTerm((Function) term);
 		}
@@ -145,10 +153,10 @@ public class MappingVocabularyRepair {
 			newTemplate.append("-{}");
 		}
 
-		LinkedList<NewLiteral> newTerms = new LinkedList<NewLiteral>();
-		newTerms.add(dfac.getValueConstant(newTemplate.toString()));
+		LinkedList<Term> newTerms = new LinkedList<Term>();
+		newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
 		newTerms.addAll(term.getTerms());
 
-		return dfac.getFunctionalTerm(uriFunction, newTerms);
+		return dfac.getFunction(uriFunction, newTerms);
 	}
 }

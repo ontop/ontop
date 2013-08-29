@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -116,7 +124,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	public String toString() {
 		StringBuffer bf = new StringBuffer();
-		for (CQIE rule : this.rules) {
+		for (CQIE rule : rules) {
 			bf.append(rule.toString());
 			bf.append("\n");
 		}
@@ -125,7 +133,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	@Override
 	public List<CQIE> getRules(Predicate headPredicate) {
-		List<CQIE> rules = this.predicateIndex.get(headPredicate);
+		List<CQIE> rules = predicateIndex.get(headPredicate);
 		if (rules == null) {
 			rules = new LinkedList<CQIE>();
 		}
@@ -140,5 +148,10 @@ public class DatalogProgramImpl implements DatalogProgram {
 	@Override
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
+	}
+	
+	@Override
+	public boolean hasModifiers() {
+		return modifiers.hasModifiers();
 	}
 }

@@ -1,8 +1,16 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 
@@ -34,9 +42,9 @@ import org.slf4j.LoggerFactory;
 
 public class QueryConnectedComponent {
 
-	private List<NewLiteral> variables; 	
+	private List<Term> variables; 	
 	private List<Loop> quantifiedVariables;   
-	private List<NewLiteral> freeVariables;
+	private List<Term> freeVariables;
 	
 	private final List<Edge> edges;  // a connect component contains a list of edges 
 	private final Loop loop;  //                                   or a loop if it is degenerate 
@@ -64,12 +72,12 @@ public class QueryConnectedComponent {
 		this.loop = isDegenerate() ? terms.get(0) : null; 
 				
 		quantifiedVariables = new ArrayList<Loop>(terms.size());
-		variables = new ArrayList<NewLiteral>(terms.size());
-		freeVariables = new ArrayList<NewLiteral>(terms.size());
+		variables = new ArrayList<Term>(terms.size());
+		freeVariables = new ArrayList<Term>(terms.size());
 		noFreeTerms = true;
 		
 		for (Loop l: terms) {
-			NewLiteral t = l.getTerm(); 
+			Term t = l.getTerm(); 
 			if (t instanceof Variable) {
 				variables.add(t);
 				//if (headNewLiterals.contains(t))
@@ -86,7 +94,7 @@ public class QueryConnectedComponent {
 		}
 	}
 	
-	public static Loop getLoop(NewLiteral t, Map<NewLiteral, Loop> allLoops, Set<NewLiteral> headTerms) {
+	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, Set<Term> headTerms) {
 		Loop l = allLoops.get(t);
 		if (l == null) {
 			boolean isExistentialVariable =  ((t instanceof Variable) && !headTerms.contains(t));
@@ -96,9 +104,9 @@ public class QueryConnectedComponent {
 		return l;
 	}
 	
-	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<NewLiteral, Loop> allLoops, List<Function> nonDLAtoms,
-																NewLiteral seed) {
-		Set<NewLiteral> ccTerms = new HashSet<NewLiteral>((allLoops.size() * 2) / 3);
+	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms,
+																Term seed) {
+		Set<Term> ccTerms = new HashSet<Term>((allLoops.size() * 2) / 3);
 		List<Edge> ccEdges = new ArrayList<Edge>(pairs.size());
 		List<Function> ccNonDLAtoms = new LinkedList<Function>();
 		List<Loop> ccLoops = new ArrayList<Loop>(allLoops.size());
@@ -118,8 +126,8 @@ public class QueryConnectedComponent {
 			//i = pairs.entrySet().iterator();
 			while (i.hasNext()) {
 				Edge edge = i.next().getValue();
-				NewLiteral t0 = edge.getTerm0();
-				NewLiteral t1 = edge.getTerm1();
+				Term t0 = edge.getTerm0();
+				Term t1 = edge.getTerm1();
 				if (ccTerms.contains(t0)) {
 					if (ccTerms.add(t1))  { // the other term is already there
 						ccLoops.add(edge.getLoop1());
@@ -176,7 +184,7 @@ public class QueryConnectedComponent {
 	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
 		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
 
-		Set<NewLiteral> headTerms = new HashSet<NewLiteral>(cqie.getHead().getTerms());
+		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
 
 
 		// collect all edges and loops 
@@ -184,17 +192,17 @@ public class QueryConnectedComponent {
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		//      a nonDL atom is an atom with a non-data predicate 
 		Map<TermPair, Edge> pairs = new HashMap<TermPair, Edge>();
-		Map<NewLiteral, Loop> allLoops = new HashMap<NewLiteral, Loop>();
+		Map<Term, Loop> allLoops = new HashMap<Term, Loop>();
 		List<Function> nonDLAtoms = new LinkedList<Function>();
 		
 		for (Function a: cqie.getBody()) {
 			Predicate p = a.getFunctionSymbol();
 			if (p.isDataPredicate()) {
 			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate
-				NewLiteral t0 = a.getTerm(0);				
+				Term t0 = a.getTerm(0);				
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms
-					NewLiteral t1 = a.getTerm(1);
+					Term t1 = a.getTerm(1);
 					TermPair pair = new TermPair(t0, t1);
 					Edge edge =  pairs.get(pair); 
 					if (edge == null) {
@@ -233,7 +241,7 @@ public class QueryConnectedComponent {
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
 		//for (Entry<NewLiteral, Loop> loop : allLoops.entrySet()) {
 		while (!allLoops.isEmpty()) {
-			NewLiteral seed = allLoops.keySet().iterator().next();
+			Term seed = allLoops.keySet().iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed));			
 			//ccs.add(new QueryConnectedComponent(Collections.EMPTY_LIST, loop.getValue(), Collections.EMPTY_LIST, Collections.singletonList(loop.getValue())));
 		}
@@ -281,7 +289,7 @@ public class QueryConnectedComponent {
 	 * @return the list of variables in the connected components
 	 */
 	
-	public List<NewLiteral> getVariables() {
+	public List<Term> getVariables() {
 		return variables;		
 	}
 
@@ -301,7 +309,7 @@ public class QueryConnectedComponent {
 	 * @return the list of free variables in the connected component
 	 */
 	
-	public List<NewLiteral> getFreeVariables() {
+	public List<Term> getFreeVariables() {
 		return freeVariables;
 	}
 
@@ -319,17 +327,17 @@ public class QueryConnectedComponent {
 	 */
 	
 	static class Loop {
-		private final NewLiteral term;
+		private final Term term;
 		private Collection<Function> atoms;
 		private final boolean isExistentialVariable;
 		
-		public Loop(NewLiteral term, boolean isExistentialVariable) {
+		public Loop(Term term, boolean isExistentialVariable) {
 			this.term = term;
 			this.isExistentialVariable = isExistentialVariable;
 			this.atoms = new ArrayList<Function>(10);
 		}
 		
-		public NewLiteral getTerm() {
+		public Term getTerm() {
 			return term;
 		}
 		
@@ -387,11 +395,11 @@ public class QueryConnectedComponent {
 			return l1;
 		}
 		
-		public NewLiteral getTerm0() {
+		public Term getTerm0() {
 			return l0.term;
 		}
 		
-		public NewLiteral getTerm1() {
+		public Term getTerm1() {
 			return l1.term;
 		}
 		
@@ -421,10 +429,10 @@ public class QueryConnectedComponent {
 	 */
 	
 	private static class TermPair {
-		private final NewLiteral t0, t1;
+		private final Term t0, t1;
 		private final int hashCode;
 
-		public TermPair(NewLiteral t0, NewLiteral t1) {
+		public TermPair(Term t0, Term t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ t1.hashCode();

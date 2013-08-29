@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.Constant;
@@ -168,13 +176,13 @@ public class QuestGraphResultSet implements GraphResultSet {
 			constant = resSet.getConstant(columnName);
 		} else if (node instanceof Node_URI) {
 			String uriString = ((Node_URI) node).getURI();
-			constant = dfac.getURIConstant(uriString);
+			constant = dfac.getConstantURI(uriString);
 		} else if (node instanceof Node_Literal) {
 			String value = ((Node_Literal) node).getLiteralValue().toString();
-			constant = dfac.getValueConstant(value);
+			constant = dfac.getConstantLiteral(value);
 		} else if (node instanceof Node_Blank) {
 			String label = ((Node_Blank) node).getBlankNodeLabel();
-			constant = dfac.getBNodeConstant(label);
+			constant = dfac.getConstantBNode(label);
 		}
 		return constant;
 	}

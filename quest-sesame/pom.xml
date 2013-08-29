@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>quest-sesame</artifactId>
 	<name>quest-sesame</name>
-	<description>This is the Sesame API implementation basedon Quest</description>
+	<description>This is the Sesame API implementation based on Quest</description>
 
 	<dependencies>
 		<dependency>
@@ -18,6 +18,11 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
+		</dependency>
+		<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<scope>test</scope>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
@@ -32,6 +37,11 @@
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
+			<groupId>inf.unibz.it.obda</groupId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<artifactId>obdalib-sesame</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.8</version>
 		</dependency>
@@ -55,7 +65,10 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
-
+	<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
+		</dependency>
 		<!-- These will download some of the sources -->
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
@@ -72,22 +85,18 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-api</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-rdfxml</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-n3</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -96,9 +105,6 @@
 		<dependency>
 			<groupId>org.apache.directory.studio</groupId>
 			<artifactId>org.apache.commons.logging</artifactId>
-			<version>1.1.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 	

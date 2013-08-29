@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.OBDAQuery;
@@ -14,12 +22,16 @@ public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 		this.sqlQuery = sqlQuery;
 	}
 
-	@Override
-	public String toString() {
+	public String getSQLQuery() {
 		if ((sqlQuery == null) || (sqlQuery.equals(""))) {
 			return "";
 		}
 		return sqlQuery;
+	}
+	
+	@Override
+	public String toString() {
+		return getSQLQuery();
 	}
 
 	@Override
@@ -41,5 +53,10 @@ public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 	@Override
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		// NO-OP
+	}
+
+	@Override
+	public boolean hasModifiers() {
+		return false;
 	}
 }

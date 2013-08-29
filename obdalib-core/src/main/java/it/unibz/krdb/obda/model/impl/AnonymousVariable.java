@@ -1,6 +1,13 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.HashMap;
@@ -61,8 +68,4 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 		return count;
 	}
 
-	@Override
-	public Atom asAtom() {
-		throw new RuntimeException("Impossible to cast as atom: " + this.getClass()); 
-	}
 }

@@ -1,14 +1,19 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
-import com.hp.hpl.jena.iri.IRIFactory;
-
 public class OBDAVocabulary {
 	
-	private static IRIFactory fact = OBDADataFactoryImpl.getIRIFactory();
 
 	/* Constants */
 
@@ -188,8 +193,6 @@ public class OBDAVocabulary {
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_URI = "URI";
 
-	public static final String QUEST_URI_LEGACY = "http://obda.org/quest#uri";
-
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_BNODE = "BNODE";
 
@@ -202,6 +205,8 @@ public class OBDAVocabulary {
 
 	public static final Predicate QUEST_CAST = new PredicateImpl(
 			QUEST_CAST_STR, 2, new COL_TYPE[2]);
+	
+	public static final String QUEST_QUERY = "ans1";
 
 	/* SPARQL Algebra vocabulary */
 

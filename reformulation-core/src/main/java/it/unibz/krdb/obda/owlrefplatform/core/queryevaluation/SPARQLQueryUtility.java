@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import it.unibz.krdb.obda.model.Constant;
@@ -74,7 +82,7 @@ public class SPARQLQueryUtility {
 		int firstIdx = strquery.indexOf('<');
 		int lastIdx = strquery.indexOf('>');
 		String uri = strquery.substring(firstIdx+1, lastIdx);
-		return OBDADataFactoryImpl.getInstance().getURIConstant(uri);
+		return OBDADataFactoryImpl.getInstance().getConstantURI(uri);
 	}
 
 	public static boolean isURIDescribe(String strquery) {

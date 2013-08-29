@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
@@ -242,11 +250,17 @@ public class QuestDBStatement implements OBDAStatement {
 		return st.getUnfolding(query);
 	}
 
+	@Override
+	public String getSPARQLRewriting(String query) throws OBDAException {
+		return st.getSPARQLRewriting(query);
+	}
+
 	public String getRewriting(String query) throws Exception {
 		Query jenaquery = QueryFactory.create(query);
 		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
 		
 		LinkedList<String> signatureContainer = new LinkedList<String>();
 		tr.getSignature(jenaquery, signatureContainer);
-		return st.getRewriting(jenaquery, signatureContainer);	}
+		return st.getRewriting(jenaquery, signatureContainer);
+	}
 }

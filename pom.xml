@@ -9,11 +9,6 @@
 	<url>http://obda.inf.unibz.it/</url>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<modules>
@@ -21,12 +16,14 @@
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-protege41</module>
+		<module>obdalib-sesame</module>
 		<module>quest-owlapi3</module>
 		<module>quest-distribution</module>
 		<module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
 		<module>quest-db</module>
 		<module>quest-rdb2rdf-compliance</module>
+
 	</modules>
 
 	<profiles>
@@ -100,7 +97,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>3.8.1</version>
+				<version>4.10</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -116,17 +113,17 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.5.11</version>
+				<version>1.6.4</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>0.9.20</version>
+				<version>1.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
-				<version>0.9.20</version>
+				<version>1.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>xsdlib</groupId>
@@ -186,39 +183,176 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
-				<version>1.5.11</version>
+				<version>1.6.4</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-logging</groupId>
 				<artifactId>commons-logging</artifactId>
 				<version>1.1.1</version>
 			</dependency>
-
-			<!-- Sesame -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<version>7.0.37</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>juli</artifactId>
+			<version>6.0.29</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>org.apache.commons.logging</artifactId>
+			<version>1.1.1</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>info.aduna</groupId>
+			<artifactId>aduna-io</artifactId>
+			<version>1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>info.aduna</groupId>
+			<artifactId>aduna-iteration</artifactId>
+			<version>1.5</version>
+		</dependency>
+		<dependency>
+			<groupId>info.aduna</groupId>
+			<artifactId>aduna-concurrent</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>info.aduna.commons</groupId>
+			<artifactId>aduna-commons-lang</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>info.aduna.commons</groupId>
+			<artifactId>aduna-commons-net</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>info.aduna.commons</groupId>
+			<artifactId>aduna-commons-text</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>info.aduna.commons</groupId>
+			<artifactId>aduna-commons-xml</artifactId>
+			<version>2.2</version>
+		</dependency>
+		
+		<!--  OWL API -->
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-api</artifactId>
+			<version>3.4.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
+			<version>3.4.5</version>
+		</dependency>
+		
+			<!-- Sesame API-->
 
 			<dependency>
 				<!-- this includes ALL seasame -->
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-runtime</artifactId>
-				<version>2.6.9</version>
+				<version>2.7.3</version>
 			</dependency>
 
 			<!-- These will download some of the sources -->
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-api</artifactId>
-				<version>2.6.9</version>
+				<version>2.7.3</version>
 			</dependency> 
-			<dependency>
+	    	<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-util</artifactId>
+			 <version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-api</artifactId>
+			 <version>2.7.3</version>
+		</dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sparql-compliance</artifactId>
+            <version>2.7.3</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sparql-testsuite</artifactId>
+            <version>2.7.3</version>
+        </dependency>      
+        <dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-model</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-turtle</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-rdfxml</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-n3</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
  	 			<groupId>org.openrdf.sesame</groupId>
      			<artifactId>sesame-queryresultio-api</artifactId>
-    			<version>2.6.9</version>
-    		</dependency>
-			<dependency>
+    			<version>2.7.3</version>
+    	</dependency>
+		<dependency>
     			<groupId>org.openrdf.sesame</groupId>
     			<artifactId>sesame-queryresultio-text</artifactId>
-    			<version>2.6.9</version>
+    			<version>2.7.3</version>
 	    	</dependency>   
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryresultio-sparqlxml</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryalgebra-model</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-sparql</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-query</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-api</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryalgebra-evaluation</artifactId>
+			<version>2.7.3</version>
+		</dependency>
                             
 			<!-- JDBC Drivers -->
 

@@ -1,26 +1,32 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.protege4.views;
 
-import it.unibz.krdb.obda.gui.swing.OBDADataQueryAction;
-import it.unibz.krdb.obda.gui.swing.OBDASaveQueryResultToFileAction;
-import it.unibz.krdb.obda.gui.swing.panel.QueryInterfacePanel;
-import it.unibz.krdb.obda.gui.swing.panel.ResultViewTablePanel;
-import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
-import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.gui.swing.utils.TextMessageFrame;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLResultSetTableModel;
 import it.unibz.krdb.obda.owlapi3.OWLResultSetWriter;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.gui.OWLResultSetTableModel;
+import it.unibz.krdb.obda.protege4.gui.action.OBDADataQueryAction;
+import it.unibz.krdb.obda.protege4.gui.action.OBDASaveQueryResultToFileAction;
+import it.unibz.krdb.obda.protege4.panels.QueryInterfacePanel;
+import it.unibz.krdb.obda.protege4.panels.ResultViewTablePanel;
+import it.unibz.krdb.obda.protege4.panels.SavedQueriesPanelListener;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
+import it.unibz.krdb.obda.protege4.utils.TextMessageFrame;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -175,7 +181,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					latch.await();
 					monitor.stop();
 					if (internalQuery.isSelectQuery() || internalQuery.isAskQuery()) {
-						OWLResultSet result = action.getResult();
+						QuestOWLResultSet result = action.getResult();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 						createTableModelFromResultSet(result);
@@ -337,7 +343,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 	}
 
-	private void createTableModelFromResultSet(OWLResultSet result) throws OWLException {
+	private void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
 		if (result != null) {
 			tableModel = new OWLResultSetTableModel(result, prefixManager, 
 					queryEditorPanel.isShortURISelect(),
@@ -404,7 +410,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	private class UnfoldQueryAction implements OBDAProgressListener {
-		private OWLStatement statement = null;
+		private QuestOWLStatement statement = null;
 		private CountDownLatch latch = null;
 		private Thread thread = null;
 		private String result = null;
@@ -424,7 +430,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OWLQueryReasoner) {
+					if (reasoner instanceof QuestOWL) {
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
 							QuestOWLStatement st = (QuestOWLStatement)dqr.getStatement();
@@ -467,7 +473,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class ExpandQueryAction implements OBDAProgressListener {
 
-		private OWLStatement statement = null;
+		private QuestOWLStatement statement = null;
 		private CountDownLatch latch = null;
 		private Thread thread = null;
 		private String result = null;
@@ -487,7 +493,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OWLQueryReasoner) {
+					if (reasoner instanceof QuestOWL) {
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
 							QuestOWLStatement st = (QuestOWLStatement)dqr.getStatement();
@@ -529,10 +535,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class ExecuteQueryAction implements OBDAProgressListener {
 
-		private OWLStatement statement = null;
+		private QuestOWLStatement statement = null;
 		private CountDownLatch latch = null;
 		private Thread thread = null;
-		private OWLResultSet result = null;
+		private QuestOWLResultSet result = null;
 		private List<OWLAxiom> graphResult = null;
 		private SPARQLQueryUtility query = null;
 
@@ -544,7 +550,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		/**
 		 * Returns results from executing SELECT query.
 		 */
-		public OWLResultSet getResult() {
+		public QuestOWLResultSet getResult() {
 			return result;
 		}
 		
@@ -560,9 +566,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OWLQueryReasoner) {
+					if (reasoner instanceof QuestOWL) {
 						try {
-							OWLQueryReasoner dqr = (OWLQueryReasoner) reasoner;
+							QuestOWL dqr = (QuestOWL) reasoner;
 							statement = dqr.getStatement();
 							String queryString = query.getQueryString();
 							if (query.isSelectQuery() || query.isAskQuery()) {
@@ -607,7 +613,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class CountAllTuplesAction implements OBDAProgressListener {
 
-		private OWLStatement statement = null;
+		private QuestOWLStatement statement = null;
 		private CountDownLatch latch = null;
 		private Thread thread = null;
 		private int result = -1;
@@ -627,10 +633,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OWLQueryReasoner) {
+					if (reasoner instanceof QuestOWL) {
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							OWLStatement st = dqr.getStatement();
+							QuestOWLStatement st = dqr.getStatement();
 							result = st.getTupleCount(query);
 							latch.countDown();
 						} catch (Exception e) {

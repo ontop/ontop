@@ -1,14 +1,18 @@
-/**
- * Author: Mariano Rodriguez Muro Free University of Bozen-Bolzano
- * rodriguez@inf.unibz.it
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
  */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -72,18 +76,18 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String input = testcase;
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
-			List<Atom> atoms = generator.getAtoms(atomsstr);
+			List<Function> atoms = generator.getAtoms(atomsstr);
 			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
 			Unifier unifier = new Unifier();
 			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 
-			Map<Variable, NewLiteral> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Map<Variable, Term> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (NewLiteral var : mgu.keySet()) {
+				for (Term var : mgu.keySet()) {
 					computedmgu.add(new Substitution(var, mgu.get(var)));
 				}
 			}

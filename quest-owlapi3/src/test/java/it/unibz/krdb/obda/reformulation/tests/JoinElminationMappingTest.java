@@ -1,14 +1,22 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
@@ -108,7 +116,6 @@ public class JoinElminationMappingTest extends TestCase {
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
 		reasoner.flush();
 
 		// Now we are ready for querying
@@ -121,7 +128,7 @@ public class JoinElminationMappingTest extends TestCase {
 				"SELECT ?x WHERE {?x :R ?y. ?y a :A}";
 		try {
 			System.out.println("\n\nSQL:\n" + st.getUnfolding(query));
-			OWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeTuple(query);
 			rs.nextRow();
 		} catch (Exception e) {
 			log.debug(e.getMessage(), e);

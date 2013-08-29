@@ -1,15 +1,18 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
-import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
-import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDALibConstants;
@@ -31,6 +34,11 @@ import it.unibz.krdb.obda.protege4.gui.SQLResultSetTableModel;
 import it.unibz.krdb.obda.protege4.gui.component.AutoSuggestComboBox;
 import it.unibz.krdb.obda.protege4.gui.component.PropertyMappingPanel;
 import it.unibz.krdb.obda.protege4.gui.component.SQLResultTable;
+import it.unibz.krdb.obda.protege4.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -521,27 +529,27 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Function concept = dfac.getAtom(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			Function concept = dfac.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
 		// Store attributes and roles in the body
-		List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>();
+		List<Term> distinguishVariables = new ArrayList<Term>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
-				NewLiteral objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				Function attribute = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
+				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 				distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				Function role = dfac.getAtom(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				body.add(role);
 			}
 		}
 		// Create the head
 		int arity = distinguishVariables.size();
-		Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);
@@ -558,7 +566,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return getUriFunctionTerm(subjectUriTemplate);
 	}
 
-	private NewLiteral createObjectTerm(String column, Predicate datatype) {
+	private Term createObjectTerm(String column, Predicate datatype) {
 		List<FormatString> columnStrings = parse(column);
 		if (columnStrings.size() > 1) {
 			throw new RuntimeException("Invalid column mapping: " + column);
@@ -568,7 +576,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		if (datatype == null) {
 			return var;
 		} else {
-			return dfac.getFunctionalTerm(datatype, var);
+			return dfac.getFunction(datatype, var);
 		}
 	}
 	
@@ -614,7 +622,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private Function getUriFunctionTerm(String text) {
 		final String PLACEHOLDER = "{}";
-		List<NewLiteral> terms = new LinkedList<NewLiteral>();
+		List<Term> terms = new LinkedList<Term>();
 		List<FormatString> tokens = parse(text);
 		StringBuilder sb = new StringBuilder();
 		for (FormatString token : tokens) {
@@ -626,9 +634,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
+		ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+		return dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
 	}
 
 	// Column placeholder pattern

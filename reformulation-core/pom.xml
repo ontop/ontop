@@ -20,7 +20,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<!-- <version>4.8.2</version> -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -35,6 +34,10 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>postgresql</groupId>
@@ -57,7 +60,6 @@
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
-			<version>7.0.37</version>
 		</dependency>     
 	</dependencies>
 	

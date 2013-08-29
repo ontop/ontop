@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -11,16 +19,10 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDAModel getOBDAModel();
 
-	public Atom getAtom(Predicate predicate, List<NewLiteral> terms);
-
-	public Atom getAtom(Predicate predicate, NewLiteral term1);
-
-	public Atom getAtom(Predicate predicate, NewLiteral term1, NewLiteral term2);
-
+	public CQIE getCQIE(Function head, Function... body );
+	
 	public CQIE getCQIE(Function head, List<Function> body);
 
-	public CQIE getCQIE(Function head, Function body);
-	
 	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
@@ -80,91 +82,64 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getUriTemplatePredicate(int arity);
 	
-	public Function getUriTemplate(NewLiteral...terms);
+	public Function getUriTemplate(Term...terms);
 
 	public Predicate getBNodeTemplatePredicate(int arity);
 
-	/*
-	 * Boolean atoms
+
+	
+	/**
+	 * Construct a {@link Function} object. A function expression consists of
+	 * functional symbol (or functor) and one or more arguments.
+	 * 
+	 * @param functor
+	 *            the function symbol name.
+	 * @param arguments
+	 *            a list of arguments.
+	 * @return the function object.
 	 */
+	public Function getFunction(Predicate functor, Term... terms);
 
-	public Atom getEQAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getGTEAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getGTAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getLTEAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getLTAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getNEQAtom(NewLiteral firstTerm, NewLiteral secondTerm);
-
-	public Atom getNOTAtom(NewLiteral term);
-
-	public Atom getANDAtom(NewLiteral term1, NewLiteral term2);
-
-	public Atom getANDAtom(NewLiteral term1, NewLiteral term2, NewLiteral term3);
-
-	public Atom getANDAtom(List<NewLiteral> terms);
-
-	public Atom getORAtom(NewLiteral term1, NewLiteral term2);
-
-	public Atom getORAtom(NewLiteral term1, NewLiteral term2, NewLiteral term3);
-
-	public Atom getORAtom(List<NewLiteral> terms);
-
-	public Atom getIsNullAtom(NewLiteral term);
-
-	public Atom getIsNotNullAtom(NewLiteral term);
-
+	public Function getFunction(Predicate functor, List<Term> terms);
 	/*
 	 * Boolean function terms
 	 */
 
-	public Function getEQFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Function getGTEFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getFunctionGTE(Term firstTerm, Term secondTerm);
 
-	public Function getGTFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getFunctionGT(Term firstTerm, Term secondTerm);
 
-	public Function getLTEFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getFunctionLTE(Term firstTerm, Term secondTerm);
 
-	public Function getLTFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public Function getNEQFunction(NewLiteral firstTerm, NewLiteral secondTerm);
+	public Function getFunctionNEQ(Term firstTerm, Term secondTerm);
 
-	public Function getNOTFunction(NewLiteral term);
+	public Function getFunctionNOT(Term term);
 
-	public Function getANDFunction(NewLiteral term1, NewLiteral term2);
+	public Function getFunctionAND(Term term1, Term term2);
 
-	public Function getANDFunction(NewLiteral term1, NewLiteral term2, NewLiteral term3);
+	public Function getFunctionOR(Term term1, Term term2);
 
-	public Function getANDFunction(List<NewLiteral> terms);
+	public Function getFunctionIsNull(Term term);
 
-	public Function getORFunction(NewLiteral term1, NewLiteral term2);
+	public Function getFunctionIsNotNull(Term term);
 
-	public Function getORFunction(NewLiteral term1, NewLiteral term2, NewLiteral term3);
-
-	public Function getORFunction(List<NewLiteral> terms);
-
-	public Function getIsNullFunction(NewLiteral term);
-
-	public Function getIsNotNullFunction(NewLiteral term);
-
-	public Function getLANGMATCHESFunction(NewLiteral term1, NewLiteral term2);
+	public Function getLANGMATCHESFunction(Term term1, Term term2);
 
 	/*
-	 * Numerical operation functions
+	 * Numerical arithmethic functions
 	 */
 
-	public Function getMinusFunction(NewLiteral term1);
+	public Function getFunctionMinus(Term term1);
 
-	public Function getAddFunction(NewLiteral term1, NewLiteral term2);
+	public Function getFunctionAdd(Term term1, Term term2);
 
-	public Function getSubstractFunction(NewLiteral term1, NewLiteral term2);
+	public Function getFunctionSubstract(Term term1, Term term2);
 
-	public Function getMultiplyFunction(NewLiteral term1, NewLiteral term2);
+	public Function getFunctionMultiply(Term term1, Term term2);
 
 	/*
 	 * JDBC objects
@@ -199,17 +174,15 @@ public interface OBDADataFactory extends Serializable {
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public URIConstant getURIConstant(String uri);
+	public URIConstant getConstantURI(String uri);
 	
-//	public URIConstant getURIConstant(IRI uri);
+	public BNode getConstantBNode(String name);
 
-	public BNode getBNodeConstant(String name);
+	public Constant getConstantNULL();
 
-	public Constant getNULL();
+	public Constant getConstantTrue();
 
-	public Constant getTrue();
-
-	public Constant getFalse();
+	public Constant getConstantFalse();
 
 	/**
 	 * Construct a {@link ValueConstant} object.
@@ -218,7 +191,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the value of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value);
+	public ValueConstant getConstantLiteral(String value);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a type definition.
@@ -236,7 +209,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value, Predicate.COL_TYPE type);
+	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a language tag.
@@ -253,7 +226,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the language tag for the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value, String language);
+	public ValueConstant getConstantLiteral(String value, String language);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name
@@ -261,7 +234,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the value constant.
 	 */
-	public ValueConstant getFreshValueConstant();
+	public ValueConstant getConstantFreshLiteral();
 	
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -285,25 +258,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the variable object.
 	 */
-	public Variable getNondistinguishedVariable();
-
-	/**
-	 * Construct a {@link Function} object. A function expression consists of
-	 * functional symbol (or functor) and one or more arguments.
-	 * 
-	 * @param functor
-	 *            the function symbol name.
-	 * @param arguments
-	 *            a list of arguments.
-	 * @return the function object.
-	 */
-	public Function getFunctionalTerm(Predicate functor, NewLiteral... terms);
-
-	public Function getFunctionalTerm(Predicate functor, List<NewLiteral> terms);
-
-	public Function getFunctionalTerm(Predicate functor, NewLiteral term1);
-
-	public Function getFunctionalTerm(Predicate functor, NewLiteral term1, NewLiteral term2);
+	public Variable getVariableNondistinguished();
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

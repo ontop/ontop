@@ -1,9 +1,17 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.Variable;
@@ -30,13 +38,13 @@ public class TurtleFormatter extends CQFormatter {
             String subject, predicate, object = "";
             String predicateName = atom.getFunctionSymbol().toString();
             if (isUnary(atom)) {
-                NewLiteral term = atom.getTerm(0);
+                Term term = atom.getTerm(0);
                 subject = getDisplayString(term);
                 predicate = "a";
                 object = getAbbreviatedName(predicateName, false);
             } else {
-                NewLiteral term1 = atom.getTerm(0);
-                NewLiteral term2 = atom.getTerm(1);
+                Term term1 = atom.getTerm(0);
+                Term term2 = atom.getTerm(1);
                 subject = getDisplayString(term1);
                 predicate = getAbbreviatedName(predicateName, false);
                 object = getDisplayString(term2);
@@ -49,7 +57,7 @@ public class TurtleFormatter extends CQFormatter {
     /**
      * Utility method to print the term.
      */
-    private String getDisplayString(NewLiteral term) {
+    private String getDisplayString(Term term) {
         if (term instanceof Function) {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
@@ -58,24 +66,24 @@ public class TurtleFormatter extends CQFormatter {
                     // For literal data type
                     final int arity = function.getArity();
                     if (arity == 1) { // without the language tag
-                        NewLiteral var = function.getTerms().get(0);
+                        Term var = function.getTerms().get(0);
                         return String.format("%s^^%s", TermUtil.toString(var), getAbbreviatedName(functionSymbol.toString(), false));
                     } else if (arity == 2) { // with the language tag
-                        NewLiteral var = function.getTerms().get(0);
-                        NewLiteral lang = function.getTerms().get(1);
+                        Term var = function.getTerms().get(0);
+                        Term lang = function.getTerms().get(1);
                         return String.format("%s@%s", TermUtil.toString(var), lang.toString());
                     }
                 } else {
                     // For the other data types
-                    NewLiteral var = function.getTerms().get(0);
+                    Term var = function.getTerms().get(0);
                     return String.format("%s^^%s", TermUtil.toString(var), getAbbreviatedName(functionSymbol.toString(), false));
                 }
             } else if (functionSymbol instanceof URITemplatePredicate) {
-                NewLiteral uriTemplateConstant = function.getTerms().get(0);
+                Term uriTemplateConstant = function.getTerms().get(0);
                 String uriTemplate = getAbbreviatedName(TermUtil.toString(uriTemplateConstant), true);
                 StringBuffer template = new StringBuffer(uriTemplate);
                 int startIndex = 0;
-                for (NewLiteral uriTemplateArg : function.getTerms()) {
+                for (Term uriTemplateArg : function.getTerms()) {
                     if (uriTemplateArg instanceof Variable) {
                         int insertIndex = uriTemplate.indexOf("{", startIndex);
                         template.insert(insertIndex + 1, TermUtil.toString(uriTemplateArg));

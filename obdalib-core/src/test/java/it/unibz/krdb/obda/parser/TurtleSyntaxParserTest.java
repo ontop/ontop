@@ -1,7 +1,15 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.io.PrefixManager;
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;
@@ -181,10 +189,6 @@ public class TurtleSyntaxParserTest extends TestCase {
 		PrefixManager pm = new SimplePrefixManager();
 		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
 		pm.addPrefix("ex:", "http://www.example.org/");
-		pm.addPrefix("rdf:", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-		pm.addPrefix("rdfs:", "http://www.w3.org/2000/01/rdf-schema#");
-		pm.addPrefix("owl:", "http://www.w3.org/2002/07/owl#");	
-		pm.addPrefix("xsd:", "http://www.w3.org/2001/XMLSchema#");
 		return pm;
 	}
 }
