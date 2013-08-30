@@ -6,7 +6,7 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package it.unibz.krdb.obda.io;
+package it.unibz.krdb.obda.sesame.r2rml;
 
 import java.io.File;
 import java.net.URI;
@@ -32,33 +32,33 @@ public class R2RMLReader {
 	
 	private Graph graph ;
 	
+	public R2RMLReader(Graph graph) {
+		manager = new R2RMLManager(graph);
+		this.graph = graph;
+	}
+	
 	public R2RMLReader(String file)
 	{
 		this(new File(file));
 	}
 	
-	public R2RMLReader(File file)
-	{
-	
-		manager = new R2RMLManager(file);
-		graph = manager.getGraph();
-	}
-	
 	public R2RMLReader(File file, OBDAModel model)
 	{
-	
-		manager = new R2RMLManager(file);
-		graph = manager.getGraph();
+		this(file);
 		obdaModel = model;
 	}
 	
+	public R2RMLReader(File file)
+	{
+		manager = new R2RMLManager(file);
+		graph = manager.getGraph();
+	}
 	
 	public void setOBDAModel(OBDAModel model)
 	{
 		this.obdaModel = model;
 	}
-	
-	
+		
 	public OBDAModel readModel(URI sourceUri){
 		try {
 			//add to the model the mappings retrieved from the manager
@@ -76,12 +76,14 @@ public class R2RMLReader {
 
 	public static void main(String args[])
 	{
-		String file = "C:/Project/Test Cases/mapping.ttl";
+		String file = "/Users/timi/Documents/hdd/Project/Test Cases/mapping1.ttl";
 	//	"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D014/r2rmla.ttl";
 	//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl";
 	
 		R2RMLReader reader = new R2RMLReader(file);
-			reader.readMappings();
+		ArrayList<OBDAMappingAxiom> axioms = reader.readMappings();
+		for (OBDAMappingAxiom ax : axioms)
+			System.out.println(ax);
 		
 	}
 

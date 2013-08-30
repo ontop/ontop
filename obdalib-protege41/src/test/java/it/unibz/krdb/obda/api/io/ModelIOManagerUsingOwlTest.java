@@ -258,11 +258,6 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         // Setting up the prefixes
         PrefixManager prefixManager = new SimplePrefixManager();
         prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#");
-        prefixManager.addPrefix("quest:", "http://obda.org/quest#");
-        prefixManager.addPrefix("rdf:", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        prefixManager.addPrefix("rdfs:", "http://www.w3.org/2000/01/rdf-schema#");
-        prefixManager.addPrefix("owl:", "http://www.w3.org/2002/07/owl#");
-        prefixManager.addPrefix("xsd:", "http://www.w3.org/2001/XMLSchema#");
         return prefixManager;
     }
     

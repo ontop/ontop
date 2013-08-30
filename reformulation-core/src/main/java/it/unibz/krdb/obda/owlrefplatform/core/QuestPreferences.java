@@ -44,6 +44,8 @@ public class QuestPreferences extends Properties {
 	
 	public static final String JDBC_URL = "JDBC_URL";
 	
+	public static final String DBNAME = "DBNAME";
+	
 	public static final String DBUSER = "DBUSER";
 	
 	public static final String DBPASSWORD = "DBPASSWORD";

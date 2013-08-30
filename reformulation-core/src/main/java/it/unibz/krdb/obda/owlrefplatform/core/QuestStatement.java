@@ -8,13 +8,13 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core;
 
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -22,6 +22,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -39,7 +40,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlPrefixManager;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
@@ -517,6 +520,42 @@ public class QuestStatement implements OBDAStatement {
 			canceled = false;
 			throw new OBDAException("Query execution was cancelled");
 		}
+	}
+
+	/**
+	 * Rewrites the given input SPARQL query and returns back an expanded SPARQL
+	 * query. The query expansion involves query transformation from SPARQL
+	 * algebra to Datalog objects and then translating back to SPARQL algebra.
+	 * The transformation to Datalog is required to apply the rewriting
+	 * algorithm.
+	 * 
+	 * @param sparql
+	 *            The input SPARQL query.
+	 * @return An expanded SPARQL query.
+	 * @throws OBDAException
+	 *             if errors occur during the transformation and translation.
+	 */
+	public String getSPARQLRewriting(String sparql) throws OBDAException {
+		if (!SPARQLQueryUtility.isSelectQuery(sparql)) {
+			throw new OBDAException("Support only SELECT query");
+		}
+		// Parse the SPARQL string into SPARQL algebra object
+		Query query = QueryFactory.create(sparql);
+ 
+		// Obtain the query signature
+		List<String> signatureContainer = new LinkedList<String>();
+		getSignature(query, signatureContainer);
+		
+		// Translate the SPARQL algebra to datalog program
+		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
+		
+		// Perform the query rewriting
+		DatalogProgram programAfterRewriting = getRewriting(initialProgram);
+		
+		// Translate the output datalog program back to SPARQL string
+		PrefixManager prefixManager = new SparqlPrefixManager(query.getPrefixMapping());
+		DatalogToSparqlTranslator datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
+		return datalogTranslator.translate(programAfterRewriting);
 	}
 
 	/**

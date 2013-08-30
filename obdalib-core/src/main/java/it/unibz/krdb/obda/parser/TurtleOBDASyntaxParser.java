@@ -8,9 +8,9 @@
  */
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.util.Map;
 
