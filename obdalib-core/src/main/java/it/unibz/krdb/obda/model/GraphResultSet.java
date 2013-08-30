@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 
 import java.util.List;
 
-import com.hp.hpl.jena.sparql.syntax.Template;
+//import com.hp.hpl.jena.sparql.syntax.Template;
 
 public interface GraphResultSet extends ResultSet {
 
@@ -26,6 +26,6 @@ public interface GraphResultSet extends ResultSet {
 
 	void addNewResultSet(List<Assertion> result);
 	
-	Template getTemplate();
+	//Template getTemplate();
 	
 }

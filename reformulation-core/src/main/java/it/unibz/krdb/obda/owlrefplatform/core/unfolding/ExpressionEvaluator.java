@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class ExpressionEvaluator {
 

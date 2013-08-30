@@ -62,8 +62,8 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit == Long.MIN_VALUE || limit == 0) {
-			if (offset == Long.MIN_VALUE) {
+		if (limit < 0 || limit == 0) {
+			if (offset < 0) {
 				/* If both limit and offset is not specified.
 				 */
 				return "LIMIT 0";
@@ -74,7 +74,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 				return String.format("LIMIT %d,18446744073709551615", offset);
 			}
 		} else {
-			if (offset == Long.MIN_VALUE) {
+			if (offset < 0) {
 				// If the offset is not specified
 				return String.format("LIMIT %d", limit);
 			} else {

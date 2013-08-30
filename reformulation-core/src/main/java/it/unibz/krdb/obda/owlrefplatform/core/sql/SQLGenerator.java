@@ -49,9 +49,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.rdf.model.Literal;
+//import com.hp.hpl.jena.rdf.model.Literal;
 
 public class SQLGenerator implements SQLQueryGenerator {
 

@@ -23,7 +23,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
-import java.net.URI;
+//import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,11 +45,16 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 
 import org.antlr.runtime.*;
+import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.impl.ValueFactoryImpl;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -178,7 +183,7 @@ public class TurtleOBDAParser extends Parser {
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	private static IRIFactory iriFactory = IRIFactory.iriImplementation();
+	private static ValueFactory iriFactory = new ValueFactoryImpl();
 
 	private String error = "";
 
@@ -708,9 +713,9 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> value = null;
 
 
-		IRI v1 =null;
+		URI v1 =null;
 		List<Term> l1 =null;
-		IRI v2 =null;
+		URI v2 =null;
 		List<Term> l2 =null;
 
 
@@ -806,11 +811,11 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "verb"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:335:1: verb returns [IRI value] : ( predicate | 'a' );
-	public final IRI verb() throws RecognitionException {
-		IRI value = null;
+	public final URI verb() throws RecognitionException {
+		URI value = null;
 
 
-		IRI predicate7 =null;
+		URI predicate7 =null;
 
 		try {
 			// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:336:3: ( predicate | 'a' )
@@ -844,7 +849,7 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:337:5: 'a'
 					{
 					match(input,77,FOLLOW_77_in_verb288); 
-					 value = iriFactory.construct(OBDAVocabulary.RDF_TYPE); 
+					 value = iriFactory.createURI(OBDAVocabulary.RDF_TYPE); 
 					}
 					break;
 
@@ -992,8 +997,8 @@ public class TurtleOBDAParser extends Parser {
 
 	// $ANTLR start "predicate"
 	// /Users/johardi/Documents/Code/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:353:1: predicate returns [IRI value] : resource ;
-	public final IRI predicate() throws RecognitionException {
-		IRI value = null;
+	public final URI predicate() throws RecognitionException {
+		URI value = null;
 
 
 		Term resource10 =null;
@@ -1010,7 +1015,7 @@ public class TurtleOBDAParser extends Parser {
 			      Term nl = resource10;
 			      if (nl instanceof URIConstant) {
 			        URIConstant c = (URIConstant) nl;
-			        value = iriFactory.construct(c.getURI());
+			        value = iriFactory.createURI(c.getURI());
 			      } else {
 			        throw new RuntimeException("Unsupported predicate syntax: " + nl.toString());
 			      }

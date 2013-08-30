@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlPrefixManager;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -61,12 +62,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.QueryParser;
+import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.syntax.Template;
+//import com.hp.hpl.jena.query.Query;
+//import com.hp.hpl.jena.query.QueryFactory;
+//import com.hp.hpl.jena.sparql.syntax.Template;
 
 /**
  * The obda statement provides the implementations necessary to query the
@@ -108,7 +114,9 @@ public class QuestStatement implements OBDAStatement {
 
 	final Map<String, List<String>> signaturecache;
 
-	private Map<String, Query> jenaQueryCache;
+	//private Map<String, Query> jenaQueryCache;
+	
+	private Map<String, ParsedQuery> sesameQueryCache;
 
 	final Map<String, Boolean> isbooleancache;
 
@@ -117,6 +125,8 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, Boolean> isdescribecache;
 
 	final SparqlAlgebraToDatalogTranslator translator;
+	
+	SesameConstructTemplate templ = null;
 
 	/*
 	 * For benchmark purpose
@@ -134,7 +144,8 @@ public class QuestStatement implements OBDAStatement {
 		this.translator = new SparqlAlgebraToDatalogTranslator(this.questInstance.getUriTemplateMatcher());
 		this.querycache = questinstance.getSQLCache();
 		this.signaturecache = questinstance.getSignatureCache();
-		this.jenaQueryCache = questinstance.getJenaQueryCache();
+		//this.jenaQueryCache = questinstance.getJenaQueryCache();
+		this.sesameQueryCache = questinstance.getSesameQueryCache();
 		this.isbooleancache = questinstance.getIsBooleanCache();
 		this.isconstructcache = questinstance.getIsConstructCache();
 		this.isdescribecache = questinstance.getIsDescribeCache();
@@ -218,23 +229,14 @@ public class QuestStatement implements OBDAStatement {
 			try {
 
 				if (!querycache.containsKey(strquery)) {
-					// final long startTime = System.currentTimeMillis();
-
-					/*
-					 * Note, while translating the SQL String, List<String> with
-					 * the query signature, and the Jena Query objects are
-					 * cached
-					 */
-
 					getUnfolding(strquery);
-
 				}
 				/*
 				 * Obtaineing the query from the cache
 				 */
 				String sql = getSqlString(strquery);
 				List<String> signature = signaturecache.get(strquery);
-				Query query = jenaQueryCache.get(strquery);
+				ParsedQuery query = sesameQueryCache.get(strquery);
 
 				log.debug("Executing the query and get the result...");
 				if (sql.equals("") && !isBoolean) {
@@ -267,11 +269,11 @@ public class QuestStatement implements OBDAStatement {
 							boolean collectResults = false;
 							if (isDescribe)
 								collectResults = true;
-							Template template = query.getConstructTemplate();
+							//Template template = query.getConstructTemplate();
 							TupleResultSet tuples = null;
 
 							tuples = new QuestResultset(set, signature, QuestStatement.this);
-							graphResult = new QuestGraphResultSet(tuples, template, collectResults);
+							graphResult = new QuestGraphResultSet(tuples, templ, collectResults);
 						}
 					} catch (SQLException e) {
 						exception = e;
@@ -310,7 +312,18 @@ public class QuestStatement implements OBDAStatement {
 		} else if (SPARQLQueryUtility.isAskQuery(strquery)) {
 			return executeTupleQuery(strquery, 2);
 		} else if (SPARQLQueryUtility.isConstructQuery(strquery)) {
+			
+			// Here we need to get the template for the CONSTRUCT query results
+			try {
+				templ = new SesameConstructTemplate(strquery);
+			} catch (MalformedQueryException e) {
+				e.printStackTrace();
+			}
+			
+			// Here we replace CONSTRUCT query with SELECT query
+			strquery = SPARQLQueryUtility.getSelectFromConstruct(strquery);
 			return executeGraphQuery(strquery, 3);
+			
 		} else if (SPARQLQueryUtility.isDescribeQuery(strquery)) {
 			// create list of uriconstants we want to describe
 			List<URIConstant> constants = new ArrayList<URIConstant>();
@@ -384,16 +397,44 @@ public class QuestStatement implements OBDAStatement {
 	 * @param query
 	 * @return
 	 */
-	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
-
-		// Contruct the datalog program object from the query string
+//	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
+//
+//		// Contruct the datalog program object from the query string
+//		DatalogProgram program = null;
+//		try {
+//			if (questInstance.isSemIdx()) {
+//				translator.setSI();
+//				translator.setUriRef(questInstance.getUriRefIds());
+//			}
+//			program = translator.translate(query, signature);
+//
+//			log.debug("Translated query: \n{}", program);
+//
+//			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
+//			removeNonAnswerQueries(program);
+//
+//			program = unfolder.unfold(program, "ans1");
+//
+//			log.debug("Flattened query: \n{}", program);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			OBDAException ex = new OBDAException(e.getMessage());
+//			ex.setStackTrace(e.getStackTrace());
+//			throw ex;
+//		}
+//		log.debug("Replacing equivalences...");
+//		program = validator.replaceEquivalences(program);
+//		return program;
+//	}
+	
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
 		try {
 			if (questInstance.isSemIdx()) {
 				translator.setSI();
 				translator.setUriRef(questInstance.getUriRefIds());
 			}
-			program = translator.translate(query, signature);
+			program = translator.translate(pq, signature);
 
 			log.debug("Translated query: \n{}", program);
 
@@ -407,12 +448,20 @@ public class QuestStatement implements OBDAStatement {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-			throw ex;
+			try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
 		return program;
+		
 	}
+
+
 
 	private DatalogProgram getUnfolding(DatalogProgram query) throws OBDAException {
 
@@ -540,11 +589,18 @@ public class QuestStatement implements OBDAStatement {
 			throw new OBDAException("Support only SELECT query");
 		}
 		// Parse the SPARQL string into SPARQL algebra object
-		Query query = QueryFactory.create(sparql);
- 
+		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+		ParsedQuery query = null;
+		try {
+			query = qp.parseQuery(sparql, null); // base URI is null
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
+		
 		// Obtain the query signature
 		List<String> signatureContainer = new LinkedList<String>();
 		getSignature(query, signatureContainer);
+		
 		
 		// Translate the SPARQL algebra to datalog program
 		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
@@ -553,15 +609,16 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram programAfterRewriting = getRewriting(initialProgram);
 		
 		// Translate the output datalog program back to SPARQL string
-		PrefixManager prefixManager = new SparqlPrefixManager(query.getPrefixMapping());
-		DatalogToSparqlTranslator datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
+		// TODO Re-enable the prefix manager using Sesame prefix manager
+//		PrefixManager prefixManager = new SparqlPrefixManager(query.getPrefixMapping());
+		DatalogToSparqlTranslator datalogTranslator = new DatalogToSparqlTranslator();
 		return datalogTranslator.translate(programAfterRewriting);
 	}
 
 	/**
 	 * Returns the final rewriting of the given query
 	 */
-	public String getRewriting(Query query, List<String> signature) throws Exception {
+	public String getRewriting(ParsedQuery query, List<String> signature) throws Exception {
 		// TODO FIX to limit to SPARQL input and output
 
 		DatalogProgram program = translateAndPreProcess(query, signature);
@@ -569,6 +626,8 @@ public class QuestStatement implements OBDAStatement {
 		OBDAQuery rewriting = rewriter.rewrite(program);
 		return DatalogProgramRenderer.encode((DatalogProgram) rewriting);
 	}
+	
+	
 
 	/**
 	 * Returns the final rewriting of the given query
@@ -597,8 +656,9 @@ public class QuestStatement implements OBDAStatement {
 		Map<Predicate, List<CQIE>> rulesIndex = questInstance.sigmaRulesIndex;
 
 		List<String> signatureContainer = new LinkedList<String>();
-		Query query;
-
+		//Query query;
+		ParsedQuery query;
+		
 		// Check the cache first if the system has processed the query string
 		// before
 		if (querycache.containsKey(strquery)) {
@@ -606,15 +666,18 @@ public class QuestStatement implements OBDAStatement {
 			sql = querycache.get(strquery);
 
 			signatureContainer = signaturecache.get(strquery);
-			query = jenaQueryCache.get(strquery);
+			query = sesameQueryCache.get(strquery);
 
 		} else {
-			query = QueryFactory.create(strquery);
+			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+			query = qp.parseQuery(strquery, null); // base URI is null
+			//getSignature(query, signatureContainer);
 			getSignature(query, signatureContainer);
 
-			jenaQueryCache.put(strquery, query);
+			sesameQueryCache.put(strquery, query);
 			signaturecache.put(strquery, signatureContainer);
 
+			//DatalogProgram program_test = translateAndPreProcess(query, signatureContainer);
 			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
 			try {
 				// log.debug("Input query:\n{}", strquery);
@@ -752,16 +815,6 @@ public class QuestStatement implements OBDAStatement {
 		program.appendRule(unionOfQueries);
 	}
 
-	// private void cacheQueryAndProperties(String sparqlQuery, String sqlQuery,
-	// List<String> signature, Query jenaQuery) {
-	// // Store the query
-	// querycache.put(sparqlQuery, sqlQuery);
-	// signaturecache.put(sparqlQuery, signature);
-	// jenaQueryCache.put(sparqlQuery, jenaQuery);
-	//
-	//
-	// }
-
 	/**
 	 * Returns the number of tuples returned by the query
 	 */
@@ -791,40 +844,14 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
-	// private DatalogProgram getDatalogQuery(String query) throws OBDAException
-	// {
-	// SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
-	//
-	// DatalogProgram queryProgram = null;
-	// try {
-	// queryProgram = sparqlTranslator.parse(query);
-	// } catch (QueryException e) {
-	// log.warn(e.getMessage());
-	// }
-	//
-	// if (queryProgram == null) { // if the SPARQL translator doesn't work,
-	// // use the Datalog parser.
-	// DatalogProgramParser datalogParser = new DatalogProgramParser();
-	// try {
-	// queryProgram = datalogParser.parse(query);
-	// } catch (RecognitionException e) {
-	// log.warn(e.getMessage());
-	// queryProgram = null;
-	// } catch (IllegalArgumentException e2) {
-	// log.warn(e2.getMessage());
-	// }
-	// }
-	//
-	// if (queryProgram == null) // if it is still null
-	// throw new OBDAException("Unsupported syntax");
-	//
-	// return queryProgram;
-	// }
+//	private void getSignature(Query query, List<String> signatureContainer) {
+//		translator.getSignature(query, signatureContainer);
+//	}
 
-	private void getSignature(Query query, List<String> signatureContainer) {
+	private void getSignature(ParsedQuery query, List<String> signatureContainer) {
 		translator.getSignature(query, signatureContainer);
 	}
-
+	
 	@Override
 	public void cancel() throws OBDAException {
 		try {

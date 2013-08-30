@@ -23,10 +23,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>arq</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>

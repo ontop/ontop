@@ -53,7 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class MappingAnalyzer {
 

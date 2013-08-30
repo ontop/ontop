@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.DataTypePredicate;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class DataTypePredicateImpl extends PredicateImpl implements DataTypePredicate {
 
