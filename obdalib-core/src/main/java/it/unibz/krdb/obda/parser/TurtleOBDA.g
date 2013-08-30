@@ -23,6 +23,7 @@ grammar TurtleOBDA;
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -250,22 +251,29 @@ private class ColumnString implements FormatString {
  */
 private Function makeAtom(Term subject, Term pred, Term object) {
     Function atom = null;
-    String p = pred.toString();
-    if (p.equals(OBDAVocabulary.RDF_TYPE)) {
+//    String p; 
+//    if (){
+//      p = pred.getValue();
+//    } else {
+//      p = pred.toString();
+//    }
+    
+    
+    if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
       if (object instanceof  URIConstant) {
         URIConstant c = (URIConstant) object;  // it has to be a URI constant
         Predicate predicate = dfac.getClassPredicate(c.getURI());
         atom = dfac.getFunction(predicate, subject);
       } else if (object instanceof  Variable){
-        Term rdftype = dfac.getConstantURI(p);
+        //Term rdftype = dfac.getConstantURI(p);
         Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
         Term uriOfObject = dfac.getFunction(uriPredicate, object);
-        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, rdftype,  uriOfObject);
+        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  uriOfObject);
         // TODO:
         //System.err.println("some warning of using varible in danger")
       } else if (object instanceof Function){
-        Term rdftype = dfac.getConstantURI(p);
-        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, rdftype,   object);           
+        //Term rdftype = dfac.getConstantURI(p);
+        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,   object);           
       }
     } else if( ! QueryUtils.isGrounded(pred )){
       atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
@@ -399,9 +407,11 @@ object returns [Term value]
 //  | blank
   ;
 
-resource returns [Term value]
-  : uriref { $value = construct($uriref.value); }
-  | qname { $value = construct($qname.value); }
+resource returns [URIConstant value]
+  : uriref { $value = dfac.getConstantURI($uriref.value);} 
+//  construct($uriref.value);
+//  | qname { $value = construct($qname.value); }
+  | qname { $value = dfac.getConstantURI($qname.value); }
   ;
 
 uriref returns [String value]
@@ -446,7 +456,8 @@ typedLiteral returns [Function value]
     }
   | variable REFERENCE resource {
       Variable var = $variable.value;
-      String functionName = $resource.value.toString();
+      //String functionName = $resource.value.toString();
+      String functionName = $resource.value.getValue();
       Predicate functionSymbol = null;
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
           functionSymbol = dfac.getDataTypePredicateLiteral();
