@@ -170,7 +170,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			OWLLiteral val = rs.getOWLLiteral("y");
 			assertEquals("<uri1>", ind1.toString());
 			//assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"B\"", val.toString());
+			assertEquals("\"A\"", val.toString());
 			
 
 		} catch (Exception e) {

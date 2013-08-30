@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -86,7 +87,8 @@ public class MetaMappingExpander {
 
 			Function firstBodyAtom = body.get(0);
 			
-			if (!firstBodyAtom.getFunctionSymbol().equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
+			Predicate pred = firstBodyAtom.getFunctionSymbol();
+			if (!pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
 				/**
 				 * for normal mappings, we do not need to expand it.
 				 */
@@ -94,11 +96,23 @@ public class MetaMappingExpander {
 				
 			} else {
 				
+				int arity;
 				
+				Term predInTriple = bodyAtom.getTerm(1);
 				
+				// variables are in the position of object
+				if(predInTriple instanceof URIConstant){
+					if(((URIConstant) predInTriple).getURI().equals(OBDAVocabulary.RDF_TYPE)){
+						arity = 1;
+					} else {
+						throw new IllegalArgumentException("MetaMappingExpander cannot handle predicate " + predInTriple);
+					}
+				} else {
+				// variables are in the position of predicate
+					arity = 2;
+				}
 				
-				
-				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom);
+				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
 				
 				// Construct the SQL query tree from the source query
 				QueryTree sourceQueryTree = translator.contructQueryTree(sourceQuery.toString());
@@ -148,10 +162,10 @@ public class MetaMappingExpander {
 				String id = mapping.getId();
 				
 				for(List<String> params : paramsForClassTemplate) {
-					String newId = IDGenerator.getNextUniqueID(id + "##");
+					String newId = IDGenerator.getNextUniqueID(id + "#");
 					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
 							bodyAtom, sourceQueryTree, columnsForTemplate,
-							columnsForValues, params);
+							columnsForValues, params, arity);
 										
 					expandedMappings.add(newMapping);	
 					
@@ -181,13 +195,13 @@ public class MetaMappingExpander {
 			Function bodyAtom, QueryTree sourceQueryTree,
 			List<DerivedColumn> columnsForTemplate,
 			List<DerivedColumn> columnsForValues,
-			List<String> params) {
+			List<String> params, int arity) {
 		
 		/*
 		 * First construct new Target Query 
 		 */
 		Function newTargetHead = targetQuery.getHead();
-		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params);
+		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params, arity);
 		CQIE newTargetQuery = dfac.getCQIE(newTargetHead, newTargetBody);
 		
 		/*
@@ -213,6 +227,7 @@ public class MetaMappingExpander {
 				
 				StringLiteral clsStringLiteral = new StringLiteral(params.get(j));
 				if(j != 0){
+				//if (newSelection.conditionSize() > 0){
 					newSelection.addOperator(new AndOperator());
 				}
 				ComparisonPredicate condition = new ComparisonPredicate(columnRefExpression, clsStringLiteral, ComparisonPredicate.Operator.EQ);
@@ -279,24 +294,40 @@ public class MetaMappingExpander {
 	/**
 	 * 
 	 * This method extracts the variables in the template from the atom 
-	 * 
-	 * Example:
+	 * <p>
+	 * Example 1: 
+	 * <p>
+	 * arity = 1. 
 	 * Input Atom:
 	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}/{}", X, Y))</pre>
 	 * 
 	 * Output: [X, Y]
+	 * <p>
+	 * Example 2: 
+	 * <p>
+	 * arity = 2. 
+	 * Input Atom:
+	 * <pre>triple(t1,  URI("http://example.org/{}/{}", X, Y), t2)</pre>
+	 * 
+	 * Output: [X, Y]
+
 	 * 
 	 * @param atom
+	 * @param arity 
 	 * @return
 	 */
-	private List<Variable> getVariablesInTemplate(Function atom) {
-		Function funcTerm = (Function)atom.getTerm(2);
+	private List<Variable> getVariablesInTemplate(Function atom, int arity) {
+		
+		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
+		
 		List<Variable> vars = new ArrayList<Variable>();
-		for(int i = 1; i < funcTerm.getArity(); i++){
-			vars.add((Variable) funcTerm.getTerm(i));
+		for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+			vars.add((Variable) uriTermForPredicate.getTerm(i));
 		}
 		return vars;
 	}
+
+	
 
 	
 	/***
@@ -309,24 +340,48 @@ public class MetaMappingExpander {
 	 * 			a Function in form of triple(t1, 'rdf:type', X)
 	 * @param values
 	 * 			the concrete name of the X 
+	 * @param arity 
 	 * @return
 	 * 			expanded atom in form of <pre>http://example.org/cls(t1)</pre>
 	 */
-	private Function expandHigherOrderAtom(Function atom, List<String> values) {
+	private Function expandHigherOrderAtom(Function atom, List<String> values, int arity) {
 
-		Term term2 = atom.getTerm(2);
-		Function functionTerm2 = (Function) term2;
-		String uriTemplate = ((ValueConstant) functionTerm2.getTerm(0)).getValue();
+		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
+		
+		String uriTemplate = ((ValueConstant) uriTermForPredicate.getTerm(0)).getValue();
 
 		String predName = URITemplates.format(uriTemplate, values);
 		
-		Predicate p = dfac.getPredicate(predName, 1, new COL_TYPE[]{COL_TYPE.OBJECT});
-
-		return dfac.getFunction(p, atom.getTerm(0));
+		Function result = null;
+		Predicate p; 
+		if(arity == 1){
+			p = dfac.getPredicate(predName, arity, new COL_TYPE[]{COL_TYPE.OBJECT});
+			result = dfac.getFunction(p, atom.getTerm(0));
+		} else if (arity == 2){
+			p = dfac.getPredicate(predName, arity, new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.OBJECT});
+			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
+		}
+		return result;
+	}
+	
+	/**
+	 * This method finds the term for the predicate template
+	 */
+	private Function findTemplatePredicateTerm(Function atom, int arity) {
+		Function uriTermForPredicate;
+		
+		if(arity == 1){
+			uriTermForPredicate = (Function) atom.getTerm(2);
+		} else if (arity == 2){
+			uriTermForPredicate = (Function) atom.getTerm(1);	
+		} else {
+			throw new IllegalArgumentException("The parameter airty should be 1 or 2");
+		}
+		return uriTermForPredicate;
 	}
 
 	/**
-	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
+	 * this method expands the input mappings, which may include meta mappings, to the concrete mappings
 	 * 
 	 * @param mappings
 	 * 		a list of mappings, which may include meta mappings

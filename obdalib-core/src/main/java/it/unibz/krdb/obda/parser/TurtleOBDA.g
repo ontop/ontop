@@ -257,25 +257,19 @@ private Function makeAtom(Term subject, Term pred, Term object) {
         Predicate predicate = dfac.getClassPredicate(c.getURI());
         atom = dfac.getFunction(predicate, subject);
       } else if (object instanceof  Variable){
-        Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
         Term rdftype = dfac.getConstantURI(p);
         Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
         Term uriOfObject = dfac.getFunction(uriPredicate, object);
-        atom = dfac.getFunction(triplepredicate, subject, rdftype,  uriOfObject);
+        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, rdftype,  uriOfObject);
         // TODO:
         //System.err.println("some warning of using varible in danger")
       } else if (object instanceof Function){
-        Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
         Term rdftype = dfac.getConstantURI(p);
-        atom = dfac.getFunction(triplepredicate, subject, rdftype,   object);           
+        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, rdftype,   object);           
       }
     } else if( ! QueryUtils.isGrounded(pred )){
-      Predicate triplepredicate = dfac.getPredicate("triple", 3); // the data type cannot be determined here!
-      atom = dfac.getFunction(triplepredicate, subject, pred,  object);
-    }
-    else
-    
-    {
+      atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+    } else {
       Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
       atom = dfac.getFunction(predicate, subject, object);
     }
