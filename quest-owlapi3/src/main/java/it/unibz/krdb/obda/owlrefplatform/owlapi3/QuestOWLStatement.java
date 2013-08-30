@@ -34,6 +34,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.QueryParser;
+import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
@@ -56,8 +60,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
+//import com.hp.hpl.jena.query.Query;
+//import com.hp.hpl.jena.query.QueryFactory;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -363,12 +367,14 @@ public class QuestOWLStatement {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			Query jenaquery = QueryFactory.create(query);
+			//Query jenaquery = QueryFactory.create(query);
+			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
 
 			LinkedList<String> signatureContainer = new LinkedList<String>();
-			tr.getSignature(jenaquery, signatureContainer);
-			return st.getRewriting(jenaquery, signatureContainer);
+			tr.getSignature(pq, signatureContainer);
+			return st.getRewriting(pq, signatureContainer);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}

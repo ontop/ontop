@@ -29,15 +29,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.QueryParser;
+import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
 
 public class QuestDBStatement implements OBDAStatement {
 
@@ -256,11 +257,14 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getRewriting(String query) throws Exception {
-		Query jenaquery = QueryFactory.create(query);
+		
+		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
+		
 		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
 		
 		LinkedList<String> signatureContainer = new LinkedList<String>();
-		tr.getSignature(jenaquery, signatureContainer);
-		return st.getRewriting(jenaquery, signatureContainer);
+		tr.getSignature(pq, signatureContainer);
+		return st.getRewriting(pq, signatureContainer);
 	}
 }

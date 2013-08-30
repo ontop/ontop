@@ -24,7 +24,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class PrefixRendererTest extends TestCase {
 
@@ -41,7 +41,7 @@ public class PrefixRendererTest extends TestCase {
 		LinkedList<Term> innerterms = new LinkedList<Term>();
 		innerterms.add(tfac.getVariable("id"));
 		
-		IRIFactory fact = new IRIFactory();
+//		IRIFactory fact = new IRIFactory();
 
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));

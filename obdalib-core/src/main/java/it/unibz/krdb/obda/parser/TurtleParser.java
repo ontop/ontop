@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
-import java.net.URI;
+//import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,9 +45,11 @@ import org.antlr.runtime.TokenStream;
 
 
 import org.antlr.runtime.*;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.URIImpl;
+//import com.hp.hpl.jena.iri.URIImplFactory;
 
 import java.util.Stack;
 import java.util.List;
@@ -155,7 +157,7 @@ public class TurtleParser extends Parser {
 
     /** Constants */
     private static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-    private static final IRI RDF_TYPE_URI = OBDADataFactoryImpl.getIRI(RDF_TYPE);
+    private static final URIImpl RDF_TYPE_URI = new URIImpl(RDF_TYPE);
 
     /** Map of directives */
     private HashMap<String, String> directives = new HashMap<String, String>();
@@ -686,11 +688,11 @@ public class TurtleParser extends Parser {
         List<Function> value = null;
 
 
-        IRI v1 =null;
+        URIImpl v1 =null;
 
         List<Term> l1 =null;
 
-        IRI v2 =null;
+        URIImpl v2 =null;
 
         List<Term> l2 =null;
 
@@ -801,11 +803,11 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "verb"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:255:1: verb returns [URI value] : ( predicate | 'a' );
-    public final IRI verb() throws RecognitionException {
-        IRI value = null;
+    public final URIImpl verb() throws RecognitionException {
+        URIImpl value = null;
 
 
-        IRI predicate7 =null;
+        URIImpl predicate7 =null;
 
 
         try {
@@ -949,7 +951,7 @@ public class TurtleParser extends Parser {
         Term value = null;
 
 
-        IRI resource8 =null;
+        URIImpl resource8 =null;
 
         Variable variable9 =null;
 
@@ -1113,11 +1115,11 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "predicate"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:275:1: predicate returns [URI value] : resource ;
-    public final IRI predicate() throws RecognitionException {
-        IRI value = null;
+    public final URIImpl predicate() throws RecognitionException {
+        URIImpl value = null;
 
 
-        IRI resource12 =null;
+        URIImpl resource12 =null;
 
 
         try {
@@ -1155,7 +1157,7 @@ public class TurtleParser extends Parser {
         Term value = null;
 
 
-        IRI resource13 =null;
+        URIImpl resource13 =null;
 
         Function function14 =null;
 
@@ -1390,8 +1392,8 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "resource"
     // C:\\Project\\Code\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:289:1: resource returns [URI value] : ( uriref | qname );
-    public final IRI resource() throws RecognitionException {
-        IRI value = null;
+    public final URIImpl resource() throws RecognitionException {
+        URIImpl value = null;
 
 
         String uriref19 =null;
@@ -1427,7 +1429,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = OBDADataFactoryImpl.getIRI(uriref19); 
+                     value = new URIImpl(uriref19); 
 
                     }
                     break;
@@ -1440,7 +1442,7 @@ public class TurtleParser extends Parser {
                     state._fsp--;
 
 
-                     value = OBDADataFactoryImpl.getIRI(qname20); 
+                     value = new URIImpl(qname20); 
 
                     }
                     break;
@@ -1654,7 +1656,7 @@ public class TurtleParser extends Parser {
         Function value = null;
 
 
-        IRI resource24 =null;
+        URIImpl resource24 =null;
 
         Vector<Term> terms25 =null;
 
@@ -1715,7 +1717,7 @@ public class TurtleParser extends Parser {
 
         Variable variable28 =null;
 
-        IRI resource29 =null;
+        URIImpl resource29 =null;
 
 
         try {
@@ -2413,7 +2415,7 @@ public class TurtleParser extends Parser {
 
         ValueConstant stringLiteral42 =null;
 
-        IRI resource43 =null;
+        URIImpl resource43 =null;
 
 
         try {

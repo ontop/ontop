@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.model;
 
 import java.io.Serializable;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 /**
  * A predicate is a property that the elements of the set have in common.

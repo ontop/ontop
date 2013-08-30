@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import java.net.URI;
 import java.util.List;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class EmptyQueryResultSet implements TupleResultSet {
 

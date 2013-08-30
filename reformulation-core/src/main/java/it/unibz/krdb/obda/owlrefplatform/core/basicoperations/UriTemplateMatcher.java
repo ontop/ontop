@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class UriTemplateMatcher {
 
