@@ -189,6 +189,11 @@ public class Unifier {
 	// }
 	// }
 
+	
+	public static void applyUnifier(List<Term> terms, 
+			Map<Variable, Term> unifier) {
+		applyUnifier(terms, unifier,0);
+	}
 	/***
 	 * Applies the subsittution to all the terms in the list. Note that this
 	 * will not clone the list or the terms insdie the list.
@@ -197,8 +202,8 @@ public class Unifier {
 	 * @param unifier
 	 */
 	public static void applyUnifier(List<Term> terms, 
-			Map<Variable, Term> unifier) {
-		for (int i = 0; i < terms.size(); i++) {
+			Map<Variable, Term> unifier, int fromIndex) {
+		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
 			/*
 			 * unifiers only apply to variables, simple or inside functional
@@ -364,8 +369,8 @@ public class Unifier {
 			 * Applying the newly computed substitution to the 'replacement' of
 			 * the existing substitutions
 			 */
-			applyUnifier(terms1, mgu);
-			applyUnifier(terms2, mgu);
+			applyUnifier(terms1, mgu, termidx + 1);
+			applyUnifier(terms2, mgu, termidx + 1);
 
 		}
 		return mgu;
