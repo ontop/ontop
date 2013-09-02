@@ -62,12 +62,12 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.8</version>
 		</dependency>
-		 <dependency>
-		<!--	this includes ALL seasame -->
-			<groupId>org.openrdf.sesame</groupId>
+		 <!-- <dependency> -->
+		<!--	this includes ALL seasame, dont keep this! -->
+		<!-- 	<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 			<scope>test</scope>
-		</dependency> 
+		</dependency> --> 
 	<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-apibinding</artifactId>
@@ -81,6 +81,25 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-api</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-sparql</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-manager</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		
+		
+		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-text</artifactId>
