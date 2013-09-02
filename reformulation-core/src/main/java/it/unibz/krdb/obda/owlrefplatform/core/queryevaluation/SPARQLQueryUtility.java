@@ -129,6 +129,14 @@ public class SPARQLQueryUtility {
 		return "CONSTRUCT { <" + constant + "> ?p ?o} WHERE { <"
 				+ constant + "> ?p ?o}";
 	}
+	
+	public static String getSelectObjQuery(String constant) {
+		return "SELECT * WHERE { ?s ?p <" + constant + "> }";
+}
+
+	public static String getSelectSubjQuery(String constant) {
+		return "SELECT * WHERE { <" + constant + "> ?p ?o}";
+}
 
 	public static String getSelectFromConstruct(String strquery){
 		String strlower = strquery.toLowerCase();

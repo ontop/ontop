@@ -6,7 +6,7 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-// $ANTLR 3.5 /Users/timi/Documents/workspaceRealGit/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2013-09-02 14:58:39
+// $ANTLR 3.5 /Users/timi/Documents/workspaceRealGit/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2013-09-02 15:55:23
 
 package it.unibz.krdb.obda.parser;
 
@@ -878,7 +878,7 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/timi/Documents/workspaceRealGit/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:373:5: 'a'
 					{
 					match(input,77,FOLLOW_77_in_verb291); 
-					value = dfac.getConstantURI(OBDAVocabulary.RDF_TYPE); 
+					value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
 					  //value = OBDAVocabulary.RDF_TYPE; 
 					  
 					}

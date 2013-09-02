@@ -370,7 +370,7 @@ predicateObjectList returns [List<Function> value]
 //verb returns [String value]
 verb returns [Term value]
   : predicate { $value = $predicate.value; }
-  | 'a' {value = dfac.getConstantURI(OBDAVocabulary.RDF_TYPE); 
+  | 'a' {value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
   //$value = OBDAVocabulary.RDF_TYPE; 
   }
   ;
