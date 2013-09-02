@@ -36,6 +36,30 @@
     
 
 
+    <!-- http://it.unibz.krdb/obda/test/simple#P_1 -->
+
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P_1"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/test/simple#P_2 -->
+
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P_2"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/test/simple#Q_1 -->
+
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#Q_1"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/test/simple#Q_2 -->
+
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#Q_2"/>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //

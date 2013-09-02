@@ -86,9 +86,10 @@ public class MappingVocabularyRepair {
 					/**
 					 * ignore triple  
 					 */
-					if (!p.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
-						
+					//if (!p.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
+					if (!p.isTriplePredicate()){
 						throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+						
 					}else{
 						predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 					}

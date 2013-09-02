@@ -278,8 +278,15 @@ private Function makeAtom(Term subject, Term pred, Term object) {
     } else if( ! QueryUtils.isGrounded(pred )){
       atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
     } else {
-      Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-      atom = dfac.getFunction(predicate, subject, object);
+    //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+        Predicate predicate;
+        if(pred instanceof URIConstant){
+          predicate = dfac.getPredicate(((URIConstant) pred).getValue(), 2);
+        } else {
+          throw new IllegalArgumentException("predicate should be a URIConstant");
+        }
+        atom = dfac.getFunction(predicate, subject, object);
+      
     }
     return atom;
   }
@@ -407,11 +414,11 @@ object returns [Term value]
 //  | blank
   ;
 
-resource returns [URIConstant value]
-  : uriref { $value = dfac.getConstantURI($uriref.value);} 
-//  construct($uriref.value);
-//  | qname { $value = construct($qname.value); }
-  | qname { $value = dfac.getConstantURI($qname.value); }
+resource returns [Term value]
+   : uriref { $value = construct($uriref.value); }
+   | qname { $value = construct($qname.value); }
+  //: uriref { $value = dfac.getConstantURI($uriref.value);}
+  // | qname { $value = dfac.getConstantURI($qname.value); }
   ;
 
 uriref returns [String value]
@@ -457,7 +464,13 @@ typedLiteral returns [Function value]
   | variable REFERENCE resource {
       Variable var = $variable.value;
       //String functionName = $resource.value.toString();
-      String functionName = $resource.value.getValue();
+      // $resource.value must be a URIConstant
+      String functionName = null;
+      if ($resource.value instanceof URIConstant){
+        functionName = ((URIConstant)$resource.value).getValue();
+      } else {
+        throw new IllegalArgumentException("$resource.value should be an URI");
+      }
       Predicate functionSymbol = null;
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
           functionSymbol = dfac.getDataTypePredicateLiteral();
