@@ -359,6 +359,12 @@ public class QuestStatement implements OBDAStatement {
 				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
 				if (describeResultSet == null) {
 					// just for the first time
+					try {
+						templ = new SesameConstructTemplate(str);
+					} catch (MalformedQueryException e) {
+						e.printStackTrace();
+					}
+					str = SPARQLQueryUtility.getSelectFromConstruct(str);
 					describeResultSet = (QuestGraphResultSet) executeGraphQuery(str, 4);
 				} else {
 					// 2nd and manyth times execute, but collect result into one
@@ -376,6 +382,12 @@ public class QuestStatement implements OBDAStatement {
 			// execute describe <uriconst> in object position
 			for (String constant : constants) {
 				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
+				try {
+					templ = new SesameConstructTemplate(str);
+				} catch (MalformedQueryException e) {
+					e.printStackTrace();
+				}
+				str = SPARQLQueryUtility.getSelectFromConstruct(str);
 				QuestGraphResultSet set = (QuestGraphResultSet) executeGraphQuery(str, 4);
 				if (set != null) {
 					while (set.hasNext()) {

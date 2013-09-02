@@ -151,7 +151,7 @@ public class JDBCUtility implements Serializable {
 		String datetime = rdfliteral.getValue().replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');
 		int zlocation = datetime.indexOf('Z');
-		int minuslocation = datetime.indexOf('-');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
 		int pluslocation = datetime.indexOf('+');
 		StringBuilder bf = new StringBuilder(datetime);
 		if (zlocation != -1) {

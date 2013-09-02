@@ -59,6 +59,7 @@ import org.openrdf.query.algebra.Order;
 import org.openrdf.query.algebra.OrderElem;
 import org.openrdf.query.algebra.Projection;
 import org.openrdf.query.algebra.ProjectionElem;
+import org.openrdf.query.algebra.Reduced;
 import org.openrdf.query.algebra.Regex;
 import org.openrdf.query.algebra.SameTerm;
 import org.openrdf.query.algebra.Slice;
@@ -210,6 +211,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		} else if (te instanceof LeftJoin) {
 			LeftJoin join = (LeftJoin) te;
 			translate(vars, join, pr, i, varcount);
+		
+		} else if (te instanceof Reduced) {
+			translate(vars, ((Reduced) te).getArg(), pr, i, varcount);
 		
 		} else {
 			try {
