@@ -98,15 +98,11 @@ public class MetaMappingExpander {
 				
 				int arity;
 				
-				Term predInTriple = bodyAtom.getTerm(1);
+				Term term1 = bodyAtom.getTerm(1);
 				
 				// variables are in the position of object
-				if(predInTriple instanceof URIConstant){
-					if(((URIConstant) predInTriple).getURI().equals(OBDAVocabulary.RDF_TYPE)){
-						arity = 1;
-					} else {
-						throw new IllegalArgumentException("MetaMappingExpander cannot handle predicate " + predInTriple);
-					}
+				if (isURIRDFType(term1)){
+					arity = 1;
 				} else {
 				// variables are in the position of predicate
 					arity = 2;
@@ -178,6 +174,28 @@ public class MetaMappingExpander {
 		
 	
 		return expandedMappings;
+	}
+
+	/**
+	 * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
+	 * @param term
+	 * @return
+	 */
+	private boolean isURIRDFType(Term term) {
+		boolean result = true;
+		if(term instanceof Function){
+			Function func = (Function) term;
+			if (func.getArity() != 1){
+				result =false;
+			} else {
+				result  = result && func.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+				result  = result && (func.getTerm(0) instanceof ValueConstant) &&
+						((ValueConstant) func.getTerm(0)).getValue(). equals(OBDAVocabulary.RDF_TYPE);
+			}
+		} else {
+			result = false;
+		}
+		return result;
 	}
 
 	/**
@@ -401,5 +419,7 @@ public class MetaMappingExpander {
 		}
 		
 	}
+	
+	
 
 }
