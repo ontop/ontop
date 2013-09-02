@@ -236,4 +236,14 @@ public class JDBCUtility implements Serializable {
 		}
 		return sql;
 	}
+
+
+
+
+	/**
+	 * @return
+	 */
+	public String getDummyTable() {
+		return "(SELECT 1)";
+	}
 }

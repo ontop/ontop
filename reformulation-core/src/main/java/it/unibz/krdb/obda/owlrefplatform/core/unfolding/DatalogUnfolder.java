@@ -1500,6 +1500,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 
 			int newatomcount = freshRule.getBody().size();
+			
 			joinEliminationPKBased(termidx, newatomcount, partialEvalution);
 
 			/***
@@ -1621,6 +1622,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List innerAtoms = getNestedList(termidx, partialEvalution);
 
 		Function currentAtom = getTerm(termidx, partialEvalution);
+		
+		
+		if (currentAtom == null) {
+			/*
+			 * Case where the resolution atemt didn't add any atoms, the body was null.
+			 */
+			
+			return;
+		}
 
 		int newatomsfirstIndex = termidx.peek();
 		if (newatomsfirstIndex <= 0) {
@@ -1823,7 +1833,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List innerTerms = getNestedList(stack, rule);
 			atom = (Function) innerTerms.get((Integer) stack.peek());
 		} else {
-			atom = (Function) rule.getBody().get((Integer) termidx.peek());
+			List<Function> body = rule.getBody();
+			Integer peek = (Integer) termidx.peek();
+			if (body.size() == 0 || peek >= body.size()) 
+				return null;
+			
+			atom = (Function) body.get(peek);
 		}
 		return atom;
 	}

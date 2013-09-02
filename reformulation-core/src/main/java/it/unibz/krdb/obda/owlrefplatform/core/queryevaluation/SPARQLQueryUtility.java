@@ -80,8 +80,9 @@ public class SPARQLQueryUtility {
 	}
 
 	public static String getDescribeURI(String strquery) {
-		int firstIdx = strquery.indexOf('<');
-		int lastIdx = strquery.indexOf('>');
+		int describeIdx = strquery.toLowerCase().indexOf("describe");
+		int firstIdx = strquery.indexOf('<', describeIdx);
+		int lastIdx = strquery.indexOf('>', describeIdx);
 		String uri = strquery.substring(firstIdx+1, lastIdx);
 		return uri;
 	}
