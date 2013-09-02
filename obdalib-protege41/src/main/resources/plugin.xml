@@ -10,7 +10,7 @@
 			value="it.unibz.krdb.obda.protege4.views.DatasourcesManagerView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
+		<category value="ontop"></category>
 	</extension>
 	
 	<extension id="MappingsManagerViewComponent"
@@ -20,7 +20,7 @@
 			value="it.unibz.krdb.obda.protege4.views.MappingsManagerView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
+		<category value="ontop"></category>
 		<navigates value="@org.protege.classcategory"/>
 	</extension>
 	
@@ -31,7 +31,7 @@
 			value="it.unibz.krdb.obda.protege4.views.MappingAssistantView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
+		<category value="ontop"></category>
 	</extension>
 	
 	<!-- Individuals queries views -->
@@ -43,24 +43,24 @@
 			value="it.unibz.krdb.obda.protege4.views.QueryManagerView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
+		<category value="ontop"></category>
 	</extension>
 	
 	<extension id="QueryInterfaceViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="OBDA query editor"></label>
+		<label value="ontop query editor"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.views.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="Data Query"></category>
+		<category value="SPARQL query"></category>
 	</extension>
 	
 	<!-- Tabs -->
 	
 	<extension id="DatasourcesManagerTab"
 		point="org.protege.editor.core.application.WorkspaceTab">
-		<label value="OBDA Model"></label>
+		<label value="ontop Mappings"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.gui.tab.OBDATab">
 		</class>
@@ -72,7 +72,7 @@
 	
 	<extension id="IndividualsQueryTab"
 		point="org.protege.editor.core.application.WorkspaceTab">
-		<label value="OBDA Query"></label>
+		<label value="ontop SPARQL"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.gui.tab.OBDAQueriesTab">
 		</class>
@@ -97,23 +97,23 @@
   <!-- MENUS -->
 	
 	<extension id="menu.obda" point="org.protege.editor.core.application.EditorKitMenuAction">
-       <name value="OBDA"/>
-       <toolTip value="Actions related to the OBDA plugin"/>
+       <name value="ontop"/>
+       <toolTip value="Actions related to the ontopPro plugin"/>
        <path value="/SlotZ-A"/>
        <editorKitId value="any"/>
    </extension>
 	
   <extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Generate individuals using mappings"/> 
-		<toolTip value="Materialize OWL Individuals from the OBDA mappings, choose from several output options"/>
+		<name value="Import data from mappings"/> 
+		<toolTip value="Import OWL Assertions (ABox/Triples) from the mappings..."/>
 		<class value="it.unibz.krdb.obda.protege4.gui.action.AboxMaterializationAction"/>
 		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotA-A"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
    <extension id="menu.obda.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Display the OBDA model statistics..."/> 
-		<toolTip value="Provide information about the size of triples inside the OBDA model"/>
+		<name value="Display the mapping statistics..."/> 
+		<toolTip value="Provide information about the number of assertions (triples) from the mappings"/>
 		<class value="it.unibz.krdb.obda.protege4.gui.action.ABoxStatisticsAction"/>
 		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-A"></path>
 		<editorKitId value="OWLEditorKit"/>
@@ -136,8 +136,8 @@
 	</extension>
 	
 	<extension id="menu.obda.bootstrap" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Bootstrap ontology and mappings"/>
-		<toolTip value="Bootstrap from database source owl ontology and obda mappings"/>
+		<name value="Generate ontology and mappings"/>
+		<toolTip value="Automatically generates classes/propertis and mappings for a DB..."/>
 		<class value="it.unibz.krdb.obda.protege4.gui.action.BootstrapAction"/>
 		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotD-A"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -146,7 +146,7 @@
 	<!-- Reasoner plugins -->
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
-    <name value="Quest 1.8"/>
+    <name value="Quest 1.9 (ontop)"/>
     <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
 </plugin>
