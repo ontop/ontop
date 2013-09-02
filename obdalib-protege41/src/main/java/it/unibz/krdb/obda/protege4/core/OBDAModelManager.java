@@ -153,7 +153,18 @@ public class OBDAModelManager implements Disposable {
 				if (change instanceof SetOntologyID) {
 					IRI newiri = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
 					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI();
+					
+					log.debug("Ontology ID changed");
+					log.debug("Old ID: {}", oldiri);
+					log.debug("New ID: {}", newiri);
+					
 					OBDAModel model = obdamodels.get(oldiri.toURI());
+					
+					if (model == null) {
+						setupNewOBDAModel();
+						model = getActiveOBDAModel();
+					}
+					
 					PrefixManager prefixManager = model.getPrefixManager();
 					prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, newiri.toURI().toString());
 
