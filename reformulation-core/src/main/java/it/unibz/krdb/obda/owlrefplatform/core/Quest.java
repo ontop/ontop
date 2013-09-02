@@ -1200,7 +1200,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				terms.add(currenthead.getTerm(0));
 				Function rdfTypeConstant = fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getConstantURI(OBDAVocabulary.RDF_TYPE));
+						fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
