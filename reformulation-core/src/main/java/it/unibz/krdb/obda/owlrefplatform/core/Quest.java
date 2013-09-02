@@ -1204,7 +1204,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantURI(classname)));
+				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantLiteral(classname)));
 				newhead = fac.getFunction(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
@@ -1215,7 +1215,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				terms.add(currenthead.getTerm(0));
 
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantURI(propname));
+				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantLiteral(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getFunction(pred, terms);
