@@ -79,10 +79,20 @@ public class MappingVocabularyRepair {
 
 			for (Function atom : body) {
 				Predicate p = atom.getPredicate();
+				
 				Function newatom = null;
 				Predicate predicate = urimap.get(p.getName());
 				if (predicate == null) {
-					throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+					/**
+					 * ignore triple  
+					 */
+					//if (!p.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
+					if (!p.isTriplePredicate()){
+						throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+						
+					}else{
+						predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
+					}
 				}
 				/* Fixing terms */
 				LinkedList<Term> newTerms = new LinkedList<Term>();
