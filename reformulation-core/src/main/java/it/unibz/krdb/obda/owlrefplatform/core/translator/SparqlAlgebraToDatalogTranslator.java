@@ -72,7 +72,6 @@ import org.openrdf.query.algebra.Var;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.sail.rdbms.algebra.SelectQuery;
 import org.slf4j.LoggerFactory;
 
 //import com.hp.hpl.jena.graph.Node;
