@@ -244,8 +244,9 @@ public class MetaMappingExpander {
 				IValueExpression columnRefExpression = column.getValueExpression();
 				
 				StringLiteral clsStringLiteral = new StringLiteral(params.get(j));
-				if(j != 0){
+				//if(j != 0){
 				//if (newSelection.conditionSize() > 0){
+				if(newSelection.getRawConditions().size() > 0){
 					newSelection.addOperator(new AndOperator());
 				}
 				ComparisonPredicate condition = new ComparisonPredicate(columnRefExpression, clsStringLiteral, ComparisonPredicate.Operator.EQ);

@@ -248,38 +248,40 @@ private class ColumnString implements FormatString {
  * </ul>
  */
 private Function makeAtom(Term subject, Term pred, Term object) {
-    Function atom = null;
-    
-     if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
-           if (object instanceof  Function) {
-                if(QueryUtils.isGrounded(object)) {
-                    ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-                    Predicate predicate = dfac.getClassPredicate(c.getValue());
-                    atom = dfac.getFunction(predicate, subject);
-                } else {
-                    atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred, object);  
-                }
-           } else if (object instanceof  Variable){
-                Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-                Term uriOfObject = dfac.getFunction(uriPredicate, object);
-                atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  uriOfObject);
-            } else {
-                throw new IllegalArgumentException("parser cannot handle object " + object);  
-            }
-      } else if( ! QueryUtils.isGrounded(pred) ){
-           atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
-      } else {
-           //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-           Predicate predicate;
-           if(pred instanceof Function){
-                ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-                predicate = dfac.getPredicate(pr.getValue(), 2);
-           } else {
-                throw new IllegalArgumentException("predicate should be a URI Function");
-           }
-           atom = dfac.getFunction(predicate, subject, object);
-     }
-      return atom;
+     Function atom = null;
+      
+       if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+             if (object instanceof  Function) {
+                  if(QueryUtils.isGrounded(object)) {
+                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
+                      Predicate predicate = dfac.getClassPredicate(c.getValue());
+                      atom = dfac.getFunction(predicate, subject);
+                  } else {
+                        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred, object);                  }
+             } else if (object instanceof  Variable){
+                  Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
+                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
+              } else {
+                  throw new IllegalArgumentException("parser cannot handle object " + object);  
+              }
+        } else if( ! QueryUtils.isGrounded(pred) ){
+             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+        } else {
+             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+             Predicate predicate;
+             if(pred instanceof Function){
+                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+                  predicate = dfac.getPredicate(pr.getValue(), 2);
+             } else {
+                  throw new IllegalArgumentException("predicate should be a URI Function");
+             }
+             atom = dfac.getFunction(predicate, subject, object);
+       }
+        return atom;
   }
 
 

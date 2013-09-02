@@ -12,11 +12,11 @@ driverClass	org.h2.Driver
 [MappingDeclaration] @collection [[
 mappingId	mapping1
 target	{uri} a :{value}_{code} . 
-source	SELECT value, uri, code FROM table1
+source	SELECT value, uri, code FROM table1 where code > 0
 
 mappingId	mapping2
 target	{uri} :{role}_{code} {value} . 
-source	SELECT value, uri, code, role FROM table1 
+source	SELECT value, uri, code, role FROM table1 where code > 0
 
 ]]
 
