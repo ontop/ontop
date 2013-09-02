@@ -236,6 +236,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		System.out.println(outfile);
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+		try {
+		
 	
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -254,10 +256,15 @@ public class SesameMaterializerCmdTest extends TestCase {
 		assertEquals(3, materializer.getVocabularySize());
 		
 		materializer.disconnect();
-		if (out!=null)
+		}catch (Exception e) {throw e; }
+		finally {
+		if (out!=null) {
 			output.close();
-		if (out.exists())
+		}
+		if (out.exists()) {	
 			out.delete();
+		}
+		}
 	}
 	
 	public void testOWLApiModeOnto() throws Exception {
