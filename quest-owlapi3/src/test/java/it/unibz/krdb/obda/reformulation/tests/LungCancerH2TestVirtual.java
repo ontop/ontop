@@ -159,7 +159,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		try {
 			executeQueryAssertResults(query3, st, 1);
 			executeQueryAssertResults(query4, st, 2);
-			executeQueryAssertResults(query1, st, 1);
+			executeQueryAssertResults(query1, st, 2);
 			executeQueryAssertResults(query2, st, 1);
 			
 			

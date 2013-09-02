@@ -166,7 +166,8 @@ private Term construct(String text) {
    if (size == 1) {
       FormatString token = tokens.get(0);
       if (token instanceof FixedString) {
-         toReturn = dfac.getConstantURI(token.toString());
+          ValueConstant uriTemplate = dfac.getConstantLiteral(token.toString()); // a single URI template
+          toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(1), uriTemplate);
       } else if (token instanceof ColumnString) {
          ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
          Variable column = dfac.getVariable(token.toString());
@@ -256,37 +257,35 @@ private Function makeAtom(Term subject, Term pred, Term object) {
 //    }
     
     
-    if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
-      if (object instanceof  URIConstant) {
-        URIConstant c = (URIConstant) object;  // it has to be a URI constant
-        Predicate predicate = dfac.getClassPredicate(c.getURI());
-        atom = dfac.getFunction(predicate, subject);
-      } else if (object instanceof  Variable){
-        //Term rdftype = dfac.getConstantURI(p);
-        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-        Term uriOfObject = dfac.getFunction(uriPredicate, object);
-        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  uriOfObject);
-        // TODO:
-        //System.err.println("some warning of using varible in danger")
-      } else if (object instanceof Function){
-        //Term rdftype = dfac.getConstantURI(p);
-        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,   object);           
-      }
+     if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+	 if (object instanceof  Function) {
+		ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
+		Predicate predicate = dfac.getClassPredicate(c.getValue());
+		atom = dfac.getFunction(predicate, subject);
+	 } else if (object instanceof  Variable){
+	        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+	        Term uriOfObject = dfac.getFunction(uriPredicate, object);
+	        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  uriOfObject);
+	        // TODO:
+	        //System.err.println("some warning of using varible in danger")
+	  } else if (object instanceof Function){
+	        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,   object);           
+	  }
     } else if( ! QueryUtils.isGrounded(pred )){
-      atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+	  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
     } else {
-    //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-        Predicate predicate;
-        if(pred instanceof URIConstant){
-          predicate = dfac.getPredicate(((URIConstant) pred).getValue(), 2);
-        } else {
-          throw new IllegalArgumentException("predicate should be a URIConstant");
-        }
-        atom = dfac.getFunction(predicate, subject, object);
-      
-    }
-    return atom;
-  }
+	    //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+	   Predicate predicate;
+	   if(pred instanceof Function){
+	        ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+	          predicate = dfac.getPredicate(pr.getValue(), 2);
+	   } else {
+	          throw new IllegalArgumentException("predicate should be a URI Function");
+	   }
+	        atom = dfac.getFunction(predicate, subject, object);
+	   }
+	    return atom;
+	}
 
 
 }
@@ -463,8 +462,8 @@ typedLiteral returns [Function value]
       //String functionName = $resource.value.toString();
       // $resource.value must be a URIConstant
       String functionName = null;
-      if ($resource.value instanceof URIConstant){
-        functionName = ((URIConstant)$resource.value).getValue();
+      if ($resource.value instanceof Function){
+        functionName = ((ValueConstant) ((Function)$resource.value).getTerm(0)).getValue();
       } else {
         throw new IllegalArgumentException("$resource.value should be an URI");
       }
@@ -539,6 +538,9 @@ dataTypeString returns [Term value]
       ValueConstant constant = $stringLiteral.value;
       String functionName = $resource.value.toString();
       Predicate functionSymbol = null;
+      if ($resource.value instanceof Function){
+	 functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
+      }
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
     	functionSymbol = dfac.getDataTypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
