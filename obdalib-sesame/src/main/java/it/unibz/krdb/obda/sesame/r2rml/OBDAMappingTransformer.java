@@ -34,7 +34,7 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import com.hp.hpl.jena.vocabulary.RDFS;
+//import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class OBDAMappingTransformer {
 	

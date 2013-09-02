@@ -14,15 +14,17 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
@@ -52,10 +54,10 @@
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -67,17 +69,22 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-model</artifactId>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-api</artifactId>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-sparql</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	
@@ -90,6 +97,8 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<testExcludes>
+						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
+						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/RDBMSDirect*.java</exclude>
 						<exclude>**/OWLAPI2ABox*.java</exclude>
 						<exclude>**/SemanticIndexTestSuite.java</exclude>

@@ -22,33 +22,29 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	}
 	
 	@Override
-	public String getShortForm(String uri, boolean insideQuotes) {
+	public String getShortForm(String originalUri, boolean insideQuotes) {
 		final List<String> namespaceList = getNamespaceList();
 		
 		/* Clean the URI string from <...> signs, if they exist.
 		 * <http://www.example.org/library#Book> --> http://www.example.org/library#Book
 		 */
-		if (uri.contains("<") && uri.contains(">")) {
-			uri = uri.replace("<", "").replace(">", "");
+		String cleanUri = originalUri;
+		if (originalUri.contains("<") && originalUri.contains(">")) {
+			cleanUri = originalUri.replace("<", "").replace(">", "");
 		}
-		
-		// Initial value for the short URI
-		String shortUri = uri;
 		
 		// Check if the URI string has a matched prefix
 		for (String prefixUriDefinition : namespaceList) {
-			if (uri.contains(prefixUriDefinition)) {
+			if (cleanUri.contains(prefixUriDefinition)) {
 				String prefix = getPrefix(prefixUriDefinition);
 				if (insideQuotes) {
 					prefix = String.format("&%s;", removeColon(prefix));
 				}
 				// Replace the URI with the corresponding prefix.
-				shortUri = uri.replace(prefixUriDefinition, prefix);
-				
-				return shortUri;
+				return cleanUri.replace(prefixUriDefinition, prefix);
 			}
 		}
-		return shortUri;
+		return originalUri; // return the original URI if no prefix definition was found
 	}
 	
 	@Override

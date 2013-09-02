@@ -1,5 +1,4 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
-import java.util.Set;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;

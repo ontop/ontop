@@ -10,12 +10,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.io.AbstractPrefixManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.hp.hpl.jena.shared.PrefixMapping;
+//import com.hp.hpl.jena.shared.PrefixMapping;
 
 /**
  * A read-only prefix manager that wraps <code>PrefixMapping</code> from Jena-API
@@ -24,10 +22,10 @@ import com.hp.hpl.jena.shared.PrefixMapping;
  */
 public class SparqlPrefixManager extends AbstractPrefixManager {
 
-	private PrefixMapping prefixMapping;
 
-	public SparqlPrefixManager(PrefixMapping prefixMapping) {
-		this.prefixMapping = prefixMapping;
+	public SparqlPrefixManager() {
+		// NO-OP
+		// TODO Implement using Sesame prefix manager
 	}
 
 	@Override
@@ -37,41 +35,22 @@ public class SparqlPrefixManager extends AbstractPrefixManager {
 
 	@Override
 	public String getURIDefinition(String prefix) {
-		if (prefix.equals(":")) {
-			prefix = ""; // to conform with Ontop prefix manager
-		}
-		return prefixMapping.getNsPrefixURI(prefix);
+		return ""; // TODO Implement using Sesame prefix manager
 	}
 
 	@Override
 	public String getPrefix(String uri) {
-		String prefix = prefixMapping.getNsURIPrefix(uri);
-		if (prefix.equals("")) {
-			prefix = ":"; // to conform with Ontop prefix manager
-		}
-		return prefix;
+		return ""; // TODO Implement using Sesame prefix manager
 	}
 
 	@Override
 	public Map<String, String> getPrefixMap() {
-		Map<String, String> newPrefixMap = new HashMap<String, String>();
-		Map<String, String> jenaPrefixMap = prefixMapping.getNsPrefixMap();
-		for (String prefix : jenaPrefixMap.keySet()) {
-			if (prefix.isEmpty()) {
-				newPrefixMap.put(":", jenaPrefixMap.get(prefix));
-			} else {
-				newPrefixMap.put(prefix, jenaPrefixMap.get(prefix));
-			}
-		}
-		return newPrefixMap;
+		return null; // TODO Implement using Sesame prefix manager
 	}
 
 	@Override
 	public boolean contains(String prefix) {
-		if (prefix.equals(":")) {
-			prefix = ""; // to conform with Ontop prefix manager
-		}
-		return getPrefixMap().containsKey(prefix);
+		return false; // TODO Implement using Sesame prefix manager
 	}
 
 	@Override
@@ -81,6 +60,6 @@ public class SparqlPrefixManager extends AbstractPrefixManager {
 
 	@Override
 	public List<String> getNamespaceList() {
-		return new ArrayList<String>(getPrefixMap().values());
+		return null; // TODO Implement using Sesame prefix manager
 	}
 }

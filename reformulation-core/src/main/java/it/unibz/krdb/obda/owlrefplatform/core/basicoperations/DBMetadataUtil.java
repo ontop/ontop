@@ -27,7 +27,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class DBMetadataUtil {
 

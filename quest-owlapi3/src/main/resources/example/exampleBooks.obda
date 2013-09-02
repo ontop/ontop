@@ -15,7 +15,7 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	cl_Authors
-target		:author/{wr_code}/ a :Author ; :name {wr_name} . 
+target		:author/{wr_code}/ a {wr_name} . 
 source		select wr_code, wr_name from tb_affiliated_writers
 
 mappingId	cl_Books

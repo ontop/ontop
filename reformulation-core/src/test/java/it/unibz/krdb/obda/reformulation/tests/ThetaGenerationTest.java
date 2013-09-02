@@ -25,7 +25,7 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 
 public class ThetaGenerationTest extends TestCase {
@@ -33,7 +33,7 @@ public class ThetaGenerationTest extends TestCase {
 	OBDADataFactory termFactory =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
-	IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
+	//IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private Vector<Substitution> getMGUAsVector(Map<Variable, Term> mgu) {
 		Vector<Substitution> computedmgu = new Vector<Substitution>();
