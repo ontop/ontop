@@ -28,13 +28,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -152,6 +153,13 @@ public class LungCancerH2TestVirtual extends TestCase {
 		String query3 = "PREFIX : <http://example.org/> SELECT * WHERE { ?y :hasStage <http://example.org/stages/II> }";
 		String query4 = "PREFIX : <http://example.org/> SELECT * WHERE { ?y :hasStage <http://example.org/stages/limited> }";
 		
+		String query5 = "PREFIX : <http://example.org/> DESCRIBE <http://example.org/db2/neoplasm/1>";
+		String query6 = "PREFIX : <http://example.org/> DESCRIBE ?y WHERE { ?x :hasCondition ?y . ?y a :Cancer . } "; 
+		String query7 = "PREFIX : <http://example.org/> DESCRIBE <http://example.org/db1/1>";
+		String query8 = "PREFIX : <http://example.org/> DESCRIBE ?x WHERE { ?x a <http://example.org/Person> . } "; 
+		
+		String query9 = "PREFIX : <http://example.org/> CONSTRUCT { ?x ?y ?z } WHERE {  { ?x :name \"Mary\" .   ?x ?y ?z  } UNION {  ?x2 :name \"Mary\" . ?x2 :hasCondition ?x .   ?x ?y ?z } } ";
+			
 		
 		
 //		String query = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm ?y }";
@@ -162,6 +170,11 @@ public class LungCancerH2TestVirtual extends TestCase {
 			executeQueryAssertResults(query1, st, 2);
 			executeQueryAssertResults(query2, st, 1);
 			
+			executeGraphQueryAssertResults(query5, st, 5);
+			executeGraphQueryAssertResults(query6, st, 20);
+			executeGraphQueryAssertResults(query7, st, 4);
+			executeGraphQueryAssertResults(query8, st, 16);
+			executeGraphQueryAssertResults(query9, st, 9); // NOTE CHECK THE CONTENT OF THIS QUERY, it seems to return the correct number of results but incorrect content, compare to the SELECT version which is correct
 			
 
 		} catch (Exception e) {
@@ -190,6 +203,17 @@ public class LungCancerH2TestVirtual extends TestCase {
 			System.out.println();
 		}
 		rs.close();
+		assertEquals(expectedRows, count);
+	}
+	
+	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
+		List<OWLAxiom> rs = st.executeGraph(query);
+		int count = 0;
+		Iterator<OWLAxiom> axit = rs.iterator();
+		while (axit.hasNext()) {
+			System.out.println(axit.next());			
+			count++;
+		}		
 		assertEquals(expectedRows, count);
 	}
 

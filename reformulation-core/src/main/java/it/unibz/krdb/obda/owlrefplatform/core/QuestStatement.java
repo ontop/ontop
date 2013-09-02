@@ -693,7 +693,7 @@ public class QuestStatement implements OBDAStatement {
 				 * Empty unfolding, constructing an empty result set
 				 */
 				if (program.getRules().size() < 1) {
-					throw new OBDAException("Error, invalid query");
+					throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
 				}
 
 				/*
