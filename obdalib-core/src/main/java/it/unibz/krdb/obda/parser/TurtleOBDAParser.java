@@ -228,7 +228,9 @@ public class TurtleOBDAParser extends Parser {
 	   if (size == 1) {
 	      FormatString token = tokens.get(0);
 	      if (token instanceof FixedString) {
-	         toReturn = dfac.getConstantURI(token.toString());
+	         //toReturn = dfac.getConstantURI(token.toString());
+	    	  ValueConstant uriTemplate = dfac.getConstantLiteral(token.toString()); // a single URI template
+		       toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(1), uriTemplate);
 	      } else if (token instanceof ColumnString) {
 	         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
 	         Variable column = dfac.getVariable(token.toString());
@@ -733,8 +735,8 @@ public class TurtleOBDAParser extends Parser {
 			        Function atom = null;
 			        String p = v1.toString();
 			        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
-			          URIConstant c = (URIConstant) object;  // it has to be a URI constant
-			          Predicate predicate = dfac.getClassPredicate(c.getURI());
+			          String c = ((Function) object).getTerm(0).toString();  // it has to be a URI constant
+			          Predicate predicate = dfac.getClassPredicate(c.substring(1, c.length()-1));
 			          atom = dfac.getFunction(predicate, subject);
 			        } else {
 			          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
@@ -770,8 +772,8 @@ public class TurtleOBDAParser extends Parser {
 					        Function atom = null;
 					        String p = v2.toString();
 					        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
-					          URIConstant c = (URIConstant) object;  // it has to be a URI constant
-					          Predicate predicate = dfac.getClassPredicate(c.getURI());
+					          String c = ((Function) object).getTerm(0).toString();  // it has to be a URI constant
+					          Predicate predicate = dfac.getClassPredicate(c.substring(1, c.length()-1));
 					          atom = dfac.getFunction(predicate, subject);
 					        } else {
 					          Predicate predicate = dfac.getPredicate(p, 2, null); // the data type cannot be determined here!
@@ -1008,9 +1010,9 @@ public class TurtleOBDAParser extends Parser {
 
 			 
 			      Term nl = resource10;
-			      if (nl instanceof URIConstant) {
-			        URIConstant c = (URIConstant) nl;
-			        value = iriFactory.construct(c.getURI());
+			      if (nl instanceof Function) {
+			        String c = ((Function) nl).getTerm(0).toString();
+			        value = iriFactory.construct(c.substring(1, c.length()-1));
 			      } else {
 			        throw new RuntimeException("Unsupported predicate syntax: " + nl.toString());
 			      }

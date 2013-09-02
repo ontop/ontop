@@ -10,6 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 public class SPARQLQueryUtility {
@@ -78,11 +79,11 @@ public class SPARQLQueryUtility {
 		return false;
 	}
 
-	public static URIConstant getDescribeURI(String strquery) {
+	public static String getDescribeURI(String strquery) {
 		int firstIdx = strquery.indexOf('<');
 		int lastIdx = strquery.indexOf('>');
 		String uri = strquery.substring(firstIdx+1, lastIdx);
-		return OBDADataFactoryImpl.getInstance().getConstantURI(uri);
+		return uri;
 	}
 
 	public static boolean isURIDescribe(String strquery) {
@@ -119,13 +120,13 @@ public class SPARQLQueryUtility {
 		return strquery;
 	}
 
-	public static String getConstructObjQuery(Constant constant) {
-		return "CONSTRUCT { ?s ?p <" + constant.toString()
-				+ "> } WHERE { ?s ?p <" + constant.toString() + ">}";
+	public static String getConstructObjQuery(String constant) {
+			return "CONSTRUCT { ?s ?p <" + constant
+					+ "> } WHERE { ?s ?p <" + constant + "> }";
 	}
 
-	public static String getConstructSubjQuery(Constant constant) {
-		return "CONSTRUCT {<" + constant.toString() + "> ?p ?o} WHERE {<"
-				+ constant.toString() + "> ?p ?o}";
+	public static String getConstructSubjQuery(String constant) {
+		return "CONSTRUCT { <" + constant + "> ?p ?o} WHERE { <"
+				+ constant + "> ?p ?o}";
 	}
 }
