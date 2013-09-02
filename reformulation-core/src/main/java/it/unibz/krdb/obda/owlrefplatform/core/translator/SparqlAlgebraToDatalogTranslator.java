@@ -60,6 +60,7 @@ import org.openrdf.query.algebra.OrderElem;
 import org.openrdf.query.algebra.Projection;
 import org.openrdf.query.algebra.ProjectionElem;
 import org.openrdf.query.algebra.Regex;
+import org.openrdf.query.algebra.SameTerm;
 import org.openrdf.query.algebra.Slice;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Str;
@@ -1214,7 +1215,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			function = ofac.getFunctionOR(term1, term2);
 		}
 		// The other expressions
-		if (expr instanceof Compare) {
+		else if (expr instanceof SameTerm){
+			function = ofac.getFunctionEQ(term1, term2);
+		} else if (expr instanceof Compare) {
 			CompareOp operator = ((Compare) expr).getOperator();
 			if (operator == Compare.CompareOp.EQ)
 				function = ofac.getFunctionEQ(term1, term2);
@@ -1228,8 +1231,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				function = ofac.getFunctionLT(term1, term2);
 			else if (operator == Compare.CompareOp.NE)
 				function = ofac.getFunctionNEQ(term1, term2);
-		}
-		if (expr instanceof MathExpr) {
+		} else if (expr instanceof MathExpr) {
 			MathOp mop = ((MathExpr)expr).getOperator();
 			if (mop == MathOp.PLUS) 
 				function = ofac.getFunctionAdd(term1, term2);
@@ -1239,6 +1241,8 @@ public class SparqlAlgebraToDatalogTranslator {
 				function = ofac.getFunctionMultiply(term1, term2);
 		} else if (expr instanceof LangMatches) {
 			function = ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
+		} else {
+			throw new IllegalStateException("getBooleanFunction does not understand the expression " + expr);
 		}
 		return function;
 	}
