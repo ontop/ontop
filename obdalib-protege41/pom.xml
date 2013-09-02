@@ -75,11 +75,39 @@
 			<artifactId>quest-db</artifactId>
 			<version>1.8</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-core</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-owlapi3</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>reformulation-core</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-sesame</artifactId>
+			<version>1.8</version>
+		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
 			<version>1.8</version>
 		</dependency>
+		
+		
+		<!-- <dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>quest-sesame</artifactId>
+			<version>1.8</version>
+		</dependency> -->
 
 		<!--
 			All the following dependencies are required at compilation or runtime
@@ -88,6 +116,7 @@
 			runtime and compilation
 		-->
 
+		<!-- 
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgrapht</artifactId>
@@ -95,7 +124,9 @@
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgraph</artifactId>
-		</dependency>
+		</dependency> 
+		
+		-->
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
@@ -108,14 +139,14 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>juli</artifactId>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>activemq</groupId>
 			<artifactId>relaxngDatatype</artifactId>
@@ -132,23 +163,33 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 		</dependency>
+		
+		<!-- <dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-n3</artifactId>
+		</dependency>
 		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-rdfxml</artifactId>
+		</dependency> -->
+		
+		<!-- <dependency>
 			<groupId>xsdlib</groupId>
 			<artifactId>xsdlib</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
-		</dependency>
+		</dependency> -->
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
-		</dependency>
+		</dependency> -->
 
 		<!-- These will download some of the sources -->
 		
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
 		</dependency>
@@ -196,14 +237,9 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-rdfxml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-n3</artifactId>
-		</dependency>
+		
+		
+		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-util</artifactId>
@@ -235,7 +271,7 @@
 		<dependency>
 			<groupId>info.aduna.commons</groupId>
 			<artifactId>aduna-commons-xml</artifactId>
-		</dependency>
+		</dependency> -->
 
 		<!-- JDBC Drivers -->
 

@@ -5,19 +5,19 @@
     <groupId>inf.unibz.it.obda</groupId>
     <version>1.8</version>
   </parent>
-  <groupId>inf.unibz.it.obda</groupId>
   <artifactId>obdalib-sesame</artifactId>
-  <version>1.8</version>
   
   
 	<dependencies>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
@@ -31,10 +31,10 @@
 			</exclusions>
 		</dependency>
 		
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-model</artifactId>
