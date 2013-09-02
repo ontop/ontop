@@ -21,6 +21,14 @@ mappingId	patient-neopalsm
 target		:db1/{PATIENTID} :hasNeoplasm :db1/neoplasm/{PATIENTID} . 
 source		select * from TBL_PATIENT
 
+mappingId	patient-neoplasm
+target		:db1/1001 :hasNeoplasm :db1/neoplasm/{PATIENTID} . 
+source		select * from TBL_PATIENT
+
+mappingId	patient-neoplasm
+target		:db1/1001 :hasNeoplasm :db1/neoplasm/2002 . 
+source		select * from TBL_PATIENT
+
 mappingId	nsclc
 target		:db1/neoplasm/{PATIENTID} a :NSCLC . 
 source		select * from TBL_PATIENT WHERE TYPE = false
