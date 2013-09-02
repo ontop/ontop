@@ -54,8 +54,6 @@ import org.slf4j.LoggerFactory;
  */
 public class MetaMappingVirtualABoxTest extends TestCase {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
 	private Connection conn;

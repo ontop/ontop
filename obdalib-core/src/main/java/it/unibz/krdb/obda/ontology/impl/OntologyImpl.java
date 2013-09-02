@@ -10,6 +10,7 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
@@ -65,6 +66,8 @@ public class OntologyImpl implements Ontology {
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
 
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
+	
+	private Set<Assertion> aboxAssertions = new HashSet<Assertion>();
 
 	class ReservedPredicate extends HashSet<Predicate> {
 
@@ -171,7 +174,15 @@ public class OntologyImpl implements Ontology {
 			originalassertions.add(assertion);
 		} else if (assertion instanceof PropertyFunctionalAxiom) {
 			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
+		} else if (assertion instanceof Assertion) {
+			/*ABox assertions */
+			aboxAssertions.add((Assertion)assertion);
 		}
+	}
+	
+	@Override 
+	public Set<Assertion> getABox() {
+		return aboxAssertions;
 	}
 
 	@Override

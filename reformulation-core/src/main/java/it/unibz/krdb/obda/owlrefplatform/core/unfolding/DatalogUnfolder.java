@@ -201,7 +201,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
-		for (CQIE query : workingSet) {
+		for (CQIE query : workingSet) {	
 			DatalogNormalizer.enforceEqualities(query, false);
 		}
 
