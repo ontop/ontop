@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -326,7 +327,7 @@ public class QuestStatement implements OBDAStatement {
 			
 		} else if (SPARQLQueryUtility.isDescribeQuery(strquery)) {
 			// create list of uriconstants we want to describe
-			List<URIConstant> constants = new ArrayList<URIConstant>();
+			List<String> constants = new ArrayList<String>();
 			if (SPARQLQueryUtility.isVarDescribe(strquery)) {
 				// if describe ?var, we have to do select distinct ?var first
 				String sel = SPARQLQueryUtility.getSelectVarDescribe(strquery);
@@ -339,7 +340,7 @@ public class QuestStatement implements OBDAStatement {
 						Constant constant = res.getConstant(1);
 						if (constant instanceof URIConstant) {
 							// collect constants in list
-							constants.add((URIConstant) constant);
+							constants.add(constant.getValue());
 						}
 					}
 				}
@@ -351,7 +352,7 @@ public class QuestStatement implements OBDAStatement {
 
 			QuestGraphResultSet describeResultSet = null;
 			// execute describe <uriconst> in subject position
-			for (Constant constant : constants) {
+			for (String constant : constants) {
 				// for each constant we execute a construct with
 				// the uri as subject, and collect the results
 				// in one graphresultset
@@ -373,7 +374,7 @@ public class QuestStatement implements OBDAStatement {
 				}
 			}
 			// execute describe <uriconst> in object position
-			for (Constant constant : constants) {
+			for (String constant : constants) {
 				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
 				QuestGraphResultSet set = (QuestGraphResultSet) executeGraphQuery(str, 4);
 				if (set != null) {

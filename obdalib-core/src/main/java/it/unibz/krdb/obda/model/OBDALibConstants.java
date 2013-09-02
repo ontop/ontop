@@ -20,6 +20,7 @@ public class OBDALibConstants {
 	
 	public static final String QUERY_HEAD = OBDA_URI_MAPPING_PREDICATE + OBDA_QUERY_PREDICATE;
 	//public static final IRI QUERY_HEAD_URI = OBDADataFactoryImpl.getIRI(QUERY_HEAD);
+
 	
 	public static final String DATALOG_IMPLY_SYMBOL = ":-";
 }
