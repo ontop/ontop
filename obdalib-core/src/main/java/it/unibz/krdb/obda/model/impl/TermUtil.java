@@ -74,7 +74,7 @@ public class TermUtil {
 			return sb.toString();
 		}
 		else if (term instanceof BNode) {
-			BNode bnode = (BNode) term;
+			BNode bnode = (BNode) term;			
 			return bnode.getName();
 		}
 		return term.toString(); // for other unknown term

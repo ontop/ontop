@@ -97,7 +97,8 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	@Override
 	public int hashCode() {
 		if (rehash) {
-			identifier = toString().hashCode();
+			string = toString();
+			identifier = string.hashCode();
 			rehash = false;
 		}
 		return identifier;
@@ -155,7 +156,9 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		if (string == null)
+			string = TermUtil.toString(this);
+		return string;
 	}
 
 	/**

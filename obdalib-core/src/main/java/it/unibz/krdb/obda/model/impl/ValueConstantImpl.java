@@ -26,6 +26,8 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	private final String language;
 
 	private final Predicate.COL_TYPE type;
+	
+	private int hashcode = -1;
 
 	/**
 	 * The default constructor.
@@ -43,6 +45,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		this.value = value;
 		this.language = language;
 		this.type = type;
+		this.hashcode = toString().hashCode();
 	}
 
 	@Override
@@ -58,9 +61,8 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	}
 
 	@Override
-	public int hashCode() {
-		final String constantString = toString();
-		return constantString.hashCode();
+	public int hashCode() {		
+		return hashcode;
 	}
 
 	@Override

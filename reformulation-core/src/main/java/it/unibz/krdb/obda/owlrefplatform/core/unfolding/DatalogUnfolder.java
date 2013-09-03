@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogT
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1245,6 +1246,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		return new LinkedList<CQIE>();
 	}
+	
+	private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
 
 	/***
 	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
@@ -1305,28 +1308,28 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// has no resolvent rule, and marks the end points to compute
 			// partial evaluations
 
-			return new LinkedList<CQIE>();
+			return emptyList;
 		}
 		/*
 		 * This is a real data atom, it either generates something, or null
 		 * (empty)
 		 */
 
-		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(focusAtom.getFunctionSymbol());
+		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
 
 		/*
 		 * If there are none, the atom is logically empty, careful, LEFT JOIN
 		 * alert!
 		 */
 
-		List<CQIE> result;
+		List<CQIE> result = null;
 		if (rulesDefiningTheAtom == null) {
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else {
 				CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
-				result = new ArrayList<CQIE>(1);
-				result.add(0, newRuleWithNullBindings);
+				result = new LinkedList<CQIE>();
+				result.add(newRuleWithNullBindings);
 			}
 		} else {
 			// Note, in this step result may get new CQIEs inside
@@ -1339,13 +1342,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// than one rull, we
 			// must reutrn an empty result i ndicating its already a partial
 			// evaluation.
-			result = new ArrayList<CQIE>();
+			result = emptyList;
 		} else if (result.size() == 0) {
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else {
 				CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
-				result = new ArrayList<CQIE>(4);
+				result = new LinkedList<CQIE>();
 				result.add(newRuleWithNullBindings);
 			}
 		}
@@ -1450,7 +1453,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
 
 		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
-		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
+//		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
+		List<CQIE> result = new LinkedList<CQIE>();
 
 		int rulesGeneratedSoFar = 0;
 		for (CQIE candidateRule : candidateMatches) {

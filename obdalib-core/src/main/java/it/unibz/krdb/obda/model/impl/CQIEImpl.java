@@ -137,7 +137,8 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public int hashCode() {
 		if (rehash) {
-			hash = toString().hashCode();
+			string = toString();
+			hash = string.hashCode();
 			rehash = false;
 		}
 		return hash;
@@ -145,6 +146,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public String toString() {
+		/* expensive, so only compute the string if necessary */
 		if (string == null) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(head.toString());
