@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
@@ -713,7 +714,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
 			/***
-			 * T-Mappings
+			 * T-Mappings and Fact mappings
 			 */
 			boolean optimizeMap = true;
 
@@ -723,7 +724,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/*
 				 * Normalizing language tags. Making all LOWER CASE
 				 */
-
+				
 				normalizeLanguageTagsinMappings(fac, unfoldingProgram);
 
 				/*
@@ -731,6 +732,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 
 				DatalogNormalizer.enforceEqualities(unfoldingProgram);
+				
+				/*
+				 * Adding ontology assertions (ABox) as rules (facts, head with no body).
+				 */
+				ABoxToFactRuleConverter.addFacts(inputTBox.getABox().iterator(), unfoldingProgram, equivalenceMaps);
+				
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
 
@@ -738,12 +745,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Adding data typing on the mapping axioms.
 				 */
 				extendTypesWithMetadata(metadata, unfoldingProgram);
-
+				
 				/*
 				 * Adding NOT NULL conditions to the variables used in the head
 				 * of all mappings to preserve SQL-RDF semantics
 				 */
 				addNOTNULLToMappings(fac, unfoldingProgram);
+				
+				
 
 			}
 

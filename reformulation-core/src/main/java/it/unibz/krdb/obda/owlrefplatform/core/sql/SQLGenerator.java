@@ -396,8 +396,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		int size = tableDefinitions.size();
 		if (isTopLevel) {
 			if (size == 0) {
-				throw new RuntimeException("No table definitions");
-			}
+				tableDefinitionsString.append("(" + jdbcutil.getDummyTable() + ") tdummy ");
+				
+			} else {
 			Iterator<String> tableDefinitionsIterator = tableDefinitions.iterator();
 			tableDefinitionsString.append(indent);
 			tableDefinitionsString.append(tableDefinitionsIterator.next());
@@ -405,6 +406,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				tableDefinitionsString.append(",\n");
 				tableDefinitionsString.append(indent);
 				tableDefinitionsString.append(tableDefinitionsIterator.next());
+			}
 			}
 		} else {
 			/*

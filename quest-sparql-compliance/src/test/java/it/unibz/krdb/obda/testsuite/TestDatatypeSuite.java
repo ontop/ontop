@@ -18,10 +18,10 @@ public class TestDatatypeSuite extends TestSuite {
 		
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite("Database Data-type Test Suite");
-		suite.addTest(MysqlDatatypeTest.suite());
-		suite.addTest(PgsqlDatatypeTest.suite());
+//		suite.addTest(MysqlDatatypeTest.suite());
+//		suite.addTest(PgsqlDatatypeTest.suite());
 //		suite.addTest(MssqlDatatypeTest.suite());
-		suite.addTest(OracleDatatypeTest.suite());
+//		suite.addTest(OracleDatatypeTest.suite());
 //		suite.addTest(Db2DatatypeTest.suite());
 		return suite;
 	}

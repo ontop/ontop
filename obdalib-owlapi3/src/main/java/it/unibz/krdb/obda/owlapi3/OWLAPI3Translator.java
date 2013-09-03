@@ -149,6 +149,7 @@ public class OWLAPI3Translator {
 			translation.addConcepts(aux.getConcepts());
 			translation.addRoles(aux.getRoles());
 			translation.addAssertions(aux.getAssertions());
+			translation.getABox().addAll(aux.getABox());
 		}
 		/* we translated successfully, now we append the new assertions */
 
@@ -460,10 +461,10 @@ public class OWLAPI3Translator {
 					dl_onto.addAssertion(funct);
 
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					/*
-					 * Individual axioms are intentionally ignored by the
-					 * translator
-					 */
+					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
+					if (translatedAxiom != null)
+						dl_onto.addAssertion(translatedAxiom);
+					
 				} else if (axiom instanceof OWLAnnotationAxiom) {
 					/*
 					 * Annotations axioms are intentionally ignored by the
