@@ -211,9 +211,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		for (CQIE query : workingSet) {
 			result.add(query);
 		}
-
+		
+		
 		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
-
+		
+		/**
+		 * We need to enforce equality again, because at this point it is 
+		 *  possible that there is still some EQ(...) in the Program resultdp
+		 * 
+		 */
+		DatalogNormalizer.enforceEqualities(resultdp, false);
+		
 		return resultdp;
 	}
 
