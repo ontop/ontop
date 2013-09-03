@@ -357,14 +357,14 @@ public class QuestStatement implements OBDAStatement {
 				// the uri as subject, and collect the results
 				// in one graphresultset
 				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
+				try {
+					templ = new SesameConstructTemplate(str);
+				} catch (MalformedQueryException e) {
+					e.printStackTrace();
+				}
+				str = SPARQLQueryUtility.getSelectFromConstruct(str);
 				if (describeResultSet == null) {
 					// just for the first time
-					try {
-						templ = new SesameConstructTemplate(str);
-					} catch (MalformedQueryException e) {
-						e.printStackTrace();
-					}
-					str = SPARQLQueryUtility.getSelectFromConstruct(str);
 					describeResultSet = (QuestGraphResultSet) executeGraphQuery(str, 4);
 				} else {
 					// 2nd and manyth times execute, but collect result into one
@@ -388,10 +388,15 @@ public class QuestStatement implements OBDAStatement {
 					e.printStackTrace();
 				}
 				str = SPARQLQueryUtility.getSelectFromConstruct(str);
-				QuestGraphResultSet set = (QuestGraphResultSet) executeGraphQuery(str, 4);
-				if (set != null) {
-					while (set.hasNext()) {
-						describeResultSet.addNewResultSet(set.next());
+				if (describeResultSet == null) {
+					// just for the first time
+					describeResultSet = (QuestGraphResultSet) executeGraphQuery(str, 4);
+				} else {
+					QuestGraphResultSet set = (QuestGraphResultSet) executeGraphQuery(str, 4);
+					if (set != null) {
+						while (set.hasNext()) {
+							describeResultSet.addNewResultSet(set.next());
+						}
 					}
 				}
 			}
