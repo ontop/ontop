@@ -461,7 +461,9 @@ public class OWLAPI3Translator {
 					dl_onto.addAssertion(funct);
 
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					dl_onto.addAssertion(translate((OWLIndividualAxiom)axiom));
+					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
+					if (translatedAxiom != null)
+						dl_onto.addAssertion(translatedAxiom);
 					
 				} else if (axiom instanceof OWLAnnotationAxiom) {
 					/*
