@@ -396,8 +396,8 @@ public class QuestOWLStatement {
 			while (resultSet.hasNext()) {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
-						String subjectIRI = ((ClassAssertion) assertion).getPredicate().toString();
-						String classIRI = ((ClassAssertion) assertion).getObject().getValue();
+						String subjectIRI = ((ClassAssertion) assertion).getObject().getValue();
+						String classIRI = ((ClassAssertion) assertion).getPredicate().toString();
 						OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
 						axiomList.add(classAxiom);
 					} else if (assertion instanceof ObjectPropertyAssertion) {
