@@ -49,7 +49,6 @@ public class R2RMLParser {
 	String parsedString = "";
 	String subjectString = "";
 	String objectString = "";
-	String basePrefix = "";
 
 	public R2RMLParser() {
 		classPredicates = new ArrayList<Predicate>();
@@ -331,17 +330,10 @@ public class R2RMLParser {
 			parsedString = iterator.next().getObject().toString();
 			// System.out.println(parsedString);
 			//uriconstant
-			if(parsedString.startsWith("http://"))
-				objectAtom = fac.getConstantURI(parsedString);
-			else
-			{
 				//valueconstant
 				Predicate pred = fac.getUriTemplatePredicate(1);
 				Term newlit = fac.getConstantLiteral(trim(parsedString));
 				objectAtom = fac.getFunction(pred, newlit);
-			}
-				
-			
 		}
 
 		// process OBJECTMAP
@@ -513,7 +505,8 @@ public class R2RMLParser {
 		List<Term> terms = new ArrayList<Term>();
 		String string = (parsedString);
 		if (!string.contains("{"))
-			if (!string.startsWith("http://")) 
+			if (type<3)
+			if(!string.startsWith("http://")) 
 			{	string = R2RMLVocabulary.baseuri + "{" + string + "}";
 				if (type == 2)
 					string = "\"" + string + "\"";
@@ -550,7 +543,7 @@ public class R2RMLParser {
 		switch (type) {
 		//constant uri
 		case 0:
-			uriTemplate = fac.getConstantURI(string);
+			uriTemplate = fac.getConstantLiteral(string);
 			pred = fac.getUriTemplatePredicate(terms.size());
 			break;
 		// URI or IRI
@@ -565,7 +558,7 @@ public class R2RMLParser {
 			break;
 		// LITERAL
 		case 3:
-			uriTemplate = fac.getConstantLiteral(string);
+			uriTemplate = fac.getVariable(string);
 			pred = OBDAVocabulary.RDFS_LITERAL_LANG;//lang?
 			terms.add(OBDAVocabulary.NULL);
 			break;
