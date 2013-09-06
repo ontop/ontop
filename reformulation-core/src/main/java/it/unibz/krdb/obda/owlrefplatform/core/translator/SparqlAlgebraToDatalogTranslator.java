@@ -1003,7 +1003,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		
 		boolean valid = true;
-		valid = XMLDatatypeUtil.isValidValue(constant.toString(), type);
+		if (type != null) 
+			valid = XMLDatatypeUtil.isValidValue(constant.toString(), type);
 //		if ((type == XMLSchema.DATETIME) || type.equals(XMLSchema.DATETIME)) {
 //			valid = XMLDatatypeUtil.isValidDateTime(constant.toString());
 //		}
