@@ -1003,15 +1003,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		
 		boolean valid = true;
-		if (type != null) 
-			valid = XMLDatatypeUtil.isValidValue(constant.toString(), type);
-//		if ((type == XMLSchema.DATETIME) || type.equals(XMLSchema.DATETIME)) {
-//			valid = XMLDatatypeUtil.isValidDateTime(constant.toString());
-//		}
-//		if ((type == XMLSchema.BOOLEAN) || type.equals(XMLSchema.BOOLEAN)) {
-//			valid = XMLDatatypeUtil.isValidBoolean(constant.toString());
-//		}
-		
+		if (type != null) {
+			valid = XMLDatatypeUtil.isValidValue(value, type);
+		}
 		if (!valid)
 			throw new RuntimeException(
 					"Invalid lexical form for datatype. Found: " + value);
