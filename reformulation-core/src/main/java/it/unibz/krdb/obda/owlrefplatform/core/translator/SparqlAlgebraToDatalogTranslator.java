@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.impl.CalendarLiteralImpl;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
@@ -1002,6 +1003,14 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 		
 		boolean valid = true;
+		valid = XMLDatatypeUtil.isValidValue(constant.toString(), type);
+//		if ((type == XMLSchema.DATETIME) || type.equals(XMLSchema.DATETIME)) {
+//			valid = XMLDatatypeUtil.isValidDateTime(constant.toString());
+//		}
+//		if ((type == XMLSchema.BOOLEAN) || type.equals(XMLSchema.BOOLEAN)) {
+//			valid = XMLDatatypeUtil.isValidBoolean(constant.toString());
+//		}
+		
 		if (!valid)
 			throw new RuntimeException(
 					"Invalid lexical form for datatype. Found: " + value);
