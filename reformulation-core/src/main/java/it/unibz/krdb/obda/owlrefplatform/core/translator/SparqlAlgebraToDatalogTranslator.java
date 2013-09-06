@@ -33,6 +33,7 @@ import org.openrdf.model.impl.CalendarLiteralImpl;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.And;
@@ -674,7 +675,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 
 				Function rdfTypeConstant = ofac.getFunction(ofac
-						.getUriTemplatePredicate(1), ofac.getConstantURI(OBDAVocabulary.RDF_TYPE));
+						.getUriTemplatePredicate(1), ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 				terms.add(ofac.getVariable(obj.getName()));
 
@@ -1153,6 +1154,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			else if ((type == XMLSchema.STRING) || type.equals(XMLSchema.STRING)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
 							lit.stringValue() + "", COL_TYPE.STRING));
+			else if ((type == RDFS.LITERAL) || type.equals(RDFS.LITERAL)) constantFunction = ofac.getFunction(ofac
+					.getDataTypePredicateLiteral(), ofac.getConstantLiteral(
+							lit.stringValue() + "", COL_TYPE.LITERAL));
 			else {
 				// its some custom type
 					constantFunction = ofac.getFunction(ofac
