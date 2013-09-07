@@ -160,6 +160,14 @@ public class TMappingProcessor implements Serializable {
 		CQCUtilities cqc1 = new CQCUtilities(strippedNewMapping, sigma);
 		Iterator<CQIE> mappingIterator = currentMappings.iterator();
 		
+		/***
+		 * Facts are just added
+		 */
+		if (newmapping.getBody().size() == 0) {
+			currentMappings.add(newmapping);
+			return;
+		}
+		
 		while (mappingIterator.hasNext()) {
 			CQIE currentMapping = mappingIterator.next();
 			List<Function> strippedExistingConditions = new LinkedList<Function>();
@@ -610,12 +618,18 @@ public class TMappingProcessor implements Serializable {
 	private void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
 			Set<CQIE> similarMappings = mappingIndex.get(p);
+			
 			Set<CQIE> result = new HashSet<CQIE>();
 			Iterator<CQIE> iterSimilarMappings = similarMappings.iterator();
 			while (iterSimilarMappings.hasNext()) {
 				CQIE candidate = iterSimilarMappings.next();
 				iterSimilarMappings.remove();
-				mergeMappingsWithCQC(result, candidate);
+				
+				if (candidate.getBody().size() > 0) {
+					mergeMappingsWithCQC(result, candidate);
+				} else {
+					result.add(candidate);
+				}
 			}
 			mappingIndex.put(p, result);
 		}
