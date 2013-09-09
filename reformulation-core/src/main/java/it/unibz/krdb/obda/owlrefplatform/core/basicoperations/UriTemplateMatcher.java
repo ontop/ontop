@@ -105,7 +105,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
 			 * generate empty queires later in the query answering process
 			 */
-			functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantURI(uriString));
+			functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(uriString));
 		}
 			
 		return functionURI;
