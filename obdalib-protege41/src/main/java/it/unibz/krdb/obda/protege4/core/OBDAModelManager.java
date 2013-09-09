@@ -152,6 +152,10 @@ public class OBDAModelManager implements Disposable {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 					IRI newiri = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
+					
+					if (newiri == null)
+						continue;
+					
 					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI();
 					
 					log.debug("Ontology ID changed");
