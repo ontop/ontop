@@ -1114,9 +1114,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			if (ct.getType() == COL_TYPE.OBJECT) {
-				int id = getUriid(ct.getValue());
-				return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+			if (isSI) {
+				if (ct.getType() == COL_TYPE.OBJECT || ct.getType() == COL_TYPE.LITERAL) {
+					int id = getUriid(ct.getValue());
+					if (id >= 0)
+						return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+				}
 			}
 			return jdbcutil.getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
