@@ -187,43 +187,6 @@
 			<scope>compile</scope>
 		</dependency>
 		
-	<!-- 
-		<dependency>
-			<groupId>info.aduna</groupId>
-			<artifactId>aduna-io</artifactId>
-			<version>1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna</groupId>
-			<artifactId>aduna-iteration</artifactId>
-			<version>1.5</version>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna</groupId>
-			<artifactId>aduna-concurrent</artifactId>
-			<version>1.4</version>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-lang</artifactId>
-			<version>2.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-net</artifactId>
-			<version>2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-text</artifactId>
-			<version>2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-xml</artifactId>
-			<version>2.2</version>
-		</dependency>
-		 -->	
 		<!--  OWL API -->
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>

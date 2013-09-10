@@ -166,16 +166,6 @@
 
 		<!-- These will download some of the sources -->
 
-		<!-- </dependency> <dependency> <groupId>org.openrdf.sesame</groupId> <artifactId>sesame-queryresultio-sparqlxml</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna</groupId> <artifactId>aduna-io</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna</groupId> <artifactId>aduna-iteration</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna</groupId> <artifactId>aduna-concurrent</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna.commons</groupId> <artifactId>aduna-commons-lang</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna.commons</groupId> <artifactId>aduna-commons-net</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna.commons</groupId> <artifactId>aduna-commons-text</artifactId> 
-			</dependency> <dependency> <groupId>info.aduna.commons</groupId> <artifactId>aduna-commons-xml</artifactId> 
-			</dependency> -->
-
 		<!-- JDBC Drivers -->
 
 		<dependency>
