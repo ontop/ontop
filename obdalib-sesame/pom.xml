@@ -3,7 +3,7 @@
   <parent>
     <artifactId>obdalib-parent</artifactId>
     <groupId>inf.unibz.it.obda</groupId>
-    <version>1.8</version>
+    <version>1.9</version>
   </parent>
   <artifactId>obdalib-sesame</artifactId>
   
@@ -22,7 +22,7 @@
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
