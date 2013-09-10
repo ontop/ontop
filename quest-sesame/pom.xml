@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.8</version>
+		<version>1.9</version>
 	</parent>
 	<artifactId>quest-sesame</artifactId>
 	<name>quest-sesame</name>
@@ -29,7 +29,7 @@
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -40,27 +40,27 @@
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-sesame</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency> 
 		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		 <!-- <dependency> -->
 		<!--	this includes ALL seasame, dont keep this! -->

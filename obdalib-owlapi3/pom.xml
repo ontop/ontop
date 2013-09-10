@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.8</version>
+		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-owlapi3</artifactId>
@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
