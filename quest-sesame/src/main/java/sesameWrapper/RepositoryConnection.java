@@ -87,7 +87,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		this.isOpen = true;
 		this.isActive = false;
 		this.autoCommit = connection.getAutoCommit();
-		
+		this.rdfParser = Rio.createParser(RDFFormat.RDFXML,
+                this.repository.getValueFactory());
 	}
 
 	
