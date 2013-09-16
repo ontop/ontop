@@ -640,35 +640,9 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		if (p instanceof URIImpl && p.toString().equals(RDF.TYPE.stringValue())) {
 			// Subject node
-			if (s == null) {
-				terms.add(ofac.getVariable(subj.getName()));
-			} else if (s instanceof LiteralImpl) {
-				LiteralImpl subject = (LiteralImpl) s;
-				ValueConstant constant = getConstant(subject);
-				terms.add(constant);
-			} else if (s instanceof URIImpl) {
-
-				/*
-				 * Found a URI, here we need to create a variable and add an
-				 * equation of the variable to uri("http:....")
-				 */
-
-				if (isSI) {
-					int id = indexOfRef(s.stringValue());
-					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-					terms.add(functionURI);
-				} else {
-				
-				URIImpl subject = (URIImpl) s;
-				subjectType = COL_TYPE.OBJECT;
-				
-
-				Function functionURI = uriTemplateMatcher.generateURIFunction(subject.stringValue());
-				functionURI.getTerms();
-				terms.add(functionURI);
-				}
-
-			}
+			
+			terms.add(getOntopTerm(subj, s, isSI));
+			
 
 			// Object node
 			if (o == null) {
@@ -730,101 +704,11 @@ public class SparqlAlgebraToDatalogTranslator {
 			 * The predicate is NOT rdf:type
 			 */
 
-			// Subject node
-			if (s == null) {
-				if (subj.isAnonymous()) {}
-				terms.add(ofac.getVariable(subj.getName()));
-			} else if (s instanceof LiteralImpl) {
-				LiteralImpl subject = (LiteralImpl) s;
-				ValueConstant constant = getConstant(subject);
-				terms.add(constant);
-			} else if (s instanceof URIImpl) {
-				URIImpl subject = (URIImpl) s;
-				subjectType = COL_TYPE.OBJECT;
-				
-				String subject_URI = subject.stringValue();
-				subject_URI = decodeURIEscapeCodes(subject_URI);
-				
+			
+			terms.add(getOntopTerm(subj, s, isSI));
 
-				if (isSI) {
-					int id = indexOfRef(s.stringValue());
-					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-					if (functionURI == null)
-					return;
-					terms.add(functionURI);
-				} else {
-					Function functionURI = uriTemplateMatcher.generateURIFunction(subject_URI);
-					if (functionURI == null)
-					return;
-					terms.add(functionURI);
-				}
-			}
-
-			// Object node
-			if (o == null) {
-				terms.add(ofac.getVariable(obj.getName()));
-			} else if (o instanceof LiteralImpl) {
-				LiteralImpl object = (LiteralImpl) o;
-				objectType = getDataType(object);
-				ValueConstant constant = getConstant(object);
-
-				// v1.7: We extend the syntax such that the data type of a
-				// constant
-				// is defined using a functional symbol.
-				Function dataTypeFunction = null;
-				if (objectType == COL_TYPE.LITERAL) {
-					// If the object has type LITERAL, check any language
-					// tag!
-					String lang = object.getLanguage();
-					if (lang != null) lang = lang.toLowerCase();
-					Predicate functionSymbol = ofac
-							.getDataTypePredicateLiteral();
-					Constant languageConstant = null;
-					if (lang != null && !lang.equals("")) {
-						languageConstant = ofac.getConstantLiteral(lang,
-								COL_TYPE.LITERAL);
-						dataTypeFunction = ofac.getFunction(
-								functionSymbol, constant, languageConstant);
-						terms.add(dataTypeFunction);
-					} else {
-						dataTypeFunction = ofac.getFunction(
-								functionSymbol, constant);
-						terms.add(dataTypeFunction);
-					}
-				} else {
-					// For other supported data-types
-					Predicate functionSymbol = getDataTypePredicate(objectType);
-					dataTypeFunction = ofac.getFunction(functionSymbol,
-							constant);
-					terms.add(dataTypeFunction);
-				}
-			} else if (o instanceof URIImpl) {
-				
-				if (isSI) {
-					int id = indexOfRef(o.stringValue());
-					Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-					terms.add(functionURI);
-				} else {
-					
-				
-				//Node_URI object = (Node_URI) o;
-				//objectType = COL_TYPE.OBJECT;
-				
-				//String object_URI = object.getURI();
-				String object_URI = o.stringValue();
-				object_URI = decodeURIEscapeCodes(object_URI);
-				
-
-				Function functionURI = uriTemplateMatcher.generateURIFunction(object_URI);
-				if (functionURI == null)
-					{
-						throw new RuntimeException(object_URI + " cannot be translated into object!");
-						
-					}
-				terms.add(functionURI);
-				}
-
-			}
+			terms.add(getOntopTerm(obj,o,isSI));
+			
 			// Construct the predicate
 
 			if (p instanceof URIImpl) {
@@ -851,6 +735,66 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		CQIE newrule = ofac.getCQIE(head, result);
 		pr.appendRule(newrule);
+	}
+	
+	private Term getOntopTerm(Var subj, Value s, boolean isSI) {
+		Term result = null;
+		if (s == null) {
+			result = ofac.getVariable(subj.getName());
+		} else if (s instanceof LiteralImpl) {
+			LiteralImpl object = (LiteralImpl) s;
+			COL_TYPE objectType = getDataType(object);
+			ValueConstant constant = getConstant(object);
+
+			// v1.7: We extend the syntax such that the data type of a
+			// constant
+			// is defined using a functional symbol.
+			Function dataTypeFunction = null;
+			if (objectType == COL_TYPE.LITERAL) {
+				// If the object has type LITERAL, check any language
+				// tag!
+				String lang = object.getLanguage();
+				if (lang != null) lang = lang.toLowerCase();
+				Predicate functionSymbol = ofac
+						.getDataTypePredicateLiteral();
+				Constant languageConstant = null;
+				if (lang != null && !lang.equals("")) {
+					languageConstant = ofac.getConstantLiteral(lang,
+							COL_TYPE.LITERAL);
+					dataTypeFunction = ofac.getFunction(
+							functionSymbol, constant, languageConstant);
+					result = dataTypeFunction;
+				} else {
+					dataTypeFunction = ofac.getFunction(
+							functionSymbol, constant);
+					result = dataTypeFunction;
+				}
+			} else {
+				// For other supported data-types
+				Predicate functionSymbol = getDataTypePredicate(objectType);
+				dataTypeFunction = ofac.getFunction(functionSymbol,
+						constant);
+				result= dataTypeFunction;
+			}
+		} else if (s instanceof URIImpl) {
+			URIImpl subject = (URIImpl) s;
+			COL_TYPE subjectType = COL_TYPE.OBJECT;
+			
+			String subject_URI = subject.stringValue();
+			subject_URI = decodeURIEscapeCodes(subject_URI);
+			
+
+			if (isSI) {
+				int id = indexOfRef(s.stringValue());
+				Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
+				result = functionURI;
+			} else {
+				Function functionURI = uriTemplateMatcher.generateURIFunction(subject_URI);
+				result = functionURI;
+			}
+		}
+		
+		return result;
 	}
 	
 	/***
@@ -1124,8 +1068,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		return ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm(expr));
 	}
 	
-	private Variable getVariableTerm(Var expr) {
-		return ofac.getVariable(expr.getName());
+	private Term getVariableTerm(Var expr) {
+		return getOntopTerm(expr, expr.getValue(), isSI);
+		
 	}
 
 	private Function getConstantFunctionTerm(org.openrdf.query.algebra.ValueConstant expr) {

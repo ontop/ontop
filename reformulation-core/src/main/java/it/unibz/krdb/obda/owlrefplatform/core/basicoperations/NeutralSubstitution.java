@@ -14,5 +14,9 @@ public class NeutralSubstitution extends Substitution {
 	public NeutralSubstitution() {
 		super(null, null);
 	}
+	
+	public String toString() {
+		return "-/-";
+	}
 
 }
