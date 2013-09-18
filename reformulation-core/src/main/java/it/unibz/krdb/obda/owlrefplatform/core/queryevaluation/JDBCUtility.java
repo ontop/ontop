@@ -199,7 +199,7 @@ public class JDBCUtility implements Serializable {
 	public String getSQLLexicalFormBoolean(ValueConstant rdfliteral) {
 		String value = rdfliteral.getValue().toLowerCase();
 		String sql = null;
-		if (value.equals("1") || value.equals("true")) {
+		if (value.equals("1") || value.equals("true") || value.equals("t")) {
 			switch (driver) {
 			case MYSQL:
 			case H2:
@@ -215,7 +215,7 @@ public class JDBCUtility implements Serializable {
 				sql = "'TRUE'";
 				break;
 			}
-		} else if (value.equals("0") || value.equals("false")) {
+		} else if (value.equals("0") || value.equals("false") || value.equals("f")) {
 			switch (driver) {
 			case MYSQL:
 			case H2:

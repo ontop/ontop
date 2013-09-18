@@ -112,7 +112,7 @@ public class ExpressionEvaluator {
 					if (!newterm.equals(old))
 						if (newterm == fac.getConstantFalse()) {
 							//
-							return fac.getConstantFalse();
+							terms.set(i, fac.getFunction(fac.getDataTypePredicateBoolean(), fac.getConstantFalse()));
 						} else if (newterm == fac.getConstantTrue()) {
 							//remove
 							terms.remove(i);
