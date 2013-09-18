@@ -70,4 +70,9 @@ public interface Ontology extends Cloneable, Serializable {
 	public Ontology clone();
 
 	public void addEntities(Set<Predicate> referencedEntities);
+
+	/**
+	 * @return
+	 */
+	Set<Assertion> getABox();
 }

@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
@@ -53,11 +53,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class MappingAnalyzer {
 
-	private ArrayList<OBDAMappingAxiom> mappingList;
+	private List<OBDAMappingAxiom> mappingList;
 	private DBMetadata dbMetaData;
 
 	private SQLQueryTranslator translator;
@@ -67,7 +67,7 @@ public class MappingAnalyzer {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public MappingAnalyzer(ArrayList<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
+	public MappingAnalyzer(List<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
 		this.mappingList = mappingList;
 		this.dbMetaData = dbMetaData;
 
@@ -105,18 +105,18 @@ public class MappingAnalyzer {
 					Predicate predicate = dfac.getPredicate(predicateName, arity);
 
 					// Swap the column name with a new variable from the lookup table
-					List<NewLiteral> terms = new ArrayList<NewLiteral>();
+					List<Term> terms = new ArrayList<Term>();
 					for (int i = 1; i <= arity; i++) {
 						String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, table.getAlias(), i);
 						String termName = lookupTable.lookup(columnName);
 						if (termName == null) {
 							throw new RuntimeException("Column '" + columnName + "'was not found in the lookup table: ");
 						}
-						NewLiteral term = dfac.getVariable(termName);
+						Term term = dfac.getVariable(termName);
 						terms.add(term);
 					}
 					// Create an atom for a particular table
-					Function atom = dfac.getAtom(predicate, terms);
+					Function atom = dfac.getFunction(predicate, terms);
 					atoms.add(atom);
 				}
 
@@ -133,10 +133,10 @@ public class MappingAnalyzer {
 					if (lookup2 == null)
 						throw new RuntimeException("Unable to get column name for variable: " + rightValue);
 
-					NewLiteral t1 = dfac.getVariable(lookup1);
-					NewLiteral t2 = dfac.getVariable(lookup2);
+					Term t1 = dfac.getVariable(lookup1);
+					Term t2 = dfac.getVariable(lookup2);
 
-					Function atom = dfac.getEQAtom(t1, t2);
+					Function atom = dfac.getFunctionEQ(t1, t2);
 					atoms.add(atom);
 				}
 
@@ -191,7 +191,7 @@ public class MappingAnalyzer {
 					// The filter function stack must have 1 element left
 					if (filterFunctionStack.size() == 1) {
 						Function filterFunction = filterFunctionStack.pop();
-						Function atom = dfac.getAtom(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
+						Function atom = dfac.getFunction(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
 						atoms.add(atom);
 					} else {						
 						throwInvalidFilterExpressionException(filterFunctionStack);
@@ -201,12 +201,12 @@ public class MappingAnalyzer {
 				// Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
 				for (Function atom : atomList) {
-					List<NewLiteral> terms = atom.getTerms();
-					List<NewLiteral> newterms = new LinkedList<NewLiteral>();
-					for (NewLiteral term : terms) {
+					List<Term> terms = atom.getTerms();
+					List<Term> newterms = new LinkedList<Term>();
+					for (Term term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
-					Function newhead = dfac.getAtom(atom.getPredicate(), newterms);
+					Function newhead = dfac.getFunction(atom.getPredicate(), newterms);
 					CQIE rule = dfac.getCQIE(newhead, atoms);
 					datalog.appendRule(rule);
 				}
@@ -265,9 +265,9 @@ public class MappingAnalyzer {
 	private Function createBooleanFunction(Function leftFunction, Function rightFunction, BooleanOperator op) {
 		Function booleanFunction = null;
 		if (op instanceof AndOperator) {
-			booleanFunction = dfac.getANDFunction(leftFunction, rightFunction);
+			booleanFunction = dfac.getFunctionAND(leftFunction, rightFunction);
 		} else if (op instanceof OrOperator) {
-			booleanFunction = dfac.getORFunction(leftFunction, rightFunction);
+			booleanFunction = dfac.getFunctionOR(leftFunction, rightFunction);
 		}
 		return booleanFunction;
 	}
@@ -288,12 +288,12 @@ public class MappingAnalyzer {
 		if (variableName == null) {
 			throw new RuntimeException("Unable to find column name for variable: " + columnName);
 		}
-		NewLiteral var = dfac.getVariable(variableName);
+		Term var = dfac.getVariable(variableName);
 
 		if (pred.useIsNullOperator()) {
-			return dfac.getIsNullFunction(var);
+			return dfac.getFunctionIsNull(var);
 		} else {
-			return dfac.getIsNotNullFunction(var);
+			return dfac.getFunctionIsNotNull(var);
 		}
 	}
 
@@ -306,10 +306,10 @@ public class MappingAnalyzer {
 		if (termLeftName == null) {
 			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
 		}
-		NewLiteral t1 = dfac.getVariable(termLeftName);
+		Term t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
-		NewLiteral t2 = null;
+		Term t2 = null;
 		if (right instanceof ReferenceValueExpression) {
 			String rightValueName = right.toString();
 			termRightName = lookupTable.lookup(rightValueName);
@@ -323,18 +323,18 @@ public class MappingAnalyzer {
 			if (literal instanceof StringLiteral) {
 				boolean isDateTime = containDateTimeString(termRightName);
 				if (isDateTime) {
-					t2 = dfac.getValueConstant(termRightName, COL_TYPE.DATETIME);
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 				} else {
-					t2 = dfac.getValueConstant(termRightName, COL_TYPE.STRING);
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
 				}
 			} else if (literal instanceof IntegerLiteral) {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.INTEGER);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
 			} else if (literal instanceof DecimalLiteral) {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.DOUBLE);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
 			} else if (literal instanceof BooleanLiteral) {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.BOOLEAN);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
 			} else {
-				t2 = dfac.getValueConstant(termRightName, COL_TYPE.LITERAL);
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 			}
 		}
 
@@ -342,12 +342,12 @@ public class MappingAnalyzer {
 
 		Function funct = null;
 		switch (op) {
-		case EQ: funct = dfac.getEQFunction(t1, t2); break;
-		case GT: funct = dfac.getGTFunction(t1, t2); break;
-		case LT: funct = dfac.getLTFunction(t1, t2); break;
-		case GE: funct = dfac.getGTEFunction(t1, t2); break;
-		case LE: funct = dfac.getLTEFunction(t1, t2); break;
-		case NE: funct = dfac.getNEQFunction(t1, t2); break;
+		case EQ: funct = dfac.getFunctionEQ(t1, t2); break;
+		case GT: funct = dfac.getFunctionGT(t1, t2); break;
+		case LT: funct = dfac.getFunctionLT(t1, t2); break;
+		case GE: funct = dfac.getFunctionGTE(t1, t2); break;
+		case LE: funct = dfac.getFunctionLTE(t1, t2); break;
+		case NE: funct = dfac.getFunctionNEQ(t1, t2); break;
 		default:
 			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
 		}
@@ -375,8 +375,8 @@ public class MappingAnalyzer {
 	/**
 	 * Returns a new term with the updated references.
 	 */
-	private NewLiteral updateTerm(NewLiteral term, LookupTable lookupTable) {
-		NewLiteral result = null;
+	private Term updateTerm(Term term, LookupTable lookupTable) {
+		Term result = null;
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			String varName = var.getName();
@@ -388,12 +388,12 @@ public class MappingAnalyzer {
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
 			Function func = (Function) term;
-			List<NewLiteral> terms = func.getTerms();
-			List<NewLiteral> newterms = new LinkedList<NewLiteral>();
-			for (NewLiteral innerTerm : terms) {
+			List<Term> terms = func.getTerms();
+			List<Term> newterms = new LinkedList<Term>();
+			for (Term innerTerm : terms) {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 			}
-			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);
+			result = dfac.getFunction(func.getFunctionSymbol(), newterms);
 		} else if (term instanceof Constant) {
 			result = term.clone();
 		}

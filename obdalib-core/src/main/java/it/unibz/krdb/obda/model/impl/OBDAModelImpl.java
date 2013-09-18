@@ -11,7 +11,6 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -437,7 +436,7 @@ public class OBDAModelImpl implements OBDAModel {
 						continue;
 					}
 					modifiedCount += 1;
-					Atom newatom = dfac.getAtom(newName, oldatom.getTerms());
+					Function newatom = dfac.getFunction(newName, oldatom.getTerms());
 					body.set(idx, newatom);
 				}
 				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);

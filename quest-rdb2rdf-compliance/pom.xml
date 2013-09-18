@@ -3,11 +3,11 @@
   	<parent>
     	<artifactId>obdalib-parent</artifactId>
     	<groupId>inf.unibz.it.obda</groupId>
-    	<version>1.8</version>
+    	<version>1.9</version>
   	</parent>
-  	<groupId>inf.unibz.it.obda</groupId>
+  	
   	<artifactId>quest-rdb2rdf-compliance</artifactId>
-  	<version>1.8</version>
+  	
   	<name>rdb2rdf-compliance-tests</name>
   
   	<dependencies>
@@ -20,19 +20,24 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 		<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<scope>test</scope>
+		</dependency>
+		<!-- <dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.8</version>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.8</version>
-		</dependency> 
+		</dependency>  -->
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>

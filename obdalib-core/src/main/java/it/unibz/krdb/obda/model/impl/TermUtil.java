@@ -10,9 +10,9 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -22,51 +22,65 @@ import it.unibz.krdb.obda.model.Variable;
  */
 public class TermUtil {
 
-	public static String toString(NewLiteral term) {
+	public static String toString(Term term) {
 		if (term instanceof Variable) {
 			Variable variable = (Variable) term;
-			return String.format("%s", variable.getName());
+			return variable.getName();
 		} 
 		else if (term instanceof ValueConstant) {
 			ValueConstant constant = (ValueConstant) term;
-			StringBuffer bf = new StringBuffer();
-			bf.append(String.format("\"%s\"", constant.getValue()));
+			StringBuilder sb = new StringBuilder();
 			
-		    final COL_TYPE datatype = constant.getType();
-			if (datatype == COL_TYPE.LITERAL_LANG) {
-				bf.append("@");
-				bf.append(constant.getLanguage());
-			} else if (datatype == COL_TYPE.LITERAL) { 
-				// NO-OP
-		    } else {
-				bf.append("^^");
-				bf.append(datatype);
+			String value = constant.getValue();
+			switch (constant.getType()) {
+				case STRING:
+				case DATETIME: sb.append(quoted(value)); break;
+				case INTEGER:
+				case DECIMAL:
+				case DOUBLE:
+				case BOOLEAN: sb.append(value); break;
+				case LITERAL:
+				case LITERAL_LANG:
+					String lang = constant.getLanguage();
+					if (lang != null && !lang.isEmpty()) {
+						value += "@" + lang;
+					}
+					sb.append(quoted(value)); break;
+				default:
+					sb.append(value);
 			}
-			return bf.toString();
+			return sb.toString();
 		}
 		else if (term instanceof URIConstant) {
 			URIConstant constant = (URIConstant) term;
-			return String.format("%s", constant.getValue());
+			return "<" + constant.getValue() + ">";
 		} 
 		else if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
 			
-			StringBuffer args = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
+			sb.append(functionSymbol.toString());
+			sb.append("(");
 			boolean separator = false;
-			for (NewLiteral innerTerm : function.getTerms()) {
+			for (Term innerTerm : function.getTerms()) {
 				if (separator) {
-					args.append(", ");
+					sb.append(",");
 				}
-				args.append(toString(innerTerm));
+				sb.append(toString(innerTerm));
 				separator = true;
 			}
-			return String.format("%s(%s)", functionSymbol.toString(), args.toString());
+			sb.append(")");
+			return sb.toString();
 		}
 		else if (term instanceof BNode) {
-			BNode bnode = (BNode) term;
+			BNode bnode = (BNode) term;			
 			return bnode.getName();
 		}
 		return term.toString(); // for other unknown term
+	}
+
+	private static String quoted(String value) {
+		return "\"" + value + "\"";
 	}
 }

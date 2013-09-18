@@ -147,7 +147,7 @@ public class QuestResultset implements TupleResultSet {
 						}
 					}
 
-					result = fac.getURIConstant(realValue);
+					result = fac.getConstantURI(realValue);
 
 				} else if (type == COL_TYPE.BNODE) {
 					String rawLabel = set.getString(column);
@@ -157,7 +157,7 @@ public class QuestResultset implements TupleResultSet {
 						bnodeCounter += 1;
 						bnodeMap.put(rawLabel, scopedLabel);
 					}
-					result = fac.getBNodeConstant(scopedLabel);
+					result = fac.getConstantBNode(scopedLabel);
 				} else {
 					/*
 					 * The constant is a literal, we need to find if its
@@ -168,29 +168,29 @@ public class QuestResultset implements TupleResultSet {
 						String value = set.getString(column);
 						String language = set.getString(column - 1);
 						if (language == null || language.trim().equals("")) {
-							result = fac.getValueConstant(value);
+							result = fac.getConstantLiteral(value);
 						} else {
-							result = fac.getValueConstant(value, language);
+							result = fac.getConstantLiteral(value, language);
 						}
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
 						if (value) {
-							result = fac.getValueConstant("true", type);
+							result = fac.getConstantLiteral("true", type);
 						} else {
-							result = fac.getValueConstant("false", type);
+							result = fac.getConstantLiteral("false", type);
 						}
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation
 
 						String s = formatter.format(d);
-						result = fac.getValueConstant(s, type);
+						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
 						Timestamp value = set.getTimestamp(column);
-						result = fac.getValueConstant(value.toString().replace(' ', 'T'), type);
+						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 					} else {
-						result = fac.getValueConstant(realValue, type);
+						result = fac.getConstantLiteral(realValue, type);
 					}
 				}
 			}

@@ -8,8 +8,8 @@
  */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
-import it.unibz.krdb.obda.gui.swing.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -117,11 +117,9 @@ public class MappingAnalyzerTest extends TestCase {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
-
 		factory.setPreferenceHolder(p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
 
 		// Get ready for querying
 		reasoner.getStatement();

@@ -8,13 +8,12 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.BNodePredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
@@ -22,7 +21,6 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -80,7 +78,7 @@ public class MappingDataTypeRepair {
 				continue;
 			}
 			// If the predicate is a data property
-			NewLiteral term = atom.getTerm(1);
+			Term term = atom.getTerm(1);
 
 			if (term instanceof Function) {
 				Function function = (Function) term;
@@ -107,7 +105,7 @@ public class MappingDataTypeRepair {
 				// column type.
 				Variable variable = (Variable) term;
 				Predicate functor = getDataTypeFunctor(variable);
-				NewLiteral newTerm = dfac.getFunctionalTerm(functor, variable);
+				Term newTerm = dfac.getFunction(functor, variable);
 				atom.setTerm(1, newTerm);
 			}
 		}
@@ -143,9 +141,9 @@ public class MappingDataTypeRepair {
 		Iterator<Function> it = body.iterator();
 		while (it.hasNext()) {
 			Function a = (Function) it.next();
-			List<NewLiteral> terms = a.getTerms();
+			List<Term> terms = a.getTerms();
 			int i = 1; // position index
-			for (NewLiteral t : terms) {
+			for (Term t : terms) {
 				if (t instanceof AnonymousVariable) {
 					i++; // increase the position index to evaluate the next
 							// variable

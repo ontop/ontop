@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano This source code is
+ * available under the terms of the Affero General Public License v3.
  * 
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
@@ -93,7 +92,14 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/***
+ * Translates an OWLOntology into ontops internal ontlogy representation. It
+ * will ignore all ABox assertions and does a syntactic approximation of the
+ * ontology, dropping anything not support by Quest during inference.
+ * 
+ * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ * 
+ */
 public class OWLAPI3Translator {
 
 	private final LanguageProfile profile = LanguageProfile.DLLITEA;
@@ -143,6 +149,7 @@ public class OWLAPI3Translator {
 			translation.addConcepts(aux.getConcepts());
 			translation.addRoles(aux.getRoles());
 			translation.addAssertions(aux.getAssertions());
+			translation.getABox().addAll(aux.getABox());
 		}
 		/* we translated successfully, now we append the new assertions */
 
@@ -197,22 +204,23 @@ public class OWLAPI3Translator {
 			try {
 				File profileReport = new File("quest-profile-report.log");
 				if (profileReport.canWrite()) {
-					BufferedWriter bf =new BufferedWriter(new FileWriter(profileReport));
+					BufferedWriter bf = new BufferedWriter(new FileWriter(profileReport));
 					bf.write(report.toString());
 					bf.flush();
 					bf.close();
 				}
 			} catch (Exception e) {
-				
+
 			}
-//			log.warn(report.toString());
+			// log.warn(report.toString());
 			// for (OWLProfileViolation violation : report.getViolations())
 			// axiomIgnoresOWL2QL.add(violation.getAxiom());
 		}
 
-		//Ontology dl_onto = ofac.createOntology((owl.getOntologyID().getOntologyIRI().toString()));
+		// Ontology dl_onto =
+		// ofac.createOntology((owl.getOntologyID().getOntologyIRI().toString()));
 		Ontology dl_onto = ofac.createOntology("http://www.unibz.it/ontology");
-		
+
 		HashSet<String> objectproperties = new HashSet<String>();
 		HashSet<String> dataproperties = new HashSet<String>();
 		HashSet<String> classes = new HashSet<String>();
@@ -248,7 +256,7 @@ public class OWLAPI3Translator {
 						dl_onto.addRole(p);
 					}
 				} else {
-					if (objectproperties.contains(p.getName().toString())) {						
+					if (objectproperties.contains(p.getName().toString())) {
 						punnedPredicates.add(p.getName().toString());
 					} else {
 						dataproperties.add(p.getName().toString());
@@ -453,10 +461,10 @@ public class OWLAPI3Translator {
 					dl_onto.addAssertion(funct);
 
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					/*
-					 * Individual axioms are intentionally ignored by the
-					 * translator
-					 */
+					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
+					if (translatedAxiom != null)
+						dl_onto.addAssertion(translatedAxiom);
+					
 				} else if (axiom instanceof OWLAnnotationAxiom) {
 					/*
 					 * Annotations axioms are intentionally ignored by the
@@ -523,7 +531,8 @@ public class OWLAPI3Translator {
 			SubClassAxiomImpl inc = (SubClassAxiomImpl) ofac.createSubClassAxiom(subDescription, superDescription);
 			dl_onto.addAssertion(inc);
 		} else {
-//			log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
+			// log.debug("Generating encoding for {} subclassof {}",
+			// subDescription, superDescription);
 
 			/*
 			 * We found an existential, we need to get an auxiliary set of
@@ -554,16 +563,21 @@ public class OWLAPI3Translator {
 					isInverse = eR.isInverse();
 				}
 
-				Property auxRole = ofac
-						.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)));
+				Property auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)));
 				auxRoleCounter += 1;
 
 				PropertySomeRestriction propertySomeRestriction = ofac.getPropertySomeRestriction(auxRole.getPredicate(), isInverse);
 				auxclass = propertySomeRestriction;
 
 				/* Creating the new subrole assertions */
-				SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) ofac.createSubPropertyAxiom(auxRole,
-						ofac.createProperty(role, false)); // Roman: was isInverse in place of false
+				SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) ofac
+						.createSubPropertyAxiom(auxRole, ofac.createProperty(role, false)); // Roman:
+																							// was
+																							// isInverse
+																							// in
+																							// place
+																							// of
+																							// false
 				/* Creatin the range assertion */
 				PropertySomeRestriction propertySomeRestrictionInv = ofac.getPropertySomeRestriction(auxRole.getPredicate(), !isInverse);
 
@@ -883,7 +897,7 @@ public class OWLAPI3Translator {
 			}
 
 			Predicate classproperty = dfac.getClassPredicate((namedclass.getIRI().toString()));
-			URIConstant c = dfac.getURIConstant(indv.asOWLNamedIndividual().getIRI().toString());
+			URIConstant c = dfac.getConstantURI(indv.asOWLNamedIndividual().getIRI().toString());
 
 			Description equivalent = null;
 			if (equivalenceMap != null)
@@ -930,8 +944,8 @@ public class OWLAPI3Translator {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
 			Predicate p = dfac.getObjectPropertyPredicate(property);
-			URIConstant c1 = dfac.getURIConstant(subject.asOWLNamedIndividual().getIRI().toString());
-			URIConstant c2 = dfac.getURIConstant(object.asOWLNamedIndividual().getIRI().toString());
+			URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
+			URIConstant c2 = dfac.getConstantURI(object.asOWLNamedIndividual().getIRI().toString());
 
 			Description equivalent = null;
 			if (equivalenceMap != null)
@@ -973,8 +987,8 @@ public class OWLAPI3Translator {
 			}
 
 			Predicate p = dfac.getDataPropertyPredicate(property);
-			URIConstant c1 = dfac.getURIConstant(subject.asOWLNamedIndividual().getIRI().toString());
-			ValueConstant c2 = dfac.getValueConstant(object.getLiteral(), type);
+			URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
+			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
 			Description equivalent = null;
 			if (equivalenceMap != null) {
@@ -1027,24 +1041,24 @@ public class OWLAPI3Translator {
 		}
 	}
 
-//	public Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
-//		switch (type) {
-//		case LITERAL:
-//			return dfac.getDataTypePredicateLiteral();
-//		case STRING:
-//			return dfac.getDataTypePredicateString();
-//		case INTEGER:
-//			return dfac.getDataTypePredicateInteger();
-//		case DECIMAL:
-//			return dfac.getDataTypePredicateDecimal();
-//		case DOUBLE:
-//			return dfac.getDataTypePredicateDouble();
-//		case DATETIME:
-//			return dfac.getDataTypePredicateDateTime();
-//		case BOOLEAN:
-//			return dfac.getDataTypePredicateBoolean();
-//		default:
-//			return dfac.getDataTypePredicateLiteral();
-//		}
-//	}
+	// public Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
+	// switch (type) {
+	// case LITERAL:
+	// return dfac.getDataTypePredicateLiteral();
+	// case STRING:
+	// return dfac.getDataTypePredicateString();
+	// case INTEGER:
+	// return dfac.getDataTypePredicateInteger();
+	// case DECIMAL:
+	// return dfac.getDataTypePredicateDecimal();
+	// case DOUBLE:
+	// return dfac.getDataTypePredicateDouble();
+	// case DATETIME:
+	// return dfac.getDataTypePredicateDateTime();
+	// case BOOLEAN:
+	// return dfac.getDataTypePredicateBoolean();
+	// default:
+	// return dfac.getDataTypePredicateLiteral();
+	// }
+	// }
 }

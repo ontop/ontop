@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -113,16 +113,16 @@ public class MappingViewManager implements ViewManager {
 				List<String> sqlVars = new Vector<String>();
 				while (ait.hasNext()) {
 					Function a = (Function) ait.next();
-					List<NewLiteral> terms = a.getTerms();
-					Iterator<NewLiteral> tit = terms.iterator();
+					List<Term> terms = a.getTerms();
+					Iterator<Term> tit = terms.iterator();
 					while (tit.hasNext()) {
-						NewLiteral t = tit.next();
+						Term t = tit.next();
 						if (t instanceof Function) {
 							Function ft = (Function) t;
-							List<NewLiteral> para = ft.getTerms();
-							Iterator<NewLiteral> pit = para.iterator();
+							List<Term> para = ft.getTerms();
+							Iterator<Term> pit = para.iterator();
 							while (pit.hasNext()) {
-								NewLiteral qt = pit.next();
+								Term qt = pit.next();
 								if (qt instanceof Variable) {
 									if (!sqlVars.contains(((Variable) qt).getName())) {
 										sqlVars.add(((Variable) qt).getName());

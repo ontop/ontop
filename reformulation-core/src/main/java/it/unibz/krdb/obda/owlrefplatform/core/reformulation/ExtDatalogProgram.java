@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -59,9 +59,9 @@ public class ExtDatalogProgram {
 		return fullDP;
 	}
 	
-	private final NewLiteral x = fac.getVariable("x");			
-	private final NewLiteral y = fac.getVariable("y");
-	private final NewLiteral w = fac.getNondistinguishedVariable(); 
+	private final Term x = fac.getVariable("x");			
+	private final Term y = fac.getVariable("y");
+	private final Term w = fac.getVariableNondistinguished(); 
 	
 	public Predicate getEntryForPredicate(Predicate p) {
 		ExtDatalogProgramDef def = extPredicateMap.get(p);
@@ -69,27 +69,27 @@ public class ExtDatalogProgram {
 			String extName = TreeWitnessRewriter.getIRI(p.getName(), "_EXT");
 			if (p.getArity() == 1) {
 				Predicate extp = fac.getClassPredicate(extName);		
-				def = new ExtDatalogProgramDef(fac.getAtom(extp, x), fac.getAtom(p, x));
+				def = new ExtDatalogProgramDef(fac.getFunction(extp, x), fac.getFunction(p, x));
 				
 				// add a rule for each of the sub-concepts
 				for (BasicClassDescription c : reasoner.getSubConcepts(p)) {
 					if (c instanceof OClass) 
-						def.add(fac.getAtom(((OClass)c).getPredicate(), x));
+						def.add(fac.getFunction(((OClass)c).getPredicate(), x));
 					else {     
 						PropertySomeRestriction some = (PropertySomeRestriction)c;
 						def.add((!some.isInverse()) ? 
-								fac.getAtom(some.getPredicate(), x, w) : fac.getAtom(some.getPredicate(), w, x)); 
+								fac.getFunction(some.getPredicate(), x, w) : fac.getFunction(some.getPredicate(), w, x)); 
 					}						
 				}
 			}
 			else  {
 				Predicate extp = fac.getObjectPropertyPredicate(extName);
-				def = new ExtDatalogProgramDef(fac.getAtom(extp, x, y), fac.getAtom(p, x, y));
+				def = new ExtDatalogProgramDef(fac.getFunction(extp, x, y), fac.getFunction(p, x, y));
 				
 				// add a rule for each of the sub-roles
 				for (Property sub: reasoner.getSubProperties(p, false))
 					def.add((!sub.isInverse()) ? 
-						fac.getAtom(sub.getPredicate(), x, y) : fac.getAtom(sub.getPredicate(), y, x)); 
+						fac.getFunction(sub.getPredicate(), x, y) : fac.getFunction(sub.getPredicate(), y, x)); 
 			}
 	
 			def.minimise();			

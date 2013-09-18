@@ -120,4 +120,12 @@ public class PredicateImpl implements Predicate {
 	public boolean isDataTypePredicate() {
 		return this instanceof DataTypePredicate;
 	}
+
+	@Override
+	public boolean isTriplePredicate() {
+		if (arity == 3 && name.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+			return true;
+		}
+		return false;
+	}
 }

@@ -8,15 +8,15 @@
  */
 package it.unibz.krdb.obda.api.io;
 
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -24,7 +24,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class PrefixRendererTest extends TestCase {
 
@@ -38,19 +38,19 @@ public class PrefixRendererTest extends TestCase {
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 		query = tfac.getDatalogProgram();
 
-		LinkedList<NewLiteral> innerterms = new LinkedList<NewLiteral>();
+		LinkedList<Term> innerterms = new LinkedList<Term>();
 		innerterms.add(tfac.getVariable("id"));
 		
-		IRIFactory fact = new IRIFactory();
+//		IRIFactory fact = new IRIFactory();
 
-		List<NewLiteral> terms = new LinkedList<NewLiteral>();
-		terms.add(tfac.getFunctionalTerm(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
+		List<Term> terms = new LinkedList<Term>();
+		terms.add(tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = tfac.getAtom(pfac.getPredicate("http://obda.org/onto.owl#Person", 1), terms);
+		Function body = tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#Person", 1), terms);
 
-		terms = new LinkedList<NewLiteral>();
+		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("id"));
-		Function head = tfac.getAtom(pfac.getPredicate("http://obda.org/predicates#q", 1), terms);
+		Function head = tfac.getFunction(pfac.getPredicate("http://obda.org/predicates#q", 1), terms);
 
 		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);

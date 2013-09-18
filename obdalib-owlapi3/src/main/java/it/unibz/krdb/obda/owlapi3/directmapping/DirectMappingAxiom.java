@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
@@ -149,11 +149,11 @@ public class DirectMappingAxiom {
 	}
 
 	public CQIE getCQ(){
-		NewLiteral sub = generateSubject((TableDefinition)table, false);
+		Term sub = generateSubject((TableDefinition)table, false);
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
-		atoms.add(df.getAtom(df.getClassPredicate(generateClassURI(table.getName())), sub));
+		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getName())), sub));
 		
 		
 		//DataType Atoms
@@ -163,25 +163,25 @@ public class DirectMappingAxiom {
 			Predicate type = typeMapper.getPredicate(att.getType());
 			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
 				Variable objV = df.getVariable(att.getName());
-				atoms.add(df.getAtom(
+				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
 			} else {
-				Function obj = df.getFunctionalTerm(type,
+				Function obj = df.getFunction(type,
 						df.getVariable(att.getName()));
-				atoms.add(df.getAtom(
+				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));
 			}
 		}
 	
 		//To construct the head, there is no static field about this predicate
-		List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
+		List<Term> headTerms = new ArrayList<Term>();
 		for(int i=0;i<table.countAttribute();i++){
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
-		Function head = df.getAtom(headPredicate, headTerms);
+		Function head = df.getFunction(headPredicate, headTerms);
 		
 		
 		return df.getCQIE(head, atoms);
@@ -189,7 +189,7 @@ public class DirectMappingAxiom {
 
 	private CQIE getRefCQ(String fk) {
 
-		NewLiteral sub = generateSubject((TableDefinition) table, true);
+		Term sub = generateSubject((TableDefinition) table, true);
 		Function atom = null;
 
 		// Object Atoms
@@ -202,21 +202,21 @@ public class DirectMappingAxiom {
 					String pkTableReference = ref.getTableReference();
 					TableDefinition tdRef = (TableDefinition) metadata
 							.getDefinition(pkTableReference);
-					NewLiteral obj = generateSubject(tdRef, true);
+					Term obj = generateSubject(tdRef, true);
 
-					atom = (df.getAtom(
+					atom = (df.getFunction(
 							df.getObjectPropertyPredicate(generateOPURI(
 									table.getName(), table.getAttributes())),
 							sub, obj));
 
 					// construct the head
-					List<NewLiteral> headTerms = new ArrayList<NewLiteral>();
+					List<Term> headTerms = new ArrayList<Term>();
 					headTerms.addAll(atom.getReferencedVariables());
 
 					Predicate headPredicate = df.getPredicate(
 							"http://obda.inf.unibz.it/quest/vocabulary#q",
 							headTerms.size());
-					Function head = df.getAtom(headPredicate, headTerms);
+					Function head = df.getFunction(headPredicate, headTerms);
 					return df.getCQIE(head, atom);
 				}
 			}
@@ -257,7 +257,7 @@ public class DirectMappingAxiom {
 	 * TODO replace URI predicate to BNode predicate for tables without PKs in
 	 * the following method after 'else'
 	 */
-	private NewLiteral generateSubject(TableDefinition td,
+	private Term generateSubject(TableDefinition td,
 			boolean ref) {
 		String tableName = "";
 		if (ref)
@@ -266,23 +266,23 @@ public class DirectMappingAxiom {
 		if (td.getPrimaryKeys().size() > 0) {
 			Predicate uritemple = df.getUriTemplatePredicate(td
 					.getPrimaryKeys().size() + 1);
-			List<NewLiteral> terms = new ArrayList<NewLiteral>();
-			terms.add(df.getValueConstant(subjectTemple(td, td.getPrimaryKeys()
+			List<Term> terms = new ArrayList<Term>();
+			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
 					.size())));
 			for (int i = 0; i < td.getPrimaryKeys().size(); i++) {
 				terms.add(df.getVariable(tableName
 						+ td.getPrimaryKeys().get(i).getName()));
 			}
-			return df.getFunctionalTerm(uritemple, terms);
+			return df.getFunction(uritemple, terms);
 
 		} else {
-			List<NewLiteral> vars = new ArrayList<NewLiteral>();
+			List<Term> vars = new ArrayList<Term>();
 			for (int i = 0; i < td.countAttribute(); i++) {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
 
 			Predicate bNode = df.getBNodeTemplatePredicate(1);
-			return df.getFunctionalTerm(bNode, vars);
+			return df.getFunction(bNode, vars);
 		}
 	}
 

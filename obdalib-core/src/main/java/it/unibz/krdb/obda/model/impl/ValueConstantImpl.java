@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -27,6 +26,8 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	private final String language;
 
 	private final Predicate.COL_TYPE type;
+	
+	private int hashcode = -1;
 
 	/**
 	 * The default constructor.
@@ -44,6 +45,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		this.value = value;
 		this.language = language;
 		this.type = type;
+		this.hashcode = toString().hashCode();
 	}
 
 	@Override
@@ -59,9 +61,8 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	}
 
 	@Override
-	public int hashCode() {
-		final String constantString = toString();
-		return constantString.hashCode();
+	public int hashCode() {		
+		return hashcode;
 	}
 
 	@Override
@@ -99,8 +100,4 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		return new HashMap<Variable, Integer>();
 	}
 
-	@Override
-	public Atom asAtom() {
-		throw new RuntimeException("Impossible to cast as atom: " + this.getClass());
-	}
 }

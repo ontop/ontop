@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -31,14 +31,14 @@ public class URIToFunctionMatcherTest extends TestCase {
 	
 	public void setUp() throws Exception {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		List<NewLiteral> variables = new LinkedList<NewLiteral>();
+		List<Term> variables = new LinkedList<Term>();
 		variables.add(fac.getVariable("x"));
 		variables.add(fac.getVariable("y"));
 		
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		Predicate p = pfac.getPredicate("http://www.obda.com/onto#individual", 2);
 		
-		NewLiteral fterm = fac.getFunctionalTerm(p, variables);
+		Term fterm = fac.getFunction(p, variables);
 		
 		Map<String,Function> termList = new HashMap<String, Function>();
 		termList.put(p.getName().toString(), (Function)fterm);
@@ -48,7 +48,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 	
 	public void testMatchURI() {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		Function matchedTerm = matcher.getPossibleFunctionalTermMatch(fac.getURIConstant("http://www.obda.com/onto#individual-mariano-rodriguez"));
+		Function matchedTerm = matcher.getPossibleFunctionalTermMatch(fac.getConstantURI("http://www.obda.com/onto#individual-mariano-rodriguez"));
 		assertTrue(matchedTerm != null);
 		assertTrue(matchedTerm.toString(), matchedTerm.getFunctionSymbol().toString().equals("http://www.obda.com/onto#individual"));
 		assertTrue(matchedTerm.toString(), matchedTerm.getTerms().get(0) instanceof ValueConstant);

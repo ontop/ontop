@@ -12,13 +12,13 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
 
 public class PropertyCharacteristicTest extends TestCase {
 	
-	private OWLConnection conn = null;
-	private OWLStatement stmt = null;
+	private QuestOWLConnection conn = null;
+	private QuestOWLStatement stmt = null;
 	private QuestOWL reasoner = null;
 	
 	private Connection jdbcconn = null;
@@ -115,7 +115,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		final File obdaFile = new File("src/test/resources/property-characteristics/noproperty.obda");
 		
 		setupReasoner(owlFile, obdaFile);
-		OWLResultSet rs = executeQuery("" +
+		QuestOWLResultSet rs = executeQuery("" +
 				"PREFIX : <http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE { ?x :knows ?y . }"
@@ -129,7 +129,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		final File obdaFile = new File("src/test/resources/property-characteristics/symmetric.obda");
 		
 		setupReasoner(owlFile, obdaFile);
-		OWLResultSet rs = executeQuery("" +
+		QuestOWLResultSet rs = executeQuery("" +
 				"PREFIX : <http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE { ?x :knows ?y . }"
@@ -153,13 +153,13 @@ public class PropertyCharacteristicTest extends TestCase {
 		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 	}
 	
-	private OWLResultSet executeQuery(String sparql) throws Exception {
+	private QuestOWLResultSet executeQuery(String sparql) throws Exception {
 			conn = reasoner.getConnection();
 			stmt = conn.createStatement();
 			return stmt.executeTuple(sparql);
 	}
 	
-	private int countResult(OWLResultSet rs, boolean stdout) throws OWLException {
+	private int countResult(QuestOWLResultSet rs, boolean stdout) throws OWLException {
 		int counter = 0;
 		while (rs.nextRow()) {
 			counter++;

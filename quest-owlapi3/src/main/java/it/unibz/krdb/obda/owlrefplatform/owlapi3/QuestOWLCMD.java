@@ -12,9 +12,6 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
@@ -35,8 +32,8 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 public class QuestOWLCMD {
 
 	private static QuestOWL reasoner;
-	private static OWLConnection conn;
-	private static OWLStatement st;
+	private static QuestOWLConnection conn;
+	private static QuestOWLStatement st;
 
 	public static void main(String args[]) {
 
@@ -74,7 +71,7 @@ public class QuestOWLCMD {
 				query.append(line + "\n");
 			}
 
-			OWLResultSet result = executeQuery(query.toString());
+			QuestOWLResultSet result = executeQuery(query.toString());
 
 			OutputStream out = null;
 			if (outputfile == null) {
@@ -107,7 +104,7 @@ public class QuestOWLCMD {
 
 	}
 
-	public static void printResult(OutputStream out, OWLResultSet result) throws Exception {
+	public static void printResult(OutputStream out, QuestOWLResultSet result) throws Exception {
 		BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out,"utf8"));
 
 		/*
@@ -141,7 +138,7 @@ public class QuestOWLCMD {
 
 	}
 
-	public static OWLResultSet executeQuery(String query) throws OWLException {
+	public static QuestOWLResultSet executeQuery(String query) throws OWLException {
 		return st.executeTuple(query);
 	}
 

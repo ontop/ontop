@@ -8,15 +8,16 @@
  */
 package inf.unibz.ontp.sesame.repository.test;
 
-import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLIndividualIterator;
+import it.unibz.krdb.obda.sesame.SesameStatementIterator;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -41,7 +42,6 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import sesameWrapper.SesameMaterializer;
-import sesameWrapper.SesameStatementIterator;
 
 public class SesameMaterializerCmdTest extends TestCase {
 	
@@ -89,6 +89,9 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			writer.close();
+		
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelTurtle() throws Exception {
@@ -114,7 +117,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 
 	public void testModelRdfXml() throws Exception {
@@ -140,7 +144,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelOntoN3() throws Exception {
@@ -165,6 +170,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			writer.close();
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testModelOntoTurtle() throws Exception {
@@ -191,7 +198,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 
 	public void testModelOntoRdfXml() throws Exception {
@@ -218,7 +226,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out != null)
 			writer.close();
-
+		if (out.exists())
+			out.delete();
 	}
 	
 	public void testOWLApiModel() throws Exception {
@@ -227,6 +236,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		System.out.println(outfile);
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+		try {
+		
 	
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -245,8 +256,15 @@ public class SesameMaterializerCmdTest extends TestCase {
 		assertEquals(3, materializer.getVocabularySize());
 		
 		materializer.disconnect();
-		if (out!=null)
+		}catch (Exception e) {throw e; }
+		finally {
+		if (out!=null) {
 			output.close();
+		}
+		if (out.exists()) {	
+			out.delete();
+		}
+		}
 	}
 	
 	public void testOWLApiModeOnto() throws Exception {
@@ -272,5 +290,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		materializer.disconnect();
 		if (out!=null)
 			output.close();
+		if (out.exists())
+			out.delete();
 	}
 }

@@ -1,0 +1,4 @@
+22:47:09.612 |-INFO  in i.u.k.o.r.t.SimpleMappingVirtualABoxTest - Elapsed time: 22218
+22:47:09.663 |-WARN  in i.u.k.o.o.owlapi3.QuestOWLFactory - You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: 'virtual'
+22:47:09.664 |-WARN  in i.u.k.o.o.owlapi3.QuestOWLFactory - To avoid this warning, set the value of 'org.obda.owlreformulationplatform.aboxmode' to 'virtual'
+22:47:27.093 |-INFO  in i.u.k.o.r.t.SimpleMappingVirtualABoxTest - Elapsed time: 17390

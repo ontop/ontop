@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -101,8 +101,8 @@ public class SemanticQueryOptimizer {
 				if (!(focusAtom.getTerms().get(0) instanceof AnonymousVariable || focusAtom.getTerms().get(1) instanceof AnonymousVariable))
 					continue;
 
-				NewLiteral t1 = focusAtom.getTerms().get(0);
-				NewLiteral t2 = focusAtom.getTerms().get(1);
+				Term t1 = focusAtom.getTerms().get(0);
+				Term t2 = focusAtom.getTerms().get(1);
 
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
@@ -163,7 +163,7 @@ public class SemanticQueryOptimizer {
 						if (included instanceof OClass) {
 							/* Case left side of inclusion is B */
 							OClass left = (OClass) included;
-							checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms());
+							checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms());
 
 						} else if (included instanceof PropertySomeRestriction) {
 							/*
@@ -173,13 +173,13 @@ public class SemanticQueryOptimizer {
 							/* Case left side of inclusion is B */
 							PropertySomeRestriction left = (PropertySomeRestriction) included;
 							if (!left.isInverse()) {
-								List<NewLiteral> terms = new LinkedList<NewLiteral>(focusAtom.getTerms());
-								terms.add(fac.getNondistinguishedVariable());
-								checkAtom = fac.getAtom(left.getPredicate(), terms);
+								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
+								terms.add(fac.getVariableNondistinguished());
+								checkAtom = fac.getFunction(left.getPredicate(), terms);
 							} else {
-								List<NewLiteral> terms = new LinkedList<NewLiteral>(focusAtom.getTerms());
-								terms.add(0, fac.getNondistinguishedVariable());
-								checkAtom = fac.getAtom(left.getPredicate(), terms);
+								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
+								terms.add(0, fac.getVariableNondistinguished());
+								checkAtom = fac.getFunction(left.getPredicate(), terms);
 							}
 						} else {
 							continue;
@@ -200,9 +200,9 @@ public class SemanticQueryOptimizer {
 							PropertySomeRestriction right = (PropertySomeRestriction) including;
 							OClass left = (OClass) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
-								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0));
+								checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms().get(0));
 							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {
-								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(1));
+								checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms().get(1));
 							} else {
 								continue;
 							}
@@ -224,18 +224,18 @@ public class SemanticQueryOptimizer {
 							PropertySomeRestriction left = (PropertySomeRestriction) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
-									checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0),
-											fac.getNondistinguishedVariable());
+									checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms().get(0),
+											fac.getVariableNondistinguished());
 								} else {
-									checkAtom = fac.getAtom(left.getPredicate(), fac.getNondistinguishedVariable(), focusAtom.getTerms()
+									checkAtom = fac.getFunction(left.getPredicate(), fac.getVariableNondistinguished(), focusAtom.getTerms()
 											.get(0));
 								}
 							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
-									checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(1),
-											fac.getNondistinguishedVariable());
+									checkAtom = fac.getFunction(left.getPredicate(), focusAtom.getTerms().get(1),
+											fac.getVariableNondistinguished());
 								} else {
-									checkAtom = fac.getAtom(left.getPredicate(), fac.getNondistinguishedVariable(), focusAtom.getTerms()
+									checkAtom = fac.getFunction(left.getPredicate(), fac.getVariableNondistinguished(), focusAtom.getTerms()
 											.get(1));
 								}
 							} else {
@@ -266,12 +266,12 @@ public class SemanticQueryOptimizer {
 					Property leftrole = (Property) roleinclusion.getSub();
 
 					if (rightrole.isInverse() == leftrole.isInverse()) {
-						checkAtom = fac.getAtom(leftrole.getPredicate(), focusAtom.getTerms());
+						checkAtom = fac.getFunction(leftrole.getPredicate(), focusAtom.getTerms());
 					} else {
-						LinkedList<NewLiteral> terms = new LinkedList<NewLiteral>();
+						LinkedList<Term> terms = new LinkedList<Term>();
 						terms.add(focusAtom.getTerms().get(1));
 						terms.add(focusAtom.getTerms().get(0));
-						checkAtom = fac.getAtom(leftrole.getPredicate(), terms);
+						checkAtom = fac.getFunction(leftrole.getPredicate(), terms);
 					}
 
 				}

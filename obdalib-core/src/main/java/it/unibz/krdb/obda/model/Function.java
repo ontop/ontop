@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This class defines a type of {@link NewLiteral} in which it denotes a mapping
+ * This class defines a type of {@link Term} in which it denotes a mapping
  * of one or more elements in a set (called the domain of the function) into a
  * unique element of another set (the range of the function).
  * <p>
@@ -29,7 +29,7 @@ import java.util.Set;
  * <p>
  * are all well-formed function expressions.
  */
-public interface Function extends NewLiteral {
+public interface Function extends Term {
 
 	/**
 	 * Get a list of terms (or arguments) that are contained in the function
@@ -37,7 +37,7 @@ public interface Function extends NewLiteral {
 	 * 
 	 * @return a list of terms.
 	 */
-	public List<NewLiteral> getTerms();
+	public List<Term> getTerms();
 
 	/**
 	 * Get the function symbol.
@@ -61,15 +61,15 @@ public interface Function extends NewLiteral {
 	 */
 	public int getArity();
 
-	public int getFirstOcurrance(NewLiteral t, int i);
+	public int getFirstOcurrance(Term t, int i);
 
-	public NewLiteral getTerm(int index);
+	public Term getTerm(int index);
 
-	public void setTerm(int index, NewLiteral term);
+	public void setTerm(int index, Term term);
 
 	public Set<Variable> getVariables();
 
-	public void updateTerms(List<NewLiteral> literals);
+	public void updateTerms(List<Term> literals);
 
 	public void setPredicate(Predicate p);
 

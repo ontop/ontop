@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -95,8 +95,8 @@ public class PositiveInclusionApplicator {
 			if (pred.getArity() == 1 && inc_predicate.getArity() == 1) {
 				return true;
 			} else if (pred.getArity() == 2 && inc_predicate.getArity() == 2) {
-				NewLiteral t2 = atom.getTerms().get(1);
-				NewLiteral t1 = atom.getTerms().get(0);
+				Term t2 = atom.getTerms().get(1);
+				Term t1 = atom.getTerms().get(0);
 				ClassDescription including = ((SubClassAxiomImpl) pi).getSuper();
 				if (including instanceof PropertySomeRestrictionImpl) {
 					PropertySomeRestrictionImpl imp = (PropertySomeRestrictionImpl) including;
@@ -286,10 +286,10 @@ public class PositiveInclusionApplicator {
 						Function a1 = (Function) body.get(i);
 						Function a2 = (Function) body.get(j);
 
-						NewLiteral ta10 = a1.getTerms().get(0);
-						NewLiteral ta11 = a1.getTerms().get(1);
-						NewLiteral ta20 = a2.getTerms().get(0);
-						NewLiteral ta21 = a2.getTerms().get(1);
+						Term ta10 = a1.getTerms().get(0);
+						Term ta11 = a1.getTerms().get(1);
+						Term ta20 = a2.getTerms().get(0);
+						Term ta21 = a2.getTerms().get(1);
 
 						boolean unify = false;
 
@@ -482,9 +482,9 @@ public class PositiveInclusionApplicator {
 
 					/* This is the simplest case A(x) generates B(x) */
 
-					List<NewLiteral> terms = a.getTerms();
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
-					Iterator<NewLiteral> tit = terms.iterator();
+					List<Term> terms = a.getTerms();
+					LinkedList<Term> v = new LinkedList<Term>();
+					Iterator<Term> tit = terms.iterator();
 					while (tit.hasNext()) {
 						v.add(tit.next().clone());
 					}
@@ -497,7 +497,7 @@ public class PositiveInclusionApplicator {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 
-					Function newatom = termFactory.getAtom(predicate.clone(), v);
+					Function newatom = termFactory.getFunction(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
@@ -507,12 +507,12 @@ public class PositiveInclusionApplicator {
 					 * Generating a role atom from a concept atom A(x) genrates
 					 * A(x,#)
 					 */
-					NewLiteral t = a.getTerms().get(0);
-					NewLiteral anonym = termFactory.getNondistinguishedVariable();
+					Term t = a.getTerms().get(0);
+					Term anonym = termFactory.getVariableNondistinguished();
 					Function newatom = null;
 
 					if (((PropertySomeRestrictionImpl) lefthandside).isInverse()) {
-						LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, anonym);
 						v.add(1, t);
 
@@ -523,9 +523,9 @@ public class PositiveInclusionApplicator {
 						} else if (lefthandside instanceof PropertySomeRestriction) {
 							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
-						newatom = termFactory.getAtom(predicate.clone(), v);
+						newatom = termFactory.getFunction(predicate.clone(), v);
 					} else {
-						LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, t);
 						v.add(1, anonym);
 
@@ -536,7 +536,7 @@ public class PositiveInclusionApplicator {
 						} else if (lefthandside instanceof PropertySomeRestriction) {
 							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
-						newatom = termFactory.getAtom(predicate.clone(), v);
+						newatom = termFactory.getFunction(predicate.clone(), v);
 					}
 
 					body.set(atomindex, newatom);
@@ -557,8 +557,8 @@ public class PositiveInclusionApplicator {
 			ClassDescription lefthandside = inc.getSub();
 			PropertySomeRestriction righthandside = (PropertySomeRestriction) inc.getSuper();
 
-			NewLiteral t1 = a.getTerms().get(0);
-			NewLiteral t2 = a.getTerms().get(1);
+			Term t1 = a.getTerms().get(0);
+			Term t2 = a.getTerms().get(1);
 
 			Function newatom = null;
 
@@ -567,7 +567,7 @@ public class PositiveInclusionApplicator {
 				/* These are the cases that go from a P(x,#) to a A(x) */
 
 				if (lefthandside instanceof ClassImpl) {
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 
 					Predicate predicate = null;
@@ -577,10 +577,10 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getAtom(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (((PropertySomeRestriction) lefthandside).isInverse()) {
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
 
@@ -591,10 +591,10 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getAtom(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (!((PropertySomeRestriction) lefthandside).isInverse()) {
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
 
@@ -605,7 +605,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getAtom(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				}
 			} else if (t1 instanceof AnonymousVariable && righthandside.isInverse()) {
@@ -613,7 +613,7 @@ public class PositiveInclusionApplicator {
 				/* These cases go from R(#,x) to A(x), S(x,#) or S(#,x) */
 
 				if (lefthandside instanceof ClassImpl) {
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 
 					Predicate predicate = null;
@@ -623,10 +623,10 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getAtom(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (((PropertySomeRestriction) lefthandside).isInverse()) {
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
 
@@ -637,10 +637,10 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getAtom(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				} else if (!((PropertySomeRestriction) lefthandside).isInverse()) {
-					LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
 
@@ -651,7 +651,7 @@ public class PositiveInclusionApplicator {
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
-					newatom = termFactory.getAtom(predicate, v);
+					newatom = termFactory.getFunction(predicate, v);
 
 				}
 			}
@@ -671,22 +671,22 @@ public class PositiveInclusionApplicator {
 
 			Function newatom = null;
 
-			NewLiteral t1 = a.getTerms().get(0);
-			NewLiteral t2 = a.getTerms().get(1);
+			Term t1 = a.getTerms().get(0);
+			Term t2 = a.getTerms().get(1);
 
 			/* All these cases go from R(x,y) to S(x,y) */
 
 			if ((righthandside.isInverse() && lefthandside.isInverse()) || (!righthandside.isInverse() && !lefthandside.isInverse())) {
-				LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t1);
 				v.add(1, t2);
-				newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
+				newatom = termFactory.getFunction(lefthandside.getPredicate(), v);
 
 			} else {
-				LinkedList<NewLiteral> v = new LinkedList<NewLiteral>();
+				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t2);
 				v.add(1, t1);
-				newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
+				newatom = termFactory.getFunction(lefthandside.getPredicate(), v);
 
 			}
 

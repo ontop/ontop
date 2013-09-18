@@ -21,12 +21,12 @@ public class Db2ConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:db2://10.7.20.39:50000/dbconst";
+		return "jdbc:db2://10.7.20.39:50001/dbconst";
 	}
 
 	@Override
 	protected String getConnectionUsername() {
-		return "db2inst1";
+		return "db2inst2";
 	}
 
 	@Override

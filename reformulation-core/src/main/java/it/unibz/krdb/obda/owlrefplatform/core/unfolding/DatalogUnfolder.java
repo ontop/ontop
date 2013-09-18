@@ -14,7 +14,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogT
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -130,7 +131,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (currentpred instanceof BooleanOperationPredicate)
 			return predicates;
 		else if (currentpred instanceof AlgebraOperatorPredicate) {
-			for (NewLiteral innerTerm : atom.getTerms()) {
+			for (Term innerTerm : atom.getTerms()) {
 				if (!(innerTerm instanceof Function))
 					continue;
 				predicates.addAll(getPredicates((Function) innerTerm));
@@ -201,7 +202,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
-		for (CQIE query : workingSet) {
+		for (CQIE query : workingSet) {	
 			DatalogNormalizer.enforceEqualities(query, false);
 		}
 
@@ -211,9 +212,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		for (CQIE query : workingSet) {
 			result.add(query);
 		}
-
+		
+		
 		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
-
+		
+		/**
+		 * We need to enforce equality again, because at this point it is 
+		 *  possible that there is still some EQ(...) in the Program resultdp
+		 * 
+		 */
+		DatalogNormalizer.enforceEqualities(resultdp, false);
+		
 		return resultdp;
 	}
 
@@ -614,8 +623,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List<Function> body = currentQuery.getBody();
 			body.remove(atomIdx);
 			for (int subtermidx = function.getTerms().size() - 1; subtermidx >= 0; subtermidx--) {
-				NewLiteral atom = function.getTerm(subtermidx);
-				body.add(atomIdx, atom.asAtom());
+				Term atom = function.getTerm(subtermidx);
+				body.add(atomIdx, (Function)atom);
 			}
 			atomIdx += -1;
 		}
@@ -1038,10 +1047,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		// This method doesn't support nested functional terms
 		CQIE freshRule = rule.clone();
 		Function head = freshRule.getHead();
-		List<NewLiteral> headTerms = head.getTerms();
+		List<Term> headTerms = head.getTerms();
 		for (int i = 0; i < headTerms.size(); i++) {
-			NewLiteral term = headTerms.get(i);
-			NewLiteral newTerm = getFreshTerm(term, suffix);
+			Term term = headTerms.get(i);
+			Term newTerm = getFreshTerm(term, suffix);
 			if (newTerm != null)
 				headTerms.set(i, newTerm);
 		}
@@ -1049,10 +1058,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Function> body = freshRule.getBody();
 		for (Function atom : body) {
 
-			List<NewLiteral> atomTerms = ((Function) atom).getTerms();
+			List<Term> atomTerms = ((Function) atom).getTerms();
 			for (int i = 0; i < atomTerms.size(); i++) {
-				NewLiteral term = atomTerms.get(i);
-				NewLiteral newTerm = getFreshTerm(term, suffix);
+				Term term = atomTerms.get(i);
+				Term newTerm = getFreshTerm(term, suffix);
 				if (newTerm != null)
 					atomTerms.set(i, newTerm);
 			}
@@ -1061,21 +1070,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	}
 
-	public static NewLiteral getFreshTerm(NewLiteral term, int suffix) {
-		NewLiteral newTerm = null;
+	public static Term getFreshTerm(Term term, int suffix) {
+		Term newTerm = null;
 		if (term instanceof VariableImpl) {
 			VariableImpl variable = (VariableImpl) term;
 			newTerm = termFactory.getVariable(variable.getName() + "_" + suffix);
 		} else if (term instanceof Function) {
 			Function functionalTerm = (Function) term;
-			List<NewLiteral> innerTerms = functionalTerm.getTerms();
-			List<NewLiteral> newInnerTerms = new LinkedList<NewLiteral>();
+			List<Term> innerTerms = functionalTerm.getTerms();
+			List<Term> newInnerTerms = new LinkedList<Term>();
 			for (int j = 0; j < innerTerms.size(); j++) {
-				NewLiteral innerTerm = innerTerms.get(j);
+				Term innerTerm = innerTerms.get(j);
 				newInnerTerms.add(getFreshTerm(innerTerm, suffix));
 			}
 			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-			Function newFunctionalTerm = (Function) termFactory.getFunctionalTerm(newFunctionSymbol, newInnerTerms);
+			Function newFunctionalTerm = (Function) termFactory.getFunction(newFunctionSymbol, newInnerTerms);
 			newTerm = newFunctionalTerm;
 		} else if (term instanceof Constant) {
 			newTerm = term.clone();
@@ -1120,7 +1129,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			Stack<Integer> termidx = new Stack<Integer>();
 
 			List<Function> currentTerms = rule.getBody();
-			List<NewLiteral> tempList = new LinkedList<NewLiteral>();
+			List<Term> tempList = new LinkedList<Term>();
 			for (Function a : currentTerms) {
 				tempList.add(a);
 			}
@@ -1176,7 +1185,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 
-	private List<CQIE> computePartialEvaluation(List<NewLiteral> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
+	private List<CQIE> computePartialEvaluation(List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
 			boolean parentIsLeftJoin) {
 
 		int nonBooleanAtomCounter = 0;
@@ -1237,6 +1246,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		return new LinkedList<CQIE>();
 	}
+	
+	private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
 
 	/***
 	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
@@ -1297,28 +1308,28 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// has no resolvent rule, and marks the end points to compute
 			// partial evaluations
 
-			return new LinkedList<CQIE>();
+			return emptyList;
 		}
 		/*
 		 * This is a real data atom, it either generates something, or null
 		 * (empty)
 		 */
 
-		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(focusAtom.getFunctionSymbol());
+		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
 
 		/*
 		 * If there are none, the atom is logically empty, careful, LEFT JOIN
 		 * alert!
 		 */
 
-		List<CQIE> result;
+		List<CQIE> result = null;
 		if (rulesDefiningTheAtom == null) {
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else {
 				CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
-				result = new ArrayList<CQIE>(1);
-				result.add(0, newRuleWithNullBindings);
+				result = new LinkedList<CQIE>();
+				result.add(newRuleWithNullBindings);
 			}
 		} else {
 			// Note, in this step result may get new CQIEs inside
@@ -1331,13 +1342,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// than one rull, we
 			// must reutrn an empty result i ndicating its already a partial
 			// evaluation.
-			result = new ArrayList<CQIE>();
+			result = emptyList;
 		} else if (result.size() == 0) {
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else {
 				CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
-				result = new ArrayList<CQIE>(4);
+				result = new LinkedList<CQIE>();
 				result.add(newRuleWithNullBindings);
 			}
 		}
@@ -1399,8 +1410,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		Function foldedJoinAtom = null;
 
 		while (dataAtomsList.size() > 1) {
-			foldedJoinAtom = termFactory.getFunctionalTerm(OBDAVocabulary.SPARQL_JOIN, (NewLiteral) dataAtomsList.remove(0),
-					(NewLiteral) dataAtomsList.remove(0));
+			foldedJoinAtom = termFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, (Term) dataAtomsList.remove(0),
+					(Term) dataAtomsList.remove(0));
 			dataAtomsList.add(0, foldedJoinAtom);
 		}
 
@@ -1442,7 +1453,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
 
 		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
-		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
+//		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
+		List<CQIE> result = new LinkedList<CQIE>();
 
 		int rulesGeneratedSoFar = 0;
 		for (CQIE candidateRule : candidateMatches) {
@@ -1451,7 +1463,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Map<Variable, NewLiteral> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
+			Map<Variable, Term> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1500,6 +1512,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 
 			int newatomcount = freshRule.getBody().size();
+			
 			joinEliminationPKBased(termidx, newatomcount, partialEvalution);
 
 			/***
@@ -1530,7 +1543,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
-		log.debug("Empty evaluation - Data Atom {}", focusLiteral);
+		log.debug("Empty evaluation - Data Function {}", focusLiteral);
 
 		CQIE freshRule = originalRuleWithLeftJoin.clone();
 		// List<Function> body = freshRule.getBody();
@@ -1579,7 +1592,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		}// end for rule body
 		freshRule.updateBody(newbody);
-		HashMap<Variable, NewLiteral> unifier = new HashMap<Variable, NewLiteral>();
+		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
 
 		OBDAVocabulary myNull = new OBDAVocabulary();
 		for (Variable var : variablesArg2) {
@@ -1621,6 +1634,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List innerAtoms = getNestedList(termidx, partialEvalution);
 
 		Function currentAtom = getTerm(termidx, partialEvalution);
+		
+		
+		if (currentAtom == null) {
+			/*
+			 * Case where the resolution atemt didn't add any atoms, the body was null.
+			 */
+			
+			return;
+		}
 
 		int newatomsfirstIndex = termidx.peek();
 		if (newatomsfirstIndex <= 0) {
@@ -1645,7 +1667,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 			Function replacement = null;
 
-			Map<Variable, NewLiteral> mgu1 = null;
+			Map<Variable, Term> mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
 				Function tempatom = (Function) innerAtoms.get(idx2);
 
@@ -1795,7 +1817,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/*
 			 * Its a nested term
 			 */
-			NewLiteral nestedTerm = null;
+			Term nestedTerm = null;
 			for (int y = 0; y < termidx.size() - 1; y++) {
 				int i = termidx.get(y);
 				if (nestedTerm == null)
@@ -1823,7 +1845,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List innerTerms = getNestedList(stack, rule);
 			atom = (Function) innerTerms.get((Integer) stack.peek());
 		} else {
-			atom = (Function) rule.getBody().get((Integer) termidx.peek());
+			List<Function> body = rule.getBody();
+			Integer peek = (Integer) termidx.peek();
+			if (body.size() == 0 || peek >= body.size()) 
+				return null;
+			
+			atom = (Function) body.get(peek);
 		}
 		return atom;
 	}

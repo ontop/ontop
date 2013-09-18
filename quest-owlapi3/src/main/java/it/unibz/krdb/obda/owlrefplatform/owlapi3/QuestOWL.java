@@ -13,12 +13,8 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -106,7 +102,7 @@ import org.slf4j.LoggerFactory;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQueryReasoner {
+public class QuestOWL extends OWLReasonerBase {
 
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -144,7 +140,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 	/* The merge and tranlsation of all loaded ontologies */
 	private Ontology translatedOntologyMerge;
 
-	private OBDAModel obdaModel;
+	private OBDAModel obdaModel = null;
 
 	private QuestPreferences preferences = new QuestPreferences();
 
@@ -173,7 +169,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 		man = rootOntology.getOWLOntologyManager();
 
-		this.obdaModel = obdaModel;
+		if (obdaModel != null)
+			this.obdaModel = (OBDAModel)obdaModel.clone();
+		
 		this.preferences.putAll(preferences);
 
 		prepareReasoner();
@@ -193,8 +191,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		this.preferences = preferences;
 	}
 
-	@Override
-	public OWLStatement getStatement() throws OWLException {
+	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new OWLReasonerRuntimeException(
 					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) {
@@ -342,13 +339,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
-	@Override
-	public void loadOBDAModel(OBDAModel model) {
-		obdaModel = (OBDAModel) model.clone();
-	}
 
-	@Override
-	public OWLConnection getConnection() throws OBDAException {
+
+	public QuestOWLConnection getConnection() throws OBDAException {
 		return owlconn;
 	}
 

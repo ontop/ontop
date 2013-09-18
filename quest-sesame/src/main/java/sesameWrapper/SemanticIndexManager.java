@@ -93,6 +93,10 @@ public class SemanticIndexManager {
 		log.debug("Semantic Index repository has been setup.");
 
 	}
+	
+	public void dropRepository() throws SQLException {
+		dataRepository.dropDBSchema(conn);
+	}
 
 	public void updateMetadata() throws SQLException {
 		dataRepository.insertMetadata(conn);

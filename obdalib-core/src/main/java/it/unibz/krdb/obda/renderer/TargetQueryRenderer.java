@@ -8,12 +8,11 @@
  */
 package it.unibz.krdb.obda.renderer;
 
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
@@ -22,6 +21,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public class TargetQueryRenderer {
 			String subject, predicate, object = "";
 			String originalString = atom.getFunctionSymbol().toString();
 			if (isUnary(atom)) {
-				NewLiteral subjectTerm = atom.getTerm(0);
+				Term subjectTerm = atom.getTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = "a";
 				object = getAbbreviatedName(originalString, prefixManager, false);
@@ -55,13 +55,13 @@ public class TargetQueryRenderer {
 					object = "<" + object + ">";
 				}
 			} else {
-				NewLiteral subjectTerm = atom.getTerm(0);
+				Term subjectTerm = atom.getTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = getAbbreviatedName(originalString, prefixManager, false);
 				if (originalString.equals(predicate)) {
 					predicate = "<" + predicate + ">";
 				}
-				NewLiteral objectTerm = atom.getTerm(1);
+				Term objectTerm = atom.getTerm(1);
 				object = getDisplayName(objectTerm, prefixManager);
 			}
 			turtleWriter.put(subject, predicate, object);
@@ -96,34 +96,13 @@ public class TargetQueryRenderer {
 		for (String prefix: currentMap.keySet()) {
 			prefManClone.addPrefix(prefix, pm.getURIDefinition(prefix));
 		}
-		boolean containsXSDPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_XSD);
-		boolean containsRDFPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDF);
-		boolean containsRDFSPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_RDFS);
-		boolean containsOWLPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_OWL);
-		boolean containsQUESTPrefix = prefManClone.contains(OBDAVocabulary.PREFIX_QUEST);
-
-		if (!containsXSDPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
-		}
-		if (!containsRDFPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDF, OBDAVocabulary.NS_RDF);
-		}
-		if (!containsRDFSPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
-		}
-		if (!containsOWLPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
-		}
-		if (!containsQUESTPrefix) {
-			prefManClone.addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
-		}
 		return prefManClone.getShortForm(uri, insideQuotes);
 	}
 
 	/**
 	 * Prints the text representation of different terms.
 	 */
-	private static String getDisplayName(NewLiteral term, PrefixManager prefixManager) {
+	private static String getDisplayName(Term term, PrefixManager prefixManager) {
 		StringBuilder sb = new StringBuilder();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
@@ -136,13 +115,13 @@ public class TargetQueryRenderer {
 					int arity = function.getArity();
 					if (arity == 1) {
 						// without the language tag
-						NewLiteral var = function.getTerms().get(0);
+						Term var = function.getTerms().get(0);
 						sb.append(getDisplayName(var, prefixManager));
 						sb.append("^^rdfs:Literal");
 					} else if (arity == 2) {
 						// with the language tag
-						NewLiteral var = function.getTerms().get(0);
-						NewLiteral lang = function.getTerms().get(1);
+						Term var = function.getTerms().get(0);
+						Term lang = function.getTerms().get(1);
 						sb.append(getDisplayName(var, prefixManager));
 						sb.append("@");
 						if (lang instanceof ValueConstant) {
@@ -154,7 +133,7 @@ public class TargetQueryRenderer {
 						}
 					}
 				} else { // for the other data types
-					NewLiteral var = function.getTerms().get(0);
+					Term var = function.getTerms().get(0);
 					sb.append(getDisplayName(var, prefixManager));
 					sb.append("^^");
 					sb.append(fname);
@@ -165,7 +144,7 @@ public class TargetQueryRenderer {
 				// Utilize the String.format() method so we replaced placeholders '{}' with '%s'
 				String templateFormat = template.replace("{}", "%s");
 				List<String> varNames = new ArrayList<String>();
-				for (NewLiteral innerTerm : function.getTerms()) {
+				for (Term innerTerm : function.getTerms()) {
 					if (innerTerm instanceof Variable) {
 						varNames.add(getDisplayName(innerTerm, prefixManager));
 					}
@@ -184,7 +163,7 @@ public class TargetQueryRenderer {
 				sb.append(fname);
 				sb.append("(");
 				boolean separator = false;
-				for (NewLiteral innerTerm : function.getTerms()) {
+				for (Term innerTerm : function.getTerms()) {
 					if (separator) {
 						sb.append(", ");
 					}

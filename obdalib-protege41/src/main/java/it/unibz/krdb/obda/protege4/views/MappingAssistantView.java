@@ -8,6 +8,13 @@
  */
 package it.unibz.krdb.obda.protege4.views;
 
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
+import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.panels.DatasourceSelector;
+import it.unibz.krdb.obda.protege4.panels.MappingAssistantPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -19,15 +26,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
-import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
-import it.unibz.krdb.obda.protege4.panels.MappingAssistantPanel;
-
-import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MappingAssistantView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
@@ -37,7 +38,7 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 
 	private OBDAModelManager apic;
 
-	private static final Logger log = Logger.getLogger(SQLQueryInterfaceView.class);
+	private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
 	
 	@Override
 	protected void disposeOWLView() {

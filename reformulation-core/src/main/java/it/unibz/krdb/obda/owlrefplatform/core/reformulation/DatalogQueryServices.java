@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
@@ -43,9 +43,9 @@ public class DatalogQueryServices {
 	// to be taken from it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder
 	
 	private static Function getFreshAtom(Function a, String suffix) {
-		List<NewLiteral> termscopy = new ArrayList<NewLiteral>(a.getArity());
+		List<Term> termscopy = new ArrayList<Term>(a.getArity());
 		
-		for (NewLiteral t : a.getTerms()) {
+		for (Term t : a.getTerms()) {
 			if ((t instanceof Variable) && !(t instanceof AnonymousVariable)) {
 				Variable v = (Variable)t;
 				termscopy.add(fac.getVariable(v.getName() + suffix));
@@ -53,7 +53,7 @@ public class DatalogQueryServices {
 			else
 				termscopy.add(t.clone());
 		}
-		return fac.getAtom(a.getPredicate(), termscopy);
+		return fac.getFunction(a.getPredicate(), termscopy);
 		
 	}
 	
@@ -102,7 +102,7 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Map<Variable, NewLiteral> mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
+					Map<Variable, Term> mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
 																	query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
@@ -162,9 +162,9 @@ public class DatalogQueryServices {
 			while (i.hasNext()) { 
 				Function a = i.next();
 				if (a.getPredicate().equals(OBDAVocabulary.EQ)) {
-					Map<Variable, NewLiteral> substituition = new HashMap<Variable, NewLiteral>(1);
-					NewLiteral t0 = a.getTerm(0); 
-					NewLiteral t1 = a.getTerm(1); 					
+					Map<Variable, Term> substituition = new HashMap<Variable, Term>(1);
+					Term t0 = a.getTerm(0); 
+					Term t1 = a.getTerm(1); 					
 					if (t1 instanceof Variable)
 						substituition.put((Variable)t1, t0);
 					else if (t0 instanceof Variable)
@@ -197,23 +197,23 @@ public class DatalogQueryServices {
 	// replace all existentially quantified variables that occur once with _
 	//
 	
-	private static void makeSingleOccurrencesAnonymous(List<Function> body, List<NewLiteral> freeVariables) {
-		Map<NewLiteral, Function> occurrences = new HashMap<NewLiteral, Function>();
+	private static void makeSingleOccurrencesAnonymous(List<Function> body, List<Term> freeVariables) {
+		Map<Term, Function> occurrences = new HashMap<Term, Function>();
 		for (Function a : body)
-			for (NewLiteral t : a.getTerms())
+			for (Term t : a.getTerms())
 				if ((t instanceof Variable) && !freeVariables.contains(t))
 					if (occurrences.containsKey(t))
 						occurrences.put(t, null);
 					else
 						occurrences.put(t, a);
 		
-		for (Map.Entry<NewLiteral, Function> e : occurrences.entrySet()) 
+		for (Map.Entry<Term, Function> e : occurrences.entrySet()) 
 			if (e.getValue() != null) {
-				ListIterator<NewLiteral> i = e.getValue().getTerms().listIterator();
+				ListIterator<Term> i = e.getValue().getTerms().listIterator();
 				while (i.hasNext()) {
-					NewLiteral t = i.next();
+					Term t = i.next();
 					if (t.equals(e.getKey()))
-						i.set(fac.getNondistinguishedVariable());
+						i.set(fac.getVariableNondistinguished());
 				}
 //				((PredicateAtomImpl)e.getValue()).listChanged();
 		}

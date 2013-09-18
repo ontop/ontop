@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.model;
 
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class OBDALibConstants {
 	
@@ -19,7 +19,8 @@ public class OBDALibConstants {
 	public static final String OBDA_QUERY_PREDICATE = "q";
 	
 	public static final String QUERY_HEAD = OBDA_URI_MAPPING_PREDICATE + OBDA_QUERY_PREDICATE;
-	public static final IRI QUERY_HEAD_URI = OBDADataFactoryImpl.getIRI(QUERY_HEAD);
+	//public static final IRI QUERY_HEAD_URI = OBDADataFactoryImpl.getIRI(QUERY_HEAD);
+
 	
 	public static final String DATALOG_IMPLY_SYMBOL = ":-";
 }
