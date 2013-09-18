@@ -670,7 +670,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			//if the metadata was not already set
 			if (metadata == null) {
 
-				metadata = JDBCConnectionManager.getMetaData(localConnection);
+				//metadata = JDBCConnectionManager.getMetaData(localConnection);
+				
+				//This is the NEW way of obtaining part of the metadata (the schema.table names) by
+				//parsing the mappings
+				MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getTables());
+				mParser.addViewDefs(metadata);
 			}
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory

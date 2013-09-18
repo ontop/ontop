@@ -61,43 +61,19 @@ public class MultiSchemaTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/simplemapping.owl";
-	final String obdafile = "src/test/resources/test/simplemapping.obda";
+	final String owlfile = "src/test/resources/test/oracle.owl";
+	final String obdafile = "src/test/resources/test/oracle.obda";
 
 	@Override
 	public void setUp() throws Exception {
 		
 		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
-
-		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
-
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 		// Loading the OBDA data
+		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
@@ -105,33 +81,6 @@ public class MultiSchemaTest extends TestCase {
 		
 	}
 
-	@Override
-	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
-	}
 
 	private void runTests(Properties p) throws Exception {
 
@@ -147,30 +96,19 @@ public class MultiSchemaTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
+		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT ?x WHERE { ?x a :Country }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
 			
-			/*
-			 * Enable this if you want to test performance, it will run several cycles
-			 */
-//			long start = System.currentTimeMillis();
-//			for (int i = 0; i < 3000; i++) {
-//				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
-//			}
-//			long end = System.currentTimeMillis();
-//			long elapsed = end-start;
-//			log.info("Elapsed time: {}", elapsed);
+
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs.getOWLLiteral("z");
+/*
 			assertEquals("<uri1>", ind1.toString());
 			assertEquals("<uri1>", ind2.toString());
 			assertEquals("\"value1\"", val.toString());
-			
+	*/		
 
 		} catch (Exception e) {
 			throw e;
@@ -185,26 +123,12 @@ public class MultiSchemaTest extends TestCase {
 		}
 	}
 
-	public void testViEqSig() throws Exception {
+	public void testMultiSchema() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
+	
 		runTests(p);
 	}
 	
-	public void testClassicEqSig() throws Exception {
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-
-		runTests(p);
-	}
-
-
 }
