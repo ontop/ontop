@@ -23,7 +23,7 @@ import org.jgrapht.graph.DefaultEdge;
  */
 
 
-public class TBoxGraphImpl implements TBoxGraph{
+public class GraphBuilderImpl implements GraphBuilder{
 	
 
 	private final GraphImpl graph = new  GraphImpl(DefaultEdge.class);
@@ -33,7 +33,7 @@ public class TBoxGraphImpl implements TBoxGraph{
 	/**
 	 * Build the graph from the TBox axioms
 	 */
-	public TBoxGraphImpl (Ontology ontology){
+	public GraphBuilderImpl (Ontology ontology){
 		
 		for (Predicate conceptp : ontology.getConcepts()) {
 			ClassDescription concept = descFactory.createClass(conceptp);
@@ -119,7 +119,7 @@ public class TBoxGraphImpl implements TBoxGraph{
 	}
 
 	//we build a graph starting from assertions of a TBox
-	public TBoxGraphImpl (Collection<Axiom> assertions, Set<Predicate> concepts, Set<Predicate> roles){
+	public GraphBuilderImpl (Collection<Axiom> assertions, Set<Predicate> concepts, Set<Predicate> roles){
 		for (Predicate conceptp : concepts) {
 			ClassDescription concept = descFactory.createClass(conceptp);
 			graph.addVertex(concept);

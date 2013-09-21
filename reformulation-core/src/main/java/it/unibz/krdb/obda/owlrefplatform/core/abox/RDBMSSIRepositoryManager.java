@@ -33,20 +33,15 @@ import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
-
-
-
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDescriptionDAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.RuleEmptynessIndex;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -73,7 +68,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -638,7 +632,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		
 		//build the namedDag (or pureIsa)
-		NamedDescriptionDAGImpl transform = new NamedDescriptionDAGImpl(dag);
+		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
 		
 		pureIsa = transform.getDAG();
 		

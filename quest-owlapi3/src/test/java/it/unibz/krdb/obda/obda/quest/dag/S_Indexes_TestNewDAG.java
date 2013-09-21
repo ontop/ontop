@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDescriptionDAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -79,7 +79,7 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		NamedDescriptionDAGImpl transform = new NamedDescriptionDAGImpl(dag);
+		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
 		DAGImpl namedDag= transform.getDAG();
 
 		

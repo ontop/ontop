@@ -49,18 +49,18 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 	public TBoxReasonerImpl(Ontology ontology, boolean named){
 		
 		//generate Graph
-		TBoxGraphImpl change= new TBoxGraphImpl(ontology);
+		GraphBuilderImpl change= new GraphBuilderImpl(ontology);
 		
 		GraphImpl graph = (GraphImpl) change.getGraph();
 		
 		//generate DAG
-		GraphDAGImpl change2 = new GraphDAGImpl(graph);
+		DAGBuilderImpl change2 = new DAGBuilderImpl (graph);
 		
 		dag=(DAGImpl) change2.getDAG();
 		
 		if(named) //generate namedDAG
 		{
-			NamedDescriptionDAGImpl transform = new NamedDescriptionDAGImpl(dag);
+			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
 			dag= transform.getDAG();	
 		}
 		
@@ -827,6 +827,24 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 
 	public  void getChainDAG() {
 		if(dag!= null){
+			//move everything to a graph that admits cycles
+			GraphImpl modifiedGraph= new GraphImpl( DefaultEdge.class);
+			
+			
+			//clone all the vertex and edges from dag
+			
+			for (Description v: dag.vertexSet()){
+				modifiedGraph.addVertex(v);
+				
+			}
+			 for (DefaultEdge e : dag.edgeSet()) {
+		            Description s = dag.getEdgeSource(e);
+		            Description t = dag.getEdgeTarget(e);
+		            
+		           
+		            modifiedGraph.addEdge(s, t, e);
+		        }
+			 
 		Collection<Description> nodes = new HashSet<Description>(dag.vertexSet());
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<Description> processedNodes = new HashSet<Description>();
@@ -853,8 +871,8 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				Description child=dag.getReplacements().get(firstChild);
 				if(child==null)
 					child=firstChild;
-				if(!child.equals(existsNode))
-				dag.addEdge(child, existsInvNode);
+				if(!child.equals(existsInvNode))
+				modifiedGraph.addEdge(child, existsInvNode);
 				
 //				}
 			}
@@ -866,7 +884,7 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				if(child==null)
 					child=firstChild;
 				if(!child.equals(existsNode))
-				dag.addEdge(child, existsNode);
+				modifiedGraph.addEdge(child, existsNode);
 				
 //				}
 			}
@@ -880,7 +898,7 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				if(parent==null)
 					parent=firstParent;
 				if(!parent.equals(existsInvNode))
-				dag.addEdge( existsInvNode, parent);
+				modifiedGraph.addEdge( existsInvNode, parent);
 				
 //				}
 			}
@@ -891,7 +909,7 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				if(parent==null)
 					parent=firstParent;
 				if(!parent.equals(existsInvNode))
-				dag.addEdge( existsNode, parent);
+				modifiedGraph.addEdge( existsNode, parent);
 				
 //				}
 			}
@@ -901,9 +919,10 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 		}
 
 		/* Collapsing the cycles */
-
-		dag.eliminateCycles();
-		dag.eliminateRedundantEdges();
+		DAGBuilderImpl change2 = new DAGBuilderImpl (modifiedGraph, dag.getMapEquivalences(), dag.getReplacements());
+		
+		dag=(DAGImpl) change2.getDAG();
+		
 		
 		}
 		else //if graph
@@ -965,12 +984,14 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 				processedNodes.add(existsNode);
 			}
 
+			
 			/* Collapsing the cycles */
-
-//			dag.clean();
+			DAGBuilderImpl change2 = new DAGBuilderImpl (graph);
+			
+			dag=(DAGImpl) change2.getDAG();
 			
 		}
-			
+		
 	}
 	
 

@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -84,7 +84,7 @@ public class S_TestTransitiveReduction extends TestCase {
 
 			GraphImpl graph1= S_InputOWL.createGraph(fileInput);
 
-			GraphDAGImpl change2 = new GraphDAGImpl(graph1);
+			DAGBuilderImpl change2 = new DAGBuilderImpl(graph1);
 			
 			DAGImpl dag2=(DAGImpl) change2.getDAG();
 //			DAGImpl dag2= S_InputOWL.createDAG(fileInput);

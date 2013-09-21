@@ -2,8 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDescriptionDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDescriptionDAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
@@ -28,6 +27,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
 		input.add("src/test/resources/test/dag/role-equivalence.owl");
+		input.add("src/test/resources/test/dag/test-class-hierarchy.owl");
 
 		/**Graph1 B-> ER -> A */
 		input.add("src/test/resources/test/newDag/ancestor1.owl");
@@ -61,7 +61,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-			NamedDescriptionDAG transform = new NamedDescriptionDAGImpl(dag1);
+			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag1);
 			DAGImpl dag2= (DAGImpl) transform.getDAG();
 			log.debug("Input number {}", i+1 );
 			log.info("First dag {}", dag1);

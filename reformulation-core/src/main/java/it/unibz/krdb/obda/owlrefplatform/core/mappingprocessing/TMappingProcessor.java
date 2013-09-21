@@ -6,8 +6,6 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-
-
 import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -23,7 +21,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDescriptionDAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.Serializable;
@@ -65,7 +63,7 @@ public class TMappingProcessor implements Serializable {
 		this.optimize = optmize;
 		reasoner= new TBoxReasonerImpl(tbox, false);
 		dag = reasoner.getDAG();
-		NamedDescriptionDAGImpl namedDagConstructor= new NamedDescriptionDAGImpl(dag);
+		NamedDAGBuilderImpl namedDagConstructor= new NamedDAGBuilderImpl(dag);
 		pureIsa =namedDagConstructor.getDAG();
 
 

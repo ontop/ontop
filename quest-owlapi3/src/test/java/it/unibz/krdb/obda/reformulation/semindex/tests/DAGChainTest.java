@@ -1,7 +1,5 @@
 package it.unibz.krdb.obda.reformulation.semindex.tests;
 
-import java.util.Set;
-
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -12,9 +10,12 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraphImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 import com.hp.hpl.jena.iri.IRIFactory;
@@ -96,7 +97,7 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
 		
 		//generate Graph
-		TBoxGraphImpl change= new TBoxGraphImpl(ontology);
+		GraphBuilderImpl change= new GraphBuilderImpl(ontology);
 		
 		GraphImpl res = (GraphImpl) change.getGraph();
 

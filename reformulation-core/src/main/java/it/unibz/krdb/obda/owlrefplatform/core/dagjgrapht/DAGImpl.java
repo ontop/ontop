@@ -177,178 +177,178 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 		
 	}
 
-	
-	/***
-	 * Eliminates redundant edges to ensure that the remaining DAG is the
-	 * transitive reduction of the original DAG.
-	 * 
-	 * <p>
-	 * This is done with an ad-hoc algorithm that functions as follows:
-	 * 
-	 * <p>
-	 * Compute the set of all nodes with more than 2 outgoing edges (these have
-	 * candidate redundant edges.) <br>
-	 */
-	public void eliminateRedundantEdges() {
-		/* Compute the candidate nodes */
-		List<Description> candidates = new LinkedList<Description>();
-		Set<Description> vertexes = this.vertexSet();
-		for (Description vertex : vertexes) {
-			int outdegree = this.outDegreeOf(vertex);
-			if (outdegree > 1) {
-				candidates.add(vertex);
-			}
-		}
-
-		/*
-		 * for each candidate x and each outgoing edge x -> y, we will check if
-		 * y appears in the set of redundant edges
-		 */
-
-		for (Description candidate : candidates) {
-			
-			Set<DefaultEdge> possiblyRedundantEdges = new LinkedHashSet<DefaultEdge>();
-			
-			possiblyRedundantEdges.addAll(this.outgoingEdgesOf(candidate));
-			
-			Set<DefaultEdge> eliminatedEdges = new HashSet<DefaultEdge>();
-			
-			// registering the target of the possible redundant targets for this
-			// node
-			Set<Description> targets = new HashSet<Description>();
-			
-			Map<Description, DefaultEdge> targetEdgeMap = new HashMap<Description, DefaultEdge>();
-			
-			for (DefaultEdge edge : possiblyRedundantEdges) {
-				Description target = this.getEdgeTarget(edge);
-				targets.add(target);
-				targetEdgeMap.put(target, edge);
-			}
-
-			for (DefaultEdge currentPathEdge : possiblyRedundantEdges) {
-				Description currentTarget = this.getEdgeTarget(currentPathEdge);
-				if (eliminatedEdges.contains(currentPathEdge))
-					continue;
-				eliminateRedundantEdge(currentPathEdge, targets, targetEdgeMap, currentTarget, eliminatedEdges);
-			}
-
-		}
-
-	}
-
-	private void eliminateRedundantEdge(DefaultEdge safeEdge, Set<Description> targets, Map<Description, DefaultEdge> targetEdgeMap,
-			Description currentTarget, Set<DefaultEdge> eliminatedEdges) {
-		if (targets.contains(currentTarget)) {
-			DefaultEdge edge = targetEdgeMap.get(currentTarget);
-			if (!edge.equals(safeEdge)) {
-				/*
-				 * This is a redundant edge, removing it.
-				 */
-				this.removeEdge(edge);
-				eliminatedEdges.add(edge);
-			}
-		}
-
-		// continue traversing the dag up
-		Set<DefaultEdge> edgesInPath = this.outgoingEdgesOf(currentTarget);
-		for (DefaultEdge outEdge : edgesInPath) {
-			Description target = this.getEdgeTarget(outEdge);
-			eliminateRedundantEdge(safeEdge, targets, targetEdgeMap, target, eliminatedEdges);
-		}
-
-	}
-
-	/***
-	 * Eliminates all cycles in the graph by computing all strongly connected
-	 * components and eliminating all but one node in each of the components
-	 * from the graph. The result of this transformation is that the graph
-	 * becomes a DAG.
-	 * 
-	 * <p>
-	 * In the process two objects are generated, an 'Equivalence map' and a
-	 * 'replacementMap'. The first can be used to get the implied equivalences
-	 * of the TBox. The second can be used to locate the node that is
-	 * representative of an eliminated node.
-	 * 
-	 * <p>
-	 * Computation of the strongly connected components is done using the
-	 * StrongConnectivityInspector from JGraphT.
-	 * 
-	 */
-	public void eliminateCycles() {
-		
-
-		
-		StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(this);
-		
-		//each set contains vertices which together form a strongly connected component within the given graph
-		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
-
-
-		for (Set<Description> equivalenceSet : equivalenceSets) {
-			if (equivalenceSet.size() < 2)
-				continue;
-			Iterator<Description> iterator = equivalenceSet.iterator();
-			Description representative = iterator.next();
-			Description notRepresentative = null;
-			if(representative instanceof PropertySomeRestriction ) //I want to consider a named class as representative element
-				for (Description equivalent: equivalenceSet) {
-					if (equivalent instanceof OClass) {
-						notRepresentative =representative;
-						representative=equivalent;
-						replacements.put(notRepresentative, representative);
-						equivalencesMap.put(notRepresentative, equivalenceSet);
-						break;
-					}
-				}
-			equivalencesMap.put(representative, equivalenceSet);
-
-			while (iterator.hasNext()) {
-				Description eliminatedNode = iterator.next();
-				if(eliminatedNode.equals(representative) & notRepresentative!=null)
-					eliminatedNode=notRepresentative;
-				replacements.put(eliminatedNode, representative);
-				equivalencesMap.put(eliminatedNode, equivalenceSet);
-				
-				/*
-				 * Re-pointing all links to and from the eliminated node to the
-				 * representative node
-				 */
-
-				Set<DefaultEdge> edges = new HashSet<DefaultEdge>(this.incomingEdgesOf(eliminatedNode));
-
-				for (DefaultEdge incEdge : edges) {
-					Description source = this.getEdgeSource(incEdge);
-
-					this.removeAllEdges(source, eliminatedNode);
-
-					if (source.equals(representative))
-						continue;
-
-					this.addEdge(source, representative);
-				}
-
-				edges = new HashSet<DefaultEdge>(this.outgoingEdgesOf(eliminatedNode));
-
-				for (DefaultEdge outEdge : edges) {
-					Description target = this.getEdgeTarget(outEdge);
-
-					this.removeAllEdges(eliminatedNode, target);
-
-					if (target.equals(representative))
-						continue;
-					this.addEdge(representative, target);
-
-				}
-
-				this.removeVertex(eliminatedNode);
-
-			}
-		}
-		
-	}
-
-		
+//	
+//	/***
+//	 * Eliminates redundant edges to ensure that the remaining DAG is the
+//	 * transitive reduction of the original DAG.
+//	 * 
+//	 * <p>
+//	 * This is done with an ad-hoc algorithm that functions as follows:
+//	 * 
+//	 * <p>
+//	 * Compute the set of all nodes with more than 2 outgoing edges (these have
+//	 * candidate redundant edges.) <br>
+//	 */
+//	public void eliminateRedundantEdges() {
+//		/* Compute the candidate nodes */
+//		List<Description> candidates = new LinkedList<Description>();
+//		Set<Description> vertexes = this.vertexSet();
+//		for (Description vertex : vertexes) {
+//			int outdegree = this.outDegreeOf(vertex);
+//			if (outdegree > 1) {
+//				candidates.add(vertex);
+//			}
+//		}
+//
+//		/*
+//		 * for each candidate x and each outgoing edge x -> y, we will check if
+//		 * y appears in the set of redundant edges
+//		 */
+//
+//		for (Description candidate : candidates) {
+//			
+//			Set<DefaultEdge> possiblyRedundantEdges = new LinkedHashSet<DefaultEdge>();
+//			
+//			possiblyRedundantEdges.addAll(this.outgoingEdgesOf(candidate));
+//			
+//			Set<DefaultEdge> eliminatedEdges = new HashSet<DefaultEdge>();
+//			
+//			// registering the target of the possible redundant targets for this
+//			// node
+//			Set<Description> targets = new HashSet<Description>();
+//			
+//			Map<Description, DefaultEdge> targetEdgeMap = new HashMap<Description, DefaultEdge>();
+//			
+//			for (DefaultEdge edge : possiblyRedundantEdges) {
+//				Description target = this.getEdgeTarget(edge);
+//				targets.add(target);
+//				targetEdgeMap.put(target, edge);
+//			}
+//
+//			for (DefaultEdge currentPathEdge : possiblyRedundantEdges) {
+//				Description currentTarget = this.getEdgeTarget(currentPathEdge);
+//				if (eliminatedEdges.contains(currentPathEdge))
+//					continue;
+//				eliminateRedundantEdge(currentPathEdge, targets, targetEdgeMap, currentTarget, eliminatedEdges);
+//			}
+//
+//		}
+//
+//	}
+//
+//	private void eliminateRedundantEdge(DefaultEdge safeEdge, Set<Description> targets, Map<Description, DefaultEdge> targetEdgeMap,
+//			Description currentTarget, Set<DefaultEdge> eliminatedEdges) {
+//		if (targets.contains(currentTarget)) {
+//			DefaultEdge edge = targetEdgeMap.get(currentTarget);
+//			if (!edge.equals(safeEdge)) {
+//				/*
+//				 * This is a redundant edge, removing it.
+//				 */
+//				this.removeEdge(edge);
+//				eliminatedEdges.add(edge);
+//			}
+//		}
+//
+//		// continue traversing the dag up
+//		Set<DefaultEdge> edgesInPath = this.outgoingEdgesOf(currentTarget);
+//		for (DefaultEdge outEdge : edgesInPath) {
+//			Description target = this.getEdgeTarget(outEdge);
+//			eliminateRedundantEdge(safeEdge, targets, targetEdgeMap, target, eliminatedEdges);
+//		}
+//
+//	}
+//
+//	/***
+//	 * Eliminates all cycles in the graph by computing all strongly connected
+//	 * components and eliminating all but one node in each of the components
+//	 * from the graph. The result of this transformation is that the graph
+//	 * becomes a DAG.
+//	 * 
+//	 * <p>
+//	 * In the process two objects are generated, an 'Equivalence map' and a
+//	 * 'replacementMap'. The first can be used to get the implied equivalences
+//	 * of the TBox. The second can be used to locate the node that is
+//	 * representative of an eliminated node.
+//	 * 
+//	 * <p>
+//	 * Computation of the strongly connected components is done using the
+//	 * StrongConnectivityInspector from JGraphT.
+//	 * 
+//	 */
+//	public void eliminateCycles() {
+//		
+//
+//		
+//		StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(this);
+//		
+//		//each set contains vertices which together form a strongly connected component within the given graph
+//		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
+//
+//
+//		for (Set<Description> equivalenceSet : equivalenceSets) {
+//			if (equivalenceSet.size() < 2)
+//				continue;
+//			Iterator<Description> iterator = equivalenceSet.iterator();
+//			Description representative = iterator.next();
+//			Description notRepresentative = null;
+//			if(representative instanceof PropertySomeRestriction ) //I want to consider a named class as representative element
+//				for (Description equivalent: equivalenceSet) {
+//					if (equivalent instanceof OClass) {
+//						notRepresentative =representative;
+//						representative=equivalent;
+//						replacements.put(notRepresentative, representative);
+//						equivalencesMap.put(notRepresentative, equivalenceSet);
+//						break;
+//					}
+//				}
+//			equivalencesMap.put(representative, equivalenceSet);
+//
+//			while (iterator.hasNext()) {
+//				Description eliminatedNode = iterator.next();
+//				if(eliminatedNode.equals(representative) & notRepresentative!=null)
+//					eliminatedNode=notRepresentative;
+//				replacements.put(eliminatedNode, representative);
+//				equivalencesMap.put(eliminatedNode, equivalenceSet);
+//				
+//				/*
+//				 * Re-pointing all links to and from the eliminated node to the
+//				 * representative node
+//				 */
+//
+//				Set<DefaultEdge> edges = new HashSet<DefaultEdge>(this.incomingEdgesOf(eliminatedNode));
+//
+//				for (DefaultEdge incEdge : edges) {
+//					Description source = this.getEdgeSource(incEdge);
+//
+//					this.removeAllEdges(source, eliminatedNode);
+//
+//					if (source.equals(representative))
+//						continue;
+//
+//					this.addEdge(source, representative);
+//				}
+//
+//				edges = new HashSet<DefaultEdge>(this.outgoingEdgesOf(eliminatedNode));
+//
+//				for (DefaultEdge outEdge : edges) {
+//					Description target = this.getEdgeTarget(outEdge);
+//
+//					this.removeAllEdges(eliminatedNode, target);
+//
+//					if (target.equals(representative))
+//						continue;
+//					this.addEdge(representative, target);
+//
+//				}
+//
+//				this.removeVertex(eliminatedNode);
+//
+//			}
+//		}
+//		
+//	}
+//
+//		
 
 
 

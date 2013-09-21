@@ -9,7 +9,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  *
  */
 
-public interface TBoxGraph {
+public interface GraphBuilder {
 
 
 	//obtain the graph built

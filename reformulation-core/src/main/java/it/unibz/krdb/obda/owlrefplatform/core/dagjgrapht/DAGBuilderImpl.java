@@ -29,7 +29,7 @@ import org.jgrapht.graph.DefaultEdge;
  * Starting from a graph build a DAG. 
  * Consider equivalences, redundancies and transitive reduction */
 
-public class GraphDAGImpl implements GraphDAG{
+public class DAGBuilderImpl implements DAGBuilder{
 
 	//contains the representative node with the set of equivalent mappings.
 	private Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
@@ -47,7 +47,7 @@ public class GraphDAGImpl implements GraphDAG{
 	private GraphImpl modifiedGraph;
 
 	
-	public GraphDAGImpl (Graph graph){
+	public DAGBuilderImpl (Graph graph){
 		
 		
 		modifiedGraph= new GraphImpl( DefaultEdge.class);
@@ -80,14 +80,34 @@ public class GraphDAGImpl implements GraphDAG{
 		dag.setMapEquivalences(equivalencesMap);
 		dag.setReplacements(replacements);
 		dag.setIsaDAG(true);
+		modifiedGraph=null;
 		
 	}
 
 
-	@Override
-	public DAG getDAG() {
+public DAGBuilderImpl (Graph graph, Map<Description, Set<Description>> equivalents, Map<Description, Description>representatives){
+		
+		
+		modifiedGraph= (GraphImpl) graph;
+		
+		 equivalencesMap=equivalents;
+		 replacements=representatives;
+		 
+		eliminateCycles(graph);
+		eliminateRedundantEdges();
+		
+//		System.out.println("modified graph "+modifiedGraph);
+		
+		dag= new DAGImpl( DefaultEdge.class);
+		
+		//change the graph in a dag
+		Graphs.addGraph(dag, modifiedGraph);
 
-		return dag;
+		dag.setMapEquivalences(equivalencesMap);
+		dag.setReplacements(replacements);
+		dag.setIsaDAG(true);
+		modifiedGraph=null;
+		
 	}
 
 
@@ -184,18 +204,18 @@ public class GraphDAGImpl implements GraphDAG{
 	 * representative of an eliminated node.
 	 * 
 	 * <p>
-	 * Computation of the strongly connected components is done using the
-	 * StrongConnectivityInspector from JGraphT.
+	 * Computation of the strongly connected components is done using Gabow SCC algorithm.
 	 * 
 	 */
 	private void eliminateCycles(Graph graph) {
 		
 		
-		StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(modifiedGraph);
-		
+//		StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(modifiedGraph);
+		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(modifiedGraph);
 		//each set contains vertices which together form a strongly connected component within the given graph
-		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
+//		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
 		
+		List<Set<Description>> equivalenceSets = inspector.stronglyConnectedSets();
 
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
@@ -210,7 +230,7 @@ public class GraphDAGImpl implements GraphDAG{
 		
 		Set<Property> namedRoles= graph.getRoles();
 
-		namedRoles.toArray();
+		
 		for (Set<Description> equivalenceSet : equivalenceSets) {
 
 			if (equivalenceSet.size() < 2)
@@ -694,6 +714,16 @@ public class GraphDAGImpl implements GraphDAG{
 			}
 		}
 		
+	}
+
+
+
+
+
+	@Override
+	public DAG getDAG() {
+		
+		return dag;
 	}
 
 		

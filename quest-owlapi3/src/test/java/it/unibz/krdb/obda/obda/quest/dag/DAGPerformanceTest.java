@@ -25,7 +25,7 @@ public class DAGPerformanceTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
 
-	int size = 10000;
+	int size = 100000;
 	int maxdepth = 10;
 
 	private class LevelRange {
@@ -100,7 +100,7 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
-		System.out.println(ont);
+		
 
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
@@ -115,15 +115,17 @@ public class DAGPerformanceTest extends TestCase {
 		
 		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
 		log.debug("Equivalences: {}", equi.size());
-		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
+		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 		log.debug("Done.");
+		System.out.println(ont);
+		System.out.println(equiOptimizer.getOptimalTBox());
 	}
 	
 	/**
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void disabledtestOnto17() throws Exception {
+	public void testOnto17() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
@@ -189,15 +191,17 @@ public class DAGPerformanceTest extends TestCase {
 
 		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
 		log.debug("Equivalences: {}", equi.size());
-		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
+		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 		log.debug("Done.");
+		System.out.println(ont);
+		System.out.println(equiOptimizer.getOptimalTBox());
 	}
 	
 	/**
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void disabledtestOnto19() throws Exception {
+	public void testOnto19() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
@@ -251,6 +255,8 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
+		
+
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		Ontology o = t.translate(ont);
@@ -264,7 +270,9 @@ public class DAGPerformanceTest extends TestCase {
 		
 		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
 		log.debug("Equivalences: {}", equi.size());
-		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
+		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 		log.debug("Done.");
+		System.out.println(ont);
+		System.out.println(equiOptimizer.getOptimalTBox());
 	}	
 }

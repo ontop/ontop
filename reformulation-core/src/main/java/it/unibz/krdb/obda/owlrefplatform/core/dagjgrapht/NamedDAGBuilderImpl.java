@@ -14,7 +14,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 /** Build a DAG with only the named descriptions*/
 
-public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
+public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 	private Set<OClass> namedClasses;
 	private Set<Property> property;
@@ -26,7 +26,7 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 	
 	private TBoxReasonerImpl reasoner;
 
-	public NamedDescriptionDAGImpl(DAG dag) {
+	public NamedDAGBuilderImpl(DAG dag) {
 
 		
 		namedDag= new DAGImpl( DefaultEdge.class);
@@ -87,8 +87,8 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 //		Description reference = replacements.get(vertex);
 		
 
-		/** if the node is not named and it's representative delete it and repoint all links */
-
+//		/** if the node is not named and it's representative delete it and repoint all links */
+//
 //			if(!equivalences.isEmpty()){ //node is not named and there are equivalent named classes
 //			
 //			
@@ -102,12 +102,12 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 //				Description node =e.next();
 //				replacements.put(node, newReference);
 //			}
-			
-			/*
-			 * Re-pointing all links to and from the eliminated node to the new
-			 * representative node
-			 */
-			
+//			
+//			/*
+//			 * Re-pointing all links to and from the eliminated node to the new
+//			 * representative node
+//			 */
+//			
 //			Set<DefaultEdge> edges = new HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
 //			for (DefaultEdge incEdge : edges) {
 //				Description source = namedDag.getEdgeSource(incEdge);
@@ -159,11 +159,11 @@ public class NamedDescriptionDAGImpl implements NamedDescriptionDAG {
 			}
 			
 			namedDag.removeVertex(vertex);
-			}
+//			}
 			
 			
 
-//			}
+			}
 			
 					
 		
