@@ -640,7 +640,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 
 
-		//to be checked
+		
 		aboxDependencies =  reasonerDag.getSigmaOntology();
 		log.debug("Assertions aboxdependencies: "+ aboxDependencies);
 
@@ -4119,7 +4119,7 @@ out.append(String.format(cls_insert_str, getQuotedString(uri), idx, c1isBNode));
 			st.executeUpdate("DELETE FROM " + interval_table);
 			st.executeUpdate("DELETE FROM " + emptyness_index_table);
 
-			/* inserting index data for classes and roeles */
+			/* inserting index data for classes and roles */
 
 			for (String concept : classIndexes.keySet()) {
 				stm.setString(1, concept.toString());
