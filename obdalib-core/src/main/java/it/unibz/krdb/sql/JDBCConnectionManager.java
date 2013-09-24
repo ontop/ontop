@@ -213,7 +213,24 @@ public class JDBCConnectionManager {
 		return getMetaData(conn, tables);
 	}
 	
-	
+	public static DBMetadata getMetaData(Connection conn, ArrayList<Relation> tables) throws SQLException {
+		DBMetadata metadata = null;
+		final DatabaseMetaData md = conn.getMetaData();
+		if (md.getDatabaseProductName().contains("Oracle")) {
+			// If the database engine is Oracle
+			metadata = getOracleMetaData(md, conn, tables);
+		} else if (md.getDatabaseProductName().contains("DB2")) {
+			// If the database engine is IBM DB2
+			metadata = getDB2MetaData(md, conn);
+		} else if (md.getDatabaseProductName().contains("SQL Server")) {
+			// If the database engine is SQL Server
+			metadata = getSqlServerMetaData(md, conn);
+		} else {
+			// For other database engines
+			metadata = getOtherMetaData(md);
+		}
+		return metadata;
+	}
 
 	/**
 	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
