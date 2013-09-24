@@ -8,6 +8,8 @@
  */
 package it.unibz.krdb.obda.parser;
 
+import java.util.ArrayList;
+
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
@@ -25,6 +27,10 @@ public class SQLQueryTranslator {
 
 	private DBMetadata dbMetaData;
 	
+	//This field will contain all the target SQL from the 
+	//mappings that could not be parsered by the parser.
+	private ArrayList<ViewDefinition> viewDefinitions;
+	
 	private static int id_counter;
 	
 	private static Logger log = LoggerFactory.getLogger(SQLQueryTranslator.class);
@@ -32,6 +38,22 @@ public class SQLQueryTranslator {
 	public SQLQueryTranslator(DBMetadata dbMetaData) {
 		this.dbMetaData = dbMetaData;
 		id_counter = 0;		
+	}
+	
+	/*
+	 * This constructor is used when the tables names and schemas are taken from the mappings
+	 */
+	public SQLQueryTranslator() {
+		this.viewDefinitions = new ArrayList<ViewDefinition>();
+		id_counter = 0;		
+	}
+	
+	/*
+	 *  Returns all the target SQL from the 
+	 *  mappings that could not be parsered by the parser.
+	 */
+	public ArrayList<ViewDefinition> getViewDefinitions(){
+		return this.viewDefinitions;
 	}
 
 	public QueryTree contructQueryTree(String query) {
