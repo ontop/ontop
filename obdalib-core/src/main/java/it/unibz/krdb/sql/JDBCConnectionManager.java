@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.Relation;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -196,6 +197,23 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
+	
+	
+	/**
+	 *  Retrieves the database meta data about the table schema given a
+	 * particular data source id.
+	 * This method is used when the table names are taken from the mappings.
+	 * 
+	 * @param sourceId
+	 *            The database id.
+	 * @return The database meta data object.
+	 */
+	public DBMetadata getMetaData(OBDADataSource sourceId, ArrayList<Relation> tables) throws SQLException {
+		Connection conn = getConnection(sourceId);
+		return getMetaData(conn, tables);
+	}
+	
+	
 
 	/**
 	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
