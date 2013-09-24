@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -476,6 +477,101 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
+	
+	
+	
+	/**
+	 * Retrieve metadata for Oracle database engine
+	 * 
+	 * Currently only retrieves metadata for the tables listed
+	 * 
+	 * Future plan to retrive all tables when this list is empty?
+	 * 
+	 * @param tables 
+	 */
+	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		ResultSet resultSet = null;
+				
+		try {
+			/* Obtain the statement object for query execution */
+			stmt = conn.createStatement();
+			
+			/* Obtain the table owner (i.e., schema name) */
+			String loggedUser = "SYSTEM"; // by default
+			resultSet = stmt.executeQuery("SELECT user FROM dual");
+			if (resultSet.next()) {
+				loggedUser = resultSet.getString("user");
+			}
+			/**
+			 *  The sql to extract table names is now removed, since we instead use the
+			 *  table names from the source sql of the mappings, given as the parameter tables
+			 */
+			
+			Iterator<Relation> table_iter = tables.iterator();
+			/* Obtain the column information for each relational object */
+			while (table_iter.hasNext()) {
+				Relation table = table_iter.next();
+				ResultSet rsColumns = null;
+				try {
+//					String tblName = resultSet.getString("object_name");
+//					tableOwner = resultSet.getString("owner_name");
+					String tblName = table.getTableName();
+					/**
+					 * fullTableName is exactly the name the user provided, including schema prefix if that was
+					 * provided, otherwise without.
+					 */
+					String tableGivenName = table.getGivenName();
+					/**
+					 * If there is a schema prefix, this must be the tableOwner argument to the 
+					 * jdbc methods below. Otherwise, we use the logged in user. I guess null would
+					 * also have worked in the latter case.
+					 */
+					String tableOwner;
+					if( table.getSchema().length() > 0)
+						tableOwner = table.getSchema();
+					else
+						tableOwner = loggedUser;
+					System.out.println("Schema: " + tableOwner + ", table: " + tblName+"\n");
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
+					
+					TableDefinition td = new TableDefinition(tableGivenName);
+					rsColumns = md.getColumns(null, tableOwner, tblName, null);
+					
+					for (int pos = 1; rsColumns.next(); pos++) {
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
+						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final Reference reference = foreignKeys.get(columnName);
+						final int isNullable = rsColumns.getInt("NULLABLE");
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+					}
+					// Add this information to the DBMetadata
+					metadata.add(td);
+					//metadata.add(tblName,tableOwner);
+					
+				} finally {
+					if (rsColumns != null) {
+						rsColumns.close(); // close existing open cursor
+					}
+				}
+			}
+		} finally {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return metadata;
+	}
+	
+	
+	
+	
 
 	/* Retrives the primary key(s) from a table */
 	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {

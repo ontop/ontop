@@ -77,7 +77,10 @@ public class TablePrimary implements ITable {
 		return givenName;
 	}
 
-
+	public String getTableName() {
+		return tableName;
+	}
+	
 	public String getName() {
 		return name;
 	}

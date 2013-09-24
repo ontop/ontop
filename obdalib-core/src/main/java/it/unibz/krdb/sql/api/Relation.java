@@ -31,6 +31,13 @@ public class Relation extends RelationalAlgebra {
 		return table.getName();
 	}
 	
+	public String getTableName() {
+		return table.getTableName();
+	}
+	
+	public String getGivenName() {
+		return table.getGivenName();
+	}
 	public String getAlias() {
 		return table.getAlias();
 	}
