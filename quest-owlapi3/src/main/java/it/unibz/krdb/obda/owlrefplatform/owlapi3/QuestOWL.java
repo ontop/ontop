@@ -116,7 +116,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private DataPropertyHierarchyInfo dataPropertyHierarchyInfo = new DataPropertyHierarchyInfo();
 
-	private static final Version version = new Version(1, 7, 0, 0);
+	private static final Version version = new Version(1, 9, 0, 0);
 
 	private boolean interrupted = false;
 
