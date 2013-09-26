@@ -31,6 +31,7 @@ public class TablePrimary implements ITable {
 	public TablePrimary(String schema, String name) {
 		setSchema(schema);
 		setName(name);
+		setTableName(name);
 		setAlias("");
 	}
 
