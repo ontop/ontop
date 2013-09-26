@@ -42,7 +42,9 @@ public class TablePrimary implements ITable {
 			setSchema(schema);
 			setTableName(tableName);
 			setGivenName(givenName);
+			setName(givenName);
 			setAlias("");
+			
 		}
 	/**
 	 * @param givenName The table name exactly as it appears in the source sql query of the mapping, possibly with prefix and quotes
@@ -98,14 +100,16 @@ public class TablePrimary implements ITable {
 
 	@Override
 	public String toString() {
+		/*
 		String str = "";
 		if (schema != "") {
 			str += schema + ".";
 		}			
-		str += name;
+		str += tableName;
 		if (alias != "") {
 			str += " as " + alias;
 		}
-		return str;
+		*/
+		return givenName;
 	}
 }
