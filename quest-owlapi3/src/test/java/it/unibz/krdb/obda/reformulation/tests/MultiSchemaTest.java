@@ -96,14 +96,23 @@ public class MultiSchemaTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT ?x WHERE { ?x a :Country }";
+		String query = "PREFIX :<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Country }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
 			
 
 			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
+			
+			/*
+			boolean nextRow = rs.nextRow();
+			assertTrue(nextRow);
+			*/
+			
+			while (rs.nextRow()){
+				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+				System.out.println(ind1.toString());
+			}
+		
 /*
 			assertEquals("<uri1>", ind1.toString());
 			assertEquals("<uri1>", ind2.toString());

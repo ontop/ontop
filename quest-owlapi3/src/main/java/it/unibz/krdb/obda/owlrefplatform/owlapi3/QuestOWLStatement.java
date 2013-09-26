@@ -109,7 +109,9 @@ public class QuestOWLStatement {
 
 	public QuestOWLResultSet executeTuple(String query) throws OWLException {
 		try {
-			return new QuestOWLResultSet((TupleResultSet) st.execute(query), this);
+			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
+			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

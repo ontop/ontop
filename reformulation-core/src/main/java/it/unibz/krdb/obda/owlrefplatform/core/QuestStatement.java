@@ -308,10 +308,12 @@ public class QuestStatement implements OBDAStatement {
 
 		// encoding ofquery type into numbers
 		if (SPARQLQueryUtility.isSelectQuery(strquery)) {
-			return executeTupleQuery(strquery, 1);
+			TupleResultSet executedQuery = executeTupleQuery(strquery, 1);
+			return executedQuery;
 
 		} else if (SPARQLQueryUtility.isAskQuery(strquery)) {
-			return executeTupleQuery(strquery, 2);
+			TupleResultSet executedQuery = executeTupleQuery(strquery, 2);
+			return executedQuery;
 		} else if (SPARQLQueryUtility.isConstructQuery(strquery)) {
 			
 			// Here we need to get the template for the CONSTRUCT query results
@@ -323,7 +325,8 @@ public class QuestStatement implements OBDAStatement {
 			
 			// Here we replace CONSTRUCT query with SELECT query
 			strquery = SPARQLQueryUtility.getSelectFromConstruct(strquery);
-			return executeGraphQuery(strquery, 3);
+			GraphResultSet executedGraphQuery = executeGraphQuery(strquery, 3);
+			return executedGraphQuery;
 			
 		} else if (SPARQLQueryUtility.isDescribeQuery(strquery)) {
 			// create list of uriconstants we want to describe
