@@ -97,7 +97,7 @@ public class MappingAnalyzer {
 				ArrayList<Function> atoms = new ArrayList<Function>();
 				for (Relation table : tableList) {
 					// Construct the URI from the table name
-					String tableName = table.getName();
+					String tableName = table.getGivenName();
 					String predicateName = tableName;
 
 					// Construct the predicate using the table name
