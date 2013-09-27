@@ -55,7 +55,7 @@ public class MultiSchemaTest extends TestCase {
 	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
-	private Connection conn;
+	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
@@ -63,6 +63,7 @@ public class MultiSchemaTest extends TestCase {
 
 	final String owlfile = "src/test/resources/test/oracle.owl";
 	final String obdafile = "src/test/resources/test/oracle.obda";
+	private QuestOWL reasoner;
 
 	@Override
 	public void setUp() throws Exception {
@@ -78,11 +79,9 @@ public class MultiSchemaTest extends TestCase {
 		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-		
-	}
-
-
-	private void runTests(Properties p) throws Exception {
+	
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -90,13 +89,24 @@ public class MultiSchemaTest extends TestCase {
 
 		factory.setPreferenceHolder(p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		conn = reasoner.getConnection();
+
 		
-		String query = "PREFIX :<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Country }";
+	}
+
+
+	public void tearDown() throws Exception{
+		conn.close();
+		reasoner.dispose();
+	}
+	
+
+	
+	private void runTests(String query) throws Exception {
+		QuestOWLStatement st = conn.createStatement();
 		StringBuilder bf = new StringBuilder(query);
 		try {
 			
@@ -131,12 +141,70 @@ public class MultiSchemaTest extends TestCase {
 		}
 	}
 
-	public void testMultiSchema() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-	
-		runTests(p);
+	/**
+	 * Test use of different schema, table prefix, where clause and join
+	 * @throws Exception
+	 */
+	public void testMultiSchemaWherePrefix() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?c ?r WHERE { ?c :countryIsInRegion ?r }";
+		runTests(query);
 	}
 	
+	/**
+	 * Tests simplest possible use of different schema than logged in user
+	 * @throws Exception
+	 */
+	public void testMultiSchema() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Country }";
+		runTests(query);
+	}
+
+	/**
+	 * Tests simplest possible use of different schema than logged in user without quotation marks
+	 * @throws Exception
+	 */
+	public void testMultiSchemaNQ() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :CountryPrefixNQ }";
+		runTests(query);
+	}
+
+	
+	/**
+	 * Test us of different schema together with table prefix in column name
+	 * @throws Exception
+	 */
+	public void testMultiSchemaPrefix() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Pais }";
+		runTests(query);
+	}
+
+
+	/**
+	 * Test use of different schema and table prefix in column name, and column alias
+	 * @throws Exception
+	 */
+	public void testMultiSchemaAlias() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Land }";
+		runTests(query);
+	}
+
+	/**
+	 * Test use of different schema and table prefix in column name, and column alias, and quote in table prefix
+	 * @throws Exception
+	 */
+	public void testMultiSchemaAliasQuote() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :LandQuote }";
+		runTests(query);
+	}
+	
+	/**
+	 * Test use of different schema and table prefix in where clause
+	 * @throws Exception
+	 */
+	public void testMultiSchemaWhere() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :CountryEgypt }";
+		runTests(query);
+	}
+		
 }

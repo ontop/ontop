@@ -24,6 +24,30 @@
     <Declaration>
         <Class IRI="#Country"/>
     </Declaration>
+    <Declaration>
+        <Class IRI="#CountryEgypt"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CountryPrefixNQ"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CountryWithRegion"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Land"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#LandQuote"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Pais"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Region"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#countryIsInRegion"/>
+    </Declaration>
 </Ontology>
 
 

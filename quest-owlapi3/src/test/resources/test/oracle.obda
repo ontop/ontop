@@ -9,8 +9,32 @@ password	obdaps83
 driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
-mappingId	MAPID-8ef78e8fd80b46c7921e6a03723fadc3
+mappingId	Countries
 target		:Country-{COUNTRY_NAME} a :Country . 
 source		select COUNTRY_NAME FROM "HR"."COUNTRIES"
+
+mappingId	Paises
+target		:Pais-{COUNTRY_NAME} a :Pais . 
+source		select COUNTRIES.COUNTRY_NAME FROM "HR"."COUNTRIES"
+
+mappingId	CountryPrefixNoQuote
+target		:CountryPrefixNQ-{COUNTRY_NAME} a :CountryPrefixNQ . 
+source		select COUNTRIES.COUNTRY_NAME FROM HR.COUNTRIES
+
+mappingId	Land
+target		:Land-{ALIAS} a :Land . 
+source		select COUNTRIES.COUNTRY_NAME ALIAS FROM HR.COUNTRIES
+
+mappingId	LandQuote
+target		:LandQuote-{COUNTRY_NAME} a :LandQuote . 
+source		select "COUNTRIES".COUNTRY_NAME countryNameAlias FROM HR.COUNTRIES
+
+mappingId	CountryEgypt
+target		:CountryEgypt-{COUNTRY_NAME} a :CountryEgypt . 
+source		select COUNTRY_NAME FROM HR.COUNTRIES WHERE COUNTRIES.COUNTRY_NAME = 'Egypt'
+
+mappingId	CountryInRegion
+target		:CountryWithRegion-{NameOfCountry} :countryIsInRegion :Region-{REGION_NAME} . 
+source		SELECT REGION_NAME, COUNTRIES.COUNTRY_NAME NameOfCountry, COUNTRY_ID FROM HR.REGIONS, HR.COUNTRIES WHERE COUNTRIES.REGION_ID = REGIONS.REGION_ID
 ]]
 
