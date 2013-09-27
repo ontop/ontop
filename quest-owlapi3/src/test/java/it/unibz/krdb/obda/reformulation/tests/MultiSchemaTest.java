@@ -147,7 +147,7 @@ public class MultiSchemaTest extends TestCase {
 	 * @throws Exception
 	 */
 	public void testMultiSchemaWherePrefix() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?c ?r WHERE { ?c :countryIsInRegion ?r }";
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x ?r WHERE { ?x :countryIsInRegion ?r }";
 		runTests(query);
 	}
 	
