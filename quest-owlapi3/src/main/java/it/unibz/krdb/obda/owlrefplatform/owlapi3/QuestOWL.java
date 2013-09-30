@@ -218,14 +218,8 @@ public class QuestOWL extends OWLReasonerBase {
 
 	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
-			OWLReasonerRuntimeException owlReasonerRuntimeException = new OWLReasonerRuntimeException(
-					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) {
-
-						/**
-						 * 
-						 */
-				private static final long serialVersionUID = 1L;
-				};
+			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
+					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) ;
 				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
 			throw owlReasonerRuntimeException;
 		}
@@ -484,6 +478,10 @@ public class QuestOWL extends OWLReasonerBase {
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+		
+		
+		
+		
 		return true;
 	}
 
