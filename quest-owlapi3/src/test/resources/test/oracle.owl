@@ -28,6 +28,9 @@
         <Class IRI="#CountryEgypt"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#CountryNotEgypt"/>
+    </Declaration>
+    <Declaration>
         <Class IRI="#CountryPrefixNQ"/>
     </Declaration>
     <Declaration>

@@ -141,6 +141,15 @@ public class MultiSchemaTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Test use of different schema, table prefix, where clause with "!="
+	 * @throws Exception
+	 */
+	public void testMultiSchemaWhereNot() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :CountryNotEgypt}";
+		runTests(query);
+	}
+	
 
 	/**
 	 * Test use of different schema, table prefix, where clause and join
