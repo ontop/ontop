@@ -142,6 +142,15 @@ public class MultiSchemaTest extends TestCase {
 	}
 
 	/**
+	 * Test use of different schema, table prefix, and non-supported function in select clause
+	 * @throws Exception
+	 */
+	public void testMultiSchemaToChar() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :RegionID}";
+		runTests(query);
+	}
+	
+	/**
 	 * Test use of different schema, table prefix, where clause with "!="
 	 * @throws Exception
 	 */

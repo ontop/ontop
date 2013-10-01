@@ -49,6 +49,9 @@
         <Class IRI="#Region"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#RegionID"/>
+    </Declaration>
+    <Declaration>
         <ObjectProperty IRI="#countryIsInRegion"/>
     </Declaration>
 </Ontology>

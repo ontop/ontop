@@ -37,9 +37,12 @@ mappingId	CountryInRegion
 target		:CountryWithRegion-{NameOfCountry} :countryIsInRegion :Region-{REGION_NAME} . 
 source		SELECT REGION_NAME, COUNTRIES.COUNTRY_NAME NameOfCountry, COUNTRY_ID FROM HR.REGIONS, HR.COUNTRIES WHERE COUNTRIES.REGION_ID = REGIONS.REGION_ID
 
-
 mappingId	CountryNotEgypt
 target		:CountryNotEgypt-{COUNTRY_NAME} a :CountryNotEgypt . 
 source		select COUNTRY_NAME FROM HR.COUNTRIES WHERE COUNTRIES.COUNTRY_NAME != 'Egypt'
+
+mappingId	RegionID
+target		:RegionID-{RID} a :RegionID . 
+source		select to_char(REGION_ID) as RID FROM HR.REGIONS
 ]]
 
