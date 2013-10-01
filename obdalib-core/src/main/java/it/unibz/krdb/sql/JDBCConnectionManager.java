@@ -533,7 +533,6 @@ public class JDBCConnectionManager {
 						tableOwner = table.getSchema();
 					else
 						tableOwner = loggedUser;
-					System.out.println("Schema: " + tableOwner + ", table: " + tblName+"\n");
 					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					

@@ -28,8 +28,8 @@ public class TablePrimary implements ITable {
 		this("", name);
 	}
 	
-	public TablePrimary(String tableName, String givenName) {
-		setGivenName(givenName);
+	public TablePrimary(String schema, String name) {
+		setSchema(schema);
 		setName(name);
 		setTableName(name);
 		setAlias("");

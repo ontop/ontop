@@ -599,6 +599,7 @@ comparison_predicate returns [ComparisonPredicate value]
 comp_op returns [ComparisonPredicate.Operator value]
   : EQUALS { $value = ComparisonPredicate.Operator.EQ; }
   | LESS GREATER { $value = ComparisonPredicate.Operator.NE; }
+  | EXCLAMATION EQUALS { $value = ComparisonPredicate.Operator.NE; }
   | LESS { $value = ComparisonPredicate.Operator.LT; }
   | GREATER { $value = ComparisonPredicate.Operator.GT; }
   | LESS EQUALS { $value = ComparisonPredicate.Operator.LE; }
@@ -752,7 +753,7 @@ table_name returns [TablePrimary value]
         $value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
       }
       else {
-        $value = new TablePrimary(tableName, tableQName);
+        $value = new TablePrimary("", tableName, tableQName);
       }      
     }
   ;  

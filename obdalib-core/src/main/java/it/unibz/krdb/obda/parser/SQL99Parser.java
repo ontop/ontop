@@ -1,4 +1,4 @@
-// $ANTLR 3.5 SQL99.g 2013-10-01 11:46:11
+// $ANTLR 3.5 SQL99.g 2013-10-01 14:38:49
 
 package it.unibz.krdb.obda.parser;
 
@@ -2361,7 +2361,7 @@ public class SQL99Parser extends Parser {
 							int LA25_8 = input.LA(5);
 							if ( (LA25_8==VARNAME) ) {
 								int LA25_9 = input.LA(6);
-								if ( (LA25_9==EQUALS||LA25_9==GREATER||LA25_9==LESS) ) {
+								if ( (LA25_9==EQUALS||LA25_9==EXCLAMATION||LA25_9==GREATER||LA25_9==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_9==IS) ) {
@@ -2385,7 +2385,7 @@ public class SQL99Parser extends Parser {
 							}
 							else if ( (LA25_8==STRING_WITH_QUOTE_DOUBLE) ) {
 								int LA25_10 = input.LA(6);
-								if ( (LA25_10==EQUALS||LA25_10==GREATER||LA25_10==LESS) ) {
+								if ( (LA25_10==EQUALS||LA25_10==EXCLAMATION||LA25_10==GREATER||LA25_10==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_10==IS) ) {
@@ -2425,6 +2425,7 @@ public class SQL99Parser extends Parser {
 							}
 							break;
 						case EQUALS:
+						case EXCLAMATION:
 						case GREATER:
 						case LESS:
 							{
@@ -2457,7 +2458,7 @@ public class SQL99Parser extends Parser {
 							int LA25_8 = input.LA(5);
 							if ( (LA25_8==VARNAME) ) {
 								int LA25_9 = input.LA(6);
-								if ( (LA25_9==EQUALS||LA25_9==GREATER||LA25_9==LESS) ) {
+								if ( (LA25_9==EQUALS||LA25_9==EXCLAMATION||LA25_9==GREATER||LA25_9==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_9==IS) ) {
@@ -2481,7 +2482,7 @@ public class SQL99Parser extends Parser {
 							}
 							else if ( (LA25_8==STRING_WITH_QUOTE_DOUBLE) ) {
 								int LA25_10 = input.LA(6);
-								if ( (LA25_10==EQUALS||LA25_10==GREATER||LA25_10==LESS) ) {
+								if ( (LA25_10==EQUALS||LA25_10==EXCLAMATION||LA25_10==GREATER||LA25_10==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_10==IS) ) {
@@ -2521,6 +2522,7 @@ public class SQL99Parser extends Parser {
 							}
 							break;
 						case EQUALS:
+						case EXCLAMATION:
 						case GREATER:
 						case LESS:
 							{
@@ -2564,6 +2566,7 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case EQUALS:
+				case EXCLAMATION:
 				case GREATER:
 				case LESS:
 					{
@@ -2601,7 +2604,7 @@ public class SQL99Parser extends Parser {
 							int LA25_8 = input.LA(5);
 							if ( (LA25_8==VARNAME) ) {
 								int LA25_9 = input.LA(6);
-								if ( (LA25_9==EQUALS||LA25_9==GREATER||LA25_9==LESS) ) {
+								if ( (LA25_9==EQUALS||LA25_9==EXCLAMATION||LA25_9==GREATER||LA25_9==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_9==IS) ) {
@@ -2625,7 +2628,7 @@ public class SQL99Parser extends Parser {
 							}
 							else if ( (LA25_8==STRING_WITH_QUOTE_DOUBLE) ) {
 								int LA25_10 = input.LA(6);
-								if ( (LA25_10==EQUALS||LA25_10==GREATER||LA25_10==LESS) ) {
+								if ( (LA25_10==EQUALS||LA25_10==EXCLAMATION||LA25_10==GREATER||LA25_10==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_10==IS) ) {
@@ -2665,6 +2668,7 @@ public class SQL99Parser extends Parser {
 							}
 							break;
 						case EQUALS:
+						case EXCLAMATION:
 						case GREATER:
 						case LESS:
 							{
@@ -2697,7 +2701,7 @@ public class SQL99Parser extends Parser {
 							int LA25_8 = input.LA(5);
 							if ( (LA25_8==VARNAME) ) {
 								int LA25_9 = input.LA(6);
-								if ( (LA25_9==EQUALS||LA25_9==GREATER||LA25_9==LESS) ) {
+								if ( (LA25_9==EQUALS||LA25_9==EXCLAMATION||LA25_9==GREATER||LA25_9==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_9==IS) ) {
@@ -2721,7 +2725,7 @@ public class SQL99Parser extends Parser {
 							}
 							else if ( (LA25_8==STRING_WITH_QUOTE_DOUBLE) ) {
 								int LA25_10 = input.LA(6);
-								if ( (LA25_10==EQUALS||LA25_10==GREATER||LA25_10==LESS) ) {
+								if ( (LA25_10==EQUALS||LA25_10==EXCLAMATION||LA25_10==GREATER||LA25_10==LESS) ) {
 									alt25=1;
 								}
 								else if ( (LA25_10==IS) ) {
@@ -2761,6 +2765,7 @@ public class SQL99Parser extends Parser {
 							}
 							break;
 						case EQUALS:
+						case EXCLAMATION:
 						case GREATER:
 						case LESS:
 							{
@@ -2804,6 +2809,7 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case EQUALS:
+				case EXCLAMATION:
 				case GREATER:
 				case LESS:
 					{
@@ -2946,14 +2952,14 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "comp_op"
-	// SQL99.g:599:1: comp_op returns [ComparisonPredicate.Operator value] : ( EQUALS | LESS GREATER | LESS | GREATER | LESS EQUALS | GREATER EQUALS );
+	// SQL99.g:599:1: comp_op returns [ComparisonPredicate.Operator value] : ( EQUALS | LESS GREATER | EXCLAMATION EQUALS | LESS | GREATER | LESS EQUALS | GREATER EQUALS );
 	public final ComparisonPredicate.Operator comp_op() throws RecognitionException {
 		ComparisonPredicate.Operator value = null;
 
 
 		try {
-			// SQL99.g:600:3: ( EQUALS | LESS GREATER | LESS | GREATER | LESS EQUALS | GREATER EQUALS )
-			int alt26=6;
+			// SQL99.g:600:3: ( EQUALS | LESS GREATER | EXCLAMATION EQUALS | LESS | GREATER | LESS EQUALS | GREATER EQUALS )
+			int alt26=7;
 			switch ( input.LA(1) ) {
 			case EQUALS:
 				{
@@ -2970,7 +2976,7 @@ public class SQL99Parser extends Parser {
 					break;
 				case EQUALS:
 					{
-					alt26=5;
+					alt26=6;
 					}
 					break;
 				case DECIMAL:
@@ -2985,7 +2991,7 @@ public class SQL99Parser extends Parser {
 				case TRUE:
 				case VARNAME:
 					{
-					alt26=3;
+					alt26=4;
 					}
 					break;
 				default:
@@ -3001,14 +3007,19 @@ public class SQL99Parser extends Parser {
 				}
 				}
 				break;
+			case EXCLAMATION:
+				{
+				alt26=3;
+				}
+				break;
 			case GREATER:
 				{
-				int LA26_3 = input.LA(2);
-				if ( (LA26_3==EQUALS) ) {
-					alt26=6;
+				int LA26_4 = input.LA(2);
+				if ( (LA26_4==EQUALS) ) {
+					alt26=7;
 				}
-				else if ( ((LA26_3 >= DECIMAL && LA26_3 <= DECIMAL_POSITIVE)||LA26_3==FALSE||(LA26_3 >= INTEGER && LA26_3 <= INTEGER_POSITIVE)||(LA26_3 >= STRING_WITH_QUOTE && LA26_3 <= STRING_WITH_QUOTE_DOUBLE)||LA26_3==TRUE||LA26_3==VARNAME) ) {
-					alt26=4;
+				else if ( ((LA26_4 >= DECIMAL && LA26_4 <= DECIMAL_POSITIVE)||LA26_4==FALSE||(LA26_4 >= INTEGER && LA26_4 <= INTEGER_POSITIVE)||(LA26_4 >= STRING_WITH_QUOTE && LA26_4 <= STRING_WITH_QUOTE_DOUBLE)||LA26_4==TRUE||LA26_4==VARNAME) ) {
+					alt26=5;
 				}
 
 				else {
@@ -3016,7 +3027,7 @@ public class SQL99Parser extends Parser {
 					try {
 						input.consume();
 						NoViableAltException nvae =
-							new NoViableAltException("", 26, 3, input);
+							new NoViableAltException("", 26, 4, input);
 						throw nvae;
 					} finally {
 						input.rewind(nvaeMark);
@@ -3047,32 +3058,40 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 3 :
-					// SQL99.g:602:5: LESS
+					// SQL99.g:602:5: EXCLAMATION EQUALS
 					{
-					match(input,LESS,FOLLOW_LESS_in_comp_op1246); 
-					 value = ComparisonPredicate.Operator.LT; 
+					match(input,EXCLAMATION,FOLLOW_EXCLAMATION_in_comp_op1246); 
+					match(input,EQUALS,FOLLOW_EQUALS_in_comp_op1248); 
+					 value = ComparisonPredicate.Operator.NE; 
 					}
 					break;
 				case 4 :
-					// SQL99.g:603:5: GREATER
+					// SQL99.g:603:5: LESS
 					{
-					match(input,GREATER,FOLLOW_GREATER_in_comp_op1254); 
-					 value = ComparisonPredicate.Operator.GT; 
+					match(input,LESS,FOLLOW_LESS_in_comp_op1256); 
+					 value = ComparisonPredicate.Operator.LT; 
 					}
 					break;
 				case 5 :
-					// SQL99.g:604:5: LESS EQUALS
+					// SQL99.g:604:5: GREATER
 					{
-					match(input,LESS,FOLLOW_LESS_in_comp_op1262); 
-					match(input,EQUALS,FOLLOW_EQUALS_in_comp_op1264); 
-					 value = ComparisonPredicate.Operator.LE; 
+					match(input,GREATER,FOLLOW_GREATER_in_comp_op1264); 
+					 value = ComparisonPredicate.Operator.GT; 
 					}
 					break;
 				case 6 :
-					// SQL99.g:605:5: GREATER EQUALS
+					// SQL99.g:605:5: LESS EQUALS
 					{
-					match(input,GREATER,FOLLOW_GREATER_in_comp_op1272); 
+					match(input,LESS,FOLLOW_LESS_in_comp_op1272); 
 					match(input,EQUALS,FOLLOW_EQUALS_in_comp_op1274); 
+					 value = ComparisonPredicate.Operator.LE; 
+					}
+					break;
+				case 7 :
+					// SQL99.g:606:5: GREATER EQUALS
+					{
+					match(input,GREATER,FOLLOW_GREATER_in_comp_op1282); 
+					match(input,EQUALS,FOLLOW_EQUALS_in_comp_op1284); 
 					 value = ComparisonPredicate.Operator.GE; 
 					}
 					break;
@@ -3093,7 +3112,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "null_predicate"
-	// SQL99.g:608:1: null_predicate returns [NullPredicate value] : column_reference IS ( NOT )? NULL ;
+	// SQL99.g:609:1: null_predicate returns [NullPredicate value] : column_reference IS ( NOT )? NULL ;
 	public final NullPredicate null_predicate() throws RecognitionException {
 		NullPredicate value = null;
 
@@ -3104,15 +3123,15 @@ public class SQL99Parser extends Parser {
 		  boolean useIsNull = true;
 
 		try {
-			// SQL99.g:612:3: ( column_reference IS ( NOT )? NULL )
-			// SQL99.g:612:5: column_reference IS ( NOT )? NULL
+			// SQL99.g:613:3: ( column_reference IS ( NOT )? NULL )
+			// SQL99.g:613:5: column_reference IS ( NOT )? NULL
 			{
-			pushFollow(FOLLOW_column_reference_in_null_predicate1298);
+			pushFollow(FOLLOW_column_reference_in_null_predicate1308);
 			column_reference35=column_reference();
 			state._fsp--;
 
-			match(input,IS,FOLLOW_IS_in_null_predicate1300); 
-			// SQL99.g:612:25: ( NOT )?
+			match(input,IS,FOLLOW_IS_in_null_predicate1310); 
+			// SQL99.g:613:25: ( NOT )?
 			int alt27=2;
 			int LA27_0 = input.LA(1);
 			if ( (LA27_0==NOT) ) {
@@ -3120,16 +3139,16 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt27) {
 				case 1 :
-					// SQL99.g:612:26: NOT
+					// SQL99.g:613:26: NOT
 					{
-					match(input,NOT,FOLLOW_NOT_in_null_predicate1303); 
+					match(input,NOT,FOLLOW_NOT_in_null_predicate1313); 
 					 useIsNull = false; 
 					}
 					break;
 
 			}
 
-			match(input,NULL,FOLLOW_NULL_in_null_predicate1309); 
+			match(input,NULL,FOLLOW_NULL_in_null_predicate1319); 
 
 			      value = new NullPredicate(column_reference35, useIsNull);
 			    
@@ -3150,17 +3169,17 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "in_predicate"
-	// SQL99.g:617:1: in_predicate : column_reference ( NOT )? IN in_predicate_value ;
+	// SQL99.g:618:1: in_predicate : column_reference ( NOT )? IN in_predicate_value ;
 	public final void in_predicate() throws RecognitionException {
 		try {
-			// SQL99.g:618:3: ( column_reference ( NOT )? IN in_predicate_value )
-			// SQL99.g:618:5: column_reference ( NOT )? IN in_predicate_value
+			// SQL99.g:619:3: ( column_reference ( NOT )? IN in_predicate_value )
+			// SQL99.g:619:5: column_reference ( NOT )? IN in_predicate_value
 			{
-			pushFollow(FOLLOW_column_reference_in_in_predicate1324);
+			pushFollow(FOLLOW_column_reference_in_in_predicate1334);
 			column_reference();
 			state._fsp--;
 
-			// SQL99.g:618:22: ( NOT )?
+			// SQL99.g:619:22: ( NOT )?
 			int alt28=2;
 			int LA28_0 = input.LA(1);
 			if ( (LA28_0==NOT) ) {
@@ -3168,16 +3187,16 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt28) {
 				case 1 :
-					// SQL99.g:618:23: NOT
+					// SQL99.g:619:23: NOT
 					{
-					match(input,NOT,FOLLOW_NOT_in_in_predicate1327); 
+					match(input,NOT,FOLLOW_NOT_in_in_predicate1337); 
 					}
 					break;
 
 			}
 
-			match(input,IN,FOLLOW_IN_in_in_predicate1331); 
-			pushFollow(FOLLOW_in_predicate_value_in_in_predicate1333);
+			match(input,IN,FOLLOW_IN_in_in_predicate1341); 
+			pushFollow(FOLLOW_in_predicate_value_in_in_predicate1343);
 			in_predicate_value();
 			state._fsp--;
 
@@ -3197,10 +3216,10 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "in_predicate_value"
-	// SQL99.g:621:1: in_predicate_value : ( table_subquery | LPAREN in_value_list RPAREN );
+	// SQL99.g:622:1: in_predicate_value : ( table_subquery | LPAREN in_value_list RPAREN );
 	public final void in_predicate_value() throws RecognitionException {
 		try {
-			// SQL99.g:622:3: ( table_subquery | LPAREN in_value_list RPAREN )
+			// SQL99.g:623:3: ( table_subquery | LPAREN in_value_list RPAREN )
 			int alt29=2;
 			int LA29_0 = input.LA(1);
 			if ( (LA29_0==LPAREN) ) {
@@ -3234,23 +3253,23 @@ public class SQL99Parser extends Parser {
 
 			switch (alt29) {
 				case 1 :
-					// SQL99.g:622:5: table_subquery
+					// SQL99.g:623:5: table_subquery
 					{
-					pushFollow(FOLLOW_table_subquery_in_in_predicate_value1348);
+					pushFollow(FOLLOW_table_subquery_in_in_predicate_value1358);
 					table_subquery();
 					state._fsp--;
 
 					}
 					break;
 				case 2 :
-					// SQL99.g:623:5: LPAREN in_value_list RPAREN
+					// SQL99.g:624:5: LPAREN in_value_list RPAREN
 					{
-					match(input,LPAREN,FOLLOW_LPAREN_in_in_predicate_value1354); 
-					pushFollow(FOLLOW_in_value_list_in_in_predicate_value1356);
+					match(input,LPAREN,FOLLOW_LPAREN_in_in_predicate_value1364); 
+					pushFollow(FOLLOW_in_value_list_in_in_predicate_value1366);
 					in_value_list();
 					state._fsp--;
 
-					match(input,RPAREN,FOLLOW_RPAREN_in_in_predicate_value1358); 
+					match(input,RPAREN,FOLLOW_RPAREN_in_in_predicate_value1368); 
 					}
 					break;
 
@@ -3269,13 +3288,13 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "table_subquery"
-	// SQL99.g:626:1: table_subquery : subquery ;
+	// SQL99.g:627:1: table_subquery : subquery ;
 	public final void table_subquery() throws RecognitionException {
 		try {
-			// SQL99.g:627:3: ( subquery )
-			// SQL99.g:627:5: subquery
+			// SQL99.g:628:3: ( subquery )
+			// SQL99.g:628:5: subquery
 			{
-			pushFollow(FOLLOW_subquery_in_table_subquery1371);
+			pushFollow(FOLLOW_subquery_in_table_subquery1381);
 			subquery();
 			state._fsp--;
 
@@ -3295,18 +3314,18 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "subquery"
-	// SQL99.g:630:1: subquery : LPAREN query RPAREN ;
+	// SQL99.g:631:1: subquery : LPAREN query RPAREN ;
 	public final void subquery() throws RecognitionException {
 		try {
-			// SQL99.g:631:3: ( LPAREN query RPAREN )
-			// SQL99.g:631:5: LPAREN query RPAREN
+			// SQL99.g:632:3: ( LPAREN query RPAREN )
+			// SQL99.g:632:5: LPAREN query RPAREN
 			{
-			match(input,LPAREN,FOLLOW_LPAREN_in_subquery1384); 
-			pushFollow(FOLLOW_query_in_subquery1386);
+			match(input,LPAREN,FOLLOW_LPAREN_in_subquery1394); 
+			pushFollow(FOLLOW_query_in_subquery1396);
 			query();
 			state._fsp--;
 
-			match(input,RPAREN,FOLLOW_RPAREN_in_subquery1388); 
+			match(input,RPAREN,FOLLOW_RPAREN_in_subquery1398); 
 			}
 
 		}
@@ -3323,17 +3342,17 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "in_value_list"
-	// SQL99.g:634:1: in_value_list : row_value_expression ( COMMA row_value_expression )* ;
+	// SQL99.g:635:1: in_value_list : row_value_expression ( COMMA row_value_expression )* ;
 	public final void in_value_list() throws RecognitionException {
 		try {
-			// SQL99.g:635:3: ( row_value_expression ( COMMA row_value_expression )* )
-			// SQL99.g:635:5: row_value_expression ( COMMA row_value_expression )*
+			// SQL99.g:636:3: ( row_value_expression ( COMMA row_value_expression )* )
+			// SQL99.g:636:5: row_value_expression ( COMMA row_value_expression )*
 			{
-			pushFollow(FOLLOW_row_value_expression_in_in_value_list1403);
+			pushFollow(FOLLOW_row_value_expression_in_in_value_list1413);
 			row_value_expression();
 			state._fsp--;
 
-			// SQL99.g:635:26: ( COMMA row_value_expression )*
+			// SQL99.g:636:26: ( COMMA row_value_expression )*
 			loop30:
 			while (true) {
 				int alt30=2;
@@ -3344,10 +3363,10 @@ public class SQL99Parser extends Parser {
 
 				switch (alt30) {
 				case 1 :
-					// SQL99.g:635:27: COMMA row_value_expression
+					// SQL99.g:636:27: COMMA row_value_expression
 					{
-					match(input,COMMA,FOLLOW_COMMA_in_in_value_list1406); 
-					pushFollow(FOLLOW_row_value_expression_in_in_value_list1408);
+					match(input,COMMA,FOLLOW_COMMA_in_in_value_list1416); 
+					pushFollow(FOLLOW_row_value_expression_in_in_value_list1418);
 					row_value_expression();
 					state._fsp--;
 
@@ -3375,7 +3394,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "group_by_clause"
-	// SQL99.g:638:1: group_by_clause returns [ArrayList<GroupingElement> value] : GROUP BY grouping_element_list ;
+	// SQL99.g:639:1: group_by_clause returns [ArrayList<GroupingElement> value] : GROUP BY grouping_element_list ;
 	public final ArrayList<GroupingElement> group_by_clause() throws RecognitionException {
 		ArrayList<GroupingElement> value = null;
 
@@ -3383,12 +3402,12 @@ public class SQL99Parser extends Parser {
 		ArrayList<GroupingElement> grouping_element_list36 =null;
 
 		try {
-			// SQL99.g:639:3: ( GROUP BY grouping_element_list )
-			// SQL99.g:639:5: GROUP BY grouping_element_list
+			// SQL99.g:640:3: ( GROUP BY grouping_element_list )
+			// SQL99.g:640:5: GROUP BY grouping_element_list
 			{
-			match(input,GROUP,FOLLOW_GROUP_in_group_by_clause1427); 
-			match(input,BY,FOLLOW_BY_in_group_by_clause1429); 
-			pushFollow(FOLLOW_grouping_element_list_in_group_by_clause1431);
+			match(input,GROUP,FOLLOW_GROUP_in_group_by_clause1437); 
+			match(input,BY,FOLLOW_BY_in_group_by_clause1439); 
+			pushFollow(FOLLOW_grouping_element_list_in_group_by_clause1441);
 			grouping_element_list36=grouping_element_list();
 			state._fsp--;
 
@@ -3412,7 +3431,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "grouping_element_list"
-	// SQL99.g:644:1: grouping_element_list returns [ArrayList<GroupingElement> value] : a= grouping_element ( COMMA b= grouping_element )* ;
+	// SQL99.g:645:1: grouping_element_list returns [ArrayList<GroupingElement> value] : a= grouping_element ( COMMA b= grouping_element )* ;
 	public final ArrayList<GroupingElement> grouping_element_list() throws RecognitionException {
 		ArrayList<GroupingElement> value = null;
 
@@ -3424,15 +3443,15 @@ public class SQL99Parser extends Parser {
 		  value = new ArrayList<GroupingElement>();
 
 		try {
-			// SQL99.g:648:3: (a= grouping_element ( COMMA b= grouping_element )* )
-			// SQL99.g:648:5: a= grouping_element ( COMMA b= grouping_element )*
+			// SQL99.g:649:3: (a= grouping_element ( COMMA b= grouping_element )* )
+			// SQL99.g:649:5: a= grouping_element ( COMMA b= grouping_element )*
 			{
-			pushFollow(FOLLOW_grouping_element_in_grouping_element_list1457);
+			pushFollow(FOLLOW_grouping_element_in_grouping_element_list1467);
 			a=grouping_element();
 			state._fsp--;
 
 			 value.add(a); 
-			// SQL99.g:649:5: ( COMMA b= grouping_element )*
+			// SQL99.g:650:5: ( COMMA b= grouping_element )*
 			loop31:
 			while (true) {
 				int alt31=2;
@@ -3443,10 +3462,10 @@ public class SQL99Parser extends Parser {
 
 				switch (alt31) {
 				case 1 :
-					// SQL99.g:649:6: COMMA b= grouping_element
+					// SQL99.g:650:6: COMMA b= grouping_element
 					{
-					match(input,COMMA,FOLLOW_COMMA_in_grouping_element_list1467); 
-					pushFollow(FOLLOW_grouping_element_in_grouping_element_list1471);
+					match(input,COMMA,FOLLOW_COMMA_in_grouping_element_list1477); 
+					pushFollow(FOLLOW_grouping_element_in_grouping_element_list1481);
 					b=grouping_element();
 					state._fsp--;
 
@@ -3476,7 +3495,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "grouping_element"
-	// SQL99.g:652:1: grouping_element returns [GroupingElement value] : ( grouping_column_reference | LPAREN grouping_column_reference_list RPAREN );
+	// SQL99.g:653:1: grouping_element returns [GroupingElement value] : ( grouping_column_reference | LPAREN grouping_column_reference_list RPAREN );
 	public final GroupingElement grouping_element() throws RecognitionException {
 		GroupingElement value = null;
 
@@ -3488,7 +3507,7 @@ public class SQL99Parser extends Parser {
 		  value = new GroupingElement();
 
 		try {
-			// SQL99.g:656:3: ( grouping_column_reference | LPAREN grouping_column_reference_list RPAREN )
+			// SQL99.g:657:3: ( grouping_column_reference | LPAREN grouping_column_reference_list RPAREN )
 			int alt32=2;
 			int LA32_0 = input.LA(1);
 			if ( (LA32_0==STRING_WITH_QUOTE_DOUBLE||LA32_0==VARNAME) ) {
@@ -3506,9 +3525,9 @@ public class SQL99Parser extends Parser {
 
 			switch (alt32) {
 				case 1 :
-					// SQL99.g:656:5: grouping_column_reference
+					// SQL99.g:657:5: grouping_column_reference
 					{
-					pushFollow(FOLLOW_grouping_column_reference_in_grouping_element1499);
+					pushFollow(FOLLOW_grouping_column_reference_in_grouping_element1509);
 					grouping_column_reference37=grouping_column_reference();
 					state._fsp--;
 
@@ -3516,14 +3535,14 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 2 :
-					// SQL99.g:657:5: LPAREN grouping_column_reference_list RPAREN
+					// SQL99.g:658:5: LPAREN grouping_column_reference_list RPAREN
 					{
-					match(input,LPAREN,FOLLOW_LPAREN_in_grouping_element1507); 
-					pushFollow(FOLLOW_grouping_column_reference_list_in_grouping_element1509);
+					match(input,LPAREN,FOLLOW_LPAREN_in_grouping_element1517); 
+					pushFollow(FOLLOW_grouping_column_reference_list_in_grouping_element1519);
 					grouping_column_reference_list38=grouping_column_reference_list();
 					state._fsp--;
 
-					match(input,RPAREN,FOLLOW_RPAREN_in_grouping_element1511); 
+					match(input,RPAREN,FOLLOW_RPAREN_in_grouping_element1521); 
 					 value.update(grouping_column_reference_list38); 
 					}
 					break;
@@ -3544,7 +3563,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "grouping_column_reference"
-	// SQL99.g:660:1: grouping_column_reference returns [ColumnReference value] : column_reference ;
+	// SQL99.g:661:1: grouping_column_reference returns [ColumnReference value] : column_reference ;
 	public final ColumnReference grouping_column_reference() throws RecognitionException {
 		ColumnReference value = null;
 
@@ -3552,10 +3571,10 @@ public class SQL99Parser extends Parser {
 		ColumnReference column_reference39 =null;
 
 		try {
-			// SQL99.g:661:3: ( column_reference )
-			// SQL99.g:661:5: column_reference
+			// SQL99.g:662:3: ( column_reference )
+			// SQL99.g:662:5: column_reference
 			{
-			pushFollow(FOLLOW_column_reference_in_grouping_column_reference1532);
+			pushFollow(FOLLOW_column_reference_in_grouping_column_reference1542);
 			column_reference39=column_reference();
 			state._fsp--;
 
@@ -3577,7 +3596,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "grouping_column_reference_list"
-	// SQL99.g:664:1: grouping_column_reference_list returns [ArrayList<ColumnReference> value] : a= column_reference ( COMMA b= column_reference )* ;
+	// SQL99.g:665:1: grouping_column_reference_list returns [ArrayList<ColumnReference> value] : a= column_reference ( COMMA b= column_reference )* ;
 	public final ArrayList<ColumnReference> grouping_column_reference_list() throws RecognitionException {
 		ArrayList<ColumnReference> value = null;
 
@@ -3589,15 +3608,15 @@ public class SQL99Parser extends Parser {
 		  value = new ArrayList<ColumnReference>();
 
 		try {
-			// SQL99.g:668:3: (a= column_reference ( COMMA b= column_reference )* )
-			// SQL99.g:668:5: a= column_reference ( COMMA b= column_reference )*
+			// SQL99.g:669:3: (a= column_reference ( COMMA b= column_reference )* )
+			// SQL99.g:669:5: a= column_reference ( COMMA b= column_reference )*
 			{
-			pushFollow(FOLLOW_column_reference_in_grouping_column_reference_list1560);
+			pushFollow(FOLLOW_column_reference_in_grouping_column_reference_list1570);
 			a=column_reference();
 			state._fsp--;
 
 			 value.add(a); 
-			// SQL99.g:669:5: ( COMMA b= column_reference )*
+			// SQL99.g:670:5: ( COMMA b= column_reference )*
 			loop33:
 			while (true) {
 				int alt33=2;
@@ -3608,10 +3627,10 @@ public class SQL99Parser extends Parser {
 
 				switch (alt33) {
 				case 1 :
-					// SQL99.g:669:6: COMMA b= column_reference
+					// SQL99.g:670:6: COMMA b= column_reference
 					{
-					match(input,COMMA,FOLLOW_COMMA_in_grouping_column_reference_list1569); 
-					pushFollow(FOLLOW_column_reference_in_grouping_column_reference_list1573);
+					match(input,COMMA,FOLLOW_COMMA_in_grouping_column_reference_list1579); 
+					pushFollow(FOLLOW_column_reference_in_grouping_column_reference_list1583);
 					b=column_reference();
 					state._fsp--;
 
@@ -3641,7 +3660,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "joined_table"
-	// SQL99.g:672:1: joined_table returns [TablePrimary value] : ( ( join_type )? JOIN table_reference join_specification ) ;
+	// SQL99.g:673:1: joined_table returns [TablePrimary value] : ( ( join_type )? JOIN table_reference join_specification ) ;
 	public final TablePrimary joined_table() throws RecognitionException {
 		TablePrimary value = null;
 
@@ -3654,13 +3673,13 @@ public class SQL99Parser extends Parser {
 		  int joinType = JoinOperator.JOIN; // by default
 
 		try {
-			// SQL99.g:676:3: ( ( ( join_type )? JOIN table_reference join_specification ) )
-			// SQL99.g:676:5: ( ( join_type )? JOIN table_reference join_specification )
+			// SQL99.g:677:3: ( ( ( join_type )? JOIN table_reference join_specification ) )
+			// SQL99.g:677:5: ( ( join_type )? JOIN table_reference join_specification )
 			{
-			// SQL99.g:676:5: ( ( join_type )? JOIN table_reference join_specification )
-			// SQL99.g:676:6: ( join_type )? JOIN table_reference join_specification
+			// SQL99.g:677:5: ( ( join_type )? JOIN table_reference join_specification )
+			// SQL99.g:677:6: ( join_type )? JOIN table_reference join_specification
 			{
-			// SQL99.g:676:6: ( join_type )?
+			// SQL99.g:677:6: ( join_type )?
 			int alt34=2;
 			int LA34_0 = input.LA(1);
 			if ( (LA34_0==FULL||LA34_0==INNER||LA34_0==LEFT||LA34_0==RIGHT) ) {
@@ -3668,9 +3687,9 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt34) {
 				case 1 :
-					// SQL99.g:676:7: join_type
+					// SQL99.g:677:7: join_type
 					{
-					pushFollow(FOLLOW_join_type_in_joined_table1603);
+					pushFollow(FOLLOW_join_type_in_joined_table1613);
 					join_type40=join_type();
 					state._fsp--;
 
@@ -3680,12 +3699,12 @@ public class SQL99Parser extends Parser {
 
 			}
 
-			match(input,JOIN,FOLLOW_JOIN_in_joined_table1609); 
-			pushFollow(FOLLOW_table_reference_in_joined_table1611);
+			match(input,JOIN,FOLLOW_JOIN_in_joined_table1619); 
+			pushFollow(FOLLOW_table_reference_in_joined_table1621);
 			table_reference42=table_reference();
 			state._fsp--;
 
-			pushFollow(FOLLOW_join_specification_in_joined_table1613);
+			pushFollow(FOLLOW_join_specification_in_joined_table1623);
 			join_specification41=join_specification();
 			state._fsp--;
 
@@ -3716,7 +3735,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "join_type"
-	// SQL99.g:686:1: join_type returns [int value] : ( INNER | outer_join_type ( OUTER )? );
+	// SQL99.g:687:1: join_type returns [int value] : ( INNER | outer_join_type ( OUTER )? );
 	public final int join_type() throws RecognitionException {
 		int value = 0;
 
@@ -3727,7 +3746,7 @@ public class SQL99Parser extends Parser {
 		  boolean bHasOuter = false;
 
 		try {
-			// SQL99.g:690:3: ( INNER | outer_join_type ( OUTER )? )
+			// SQL99.g:691:3: ( INNER | outer_join_type ( OUTER )? )
 			int alt36=2;
 			int LA36_0 = input.LA(1);
 			if ( (LA36_0==INNER) ) {
@@ -3745,20 +3764,20 @@ public class SQL99Parser extends Parser {
 
 			switch (alt36) {
 				case 1 :
-					// SQL99.g:690:5: INNER
+					// SQL99.g:691:5: INNER
 					{
-					match(input,INNER,FOLLOW_INNER_in_join_type1638); 
+					match(input,INNER,FOLLOW_INNER_in_join_type1648); 
 					 value = JoinOperator.INNER_JOIN; 
 					}
 					break;
 				case 2 :
-					// SQL99.g:691:5: outer_join_type ( OUTER )?
+					// SQL99.g:692:5: outer_join_type ( OUTER )?
 					{
-					pushFollow(FOLLOW_outer_join_type_in_join_type1646);
+					pushFollow(FOLLOW_outer_join_type_in_join_type1656);
 					outer_join_type43=outer_join_type();
 					state._fsp--;
 
-					// SQL99.g:691:21: ( OUTER )?
+					// SQL99.g:692:21: ( OUTER )?
 					int alt35=2;
 					int LA35_0 = input.LA(1);
 					if ( (LA35_0==OUTER) ) {
@@ -3766,9 +3785,9 @@ public class SQL99Parser extends Parser {
 					}
 					switch (alt35) {
 						case 1 :
-							// SQL99.g:691:22: OUTER
+							// SQL99.g:692:22: OUTER
 							{
-							match(input,OUTER,FOLLOW_OUTER_in_join_type1649); 
+							match(input,OUTER,FOLLOW_OUTER_in_join_type1659); 
 							 bHasOuter = true; 
 							}
 							break;
@@ -3806,13 +3825,13 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "outer_join_type"
-	// SQL99.g:705:1: outer_join_type returns [int value] : ( LEFT | RIGHT | FULL );
+	// SQL99.g:706:1: outer_join_type returns [int value] : ( LEFT | RIGHT | FULL );
 	public final int outer_join_type() throws RecognitionException {
 		int value = 0;
 
 
 		try {
-			// SQL99.g:706:3: ( LEFT | RIGHT | FULL )
+			// SQL99.g:707:3: ( LEFT | RIGHT | FULL )
 			int alt37=3;
 			switch ( input.LA(1) ) {
 			case LEFT:
@@ -3837,23 +3856,23 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt37) {
 				case 1 :
-					// SQL99.g:706:5: LEFT
+					// SQL99.g:707:5: LEFT
 					{
-					match(input,LEFT,FOLLOW_LEFT_in_outer_join_type1674); 
+					match(input,LEFT,FOLLOW_LEFT_in_outer_join_type1684); 
 					 value = JoinOperator.LEFT_JOIN; 
 					}
 					break;
 				case 2 :
-					// SQL99.g:707:5: RIGHT
+					// SQL99.g:708:5: RIGHT
 					{
-					match(input,RIGHT,FOLLOW_RIGHT_in_outer_join_type1682); 
+					match(input,RIGHT,FOLLOW_RIGHT_in_outer_join_type1692); 
 					 value = JoinOperator.RIGHT_JOIN; 
 					}
 					break;
 				case 3 :
-					// SQL99.g:708:5: FULL
+					// SQL99.g:709:5: FULL
 					{
-					match(input,FULL,FOLLOW_FULL_in_outer_join_type1690); 
+					match(input,FULL,FOLLOW_FULL_in_outer_join_type1700); 
 					 value = JoinOperator.FULL_JOIN; 
 					}
 					break;
@@ -3874,7 +3893,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "join_specification"
-	// SQL99.g:711:1: join_specification returns [BooleanValueExpression value] : join_condition ;
+	// SQL99.g:712:1: join_specification returns [BooleanValueExpression value] : join_condition ;
 	public final BooleanValueExpression join_specification() throws RecognitionException {
 		BooleanValueExpression value = null;
 
@@ -3882,10 +3901,10 @@ public class SQL99Parser extends Parser {
 		BooleanValueExpression join_condition44 =null;
 
 		try {
-			// SQL99.g:712:3: ( join_condition )
-			// SQL99.g:712:5: join_condition
+			// SQL99.g:713:3: ( join_condition )
+			// SQL99.g:713:5: join_condition
 			{
-			pushFollow(FOLLOW_join_condition_in_join_specification1709);
+			pushFollow(FOLLOW_join_condition_in_join_specification1719);
 			join_condition44=join_condition();
 			state._fsp--;
 
@@ -3907,7 +3926,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "join_condition"
-	// SQL99.g:716:1: join_condition returns [BooleanValueExpression value] : ON search_condition ;
+	// SQL99.g:717:1: join_condition returns [BooleanValueExpression value] : ON search_condition ;
 	public final BooleanValueExpression join_condition() throws RecognitionException {
 		BooleanValueExpression value = null;
 
@@ -3915,11 +3934,11 @@ public class SQL99Parser extends Parser {
 		BooleanValueExpression search_condition45 =null;
 
 		try {
-			// SQL99.g:717:3: ( ON search_condition )
-			// SQL99.g:717:5: ON search_condition
+			// SQL99.g:718:3: ( ON search_condition )
+			// SQL99.g:718:5: ON search_condition
 			{
-			match(input,ON,FOLLOW_ON_in_join_condition1729); 
-			pushFollow(FOLLOW_search_condition_in_join_condition1731);
+			match(input,ON,FOLLOW_ON_in_join_condition1739); 
+			pushFollow(FOLLOW_search_condition_in_join_condition1741);
 			search_condition45=search_condition();
 			state._fsp--;
 
@@ -3943,19 +3962,19 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "named_columns_join"
-	// SQL99.g:722:1: named_columns_join : USING LPAREN join_column_list RPAREN ;
+	// SQL99.g:723:1: named_columns_join : USING LPAREN join_column_list RPAREN ;
 	public final void named_columns_join() throws RecognitionException {
 		try {
-			// SQL99.g:723:3: ( USING LPAREN join_column_list RPAREN )
-			// SQL99.g:723:5: USING LPAREN join_column_list RPAREN
+			// SQL99.g:724:3: ( USING LPAREN join_column_list RPAREN )
+			// SQL99.g:724:5: USING LPAREN join_column_list RPAREN
 			{
-			match(input,USING,FOLLOW_USING_in_named_columns_join1746); 
-			match(input,LPAREN,FOLLOW_LPAREN_in_named_columns_join1748); 
-			pushFollow(FOLLOW_join_column_list_in_named_columns_join1750);
+			match(input,USING,FOLLOW_USING_in_named_columns_join1756); 
+			match(input,LPAREN,FOLLOW_LPAREN_in_named_columns_join1758); 
+			pushFollow(FOLLOW_join_column_list_in_named_columns_join1760);
 			join_column_list();
 			state._fsp--;
 
-			match(input,RPAREN,FOLLOW_RPAREN_in_named_columns_join1752); 
+			match(input,RPAREN,FOLLOW_RPAREN_in_named_columns_join1762); 
 			}
 
 		}
@@ -3972,17 +3991,17 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "join_column_list"
-	// SQL99.g:726:1: join_column_list : column_name ( COMMA column_name )* ;
+	// SQL99.g:727:1: join_column_list : column_name ( COMMA column_name )* ;
 	public final void join_column_list() throws RecognitionException {
 		try {
-			// SQL99.g:727:3: ( column_name ( COMMA column_name )* )
-			// SQL99.g:727:5: column_name ( COMMA column_name )*
+			// SQL99.g:728:3: ( column_name ( COMMA column_name )* )
+			// SQL99.g:728:5: column_name ( COMMA column_name )*
 			{
-			pushFollow(FOLLOW_column_name_in_join_column_list1765);
+			pushFollow(FOLLOW_column_name_in_join_column_list1775);
 			column_name();
 			state._fsp--;
 
-			// SQL99.g:727:17: ( COMMA column_name )*
+			// SQL99.g:728:17: ( COMMA column_name )*
 			loop38:
 			while (true) {
 				int alt38=2;
@@ -3993,10 +4012,10 @@ public class SQL99Parser extends Parser {
 
 				switch (alt38) {
 				case 1 :
-					// SQL99.g:727:18: COMMA column_name
+					// SQL99.g:728:18: COMMA column_name
 					{
-					match(input,COMMA,FOLLOW_COMMA_in_join_column_list1768); 
-					pushFollow(FOLLOW_column_name_in_join_column_list1770);
+					match(input,COMMA,FOLLOW_COMMA_in_join_column_list1778); 
+					pushFollow(FOLLOW_column_name_in_join_column_list1780);
 					column_name();
 					state._fsp--;
 
@@ -4024,7 +4043,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "table_primary"
-	// SQL99.g:731:1: table_primary returns [TablePrimary value] : table_name ( ( AS )? alias_name )? ;
+	// SQL99.g:732:1: table_primary returns [TablePrimary value] : table_name ( ( AS )? alias_name )? ;
 	public final TablePrimary table_primary() throws RecognitionException {
 		TablePrimary value = null;
 
@@ -4033,14 +4052,14 @@ public class SQL99Parser extends Parser {
 		String alias_name47 =null;
 
 		try {
-			// SQL99.g:732:3: ( table_name ( ( AS )? alias_name )? )
-			// SQL99.g:732:5: table_name ( ( AS )? alias_name )?
+			// SQL99.g:733:3: ( table_name ( ( AS )? alias_name )? )
+			// SQL99.g:733:5: table_name ( ( AS )? alias_name )?
 			{
-			pushFollow(FOLLOW_table_name_in_table_primary1790);
+			pushFollow(FOLLOW_table_name_in_table_primary1800);
 			table_name46=table_name();
 			state._fsp--;
 
-			// SQL99.g:733:5: ( ( AS )? alias_name )?
+			// SQL99.g:734:5: ( ( AS )? alias_name )?
 			int alt40=2;
 			int LA40_0 = input.LA(1);
 			if ( (LA40_0==AS||LA40_0==STRING_WITH_QUOTE_DOUBLE||LA40_0==VARNAME) ) {
@@ -4048,9 +4067,9 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt40) {
 				case 1 :
-					// SQL99.g:733:6: ( AS )? alias_name
+					// SQL99.g:734:6: ( AS )? alias_name
 					{
-					// SQL99.g:733:6: ( AS )?
+					// SQL99.g:734:6: ( AS )?
 					int alt39=2;
 					int LA39_0 = input.LA(1);
 					if ( (LA39_0==AS) ) {
@@ -4058,15 +4077,15 @@ public class SQL99Parser extends Parser {
 					}
 					switch (alt39) {
 						case 1 :
-							// SQL99.g:733:6: AS
+							// SQL99.g:734:6: AS
 							{
-							match(input,AS,FOLLOW_AS_in_table_primary1797); 
+							match(input,AS,FOLLOW_AS_in_table_primary1807); 
 							}
 							break;
 
 					}
 
-					pushFollow(FOLLOW_alias_name_in_table_primary1800);
+					pushFollow(FOLLOW_alias_name_in_table_primary1810);
 					alias_name47=alias_name();
 					state._fsp--;
 
@@ -4098,7 +4117,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "table_name"
-	// SQL99.g:745:1: table_name returns [TablePrimary value] : ( schema_name PERIOD )? table_identifier ;
+	// SQL99.g:746:1: table_name returns [TablePrimary value] : ( schema_name PERIOD )? table_identifier ;
 	public final TablePrimary table_name() throws RecognitionException {
 		TablePrimary value = null;
 
@@ -4107,10 +4126,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> schema_name49 =null;
 
 		try {
-			// SQL99.g:746:3: ( ( schema_name PERIOD )? table_identifier )
-			// SQL99.g:746:5: ( schema_name PERIOD )? table_identifier
+			// SQL99.g:747:3: ( ( schema_name PERIOD )? table_identifier )
+			// SQL99.g:747:5: ( schema_name PERIOD )? table_identifier
 			{
-			// SQL99.g:746:5: ( schema_name PERIOD )?
+			// SQL99.g:747:5: ( schema_name PERIOD )?
 			int alt41=2;
 			int LA41_0 = input.LA(1);
 			if ( (LA41_0==VARNAME) ) {
@@ -4127,19 +4146,19 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt41) {
 				case 1 :
-					// SQL99.g:746:6: schema_name PERIOD
+					// SQL99.g:747:6: schema_name PERIOD
 					{
-					pushFollow(FOLLOW_schema_name_in_table_name1828);
+					pushFollow(FOLLOW_schema_name_in_table_name1838);
 					schema_name49=schema_name();
 					state._fsp--;
 
-					match(input,PERIOD,FOLLOW_PERIOD_in_table_name1830); 
+					match(input,PERIOD,FOLLOW_PERIOD_in_table_name1840); 
 					}
 					break;
 
 			}
 
-			pushFollow(FOLLOW_table_identifier_in_table_name1834);
+			pushFollow(FOLLOW_table_identifier_in_table_name1844);
 			table_identifier48=table_identifier();
 			state._fsp--;
 
@@ -4152,7 +4171,7 @@ public class SQL99Parser extends Parser {
 			        value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
 			      }
 			      else {
-			        value = new TablePrimary(tableName, tableQName);
+			        value = new TablePrimary("", tableName, tableQName);
 			      }      
 			    
 			}
@@ -4172,7 +4191,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "alias_name"
-	// SQL99.g:760:1: alias_name returns [String value] : identifier ;
+	// SQL99.g:761:1: alias_name returns [String value] : identifier ;
 	public final String alias_name() throws RecognitionException {
 		String value = null;
 
@@ -4180,10 +4199,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier50 =null;
 
 		try {
-			// SQL99.g:761:3: ( identifier )
-			// SQL99.g:761:5: identifier
+			// SQL99.g:762:3: ( identifier )
+			// SQL99.g:762:5: identifier
 			{
-			pushFollow(FOLLOW_identifier_in_alias_name1855);
+			pushFollow(FOLLOW_identifier_in_alias_name1865);
 			identifier50=identifier();
 			state._fsp--;
 
@@ -4205,13 +4224,13 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "derived_table"
-	// SQL99.g:764:1: derived_table : table_subquery ;
+	// SQL99.g:765:1: derived_table : table_subquery ;
 	public final void derived_table() throws RecognitionException {
 		try {
-			// SQL99.g:765:3: ( table_subquery )
-			// SQL99.g:765:5: table_subquery
+			// SQL99.g:766:3: ( table_subquery )
+			// SQL99.g:766:5: table_subquery
 			{
-			pushFollow(FOLLOW_table_subquery_in_derived_table1871);
+			pushFollow(FOLLOW_table_subquery_in_derived_table1881);
 			table_subquery();
 			state._fsp--;
 
@@ -4231,7 +4250,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "table_identifier"
-	// SQL99.g:768:1: table_identifier returns [ArrayList<String> value] : identifier ;
+	// SQL99.g:769:1: table_identifier returns [ArrayList<String> value] : identifier ;
 	public final ArrayList<String> table_identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4239,10 +4258,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier51 =null;
 
 		try {
-			// SQL99.g:769:3: ( identifier )
-			// SQL99.g:769:5: identifier
+			// SQL99.g:770:3: ( identifier )
+			// SQL99.g:770:5: identifier
 			{
-			pushFollow(FOLLOW_identifier_in_table_identifier1892);
+			pushFollow(FOLLOW_identifier_in_table_identifier1902);
 			identifier51=identifier();
 			state._fsp--;
 
@@ -4264,7 +4283,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "schema_name"
-	// SQL99.g:772:1: schema_name returns [ArrayList<String> value] : identifier ;
+	// SQL99.g:773:1: schema_name returns [ArrayList<String> value] : identifier ;
 	public final ArrayList<String> schema_name() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4272,10 +4291,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier52 =null;
 
 		try {
-			// SQL99.g:773:3: ( identifier )
-			// SQL99.g:773:5: identifier
+			// SQL99.g:774:3: ( identifier )
+			// SQL99.g:774:5: identifier
 			{
-			pushFollow(FOLLOW_identifier_in_schema_name1913);
+			pushFollow(FOLLOW_identifier_in_schema_name1923);
 			identifier52=identifier();
 			state._fsp--;
 
@@ -4297,7 +4316,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "column_name"
-	// SQL99.g:776:1: column_name returns [ArrayList<String> value] : identifier ;
+	// SQL99.g:777:1: column_name returns [ArrayList<String> value] : identifier ;
 	public final ArrayList<String> column_name() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4305,10 +4324,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier53 =null;
 
 		try {
-			// SQL99.g:777:3: ( identifier )
-			// SQL99.g:777:5: identifier
+			// SQL99.g:778:3: ( identifier )
+			// SQL99.g:778:5: identifier
 			{
-			pushFollow(FOLLOW_identifier_in_column_name1936);
+			pushFollow(FOLLOW_identifier_in_column_name1946);
 			identifier53=identifier();
 			state._fsp--;
 
@@ -4330,7 +4349,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "identifier"
-	// SQL99.g:780:1: identifier returns [ArrayList<String> value] : (t= regular_identifier |t= delimited_identifier ) ;
+	// SQL99.g:781:1: identifier returns [ArrayList<String> value] : (t= regular_identifier |t= delimited_identifier ) ;
 	public final ArrayList<String> identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4338,10 +4357,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> t =null;
 
 		try {
-			// SQL99.g:781:3: ( (t= regular_identifier |t= delimited_identifier ) )
-			// SQL99.g:781:5: (t= regular_identifier |t= delimited_identifier )
+			// SQL99.g:782:3: ( (t= regular_identifier |t= delimited_identifier ) )
+			// SQL99.g:782:5: (t= regular_identifier |t= delimited_identifier )
 			{
-			// SQL99.g:781:5: (t= regular_identifier |t= delimited_identifier )
+			// SQL99.g:782:5: (t= regular_identifier |t= delimited_identifier )
 			int alt42=2;
 			int LA42_0 = input.LA(1);
 			if ( (LA42_0==VARNAME) ) {
@@ -4359,18 +4378,18 @@ public class SQL99Parser extends Parser {
 
 			switch (alt42) {
 				case 1 :
-					// SQL99.g:781:6: t= regular_identifier
+					// SQL99.g:782:6: t= regular_identifier
 					{
-					pushFollow(FOLLOW_regular_identifier_in_identifier1960);
+					pushFollow(FOLLOW_regular_identifier_in_identifier1970);
 					t=regular_identifier();
 					state._fsp--;
 
 					}
 					break;
 				case 2 :
-					// SQL99.g:781:29: t= delimited_identifier
+					// SQL99.g:782:29: t= delimited_identifier
 					{
-					pushFollow(FOLLOW_delimited_identifier_in_identifier1966);
+					pushFollow(FOLLOW_delimited_identifier_in_identifier1976);
 					t=delimited_identifier();
 					state._fsp--;
 
@@ -4397,7 +4416,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "regular_identifier"
-	// SQL99.g:784:1: regular_identifier returns [ArrayList<String> value] : VARNAME ;
+	// SQL99.g:785:1: regular_identifier returns [ArrayList<String> value] : VARNAME ;
 	public final ArrayList<String> regular_identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4405,10 +4424,10 @@ public class SQL99Parser extends Parser {
 		Token VARNAME54=null;
 
 		try {
-			// SQL99.g:785:3: ( VARNAME )
-			// SQL99.g:785:5: VARNAME
+			// SQL99.g:786:3: ( VARNAME )
+			// SQL99.g:786:5: VARNAME
 			{
-			VARNAME54=(Token)match(input,VARNAME,FOLLOW_VARNAME_in_regular_identifier1986); 
+			VARNAME54=(Token)match(input,VARNAME,FOLLOW_VARNAME_in_regular_identifier1996); 
 			 value = new ArrayList<String>();
 			  	value.add((VARNAME54!=null?VARNAME54.getText():null));
 			  	value.add((VARNAME54!=null?VARNAME54.getText():null));
@@ -4430,7 +4449,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "delimited_identifier"
-	// SQL99.g:791:1: delimited_identifier returns [ArrayList<String> value] : STRING_WITH_QUOTE_DOUBLE ;
+	// SQL99.g:792:1: delimited_identifier returns [ArrayList<String> value] : STRING_WITH_QUOTE_DOUBLE ;
 	public final ArrayList<String> delimited_identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4438,10 +4457,10 @@ public class SQL99Parser extends Parser {
 		Token STRING_WITH_QUOTE_DOUBLE55=null;
 
 		try {
-			// SQL99.g:792:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// SQL99.g:792:5: STRING_WITH_QUOTE_DOUBLE
+			// SQL99.g:793:3: ( STRING_WITH_QUOTE_DOUBLE )
+			// SQL99.g:793:5: STRING_WITH_QUOTE_DOUBLE
 			{
-			STRING_WITH_QUOTE_DOUBLE55=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_delimited_identifier2005); 
+			STRING_WITH_QUOTE_DOUBLE55=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_delimited_identifier2015); 
 			 
 				value = new ArrayList<String>();  
 			    value.add((STRING_WITH_QUOTE_DOUBLE55!=null?STRING_WITH_QUOTE_DOUBLE55.getText():null));
@@ -4464,7 +4483,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "general_literal"
-	// SQL99.g:799:1: general_literal returns [Literal value] : ( string_literal | boolean_literal );
+	// SQL99.g:800:1: general_literal returns [Literal value] : ( string_literal | boolean_literal );
 	public final Literal general_literal() throws RecognitionException {
 		Literal value = null;
 
@@ -4473,7 +4492,7 @@ public class SQL99Parser extends Parser {
 		BooleanLiteral boolean_literal57 =null;
 
 		try {
-			// SQL99.g:800:3: ( string_literal | boolean_literal )
+			// SQL99.g:801:3: ( string_literal | boolean_literal )
 			int alt43=2;
 			int LA43_0 = input.LA(1);
 			if ( (LA43_0==STRING_WITH_QUOTE) ) {
@@ -4491,9 +4510,9 @@ public class SQL99Parser extends Parser {
 
 			switch (alt43) {
 				case 1 :
-					// SQL99.g:800:5: string_literal
+					// SQL99.g:801:5: string_literal
 					{
-					pushFollow(FOLLOW_string_literal_in_general_literal2024);
+					pushFollow(FOLLOW_string_literal_in_general_literal2034);
 					string_literal56=string_literal();
 					state._fsp--;
 
@@ -4501,9 +4520,9 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 2 :
-					// SQL99.g:801:5: boolean_literal
+					// SQL99.g:802:5: boolean_literal
 					{
-					pushFollow(FOLLOW_boolean_literal_in_general_literal2032);
+					pushFollow(FOLLOW_boolean_literal_in_general_literal2042);
 					boolean_literal57=boolean_literal();
 					state._fsp--;
 
@@ -4527,7 +4546,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "string_literal"
-	// SQL99.g:804:1: string_literal returns [StringLiteral value] : STRING_WITH_QUOTE ;
+	// SQL99.g:805:1: string_literal returns [StringLiteral value] : STRING_WITH_QUOTE ;
 	public final StringLiteral string_literal() throws RecognitionException {
 		StringLiteral value = null;
 
@@ -4535,10 +4554,10 @@ public class SQL99Parser extends Parser {
 		Token STRING_WITH_QUOTE58=null;
 
 		try {
-			// SQL99.g:805:3: ( STRING_WITH_QUOTE )
-			// SQL99.g:805:5: STRING_WITH_QUOTE
+			// SQL99.g:806:3: ( STRING_WITH_QUOTE )
+			// SQL99.g:806:5: STRING_WITH_QUOTE
 			{
-			STRING_WITH_QUOTE58=(Token)match(input,STRING_WITH_QUOTE,FOLLOW_STRING_WITH_QUOTE_in_string_literal2051); 
+			STRING_WITH_QUOTE58=(Token)match(input,STRING_WITH_QUOTE,FOLLOW_STRING_WITH_QUOTE_in_string_literal2061); 
 
 			      String str = (STRING_WITH_QUOTE58!=null?STRING_WITH_QUOTE58.getText():null);
 			      str = str.substring(1, str.length()-1);
@@ -4561,7 +4580,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "boolean_literal"
-	// SQL99.g:812:1: boolean_literal returns [BooleanLiteral value] : (t= TRUE |t= FALSE ) ;
+	// SQL99.g:813:1: boolean_literal returns [BooleanLiteral value] : (t= TRUE |t= FALSE ) ;
 	public final BooleanLiteral boolean_literal() throws RecognitionException {
 		BooleanLiteral value = null;
 
@@ -4569,10 +4588,10 @@ public class SQL99Parser extends Parser {
 		Token t=null;
 
 		try {
-			// SQL99.g:813:3: ( (t= TRUE |t= FALSE ) )
-			// SQL99.g:813:5: (t= TRUE |t= FALSE )
+			// SQL99.g:814:3: ( (t= TRUE |t= FALSE ) )
+			// SQL99.g:814:5: (t= TRUE |t= FALSE )
 			{
-			// SQL99.g:813:5: (t= TRUE |t= FALSE )
+			// SQL99.g:814:5: (t= TRUE |t= FALSE )
 			int alt44=2;
 			int LA44_0 = input.LA(1);
 			if ( (LA44_0==TRUE) ) {
@@ -4590,15 +4609,15 @@ public class SQL99Parser extends Parser {
 
 			switch (alt44) {
 				case 1 :
-					// SQL99.g:813:6: t= TRUE
+					// SQL99.g:814:6: t= TRUE
 					{
-					t=(Token)match(input,TRUE,FOLLOW_TRUE_in_boolean_literal2073); 
+					t=(Token)match(input,TRUE,FOLLOW_TRUE_in_boolean_literal2083); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:813:15: t= FALSE
+					// SQL99.g:814:15: t= FALSE
 					{
-					t=(Token)match(input,FALSE,FOLLOW_FALSE_in_boolean_literal2079); 
+					t=(Token)match(input,FALSE,FOLLOW_FALSE_in_boolean_literal2089); 
 					}
 					break;
 
@@ -4622,7 +4641,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal"
-	// SQL99.g:816:1: numeric_literal returns [NumericLiteral value] : ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative );
+	// SQL99.g:817:1: numeric_literal returns [NumericLiteral value] : ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative );
 	public final NumericLiteral numeric_literal() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4632,7 +4651,7 @@ public class SQL99Parser extends Parser {
 		NumericLiteral numeric_literal_negative61 =null;
 
 		try {
-			// SQL99.g:817:3: ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative )
+			// SQL99.g:818:3: ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative )
 			int alt45=3;
 			switch ( input.LA(1) ) {
 			case DECIMAL:
@@ -4660,9 +4679,9 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt45) {
 				case 1 :
-					// SQL99.g:817:5: numeric_literal_unsigned
+					// SQL99.g:818:5: numeric_literal_unsigned
 					{
-					pushFollow(FOLLOW_numeric_literal_unsigned_in_numeric_literal2099);
+					pushFollow(FOLLOW_numeric_literal_unsigned_in_numeric_literal2109);
 					numeric_literal_unsigned59=numeric_literal_unsigned();
 					state._fsp--;
 
@@ -4670,9 +4689,9 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 2 :
-					// SQL99.g:818:5: numeric_literal_positive
+					// SQL99.g:819:5: numeric_literal_positive
 					{
-					pushFollow(FOLLOW_numeric_literal_positive_in_numeric_literal2107);
+					pushFollow(FOLLOW_numeric_literal_positive_in_numeric_literal2117);
 					numeric_literal_positive60=numeric_literal_positive();
 					state._fsp--;
 
@@ -4680,9 +4699,9 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 3 :
-					// SQL99.g:819:5: numeric_literal_negative
+					// SQL99.g:820:5: numeric_literal_negative
 					{
-					pushFollow(FOLLOW_numeric_literal_negative_in_numeric_literal2115);
+					pushFollow(FOLLOW_numeric_literal_negative_in_numeric_literal2125);
 					numeric_literal_negative61=numeric_literal_negative();
 					state._fsp--;
 
@@ -4706,7 +4725,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal_unsigned"
-	// SQL99.g:822:1: numeric_literal_unsigned returns [NumericLiteral value] : ( INTEGER | DECIMAL );
+	// SQL99.g:823:1: numeric_literal_unsigned returns [NumericLiteral value] : ( INTEGER | DECIMAL );
 	public final NumericLiteral numeric_literal_unsigned() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4715,7 +4734,7 @@ public class SQL99Parser extends Parser {
 		Token DECIMAL63=null;
 
 		try {
-			// SQL99.g:823:3: ( INTEGER | DECIMAL )
+			// SQL99.g:824:3: ( INTEGER | DECIMAL )
 			int alt46=2;
 			int LA46_0 = input.LA(1);
 			if ( (LA46_0==INTEGER) ) {
@@ -4733,16 +4752,16 @@ public class SQL99Parser extends Parser {
 
 			switch (alt46) {
 				case 1 :
-					// SQL99.g:823:5: INTEGER
+					// SQL99.g:824:5: INTEGER
 					{
-					INTEGER62=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numeric_literal_unsigned2134); 
+					INTEGER62=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numeric_literal_unsigned2144); 
 					 value = new IntegerLiteral((INTEGER62!=null?INTEGER62.getText():null)); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:824:5: DECIMAL
+					// SQL99.g:825:5: DECIMAL
 					{
-					DECIMAL63=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numeric_literal_unsigned2142); 
+					DECIMAL63=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numeric_literal_unsigned2152); 
 					 value = new DecimalLiteral((DECIMAL63!=null?DECIMAL63.getText():null)); 
 					}
 					break;
@@ -4763,7 +4782,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal_positive"
-	// SQL99.g:827:1: numeric_literal_positive returns [NumericLiteral value] : ( INTEGER_POSITIVE | DECIMAL_POSITIVE );
+	// SQL99.g:828:1: numeric_literal_positive returns [NumericLiteral value] : ( INTEGER_POSITIVE | DECIMAL_POSITIVE );
 	public final NumericLiteral numeric_literal_positive() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4772,7 +4791,7 @@ public class SQL99Parser extends Parser {
 		Token DECIMAL_POSITIVE65=null;
 
 		try {
-			// SQL99.g:828:3: ( INTEGER_POSITIVE | DECIMAL_POSITIVE )
+			// SQL99.g:829:3: ( INTEGER_POSITIVE | DECIMAL_POSITIVE )
 			int alt47=2;
 			int LA47_0 = input.LA(1);
 			if ( (LA47_0==INTEGER_POSITIVE) ) {
@@ -4790,16 +4809,16 @@ public class SQL99Parser extends Parser {
 
 			switch (alt47) {
 				case 1 :
-					// SQL99.g:828:5: INTEGER_POSITIVE
+					// SQL99.g:829:5: INTEGER_POSITIVE
 					{
-					INTEGER_POSITIVE64=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numeric_literal_positive2161); 
+					INTEGER_POSITIVE64=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numeric_literal_positive2171); 
 					 value = new IntegerLiteral((INTEGER_POSITIVE64!=null?INTEGER_POSITIVE64.getText():null)); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:829:5: DECIMAL_POSITIVE
+					// SQL99.g:830:5: DECIMAL_POSITIVE
 					{
-					DECIMAL_POSITIVE65=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numeric_literal_positive2169); 
+					DECIMAL_POSITIVE65=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numeric_literal_positive2179); 
 					 value = new DecimalLiteral((DECIMAL_POSITIVE65!=null?DECIMAL_POSITIVE65.getText():null)); 
 					}
 					break;
@@ -4820,7 +4839,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal_negative"
-	// SQL99.g:832:1: numeric_literal_negative returns [NumericLiteral value] : ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE );
+	// SQL99.g:833:1: numeric_literal_negative returns [NumericLiteral value] : ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE );
 	public final NumericLiteral numeric_literal_negative() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4829,7 +4848,7 @@ public class SQL99Parser extends Parser {
 		Token DECIMAL_NEGATIVE67=null;
 
 		try {
-			// SQL99.g:833:3: ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE )
+			// SQL99.g:834:3: ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE )
 			int alt48=2;
 			int LA48_0 = input.LA(1);
 			if ( (LA48_0==INTEGER_NEGATIVE) ) {
@@ -4847,16 +4866,16 @@ public class SQL99Parser extends Parser {
 
 			switch (alt48) {
 				case 1 :
-					// SQL99.g:833:5: INTEGER_NEGATIVE
+					// SQL99.g:834:5: INTEGER_NEGATIVE
 					{
-					INTEGER_NEGATIVE66=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numeric_literal_negative2190); 
+					INTEGER_NEGATIVE66=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numeric_literal_negative2200); 
 					 value = new IntegerLiteral((INTEGER_NEGATIVE66!=null?INTEGER_NEGATIVE66.getText():null)); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:834:5: DECIMAL_NEGATIVE
+					// SQL99.g:835:5: DECIMAL_NEGATIVE
 					{
-					DECIMAL_NEGATIVE67=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numeric_literal_negative2198); 
+					DECIMAL_NEGATIVE67=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numeric_literal_negative2208); 
 					 value = new DecimalLiteral((DECIMAL_NEGATIVE67!=null?DECIMAL_NEGATIVE67.getText():null)); 
 					}
 					break;
@@ -4877,7 +4896,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "truth_value"
-	// SQL99.g:837:1: truth_value returns [boolean value] : (t= TRUE |t= FALSE ) ;
+	// SQL99.g:838:1: truth_value returns [boolean value] : (t= TRUE |t= FALSE ) ;
 	public final boolean truth_value() throws RecognitionException {
 		boolean value = false;
 
@@ -4885,10 +4904,10 @@ public class SQL99Parser extends Parser {
 		Token t=null;
 
 		try {
-			// SQL99.g:838:3: ( (t= TRUE |t= FALSE ) )
-			// SQL99.g:838:5: (t= TRUE |t= FALSE )
+			// SQL99.g:839:3: ( (t= TRUE |t= FALSE ) )
+			// SQL99.g:839:5: (t= TRUE |t= FALSE )
 			{
-			// SQL99.g:838:5: (t= TRUE |t= FALSE )
+			// SQL99.g:839:5: (t= TRUE |t= FALSE )
 			int alt49=2;
 			int LA49_0 = input.LA(1);
 			if ( (LA49_0==TRUE) ) {
@@ -4906,15 +4925,15 @@ public class SQL99Parser extends Parser {
 
 			switch (alt49) {
 				case 1 :
-					// SQL99.g:838:6: t= TRUE
+					// SQL99.g:839:6: t= TRUE
 					{
-					t=(Token)match(input,TRUE,FOLLOW_TRUE_in_truth_value2222); 
+					t=(Token)match(input,TRUE,FOLLOW_TRUE_in_truth_value2232); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:838:15: t= FALSE
+					// SQL99.g:839:15: t= FALSE
 					{
-					t=(Token)match(input,FALSE,FOLLOW_FALSE_in_truth_value2228); 
+					t=(Token)match(input,FALSE,FOLLOW_FALSE_in_truth_value2238); 
 					}
 					break;
 
@@ -4938,7 +4957,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "datetime_literal"
-	// SQL99.g:841:1: datetime_literal returns [DateTimeLiteral value] : DATETIME ;
+	// SQL99.g:842:1: datetime_literal returns [DateTimeLiteral value] : DATETIME ;
 	public final DateTimeLiteral datetime_literal() throws RecognitionException {
 		DateTimeLiteral value = null;
 
@@ -4946,10 +4965,10 @@ public class SQL99Parser extends Parser {
 		Token DATETIME68=null;
 
 		try {
-			// SQL99.g:842:3: ( DATETIME )
-			// SQL99.g:842:5: DATETIME
+			// SQL99.g:843:3: ( DATETIME )
+			// SQL99.g:843:5: DATETIME
 			{
-			DATETIME68=(Token)match(input,DATETIME,FOLLOW_DATETIME_in_datetime_literal2248); 
+			DATETIME68=(Token)match(input,DATETIME,FOLLOW_DATETIME_in_datetime_literal2258); 
 			 value = new DateTimeLiteral((DATETIME68!=null?DATETIME68.getText():null)); 
 			}
 
@@ -5063,101 +5082,103 @@ public class SQL99Parser extends Parser {
 	public static final BitSet FOLLOW_LPAREN_in_parenthesized_boolean_value_expression1174 = new BitSet(new long[]{0x0004380807000000L,0x0000000000044C00L});
 	public static final BitSet FOLLOW_boolean_value_expression_in_parenthesized_boolean_value_expression1178 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
 	public static final BitSet FOLLOW_RPAREN_in_parenthesized_boolean_value_expression1180 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_row_value_expression_in_comparison_predicate1203 = new BitSet(new long[]{0x0002004100000000L});
+	public static final BitSet FOLLOW_row_value_expression_in_comparison_predicate1203 = new BitSet(new long[]{0x0002004500000000L});
 	public static final BitSet FOLLOW_comp_op_in_comparison_predicate1205 = new BitSet(new long[]{0x0000380807000000L,0x0000000000044C00L});
 	public static final BitSet FOLLOW_row_value_expression_in_comparison_predicate1209 = new BitSet(new long[]{0x0000000000000002L});
 	public static final BitSet FOLLOW_EQUALS_in_comp_op1228 = new BitSet(new long[]{0x0000000000000002L});
 	public static final BitSet FOLLOW_LESS_in_comp_op1236 = new BitSet(new long[]{0x0000004000000000L});
 	public static final BitSet FOLLOW_GREATER_in_comp_op1238 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_LESS_in_comp_op1246 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_GREATER_in_comp_op1254 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_LESS_in_comp_op1262 = new BitSet(new long[]{0x0000000100000000L});
-	public static final BitSet FOLLOW_EQUALS_in_comp_op1264 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_GREATER_in_comp_op1272 = new BitSet(new long[]{0x0000000100000000L});
+	public static final BitSet FOLLOW_EXCLAMATION_in_comp_op1246 = new BitSet(new long[]{0x0000000100000000L});
+	public static final BitSet FOLLOW_EQUALS_in_comp_op1248 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_LESS_in_comp_op1256 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_GREATER_in_comp_op1264 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_LESS_in_comp_op1272 = new BitSet(new long[]{0x0000000100000000L});
 	public static final BitSet FOLLOW_EQUALS_in_comp_op1274 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_column_reference_in_null_predicate1298 = new BitSet(new long[]{0x0000400000000000L});
-	public static final BitSet FOLLOW_IS_in_null_predicate1300 = new BitSet(new long[]{0x0180000000000000L});
-	public static final BitSet FOLLOW_NOT_in_null_predicate1303 = new BitSet(new long[]{0x0100000000000000L});
-	public static final BitSet FOLLOW_NULL_in_null_predicate1309 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_column_reference_in_in_predicate1324 = new BitSet(new long[]{0x0080020000000000L});
-	public static final BitSet FOLLOW_NOT_in_in_predicate1327 = new BitSet(new long[]{0x0000020000000000L});
-	public static final BitSet FOLLOW_IN_in_in_predicate1331 = new BitSet(new long[]{0x0004000000000000L});
-	public static final BitSet FOLLOW_in_predicate_value_in_in_predicate1333 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_table_subquery_in_in_predicate_value1348 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_LPAREN_in_in_predicate_value1354 = new BitSet(new long[]{0x0000380807000000L,0x0000000000044C00L});
-	public static final BitSet FOLLOW_in_value_list_in_in_predicate_value1356 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
-	public static final BitSet FOLLOW_RPAREN_in_in_predicate_value1358 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_subquery_in_table_subquery1371 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_LPAREN_in_subquery1384 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000040L});
-	public static final BitSet FOLLOW_query_in_subquery1386 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
-	public static final BitSet FOLLOW_RPAREN_in_subquery1388 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_row_value_expression_in_in_value_list1403 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_COMMA_in_in_value_list1406 = new BitSet(new long[]{0x0000380807000000L,0x0000000000044C00L});
-	public static final BitSet FOLLOW_row_value_expression_in_in_value_list1408 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_GROUP_in_group_by_clause1427 = new BitSet(new long[]{0x0000000000010000L});
-	public static final BitSet FOLLOW_BY_in_group_by_clause1429 = new BitSet(new long[]{0x0004000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_grouping_element_list_in_group_by_clause1431 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_grouping_element_in_grouping_element_list1457 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_COMMA_in_grouping_element_list1467 = new BitSet(new long[]{0x0004000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_grouping_element_in_grouping_element_list1471 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_grouping_column_reference_in_grouping_element1499 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_LPAREN_in_grouping_element1507 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_grouping_column_reference_list_in_grouping_element1509 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
-	public static final BitSet FOLLOW_RPAREN_in_grouping_element1511 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_column_reference_in_grouping_column_reference1532 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_column_reference_in_grouping_column_reference_list1560 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_COMMA_in_grouping_column_reference_list1569 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_column_reference_in_grouping_column_reference_list1573 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_join_type_in_joined_table1603 = new BitSet(new long[]{0x0000800000000000L});
-	public static final BitSet FOLLOW_JOIN_in_joined_table1609 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_table_reference_in_joined_table1611 = new BitSet(new long[]{0x0200000000000000L});
-	public static final BitSet FOLLOW_join_specification_in_joined_table1613 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INNER_in_join_type1638 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_outer_join_type_in_join_type1646 = new BitSet(new long[]{0x1000000000000002L});
-	public static final BitSet FOLLOW_OUTER_in_join_type1649 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_LEFT_in_outer_join_type1674 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_RIGHT_in_outer_join_type1682 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_FULL_in_outer_join_type1690 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_join_condition_in_join_specification1709 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_ON_in_join_condition1729 = new BitSet(new long[]{0x0004380807000000L,0x0000000000044C00L});
-	public static final BitSet FOLLOW_search_condition_in_join_condition1731 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_USING_in_named_columns_join1746 = new BitSet(new long[]{0x0004000000000000L});
-	public static final BitSet FOLLOW_LPAREN_in_named_columns_join1748 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_join_column_list_in_named_columns_join1750 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
-	public static final BitSet FOLLOW_RPAREN_in_named_columns_join1752 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_column_name_in_join_column_list1765 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_COMMA_in_join_column_list1768 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_column_name_in_join_column_list1770 = new BitSet(new long[]{0x0000000000100002L});
-	public static final BitSet FOLLOW_table_name_in_table_primary1790 = new BitSet(new long[]{0x0000000000000802L,0x0000000000040800L});
-	public static final BitSet FOLLOW_AS_in_table_primary1797 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_alias_name_in_table_primary1800 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_schema_name_in_table_name1828 = new BitSet(new long[]{0x4000000000000000L});
-	public static final BitSet FOLLOW_PERIOD_in_table_name1830 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
-	public static final BitSet FOLLOW_table_identifier_in_table_name1834 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_identifier_in_alias_name1855 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_table_subquery_in_derived_table1871 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_identifier_in_table_identifier1892 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_identifier_in_schema_name1913 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_identifier_in_column_name1936 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_regular_identifier_in_identifier1960 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_delimited_identifier_in_identifier1966 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_VARNAME_in_regular_identifier1986 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_delimited_identifier2005 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_string_literal_in_general_literal2024 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_boolean_literal_in_general_literal2032 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_QUOTE_in_string_literal2051 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_TRUE_in_boolean_literal2073 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_FALSE_in_boolean_literal2079 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numeric_literal_unsigned_in_numeric_literal2099 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numeric_literal_positive_in_numeric_literal2107 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numeric_literal_negative_in_numeric_literal2115 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_in_numeric_literal_unsigned2134 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_in_numeric_literal_unsigned2142 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_POSITIVE_in_numeric_literal_positive2161 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_POSITIVE_in_numeric_literal_positive2169 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_NEGATIVE_in_numeric_literal_negative2190 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_NEGATIVE_in_numeric_literal_negative2198 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_TRUE_in_truth_value2222 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_FALSE_in_truth_value2228 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DATETIME_in_datetime_literal2248 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_GREATER_in_comp_op1282 = new BitSet(new long[]{0x0000000100000000L});
+	public static final BitSet FOLLOW_EQUALS_in_comp_op1284 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_column_reference_in_null_predicate1308 = new BitSet(new long[]{0x0000400000000000L});
+	public static final BitSet FOLLOW_IS_in_null_predicate1310 = new BitSet(new long[]{0x0180000000000000L});
+	public static final BitSet FOLLOW_NOT_in_null_predicate1313 = new BitSet(new long[]{0x0100000000000000L});
+	public static final BitSet FOLLOW_NULL_in_null_predicate1319 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_column_reference_in_in_predicate1334 = new BitSet(new long[]{0x0080020000000000L});
+	public static final BitSet FOLLOW_NOT_in_in_predicate1337 = new BitSet(new long[]{0x0000020000000000L});
+	public static final BitSet FOLLOW_IN_in_in_predicate1341 = new BitSet(new long[]{0x0004000000000000L});
+	public static final BitSet FOLLOW_in_predicate_value_in_in_predicate1343 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_table_subquery_in_in_predicate_value1358 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_LPAREN_in_in_predicate_value1364 = new BitSet(new long[]{0x0000380807000000L,0x0000000000044C00L});
+	public static final BitSet FOLLOW_in_value_list_in_in_predicate_value1366 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
+	public static final BitSet FOLLOW_RPAREN_in_in_predicate_value1368 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_subquery_in_table_subquery1381 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_LPAREN_in_subquery1394 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000040L});
+	public static final BitSet FOLLOW_query_in_subquery1396 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
+	public static final BitSet FOLLOW_RPAREN_in_subquery1398 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_row_value_expression_in_in_value_list1413 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_COMMA_in_in_value_list1416 = new BitSet(new long[]{0x0000380807000000L,0x0000000000044C00L});
+	public static final BitSet FOLLOW_row_value_expression_in_in_value_list1418 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_GROUP_in_group_by_clause1437 = new BitSet(new long[]{0x0000000000010000L});
+	public static final BitSet FOLLOW_BY_in_group_by_clause1439 = new BitSet(new long[]{0x0004000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_grouping_element_list_in_group_by_clause1441 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_grouping_element_in_grouping_element_list1467 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_COMMA_in_grouping_element_list1477 = new BitSet(new long[]{0x0004000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_grouping_element_in_grouping_element_list1481 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_grouping_column_reference_in_grouping_element1509 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_LPAREN_in_grouping_element1517 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_grouping_column_reference_list_in_grouping_element1519 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
+	public static final BitSet FOLLOW_RPAREN_in_grouping_element1521 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_column_reference_in_grouping_column_reference1542 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_column_reference_in_grouping_column_reference_list1570 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_COMMA_in_grouping_column_reference_list1579 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_column_reference_in_grouping_column_reference_list1583 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_join_type_in_joined_table1613 = new BitSet(new long[]{0x0000800000000000L});
+	public static final BitSet FOLLOW_JOIN_in_joined_table1619 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_table_reference_in_joined_table1621 = new BitSet(new long[]{0x0200000000000000L});
+	public static final BitSet FOLLOW_join_specification_in_joined_table1623 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INNER_in_join_type1648 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_outer_join_type_in_join_type1656 = new BitSet(new long[]{0x1000000000000002L});
+	public static final BitSet FOLLOW_OUTER_in_join_type1659 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_LEFT_in_outer_join_type1684 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_RIGHT_in_outer_join_type1692 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_FULL_in_outer_join_type1700 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_join_condition_in_join_specification1719 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_ON_in_join_condition1739 = new BitSet(new long[]{0x0004380807000000L,0x0000000000044C00L});
+	public static final BitSet FOLLOW_search_condition_in_join_condition1741 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_USING_in_named_columns_join1756 = new BitSet(new long[]{0x0004000000000000L});
+	public static final BitSet FOLLOW_LPAREN_in_named_columns_join1758 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_join_column_list_in_named_columns_join1760 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000010L});
+	public static final BitSet FOLLOW_RPAREN_in_named_columns_join1762 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_column_name_in_join_column_list1775 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_COMMA_in_join_column_list1778 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_column_name_in_join_column_list1780 = new BitSet(new long[]{0x0000000000100002L});
+	public static final BitSet FOLLOW_table_name_in_table_primary1800 = new BitSet(new long[]{0x0000000000000802L,0x0000000000040800L});
+	public static final BitSet FOLLOW_AS_in_table_primary1807 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_alias_name_in_table_primary1810 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_schema_name_in_table_name1838 = new BitSet(new long[]{0x4000000000000000L});
+	public static final BitSet FOLLOW_PERIOD_in_table_name1840 = new BitSet(new long[]{0x0000000000000000L,0x0000000000040800L});
+	public static final BitSet FOLLOW_table_identifier_in_table_name1844 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_identifier_in_alias_name1865 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_table_subquery_in_derived_table1881 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_identifier_in_table_identifier1902 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_identifier_in_schema_name1923 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_identifier_in_column_name1946 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_regular_identifier_in_identifier1970 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_delimited_identifier_in_identifier1976 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_VARNAME_in_regular_identifier1996 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_delimited_identifier2015 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_string_literal_in_general_literal2034 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_boolean_literal_in_general_literal2042 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_STRING_WITH_QUOTE_in_string_literal2061 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_TRUE_in_boolean_literal2083 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_FALSE_in_boolean_literal2089 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numeric_literal_unsigned_in_numeric_literal2109 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numeric_literal_positive_in_numeric_literal2117 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numeric_literal_negative_in_numeric_literal2125 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INTEGER_in_numeric_literal_unsigned2144 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DECIMAL_in_numeric_literal_unsigned2152 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INTEGER_POSITIVE_in_numeric_literal_positive2171 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DECIMAL_POSITIVE_in_numeric_literal_positive2179 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INTEGER_NEGATIVE_in_numeric_literal_negative2200 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DECIMAL_NEGATIVE_in_numeric_literal_negative2208 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_TRUE_in_truth_value2232 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_FALSE_in_truth_value2238 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DATETIME_in_datetime_literal2258 = new BitSet(new long[]{0x0000000000000002L});
 }

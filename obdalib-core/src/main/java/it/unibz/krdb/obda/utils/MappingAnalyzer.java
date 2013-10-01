@@ -412,7 +412,7 @@ public class MappingAnalyzer {
 		int offset = 0; // the index offset
 
 		for (Relation table : tableList) {
-			String tableName = table.getName();
+			String tableName = table.getTableName();
 			String tableGivenName = table.getGivenName();
 			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
 			if (def == null) {
@@ -425,7 +425,7 @@ public class MappingAnalyzer {
 				int index = i + offset;
 				
 				// simple attribute name
-				String columnName = dbMetaData.getAttributeName(tableName, i);
+				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
 				lookupTable.add(columnName, index);
 				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(columnName), columnName);
@@ -440,7 +440,7 @@ public class MappingAnalyzer {
 				
 				
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
+				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
 				lookupTable.add(qualifiedColumnName, index);
 				if (aliasMap.containsKey(qualifiedColumnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
