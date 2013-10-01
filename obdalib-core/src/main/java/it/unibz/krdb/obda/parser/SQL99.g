@@ -460,14 +460,14 @@ reference_value_expression returns [ReferenceValueExpression value]
   ;
 
 column_reference returns [ColumnReference value]
-  : ((s=schema_name)? PERIOD t=table_identifier PERIOD)? column_name {
+  : ((s=schema_name PERIOD)? t=table_identifier PERIOD)? column_name {
       String table = "";
       if (t != null) {
         table = $t.value.get(0);
         if (s != null) 
         	table = $s.value.get(0) + "." + table;
       }
-      $value = new ColumnReference(table, $column_name.value);
+      $value = new ColumnReference(table, $column_name.value.get(1));
     }
   ;  
   
@@ -744,12 +744,15 @@ table_primary returns [TablePrimary value]
  
 table_name returns [TablePrimary value]
   : (schema_name PERIOD)? table_identifier {
-      String schema = $schema_name.value.get(1);      
-      if (schema != null && schema != "") {
-        $value = new TablePrimary($schema_name.value.get(1), $table_identifier.value.get(1), $schema_name.value.get(0) + "." + $table_identifier.value.get(0));
+	  String tableName = $table_identifier.value.get(1);
+      String tableQName = $table_identifier.value.get(0);
+      if ($schema_name.value != null && $schema_name.value.get(1).length() > 0) {
+      	String schemaName = $schema_name.value.get(1);
+      	String schemaQName = $schema_name.value.get(0);         
+        $value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
       }
       else {
-        $value = new TablePrimary($table_identifier.value.get(1), $table_identifier.value.get(0));
+        $value = new TablePrimary(tableName, tableQName);
       }      
     }
   ;  
@@ -770,8 +773,8 @@ schema_name returns [ArrayList<String> value]
   : identifier { $value = $identifier.value; }
   ;
     
-column_name returns [String value]
-  : identifier { $value = $identifier.value.get(1); }
+column_name returns [ArrayList<String> value]
+  : identifier { $value = $identifier.value; }
   ;
   
 identifier returns [ArrayList<String> value]

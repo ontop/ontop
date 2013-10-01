@@ -413,9 +413,10 @@ public class MappingAnalyzer {
 
 		for (Relation table : tableList) {
 			String tableName = table.getName();
-			DataDefinition def = dbMetaData.getDefinition(tableName);
+			String tableGivenName = table.getGivenName();
+			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
 			if (def == null) {
-				throw new RuntimeException("Definition not found for table '" + tableName + "'.");
+				throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
 			}
 			int size = def.countAttribute();
 
@@ -429,6 +430,14 @@ public class MappingAnalyzer {
 				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(columnName), columnName);
 				}
+				
+				// attribute name with table name prefix
+				String tableColumnName = tableName + "." + columnName;
+				lookupTable.add(tableColumnName, index);
+				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
+				}
+				
 				
 				// full qualified attribute name
 				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
