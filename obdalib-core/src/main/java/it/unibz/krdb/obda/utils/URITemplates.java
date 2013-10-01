@@ -1,7 +1,11 @@
 package it.unibz.krdb.obda.utils;
 
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Variable;
+
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * A utility class for URI templates
@@ -22,7 +26,7 @@ public class URITemplates {
 	 * Example:
 	 * <p>
 	 * 
-	 * If {@code args = ["A", a]}, then
+	 * If {@code args = ["A", 1]}, then
 	 * 
 	 * {@code  URITemplates.format("http://example.org/{}/{}", args)} 
 	 * results {@code "http://example.org/A/1" }
@@ -71,6 +75,23 @@ public class URITemplates {
 	 */
 	public static String format(String uriTemplate, Object... args) {
 		return format(uriTemplate, Arrays.asList(args));
+	}
+
+	
+	public static String getUriTemplateString(Function uriFunction) {
+		String template = uriFunction.getTerm(0).toString();
+		Iterator<Variable> vars = uriFunction.getVariables().iterator();
+		String[] split = template.split("\\{\\}");
+		int i = 0;
+		template = "";
+		while (vars.hasNext()) {
+			template += split[i] + "{" + vars.next().toString() + "}";
+			i++;
+		}
+		if (split.length-i > 1)
+		template += split[i];
+	
+		return template;
 	}
 
 
