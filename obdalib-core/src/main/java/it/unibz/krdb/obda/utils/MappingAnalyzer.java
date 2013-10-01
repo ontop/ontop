@@ -57,7 +57,7 @@ import java.util.Stack;
 
 public class MappingAnalyzer {
 
-	private List<OBDAMappingAxiom> mappingList;
+	private List<ParsedMapping> mappingList;
 	private DBMetadata dbMetaData;
 
 	private SQLQueryTranslator translator;
@@ -67,7 +67,7 @@ public class MappingAnalyzer {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public MappingAnalyzer(List<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
+	public MappingAnalyzer(List<ParsedMapping> mappingList, DBMetadata dbMetaData) {
 		this.mappingList = mappingList;
 		this.dbMetaData = dbMetaData;
 
@@ -77,16 +77,22 @@ public class MappingAnalyzer {
 	public DatalogProgram constructDatalogProgram() {
 		DatalogProgram datalog = dfac.getDatalogProgram();
 		LinkedList<String> errorMessage = new LinkedList<String>();
-		for (OBDAMappingAxiom axiom : mappingList) {
+		for (ParsedMapping axiom : mappingList) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
 				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
+				
+				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
+				QueryTree queryTree = axiom.getSourceQueryTree();
+
+				/*
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 				// Construct the SQL query tree from the source query
 				QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
-
+				 */
+				
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryTree);
 

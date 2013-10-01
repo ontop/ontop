@@ -66,7 +66,8 @@ public class MappingAnalyzerTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, md);
+		MappingParser mParser = new MappingParser(mappingList);
+		MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), md);
 		DatalogProgram dp = analyzer.constructDatalogProgram();
 		
 		assertNotNull(dp);

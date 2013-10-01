@@ -668,14 +668,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
+
+			//This is the NEW way of obtaining part of the metadata (the schema.table names) by
+			//parsing the mappings
+			MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+			
+			
 			//if the metadata was not already set
 			if (metadata == null) {
 
 				//metadata = JDBCConnectionManager.getMetaData(localConnection);
-				
-				//This is the NEW way of obtaining part of the metadata (the schema.table names) by
-				//parsing the mappings
-				MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
 				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getTables());
 				mParser.addViewDefs(metadata);
 			}
@@ -711,12 +713,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/**
 			 * Expand the meta mapping 
 			 */
-			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
+			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
 			
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
-			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
+			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
@@ -852,7 +854,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
-		MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+		MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()));
+		MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
