@@ -143,7 +143,7 @@ public class SQLQueryTranslator {
 	}
 	
 	private QueryTree createViewTree(String viewName, String query) {		
-		TablePrimary view = new TablePrimary(viewName);
+		TablePrimary view = new TablePrimary("", viewName, viewName);
 		QueryTree queryTree = new QueryTree(new Relation(view));
 
 		return queryTree;
