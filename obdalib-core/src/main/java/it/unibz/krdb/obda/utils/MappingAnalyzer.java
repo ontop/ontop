@@ -84,14 +84,14 @@ public class MappingAnalyzer {
 				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
 				
 				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
-				QueryTree queryTree = axiom.getSourceQueryTree();
+				//QueryTree queryTree = axiom.getSourceQueryTree();
 
-				/*
+				
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 				// Construct the SQL query tree from the source query
 				QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
-				 */
+				 
 				
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryTree);

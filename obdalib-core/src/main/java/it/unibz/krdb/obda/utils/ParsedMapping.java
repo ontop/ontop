@@ -6,6 +6,7 @@ import org.antlr.runtime.RecognitionException;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.parser.SQL99Lexer;
 import it.unibz.krdb.obda.parser.SQL99Parser;
@@ -41,6 +42,16 @@ public class ParsedMapping {
 	 */
 	public QueryTree getSourceQueryTree(){
 		return this.sourceQueryTree;
+	}
+	
+	
+	
+	/**
+	 * This returns the source query
+	 * @return
+	 */
+	public OBDAQuery getSourceQuery(){
+		return axiom.getSourceQuery();
 	}
 	
 	/**

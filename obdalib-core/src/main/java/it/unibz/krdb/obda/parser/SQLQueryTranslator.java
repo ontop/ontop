@@ -45,6 +45,7 @@ public class SQLQueryTranslator {
 	 */
 	public SQLQueryTranslator() {
 		this.viewDefinitions = new ArrayList<ViewDefinition>();
+		this.dbMetaData = null;
 		id_counter = 0;		
 	}
 	
@@ -80,7 +81,11 @@ public class SQLQueryTranslator {
 		String viewName = String.format("view_%s", id_counter++);
 		
 		ViewDefinition vd = createViewDefintion(viewName, query);
-		dbMetaData.add(vd);
+		
+		if(dbMetaData != null)
+			dbMetaData.add(vd);
+		else
+			viewDefinitions.add(vd);
 		
 		QueryTree vt = createViewTree(viewName, query);
 		return vt;
