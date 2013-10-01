@@ -103,6 +103,29 @@ public class ExpressionEvaluator {
 
 	public Term eval(Function expr) {
 		Predicate p = expr.getFunctionSymbol();
+		if (p == OBDAVocabulary.SPARQL_JOIN || p == OBDAVocabulary.SPARQL_LEFTJOIN) {
+			List<Term> terms = expr.getTerms();
+			for (int i=0; i<terms.size(); i++) {
+				Term old = terms.get(i);
+				if (old instanceof Function) {
+					Term newterm = eval((Function) terms.get(i));
+					if (!newterm.equals(old))
+						if (newterm == fac.getConstantFalse()) {
+							//
+							terms.set(i, fac.getFunction(fac.getDataTypePredicateBoolean(), fac.getConstantFalse()));
+						} else if (newterm == fac.getConstantTrue()) {
+							//remove
+							terms.remove(i);
+							i--;
+							continue;
+						}
+						else {
+							terms.set(i, newterm);
+						}
+				}
+			}
+			return expr;
+		}
 		if (p instanceof BooleanOperationPredicate) {
 			return evalBoolean(expr);
 		} else if (p instanceof NonBooleanOperationPredicate) {

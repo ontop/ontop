@@ -262,6 +262,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (innerAtomAsFunction.isBooleanFunction()) {
 				String condition = getSQLCondition(innerAtomAsFunction, index);
 				conditions.add(condition);
+			}else if (innerAtomAsFunction.isDataTypeFunction()) {
+				String condition = getSQLString(innerAtom, index, false);
+				conditions.add(condition);
 			}
 		}
 		return conditions;
@@ -561,6 +564,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return atom.getVariables();
 		}
 		if (atom.isBooleanFunction()) {
+			return new HashSet<Variable>();
+		}
+		if (atom.isDataTypeFunction()) {
 			return new HashSet<Variable>();
 		}
 		/*
