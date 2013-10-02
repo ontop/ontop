@@ -44,5 +44,9 @@ source		select COUNTRY_NAME FROM HR.COUNTRIES WHERE COUNTRIES.COUNTRY_NAME != 'E
 mappingId	RegionID
 target		:RegionID-{RID} a :RegionID . 
 source		select to_char(REGION_ID) as RID FROM HR.REGIONS
+
+mappingId	NewCountry
+target		:NewCountry-{NAME} a :NewCountry . 
+source		select apply_name NAME from all_apply where all_apply.apply_name = all_apply.apply_name
 ]]
 

@@ -43,6 +43,9 @@
         <Class IRI="#LandQuote"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#NewCountry"/>
+    </Declaration>
+    <Declaration>
         <Class IRI="#Pais"/>
     </Declaration>
     <Declaration>

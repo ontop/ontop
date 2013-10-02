@@ -142,6 +142,16 @@ public class MultiSchemaTest extends TestCase {
 	}
 
 	/**
+	 * Test use of views
+	 * @throws Exception
+	 */
+	public void testMultiSchemaView() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :NewCountry}";
+		runTests(query);
+	}
+	
+	
+	/**
 	 * Test use of different schema, table prefix, and non-supported function in select clause
 	 * @throws Exception
 	 */
