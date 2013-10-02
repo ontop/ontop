@@ -57,7 +57,7 @@ import java.util.Stack;
 
 public class MappingAnalyzer {
 
-	private List<ParsedMapping> mappingList;
+	private List<OBDAMappingAxiom> mappingList;
 	private DBMetadata dbMetaData;
 
 	private SQLQueryTranslator translator;
@@ -67,7 +67,7 @@ public class MappingAnalyzer {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public MappingAnalyzer(List<ParsedMapping> mappingList, DBMetadata dbMetaData) {
+	public MappingAnalyzer(List<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
 		this.mappingList = mappingList;
 		this.dbMetaData = dbMetaData;
 
@@ -77,13 +77,14 @@ public class MappingAnalyzer {
 	public DatalogProgram constructDatalogProgram() {
 		DatalogProgram datalog = dfac.getDatalogProgram();
 		LinkedList<String> errorMessage = new LinkedList<String>();
-		for (ParsedMapping axiom : mappingList) {
+		for (OBDAMappingAxiom axiom : mappingList) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
 				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
 				
 				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
+				// Currently disabled, to prevent interference with the MetaMappingExpander
 				//QueryTree queryTree = axiom.getSourceQueryTree();
 
 				
@@ -437,6 +438,18 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(columnName), columnName);
 				}
 				
+				// If the column name in the select string is in lower case
+				if (aliasMap.containsKey(columnName.toLowerCase())) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(columnName.toLowerCase()), columnName);
+				}
+				
+
+				// If the column name in the select string is in upper case
+				if (aliasMap.containsKey(columnName.toUpperCase())) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(columnName.toUpperCase()), columnName);
+				}
+				
+				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
 				lookupTable.add(tableColumnName, index);
@@ -460,8 +473,26 @@ public class MappingAnalyzer {
 					if (aliasMap.containsKey(columnName)) {
 						lookupTable.add(aliasMap.get(columnName), columnName);
 					}
+					// If the column name in the select string is in lower case
+					if (aliasMap.containsKey(columnName.toLowerCase())) { // register the alias name, if any
+						lookupTable.add(aliasMap.get(columnName.toLowerCase()), columnName);
+					}
+
+					// If the column name in the select string is in upper case
+					if (aliasMap.containsKey(columnName.toUpperCase())) { // register the alias name, if any
+						lookupTable.add(aliasMap.get(columnName.toUpperCase()), columnName);
+					}
+					
 					if (aliasMap.containsKey(qualifiedColumnName)) {
 						lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
+					}
+					// If the qualified column name in the select string is in lower case
+					if (aliasMap.containsKey(qualifiedColumnName.toLowerCase())) { // register the alias name, if any
+						lookupTable.add(aliasMap.get(qualifiedColumnName.toLowerCase()), qualifiedColumnName);
+					}
+					// If the qualified column name in the select string is in upper case
+					if (aliasMap.containsKey(qualifiedColumnName.toUpperCase())) { // register the alias name, if any
+						lookupTable.add(aliasMap.get(qualifiedColumnName.toUpperCase()), qualifiedColumnName);
 					}
 					if (aliasMap.containsKey(qualifiedColumnAlias)) {
 						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);

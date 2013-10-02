@@ -29,10 +29,7 @@ public class TablePrimary implements ITable {
 	}
 	
 	public TablePrimary(String schema, String name) {
-		setSchema(schema);
-		setName(name);
-		setTableName(name);
-		setAlias("");
+		this(schema, name, name);
 	}
 
 	/*
@@ -112,5 +109,13 @@ public class TablePrimary implements ITable {
 		}
 		*/
 		return givenName;
+	}
+	
+	@Override
+	public boolean equals(Object t){
+		if(t instanceof TablePrimary){
+			return this.givenName.equals(((TablePrimary) t).getGivenName());
+		}
+		return false;
 	}
 }

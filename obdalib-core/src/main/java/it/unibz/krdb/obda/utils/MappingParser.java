@@ -23,11 +23,19 @@ public class MappingParser {
 	private ArrayList<OBDAMappingAxiom> mappingList;
 	private SQLQueryTranslator translator;
 	private ArrayList<ParsedMapping> parsedMappings;
+	private ArrayList<Relation> realTables; // Tables that are not view definitions
 	
 	public MappingParser(ArrayList<OBDAMappingAxiom> mappingList){
 		this.mappingList = mappingList;
 		this.translator = new SQLQueryTranslator();
 		this.parsedMappings = this.parseMappings();
+		this.realTables = this.getTables();
+		for(ViewDefinition vd : translator.getViewDefinitions()){
+			for(Relation rel : realTables){
+				if(rel.getName().equals(vd.getName()))
+					realTables.remove(rel);
+			}
+		}
 	}
 	
 	public ArrayList<ParsedMapping> getParsedMappings(){
@@ -47,6 +55,17 @@ public class MappingParser {
 		}
 		return tables;
 	}
+	
+	/**
+	 * Called by getOracleMetaData
+	 * 
+	 * @return The tables that are not created view definitions
+	 */
+	public ArrayList<Relation> getRealTables(){
+		return this.realTables;
+	}
+	
+	
 	
 	/**
 	 * Adds the view definitions created by the SQLQueryTranslator during parsing to the metadata

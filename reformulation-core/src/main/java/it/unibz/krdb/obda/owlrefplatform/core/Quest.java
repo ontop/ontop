@@ -678,7 +678,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (metadata == null) {
 
 				//metadata = JDBCConnectionManager.getMetaData(localConnection);
-				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getTables());
+				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
 				mParser.addViewDefs(metadata);
 			}
 		
@@ -717,8 +717,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
-
-			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
+			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
@@ -854,8 +854,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
-		MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()));
-		MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
+		//MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()));
+		MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
