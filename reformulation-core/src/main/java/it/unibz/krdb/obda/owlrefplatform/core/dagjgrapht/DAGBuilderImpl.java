@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.Edge;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,9 +22,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.alg.StrongConnectivityInspector;
+import org.jgrapht.alg.TransitiveClosure;
 import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /** 
  * Starting from a graph build a DAG. 
@@ -49,7 +54,7 @@ public class DAGBuilderImpl implements DAGBuilder{
 	
 	public DAGBuilderImpl (Graph graph){
 		
-		
+//		 long start = System.nanoTime();
 		modifiedGraph= new GraphImpl( DefaultEdge.class);
 		
 		
@@ -66,22 +71,30 @@ public class DAGBuilderImpl implements DAGBuilder{
 	           
 	            modifiedGraph.addEdge(s, t, e);
 	        }
-		 
+//		 System.out.println("modified graph "+ ((System.nanoTime() - start)/1000000));
+		 long start1 = System.nanoTime();
 		eliminateCycles(graph);
+		System.out.println("cycles "+ ((System.nanoTime() - start1)/1000000));
+		long start2 = System.nanoTime();
+		
+//		eliminateRedundances();
 		eliminateRedundantEdges();
+		System.out.println("redundant "+ ((System.nanoTime() - start2)/1000000));
 		
 //		System.out.println("modified graph "+modifiedGraph);
 		
-		dag= new DAGImpl( DefaultEdge.class);
 		
+//		long start3 = System.nanoTime();
 		//change the graph in a dag
+
+		dag= new DAGImpl( DefaultEdge.class);
 		Graphs.addGraph(dag, modifiedGraph);
 
 		dag.setMapEquivalences(equivalencesMap);
 		dag.setReplacements(replacements);
 		dag.setIsaDAG(true);
 		modifiedGraph=null;
-		
+//		System.out.println("graph to dag"+ ((System.nanoTime() - start3)/1000000));
 	}
 
 
@@ -716,9 +729,41 @@ public DAGBuilderImpl (Graph graph, Map<Description, Set<Description>> equivalen
 		
 	}
 
-
-
-
+	/*
+public void eliminateRedundances(){
+	LinkedList<DefaultEdge> redundantEdges = new LinkedList<DefaultEdge>();
+	TopologicalOrderIterator<Description, DefaultEdge> iterator =new TopologicalOrderIterator<Description, DefaultEdge>(modifiedGraph);
+	
+	while (iterator.hasNext()) {
+		Description vertex= iterator.next();
+		Set<DefaultEdge> edges = modifiedGraph.outgoingEdgesOf(vertex);
+		for (DefaultEdge edge : edges) {
+			for (DefaultEdge edge2 : edges) {
+				if(edge.equals(edge2))
+					continue;
+				if(isReachable(modifiedGraph.getEdgeTarget(edge), modifiedGraph.getEdgeTarget(edge2)))
+					
+				redundantEdges.add(edge2);
+			}
+		}
+	}
+					
+			
+	modifiedGraph.removeAllEdges(redundantEdges);
+		
+	
+	
+}
+ boolean isReachable(Description node, Description vertex){
+	 BreadthFirstIterator<Description, DefaultEdge> iterator= new BreadthFirstIterator<Description, DefaultEdge>(modifiedGraph, node);
+	 while(iterator.hasNext()){
+			Description parent=iterator.next();
+			if(parent.equals(vertex))
+				return true;
+	 }
+	 return false;
+ }
+    */
 
 	@Override
 	public DAG getDAG() {

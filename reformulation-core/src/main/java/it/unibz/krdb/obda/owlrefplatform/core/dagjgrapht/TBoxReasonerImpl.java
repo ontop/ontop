@@ -48,15 +48,18 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 
 	public TBoxReasonerImpl(Ontology ontology, boolean named){
 		
+//		long start1 = System.nanoTime();
 		//generate Graph
 		GraphBuilderImpl change= new GraphBuilderImpl(ontology);
 		
-		GraphImpl graph = (GraphImpl) change.getGraph();
-		
+		graph = (GraphImpl) change.getGraph();
+//		System.out.println("graph "+ ((System.nanoTime() - start1)/1000000));
+//		long start2 = System.nanoTime();
 		//generate DAG
 		DAGBuilderImpl change2 = new DAGBuilderImpl (graph);
 		
 		dag=(DAGImpl) change2.getDAG();
+//		System.out.println("dag "+ ((System.nanoTime() - start2)/1000000));
 		
 		if(named) //generate namedDAG
 		{
@@ -740,11 +743,18 @@ public class TBoxReasonerImpl implements TBoxReasoner{
 		return result;
 		
 	}
+	
+	
 
 	@Override
 	public DAGImpl getDAG() {
 
 		return dag;
+	}
+	
+	public GraphImpl getGraph() {
+
+		return graph;
 	}
 	
 //	public Ontology getSigmaOntology() {
