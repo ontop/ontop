@@ -29,15 +29,39 @@ public class MappingParser {
 		this.mappingList = mappingList;
 		this.translator = new SQLQueryTranslator();
 		this.parsedMappings = this.parseMappings();
-		this.realTables = this.getTables();
-		for(ViewDefinition vd : translator.getViewDefinitions()){
-			for(Relation rel : realTables){
-				if(rel.getName().equals(vd.getName()))
-					realTables.remove(rel);
-			}
-		}
 	}
 	
+
+	/**
+	 * Called by getOracleMetaData
+	 * 
+	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
+	 */
+	public ArrayList<Relation> getRealTables(){
+		if(this.realTables == null){
+			ArrayList<Relation> _realTables = this.getTables();
+			ArrayList<Relation> removeThese = new ArrayList<Relation>();
+			for(ViewDefinition vd : translator.getViewDefinitions()){
+				for(Relation rel : _realTables){
+					if(rel.getName().equals(vd.getName()))
+						removeThese.add(rel);
+				}
+			}
+			for(Relation remRel : removeThese){
+				_realTables.remove(remRel);
+			}
+			this.realTables = _realTables;
+		}
+		return this.realTables;
+	}
+	
+	/**
+	 * Returns the list of parsed mapping objects.
+	 * "Parsed" only means that sql part is parsed
+	 * Called by Quest.setuprepository
+	 * 
+	 * @return
+	 */
 	public ArrayList<ParsedMapping> getParsedMappings(){
 		return parsedMappings;
 	}
@@ -56,14 +80,6 @@ public class MappingParser {
 		return tables;
 	}
 	
-	/**
-	 * Called by getOracleMetaData
-	 * 
-	 * @return The tables that are not created view definitions
-	 */
-	public ArrayList<Relation> getRealTables(){
-		return this.realTables;
-	}
 	
 	
 	
