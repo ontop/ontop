@@ -117,10 +117,10 @@ public class MultiSchemaTest extends TestCase {
 			
 			*/
 			assertTrue(rs.nextRow());
-			while (rs.nextRow()){
-				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-				System.out.println(ind1.toString());
-			}
+//			while (rs.nextRow()){
+//				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+//				System.out.println(ind1.toString());
+//			}
 		
 /*
 			assertEquals("<uri1>", ind1.toString());
