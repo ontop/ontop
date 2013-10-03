@@ -14,7 +14,8 @@ public class GabowSCC<V, E>
     private final DirectedGraph<V, E> graph;
 
     // stores the vertices
-    private List<VertexNumber<V>> S= new ArrayList<VertexNumber<V>> ();
+    private Deque<VertexNumber<V>> stack = new ArrayDeque<VertexNumber<V>>();
+    
 
     // the result of the computation, cached for future calls
     private List<Set<V>> stronglyConnectedSets;
@@ -22,7 +23,7 @@ public class GabowSCC<V, E>
 
     // maps vertices to their VertexNumber object
     private Map<V, VertexNumber<V>> vertexToVertexName;
-    private List<Integer> B = new ArrayList<Integer>(); 
+    private Deque<Integer> B = new ArrayDeque<Integer>();
     
     private int c; 
 
@@ -43,6 +44,7 @@ public class GabowSCC<V, E>
 
         graph = directedGraph;
         vertexToVertexName = null;
+ 
         
         stronglyConnectedSets = null;
         
@@ -88,8 +90,7 @@ public class GabowSCC<V, E>
             // create VertexData objects for all vertices, store them
             createVertexData();
 
-            // perform the first round of DFS, result is an ordering
-            // of the vertices by decreasing finishing time
+            // perform  DFS
             for (VertexNumber<V> data : vertexToVertexName.values()) {
 //            	if(data.getVertex().toString().equals("http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker"))
 //            		System.out.println(Graphs.successorListOf(graph, data.getVertex()) );
@@ -101,7 +102,7 @@ public class GabowSCC<V, E>
        
             
             vertexToVertexName = null;
-            S=null;
+            stack =null;
             B=null;
         }
 
@@ -116,17 +117,19 @@ public class GabowSCC<V, E>
      */
     private void createVertexData()
     {
-    	int N=0;
+    	c=graph.vertexSet().size();
         vertexToVertexName =
-            new HashMap<V, VertexNumber<V>>(graph.vertexSet().size());
+            new HashMap<V, VertexNumber<V>>(c);
 
         for (V vertex : graph.vertexSet()) {
             vertexToVertexName.put(
                 vertex,
                 new VertexNumber<V>(vertex, 0));
-            N++;
+            
         }
-        c=N;
+        
+        stack = new ArrayDeque<VertexNumber<V>>(c);
+        B = new ArrayDeque<Integer>(c);
     }
 
     /*
@@ -137,9 +140,9 @@ public class GabowSCC<V, E>
         VertexNumber<V> v)
     {
     	 VertexNumber<V> w;
-    	 S.add(v);
-    	 B.add(v.setNumber(S.size()-1));
-    	 vertexToVertexName.put( v.getVertex(),v);
+    	 stack.add(v);
+    	 B.add(v.setNumber(stack.size()-1));
+//    	 vertexToVertexName.put( v.getVertex(),v);
 //    	 System.out.println(vertexToVertexData.get(v.getVertex()).getNumber());
     	
 
@@ -157,22 +160,23 @@ public class GabowSCC<V, E>
                         dfsVisit(graph, w);
                     }
                     else { /*contract if necessary*/
-                    	while (w.getNumber() < B.get((B.size() - 1))) 
-                    	 B.remove(B.size() - 1); 
+                    	while (w.getNumber() < B.getLast()) 
+                    	 B.removeLast(); 
                     	 } 
                     	 }
                 Set<V> L = new HashSet<V>(); 
-                if (v.getNumber() == (B.get(B.size()-1 ))) { 
+                if (v.getNumber() == (B.getLast())) { 
                 	/* number vertices of the next
                 		strong component */
-                 B.remove(B.size() - 1); 
+                 B.removeLast(); 
+              
                 c++;
-                while (v.getNumber() <= (S.size()-1)) {
-                	VertexNumber<V> r= S.get(S.size()-1);
+                while (v.getNumber() <= (stack.size()-1)) {
+                	VertexNumber<V> r= stack.removeLast();
                  L.add(r.getVertex()); 
-                 S.remove(S.size() - 1); 
+//                 stack.remove(stack.size() - 1); 
                  r.setNumber(c);
-                 vertexToVertexName.put( r.getVertex(),r);
+//                 vertexToVertexName.put( r.getVertex(),r);
                 } 
                 stronglyConnectedSets.add(L); 
                  } 
