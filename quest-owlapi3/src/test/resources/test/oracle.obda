@@ -48,5 +48,9 @@ source		select to_char(REGION_ID) as RID FROM HR.REGIONS
 mappingId	NewCountry
 target		:NewCountry-{NAME} a :NewCountry . 
 source		select owner NAME from all_tables where all_tables.owner = 'SYS'
+
+mappingId	View
+target		:View-{name} a :View . 
+source		select t1.table_name name from all_tables t1, all_tables t2, all_views where t1.owner = all_views.owner
 ]]
 

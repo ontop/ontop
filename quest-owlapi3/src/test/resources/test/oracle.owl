@@ -55,6 +55,9 @@
         <Class IRI="#RegionID"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#View"/>
+    </Declaration>
+    <Declaration>
         <ObjectProperty IRI="#countryIsInRegion"/>
     </Declaration>
 </Ontology>

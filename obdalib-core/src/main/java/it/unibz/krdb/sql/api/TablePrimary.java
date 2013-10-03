@@ -110,11 +110,19 @@ public class TablePrimary implements ITable {
 		*/
 		return givenName;
 	}
-	
+
+	/**
+	 * Called from the MappingParser:getTables. 
+	 * Needed to remove duplicates from the list of tables
+	 */
 	@Override
 	public boolean equals(Object t){
 		if(t instanceof TablePrimary){
-			return this.givenName.equals(((TablePrimary) t).getGivenName());
+			TablePrimary tp = (TablePrimary) t;
+			return this.givenName.equals(tp.getGivenName())
+					&& ((this.alias == null && tp.getAlias() == null)
+							|| this.alias.equals(tp.getAlias())
+							);
 		}
 		return false;
 	}
