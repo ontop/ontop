@@ -1,7 +1,7 @@
 ontop
 ==================
 
-ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
+Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
 virtual RDF graphs defined through mappings to RDBMS. 
 
 Licensing terms 
