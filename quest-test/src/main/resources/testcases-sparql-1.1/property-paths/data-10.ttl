@@ -1,0 +1,4 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex:  <http://example.org/> .
+
+ex:a ex:hasList (1 2 3 4 5) .

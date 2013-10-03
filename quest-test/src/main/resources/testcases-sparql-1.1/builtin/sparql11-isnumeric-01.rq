@@ -1,0 +1,7 @@
+PREFIX  dc:  <http://purl.org/dc/elements/1.1/>
+PREFIX  :  <http://example.org/>
+SELECT  ?discount
+   { 
+     ?x :discount ?discount .
+     FILTER (isNumeric(?discount)) 
+   }

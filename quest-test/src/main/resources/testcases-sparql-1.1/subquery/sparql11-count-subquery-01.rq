@@ -1,0 +1,4 @@
+SELECT (count(*) as ?count)
+WHERE { 
+	{ SELECT ?s ?p ?o WHERE { ?s ?p ?o } }
+}

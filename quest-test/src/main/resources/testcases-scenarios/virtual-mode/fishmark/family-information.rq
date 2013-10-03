@@ -1,0 +1,23 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?noOfGenera ?noOfSpecies ?marine ?brackish ?freshwater 
+       ?aquarium ?remark  ?division ?activityLevel ?author ?year ?repguild ?SpeciesCount
+WHERE {
+   ?familiesID fd:families_Family "Bothidae" .
+   ?familiesID fd:families_SpeciesCount ?SpeciesCount .
+   ?familiesID fd:families_Genera ?noOfGenera .
+   ?familiesID fd:families_Species ?noOfSpecies .
+   ?familiesID fd:families_Marine ?marine .
+   ?familiesID fd:families_Brackish ?brackish .
+   ?familiesID fd:families_Freshwater ?freshwater .
+   ?familiesID fd:families_Aquarium ?aquarium .
+   ?familiesID fd:families_Remark ?remark .
+   ?familiesID fd:families_Division ?division .
+   ?familiesID fd:families_Activity ?activityLevel .
+   ?familiesID fd:families_ReprGuild ?repguild .
+   ?familiesID fd:families_FamiliesRefNo ?code .
+   ?x fd:refrens_RefNo ?code .
+   ?x fd:refrens_Author  ?author .
+   ?x fd:refrens_Year ?year .
+}

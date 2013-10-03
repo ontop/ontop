@@ -1,0 +1,14 @@
+# Query9
+# Besides the aforementioned features of class Student and the wide hierarchy of
+# class Faculty, like Query 2, this query is characterized by the most classes and
+# properties in the query set and there is a triangular pattern of relationships.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+SELECT ?X ?Y ?Z
+WHERE
+{?X rdf:type ub:Student .
+  ?Y rdf:type ub:Faculty .
+  ?Z rdf:type ub:Course .
+  ?X ub:advisor ?Y .
+  ?Y ub:teacherOf ?Z .
+  ?X ub:takesCourse ?Z}

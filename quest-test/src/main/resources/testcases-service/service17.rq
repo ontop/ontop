@@ -1,0 +1,11 @@
+# SERVICE test projection of subselects in service SES-1000
+
+PREFIX foo: <http://example.org/> 
+
+SELECT ?thing ?counter WHERE {
+	SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> {
+		SELECT ?thing (COUNT(?thing2) AS ?counter) WHERE {
+			?thing foo:predicate ?thing2
+		} GROUP BY ?thing ORDER BY DESC(?counter) 
+	}
+} 

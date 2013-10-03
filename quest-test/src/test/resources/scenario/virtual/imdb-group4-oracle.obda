@@ -1,0 +1,127 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	kbdb_imdb
+connectionUrl	jdbc:oracle:thin:@obdalin.inf.unibz.it:1522/
+username	imdbobda
+password	imdbobda
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	Actor
+target		:Person-{id} a :Actor . 
+source		select name.id as id from name, cast_info where name.id = cast_info.person_id and cast_info.role_id = 1
+
+mappingId	Movie
+target		:Title-{id} a :Movie ; :hasTitle {title} ; :hasProductionYear {prodyear} . 
+source		select title.id as id, title.title as title, title.production_year as prodyear from title where kind_id = 1
+
+mappingId	Producer
+target		:Person-{id} a :Producer . 
+source		select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 3
+
+mappingId	Actress
+target		:Person-{id} a :Actress . 
+source		select name.id as id from name, cast_info where name.id = cast_info.person_id and cast_info.role_id = 2
+
+mappingId	TVSeries
+target		:Title-{id} a :TVSeries ; :hasTitle {title} ; :hasProductionYear {prodyear} . 
+source		select title.id as id, title.title as title, title.production_year as prodyear from title where kind_id = 2
+
+mappingId	Writer
+target		:Person-{id} a :Writer . 
+source		select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 4
+
+mappingId	Director
+target		:Person-{id} a :Director . 
+source		select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 8
+
+mappingId	Editor
+target		:Person-{id} a :Editor . 
+source		select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 9
+
+mappingId	hasGenre
+target		:Title-{title_id} :hasGenre {genre} . 
+source		select title.id as title_id, movie_info.info as genre from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 3
+
+mappingId	hasPlot
+target		:Title-{title_id} :hasPlot {plot} . 
+source		select title.id as title_id, movie_info.info as plot from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 98
+
+mappingId	hasBudget
+target		:Title-{title_id} :hasBudget {budget} . 
+source		select title.id as title_id, movie_info.info as budget from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 105
+
+mappingId	hasLocation
+target		:Title-{title_id} :hasLocation {location} . 
+source		select title.id as title_id, movie_info.info as location from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 18
+
+mappingId	hasGross
+target		:Title-{title_id} :hasGross {gross} . 
+source		select title.id as title_id, movie_info.info as gross from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 107
+
+mappingId	hasRentalRevenue
+target		:Title-{title_id} :hasRentalRevenue {rental} . 
+source		select title.id as title_id, movie_info.info as rental from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 109
+
+mappingId	hasActor
+target		:Title-{movie_id} :hasActor :Person-{person_id} . 
+source		select person_id, movie_id from cast_info where role_id = 1 or role_id = 2
+
+mappingId	hasDirector
+target		:Title-{movie_id} :hasDirector :Person-{person_id} . 
+source		select person_id, movie_id from cast_info where role_id = 8
+
+mappingId	hasEditor
+target		:Title-{movie_id} :hasEditor :Person-{person_id} . 
+source		select person_id, movie_id from cast_info where role_id = 9
+
+mappingId	hasWriter
+target		:Title-{movie_id} :hasWriter :Person-{person_id} . 
+source		select person_id, movie_id from cast_info where role_id = 4
+
+mappingId	hasProducer
+target		:Title-{movie_id} :hasProducer :Person-{person_id} . 
+source		select person_id, movie_id from cast_info where role_id = 3
+
+mappingId	hasDateOfBirth
+target		:Person-{person_id} :hasDateOfBirth {dob} . 
+source		select person_id, info as dob from person_info where info_type_id = 21
+
+mappingId	ProductionCompany
+target		:company($id) a :ProductionCompany ; :hasCompanyName {name} . 
+source		select company_name.id as id, company_name.name as name, company_name.country_code as country from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 2
+
+mappingId	DistributionCompany
+target		:company($id) a :DistributionCompany ; :hasCompanyName {name} . 
+source		select company_name.id as id, company_name.name as name, company_name.country_code as country from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 1
+
+mappingId	hasProductionCompany
+target		:Title-{title_id} :hasProductionCompany :cCompany-{company_id} . 
+source		select company_name.id as company_id, movie_companies.movie_id as title_id from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 2
+
+mappingId	hasDistributionCompany
+target		:Title-{title_id} :hasDistributionCompany :cCompany-{company_id} . 
+source		select company_name.id as company_id, movie_companies.movie_id as title_id from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 1
+
+mappingId	hasCountryCode
+target		:company($id) :hasCountryCode {country} . 
+source		select company_name.id as id, company_name.country_code as country from company_name
+
+mappingId	hasName
+target		:Person-{id} :hasName {name} . 
+source		select name.id as id, name.name as name from name
+]]
+

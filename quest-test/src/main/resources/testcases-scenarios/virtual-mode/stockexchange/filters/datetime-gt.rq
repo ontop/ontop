@@ -1,0 +1,7 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+
+SELECT DISTINCT $x $id 
+WHERE { 
+   $x a :Transaction; :transactionID $id; :transactionDate $transDate. 
+   FILTER ( $transDate > "2008-04-02T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> ). 
+}

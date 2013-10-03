@@ -1,0 +1,4 @@
+SELECT  ?type 
+WHERE { ?subj a ?type } 
+GROUP BY ?type 
+ORDER BY (count(?subj))

@@ -1,0 +1,14 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?genus ?species ?occurrence ?aquarium 
+WHERE {
+   ?x fd:species_Genus ?genus .
+   ?x fd:species_Species ?species .
+   ?x fd:species_Aquarium ?aquarium .
+   ?c fd:country_SpecCode ?x.
+   ?c fd:country_Status ?occurrence .
+   ?c fd:country_LiveExport "ornamental" .
+   ?c fd:country_C_Code ?cf .
+   ?cf fd:countref_PAESE "Indonesia" .  
+}

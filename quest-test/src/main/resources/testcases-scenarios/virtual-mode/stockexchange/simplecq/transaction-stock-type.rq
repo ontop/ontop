@@ -1,0 +1,1 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>SELECT DISTINCT $x $inst $type WHERE {      $x a :Transaction . 		$x :involvesInstrument $inst. 		$inst a :Stock.		$inst :typeOfShares $type.}

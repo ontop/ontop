@@ -1,0 +1,14 @@
+PREFIX ex: <http://example.org/>
+SELECT ?friend
+WHERE {
+  ?popular ex:knows ?friend .
+  {
+    SELECT ?popular
+    WHERE {
+      ?someone ex:knows ?popular
+    } 
+    GROUP BY ?popular
+    ORDER BY DESC(COUNT(?someone))
+    LIMIT 1
+  }
+}

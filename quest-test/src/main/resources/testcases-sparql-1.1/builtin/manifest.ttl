@@ -1,0 +1,231 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://www.w3.org/2001/sw/DataAccess/tests/data-r2/syntax-sparql1/manifest#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
+@prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:comment "SPARQL 1.1: builtin functions (by Jeen Broekstra)" ;
+    mf:entries
+    (
+    	:sparql11-isnumeric-01
+    	:sparql11-if-01
+    	:sparql11-if-02
+    	:sparql11-iri-01
+    	:sparql11-uri-01
+    	:sparql11-bnode-01
+    	:sparql11-bnode-02
+    	:sparql11-strdt-01
+    	:sparql11-strlang-01
+    	:sparql11-coalesce-01
+    	:sparql11-in-01
+    	:sparql11-in-02
+    	:sparql11-in-03
+    	:sparql11-not-in-01
+    	:sparql11-not-in-02
+    	:sparql11-not-in-03
+    	:sparql11-concat-01
+    	:sparql11-concat-02
+    	:sparql11-concat-03
+    	:sparql11-concat-04
+    	:sparql11-concat-05
+    	:sparql11-substr-01
+    	:sparql11-substr-02
+    	:sparql11-substr-03
+    	:sparql11-strlen-01
+    	:sparql11-strlen-02
+    	:sparql11-ucase-01
+    	:sparql11-lcase-01
+    	:sparql11-strstarts-01
+    	:sparql11-strends-01
+    	:sparql11-encodeforuri-01
+    	:sparql11-abs-01
+    	:sparql11-round-01
+    	:sparql11-round-02
+    	:sparql11-ceil-01
+    	:sparql11-floor-01
+    ).
+    
+:sparql11-strstarts-01  mf:name  "sparql11-strstarts-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-strstarts-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-strstarts-01.srx> .
+          
+:sparql11-strends-01  mf:name  "sparql11-strends-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-strends-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-strends-01.srx> . 
+
+:sparql11-abs-01  mf:name  "sparql11-abs-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-abs-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-abs-01.srx> . 
+         
+:sparql11-round-01  mf:name  "sparql11-round-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-round-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-round-01.srx> . 
+
+:sparql11-round-02  mf:name  "sparql11-round-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-round-02.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-round-02.srx> . 
+
+ :sparql11-ceil-01  mf:name  "sparql11-ceil-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-ceil-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-ceil-01.srx> . 
+         
+:sparql11-floor-01  mf:name  "sparql11-floor-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-floor-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-floor-01.srx> . 
+            
+:sparql11-encodeforuri-01  mf:name  "sparql11-encodeforuri-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-encodeforuri-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-encodeforuri-01.srx> .
+                                             
+:sparql11-concat-01  mf:name  "sparql11-concat-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-concat-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-concat-01.srx> . 
+
+:sparql11-concat-02  mf:name  "sparql11-concat-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-concat-02.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-concat-02.srx> . 
+
+:sparql11-concat-03  mf:name  "sparql11-concat-03" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-concat-03.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-concat-03.srx> . 
+
+
+:sparql11-strlen-01  mf:name  "sparql11-strlen-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-strlen-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-strlen-01.srx> . 
+         
+:sparql11-strlen-02  mf:name  "sparql11-strlen-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-strlen-02.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-strlen-02.srx> .
+         
+:sparql11-ucase-01  mf:name  "sparql11-ucase-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-ucase-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-ucase-01.srx> . 
+         
+:sparql11-lcase-01  mf:name  "sparql11-lcase-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-lcase-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-lcase-01.srx> .           
+         
+:sparql11-substr-01  mf:name  "sparql11-substr-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-substr-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-substr-01.srx> . 
+         
+:sparql11-substr-02  mf:name  "sparql11-substr-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-substr-02.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-substr-02.srx> . 
+         
+:sparql11-substr-03  mf:name  "sparql11-substr-03" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-substr-03.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-substr-03.srx> . 
+         
+:sparql11-concat-04  mf:name  "sparql11-concat-04" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-concat-04.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-concat-04.srx> . 
+
+:sparql11-concat-05  mf:name  "sparql11-concat-05" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-concat-05.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-concat-05.srx> .                            
+
+:sparql11-isnumeric-01  mf:name  "sparql11-isnumeric-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-isnumeric-01.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-isnumeric-01.srx> .
+
+
+:sparql11-if-01  mf:name  "sparql11-if-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-if-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-if-01.srx> .
+
+
+:sparql11-if-02  mf:name  "sparql11-if-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-if-02.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-if-02.srx> .
+
+:sparql11-iri-01  mf:name  "sparql11-iri-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-iri-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-iri-01.srx> .
+         
+:sparql11-uri-01  mf:name  "sparql11-uri-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-uri-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-uri-01.srx> .
+         
+:sparql11-bnode-01  mf:name  "sparql11-bnode-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-bnode-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-bnode-01.srx> .
+
+:sparql11-bnode-02  mf:name  "sparql11-bnode-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-bnode-02.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-bnode-02.srx> .
+                           
+:sparql11-strdt-01  mf:name  "sparql11-strdt-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-strdt-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-strdt-01.srx> .
+         
+:sparql11-strlang-01  mf:name  "sparql11-strlang-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-strlang-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-strlang-01.srx> .
+         
+:sparql11-coalesce-01  mf:name  "sparql11-coalesce-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-coalesce-01.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-coalesce-01.srx> .   
+         
+:sparql11-in-01  mf:name  "sparql11-in-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-in-01.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-in-01.srx> . 
+         
+:sparql11-in-02  mf:name  "sparql11-in-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-in-02.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-in-02.srx> .
+          
+:sparql11-in-03  mf:name  "sparql11-in-03" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-in-03.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-in-03.srx> .
+                           
+:sparql11-not-in-01  mf:name  "sparql11-not-in-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-not-in-01.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-not-in-01.srx> .    
+         
+:sparql11-not-in-02  mf:name  "sparql11-not-in-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-not-in-02.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-not-in-02.srx> .
+         
+:sparql11-not-in-03  mf:name  "sparql11-not-in-03" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-not-in-03.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-not-in-03.srx> .                          

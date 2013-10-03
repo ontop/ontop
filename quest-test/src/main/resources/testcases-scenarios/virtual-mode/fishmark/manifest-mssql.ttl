@@ -1,0 +1,254 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Fishmark Queries" ;
+    mf:entries
+    ( 
+      :common-name
+      :species-page
+      :genus
+      :species
+      :family-information
+      :family-all-fish
+      :family-nominal-species
+      :family-list-of-pictures
+      :collaborator-page
+      :picture-page
+      :country-all-fish
+      :country-species-information
+      :country-fresh-water
+      :country-introduced
+      :country-endemic
+      :country-reef-associated
+      :country-pelagic
+      :country-game-fish
+      :country-commercial
+      :country-used-aquaculture
+      :country-pot-aquaculture
+      :country-aquarium-trade
+    ) .
+
+:common-name rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q1: Find species for a given common names" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <common-name.rq> ] ;
+    mf:result <common-name.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:species-page rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q2: Retrieve information about a specific species" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <species-page.rq> ] ;
+    mf:result <species-page.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+
+:genus rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q3: Find species matching a given genus" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <genus.rq> ] ;
+    mf:result <genus.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:species rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q4: Find species matching a given species" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <species.rq> ] ;
+    mf:result <species.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:family-information rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q5: Retrieve information about a specific family of species" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <family-information.rq> ] ;
+    mf:result <family-information.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+ 
+:family-all-fish rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q6: Find all fish for a given family" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <family-all-fish.rq> ] ;
+    mf:result <family-all-fish.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:family-nominal-species rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q7: Find all nominal species for a given family" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <family-nominal-species.rq> ] ;
+    mf:result <family-nominal-species.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:family-list-of-pictures rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q8: Find all fish pictures that belong to a given family" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <family-list-of-pictures.rq> ] ;
+    mf:result <family-list-of-pictures.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:collaborator-page rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q9: Retrieve information about a specific collaborator" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <collaborator-page.rq> ] ;
+    mf:result <collaborator-page.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:picture-page rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10: Retrieve information about a specific picture" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <picture-page.rq> ] ;
+    mf:result <picture-page.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+
+:country-all-fish rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q11: Find all fish for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-all-fish.rq> ] ;
+    mf:result <country-all-fish.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-species-information rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q12: Retrieve information about a species of a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-species-information.rq> ] ;
+    mf:result <country-species-information.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-fresh-water rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q13: Find all freshwater species for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-fresh-water.rq> ] ;
+    mf:result <country-fresh-water.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-introduced rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q14: Find all introduced species for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-introduced.rq> ] ;
+    mf:result <country-introduced.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-endemic rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q15: Find all endemic species for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-endemic.rq> ] ;
+    mf:result <country-endemic.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-reef-associated rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q16: Find all reef-associated species for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-reef-associated.rq> ] ;
+    mf:result <country-reef-associated.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-pelagic rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q17: Find all pelagic species for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-pelagic.rq> ] ;
+    mf:result <country-pelagic.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-game-fish rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q18: Find all game fish for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-game-fish.rq> ] ;
+    mf:result <country-game-fish.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-commercial rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q19: Find all commercial fish for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-commercial.rq> ] ;
+    mf:result <country-commercial.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-used-aquaculture rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q20: Find all species used for aquaculture for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-used-aquaculture.rq> ] ;
+    mf:result <country-used-aquaculture.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-pot-aquaculture rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q21: find species with potential use for aquaculture for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-pot-aquaculture.rq> ] ;
+    mf:result <country-pot-aquaculture.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
+    
+:country-aquarium-trade rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q22: Find all species used for aquarium trade for a given country" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <country-aquarium-trade.rq> ] ;
+    mf:result <country-aquarium-trade.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-mssql.obda> .
