@@ -467,7 +467,7 @@ column_reference returns [ColumnReference value]
       if($column_name.value == null)
         $value = new ColumnReference(table, null);	
       else
-        $value = new ColumnReference(table, $column_name.value.get(0));
+        $value = new ColumnReference(table, $column_name.value.get(1));
     }
   ;  
   

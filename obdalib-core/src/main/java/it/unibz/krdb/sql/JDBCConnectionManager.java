@@ -216,20 +216,16 @@ public class JDBCConnectionManager {
 	}
 	
 	public static DBMetadata getMetaData(Connection conn, ArrayList<Relation> tables) throws SQLException {
+		if (tables == null || tables.isEmpty())
+			return getMetaData(conn);
 		DBMetadata metadata = null;
 		final DatabaseMetaData md = conn.getMetaData();
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn, tables);
-		} else if (md.getDatabaseProductName().contains("DB2")) {
-			// If the database engine is IBM DB2
-			metadata = getDB2MetaData(md, conn);
-		} else if (md.getDatabaseProductName().contains("SQL Server")) {
-			// If the database engine is SQL Server
-			metadata = getSqlServerMetaData(md, conn);
-		} else {
+		}  else {
 			// For other database engines
-			metadata = getOtherMetaData(md);
+			metadata = getOtherMetaData(md, conn, tables);
 		}
 		return metadata;
 	}
@@ -291,6 +287,81 @@ public class JDBCConnectionManager {
 	}
 
 	/**
+	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
+	 * 
+	 * Only retrieves metadata for the tables listed
+	 * 
+	 * Future plan to retrive all tables when this list is empty?
+	 * 
+	 * @param tables 
+	 */
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		
+		/* Obtain the statement object for query execution */
+		stmt = conn.createStatement();
+
+
+		/**
+		 *  The sql to extract table names is now removed, since we instead use the
+		 *  table names from the source sql of the mappings, given as the parameter tables
+		 */
+
+		Iterator<Relation> table_iter = tables.iterator();
+		/* Obtain the column information for each relational object */
+		while (table_iter.hasNext()) {
+			Relation table = table_iter.next();
+			ResultSet rsColumns = null;
+			Set<String> tableColumns = new HashSet<String>();
+			String tblName = table.getTableName();
+			/**
+			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
+			 * provided, otherwise without.
+			 */
+			String tableGivenName = table.getGivenName();
+			String tableSchema;
+			if( table.getSchema().length() > 0)
+				tableSchema = table.getSchema();
+			else
+				tableSchema = null;
+
+			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
+			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+
+			TableDefinition td = new TableDefinition(tableGivenName);
+
+			try {
+				final String columnSelectQuery = "SELECT * FROM " + tableGivenName;
+				rsColumns = stmt.executeQuery(columnSelectQuery);
+				ResultSetMetaData rmd = rsColumns.getMetaData();
+				
+				for(int pos = 1; pos <= rmd.getColumnCount(); pos++){
+					final String columnName = rmd.getColumnName(pos); 
+					final int dataType = rmd.getColumnType(pos);
+					final boolean isPrimaryKey = primaryKeys.contains(columnName);
+					final Reference reference = foreignKeys.get(columnName);
+					final int isNullable = rmd.isNullable(pos);
+					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+				
+					// Check if the columns are unique regardless their letter cases
+					if (!tableColumns.add(columnName.toLowerCase())) {
+						// if exist
+						throw new RuntimeException("The system cannot process duplicate table columns!");
+					}
+				}
+				// Add this information to the DBMetadata
+				metadata.add(td);
+			} finally {
+				if (rsColumns != null) {
+					rsColumns.close(); // close existing open cursor
+				}
+			}
+		}
+		return metadata;
+	}
+
+	/**
 	 * Retrieve metadata for SQL Server database engine
 	 */
 	private static DBMetadata getSqlServerMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
@@ -300,13 +371,13 @@ public class JDBCConnectionManager {
 		try {
 			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();
-			
+
 			/* Obtain the relational objects (i.e., tables and views) */
 			final String tableSelectQuery = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
 					"FROM INFORMATION_SCHEMA.TABLES " +
 					"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
 			resultSet = stmt.executeQuery(tableSelectQuery);
-			
+
 			/* Obtain the column information for each relational object */
 			while (resultSet.next()) {
 				ResultSet rsColumns = null;
@@ -316,10 +387,10 @@ public class JDBCConnectionManager {
 					final String tblName = resultSet.getString("TABLE_NAME");
 					final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, tblCatalog, tblSchema, tblName);
-					
+
 					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
-					
+
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
@@ -346,7 +417,7 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
-	
+
 	/**
 	 * Retrieve metadata for DB2 database engine
 	 */
@@ -520,7 +591,7 @@ public class JDBCConnectionManager {
 //					tableOwner = resultSet.getString("owner_name");
 					String tblName = table.getTableName();
 					/**
-					 * fullTableName is exactly the name the user provided, including schema prefix if that was
+					 * givenTableName is exactly the name the user provided, including schema prefix if that was
 					 * provided, otherwise without.
 					 */
 					String tableGivenName = table.getGivenName();
