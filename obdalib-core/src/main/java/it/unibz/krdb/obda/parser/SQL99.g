@@ -745,21 +745,29 @@ table_primary returns [TablePrimary value]
  
 table_name returns [TablePrimary value]
   : (schema_name PERIOD)? table_identifier {
-	  String tableName = $table_identifier.value.get(1);
-      String tableQName = $table_identifier.value.get(0);
-      if ($schema_name.value != null && $schema_name.value.get(1).length() > 0) {
-      	String schemaName = $schema_name.value.get(1);
-      	String schemaQName = $schema_name.value.get(0);         
-        $value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
-      }
-      else {
-        $value = new TablePrimary("", tableName, tableQName);
-      }      
+      if($table_identifier.value != null){
+	    String tableName = $table_identifier.value.get(1);
+        String tableQName = $table_identifier.value.get(0);
+        if ($schema_name.value != null && $schema_name.value.get(1).length() > 0) {
+      	  String schemaName = $schema_name.value.get(1);
+      	  String schemaQName = $schema_name.value.get(0);         
+          $value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
+        }
+        else {
+          $value = new TablePrimary("", tableName, tableQName);
+        }
+      } else 
+        $value = new TablePrimary("", null, null);      
     }
   ;  
 
 alias_name returns [String value]
-  : identifier  { $value = $identifier.value.get(1); }
+  : identifier  { 
+     if ($identifier.value != null)
+       $value = $identifier.value.get(1);
+     else
+       $value = null;
+    }
   ;
 
 derived_table

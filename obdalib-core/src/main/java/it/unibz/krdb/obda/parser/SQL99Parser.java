@@ -1,4 +1,4 @@
-// $ANTLR 3.5 SQL99.g 2013-10-04 10:00:41
+// $ANTLR 3.5 SQL99.g 2013-10-04 10:21:33
 
 package it.unibz.krdb.obda.parser;
 
@@ -3817,16 +3817,19 @@ public class SQL99Parser extends Parser {
 			state._fsp--;
 
 
-				  String tableName = table_identifier48.get(1);
-			      String tableQName = table_identifier48.get(0);
-			      if (schema_name49 != null && schema_name49.get(1).length() > 0) {
-			      	String schemaName = schema_name49.get(1);
-			      	String schemaQName = schema_name49.get(0);         
-			        value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
-			      }
-			      else {
-			        value = new TablePrimary("", tableName, tableQName);
-			      }      
+			      if(table_identifier48 != null){
+				    String tableName = table_identifier48.get(1);
+			        String tableQName = table_identifier48.get(0);
+			        if (schema_name49 != null && schema_name49.get(1).length() > 0) {
+			      	  String schemaName = schema_name49.get(1);
+			      	  String schemaQName = schema_name49.get(0);         
+			          value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
+			        }
+			        else {
+			          value = new TablePrimary("", tableName, tableQName);
+			        }
+			      } else 
+			        value = new TablePrimary("", null, null);      
 			    
 			}
 
@@ -3845,7 +3848,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "alias_name"
-	// SQL99.g:761:1: alias_name returns [String value] : identifier ;
+	// SQL99.g:764:1: alias_name returns [String value] : identifier ;
 	public final String alias_name() throws RecognitionException {
 		String value = null;
 
@@ -3853,14 +3856,19 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier50 =null;
 
 		try {
-			// SQL99.g:762:3: ( identifier )
-			// SQL99.g:762:5: identifier
+			// SQL99.g:765:3: ( identifier )
+			// SQL99.g:765:5: identifier
 			{
 			pushFollow(FOLLOW_identifier_in_alias_name1856);
 			identifier50=identifier();
 			state._fsp--;
 
-			 value = identifier50.get(1); 
+			 
+			     if (identifier50 != null)
+			       value = identifier50.get(1);
+			     else
+			       value = null;
+			    
 			}
 
 		}
@@ -3878,11 +3886,11 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "derived_table"
-	// SQL99.g:765:1: derived_table : table_subquery ;
+	// SQL99.g:773:1: derived_table : table_subquery ;
 	public final void derived_table() throws RecognitionException {
 		try {
-			// SQL99.g:766:3: ( table_subquery )
-			// SQL99.g:766:5: table_subquery
+			// SQL99.g:774:3: ( table_subquery )
+			// SQL99.g:774:5: table_subquery
 			{
 			pushFollow(FOLLOW_table_subquery_in_derived_table1872);
 			table_subquery();
@@ -3904,7 +3912,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "table_identifier"
-	// SQL99.g:769:1: table_identifier returns [ArrayList<String> value] : identifier ;
+	// SQL99.g:777:1: table_identifier returns [ArrayList<String> value] : identifier ;
 	public final ArrayList<String> table_identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -3912,8 +3920,8 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier51 =null;
 
 		try {
-			// SQL99.g:770:3: ( identifier )
-			// SQL99.g:770:5: identifier
+			// SQL99.g:778:3: ( identifier )
+			// SQL99.g:778:5: identifier
 			{
 			pushFollow(FOLLOW_identifier_in_table_identifier1893);
 			identifier51=identifier();
@@ -3937,7 +3945,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "schema_name"
-	// SQL99.g:773:1: schema_name returns [ArrayList<String> value] : identifier ;
+	// SQL99.g:781:1: schema_name returns [ArrayList<String> value] : identifier ;
 	public final ArrayList<String> schema_name() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -3945,8 +3953,8 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier52 =null;
 
 		try {
-			// SQL99.g:774:3: ( identifier )
-			// SQL99.g:774:5: identifier
+			// SQL99.g:782:3: ( identifier )
+			// SQL99.g:782:5: identifier
 			{
 			pushFollow(FOLLOW_identifier_in_schema_name1914);
 			identifier52=identifier();
@@ -3970,7 +3978,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "column_name"
-	// SQL99.g:777:1: column_name returns [ArrayList<String> value] : identifier ;
+	// SQL99.g:785:1: column_name returns [ArrayList<String> value] : identifier ;
 	public final ArrayList<String> column_name() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -3978,8 +3986,8 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> identifier53 =null;
 
 		try {
-			// SQL99.g:778:3: ( identifier )
-			// SQL99.g:778:5: identifier
+			// SQL99.g:786:3: ( identifier )
+			// SQL99.g:786:5: identifier
 			{
 			pushFollow(FOLLOW_identifier_in_column_name1937);
 			identifier53=identifier();
@@ -4003,7 +4011,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "identifier"
-	// SQL99.g:781:1: identifier returns [ArrayList<String> value] : (t= regular_identifier |t= delimited_identifier ) ;
+	// SQL99.g:789:1: identifier returns [ArrayList<String> value] : (t= regular_identifier |t= delimited_identifier ) ;
 	public final ArrayList<String> identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4011,10 +4019,10 @@ public class SQL99Parser extends Parser {
 		ArrayList<String> t =null;
 
 		try {
-			// SQL99.g:782:3: ( (t= regular_identifier |t= delimited_identifier ) )
-			// SQL99.g:782:5: (t= regular_identifier |t= delimited_identifier )
+			// SQL99.g:790:3: ( (t= regular_identifier |t= delimited_identifier ) )
+			// SQL99.g:790:5: (t= regular_identifier |t= delimited_identifier )
 			{
-			// SQL99.g:782:5: (t= regular_identifier |t= delimited_identifier )
+			// SQL99.g:790:5: (t= regular_identifier |t= delimited_identifier )
 			int alt41=2;
 			int LA41_0 = input.LA(1);
 			if ( (LA41_0==VARNAME) ) {
@@ -4032,7 +4040,7 @@ public class SQL99Parser extends Parser {
 
 			switch (alt41) {
 				case 1 :
-					// SQL99.g:782:6: t= regular_identifier
+					// SQL99.g:790:6: t= regular_identifier
 					{
 					pushFollow(FOLLOW_regular_identifier_in_identifier1961);
 					t=regular_identifier();
@@ -4041,7 +4049,7 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 2 :
-					// SQL99.g:782:29: t= delimited_identifier
+					// SQL99.g:790:29: t= delimited_identifier
 					{
 					pushFollow(FOLLOW_delimited_identifier_in_identifier1967);
 					t=delimited_identifier();
@@ -4070,7 +4078,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "regular_identifier"
-	// SQL99.g:785:1: regular_identifier returns [ArrayList<String> value] : VARNAME ;
+	// SQL99.g:793:1: regular_identifier returns [ArrayList<String> value] : VARNAME ;
 	public final ArrayList<String> regular_identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4078,8 +4086,8 @@ public class SQL99Parser extends Parser {
 		Token VARNAME54=null;
 
 		try {
-			// SQL99.g:786:3: ( VARNAME )
-			// SQL99.g:786:5: VARNAME
+			// SQL99.g:794:3: ( VARNAME )
+			// SQL99.g:794:5: VARNAME
 			{
 			VARNAME54=(Token)match(input,VARNAME,FOLLOW_VARNAME_in_regular_identifier1987); 
 			 value = new ArrayList<String>();
@@ -4103,7 +4111,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "delimited_identifier"
-	// SQL99.g:792:1: delimited_identifier returns [ArrayList<String> value] : STRING_WITH_QUOTE_DOUBLE ;
+	// SQL99.g:800:1: delimited_identifier returns [ArrayList<String> value] : STRING_WITH_QUOTE_DOUBLE ;
 	public final ArrayList<String> delimited_identifier() throws RecognitionException {
 		ArrayList<String> value = null;
 
@@ -4111,8 +4119,8 @@ public class SQL99Parser extends Parser {
 		Token STRING_WITH_QUOTE_DOUBLE55=null;
 
 		try {
-			// SQL99.g:793:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// SQL99.g:793:5: STRING_WITH_QUOTE_DOUBLE
+			// SQL99.g:801:3: ( STRING_WITH_QUOTE_DOUBLE )
+			// SQL99.g:801:5: STRING_WITH_QUOTE_DOUBLE
 			{
 			STRING_WITH_QUOTE_DOUBLE55=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_delimited_identifier2006); 
 			 
@@ -4137,7 +4145,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "general_literal"
-	// SQL99.g:800:1: general_literal returns [Literal value] : ( string_literal | boolean_literal );
+	// SQL99.g:808:1: general_literal returns [Literal value] : ( string_literal | boolean_literal );
 	public final Literal general_literal() throws RecognitionException {
 		Literal value = null;
 
@@ -4146,7 +4154,7 @@ public class SQL99Parser extends Parser {
 		BooleanLiteral boolean_literal57 =null;
 
 		try {
-			// SQL99.g:801:3: ( string_literal | boolean_literal )
+			// SQL99.g:809:3: ( string_literal | boolean_literal )
 			int alt42=2;
 			int LA42_0 = input.LA(1);
 			if ( (LA42_0==STRING_WITH_QUOTE) ) {
@@ -4164,7 +4172,7 @@ public class SQL99Parser extends Parser {
 
 			switch (alt42) {
 				case 1 :
-					// SQL99.g:801:5: string_literal
+					// SQL99.g:809:5: string_literal
 					{
 					pushFollow(FOLLOW_string_literal_in_general_literal2025);
 					string_literal56=string_literal();
@@ -4174,7 +4182,7 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 2 :
-					// SQL99.g:802:5: boolean_literal
+					// SQL99.g:810:5: boolean_literal
 					{
 					pushFollow(FOLLOW_boolean_literal_in_general_literal2033);
 					boolean_literal57=boolean_literal();
@@ -4200,7 +4208,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "string_literal"
-	// SQL99.g:805:1: string_literal returns [StringLiteral value] : STRING_WITH_QUOTE ;
+	// SQL99.g:813:1: string_literal returns [StringLiteral value] : STRING_WITH_QUOTE ;
 	public final StringLiteral string_literal() throws RecognitionException {
 		StringLiteral value = null;
 
@@ -4208,8 +4216,8 @@ public class SQL99Parser extends Parser {
 		Token STRING_WITH_QUOTE58=null;
 
 		try {
-			// SQL99.g:806:3: ( STRING_WITH_QUOTE )
-			// SQL99.g:806:5: STRING_WITH_QUOTE
+			// SQL99.g:814:3: ( STRING_WITH_QUOTE )
+			// SQL99.g:814:5: STRING_WITH_QUOTE
 			{
 			STRING_WITH_QUOTE58=(Token)match(input,STRING_WITH_QUOTE,FOLLOW_STRING_WITH_QUOTE_in_string_literal2052); 
 
@@ -4234,7 +4242,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "boolean_literal"
-	// SQL99.g:813:1: boolean_literal returns [BooleanLiteral value] : (t= TRUE |t= FALSE ) ;
+	// SQL99.g:821:1: boolean_literal returns [BooleanLiteral value] : (t= TRUE |t= FALSE ) ;
 	public final BooleanLiteral boolean_literal() throws RecognitionException {
 		BooleanLiteral value = null;
 
@@ -4242,10 +4250,10 @@ public class SQL99Parser extends Parser {
 		Token t=null;
 
 		try {
-			// SQL99.g:814:3: ( (t= TRUE |t= FALSE ) )
-			// SQL99.g:814:5: (t= TRUE |t= FALSE )
+			// SQL99.g:822:3: ( (t= TRUE |t= FALSE ) )
+			// SQL99.g:822:5: (t= TRUE |t= FALSE )
 			{
-			// SQL99.g:814:5: (t= TRUE |t= FALSE )
+			// SQL99.g:822:5: (t= TRUE |t= FALSE )
 			int alt43=2;
 			int LA43_0 = input.LA(1);
 			if ( (LA43_0==TRUE) ) {
@@ -4263,13 +4271,13 @@ public class SQL99Parser extends Parser {
 
 			switch (alt43) {
 				case 1 :
-					// SQL99.g:814:6: t= TRUE
+					// SQL99.g:822:6: t= TRUE
 					{
 					t=(Token)match(input,TRUE,FOLLOW_TRUE_in_boolean_literal2074); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:814:15: t= FALSE
+					// SQL99.g:822:15: t= FALSE
 					{
 					t=(Token)match(input,FALSE,FOLLOW_FALSE_in_boolean_literal2080); 
 					}
@@ -4295,7 +4303,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal"
-	// SQL99.g:817:1: numeric_literal returns [NumericLiteral value] : ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative );
+	// SQL99.g:825:1: numeric_literal returns [NumericLiteral value] : ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative );
 	public final NumericLiteral numeric_literal() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4305,7 +4313,7 @@ public class SQL99Parser extends Parser {
 		NumericLiteral numeric_literal_negative61 =null;
 
 		try {
-			// SQL99.g:818:3: ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative )
+			// SQL99.g:826:3: ( numeric_literal_unsigned | numeric_literal_positive | numeric_literal_negative )
 			int alt44=3;
 			switch ( input.LA(1) ) {
 			case DECIMAL:
@@ -4333,7 +4341,7 @@ public class SQL99Parser extends Parser {
 			}
 			switch (alt44) {
 				case 1 :
-					// SQL99.g:818:5: numeric_literal_unsigned
+					// SQL99.g:826:5: numeric_literal_unsigned
 					{
 					pushFollow(FOLLOW_numeric_literal_unsigned_in_numeric_literal2100);
 					numeric_literal_unsigned59=numeric_literal_unsigned();
@@ -4343,7 +4351,7 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 2 :
-					// SQL99.g:819:5: numeric_literal_positive
+					// SQL99.g:827:5: numeric_literal_positive
 					{
 					pushFollow(FOLLOW_numeric_literal_positive_in_numeric_literal2108);
 					numeric_literal_positive60=numeric_literal_positive();
@@ -4353,7 +4361,7 @@ public class SQL99Parser extends Parser {
 					}
 					break;
 				case 3 :
-					// SQL99.g:820:5: numeric_literal_negative
+					// SQL99.g:828:5: numeric_literal_negative
 					{
 					pushFollow(FOLLOW_numeric_literal_negative_in_numeric_literal2116);
 					numeric_literal_negative61=numeric_literal_negative();
@@ -4379,7 +4387,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal_unsigned"
-	// SQL99.g:823:1: numeric_literal_unsigned returns [NumericLiteral value] : ( INTEGER | DECIMAL );
+	// SQL99.g:831:1: numeric_literal_unsigned returns [NumericLiteral value] : ( INTEGER | DECIMAL );
 	public final NumericLiteral numeric_literal_unsigned() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4388,7 +4396,7 @@ public class SQL99Parser extends Parser {
 		Token DECIMAL63=null;
 
 		try {
-			// SQL99.g:824:3: ( INTEGER | DECIMAL )
+			// SQL99.g:832:3: ( INTEGER | DECIMAL )
 			int alt45=2;
 			int LA45_0 = input.LA(1);
 			if ( (LA45_0==INTEGER) ) {
@@ -4406,14 +4414,14 @@ public class SQL99Parser extends Parser {
 
 			switch (alt45) {
 				case 1 :
-					// SQL99.g:824:5: INTEGER
+					// SQL99.g:832:5: INTEGER
 					{
 					INTEGER62=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numeric_literal_unsigned2135); 
 					 value = new IntegerLiteral((INTEGER62!=null?INTEGER62.getText():null)); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:825:5: DECIMAL
+					// SQL99.g:833:5: DECIMAL
 					{
 					DECIMAL63=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numeric_literal_unsigned2143); 
 					 value = new DecimalLiteral((DECIMAL63!=null?DECIMAL63.getText():null)); 
@@ -4436,7 +4444,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal_positive"
-	// SQL99.g:828:1: numeric_literal_positive returns [NumericLiteral value] : ( INTEGER_POSITIVE | DECIMAL_POSITIVE );
+	// SQL99.g:836:1: numeric_literal_positive returns [NumericLiteral value] : ( INTEGER_POSITIVE | DECIMAL_POSITIVE );
 	public final NumericLiteral numeric_literal_positive() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4445,7 +4453,7 @@ public class SQL99Parser extends Parser {
 		Token DECIMAL_POSITIVE65=null;
 
 		try {
-			// SQL99.g:829:3: ( INTEGER_POSITIVE | DECIMAL_POSITIVE )
+			// SQL99.g:837:3: ( INTEGER_POSITIVE | DECIMAL_POSITIVE )
 			int alt46=2;
 			int LA46_0 = input.LA(1);
 			if ( (LA46_0==INTEGER_POSITIVE) ) {
@@ -4463,14 +4471,14 @@ public class SQL99Parser extends Parser {
 
 			switch (alt46) {
 				case 1 :
-					// SQL99.g:829:5: INTEGER_POSITIVE
+					// SQL99.g:837:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE64=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numeric_literal_positive2162); 
 					 value = new IntegerLiteral((INTEGER_POSITIVE64!=null?INTEGER_POSITIVE64.getText():null)); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:830:5: DECIMAL_POSITIVE
+					// SQL99.g:838:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE65=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numeric_literal_positive2170); 
 					 value = new DecimalLiteral((DECIMAL_POSITIVE65!=null?DECIMAL_POSITIVE65.getText():null)); 
@@ -4493,7 +4501,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "numeric_literal_negative"
-	// SQL99.g:833:1: numeric_literal_negative returns [NumericLiteral value] : ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE );
+	// SQL99.g:841:1: numeric_literal_negative returns [NumericLiteral value] : ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE );
 	public final NumericLiteral numeric_literal_negative() throws RecognitionException {
 		NumericLiteral value = null;
 
@@ -4502,7 +4510,7 @@ public class SQL99Parser extends Parser {
 		Token DECIMAL_NEGATIVE67=null;
 
 		try {
-			// SQL99.g:834:3: ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE )
+			// SQL99.g:842:3: ( INTEGER_NEGATIVE | DECIMAL_NEGATIVE )
 			int alt47=2;
 			int LA47_0 = input.LA(1);
 			if ( (LA47_0==INTEGER_NEGATIVE) ) {
@@ -4520,14 +4528,14 @@ public class SQL99Parser extends Parser {
 
 			switch (alt47) {
 				case 1 :
-					// SQL99.g:834:5: INTEGER_NEGATIVE
+					// SQL99.g:842:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE66=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numeric_literal_negative2191); 
 					 value = new IntegerLiteral((INTEGER_NEGATIVE66!=null?INTEGER_NEGATIVE66.getText():null)); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:835:5: DECIMAL_NEGATIVE
+					// SQL99.g:843:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE67=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numeric_literal_negative2199); 
 					 value = new DecimalLiteral((DECIMAL_NEGATIVE67!=null?DECIMAL_NEGATIVE67.getText():null)); 
@@ -4550,7 +4558,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "truth_value"
-	// SQL99.g:838:1: truth_value returns [boolean value] : (t= TRUE |t= FALSE ) ;
+	// SQL99.g:846:1: truth_value returns [boolean value] : (t= TRUE |t= FALSE ) ;
 	public final boolean truth_value() throws RecognitionException {
 		boolean value = false;
 
@@ -4558,10 +4566,10 @@ public class SQL99Parser extends Parser {
 		Token t=null;
 
 		try {
-			// SQL99.g:839:3: ( (t= TRUE |t= FALSE ) )
-			// SQL99.g:839:5: (t= TRUE |t= FALSE )
+			// SQL99.g:847:3: ( (t= TRUE |t= FALSE ) )
+			// SQL99.g:847:5: (t= TRUE |t= FALSE )
 			{
-			// SQL99.g:839:5: (t= TRUE |t= FALSE )
+			// SQL99.g:847:5: (t= TRUE |t= FALSE )
 			int alt48=2;
 			int LA48_0 = input.LA(1);
 			if ( (LA48_0==TRUE) ) {
@@ -4579,13 +4587,13 @@ public class SQL99Parser extends Parser {
 
 			switch (alt48) {
 				case 1 :
-					// SQL99.g:839:6: t= TRUE
+					// SQL99.g:847:6: t= TRUE
 					{
 					t=(Token)match(input,TRUE,FOLLOW_TRUE_in_truth_value2223); 
 					}
 					break;
 				case 2 :
-					// SQL99.g:839:15: t= FALSE
+					// SQL99.g:847:15: t= FALSE
 					{
 					t=(Token)match(input,FALSE,FOLLOW_FALSE_in_truth_value2229); 
 					}
@@ -4611,7 +4619,7 @@ public class SQL99Parser extends Parser {
 
 
 	// $ANTLR start "datetime_literal"
-	// SQL99.g:842:1: datetime_literal returns [DateTimeLiteral value] : DATETIME ;
+	// SQL99.g:850:1: datetime_literal returns [DateTimeLiteral value] : DATETIME ;
 	public final DateTimeLiteral datetime_literal() throws RecognitionException {
 		DateTimeLiteral value = null;
 
@@ -4619,8 +4627,8 @@ public class SQL99Parser extends Parser {
 		Token DATETIME68=null;
 
 		try {
-			// SQL99.g:843:3: ( DATETIME )
-			// SQL99.g:843:5: DATETIME
+			// SQL99.g:851:3: ( DATETIME )
+			// SQL99.g:851:5: DATETIME
 			{
 			DATETIME68=(Token)match(input,DATETIME,FOLLOW_DATETIME_in_datetime_literal2249); 
 			 value = new DateTimeLiteral((DATETIME68!=null?DATETIME68.getText():null)); 
