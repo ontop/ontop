@@ -57,7 +57,35 @@ public class SQLQueryTranslator {
 		return this.viewDefinitions;
 	}
 
+	/**
+	 * Called from ParsedMapping. Returns the query tree, even if there were 
+	 * parsing errors. This is because the ParsedMapping only need the table names,
+	 * and it needs them, especially in the cases like "select *", that are treated like parsing
+	 * errors, but are treated by preprocessProjection
+	 * 
+	 * @param query The sql query to be parsed
+	 * @return A QueryTree (possible with null values and errors)
+	 */
+	public QueryTree constructQueryTreeNoView(String query){
+		return contructQueryTree(query, false);
+	}
+	
+
+
+	/**
+	 * Called from MappingAnalyzer:createLookupTable. Returns the query tree, or, if there are
+	 * syntax error, the name of a generated view, even if there were 
+	 * parsing errors. This is because the Parsed
+	 * 
+	 * @param query The sql query to be parsed
+	 * @return A QueryTree (possible just the name of a generated view)
+	 */
 	public QueryTree contructQueryTree(String query) {
+		return contructQueryTree(query, true);
+	}
+	
+		
+	private QueryTree contructQueryTree(String query, boolean generateViews) {
 		ANTLRStringStream inputStream = new ANTLRStringStream(query);
 		SQL99Lexer lexer = new SQL99Lexer(inputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -70,7 +98,7 @@ public class SQLQueryTranslator {
 			// Does nothing
 		}
 		
-		if (parser.getNumberOfSyntaxErrors() != 0) {
+		if (parser.getNumberOfSyntaxErrors() != 0 && generateViews) {
 			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
 			queryTree = createView(query);
 		}		

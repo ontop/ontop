@@ -32,7 +32,7 @@ public class ParsedMapping {
 		OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 		// Construct the SQL query tree from the source query
-		QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
+		QueryTree queryTree = translator.constructQueryTreeNoView(sourceQuery.toString());
 		this.sourceQueryTree = queryTree;
 	}
 	

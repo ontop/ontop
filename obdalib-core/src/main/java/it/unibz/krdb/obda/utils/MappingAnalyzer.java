@@ -423,7 +423,10 @@ public class MappingAnalyzer {
 			String tableGivenName = table.getGivenName();
 			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
 			if (def == null) {
-				throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
+				 def = dbMetaData.getDefinition(tableName);
+				 if (def == null) {
+					 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
+				 }
 			}
 			int size = def.countAttribute();
 
