@@ -669,17 +669,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			URI sourceId = datasource.getSourceID();
 
 
-			//This is the NEW way of obtaining part of the metadata (the schema.table names) by
-			//parsing the mappings
-			MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
-			
 			
 			//if the metadata was not already set
 			if (metadata == null) {
-
+				
 				//metadata = JDBCConnectionManager.getMetaData(localConnection);
+				//This is the NEW way of obtaining part of the metadata (the schema.table names) by
+				//parsing the mappings
+				MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
 				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
-				mParser.addViewDefs(metadata);
+				// This call should be used if the ParsedMappings are reused for the parsing below
+				//mParser.addViewDefs(metadata);
 			}
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory

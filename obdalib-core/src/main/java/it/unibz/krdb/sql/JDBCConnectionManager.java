@@ -332,16 +332,16 @@ public class JDBCConnectionManager {
 			TableDefinition td = new TableDefinition(tableGivenName);
 
 			try {
-				final String columnSelectQuery = "SELECT * FROM " + tableGivenName;
-				rsColumns = stmt.executeQuery(columnSelectQuery);
-				ResultSetMetaData rmd = rsColumns.getMetaData();
-				
-				for(int pos = 1; pos <= rmd.getColumnCount(); pos++){
-					final String columnName = rmd.getColumnName(pos); 
-					final int dataType = rmd.getColumnType(pos);
+				rsColumns = md.getColumns(null, tableSchema, tblName, null);
+				if (rsColumns == null) {
+					continue;
+				}
+				for (int pos = 1; rsColumns.next(); pos++) {
+					final String columnName = rsColumns.getString("COLUMN_NAME");
+					final int dataType = rsColumns.getInt("DATA_TYPE");
 					final boolean isPrimaryKey = primaryKeys.contains(columnName);
 					final Reference reference = foreignKeys.get(columnName);
-					final int isNullable = rmd.isNullable(pos);
+					final int isNullable = rsColumns.getInt("NULLABLE");
 					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 				
 					// Check if the columns are unique regardless their letter cases
