@@ -679,7 +679,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
 				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
 				// This call should be used if the ParsedMappings are reused for the parsing below
-				//mParser.addViewDefs(metadata);
+				mParser.addViewDefs(metadata);
 			}
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
@@ -695,8 +695,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
 
-			//preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
+			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
+			
 			/***
 			 * Starting mapping processing
 			 */
@@ -716,6 +717,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
 			
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+			
+
+			
+			/**
+			 * A second parse is necessary, to get the tables in the new mappings
+			 */
+			MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+			metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
+			
+			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
