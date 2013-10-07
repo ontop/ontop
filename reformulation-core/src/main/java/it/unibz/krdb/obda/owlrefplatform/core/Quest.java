@@ -695,7 +695,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
 
-			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
+			//preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
 			/***
 			 * Starting mapping processing
