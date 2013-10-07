@@ -1,4 +1,4 @@
-ontop
+Ontop
 ==================
 
 Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
