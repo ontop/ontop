@@ -21,4 +21,19 @@ The code is organized in several submodules as follows:
 // TODO - extend this section of the readme
 
 
-http://ontop.inf.unibz.it/
+Links
+--------------------
+
+official website and documentations: http://ontop.inf.unibz.it/
+
+Mail list: ontop4obda AT googlegroups DOT com
+
+Blog: http://ontop-obda.blogspot.it/
+
+Source Code: https://github.com/ontop/ontop
+
+Issue Tracker: https://github.com/ontop/ontop/issues
+
+
+
+
