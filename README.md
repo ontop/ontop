@@ -1,5 +1,5 @@
 [![Build Status](https://www.travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
-
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 Ontop
 ==================
 
