@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
+
 Ontop
 ==================
 
