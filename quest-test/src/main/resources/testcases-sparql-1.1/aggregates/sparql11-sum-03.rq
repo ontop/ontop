@@ -1,0 +1,6 @@
+PREFIX : <http://example.org/>
+SELECT (SUM(?x) AS ?total)
+WHERE {
+  ?a :p ?x.
+}
+GROUP BY ?a

@@ -1,0 +1,6 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+
+SELECT DISTINCT $x $date 
+WHERE { 
+   $x a :Transaction; :transactionDate $date; :amountOfTransaction "-2.349"^^<http://www.w3.org/2001/XMLSchema#decimal> . 
+}

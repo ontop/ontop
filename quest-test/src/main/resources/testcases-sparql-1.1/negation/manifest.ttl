@@ -1,0 +1,84 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://www.w3.org/2001/sw/DataAccess/tests/data-r2/syntax-sparql1/manifest#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
+@prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:comment "SPARQL 1.1: negation (by Jeen Broekstra)" ;
+    mf:entries
+    (
+    	:sparql11-exists-01
+    	:sparql11-exists-02
+    	:sparql11-exists-03
+    	:sparql11-exists-04
+    	:sparql11-exists-05
+    	:sparql11-exists-06
+    	:sparql11-minus-01
+    	:sparql11-minus-02
+    	:sparql11-minus-03
+    	:sparql11-minus-05
+    	:sparql11-minus-06
+    	:sparql11-minus-07
+    ).
+
+:sparql11-exists-01  mf:name  "sparql11-exists-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-exists-01.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-exists-01.srx> .
+         
+:sparql11-exists-02  mf:name  "sparql11-exists-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-exists-02.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-exists-02.srx> .
+         
+:sparql11-exists-03  mf:name  "sparql11-exists-03" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-exists-03.rq> ; qt:data <data-03.ttl> ] ;
+         mf:result <sparql11-exists-03.srx> .
+
+:sparql11-exists-04  mf:name  "sparql11-exists-04" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-exists-04.rq> ; qt:data <data-03.ttl> ] ;
+         mf:result <sparql11-exists-04.srx> .
+
+:sparql11-exists-05  mf:name  "sparql11-exists-05" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-exists-05.rq> ; qt:data <data-04.ttl> ] ;
+         mf:result <sparql11-exists-05.srx> .
+
+:sparql11-exists-06  mf:name  "sparql11-exists-06" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-exists-06.rq> ; qt:data <data-04.ttl> ] ;
+         mf:result <sparql11-exists-06.srx> .
+                  
+:sparql11-minus-01 mf:name  "sparql11-minus-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-minus-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-minus-01.srx> .
+         
+:sparql11-minus-02 mf:name  "sparql11-minus-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-minus-02.rq> ; qt:data <data-03.ttl> ] ;
+         mf:result <sparql11-minus-02.srx> .
+
+:sparql11-minus-03 mf:name  "sparql11-minus-03" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-minus-03.rq> ; qt:data <data-03.ttl> ] ;
+         mf:result <sparql11-minus-03.srx> .
+         
+:sparql11-minus-05 mf:name  "sparql11-minus-05" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-minus-05.rq> ; qt:data <data-04.ttl> ] ;
+         mf:result <sparql11-minus-05.srx> .
+
+:sparql11-minus-06 mf:name  "sparql11-minus-06" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-minus-06.rq> ; qt:data <data-04.ttl> ] ;
+         mf:result <sparql11-minus-06.srx> .
+         
+:sparql11-minus-07 mf:name  "sparql11-minus-07" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-minus-07.rq> ; qt:data <data-04.ttl> ] ;
+         mf:result <sparql11-minus-07.srx> .

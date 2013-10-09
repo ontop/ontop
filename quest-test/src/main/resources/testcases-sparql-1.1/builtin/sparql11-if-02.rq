@@ -1,0 +1,6 @@
+PREFIX  dc:  <http://purl.org/dc/elements/1.1/>
+PREFIX  :  <http://example/>
+SELECT  ?X (IF(?Y != 42, "yes", "no") as ?Z)
+ WHERE {
+   	?X :numericLiteral ?Y . 
+}

@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.Vector;
 
@@ -46,10 +47,11 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			boolean isClass = isClass(p);
 			boolean isObjectProp = isObjectProperty(p);
 			boolean isDataProp = isDataProperty(p);
+			boolean isTriple = isTriple(p);
 
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp;
+			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isTriple;
 
 			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
 			if (isPredicateValid) {
@@ -95,5 +97,10 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
 		return obdaModel.isDeclaredDataProperty(predicate);
+	}
+	
+	@Override
+	public boolean isTriple(Predicate predicate){
+		return predicate.equals(OBDAVocabulary.QUEST_TRIPLE_PRED);
 	}
 }

@@ -1,0 +1,11 @@
+SELECT * 
+WHERE { 
+    {
+	  SELECT ?s 
+	  WHERE {?s ?p ?o}
+	  LIMIT 1 
+    }
+    {?s ?p ?o} 
+    UNION 
+    {} 
+}

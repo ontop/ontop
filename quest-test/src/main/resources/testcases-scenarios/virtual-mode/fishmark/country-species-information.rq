@@ -1,0 +1,19 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT  ?freshwater ?marine ?brackish ?occurrence ?factbook
+WHERE {
+   ?c fd:country_SpecCode ?x.
+   ?c fd:country_Freshwater ?freshwater .
+   ?c fd:country_Brackish ?brackish .
+   ?c fd:country_Saltwater ?marine .
+   ?c fd:country_Status ?occurrence .
+   ?c fd:country_C_Code ?cf .
+   ?x fd:species_Genus "Coregonus" .
+   ?x fd:species_Species "clupeaformis" .
+   ?x fd:species_FamCode ?f .
+   ?f fd:families_Family  ?family .
+   ?f fd:families_Order ?order .
+   ?cf fd:countref_PAESE "Italy" .
+   ?cf fd:countref_Factbook ?factbook .
+}

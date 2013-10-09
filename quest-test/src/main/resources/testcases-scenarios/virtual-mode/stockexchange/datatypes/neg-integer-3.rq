@@ -1,0 +1,6 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+
+SELECT DISTINCT $x $street 
+WHERE { 
+   $x a :Address; :inStreet $street; :hasNumber "-3"^^<http://www.w3.org/2001/XMLSchema#integer>. 
+}

@@ -1,0 +1,7 @@
+PREFIX  rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX :   <http://example/> 
+SELECT ?x 
+WHERE 
+{
+    :a (:p1/:p2/:p3)* ?x
+}

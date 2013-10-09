@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<sparql
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema#"
+    xmlns="http://www.w3.org/2005/sparql-results#" >
+  <head>
+    <variable name="x"/>
+  </head>
+  <results>
+    <result>
+      <binding name="x">
+        <uri>http://xmlns.com/foaf/0.1/Person</uri>
+      </binding>
+    </result>
+     <result>
+      <binding name="x">
+        <literal>Alice</literal>
+      </binding>
+    </result>
+         <result>
+      <binding name="x">
+        <uri>http://example/john</uri>
+      </binding>
+    </result>
+  </results>
+</sparql>

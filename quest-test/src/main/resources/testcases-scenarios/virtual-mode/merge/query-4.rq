@@ -1,0 +1,7 @@
+PREFIX person: <http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819625360.owl#>
+PREFIX book: <http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#>
+SELECT * WHERE
+{
+?person a person:Person.
+?book a book:Book.
+?person person:owns ?book.}

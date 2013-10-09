@@ -1,0 +1,18 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://example/> .
+
+:org1 :affiliates :auth1, :auth2 .
+:auth1 :writesBook :book1, :book2 .
+:book1 :price 9 .
+:book2 :price 5 .
+:auth2 :writesBook :book3 .
+:book3 :price 7 .
+:org2 :affiliates :auth3 .
+:auth3 :writesBook :book4 .
+:book4 :price 7 .
+
+:book1 :rating 4 .
+:book1 :rating 5 .
+:book2 :rating 3 .
+:book2 :rating 8 .
+:book2 :rating 6 .

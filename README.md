@@ -1,7 +1,9 @@
-ontop
+[![Build Status](https://www.travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+Ontop
 ==================
 
-ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
+Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
 virtual RDF graphs defined through mappings to RDBMS. 
 
 Licensing terms 
@@ -21,4 +23,19 @@ The code is organized in several submodules as follows:
 // TODO - extend this section of the readme
 
 
-http://ontop.inf.unibz.it/
+Links
+--------------------
+
+official website and documentations: http://ontop.inf.unibz.it/
+
+Mail list: ontop4obda AT googlegroups DOT com
+
+Blog: http://ontop-obda.blogspot.it/
+
+Source Code: https://github.com/ontop/ontop
+
+Issue Tracker: https://github.com/ontop/ontop/issues
+
+
+
+

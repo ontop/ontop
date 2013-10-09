@@ -1,0 +1,95 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	RandBStockExchange
+connectionUrl	jdbc:postgresql://obdalin.inf.unibz.it/stockclient1
+username	stock
+password	stock-09
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-addresses
+target		:Address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} . 
+source		select id, street, number, city, state, country from address
+
+mappingId	mapping-brokers
+target		:Person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
+source		select id, name, lastname, dateofbirth, ssn from broker
+
+mappingId	mapping-broker-address
+target		:Person-{id} :hasAddress :Address-{addressid} . 
+source		select id, addressid from broker
+
+mappingId	mapping-investors
+target		:Person-{id} a :Investor ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
+source		select id, name, lastname, dateofbirth, ssn from client
+
+mappingId	mapping-investor-address
+target		:Person-{id} :hasAddress :Address-{addressid} . 
+source		select id, name, lastname, addressid from client
+
+mappingId	mapping-companies
+target		:getCompanyObj($id) a :Company ; :companyName {name} ; :marketShares {marketshares} ; :netWorth {networth} . 
+source		select id, name, marketshares, networth from company
+
+mappingId	mapping-company-addresses
+target		:getCompanyObj($id) :hasAddress :Address-{addressid} . 
+source		select id, addressid from company
+
+mappingId	mapping-stocks
+target		:getStockObj($id) a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype} . 
+source		select id, numberofshares, sharetype from stockinformation
+
+mappingId	mapping-stockbooks
+target		:StockBook-{date} a :StockExchangeList ; :listdate {date} . 
+source		select distinct date from stockbooklist 
+
+mappingId	mapping-tradesOnBehalfOf-physical
+target		:Person-{brokerid} :tradesOnBehalfOf :Person-{clientid} . 
+source		select brokerid, clientid from brokerworksfor where clientid IS NOT NULL
+
+mappingId	mapping-tradesOnBehalfOf-legal
+target		:Person-{brokerid} :tradesOnBehalfOf :Company-{companyid} . 
+source		select brokerid, companyid from brokerworksfor where companyid IS NOT NULL
+
+mappingId	mapping-transactions
+target		:Transaction-{id} a :Transaction ; :transactionID {id} ; :transactionDate {date} . 
+source		select id, date from transaction
+
+mappingId	mapping-transaction-roles-persons
+target		:Transaction-{id} :isExecutedBy :Person-{brokerid} ; :isExecutedFor :Person-{forclientid} ; :involvesInstrument Stock-{stockid} . 
+source		select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL
+
+mappingId	mapping-transaction-roles-companies
+target		:Transaction-{id} :isExecutedBy :Person-{brokerid} ; :isExecutedFor :Company-{forcompanyid} ; :involvesInstrument Stock-{stockid} . 
+source		select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL
+
+mappingId	mapping-stock-company
+target		:getStockObj($id) :belongsToCompany :Company-{companyid} . 
+source		select id, companyid from stockinformation
+
+mappingId	mapping-stock-listedin
+target		:StockBook-{date} :listsStock Stock-{stockid} . 
+source		select date, stockid from stockbooklist
+
+mappingId	mapping-dealer
+target		:Person-{clientid} a :Dealer . 
+source		select clientid from broker,client,brokerworksfor where client.id = broker.id and brokerid=broker.id and client.id=clientid
+
+mappingId	mapping-offers
+target		:Transaction-{id} a :Offer . 
+source		SELECT id FROM transaction WHERE type='true'
+]]
+

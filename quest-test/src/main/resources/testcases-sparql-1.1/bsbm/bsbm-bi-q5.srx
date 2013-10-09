@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<sparql xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema#" xmlns="http://www.w3.org/2005/sparql-results#">
+	<head>
+		<variable name="country" />
+		<variable name="product" />
+		<variable name="nrOfReviews" />
+		<variable name="avgPrice" />
+	</head>
+	<results>
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product52
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">13</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">4698.4</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#US</uri>
+			</binding>
+		</result>
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product56
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">7</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5265.4478</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#CN</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product65
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">7</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5427.5557</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#CN</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product47
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">7</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5004.894</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#ES</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product64
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">5</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">6113.2705</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#JP</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product92
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">4</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5615.3477</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#DE</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product67
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">4813.4653</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#FR</uri>
+			</binding>
+		</result>
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product16
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5058.253</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#GB</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product39
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5176.929</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#GB</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product44
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">4945.1826</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#GB</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product58
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5384.628</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#GB</uri>
+			</binding>
+		</result>
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product62
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">4924.4287</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#GB</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product73
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">3637.083</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#GB</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product48
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">4717.9014</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#RU</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product56
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">5265.4478</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#RU</uri>
+			</binding>
+		</result>
+
+		<result>
+			<binding name="product">
+				<uri>http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer2/Product63
+				</uri>
+			</binding>
+			<binding name="nrOfReviews">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+			</binding>
+			<binding name="avgPrice">
+				<literal datatype="http://www.w3.org/2001/XMLSchema#float">4207.426</literal>
+			</binding>
+			<binding name="country">
+				<uri>http://downlode.org/rdf/iso-3166/countries#RU</uri>
+			</binding>
+		</result>
+	</results>
+</sparql>

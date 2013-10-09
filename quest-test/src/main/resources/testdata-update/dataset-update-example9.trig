@@ -1,0 +1,17 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+
+<http://example/bookStore> {
+  <http://example/book1> dc:title "Fundamentals of Compiler Design" .
+  <http://example/book1> dc:date "1996-01-01T00:00:00-02:00"^^xsd:dateTime .
+  <http://example/book1> a dcmitype:PhysicalObject .
+
+  <http://example/book3> dc:title "SPARQL 1.1 Tutorial" .
+}
+
+<http://example/bookStore2> {
+  <http://example/book4> dc:title "SPARQL 1.0 Tutorial" .
+}

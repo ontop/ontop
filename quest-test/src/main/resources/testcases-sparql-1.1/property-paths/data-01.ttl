@@ -1,0 +1,19 @@
+@prefix  :       <http://example/> .
+@prefix  rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix  foaf:   <http://xmlns.com/foaf/0.1/> .
+
+:alice  rdf:type   foaf:Person .
+:alice  foaf:name  "Alice" .
+:alice  foaf:knows :bob .
+
+:bob    rdf:type   foaf:Person .
+:bob    foaf:firstName "Bob" .
+:bob	foaf:knows :alice .
+:bob    foaf:knows :john .
+:bob 	foaf:knows :bill .
+
+:john	rdf:type	foaf:Person .
+:john   foaf:knows	:bill .
+
+:bill	rdf:type foaf:Person .
+:bill	foaf:name "Bill" .

@@ -1,0 +1,542 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1242910306 "http://www.owl-ontologies.com/Ontology1242910306.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.owl-ontologies.com/Ontology1242910306.owl#"
+     xml:base="http://www.owl-ontologies.com/Ontology1242910306.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:Ontology1242910306="http://www.owl-ontologies.com/Ontology1242910306.owl#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasActor -->
+
+    <owl:ObjectProperty rdf:about="#hasActor">
+        <rdfs:range rdf:resource="#Performer"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasCastMember"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasCastMember -->
+
+    <owl:ObjectProperty rdf:about="#hasCastMember">
+        <rdfs:range rdf:resource="#Person"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <owl:inverseOf rdf:resource="#isCastMemberOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasDirector -->
+
+    <owl:ObjectProperty rdf:about="#hasDirector">
+        <rdfs:range rdf:resource="#Director"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasCastMember"/>
+        <owl:inverseOf rdf:resource="#isDirectorOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasDistributionCompany -->
+
+    <owl:ObjectProperty rdf:about="#hasDistributionCompany">
+        <rdfs:range rdf:resource="#DistributionCompany"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <owl:inverseOf rdf:resource="#isDistributionCompanyOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasEditor -->
+
+    <owl:ObjectProperty rdf:about="#hasEditor">
+        <rdfs:range rdf:resource="#Editor"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasCastMember"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasProducer -->
+
+    <owl:ObjectProperty rdf:about="#hasProducer">
+        <rdfs:range rdf:resource="#Producer"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasCastMember"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasProductionCompany -->
+
+    <owl:ObjectProperty rdf:about="#hasProductionCompany">
+        <rdfs:range rdf:resource="#ProductionCompany"/>
+        <rdfs:domain rdf:resource="#Title"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasWriter -->
+
+    <owl:ObjectProperty rdf:about="#hasWriter">
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:range rdf:resource="#Writer"/>
+        <rdfs:subPropertyOf rdf:resource="#hasCastMember"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isActorIn -->
+
+    <owl:ObjectProperty rdf:about="#isActorIn">
+        <rdfs:domain rdf:resource="#Performer"/>
+        <rdfs:range rdf:resource="#Title"/>
+        <owl:inverseOf rdf:resource="#hasActor"/>
+        <rdfs:subPropertyOf rdf:resource="#isCastMemberOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isCastMemberOf -->
+
+    <owl:ObjectProperty rdf:about="#isCastMemberOf">
+        <rdfs:domain rdf:resource="#Person"/>
+        <rdfs:range rdf:resource="#Title"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isDirectorOf -->
+
+    <owl:ObjectProperty rdf:about="#isDirectorOf">
+        <rdfs:domain rdf:resource="#Director"/>
+        <rdfs:range rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#isCastMemberOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isDistributionCompanyOf -->
+
+    <owl:ObjectProperty rdf:about="#isDistributionCompanyOf">
+        <rdfs:domain rdf:resource="#DistributionCompany"/>
+        <rdfs:range rdf:resource="#Title"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isEditorOf -->
+
+    <owl:ObjectProperty rdf:about="#isEditorOf">
+        <rdfs:domain rdf:resource="#Editor"/>
+        <rdfs:range rdf:resource="#Title"/>
+        <owl:inverseOf rdf:resource="#hasEditor"/>
+        <rdfs:subPropertyOf rdf:resource="#isCastMemberOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isProducerOf -->
+
+    <owl:ObjectProperty rdf:about="#isProducerOf">
+        <rdfs:domain rdf:resource="#Producer"/>
+        <rdfs:range rdf:resource="#Title"/>
+        <owl:inverseOf rdf:resource="#hasProducer"/>
+        <rdfs:subPropertyOf rdf:resource="#isCastMemberOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isProductionCompanyOf -->
+
+    <owl:ObjectProperty rdf:about="#isProductionCompanyOf">
+        <rdfs:domain rdf:resource="#ProductionCompany"/>
+        <rdfs:range rdf:resource="#Title"/>
+        <owl:inverseOf rdf:resource="#hasProductionCompany"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#isWriterOf -->
+
+    <owl:ObjectProperty rdf:about="#isWriterOf">
+        <rdfs:range rdf:resource="#Title"/>
+        <rdfs:domain rdf:resource="#Writer"/>
+        <owl:inverseOf rdf:resource="#hasWriter"/>
+        <rdfs:subPropertyOf rdf:resource="#isCastMemberOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasBudget -->
+
+    <owl:DatatypeProperty rdf:about="#hasBudget">
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasProperty"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasCompanyName -->
+
+    <owl:DatatypeProperty rdf:about="#hasCompanyName">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Company"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasCountryCode -->
+
+    <owl:DatatypeProperty rdf:about="#hasCountryCode">
+        <rdfs:domain rdf:resource="#Company"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasDateOfBirth -->
+
+    <owl:DatatypeProperty rdf:about="#hasDateOfBirth">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasGenre -->
+
+    <owl:DatatypeProperty rdf:about="#hasGenre">
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasProperty"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasGross -->
+
+    <owl:DatatypeProperty rdf:about="#hasGross">
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasProperty"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasLocation -->
+
+    <owl:DatatypeProperty rdf:about="#hasLocation">
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasProperty"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasName -->
+
+    <owl:DatatypeProperty rdf:about="#hasName">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasPlot -->
+
+    <owl:DatatypeProperty rdf:about="#hasPlot">
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:subPropertyOf rdf:resource="#hasProperty"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasProductionDecade -->
+
+    <owl:DatatypeProperty rdf:about="#hasProductionDecade">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasProductionYear -->
+
+    <owl:DatatypeProperty rdf:about="#hasProductionYear">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasProperty -->
+
+    <owl:DatatypeProperty rdf:about="#hasProperty">
+        <rdfs:domain rdf:resource="#Title"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasRentalRevenue -->
+
+    <owl:DatatypeProperty rdf:about="#hasRentalRevenue">
+        <rdfs:domain rdf:resource="#Movie"/>
+        <rdfs:subPropertyOf rdf:resource="#hasProperty"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#hasTitle -->
+
+    <owl:DatatypeProperty rdf:about="#hasTitle">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Title"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Actor -->
+
+    <owl:Class rdf:about="#Actor">
+        <rdfs:subClassOf rdf:resource="#Performer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Actress -->
+
+    <owl:Class rdf:about="#Actress">
+        <rdfs:subClassOf rdf:resource="#Performer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Company -->
+
+    <owl:Class rdf:about="#Company">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasCompanyName"/>
+                <owl:someValuesFrom rdf:resource="&xsd;Literal"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Person"/>
+        <owl:disjointWith rdf:resource="#Title"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasName"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </owl:disjointWith>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasTitle"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Director -->
+
+    <owl:Class rdf:about="#Director">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#DistributionCompany -->
+
+    <owl:Class rdf:about="#DistributionCompany">
+        <rdfs:subClassOf rdf:resource="#Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Editor -->
+
+    <owl:Class rdf:about="#Editor">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Movie -->
+
+    <owl:Class rdf:about="#Movie">
+        <rdfs:subClassOf rdf:resource="#Title"/>
+        <owl:disjointWith rdf:resource="#TVSeries"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Performer -->
+
+    <owl:Class rdf:about="#Performer">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Person -->
+
+    <owl:Class rdf:about="#Person">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasName"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Title"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasCompanyName"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </owl:disjointWith>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasTitle"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Producer -->
+
+    <owl:Class rdf:about="#Producer">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#ProductionCompany -->
+
+    <owl:Class rdf:about="#ProductionCompany">
+        <rdfs:subClassOf rdf:resource="#Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#TVSeries -->
+
+    <owl:Class rdf:about="#TVSeries">
+        <rdfs:subClassOf rdf:resource="#Title"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Title -->
+
+    <owl:Class rdf:about="#Title">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasTitle"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasPlot"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasCompanyName"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </owl:disjointWith>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasName"/>
+                <owl:someValuesFrom rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1242910306.owl#Writer -->
+
+    <owl:Class rdf:about="#Writer">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.913) http://owlapi.sourceforge.net -->
+
