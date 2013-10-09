@@ -720,13 +720,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 
 			
-			/**
-			 * A second parse is necessary, to get the tables in the new mappings
-			 */
-			MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
-			metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
-			
-			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
