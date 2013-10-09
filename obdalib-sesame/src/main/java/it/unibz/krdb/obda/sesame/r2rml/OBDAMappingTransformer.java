@@ -22,7 +22,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
-import it.unibz.krdb.obda.uri.UriTemplateHelper;
+import it.unibz.krdb.obda.utils.URITemplates;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,7 +83,7 @@ public class OBDAMappingTransformer {
 		//get subject uri
 		Resource subjectNode =  vf.createBNode("subjectMap" +idx);
 		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
-		String subjectURI =  UriTemplateHelper.getUriTemplateString(uriTemplate);
+		String subjectURI =  URITemplates.getUriTemplateString(uriTemplate);
 		//add subject Map to triples Map node
 		statements.add(vf.createStatement(mainNode, R2RMLVocabulary.subjectMap, subjectNode));
 		//add template subject
@@ -115,7 +115,7 @@ public class OBDAMappingTransformer {
 					//check if uritemplate
 					Predicate objectPred = ((Function) object).getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
-						String objectURI =  UriTemplateHelper.getUriTemplateString((Function)object);
+						String objectURI =  URITemplates.getUriTemplateString((Function)object);
 						//add template object
 						statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createURI(objectURI)));
 					}else if (objectPred instanceof DataTypePredicate) {

@@ -6,7 +6,7 @@ virtual RDF graphs defined through mappings to RDBMS.
 
 Licensing terms 
 --------------------
-Lincense information can be found int he file LICENSE.txt
+License information can be found in the file LICENSE.txt
 
 Compiling, packing, testing, etc.
 --------------------
@@ -21,3 +21,4 @@ The code is organized in several submodules as follows:
 // TODO - extend this section of the readme
 
 
+http://ontop.inf.unibz.it/
