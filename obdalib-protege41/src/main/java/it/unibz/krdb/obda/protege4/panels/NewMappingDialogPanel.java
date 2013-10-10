@@ -199,9 +199,13 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				try {
 					OBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
-
+					System.out.println(sourceID.toString()+" \n");
+					
 					OBDASQLQuery body = dataFactory.getSQLQuery(source);
+					System.out.println(body.toString()+" \n");
+
 					OBDARDBMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
+					System.out.println(newmapping.toString()+" \n");
 
 					if (mapping == null) {
 						// Case when we are creating a new mapping

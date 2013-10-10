@@ -1,6 +1,9 @@
 package it.unibz.krdb.obda.utils;
 
+import it.unibz.krdb.obda.exception.InvalidPrefixWritingException;
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Arrays;
@@ -79,7 +82,8 @@ public class URITemplates {
 
 	
 	public static String getUriTemplateString(Function uriFunction) {
-		String template = uriFunction.getTerm(0).toString();
+		Term term = uriFunction.getTerm(0);
+		String template = term.toString();
 		Iterator<Variable> vars = uriFunction.getVariables().iterator();
 		String[] split = template.split("\\{\\}");
 		int i = 0;
@@ -88,9 +92,27 @@ public class URITemplates {
 			template += split[i] + "{" + vars.next().toString() + "}";
 			i++;
 		}
-		if (split.length-i > 1)
-		template += split[i];
-	
+		//the number of place holdes should be equal to the number of variables.
+		if (split.length-i == 1){
+			template += split[i];
+			//we remove the quotes cos later the literal constructor adds them
+			template= template.substring(1, template.length()-1);
+		}else{
+			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
+		}
+		
+		
+		return template;
+	}
+
+	public static String getUriTemplateString(Function uriTemplate,
+			PrefixManager prefixmng) {
+		String template = getUriTemplateString(uriTemplate);
+		try{
+		template = prefixmng.getExpandForm(template);
+		} catch (InvalidPrefixWritingException ex){
+			// in this case, the we do not need to expand
+		}
 		return template;
 	}
 
