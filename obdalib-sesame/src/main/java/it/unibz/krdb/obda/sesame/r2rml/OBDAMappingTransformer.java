@@ -78,6 +78,11 @@ public class OBDAMappingTransformer {
 				String tableName = sqlquery.substring(14);
 				//tableName = trimApostrophes(tableName);
 				statements.add(vf.createStatement(mainNode, R2RMLVocabulary.logicalTable, logicalTableNode));
+				
+				if(tableName.startsWith("\"") && tableName.endsWith("\"")){
+					tableName = tableName.substring(1, tableName.length() - 1);
+				}
+				
 				statements.add(vf.createStatement(logicalTableNode, R2RMLVocabulary.tableName, vf.createLiteral(tableName)));
 //			} else if (sqlquery.contains("CHILD")) {
 //				//join mapping
