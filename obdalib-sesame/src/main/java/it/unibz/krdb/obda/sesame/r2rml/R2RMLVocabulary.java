@@ -25,6 +25,8 @@ public class R2RMLVocabulary {
 	public static final URI r2rmlView = fact.createURI("http://www.w3.org/ns/r2rml#R2RMLView");
 
 	public static final URI subjectMap = fact.createURI("http://www.w3.org/ns/r2rml#subjectMap");
+	public static final URI subjectMapClass = fact.createURI("http://www.w3.org/ns/r2rml#SubjectMap");
+
 	public static final URI subject = fact.createURI("http://www.w3.org/ns/r2rml#subject");
 	public static final URI predicateObjectMap = fact.createURI("http://www.w3.org/ns/r2rml#predicateObjectMap");
 	public static final URI predicateMap = fact.createURI("http://www.w3.org/ns/r2rml#predicateMap");
@@ -39,6 +41,7 @@ public class R2RMLVocabulary {
 	public static final URI column = fact.createURI("http://www.w3.org/ns/r2rml#column");
 	public static final URI constant = fact.createURI("http://www.w3.org/ns/r2rml#constant");
 	public static final URI termType = fact.createURI("http://www.w3.org/ns/r2rml#termType");
+	public static final URI termMap = fact.createURI("http://www.w3.org/ns/r2rml#TermMap");
 	public static final URI language = fact.createURI("http://www.w3.org/ns/r2rml#language");
 	public static final URI datatype = fact.createURI("http://www.w3.org/ns/r2rml#datatype");
 	public static final URI inverseExpression = fact.createURI("http://www.w3.org/ns/r2rml#inverseExpression");

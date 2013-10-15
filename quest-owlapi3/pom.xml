@@ -98,7 +98,6 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<testExcludes>
-						<exclude>**</exclude>
 						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/RDBMSDirect*.java</exclude>
