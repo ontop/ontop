@@ -56,10 +56,6 @@ public class OBDAMappingTransformer {
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		CQIE tquery = (CQIE) axiom.getTargetQuery();
 		
-		//int random_number = 0;
-		Random rand = new Random();
-		//random_number = rand.nextInt(10000);
-		
 		String random_number = IDGenerator.getNextUniqueID("");
 		
 		//triplesMap node
@@ -69,14 +65,15 @@ public class OBDAMappingTransformer {
 		Resource mainNode = vf.createURI(mapping_id);
 		statements.add(vf.createStatement(mainNode, vf.createURI(OBDAVocabulary.RDF_TYPE), R2RMLVocabulary.TriplesMap));
 		
+		//creating logical table node
+		Resource logicalTableNode = vf.createBNode("logicalTable"+ random_number);
+		
 		//process source query
 		String sqlquery = squery.getSQLQuery();
 		OBDAQueryModifiers modifiers = squery.getQueryModifiers();
 		if (sqlquery.startsWith("SELECT * FROM") &&
 			 !sqlquery.contains("WHERE") && !sqlquery.contains(",")) {
 				//tableName -> need small parser
-				String str_nod_logtable = "http://example.org/" + random_number +"/"+ "MyLogTab";
-				Resource logicalTableNode = vf.createURI(str_nod_logtable);
 				String tableName = sqlquery.substring(14);
 				tableName = trimApostrophes(tableName);
 				statements.add(vf.createStatement(mainNode, R2RMLVocabulary.logicalTable, logicalTableNode));
@@ -84,41 +81,31 @@ public class OBDAMappingTransformer {
 //			} else if (sqlquery.contains("CHILD")) {
 //				//join mapping
 //				
-			
 		} else {
 			//sqlquery -> general case
-			
-			//creating logical table node
-			String str_nod_log_table = "http://example.org/" + random_number +"/"+ "MylogicalTable";
-			Resource nod_log_table =  vf.createURI(str_nod_log_table);
-			
 			//creating triple main-node -- logical table
-			statements.add(vf.createStatement(mainNode, R2RMLVocabulary.logicalTable, nod_log_table));
+			statements.add(vf.createStatement(mainNode, R2RMLVocabulary.logicalTable, logicalTableNode));
 
 			//the node is a view
-			statements.add(vf.createStatement(nod_log_table,vf.createURI(OBDAVocabulary.RDF_TYPE),  R2RMLVocabulary.r2rmlView));
+			statements.add(vf.createStatement(logicalTableNode, vf.createURI(OBDAVocabulary.RDF_TYPE),  R2RMLVocabulary.r2rmlView));
 
 			//this is the SQL in the logical table
-			statements.add(vf.createStatement(nod_log_table, R2RMLVocabulary.sqlQuery, vf.createLiteral(sqlquery)));
+			statements.add(vf.createStatement(logicalTableNode, R2RMLVocabulary.sqlQuery, vf.createLiteral(sqlquery)));
 		}
 		
 		//get subject uri
-		//Resource subjectNode =  vf.createBNode("subjectMap" +random_number);
+		Resource subjectNode =  vf.createBNode("subjectMap" +random_number);
 		
-		//We define the subject of the mapping
-		String str_nod_subject = "http://example.org/" + random_number +"/"+ "MySubjectMap";
-		Resource nod_subject =  vf.createURI(str_nod_subject);
-	
 		//add subject Map to triples Map node
-		statements.add(vf.createStatement(mainNode, R2RMLVocabulary.subjectMap, nod_subject));
-		statements.add(vf.createStatement(nod_subject, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));		
+		statements.add(vf.createStatement(mainNode, R2RMLVocabulary.subjectMap, subjectNode));
+		statements.add(vf.createStatement(subjectNode, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));		
 
 		//Now we add the template!!
 		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);
 		
 		//add template subject
-		statements.add(vf.createStatement(nod_subject, R2RMLVocabulary.template, vf.createLiteral(subjectTemplate)));
+		statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.template, vf.createLiteral(subjectTemplate)));
 		//TODO: deal with column and termType
 
 		
@@ -159,12 +146,10 @@ public class OBDAMappingTransformer {
 			//	statements.add(vf.createStatement(nod_subject, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));		
 				
 				//add class declaration to subject Map node
-				statements.add(vf.createStatement(nod_subject, R2RMLVocabulary.classUri, predUri));
+				statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.classUri, predUri));
 				
 			} else {
-				String str_nod_prop = "http://example.org/" + random_number +"/"+ "MyPropMap";
-				//Resource predObjNode = vf.createBNode("predicateObjectMap"+ random_number);
-				Resource predObjNode = vf.createURI(str_nod_prop);
+				Resource predObjNode = vf.createBNode("predicateObjectMap"+ random_number);
 				
 				//add predicateObjectMap to triples Map node
 				Statement triple_main_predicate = vf.createStatement(mainNode, R2RMLVocabulary.predicateObjectMap, predObjNode);
@@ -177,8 +162,7 @@ public class OBDAMappingTransformer {
 				}
 				else {
 					//add predicate template declaration
-					String str_nod_pred = "http://example.org/" + random_number +"/"+ "MyPredMap";
-					Resource predMapNode = vf.createURI(str_nod_pred);
+					Resource predMapNode = vf.createBNode("predicateMap"+ random_number);
 					Statement triple_predicateObject_predicate_map = vf.createStatement(predObjNode, R2RMLVocabulary.predicateMap, predMapNode);
 					Statement triple_predicateTemplate = vf.createStatement(predMapNode, R2RMLVocabulary.template, vf.createLiteral(predURIString));
 					statements.add(triple_predicateObject_predicate_map);
@@ -190,11 +174,8 @@ public class OBDAMappingTransformer {
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
 				
-				//Resource objNode = vf.createBNode("objectMap"+random_number);
+				Resource objNode = vf.createBNode("objectMap"+random_number);
 				
-				String str_nod_obj = "http://example.org/" + random_number +"/"+ "MyObjectMap";
-				//Resource predObjNode = vf.createBNode("predicateObjectMap"+ random_number);
-				Resource objNode = vf.createURI(str_nod_obj);
 				Statement triple_prop_obj = vf.createStatement(predObjNode, R2RMLVocabulary.objectMap, objNode);
 				statements.add(triple_prop_obj);
 
