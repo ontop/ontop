@@ -45,6 +45,7 @@ import org.openrdf.query.algebra.Compare;
 import org.openrdf.query.algebra.Compare.CompareOp;
 import org.openrdf.query.algebra.Datatype;
 import org.openrdf.query.algebra.Distinct;
+import org.openrdf.query.algebra.Extension;
 import org.openrdf.query.algebra.Filter;
 import org.openrdf.query.algebra.IsBNode;
 import org.openrdf.query.algebra.IsLiteral;
@@ -77,15 +78,6 @@ import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.LoggerFactory;
-
-//import com.hp.hpl.jena.graph.Node;
-//import com.hp.hpl.jena.graph.Node_URI;
-//import com.hp.hpl.jena.graph.Triple;
-//import com.hp.hpl.jena.query.Query;
-//import com.hp.hpl.jena.query.QueryException;
-//import com.hp.hpl.jena.sparql.algebra.Algebra;
-//import com.hp.hpl.jena.sparql.algebra.Op;
-//import com.hp.hpl.jena.sparql.syntax.Template;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -217,6 +209,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		} else if (te instanceof Reduced) {
 			translate(vars, ((Reduced) te).getArg(), pr, i, varcount);
 		
+		} else  if (te instanceof Extension) { // BIND
+			Extension extend = (Extension) te;
+			translate(vars, extend, pr, i, varcount);
+			
 		} else {
 			try {
 				throw new QueryEvaluationException("Operation not supported: "
@@ -227,6 +223,59 @@ public class SparqlAlgebraToDatalogTranslator {
 			}
 		}
 	}
+
+	
+private void translate(List<Variable> vars, Extension extend, DatalogProgram pr,
+			      int i, int[] varcount) {
+			    TupleExpr te = extend.getArg();
+			    VarExprList extendExpr = extend.getVarExprList();
+			    Map<Var, Expr> varmap = extendExpr.getExprs();
+			    Variable var = null;
+			    Expr exp = null;
+			    
+			    for (Var v: varmap.keySet()){
+			      String name = v.getVarName();
+			      var = ofac.getVariable(name);
+			      exp = varmap.get(v);
+			    }
+			    
+			    Term term = getTermFromExpression(exp);
+			    
+			    Set<Variable> atom1VarsSet = getVariables(subop);
+			    List<Term> atom1VarsList = new LinkedList<Term>();
+			    atom1VarsList.addAll(atom1VarsSet);
+			    atom1VarsList.add(var);
+			    Collections.sort(atom1VarsList, comparator);
+			    int indexOfvar = atom1VarsList.indexOf(var);
+			    atom1VarsList.set(indexOfvar,term);
+			    Predicate leftAtomPred = ofac.getPredicate("ans" + (i),
+			        atom1VarsList.size());
+			    Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
+			
+			    
+			    Set<Variable> atom2VarsSet = getVariables(subop);
+			    List<Term> atom2VarsList = new LinkedList<Term>();
+			    atom2VarsList.addAll(atom2VarsSet);
+			    Collections.sort(atom2VarsList, comparator);
+			    Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
+			        atom2VarsList.size());
+			    Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
+			    
+			    
+			    
+			    CQIE newrule = ofac.getCQIE(head, rightAtom);
+			    pr.appendRule(newrule);
+			    
+			    /*
+			     * Translating the rest
+			     */
+			    {
+			      List<Variable> vars1 = new LinkedList<Variable>();
+			      for (Term var1 : atom2VarsSet)
+			        vars1.add((Variable) var1);
+			      translate(vars1, subop, pr, 2 * i, varcount);
+			    }
+}	
 	
 	private void translate(List<Variable> vars, Union union,
 			DatalogProgram pr, long i, int[] varcount) {
