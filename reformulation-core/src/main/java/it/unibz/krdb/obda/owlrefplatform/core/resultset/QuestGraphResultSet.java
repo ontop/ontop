@@ -31,6 +31,7 @@ import org.openrdf.query.algebra.ExtensionElem;
 import org.openrdf.query.algebra.ProjectionElem;
 import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.ValueExpr;
+import org.openrdf.query.algebra.Var;
 
 //import com.hp.hpl.jena.sparql.syntax.Template;
 
@@ -102,7 +103,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	private List<Assertion> processResults(TupleResultSet result,
 			SesameConstructTemplate template) throws OBDAException {
 		List<Assertion> tripleAssertions = new ArrayList<Assertion>();
-		ProjectionElemList peList = template.getProjection().getProjectionElemList();
+		List<ProjectionElemList> peLists = template.getProjectionElemList();
 		
 		Extension ex = template.getExtension();
 		if (ex != null) 
@@ -114,14 +115,13 @@ public class QuestGraphResultSet implements GraphResultSet {
 				}
 				extMap = newExtMap;
 			}
-		
+		for (ProjectionElemList peList : peLists) {
 		int size = peList.getElements().size();
 		
 		for (int i = 0; i < size / 3; i++) {
 			
 			Constant subjectConstant = getConstant(peList.getElements().get(i*3), result);
-			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1),
-					result);
+			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1), result);
 			Constant objectConstant = getConstant(peList.getElements().get(i*3+2), result);
 
 			// Determines the type of assertion
@@ -160,6 +160,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 				}
 			}
 		}
+		}
 		return (tripleAssertions);
 	}
 	
@@ -189,8 +190,10 @@ public class QuestGraphResultSet implements GraphResultSet {
 			throws OBDAException {
 		Constant constant = null;
 		String node_name = node.getSourceName();
+		ValueExpr ve = extMap.get(node_name);
+		if (ve!=null && ve instanceof Var)
+			throw new RuntimeException ("Invalid query. Found unbound variable: "+ve);
 		if (node_name.charAt(0) == '-') {
-			ValueExpr ve = extMap.get(node_name);
 			org.openrdf.query.algebra.ValueConstant vc = (org.openrdf.query.algebra.ValueConstant) ve;
 			 if (vc.getValue() instanceof URIImpl) {
 				 constant = dfac.getConstantURI(vc.getValue().stringValue());
