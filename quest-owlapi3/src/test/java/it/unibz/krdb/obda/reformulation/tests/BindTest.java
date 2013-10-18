@@ -66,8 +66,6 @@ public class BindTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		
-		
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */
@@ -99,10 +97,8 @@ public class BindTest extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-		
 	}
 
 	@Override
@@ -150,34 +146,21 @@ public class BindTest extends TestCase {
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> "
 				+ "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>"
 				+ "PREFIX  ns:  <http://example.org/ns#>"
-				+ "SELECT  ?title ?price" + "{  ?x ns:price ?p ."
-				+ "   ?x ns:discount ?discount"
+				+ "SELECT  ?title ?price WHERE" 
+				+ "{  ?x ns:hasPrice ?p ."
+				+ "   ?x ns:hasDiscount ?discount"
 				+ "   BIND (?p*(1-?discount) AS ?price)"
-				+ "   FILTER(?price < 20)" + "   ?x dc:title ?title ." + "}";
+				+ "   FILTER(?price < 20)" 
+				+ "   ?x dc:title ?title ." 
+				+ "}";
+
 
 		StringBuilder bf = new StringBuilder(query);
 		try {
-			
-			/*
-			 * Enable this if you want to test performance, it will run several cycles
-			 */
-//			long start = System.currentTimeMillis();
-//			for (int i = 0; i < 3000; i++) {
-//				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
-//			}
-//			long end = System.currentTimeMillis();
-//			long elapsed = end-start;
-//			log.info("Elapsed time: {}", elapsed);
 			QuestOWLResultSet rs = st.executeTuple(query);
-			//assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");
 			OWLLiteral val = rs.getOWLLiteral("z");
-			//assertEquals("<uri1>", ind1.toString());
-			//assertEquals("<uri1>", ind2.toString());
-			//assertEquals("\"value1\"", val.toString());
-			
 
 		} catch (Exception e) {
 			throw e;
@@ -192,7 +175,7 @@ public class BindTest extends TestCase {
 		}
 	}
 
-	public void testViEqSig() throws Exception {
+	public void testBind() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -201,17 +184,5 @@ public class BindTest extends TestCase {
 
 		runTests(p);
 	}
-	
-	public void testClassicEqSig() throws Exception {
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-
-		runTests(p);
-	}
-
 
 }

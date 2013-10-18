@@ -1005,17 +1005,27 @@ public class SparqlAlgebraToDatalogTranslator {
 		return vars;
 	}
 	
+	public Set<Variable> getBindVariables(List<ExtensionElem> elements) {
+		Set<Variable> vars = new HashSet<Variable>();
+		for (ExtensionElem el : elements) {
+				String name = el.getName();
+				Variable var = ofac.getVariable(name);
+				vars.add(var);
+			}
+		return vars;
+	}
 	
 	public Set<Variable> getVariables(TupleExpr te) {
 		Set<Variable> result = new LinkedHashSet<Variable>();
 		if (te instanceof StatementPattern) {
 			result.addAll(getVariables(((StatementPattern) te).getVarList()));
-		//} else if (op instanceof OpTriple) {
-		//	result.addAll(getVariables(((OpTriple) op).getTriple()));
 		} else if (te instanceof BinaryTupleOperator) {
 			result.addAll(getVariables(((BinaryTupleOperator) te).getLeftArg()));
 			result.addAll(getVariables(((BinaryTupleOperator) te).getRightArg()));
 		} else if (te instanceof UnaryTupleOperator) {
+				if (te instanceof Extension) {
+					result.addAll(getBindVariables(((Extension) te).getElements()));
+				}
 			result.addAll(getVariables(((UnaryTupleOperator) te).getArg()));
 		} else {
 			throw new RuntimeException("Operator not supported: " + te);
