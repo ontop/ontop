@@ -46,6 +46,7 @@ import org.openrdf.query.algebra.Compare.CompareOp;
 import org.openrdf.query.algebra.Datatype;
 import org.openrdf.query.algebra.Distinct;
 import org.openrdf.query.algebra.Extension;
+import org.openrdf.query.algebra.ExtensionElem;
 import org.openrdf.query.algebra.Filter;
 import org.openrdf.query.algebra.IsBNode;
 import org.openrdf.query.algebra.IsLiteral;
@@ -209,7 +210,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		} else if (te instanceof Reduced) {
 			translate(vars, ((Reduced) te).getArg(), pr, i, varcount);
 		
-		} else  if (te instanceof Extension) { // BIND
+		} else if (te instanceof Extension) { 
 			Extension extend = (Extension) te;
 			translate(vars, extend, pr, i, varcount);
 			
@@ -224,58 +225,101 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 	}
 
-	
-private void translate(List<Variable> vars, Extension extend, DatalogProgram pr,
-			      int i, int[] varcount) {
-			    TupleExpr te = extend.getArg();
-			    VarExprList extendExpr = extend.getVarExprList();
-			    Map<Var, Expr> varmap = extendExpr.getExprs();
-			    Variable var = null;
-			    Expr exp = null;
-			    
-			    for (Var v: varmap.keySet()){
-			      String name = v.getVarName();
-			      var = ofac.getVariable(name);
-			      exp = varmap.get(v);
-			    }
-			    
-			    Term term = getTermFromExpression(exp);
-			    
-			    Set<Variable> atom1VarsSet = getVariables(subop);
-			    List<Term> atom1VarsList = new LinkedList<Term>();
-			    atom1VarsList.addAll(atom1VarsSet);
-			    atom1VarsList.add(var);
-			    Collections.sort(atom1VarsList, comparator);
-			    int indexOfvar = atom1VarsList.indexOf(var);
-			    atom1VarsList.set(indexOfvar,term);
-			    Predicate leftAtomPred = ofac.getPredicate("ans" + (i),
-			        atom1VarsList.size());
-			    Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
+	private void translate(List<Variable> vars, Extension extend,
+			DatalogProgram pr, long i, int[] varcount) {
+		TupleExpr subte = extend.getArg();
+		List<ExtensionElem> elements = extend.getElements();
+		Set<Variable> atom2VarsSet = null;
+		for (ExtensionElem el: elements) {
+			Variable var = null;
 			
-			    
-			    Set<Variable> atom2VarsSet = getVariables(subop);
-			    List<Term> atom2VarsList = new LinkedList<Term>();
-			    atom2VarsList.addAll(atom2VarsSet);
-			    Collections.sort(atom2VarsList, comparator);
-			    Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
-			        atom2VarsList.size());
-			    Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
-			    
-			    
-			    
-			    CQIE newrule = ofac.getCQIE(head, rightAtom);
-			    pr.appendRule(newrule);
-			    
-			    /*
-			     * Translating the rest
-			     */
-			    {
-			      List<Variable> vars1 = new LinkedList<Variable>();
-			      for (Term var1 : atom2VarsSet)
-			        vars1.add((Variable) var1);
-			      translate(vars1, subop, pr, 2 * i, varcount);
-			    }
-}	
+			String name = el.getName();
+			ValueExpr vexp = el.getExpr();
+			var = ofac.getVariable(name);
+			
+			Term term = getBooleanTerm(vexp);
+
+			Set<Variable> atom1VarsSet = getVariables(subte);
+			List<Term> atom1VarsList = new LinkedList<Term>();
+			atom1VarsList.addAll(atom1VarsSet);
+			atom1VarsList.add(var);
+			Collections.sort(atom1VarsList, comparator);
+			int indexOfvar = atom1VarsList.indexOf(var);
+			atom1VarsList.set(indexOfvar,term);
+			Predicate leftAtomPred = ofac.getPredicate("ans" + (i),
+					atom1VarsList.size());
+			Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
+		
+			atom2VarsSet = getVariables(subte);
+			List<Term> atom2VarsList = new LinkedList<Term>();
+			atom2VarsList.addAll(atom2VarsSet);
+			Collections.sort(atom2VarsList, comparator);
+			Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
+					atom2VarsList.size());
+			Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
+
+			CQIE newrule = ofac.getCQIE(head, rightAtom);
+			pr.appendRule(newrule);
+		}
+		/*
+		 * Translating the rest
+		 */
+	
+		{
+			List<Variable> vars1 = new LinkedList<Variable>();
+			for (Term var1 : atom2VarsSet)
+				vars1.add((Variable) var1);
+			translate(vars1, subte, pr, 2 * i, varcount);
+		}
+	}		    
+//		    VarExprList extendExpr = extend.getVarExprList();
+//		    Map<Var, Expr> varmap = extendExpr.getExprs();
+//		    Variable var = null;
+//		    Expr exp = null;
+//		    
+//		    for (Var v: varmap.keySet()){
+//		      String name = v.getVarName();
+//		      var = ofac.getVariable(name);
+//		      exp = varmap.get(v);
+//		    }
+//		    
+//		    Term term = getTermFromExpression(exp);
+//		    
+//		    Set<Variable> atom1VarsSet = getVariables(subop);
+//		    List<Term> atom1VarsList = new LinkedList<Term>();
+//		    atom1VarsList.addAll(atom1VarsSet);
+//		    atom1VarsList.add(var);
+//		    Collections.sort(atom1VarsList, comparator);
+//		    int indexOfvar = atom1VarsList.indexOf(var);
+//		    atom1VarsList.set(indexOfvar,term);
+//		    Predicate leftAtomPred = ofac.getPredicate("ans" + (i),
+//		        atom1VarsList.size());
+//		    Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
+//		
+//		    
+//		    Set<Variable> atom2VarsSet = getVariables(subop);
+//		    List<Term> atom2VarsList = new LinkedList<Term>();
+//		    atom2VarsList.addAll(atom2VarsSet);
+//		    Collections.sort(atom2VarsList, comparator);
+//		    Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
+//		        atom2VarsList.size());
+//		    Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
+//		    
+//		    
+//		    
+//		    CQIE newrule = ofac.getCQIE(head, rightAtom);
+//		    pr.appendRule(newrule);
+//		    
+//		    /*
+//		     * Translating the rest
+//		     */
+//		    {
+//		      List<Variable> vars1 = new LinkedList<Variable>();
+//		      for (Term var1 : atom2VarsSet)
+//		        vars1.add((Variable) var1);
+//		      translate(vars1, subop, pr, 2 * i, varcount);
+//		    }
+
 	
 	private void translate(List<Variable> vars, Union union,
 			DatalogProgram pr, long i, int[] varcount) {
