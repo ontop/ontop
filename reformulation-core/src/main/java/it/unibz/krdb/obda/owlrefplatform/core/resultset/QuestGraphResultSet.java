@@ -190,9 +190,14 @@ public class QuestGraphResultSet implements GraphResultSet {
 			throws OBDAException {
 		Constant constant = null;
 		String node_name = node.getSourceName();
-		ValueExpr ve = extMap.get(node_name);
-		if (ve!=null && ve instanceof Var)
-			throw new RuntimeException ("Invalid query. Found unbound variable: "+ve);
+		ValueExpr ve = null;
+		
+		if (extMap!= null) {
+			ve = extMap.get(node_name);
+			if (ve!=null && ve instanceof Var)
+				throw new RuntimeException ("Invalid query. Found unbound variable: "+ve);
+		}
+		
 		if (node_name.charAt(0) == '-') {
 			org.openrdf.query.algebra.ValueConstant vc = (org.openrdf.query.algebra.ValueConstant) ve;
 			 if (vc.getValue() instanceof URIImpl) {
