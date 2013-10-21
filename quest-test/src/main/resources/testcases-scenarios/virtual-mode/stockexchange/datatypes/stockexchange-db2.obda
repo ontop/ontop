@@ -80,9 +80,9 @@ source		select date, stockid from "stockbooklist"
 
 mappingId	mapping-dealer
 target		:person-{clientid} a :Dealer . 
-source		select clientid from "broker",client,brokerworksfor where ( ( client.id = broker.id and brokerid=broker.id ) and client.id=clientid )
+source		select clientid from "broker","client","brokerworksfor" where ( ( "client".id = "broker".id and brokerid="broker".id ) and "client".id=clientid )
 
 mappingId	mapping-offers
 target		:transaction-{id} a :Offer . 
-source		SELECT id FROM transaction WHERE type=1
+source		SELECT id FROM "transaction" WHERE type=1
 ]]
