@@ -6,7 +6,7 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -61,8 +61,8 @@ public class MultiSchemaTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/oracle.owl";
-	final String obdafile = "src/test/resources/test/oracle.obda";
+	final String owlfile = "src/test/resources/oracle.owl";
+	final String obdafile = "src/test/resources/oracle.obda";
 	private QuestOWL reasoner;
 
 	@Override
