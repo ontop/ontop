@@ -32,15 +32,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+
+//import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
 	
 	private static OBDADataFactory instance = null;
-	private static IRIFactory irifactory = null;
+	private static ValueFactory irifactory = null;
 
 	private static int counter = 0;
 	
@@ -55,16 +58,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return instance;
 	}
 	
-	public static IRIFactory getIRIFactory() {
+	public static ValueFactory getIRIFactory() {
 		if (irifactory == null) {
-			irifactory = new IRIFactory();
+			irifactory = new ValueFactoryImpl();
 		}
 		return irifactory;
 	}
 
-	public static IRI getIRI(String s){
-		return getIRIFactory().construct(s);
-	}
+	public static org.openrdf.model.URI getIRI(String s){
+		return getIRIFactory().createURI(s);
+				}
 	
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
@@ -93,6 +96,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	@Deprecated
 	public URIConstant getConstantURI(String uriString) {
 		return new URIConstantImpl(uriString);
 	}

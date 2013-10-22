@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.8</version>
+		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-owlapi3</artifactId>
@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -46,6 +46,13 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
+			<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-surefire-plugin</artifactId>
+	       		<configuration>
+          			<skipTests>true</skipTests>
+        		</configuration>
+      		</plugin>
 		</plugins>
 	</build>
 </project>

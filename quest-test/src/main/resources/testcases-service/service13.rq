@@ -1,0 +1,17 @@
+# Test for SES 899
+
+PREFIX : <http://example.org/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+
+SELECT ?a ?b
+{
+  SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> {
+     ?a a ?t1 
+     filter(?t1 = owl:Class) 
+  }
+  SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> { 
+     ?b a ?t2 
+     filter(?t2 = owl:Class) 
+  } 
+  
+} 

@@ -23,8 +23,9 @@ grammar TurtleOBDA;
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
@@ -34,6 +35,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -57,8 +59,6 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 }
 
 @lexer::header {
@@ -109,15 +109,14 @@ public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet foll
 private HashMap<String, String> directives = new HashMap<String, String>();
 
 /** The current subject term */
-private NewLiteral subject;
+private Term currentSubject;
 
 /** All variables */
-private Set<NewLiteral> variableSet = new HashSet<NewLiteral>();
+private Set<Term> variableSet = new HashSet<Term>();
 
 /** A factory to construct the predicates and terms */
 private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-private static IRIFactory iriFactory = IRIFactory.iriImplementation();
 
 private String error = "";
 
@@ -158,22 +157,23 @@ private String removeBrackets(String text) {
    return text.substring(1, text.length()-1);
 }
 
-private NewLiteral construct(String text) {
-   NewLiteral toReturn = null;
+private Term construct(String text) {
+   Term toReturn = null;
    final String PLACEHOLDER = "{}"; 
-   List<NewLiteral> terms = new LinkedList<NewLiteral>();
+   List<Term> terms = new LinkedList<Term>();
    List<FormatString> tokens = parse(text);
    int size = tokens.size();
    if (size == 1) {
       FormatString token = tokens.get(0);
       if (token instanceof FixedString) {
-         toReturn = dfac.getURIConstant(token.toString());
+          ValueConstant uriTemplate = dfac.getConstantLiteral(token.toString()); // a single URI template
+          toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(1), uriTemplate);
       } else if (token instanceof ColumnString) {
-         ValueConstant uriTemplate = dfac.getValueConstant(PLACEHOLDER); // a single URI template
+         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
          Variable column = dfac.getVariable(token.toString());
          terms.add(0, uriTemplate);
          terms.add(column);
-         toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+         toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
       }
    } else {
       StringBuilder sb = new StringBuilder();
@@ -186,9 +186,9 @@ private NewLiteral construct(String text) {
             terms.add(column);
          }
       }
-      ValueConstant uriTemplate = dfac.getValueConstant(sb.toString()); // complete URI template
+      ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
       terms.add(0, uriTemplate);
-      toReturn = dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(terms.size()), terms);
+      toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
    }
    return toReturn;
 }
@@ -236,7 +236,57 @@ private class ColumnString implements FormatString {
    @Override public int index() { return 0; }  // flag code for column string
    @Override public String toString() { return s; }
 }
+
+/**
+ * This methods construct an atom from a triple 
+ * 
+ * For the input (subject, pred, object), the result is 
+ * <ul>
+ *  <li> object(subject), if pred == rdf:type and subject is grounded ; </li>
+ *  <li> predicate(subject, object), if pred != rdf:type and predicate is grounded ; </li>
+ *  <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
+ * </ul>
+ */
+private Function makeAtom(Term subject, Term pred, Term object) {
+     Function atom = null;
+      
+       if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+             if (object instanceof  Function) {
+                  if(QueryUtils.isGrounded(object)) {
+                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
+                      Predicate predicate = dfac.getClassPredicate(c.getValue());
+                      atom = dfac.getFunction(predicate, subject);
+                  } else {
+                        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred, object);                  }
+             } else if (object instanceof  Variable){
+                  Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
+                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
+              } else {
+                  throw new IllegalArgumentException("parser cannot handle object " + object);  
+              }
+        } else if( ! QueryUtils.isGrounded(pred) ){
+             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+        } else {
+             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+             Predicate predicate;
+             if(pred instanceof Function){
+                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+                  predicate = dfac.getPredicate(pr.getValue(), 2);
+             } else {
+                  throw new IllegalArgumentException("predicate should be a URI Function");
+             }
+             atom = dfac.getFunction(predicate, subject, object);
+       }
+        return atom;
+  }
+
+
 }
+
 
 /*------------------------------------------------------------------
  * PARSER RULES
@@ -246,8 +296,8 @@ parse returns [CQIE value]
   : directiveStatement*
     t1=triplesStatement {
       int arity = variableSet.size();
-      List<NewLiteral> distinguishVariables = new ArrayList<NewLiteral>(variableSet);
-      Function head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
+      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
+      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
       
       // Create a new rule
       List<Function> triples = $t1.value;
@@ -291,7 +341,7 @@ prefixID
   ;
 
 triples returns [List<Function> value]
-  : subject { subject = $subject.value; } predicateObjectList {
+  : subject { currentSubject = $subject.value; } predicateObjectList {
       $value = $predicateObjectList.value;
     }
   ;
@@ -300,69 +350,56 @@ predicateObjectList returns [List<Function> value]
 @init {
    $value = new LinkedList<Function>();
 }
-  : v1=verb l1=objectList {
-      for (NewLiteral object : $l1.value) {
-        Function atom = null;
-        String p = $v1.value.toString();
-        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
-          URIConstant c = (URIConstant) object;  // it has to be a URI constant
-          Predicate predicate = dfac.getClassPredicate(c.getURI());
-          atom = dfac.getAtom(predicate, subject);
-        } else {
-          Predicate predicate = dfac.getPredicate($v1.value, 2, null); // the data type cannot be determined here!
-          atom = dfac.getAtom(predicate, subject, object);
-        }
+  : v1=verb  l1= objectList{
+      for (Term object : $l1.value) {
+        Function atom = makeAtom(currentSubject, $v1.value, object);
         $value.add(atom);
       }
     } 
     (SEMI v2=verb l2=objectList {
-      for (NewLiteral object : $l2.value) {
-        Function atom = null;
-        String p = $v2.value.toString();
-        if (p.equals(OBDAVocabulary.RDF_TYPE)) {
-          URIConstant c = (URIConstant) object;  // it has to be a URI constant
-          Predicate predicate = dfac.getClassPredicate(c.getURI());
-          atom = dfac.getAtom(predicate, subject);
-        } else {
-          Predicate predicate = dfac.getPredicate($v2.value, 2, null); // the data type cannot be determined here!
-          atom = dfac.getAtom(predicate, subject, object);
-        }
+      for (Term object : $l2.value) {
+        Function atom = makeAtom(currentSubject, $v2.value, object);
         $value.add(atom);
       }
     })*
   ;
   
-verb returns [IRI value]
+//verb returns [String value]
+verb returns [Term value]
   : predicate { $value = $predicate.value; }
-  | 'a' { $value = iriFactory.construct(OBDAVocabulary.RDF_TYPE); }
+  | 'a' {value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
+  //$value = OBDAVocabulary.RDF_TYPE; 
+  }
   ;
 
-objectList returns [List<NewLiteral> value]
+objectList returns [List<Term> value]
 @init {
-  $value = new ArrayList<NewLiteral>();
+  $value = new ArrayList<Term>();
 }
   : o1=object { $value.add($o1.value); } (COMMA o2=object { $value.add($o2.value); })* 
   ;
 
-subject returns [NewLiteral value]
+subject returns [Term value]
   : resource { $value = $resource.value; }
   | variable { $value = $variable.value; }
 //  | blank
   ;
 
-predicate returns [IRI value]
-  : resource { 
-      NewLiteral nl = $resource.value;
-      if (nl instanceof URIConstant) {
-        URIConstant c = (URIConstant) nl;
-        $value = c.getURI();
-      } else {
-        throw new RuntimeException("Unsupported predicate syntax: " + nl.toString());
-      }
+//predicate returns [String value]
+predicate returns [Term value]
+  : resource {
+  	$value = $resource.value; 
+//      Term nl = $resource.value;
+//      if (nl instanceof URIConstant) {
+//        URIConstant c = (URIConstant) nl;
+//        $value = c.getValue();
+//      } else {
+//        throw new RuntimeException("Unsupported predicate syntax: " + nl.toString());
+//      }
     }
   ;
 
-object returns [NewLiteral value]
+object returns [Term value]
   : resource { $value = $resource.value; }
   | literal  { $value = $literal.value; }
   | typedLiteral { $value = $typedLiteral.value; }
@@ -370,9 +407,11 @@ object returns [NewLiteral value]
 //  | blank
   ;
 
-resource returns [NewLiteral value]
-  : uriref { $value = construct($uriref.value); }
-  | qname { $value = construct($qname.value); }
+resource returns [Term value]
+   : uriref { $value = construct($uriref.value); }
+   | qname { $value = construct($qname.value); }
+  //: uriref { $value = dfac.getConstantURI($uriref.value);}
+  // | qname { $value = dfac.getConstantURI($qname.value); }
   ;
 
 uriref returns [String value]
@@ -403,8 +442,8 @@ function returns [Function value]
   : resource LPAREN terms RPAREN {
       String functionName = $resource.value.toString();
       int arity = $terms.value.size();
-      Predicate functionSymbol = dfac.getPredicate(iriFactory.construct(functionName), arity);
-      $value = dfac.getFunctionalTerm(functionSymbol, $terms.value);
+      Predicate functionSymbol = dfac.getPredicate(functionName, arity);
+      $value = dfac.getFunction(functionSymbol, $terms.value);
     }
   ;
 
@@ -412,12 +451,19 @@ typedLiteral returns [Function value]
   : variable AT language {
       Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
       Variable var = $variable.value;
-      NewLiteral lang = $language.value;   
-      $value = dfac.getFunctionalTerm(functionSymbol, var, lang);
+      Term lang = $language.value;   
+      $value = dfac.getFunction(functionSymbol, var, lang);
     }
   | variable REFERENCE resource {
       Variable var = $variable.value;
-      String functionName = $resource.value.toString();
+      //String functionName = $resource.value.toString();
+      // $resource.value must be a URIConstant
+      String functionName = null;
+      if ($resource.value instanceof Function){
+        functionName = ((ValueConstant) ((Function)$resource.value).getTerm(0)).getValue();
+      } else {
+        throw new IllegalArgumentException("$resource.value should be an URI");
+      }
       Predicate functionSymbol = null;
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
           functionSymbol = dfac.getDataTypePredicateLiteral();
@@ -436,40 +482,40 @@ typedLiteral returns [Function value]
       } else {
           throw new RecognitionException();
       }
-      $value = dfac.getFunctionalTerm(functionSymbol, var);
+      $value = dfac.getFunction(functionSymbol, var);
      }
   ;
 
-language returns [NewLiteral value]
+language returns [Term value]
   : languageTag {
-    	$value = dfac.getValueConstant($languageTag.text.toLowerCase(), COL_TYPE.STRING);
+    	$value = dfac.getConstantLiteral($languageTag.text.toLowerCase(), COL_TYPE.STRING);
     }
   | variable {
     	$value = $variable.value;
     }
   ;
 
-terms returns [Vector<NewLiteral> value]
+terms returns [Vector<Term> value]
 @init {
-  $value = new Vector<NewLiteral>();
+  $value = new Vector<Term>();
 }
   : t1=term { $value.add($t1.value); } (COMMA t2=term { $value.add($t2.value); })*
   ;
 
-term returns [NewLiteral value]
+term returns [Term value]
   : function { $value = $function.value; }
   | variable { $value = $variable.value; }
   | literal { $value = $literal.value; }
   ;
 
-literal returns [NewLiteral value]
+literal returns [Term value]
   : stringLiteral (AT language)? {
        ValueConstant constant = $stringLiteral.value;
-       NewLiteral lang = $language.value;
+       Term lang = $language.value;
        if (lang != null) {
-         $value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+         $value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
        } else {
-       	 $value = dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), constant);
+       	 $value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
        }
     }
   | dataTypeString { $value = $dataTypeString.value; }
@@ -480,15 +526,18 @@ literal returns [NewLiteral value]
 stringLiteral returns [ValueConstant value]
   : STRING_WITH_QUOTE_DOUBLE {
       String str = $STRING_WITH_QUOTE_DOUBLE.text;
-      $value = dfac.getValueConstant(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+      $value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
     }
   ;
 
-dataTypeString returns [NewLiteral value]
+dataTypeString returns [Term value]
   :  stringLiteral REFERENCE resource {
       ValueConstant constant = $stringLiteral.value;
       String functionName = $resource.value.toString();
       Predicate functionSymbol = null;
+      if ($resource.value instanceof Function){
+	 functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
+      }
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
     	functionSymbol = dfac.getDataTypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
@@ -506,7 +555,7 @@ dataTypeString returns [NewLiteral value]
       } else {
         throw new RuntimeException("Unknown datatype: " + functionName);
       }
-      $value = dfac.getFunctionalTerm(functionSymbol, constant);
+      $value = dfac.getFunction(functionSymbol, constant);
     }
   ;
 
@@ -541,26 +590,26 @@ languageTag
   ;
 
 booleanLiteral returns [ValueConstant value]
-  : TRUE  { $value = dfac.getValueConstant($TRUE.text, COL_TYPE.BOOLEAN); }
-  | FALSE { $value = dfac.getValueConstant($FALSE.text, COL_TYPE.BOOLEAN); }
+  : TRUE  { $value = dfac.getConstantLiteral($TRUE.text, COL_TYPE.BOOLEAN); }
+  | FALSE { $value = dfac.getConstantLiteral($FALSE.text, COL_TYPE.BOOLEAN); }
   ;
 
 numericUnsigned returns [ValueConstant value]
-  : INTEGER { $value = dfac.getValueConstant($INTEGER.text, COL_TYPE.INTEGER); }
-  | DOUBLE  { $value = dfac.getValueConstant($DOUBLE.text, COL_TYPE.DOUBLE); }
-  | DECIMAL { $value = dfac.getValueConstant($DECIMAL.text, COL_TYPE.DECIMAL); }
+  : INTEGER { $value = dfac.getConstantLiteral($INTEGER.text, COL_TYPE.INTEGER); }
+  | DOUBLE  { $value = dfac.getConstantLiteral($DOUBLE.text, COL_TYPE.DOUBLE); }
+  | DECIMAL { $value = dfac.getConstantLiteral($DECIMAL.text, COL_TYPE.DECIMAL); }
   ;
 
 numericPositive returns [ValueConstant value]
-  : INTEGER_POSITIVE { $value = dfac.getValueConstant($INTEGER_POSITIVE.text, COL_TYPE.INTEGER); }
-  | DOUBLE_POSITIVE  { $value = dfac.getValueConstant($DOUBLE_POSITIVE.text, COL_TYPE.DOUBLE); }
-  | DECIMAL_POSITIVE { $value = dfac.getValueConstant($DECIMAL_POSITIVE.text, COL_TYPE.DECIMAL); }
+  : INTEGER_POSITIVE { $value = dfac.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.INTEGER); }
+  | DOUBLE_POSITIVE  { $value = dfac.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.DOUBLE); }
+  | DECIMAL_POSITIVE { $value = dfac.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.DECIMAL); }
   ;
 
 numericNegative returns [ValueConstant value]
-  : INTEGER_NEGATIVE { $value = dfac.getValueConstant($INTEGER_NEGATIVE.text, COL_TYPE.INTEGER); }
-  | DOUBLE_NEGATIVE  { $value = dfac.getValueConstant($DOUBLE_NEGATIVE.text, COL_TYPE.DOUBLE); }
-  | DECIMAL_NEGATIVE { $value = dfac.getValueConstant($DECIMAL_NEGATIVE.text, COL_TYPE.DECIMAL); }
+  : INTEGER_NEGATIVE { $value = dfac.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.INTEGER); }
+  | DOUBLE_NEGATIVE  { $value = dfac.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.DOUBLE); }
+  | DECIMAL_NEGATIVE { $value = dfac.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.DECIMAL); }
   ;
 
 /*------------------------------------------------------------------

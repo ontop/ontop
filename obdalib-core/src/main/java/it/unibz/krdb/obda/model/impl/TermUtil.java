@@ -29,50 +29,58 @@ public class TermUtil {
 		} 
 		else if (term instanceof ValueConstant) {
 			ValueConstant constant = (ValueConstant) term;
-			StringBuilder bf = new StringBuilder();
-			bf.append("\"");
-			bf.append(constant.getValue());
-			bf.append("\"");
+			StringBuilder sb = new StringBuilder();
 			
-			
-		    final COL_TYPE datatype = constant.getType();
-			if (datatype == COL_TYPE.LITERAL_LANG) {
-				bf.append("@");
-				bf.append(constant.getLanguage());
-			} else if (datatype == COL_TYPE.LITERAL) { 
-				// NO-OP
-		    } else {
-				bf.append("^^");
-				bf.append(datatype);
+			String value = constant.getValue();
+			switch (constant.getType()) {
+				case STRING:
+				case DATETIME: sb.append(quoted(value)); break;
+				case INTEGER:
+				case DECIMAL:
+				case DOUBLE:
+				case BOOLEAN: sb.append(value); break;
+				case LITERAL:
+				case LITERAL_LANG:
+					String lang = constant.getLanguage();
+					if (lang != null && !lang.isEmpty()) {
+						value += "@" + lang;
+					}
+					sb.append(quoted(value)); break;
+				default:
+					sb.append(value);
 			}
-			return bf.toString();
+			return sb.toString();
 		}
 		else if (term instanceof URIConstant) {
 			URIConstant constant = (URIConstant) term;
-			return constant.getValue();
+			return "<" + constant.getValue() + ">";
 		} 
 		else if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
 			
-			StringBuilder args = new StringBuilder();
-			args.append(functionSymbol.toString());
-			args.append("(");
+			StringBuilder sb = new StringBuilder();
+			sb.append(functionSymbol.toString());
+			sb.append("(");
 			boolean separator = false;
 			for (Term innerTerm : function.getTerms()) {
 				if (separator) {
-					args.append(", ");
+					sb.append(",");
 				}
-				args.append(toString(innerTerm));
+				sb.append(toString(innerTerm));
 				separator = true;
 			}
-			args.append(")");
-			return args.toString();
+			sb.append(")");
+			return sb.toString();
 		}
 		else if (term instanceof BNode) {
-			BNode bnode = (BNode) term;
+			BNode bnode = (BNode) term;			
 			return bnode.getName();
 		}
 		return term.toString(); // for other unknown term
+	}
+
+	private static String quoted(String value) {
+		return "\"" + value + "\"";
 	}
 }

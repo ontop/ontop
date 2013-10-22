@@ -1,0 +1,39 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://www.w3.org/2001/sw/DataAccess/tests/data-r2/syntax-sparql1/manifest#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
+@prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:comment "SPARQL 1.1: Expressions in SELECT (by Jeen Broekstra)" ;
+    mf:entries
+    (
+    	:sparql11-alias-01
+    	:sparql11-alias-02
+    	:sparql11-numeric-01
+    	:sparql11-expression-ordered-01
+    ).
+
+:sparql11-alias-01  mf:name  "sparql11-alias-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-alias-01.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-alias-01.srx> .
+	 
+	 
+:sparql11-alias-02  mf:name  "sparql11-alias-02" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-alias-02.rq> ; qt:data <data-01.ttl> ] ;
+         mf:result <sparql11-alias-02.srx> .
+         
+:sparql11-numeric-01  mf:name  "sparql11-numeric-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-numeric-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:result <sparql11-numeric-01.srx> .
+         
+:sparql11-expression-ordered-01  mf:name  "sparql11-expression-ordered-01" ;
+         rdf:type   mf:QueryEvaluationTest ;
+         mf:action [ qt:query <sparql11-expression-ordered-01.rq> ; qt:data <data-02.ttl> ] ;
+         mf:checkOrder "true" ;
+         mf:result <sparql11-expression-ordered-01.srx> .
+	 

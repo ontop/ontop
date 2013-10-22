@@ -1,0 +1,9 @@
+PREFIX  dc:  <http://purl.org/dc/elements/1.1/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX  :  <http://example.org/>
+SELECT  ?book ?discount
+ WHERE {
+   	?book a :Book ;
+   		  :discount ?discount .
+   	FILTER(str(?discount) IN ("no discount", "50", "42"))
+}

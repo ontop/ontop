@@ -1,0 +1,57 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:   <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Merged ontology queries" ;
+    mf:entries
+    ( 
+      :query-1
+      :query-2
+      :query-3
+	  :query-4
+  ) .
+
+:query-1 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q1: All books" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ1> ;
+    mf:action
+            [ qt:query <query-1.rq> ] ;
+    mf:result <query-result.ttl> ;
+    mf:knowledgebase <Reading.owl> ;
+    mf:mappings <Reading.obda> .
+
+:query-2 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q2: All persons" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ2> ;
+    mf:action
+            [ qt:query <query-2.rq> ] ;
+    mf:result <query-result.ttl> ;
+    mf:knowledgebase <Reading.owl> ;
+    mf:mappings <Reading.obda> .
+
+:query-3 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q3: All persons reading a book" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ3> ;
+    mf:action
+            [ qt:query <query-3.rq> ] ;
+    mf:result <query-result-2.ttl> ;
+    mf:knowledgebase <Reading.owl> ;
+    mf:mappings <Reading.obda> .
+
+:query-4 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q4: All persons owning a book" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://wifo5-03.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/20080912/index.html#queryTripleQ3> ;
+    mf:action
+            [ qt:query <query-4.rq> ] ;
+    mf:result <query-result-3.ttl> ;
+    mf:knowledgebase <Reading.owl> ;
+    mf:mappings <Reading.obda> .
+    

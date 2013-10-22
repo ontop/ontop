@@ -8,9 +8,10 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.sparql.SPARQLParser;
 
 public class SPARQLQueryUtility {
 	
@@ -78,11 +79,31 @@ public class SPARQLQueryUtility {
 		return false;
 	}
 
-	public static URIConstant getDescribeURI(String strquery) {
-		int firstIdx = strquery.indexOf('<');
-		int lastIdx = strquery.indexOf('>');
-		String uri = strquery.substring(firstIdx+1, lastIdx);
-		return OBDADataFactoryImpl.getInstance().getConstantURI(uri);
+	public static String getDescribeURI(String strquery) {
+		int describeIdx = strquery.toLowerCase().indexOf("describe");
+		String uri = "";
+		try{
+		org.openrdf.query.parser.sparql.SPARQLParser parser = new SPARQLParser();
+			ParsedQuery q = parser.parseQuery(strquery, "http://example.org");
+			TupleExpr expr = q.getTupleExpr();
+			String sign = expr.toString();
+			//ValueConstant (value=http://example.org/db2/neoplasm/1)
+			if (sign.contains("ValueConstant")) {
+				int idx = sign.indexOf("ValueConstant");
+				int first = sign.indexOf('=', idx) +1;
+				int last = sign.indexOf(')', first);
+				uri = sign.substring(first, last);
+			}
+		} catch (MalformedQueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (uri.isEmpty()) {
+			int firstIdx = strquery.indexOf('<', describeIdx);
+			int lastIdx = strquery.indexOf('>', describeIdx);
+			uri = strquery.substring(firstIdx+1, lastIdx);
+		}
+		return uri;
 	}
 
 	public static boolean isURIDescribe(String strquery) {
@@ -119,13 +140,34 @@ public class SPARQLQueryUtility {
 		return strquery;
 	}
 
-	public static String getConstructObjQuery(Constant constant) {
-		return "CONSTRUCT { ?s ?p <" + constant.toString()
-				+ "> } WHERE { ?s ?p <" + constant.toString() + ">}";
+	public static String getConstructObjQuery(String constant) {
+			return "CONSTRUCT { ?s ?p <" + constant
+					+ "> } WHERE { ?s ?p <" + constant + "> }";
 	}
 
-	public static String getConstructSubjQuery(Constant constant) {
-		return "CONSTRUCT {<" + constant.toString() + "> ?p ?o} WHERE {<"
-				+ constant.toString() + "> ?p ?o}";
+	public static String getConstructSubjQuery(String constant) {
+		return "CONSTRUCT { <" + constant + "> ?p ?o} WHERE { <"
+				+ constant + "> ?p ?o}";
+	}
+	
+	public static String getSelectObjQuery(String constant) {
+		return "SELECT * WHERE { ?s ?p <" + constant + "> }";
+}
+
+	public static String getSelectSubjQuery(String constant) {
+		return "SELECT * WHERE { <" + constant + "> ?p ?o}";
+}
+
+	public static String getSelectFromConstruct(String strquery){
+		String strlower = strquery.toLowerCase();
+		// Lets assume it IS Construct query and we dont need to check
+			StringBuilder bf = new StringBuilder();
+			int idx_con = strlower.indexOf("construct");
+			int idx_where = strlower.indexOf("where");
+			bf.append(strquery.substring(0, idx_con));
+			bf.append(" SELECT * ");
+			bf.append(strquery.substring(idx_where));
+			strquery = bf.toString();
+		return strquery;
 	}
 }

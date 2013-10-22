@@ -1,0 +1,7 @@
+PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
+
+SELECT ?x ?y
+WHERE {
+   ?x a :Row; :hasInterval ?y
+   FILTER ( ?y = "00:01:40"^^<http://www.w3.org/2001/XMLSchema#string> ) .
+}

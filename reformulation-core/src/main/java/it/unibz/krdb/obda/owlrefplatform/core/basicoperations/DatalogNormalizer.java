@@ -950,7 +950,7 @@ public class DatalogNormalizer {
 		Set<Function> booleanAtoms = new HashSet<Function>();
 		Set<Function> tempBooleans = new HashSet<Function>();
 		List body = query.getBody();
-		Function f = (Function) body.get(0);
+		
 		pullOutLJCond(body, booleanAtoms, false, tempBooleans, false);
 		body.addAll(booleanAtoms);
 	}
@@ -963,6 +963,14 @@ public class DatalogNormalizer {
 		List tempTerms = new LinkedList();
 		tempTerms.addAll(currentTerms);
 		Set<Function> tempConditionBooleans = new HashSet<Function>();
+		
+		if (currentTerms.size() == 0) {
+			/*
+			 * This can happen when there are mappings with no body (facts)
+			 */
+			return;
+		}
+		
 		Term firstT = (Term) currentTerms.get(0);
 		if (!(firstT instanceof Function))
 			throw new RuntimeException("Unexpected term found while normalizing (pulling out conditions) the query.");

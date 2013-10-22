@@ -48,4 +48,13 @@ public interface TargetQueryVocabularyValidator {
 	 *         the input ontology, or false otherwise.
 	 */
 	public boolean isDataProperty(Predicate predicate);
+
+	/**
+	 * Checks whether the predicate is a "triple", which is used for meta mapping
+	 * 
+	 * @param predicate
+	 * @return
+	 * 	True if the predicate is "triple", or false otherwise
+	 */
+	boolean isTriple(Predicate predicate);
 }

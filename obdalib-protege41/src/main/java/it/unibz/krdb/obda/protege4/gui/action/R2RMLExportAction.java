@@ -8,11 +8,11 @@
  */
 package it.unibz.krdb.obda.protege4.gui.action;
 
-import it.unibz.krdb.obda.io.R2RMLWriter;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
+import it.unibz.krdb.obda.sesame.r2rml.R2RMLWriter;
 
 import java.awt.event.ActionEvent;
 import java.io.File;

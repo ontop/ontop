@@ -1,0 +1,7 @@
+PREFIX : <http://example/>
+SELECT * WHERE {
+	?a :p ?n
+	FILTER NOT EXISTS {
+		?a :q ?n .
+	}
+}

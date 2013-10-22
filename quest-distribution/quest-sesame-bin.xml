@@ -43,6 +43,13 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<directory>${project.basedir}/../obdalib-sesame/target/classes/it</directory>
+			<outputDirectory>/it</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<directory>${project.basedir}/../quest-db/target/classes/it</directory>
 			<outputDirectory>/it</outputDirectory>
 			<includes>

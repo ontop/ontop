@@ -1,0 +1,21 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.org/> .
+
+    ex:graph1 dc:publisher "Bob" ;
+	      ex:containsPerson ex:bob .
+
+    ex:graph2 dc:publisher "Alice" ;
+	      ex:containsPerson ex:alice .
+
+    ex:graph3 dc:publisher "William" ;
+	      ex:containsPerson ex:william .
+
+	 ex:bob a foaf:Person .
+	 ex:alice a foaf:Person .
+	 
+	 ex:wiliam a foaf:Person .
+	 ex:william foaf:name "William" .

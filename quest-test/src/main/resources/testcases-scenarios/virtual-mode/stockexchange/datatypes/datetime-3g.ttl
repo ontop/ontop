@@ -1,0 +1,8 @@
+@prefix rsi:      <http://ontop.inf.unibz.it/tests/rs-info#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix :        <http://example.org/#> .
+
+# Parsing error on Jena-ARQ API
+[]    rdf:type      rsi:ResultSetInfo ;
+      rsi:size      "-1" ;
+      rsi:thrownException        "org.openrdf.query.QueryEvaluationException" .

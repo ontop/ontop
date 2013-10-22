@@ -1,0 +1,12 @@
+@prefix : <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix test: <http://example.org/> .
+
+test:test1 test:p "A1" .
+test:test1 test:o "B1" .
+test:test2 test:p "A2" .
+test:test2 test:o "B2" .
+
+
+

@@ -53,11 +53,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import com.hp.hpl.jena.iri.IRI;
+//import com.hp.hpl.jena.iri.IRI;
 
 public class MappingAnalyzer {
 
-	private ArrayList<OBDAMappingAxiom> mappingList;
+	private List<OBDAMappingAxiom> mappingList;
 	private DBMetadata dbMetaData;
 
 	private SQLQueryTranslator translator;
@@ -67,7 +67,7 @@ public class MappingAnalyzer {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public MappingAnalyzer(ArrayList<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
+	public MappingAnalyzer(List<OBDAMappingAxiom> mappingList, DBMetadata dbMetaData) {
 		this.mappingList = mappingList;
 		this.dbMetaData = dbMetaData;
 

@@ -52,7 +52,7 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return DEFAULT_NAME;
 	}
 
 	@Override

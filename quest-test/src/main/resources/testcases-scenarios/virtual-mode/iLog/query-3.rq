@@ -1,0 +1,31 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>  
+
+
+# gli ITU a terra in un certo giorno (ILOG)
+# ossia: gli ITU che come ultimo evento hanno avuto un unloading
+# per fare il MAX abbiamo usato un pattern trovato qui:
+# http://dallemang.typepad.com/my_weblog/2007/09/min-and-max-in-.html
+#
+
+SELECT DISTINCT ?itu
+WHERE {
+?event :hasEventTime ?time;
+	:happensToITU ?itu;
+	a :Unloading.
+OPTIONAL {
+#?piu_recente a :ITUEvent. # lasciare commentato!
+?piu_recente :happensToITU ?itu;
+	:hasEventTime ?maxtime.
+FILTER(?maxtime > ?time &&
+	?time < "2011-11-11T15:00:00.000Z"^^xsd:dateTime &&
+	?maxtime < "2011-11-11T15:00:00.000Z"^^xsd:dateTime).
+	}.
+FILTER(!bound(?piu_recente) &&
+	?time < "2011-11-11T15:00:00.000Z"^^xsd:dateTime).
+}
+ORDER BY ?itu
+

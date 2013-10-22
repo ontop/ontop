@@ -1,0 +1,9 @@
+# Query1
+# This query bears large input and high selectivity. It queries about just one class and
+# one property and does not assume any hierarchy information or inference.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+SELECT ?X	
+WHERE
+{?X rdf:type :GraduateStudent .
+  ?X :takesCourse <http://www.Department0.University0.edu/GraduateCourse0>. }

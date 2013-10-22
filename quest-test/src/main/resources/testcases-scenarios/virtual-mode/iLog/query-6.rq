@@ -1,0 +1,29 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>  
+
+
+# customer che hanno ordini inevasi (eventualmente contare) (ILOG)
+# qui un ordine inevaso e' un ordine il cui ITU non e' stato scaricato dove l'ordine dice che deve andare
+
+SELECT DISTINCT ?customer
+WHERE {
+?customer :requests ?req.
+?req :containsITU ?itu;
+	:hasRequestDate ?date1.
+?order :relatesToITU ?itu;
+	:hasITUArrival ?terminal.
+FILTER(?date1 <= '2011-11-11T01:00:00.0'^^xsd:dateTime).
+OPTIONAL {
+	?event :happensToITU ?itu;
+	a :Unloading;
+	:takesPlaceAt ?terminal;
+	:hasEventTime ?date2.
+FILTER(?date2 < '2011-11-13T01:00:00.0'^^xsd:dateTime).
+}
+FILTER (!bound(?event)).
+}
+ORDER BY ?customer
+

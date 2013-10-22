@@ -21,6 +21,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.utils.VersionInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -116,7 +117,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private DataPropertyHierarchyInfo dataPropertyHierarchyInfo = new DataPropertyHierarchyInfo();
 
-	private static final Version version = new Version(1, 7, 0, 0);
+	private Version version;
 
 	private boolean interrupted = false;
 
@@ -174,8 +175,32 @@ public class QuestOWL extends OWLReasonerBase {
 		
 		this.preferences.putAll(preferences);
 
+		extractVersion();
+		
 		prepareReasoner();
 
+	}
+
+	/**
+	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
+	 */
+	private void extractVersion() {
+		VersionInfo versonInfo = VersionInfo.getVersionInfo();
+		String versionString = versonInfo.getVersion();
+		String[] splits = versionString.split("\\.");
+		int major = 0;
+		int minor = 0;
+		int patch = 0;
+		int build = 0;
+		try {
+			major = Integer.parseInt(splits[0]);
+			minor = Integer.parseInt(splits[1]);
+			patch = Integer.parseInt(splits[2]);
+			build = Integer.parseInt(splits[3]);
+		} catch (Exception ex) {
+
+		}
+		version = new Version(major, minor, patch, build);
 	}
 
 	public void flush() {

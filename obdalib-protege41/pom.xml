@@ -4,17 +4,15 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.8</version>
+		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-protege41</artifactId>
 	<name>obdalib-protege41</name>
 
 	<repositories>
-		<!--
-			This repository holds protege 4 and obdalib related dependencies, the
-			machine will change soon to obdavm instead of obdalin
-		-->
+		<!-- This repository holds protege 4 and obdalib related dependencies, 
+			the machine will change soon to obdavm instead of obdalin -->
 		<repository>
 			<id>obda.inf.unibz.it</id>
 			<name>FUB OBDA Maven repository</name>
@@ -48,13 +46,9 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
-		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.8</version>
-		</dependency>
+
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
 
@@ -63,79 +57,93 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-apibinding</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-db</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-core</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-owlapi3</artifactId>
+			<version>1.9</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-apibinding</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>reformulation-core</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-sesame</artifactId>
+			<version>1.9</version>
+
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>1.8</version>
+			<version>1.9</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-apibinding</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
-		<!--
-			All the following dependencies are required at compilation or runtime
-			and are not available in the OSGi, or Protege 4 classpath. They must
-			be packed together with the bundle. They have a default scope of
-			runtime and compilation
-		-->
 
-		<dependency>
-			<groupId>org.jgraph</groupId>
-			<artifactId>jgrapht</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jgraph</groupId>
-			<artifactId>jgraph</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr-runtime</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>iri</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>arq</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>json-jena</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>juli</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>activemq</groupId>
-			<artifactId>relaxngDatatype</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>inf.unibz.it.obda</groupId> <artifactId>quest-sesame</artifactId> 
+			<version>1.8</version> </dependency> -->
+
+		<!-- All the following dependencies are required at compilation or runtime 
+			and are not available in the OSGi, or Protege 4 classpath. They must be packed 
+			together with the bundle. They have a default scope of runtime and compilation -->
+
+		<!-- <dependency> <groupId>org.jgraph</groupId> <artifactId>jgrapht</artifactId> 
+			</dependency> <dependency> <groupId>org.jgraph</groupId> <artifactId>jgraph</artifactId> 
+			</dependency> -->
+
+		<!-- -->
+		<!-- <dependency> <groupId>com.ibm.icu</groupId> <artifactId>icu4j</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>activemq</groupId> <artifactId>relaxngDatatype</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -148,110 +156,15 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>xsdlib</groupId>
-			<artifactId>xsdlib</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-runtime</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>xsdlib</groupId> <artifactId>xsdlib</artifactId> 
+			</dependency> <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
+			</dependency> -->
+
+		<!-- <dependency> <groupId>org.openrdf.sesame</groupId> <artifactId>sesame-runtime</artifactId> 
+			</dependency> -->
 
 		<!-- These will download some of the sources -->
-		
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryresultio-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryresultio-sparqlxml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-query</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryalgebra-evaluation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryalgebra-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-sparql</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryresultio-text</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-turtle</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-rdfxml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-n3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna</groupId>
-			<artifactId>aduna-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna</groupId>
-			<artifactId>aduna-iteration</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna</groupId>
-			<artifactId>aduna-concurrent</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-lang</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-net</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-text</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.aduna.commons</groupId>
-			<artifactId>aduna-commons-xml</artifactId>
-		</dependency>
 
 		<!-- JDBC Drivers -->
 
@@ -287,18 +200,119 @@
 			<classifier>jar</classifier>
 			<scope>provided</scope>
 		</dependency>
+		<!-- <dependency> <groupId>commons-logging</groupId> <artifactId>commons-logging</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>log4j-over-slf4j</artifactId> 
+			</dependency> -->
+
+		<!-- transitive dependencies -->
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr-runtime</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>antlr</groupId>
+					<artifactId>antlr</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>stringtemplate</artifactId>
+			<version>3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>juli</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-query</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryalgebra-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-sparql</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryresultio-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryresultio-text</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-datatypes</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-languages</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-n3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-ntriples</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-rdfxml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-turtle</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-util</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-1.8</finalName>
+		<finalName>it.unibz.inf.obda.p4plugin-1.9</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -307,6 +321,11 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<excludes>
+					
+						<exclude>**/TBoxDAGImpl.java</exclude>
+						<exclude>**/dagjgrapht/*.java</exclude>
+						<exclude>**/LUBM*.java</exclude>
+					
 						<exclude>*it/unibz/krdb/obda/owlrefplatform/core/reformulation/TreeWitness*</exclude>
 						<exclude>**/TW*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
@@ -320,58 +339,47 @@
 					</testExcludes>
 				</configuration>
 			</plugin>
-
-			<!--
-				<plugin> <artifactId>maven-jar-plugin</artifactId> <configuration>
-				<archive>
-				<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-				</archive> </configuration> </plugin>
-			-->
 			<plugin>
-				<!--
-					This is the main plugin to build the bundle. Informattion about
-					this plugin can be found here:
-					http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html
-					Note the inline comments
-				-->
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-surefire-plugin</artifactId>
+	       		<configuration>
+          			<skipTests>true</skipTests>
+        		</configuration>
+      		</plugin>
+			<!-- <plugin> <artifactId>maven-jar-plugin</artifactId> <configuration> 
+				<archive> <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile> 
+				</archive> </configuration> </plugin> -->
+			<plugin>
+				<!-- This is the main plugin to build the bundle. Informattion about 
+					this plugin can be found here: http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html 
+					Note the inline comments -->
 
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 
-				<!--
-					<executions> <execution> <id>bundle-manifest</id>
-					<phase>process-classes</phase> <goals> <goal>manifest</goal>
-					</goals> </execution> </executions>
-				-->
+				<!-- <executions> <execution> <id>bundle-manifest</id> <phase>process-classes</phase> 
+					<goals> <goal>manifest</goal> </goals> </execution> </executions> -->
 
 				<!-- <version>2.3.4</version> -->
 				<extensions>true</extensions>
 				<configuration>
 
-					<!--
-						The follwing is the set of instructions of how pack the bundle and
-						how to create the MANIFEST.MF for the bundle. The configuration
-						does 4 things. 1. It makes sure that the "tight" dependencies are
-						not packed as jars, but as .class files (inline). It makes sure
-						that all the runtime dependencies are packed as jars. 2. It makes
-						sure all the protege plugin resources are packed (plugin.xml,
-						tabs*.xml, etc). 3. It makes sure the META-INF/MANIFEST.MF for
-						OSGi bundles is created with the correct imports, exports and
-						classpath.
-					-->
+					<!-- The follwing is the set of instructions of how pack the bundle 
+						and how to create the MANIFEST.MF for the bundle. The configuration does 
+						4 things. 1. It makes sure that the "tight" dependencies are not packed as 
+						jars, but as .class files (inline). It makes sure that all the runtime dependencies 
+						are packed as jars. 2. It makes sure all the protege plugin resources are 
+						packed (plugin.xml, tabs*.xml, etc). 3. It makes sure the META-INF/MANIFEST.MF 
+						for OSGi bundles is created with the correct imports, exports and classpath. -->
 
 					<instructions>
 
 						<!-- <Build-Jdk>1.6</Build-Jdk> -->
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
-						<!--
-							This makes sure any dependency in the obdalib <dependency>
-							dependencies are packed as .classes (uncompressed, no jars) and
-							the rest is packed as .jars
-						-->
-						<!--
-							<Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency>
-						-->
+						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
+							are packed as .classes (uncompressed, no jars) and the rest is packed as 
+							.jars -->
+						<!-- <Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
 						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
 						<Bundle-Name>-ontopPro-</Bundle-Name>
@@ -379,22 +387,22 @@
 						<Bundle-Category>protege</Bundle-Category>
 
 						<!-- general information -->
-						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
+						<Bundle-ContactAddress>mariano.muro@gmail.com</Bundle-ContactAddress>
 						<Bundle-DocURL>http://ontop.inf.unibz.it</Bundle-DocURL>
 						<Bundle-Description>-ontopPro- Protege 4</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen-Bolzano. KRDB Research
 							Centre</Bundle-Vendor>
-						<Implementation-Version>${project.version}.b2039</Implementation-Version>
+						<Implementation-Version>${project.version}</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.8</Bundle-Version>
-						<Build-Number>2157</Build-Number>
-						<!--
-							<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
-							!org.w3c.dom.traversal*</Private-Package>
-						-->
+						<Bundle-Version>1.9</Bundle-Version>
+						<Build-Number>0</Build-Number>
+						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>it.unibz.krdb.obda.protege4.*,!org.json,
+						<Import-Package>it.unibz.krdb.obda.protege4.*,
+							!org.json,
+							!org.codehaus.groovy.*,
+							!groovy.*,
 							javax.xml.datatype, javax.swing.*,
 							javax.accessibility,
 							javax.naming.*,javax.management.*,javax.sql.*,
@@ -427,53 +435,34 @@
 							!org.w3c.dom.ranges,!org.w3c.dom.traversal, *</Import-Package>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
-						<!--
-							The name of the plugin for OSGi dependencies. It has to be
-							singleton or protege wont load it
-						-->
+						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
+							or protege wont load it -->
 						<Bundle-SymbolicName>it.unibz.krdb.obda.protege4;singleton:=true</Bundle-SymbolicName>
 
-						<!--
-							This makes sure ONLY the necessary dependencies are imported. If
-							this is not supplied, maven-bundle-plugin will attempt to import
-							ALL classes in the dependencies (even transitive ones) This will
-							lead to class not found exceptions. It's very important to assure
-							only the needed depdencies are imported.
-						-->
-						<!--
-							<Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package>
-						-->
-						<!--
-							<Import-Package>!osgi.wiring.package,!org.w3c.dom.ranges,javax.accessibility.*,org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package>
-						-->
+						<!-- This makes sure ONLY the necessary dependencies are imported. 
+							If this is not supplied, maven-bundle-plugin will attempt to import ALL classes 
+							in the dependencies (even transitive ones) This will lead to class not found 
+							exceptions. It's very important to assure only the needed depdencies are 
+							imported. -->
+						<!-- <Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package> -->
+						<!-- <Import-Package>!osgi.wiring.package,!org.w3c.dom.ranges,javax.accessibility.*,org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package> -->
 
-						<!--
-							This makes sure all OBDA classes are exported and available in
-							dependent projects
-						-->
+						<!-- This makes sure all OBDA classes are exported and available in 
+							dependent projects -->
 						<!-- <Export-Package>it.unibz.krdb.*</Export-Package> -->
 
-						<!--
-							Not needed anymore, it was necessary when we were not using
-							import-package
-							<Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi</Require-Bundle>
-						-->
+						<!-- Not needed anymore, it was necessary when we were not using import-package 
+							<Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi</Require-Bundle> -->
 					</instructions>
 				</configuration>
 			</plugin>
 
-			<!--
-				<plugin> <groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId> <executions>
-				<execution> <phase>validate</phase> <goals> <goal>create</goal>
-				</goals> </execution> </executions> </plugin>
-			-->
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>buildnumber-maven-plugin</artifactId> 
+				<executions> <execution> <phase>validate</phase> <goals> <goal>create</goal> 
+				</goals> </execution> </executions> </plugin> -->
 
-			<!--
-				<plugin> <groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId> <configuration>
-				<skip>false</skip> </configuration> </plugin>
-			-->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-deploy-plugin</artifactId> 
+				<configuration> <skip>false</skip> </configuration> </plugin> -->
 
 		</plugins>
 	</build>

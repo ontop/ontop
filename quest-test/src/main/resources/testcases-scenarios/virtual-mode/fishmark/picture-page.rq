@@ -1,0 +1,12 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?genus ?species ?photographer ?stage  
+WHERE {
+   ?pcode fd:picturesmain_PicName "Abriv_u4.jpg" .
+   ?pcode fd:picturesmain_AuthName ?photographer .
+   ?pcode fd:picturesmain_LifeStage ?stage .
+   ?pcode fd:picturesmain_SpecCode ?scode .
+   ?scode fd:species_Genus ?genus .
+   ?scode fd:species_Species ?species .
+}

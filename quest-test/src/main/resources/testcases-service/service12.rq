@@ -1,0 +1,11 @@
+# SERVICE join with pattern in the default graph
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dbpedia: <http://dbpedia.org/ontology/>
+
+SELECT ?President ?Party WHERE {
+	?President rdf:type <http://dbpedia.org/class/yago/PresidentsOfTheUnitedStates> .
+	SERVICE <http://dbpedia.org/sparql> {
+		?President dbpedia:party ?Party .
+	} 
+}

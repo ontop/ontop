@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
@@ -34,6 +35,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.QueryParser;
+import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
@@ -56,8 +61,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
+//import com.hp.hpl.jena.query.Query;
+//import com.hp.hpl.jena.query.QueryFactory;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -104,10 +109,13 @@ public class QuestOWLStatement {
 	}
 
 	public QuestOWLResultSet executeTuple(String query) throws OWLException {
+		if (SPARQLQueryUtility.isSelectQuery(query) || SPARQLQueryUtility.isAskQuery(query)) {
 		try {
 			return new QuestOWLResultSet((TupleResultSet) st.execute(query), this);
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
+		}} else {
+			throw new RuntimeException("Query is not tuple query (SELECT / ASK).");
 		}
 	}
 
@@ -121,11 +129,14 @@ public class QuestOWLStatement {
 	}
 
 	public List<OWLAxiom> executeGraph(String query) throws OWLException {
+		if (SPARQLQueryUtility.isConstructQuery(query) || SPARQLQueryUtility.isDescribeQuery(query)) {
 		try {
 			GraphResultSet resultSet = (GraphResultSet) st.execute(query);
 			return createOWLIndividualAxioms(resultSet);
 		} catch (Exception e) {
 			throw new OWLOntologyCreationException(e);
+		}} else {
+			throw new RuntimeException("Query is not graph query (CONSTRUCT / DESCRIBE).");
 		}
 	}
 
@@ -363,12 +374,14 @@ public class QuestOWLStatement {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			Query jenaquery = QueryFactory.create(query);
+			//Query jenaquery = QueryFactory.create(query);
+			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
 
 			LinkedList<String> signatureContainer = new LinkedList<String>();
-			tr.getSignature(jenaquery, signatureContainer);
-			return st.getRewriting(jenaquery, signatureContainer);
+			tr.getSignature(pq, signatureContainer);
+			return st.getRewriting(pq, signatureContainer);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
@@ -390,8 +403,8 @@ public class QuestOWLStatement {
 			while (resultSet.hasNext()) {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
-						String subjectIRI = ((ClassAssertion) assertion).getPredicate().toString();
-						String classIRI = ((ClassAssertion) assertion).getObject().getValue();
+						String subjectIRI = ((ClassAssertion) assertion).getObject().getValue();
+						String classIRI = ((ClassAssertion) assertion).getPredicate().toString();
 						OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
 						axiomList.add(classAxiom);
 					} else if (assertion instanceof ObjectPropertyAssertion) {

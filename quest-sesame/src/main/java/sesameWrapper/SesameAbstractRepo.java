@@ -83,7 +83,7 @@ public abstract class SesameAbstractRepo implements
 		// Once shut down, the repository can no longer be used until it is
 		// re-initialized.
 		isinitialized=false;
-		if(repoConnection.isOpen())
+		if(repoConnection!=null && repoConnection.isOpen())
 			repoConnection.close();
 		
 	}

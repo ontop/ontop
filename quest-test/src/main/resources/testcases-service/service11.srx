@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="o1"/>
+    <variable name="o2"/>
+  </head>
+  <results>
+    <result>
+      <binding name="o1"><literal>Person_a</literal></binding>
+      <binding name="o2"><literal>a</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_c</literal></binding>
+      <binding name="o2"><literal>c</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_e</literal></binding>
+      <binding name="o2"><literal>e</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_g</literal></binding>
+      <binding name="o2"><literal>g</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_i</literal></binding>
+      <binding name="o2"><literal>i</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_k</literal></binding>
+      <binding name="o2"><literal>k</literal></binding>
+    </result> 
+    <result>
+      <binding name="o1"><literal>Person_l</literal></binding>
+      <binding name="o2"><literal>l</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_n</literal></binding>
+      <binding name="o2"><literal>n</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_p</literal></binding>
+      <binding name="o2"><literal>p</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_r</literal></binding>
+      <binding name="o2"><literal>r</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_t</literal></binding>
+      <binding name="o2"><literal>t</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_v</literal></binding>
+      <binding name="o2"><literal>v</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_x</literal></binding>
+      <binding name="o2"><literal>x</literal></binding>
+    </result>
+    <result>
+      <binding name="o1"><literal>Person_z</literal></binding>
+      <binding name="o2"><literal>z</literal></binding>
+    </result>                        
+  </results>
+</sparql>
+

@@ -1,0 +1,14 @@
+PREFIX : <http://example/>
+SELECT ?totalPrice
+WHERE {
+	{
+		SELECT (SUM(?price) AS ?totalPrice)
+		WHERE {
+  			?org :affiliates ?auth .
+  			?auth :writesBook ?book .
+  			?book :price ?price.
+		}
+		GROUP BY ?org
+	}
+}
+ORDER BY DESC(?totalPrice)

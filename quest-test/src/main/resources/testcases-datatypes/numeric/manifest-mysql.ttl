@@ -1,0 +1,100 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Numeric Type Tests" ;
+    mf:entries
+    ( 
+      :tinyint
+      :smallint
+      :mediumint
+      :int
+      :bigint
+      :decimal
+      :float
+      :double
+    ) .
+
+:tinyint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TINYINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <tinyint.rq> ] ;
+    mf:result <tinyint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:smallint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: SMALLINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <smallint.rq> ] ;
+    mf:result <smallint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:mediumint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: MEDIUMINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <mediumint.rq> ] ;
+    mf:result <mediumint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+ :int rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: INT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <int.rq> ] ;
+    mf:result <int.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+ :bigint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: BIGINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <bigint.rq> ] ;
+    mf:result <bigint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+ 
+ :decimal rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DECIMAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <decimal.rq> ] ;
+    mf:result <decimal.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+ :float rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: FLOAT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <float.rq> ] ;
+    mf:result <float.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+ :double rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DOUBLE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <double.rq> ] ;
+    mf:result <double.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .

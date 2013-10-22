@@ -12,7 +12,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.protege4.gui.action.OBDADataQueryAction;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.protege4.utils.SPARQLQueryStyledDocument;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 
@@ -25,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
 /**
@@ -40,7 +40,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	 */
 	private static final long serialVersionUID = -5902798157183352944L;
 	
-	private SPARQLQueryStyledDocument styledDocument;
+	private DefaultStyledDocument styledDocument;
 	
 	private OBDADataQueryAction executeUCQAction;
 	private OBDADataQueryAction executeEQLAction;
@@ -68,7 +68,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		initComponents();
 
 		StyleContext style = new StyleContext();
-		styledDocument = new SPARQLQueryStyledDocument(style);
+		styledDocument = new DefaultStyledDocument(style);
 
 		queryTextPane.setDocument(styledDocument);
 		queryTextPane.setBackground(Color.WHITE);

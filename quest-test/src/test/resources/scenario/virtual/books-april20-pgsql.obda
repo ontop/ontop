@@ -1,0 +1,75 @@
+[PrefixDeclaration]
+:		http://meraka/moss/example2.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	datasource
+connectionUrl	jdbc:postgresql://localhost/
+username	kbdbhabana
+password	habana10
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	M1:Editor
+target		:Editor-{ed_code} a :Editor ; :name {ed_name} . 
+source		SELECT ed_code, ed_name FROM tb_editor
+
+mappingId	M2:PrintedBook
+target		:Book-{bk_code} a :PrintedBook ; :title {bk_title} . 
+source		SELECT bk_code, bk_title FROM tb_books WHERE bk_type = 'P'
+
+mappingId	M3:EBook
+target		:Book-{bk_code} a :EBook ; :title {bk_title} . 
+source		SELECT bk_code, bk_title FROM tb_books WHERE bk_type = 'E'
+
+mappingId	M4:AudioBook
+target		:Book-{bk_code} a :AudioBook ; :title {bk_title} . 
+source		SELECT bk_code, bk_title FROM tb_books WHERE bk_type = 'A'
+
+mappingId	M5:IneditedBook
+target		:Book-{bk_code} a :IneditedBook . 
+source		SELECT bk_code FROM tb_books WHERE bk_code NOT IN ( SELECT bk_id FROM tb_edition )
+
+mappingId	M6:genre
+target		:bk($id_bk) :genre {gen_name} . 
+source		SELECT id_bk, gen_name FROM tb_bk_gen
+
+mappingId	M7:writtenBy
+target		:Book-{bk_code} :writtenBy :Author-{wr_id} . 
+source		SELECT bk_code, wr_id FROM tb_authors
+
+mappingId	M8:Author
+target		:Author-{wr_code} a :Author ; :name {wr_name} . 
+source		SELECT wr_code, wr_name FROM tb_affiliated_writers
+
+mappingId	M9:EmergingWriter
+target		:Author-{wr_code} a :EmergingWriter; :name {wr_name} . 
+source		SELECT wr_code, wr_name FROM tb_on_prob_wr
+
+mappingId	M10:Edition
+target		:Book-{bk_id} :hasEdition :Edition-{ed_code} . :Edition-{ed_code} a :Edition ; :dateOfPublication {pub_date} ; :editionNumber {n_edt} ; :editedBy :Editor-{editor} . 
+source		SELECT ed_code, pub_date, n_edt, editor, bk_id FROM tb_edition
+
+mappingId	M11:SpecialEdition
+target		:Edition-{ed_code} a :SpecialEdition . 
+source		SELECT ed_code  FROM tb_edition WHERE ed_type = 'S'
+
+mappingId	M12:EconomicEdition
+target		:Edition-{ed_code} a :EconomicEdition . 
+source		SELECT ed_code  FROM tb_edition WHERE ed_type = 'E'
+
+mappingId	M13:dateOfFirstPublication
+target		:Edition-{ed_code} :dateOfFirstPublication {mindata} . 
+source		SELECT ed_code, MIN(pub_date) AS mindata FROM tb_edition GROUP BY ed_code
+]]
+

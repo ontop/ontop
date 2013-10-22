@@ -1,0 +1,24 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Fishmark Queries" ;
+    mf:entries
+    ( 
+      :common-name
+      ) .
+
+:common-name rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q1: Find species for a given common names" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <common-name.rq> ] ;
+    mf:result <common-name.ttl> ;
+    mf:knowledgebase <fishdelish.owl> ;
+    mf:mappings <fishdelish-adp.obda> .
+  

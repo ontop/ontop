@@ -1,0 +1,68 @@
+[PrefixDeclaration]
+:		http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/
+
+[SourceDeclaration]
+sourceUri	fishdelish
+connectionUrl	
+username	fish
+password	fish
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Species
+target		<"&:;species/{$Genus}/{$Species}"> a :species ; :species_Genus $Genus ; :species_SpecCode $SpecCode ; :species_Species $Species ; :species_SpeciesRefNo $SpeciesRefNo ; :species_Author $Author ; :species_FBname $FBname ; :species_PicPreferredName $PicPreferredName ; :species_AnaCat $AnaCat ; :species_Comments $Comments ; :species_Dangerous $Dangerous ; :species_DemersPelag $DemersPelag ; :species_GameFish $GameFish ; :species_GameRef $GameRef ; :species_UsedforAquaculture $usedForAquaculture ; :species_Aquarium $Aquarium . 
+source		select SpecCode, Genus, Species, SpeciesRefNo, Author, FBname, PicPreferredName, FamCode, AnaCat, Comments, Dangerous, DemersPelag, GameFish, GameRef, usedForAquaculture, Aquarium from species
+
+mappingId	Families
+target		<"&:;families/{$Family}"> a :families ; :families_FamiliesRefNo $FamiliesRefNo ; :families_Activity $Activity ; :families_Aquarium $Aquarium ; :families_Freshwater $Freshwater ; :families_Marine $Marine ; :families_Species $Species ; :families_Brackish $Brackish ; :families_Division $Division ; :families_Order $FamilyOrder ; :families_Remark $Remark ; :families_Family $Family ; :families_Genera $Genera ; :families_Class $Class ; :families_SpeciesCount $SpeciesCount ; :families_ReprGuild $ReprGuild . 
+source		select FamiliesRefNo, Activity, Aquarium, Brackish, Class, Division, Family, FamCode, Genera, Freshwater, Marine, FamilyOrder, Remark, ReprGuild, Species, SpeciesCount from families
+
+mappingId	Collaborators
+target		<"&:;collaborators/{$Surname}_{$Prename}"> a :collaborators ; :collaborators_City $City ; :collaborators_Comments $Comments ; :collaborators_Country $Country ; :collaborators_E-mail $Email ; :collaborators_FAX $FAX ; :collaborators_Institute $Institute ; :collaborators_Keywords $Keywords ; :collaborators_Personnel $Personnel ; :collaborators_Prename $Prename ; :collaborators_StaffPhoto $StaffPhoto ; :collaborators_Street $Street ; :collaborators_Surname $Surname ; :collaborators_WebPage $WebPage ; :collaborators_Year $Year . 
+source		select Surname, Prename, City, Comments, Country, Email, FAX, Institute, Keywords, Personnel, StaffPhoto, Street, WebPage, Year from collaborators
+
+mappingId	Common Names
+target		<"&:;comnames/{$autoctr}/{$ComName}/{$StockCode}/{$C_Code}/{$Language}/{$NameType}"> a :comnames ; :comnames_ComName $ComName ; :comnames_Language $Language ; :comnames_NameType $NameType ; :comnames_C_Code <"&:;countref/{$C_Code}"> . 
+source		select autoctr, ComName, StockCode, C_Code, Language, NameType, SpecCode from comnames
+
+mappingId	Country Ref
+target		<"&:;countref/{$C_Code}"> a :countref ; :countref_PAESE $PAESE ; :countref_Factbook $Factbook . 
+source		select C_Code, PAESE, Factbook from countref
+
+mappingId	Country
+target		<"&:;country/{$Stockcode}/{$C_Code}"> a :country ; :country_Aquaculture $Aquaculture ; :country_Brackish $Brackish ; :country_Freshwater $Freshwater ; :country_Importance $Importance ; :country_LiveExport $LiveExport ; :country_Saltwater $Saltwater ; :country_Status $Status ; :country_Game $Game ; :country_C_Code <"&:;countref/{$C_Code}"> . 
+source		select Stockcode, C_Code, Aquaculture, Brackish, Freshwater, Importance, LiveExport, Saltwater, Status, Game, SpecCode from country
+
+mappingId	Morph Data
+target		<"&:;morphdat/{$StockCode}"> a :morphdat ; :morphdat_AddChars $AddChars . 
+source		select StockCode, AddChars, Speccode from morphdat
+
+mappingId	Pictures Main
+target		<"&:;picturesmain/{$autoctr}"> a :picturesmain ; :picturesmain_PicName $PicName ; :picturesmain_AuthName $AuthName ; :picturesmain_Entered $Entered ; :picturesmain_LifeStage $LifeStage ; :picturesmain_autoctr $autoctr . 
+source		select PicName, AuthName, Entered, LifeStage, autoctr, SpecCode from picturesmain
+
+mappingId	References
+target		<"&:;refrens/{$autoctr}"> a :refrens ; :refrens_RefNo $RefNo ; :refrens_Year $Year ; :refrens_Author $Author . 
+source		select autoctr, Author, RefNo, Year from refrens
+
+mappingId	mapping-picturesmain-species
+target		<"&:;picturesmain/{$autoctr}"> :picturesmain_SpecCode <"&:;species/{$Genus}/{$Species}"> . 
+source		select autoctr, Genus, Species from picturesmain , species where species.SpecCode=picturesmain.SpecCode
+
+mappingId	mapping-country-species
+target		<"&:;country/{$Stockcode}/{$C_Code}"> :country_SpecCode <"&:;species/{$Genus}/{$Species}"> . 
+source		select Species, Genus, Stockcode, C_Code from species , country  where species.SpecCode=country.SpecCode
+
+mappingId	mapping-comnames-species
+target		<"&:;comnames/{$autoctr}/{$ComName}/{$StockCode}/{$C_Code}/{$Language}/{$NameType}"> :comnames_SpecCode <"&:;species/{$Genus}/{$Species}"> . 
+source		select Genus, Species, autoctr, ComName, StockCode, C_Code, Language, NameType from species, comnames  where species.SpecCode=comnames.SpecCode
+
+mappingId	mapping-morphdat-species
+target		<"&:;morphdat/{$StockCode}"> :morphdat_Speccode <"&:;species/{$Genus}/{$Species}"> . 
+source		select Genus, Species, StockCode from species, morphdat where species.SpecCode=morphdat.SpecCode
+
+mappingId	mapping-species-families
+target		<"&:;species/{$Genus}/{$Specs}"> :species_FamCode <"&:;families/{$Family}"> . 
+source		select Genus, species.Species as Specs, Family from species, families where species.FamCode=families.FamCode
+]]
+

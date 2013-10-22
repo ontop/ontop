@@ -17,14 +17,15 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
-import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatasourceParametersEditorView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger log = Logger.getLogger(DatasourceParametersEditorView.class);
+	private static final Logger log = LoggerFactory.getLogger(DatasourceParametersEditorView.class);
 
 	private DatasourceParameterEditorPanel panel;
 

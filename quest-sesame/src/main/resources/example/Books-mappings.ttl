@@ -1,0 +1,119 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://meraka/moss/exampleBooks.owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix quest: <http://obda.org/quest#> .
+@prefix owl2xml: <http://www.w3.org/2006/12/owl2-xml#> .
+@base <http://example.com/base/> .
+
+<cl_Authors>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:sqlQuery """
+		select wr_code, wr_name from tb_affiliated_writers
+	""" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#author/{\"wr_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#Author>
+ ];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#name> ;
+		 rr:objectMap [ rr:column "\"wr_name\"" ]
+	].
+
+<cl_Books>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:tableName "tb_books" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#book/{\"bk_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#Book>
+ ];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#title> ;
+		 rr:objectMap [ rr:column "\"bk_title\"" ]
+	];
+
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#hasEdition> ;
+		 rr:objectMap 	[  
+			a rr:RefObjectMap;
+        		rr:parentTriplesMap <cl_Editions>;
+       			 rr:joinCondition [
+        			  rr:child "\"bk_code\"";
+       				   rr:parent "\"bk_id\"";
+      			  ];
+		];
+	].
+
+
+<cl_Editors>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:sqlQuery """
+		select ed_code, ed_name from tb_editor
+	""" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#editor/{\"ed_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#Editor>
+ ];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#name> ;
+		 rr:objectMap [ rr:column "\"ed_name\"" ]
+	].
+
+<cl_Editions>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:tableName "tb_edition" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#edition/{\"ed_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#Edition>
+ ];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#dateOfPublication> ;
+		 rr:objectMap [ rr:column "\"pub_date\"" ]
+	];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#editionNumber> ;
+		 rr:objectMap [ rr:column "\"n_edt\"" ]
+	].
+
+<cl_AudioBook>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:sqlQuery """
+		select bk_code, bk_title from tb_books where bk_type='A'
+	""" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#book/{\"bk_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#AudioBook>
+ ].
+
+<cl_EmergingWriter>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:sqlQuery """
+		select wr_code,wr_name from tb_on_prob_wr
+	""" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#author/{\"wr_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#EmergingWriter>
+ ];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#name> ;
+		 rr:objectMap [ rr:column "\"wr_name\"" ]
+	].
+
+<cl_SpecialEdition>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:sqlQuery """
+		select ed_code,pub_date,n_edt from tb_edition where ed_type='S'
+	""" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#edition/{\"ed_code\"}/";
+					 rr:class <http://meraka/moss/exampleBooks.owl#SpecialEdition>
+ ].
+
+<dp_genre>
+	 a rr:TriplesMap;
+	rr:logicalTable [ rr:sqlQuery """
+		select id_bk,gen_name from tb_bk_gen
+	""" ];
+	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#book/{\"id_bk\"}/" ];
+	rr:predicateObjectMap [
+		 rr:predicate 	<http://meraka/moss/exampleBooks.owl#genre> ;
+		 rr:objectMap [ rr:column "\"gen_name\"" ]
+	].
+
+
