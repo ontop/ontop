@@ -1,0 +1,11 @@
+# Query8
+# This query is further more complex than Query 7 by including one more property.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+SELECT ?X ?Y ?Z
+WHERE
+{?X rdf:type ub:Student .
+  ?Y rdf:type ub:Department .
+  ?X ub:memberOf ?Y .
+  ?Y ub:subOrganizationOf <http://www.University0.edu> .
+  ?X ub:emailAddress ?Z}

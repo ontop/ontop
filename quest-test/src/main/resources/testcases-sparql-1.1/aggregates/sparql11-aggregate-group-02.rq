@@ -1,0 +1,3 @@
+PREFIX : <http://www.example.org/>
+SELECT (COUNT(?O1) AS ?C)
+WHERE { ?S :p ?O1; :q ?O2 } GROUP BY ((?O1 + ?O2))

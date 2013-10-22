@@ -1,0 +1,387 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "StockExchange Filter Queries" ;
+    mf:entries
+    ( 
+      :boolean-and
+	  :boolean-or
+	  :boolean-nested-1
+	  :boolean-nested-2
+	  :boolean-nested-3
+	  :string-eq
+	  :string-neq
+	  :integer-eq
+	  :integer-neq
+	  :integer-gt
+	  :integer-gte
+	  :integer-lt
+	  :integer-lte
+	  :decimal-eq
+	  :decimal-neq
+	  :decimal-gt
+	  :decimal-gte
+	  :decimal-lt
+	  :decimal-lte
+	  :double-eq
+	  :double-neq
+	  :double-gt
+	  :double-gte
+	  :double-lt
+	  :double-lte
+	  :datetime-eq
+	  :datetime-neq
+	  :datetime-gt
+	  :datetime-gte
+	  :datetime-lt
+	  :datetime-lte
+	  :boolean-eq
+	  :boolean-neq
+	  :literal-langmatch
+    ) .
+
+:boolean-and rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q1: Filter Street and city" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-and.rq> ] ;
+    mf:result <boolean-and.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+    
+:boolean-or rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q2: Filter street or city" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-or.rq> ] ;
+    mf:result <boolean-or.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:boolean-nested-1 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q3: Filter street and (city or street)" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-nested-1.rq> ] ;
+    mf:result <boolean-nested-1.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+    
+:boolean-nested-2 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q4: Filter country, street, city" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-nested-2.rq> ] ;
+    mf:result <boolean-nested-2.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+    
+:boolean-nested-3 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q5: Filter nested" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-nested-3.rq> ] ;
+    mf:result <boolean-nested-3.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+ 
+:string-eq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q6: Filter city string with equality" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <string-eq.rq> ] ;
+    mf:result <string-eq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:string-neq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q7: Filter city string with inequality" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <string-neq.rq> ] ;
+    mf:result <string-neq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:integer-eq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q8: Filter street number with equality" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <integer-eq.rq> ] ;
+    mf:result <integer-eq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:integer-neq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q9: Filter street number with inequality" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <integer-neq.rq> ] ;
+    mf:result <integer-neq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:integer-gt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10: Filter street number with greater-than" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <integer-gt.rq> ] ;
+    mf:result <integer-gt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:integer-gte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q11: Filter street number with greater-or-equal-than" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <integer-gte.rq> ] ;
+    mf:result <integer-gte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:integer-lt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q12: Filter street number with less-than" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <integer-lt.rq> ] ;
+    mf:result <integer-lt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:integer-lte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q13: Filter street number with less-or-equal-than" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <integer-lte.rq> ] ;
+    mf:result <integer-lte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:decimal-eq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q14: Decimal EQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <decimal-eq.rq> ] ;
+    mf:result <decimal-eq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:decimal-neq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q15: Decimal NEQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <decimal-neq.rq> ] ;
+    mf:result <decimal-neq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:decimal-gt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q16: Decimal GT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <decimal-gt.rq> ] ;
+    mf:result <decimal-gt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:decimal-gte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q17: Decimal GTE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <decimal-gte.rq> ] ;
+    mf:result <decimal-gte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:decimal-lt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q18: Decimal LT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <decimal-lt.rq> ] ;
+    mf:result <decimal-lt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:decimal-lte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q19: Decimal LTE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <decimal-lte.rq> ] ;
+    mf:result <decimal-lte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:double-eq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q20: Double EQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <double-eq.rq> ] ;
+    mf:result <double-eq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:double-neq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q21: Double NEQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <double-neq.rq> ] ;
+    mf:result <double-neq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:double-gt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q22: Double GT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <double-gt.rq> ] ;
+    mf:result <double-gt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:double-gte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q23: Double GTE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <double-gte.rq> ] ;
+    mf:result <double-gte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:double-lt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q24: Double LT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <double-lt.rq> ] ;
+    mf:result <double-lt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:double-lte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q25: Double LTE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <double-lte.rq> ] ;
+    mf:result <double-lte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:datetime-eq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q26: DateTime EQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <datetime-eq.rq> ] ;
+    mf:result <datetime-eq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:datetime-neq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q27: DateTime NEQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <datetime-neq.rq> ] ;
+    mf:result <datetime-neq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:datetime-gt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q28: DateTime GT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <datetime-gt.rq> ] ;
+    mf:result <datetime-gt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:datetime-gte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q29: DateTime GTE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <datetime-gte.rq> ] ;
+    mf:result <datetime-gte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:datetime-lt rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q30: DateTime LT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <datetime-lt.rq> ] ;
+    mf:result <datetime-lt.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:datetime-lte rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q31: DateTime LTE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <datetime-lte.rq> ] ;
+    mf:result <datetime-lte.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:boolean-eq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q32: Boolean EQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-eq.rq> ] ;
+    mf:result <boolean-eq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:boolean-neq rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q33: Boolean NEQ" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <boolean-neq.rq> ] ;
+    mf:result <boolean-neq.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+
+:literal-langmatch rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q34: Literal Langmatch" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <literal-langmatch.rq> ] ;
+    mf:result <literal-langmatch.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+

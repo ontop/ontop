@@ -79,9 +79,11 @@ public class R2RMLWriter {
 	 */
 	public Graph getGraph() {
 		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
-		Set<Statement> statements = new HashSet<Statement>();
+		List<Statement> statements = new ArrayList<Statement>();
+		
 		for (OBDAMappingAxiom axiom: this.mappings) {
-			statements.addAll(transformer.getStatements(axiom));
+			List<Statement> statements2 = transformer.getStatements(axiom,prefixmng);
+			statements.addAll(statements2);
 		}
 		@SuppressWarnings("deprecation")
 		Graph g = new GraphImpl(); 

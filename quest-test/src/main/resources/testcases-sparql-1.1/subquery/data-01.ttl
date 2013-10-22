@@ -1,0 +1,8 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://example/> .
+
+:alice :name "Alice", "Alice Foo", "A. Foo" .
+:alice :knows :bob, :carol .
+:bob :name "Bob", "Bob Bar", "B. Bar" .
+:bob :age "42"^^xsd:integer .
+:carol :name "Carol", "Carol Baz", "C. Baz" .

@@ -1,0 +1,152 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://obda.org/quest/tests/bsbm#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:   <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "LUBM Queries" ;
+    mf:entries
+    ( 
+      :query-1
+      :query-2
+      :query-3
+      :query-4 # added DISTINCT
+      :query-5
+      :query-6
+      :query-7
+      :query-8
+      :query-9
+      :query-10
+      :query-11
+      :query-12 # added DISTINCT
+      :query-13
+      :query-14
+    ) .
+
+:query-1 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q1: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-1.rq> ] ;
+    mf:result <query-result-1.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+
+:query-2 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q2: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-2.rq> ] ;
+    mf:result <query-result-2.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+
+:query-3 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q3: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-3.rq> ] ;
+    mf:result <query-result-3.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+    
+:query-4 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q4: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-4.rq> ] ;
+    mf:result <query-result-4.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+ 
+:query-5 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q5: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-5.rq> ] ;
+    mf:result <query-result-5.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+
+:query-6 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q6: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-6.rq> ] ;
+    mf:result <query-result-6.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+  
+:query-7 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q7: " ;
+    obdat:approval obdat:Approved ;
+     mf:action
+            [ qt:query <query-7.rq> ] ;
+    mf:result <query-result-7.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+  
+:query-8 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q8: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-8.rq> ] ;
+    mf:result <query-result-8.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+    
+:query-9 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q9: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-9.rq> ] ;
+    mf:result <query-result-9.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+ 
+:query-10 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-10.rq> ] ;
+    mf:result <query-result-10.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> .
+ 
+:query-11 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q11: " ;
+    obdat:approval obdat:Approved ;
+     mf:action
+            [ qt:query <query-11.rq> ] ;
+    mf:result <query-result-11.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> . 
+    
+:query-12 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q12: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-12.rq> ] ;
+    mf:result <query-result-12.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> . 
+    
+:query-13 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q13: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-13.rq> ] ;
+    mf:result <query-result-13.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> . 
+    
+:query-14 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q14: " ;
+    obdat:approval obdat:Approved ;
+    mf:action
+            [ qt:query <query-14.rq> ] ;
+    mf:result <query-result-14.ttl> ;
+    mf:knowledgebase <lubm.owl> ;
+    mf:mappings <lubm-pgsql.obda> . 

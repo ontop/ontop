@@ -1,0 +1,30 @@
+[PrefixDeclaration]
+person:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819625360.owl#
+book:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#
+:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355821406833.owl#
+
+[SourceDeclaration]
+sourceUri	simple-h2
+connectionUrl	jdbc:h2:tcp://localhost/test
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Book
+target		<"&book;book/{$id}"> a book:Novel; book:title $title; book:author $author . 
+source		select id, title, author from BOOK
+
+mappingId	Person
+target		<"&person;person/{$id}"> a person:Person; person:name $name . 
+source		select id, name from PERSON
+
+mappingId	Reads
+target		<"&person;person/{$personid}"> book:isReading <"&book;book/{$bookid}"> . 
+source		select personid, bookid from LENDING where owns = false
+
+mappingId	Owns
+target		<"&person;person/{$personid}"> person:owns <"&book;book/{$bookid}"> . 
+source		select personid, bookid from LENDING where owns = true
+]]
+

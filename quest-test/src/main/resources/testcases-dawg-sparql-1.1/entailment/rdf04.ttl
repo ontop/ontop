@@ -1,0 +1,5 @@
+@prefix :  <http://example.org/x/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ :x :p :y.
+ :x rdf:type :c.

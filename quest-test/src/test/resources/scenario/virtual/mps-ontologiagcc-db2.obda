@@ -1,0 +1,779 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	sourceGCC
+connectionUrl	jdbc:db2://obdawin.inf.unibz.it:50000/
+username	obda
+password	obda09
+driverClass	com.ibm.db2.jcc.DB2Driver
+
+[MappingDeclaration] @collection [[
+mappingId	M:1 - Cliente,NGR,timestampI
+target		:Cl-{cd_ngr} a :Cliente ; :NGR {cd_ngr} ; :timestampI {ts_iniz} . 
+source		select cd_ngr, min(ts_iniz_val) as ts_iniz from gruppo.gz0001e_entita where cd_stato_rich = 'C' group by cd_ngr 
+
+mappingId	M:2 - timestampF
+target		:Cl-{cd_ngr} :timestampF {ts_fin} . 
+source		select cd_ngr, max(ts_fine_val) as ts_fin from gruppo.gz0001e_entita where cd_stato_rich = 'C' and cd_ngr not in (select cd_ngr from gruppo.gz0001e_entita ) group by cd_ngr 
+
+mappingId	M:3 . ClienteAttuale
+target		:Cl-{cd_ngr} a :ClienteAttuale . 
+source		select cd_ngr from gruppo.gz0001e_entita where cd_stato_rich = 'C'
+
+mappingId	M:4 - ClienteFittizio
+target		:Cl-{cd_ngr} a :ClienteFittizio . 
+source		select cd_ngr from gruppo.gz0001e_entita where cd_ngr = 0 and cd_stato_rich = 'C'
+
+mappingId	M:5 - NGR, Composizione, haCommposizione, inComposizione, timestampI
+target		:Cl-{cd_ngr1} :NGR {cd_ngr1} , {cd_ngr2} ; :inComposizione :Comp-{cd_ngr2}_{cd_ngr2}_{ts_iniz_val} . :Comp-{cd_ngr2}_{cd_ngr2}_{ts_iniz_val} a :Composizione; :timestampI {ts_iniz_val} . :Cl-{cd_ngr2} :NGR {cd_ngr1} , {cd_ngr2} ; :haComposizione :Comp-{cd_ngr2}_{cd_ngr2}_{ts_iniz_val} . 
+source		select cd_ngr1, cd_ngr2, ts_iniz_val from gruppo.gz0005r_leg_soci where cd_tp_legame = 504 and cd_stato_rich = 'C'
+
+mappingId	M:6 - timestampF
+target		:Comp-{cd_ngr2}_{cd_ngr2}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr1, cd_ngr2, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where cd_tp_legame = 504 and cd_stato_rich = 'C'
+
+mappingId	M:7 - NGR, Capofila, timestampI, haComposizione, inComposizione
+target		:Cl-{cd_ngr} :NGR {cd_ngr} ; :haComposizione :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) . :Cl-{cd_ngr_cf} :inComposizione :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) . :Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) a :Capofila; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, cd_ngr_cf, ts_iniz_val from gruppo.gz0015e_gge where cd_stato_rich = 'C' and cd_ngr_cf > 0
+
+mappingId	M:8 - timestampF
+target		:Capf-{cd_ngr}_{cd_ngr_cf}_{ts_iniz_val) :timestampF {ts_fine_val} . 
+source		select cd_ngr, cd_ngr_cf, ts_iniz_val, ts_fine_val from gruppo.gz0015e_gge where cd_stato_rich = 'C' and cd_ngr_cf > 0 
+
+mappingId	M:9 - DatiBilancio, haDatiBilancio, timestampI, dataBilancio
+target		:Cl-{cd_ngr} :haDatiBilancio :Dati_bil-{cd_ngr}_{ts_iniz_val} . :Dati_bil-{cd_ngr}_{ts_iniz_val} a :DatiBilancio; :timestampI {ts_iniz_val} ; :dataBilancio {dt_bil_civ} . 
+source		select cd_ngr, dt_bil_civ, ts_iniz_val from gruppo.gz0001e_entita where fg_bil_civ = 'S' and cd_stato_rich = 'C' 
+
+mappingId	M:10 - timestampF
+target		:Dati_bil-{cd_ngr}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_fine_val, ts_iniz_val from gruppo.gz0001e_entita where fg_bil_civ = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:11 - importoFatturato
+target		:Dati_bil-{cd_ngr}_{ts_iniz_val} :importoFatturato {im_fatturato} . 
+source		select cd_ngr, im_fatturato, ts_iniz_val from gruppo.gz0001e_entita where fg_bil_civ = 'S' and cd_stato_rich = 'C' 
+
+mappingId	M:12 - importoUtile
+target		:Dati_bil-{cd_ngr}_{ts_iniz_val} :importoUtile {im_utile} . 
+source		select cd_ngr, im_utile, ts_iniz_val from gruppo.gz0001e_entita where fg_bil_civ = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:13 - importoPatrimonioNetto
+target		:Dati_bil-{cd_ngr}_{ts_iniz_val} :importoPatrimonioNetto {im_patrim_net} . 
+source		select cd_ngr, im_patrim_net, ts_iniz_val from gruppo.gz0001e_entita where fg_bil_civ = 'S' and cd_stato_rich = 'C' 
+
+mappingId	M:14 - PatrimonioResponsabile, importoPatrimonioResponsabile, dataPatrimonioResponsabile, Banca, haPatrimonioResponsabile, ottenutoDa, ABI, timestampI, NGR
+target		:Cl-{cd_ngr} :haPatrimonioResponsabile :PatRes-{cd_ngr}_{ts_iniz_val} ; :NGR {cd_ngr} . :Bnc-{cd_az_patrim_resp} a :PatrimonioResponsabile , :Banca; :codiceABI {cd_az_patrim_resp} . :PatRes-{cd_ngr}_{ts_iniz_val} a :PatrimonioResponsabile, :Banca; :importoPatrimonioResponsabile {im_patrim_resp} ; :dataPatrimonioResponsabile {dt_patrim_resp} ; :ottenutoDa :Bnc-{cd_az_patrim_resp} ; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, ts_iniz_val, im_patrim_resp, dt_patrim_resp, cd_az_patrim_resp from gruppo.gz0012e_dati_ext where fg_patrim_resp = 'S'
+
+mappingId	M:15 - timestampF
+target		:PatRes-{cd_ngr}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, ts_fine_val from gruppo.gz0012e_dati_ext where fg_patrim_resp = 'S'
+
+mappingId	M:16 - Affidamenti, haAffidamenti, importoTotFidi, timestampI, NGR
+target		:Cl-{cd_ngr} :haAffidamenti :Aff-{cd_ngr}_{ts_iniz_val} ; :NGR {cd_ngr} . :Aff-{cd_ngr}_{ts_iniz_val} a :Affidamenti; :importoTotFidi {im_tot_acc_fidi} ; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, im_tot_acc_fidi, ts_iniz_val from gruppo.gz0012e_dati_ext where fl_im_cons = 'S'
+
+mappingId	M:17 - timestampF
+target		:Aff-{cd_ngr}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, ts_fine_val from gruppo.gz0012e_dati_ext where fl_im_cons = 'S'
+
+mappingId	M:18 - Affidamenti, haAffidamenti, importoFidiFG, timestampI, NGR
+target		:Cl-{cd_ngr} :haAffidamenti :Aff-{cd_ngr}_{ts_iniz_val} ; :NGR {cd_ngr} . :Aff-{cd_ngr}_{ts_iniz_val} a :Affidamenti; :importoFidiFG {im_fidi_p_fg} ; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, im_fidi_p_fg, ts_iniz_val from gruppo.gz0012e_dati_ext where fl_im_p_fg = 'S'
+
+mappingId	M:19 - timestampF
+target		:Aff-{cd_ngr}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, ts_fine_val from gruppo.gz0012e_dati_ext where fl_im_p_fg = 'S'
+
+mappingId	M:20 - Affidamenti, haAffidamenti, importoFidiPEF, timstampI, NGR
+target		:Cl-{cd_ngr} :haAffidamenti :Aff-{cd_ngr}_{ts_iniz_val} ; :NGR {cd_ngr} . :Aff-{cd_ngr}_{ts_iniz_val} a :Affidamenti; :importoFidiPEF {im_fidi_p_pef} ; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, im_fidi_p_pef, ts_iniz_val from gruppo.gz0012e_dati_ext where fl_im_p_pef = 'S'
+
+mappingId	M:21 - timestampF
+target		:Aff-{cd_ngr}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, ts_fine_val from gruppo.gz0012e_dati_ext where fl_im_p_pef = 'S'
+
+mappingId	M:22 - Appartenenza, inAppartenenza, haAppartenenza, timestampI, IGA
+target		:Cl-{cd_ngr} :inAppartenenza :App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} . :Grup-{id_gruppo} :haAppartenenza :App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} ; :IGA {id_gruppo} . :App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} a :Appartenenza; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0
+
+mappingId	M:23 - percentualeFatturato
+target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} :percentualeFatturato {pc_fatt_gruppo} . 
+source		select cd_ngr, id_gruppo, pc_fatt_gruppo, ts_iniz_val from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0 and pc_fatt_gruppo > 0
+
+mappingId	M:24 - quotaGruppo
+target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} :quotaGruppo {pc_qt_gruppo} . 
+source		select cd_ngr, id_gruppo, pc_qt_gruppo, ts_iniz_val from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0 and pc_qt_gruppo > 0
+
+mappingId	M:25 - AppartenenzaAttuale
+target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} a :AppartenenzaAttuale . 
+source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0
+
+mappingId	M:26 - timestampF
+target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, id_gruppo, ts_iniz_val, ts_fine_val from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0
+
+mappingId	M:27 - Holding
+target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} a :Holding . 
+source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita where fg_ent_cg = 'S' and cd_stato_rich = 'C' and id_gruppo > 0
+
+mappingId	M:28 - inAreaConsolidamento
+target		:App-{cd_ngr}_{id_gruppo}_{ts_iniz_val} a :InAreaConsolidamento . 
+source		select cd_ngr, id_gruppo, ts_iniz_val from gruppo.gz0001e_entita where fg_area_cons = 'S' and cd_stato_rich = 'C' and id_gruppo > 0
+
+mappingId	M:29 - GruppoAziendale, IGA, timestampI
+target		:Grup-{id_gruppo} a :GruppoAziendale; :IGA {id_gruppo} ; :timestampI {ts_min} . 
+source		select id_gruppo, min(ts_iniz_val) as ts_min from gruppo.gz0007e_gruppi where cd_stato_rich = 'C' group by id_gruppo
+
+mappingId	M:30 - timestampF
+target		:Grup-{id_gruppo} :timestampF {ts_fine} . 
+source		select id_gruppo, max(ts_fine_val) as ts_fine from gruppo.gz0007e_gruppi where cd_stato_rich = 'C' and id_gruppo not in (select id_gruppo from gruppo.gz0007e_gruppi ) group by id_gruppo
+
+mappingId	M:31 - GruppoAziendaleAttuale
+target		:Grup-{id_gruppo} a :GruppoAziendaleAttuale . 
+source		select id_gruppo from gruppo.gz0007e_gruppi where cd_stato_rich = 'C'
+
+mappingId	M:32 - Denominazione, haDenominazione, stringaDenominazione, timestampI
+target		:Grup-{id_gruppo} :haDenominazione :Denom-{id_gruppo}_{ts_iniz_val} . :Denom-{id_gruppo}_{ts_iniz_val} a :Denominazione; :stringaDenominazione {tx_denom} ; :timestampI {ts_iniz_val} . 
+source		select id_gruppo, tx_denom, ts_iniz_val from gruppo.gz0007e_gruppi where cd_stato_rich = 'C'
+
+mappingId	M:33 - timestampF
+target		:Denom-{id_gruppo}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_gruppo, ts_iniz_val, ts_fine_val from gruppo.gz0007e_gruppi where cd_stato_rich = 'C'
+
+mappingId	M:34 - LegameFittizio
+target		:LegGiur-{id_leg} a :LegameFittizio . 
+source		select id_leg from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 201
+
+mappingId	M:35 - LegameGiuridico
+target		:LegGiur-{id_leg} a :LegameGiuridico . 
+source		select id_leg from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 202
+
+mappingId	M:36 - MaggioranzaRelativa
+target		:LegGiur-{id_leg} a :MaggioranzaRelativa . 
+source		 select id_leg from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 202 and fg_magg_rel = 'S'
+
+mappingId	M:37 - LegameDirezioneCoordinamento
+target		:LegGiur-{id_leg} a :LegameDirezioneCoordinamento . 
+source		 select id_leg from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 203
+
+mappingId	M:38 - timestampF
+target		:LegGiur-{id_leg} :timestampF {ts} . 
+source		select id_leg, max(ts_fine_val) as ts from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0002r_leg_giur) group by id_leg
+
+mappingId	M:39 - LegameAttuale
+target		:LegGiur-{id_leg} a :LegameAttuale . 
+source		select id_leg from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C'
+
+mappingId	M:40 - LegameRilevanteCalcolato
+target		:LegGiur-{id_leg} a :LegameRilevanteCalcolato . 
+source		select id_leg from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and fg_rilev_calc = 'S'
+
+mappingId	M:41 - LegameRilevanteEffettivo
+target		:LegGiur-{id_leg} a :LegameRilevanteEffettivo . 
+source		select id_leg from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'S' and fg_rilev_forz = '' and cd_stato_rich = 'C' union select id_leg from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:42 - LegameGaranziaProposto
+target		:LegGar-{id_leg} a :LegameGaranziaProposto . 
+source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302
+
+mappingId	M:43 - LegameGaranziaProposto
+target		:LegGar-{id_leg} a :LegameGaranziaProposto . 
+source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303
+
+mappingId	M:44 - LegameGaranziaConsolidato
+target		:LegGar-{id_leg} a :LegameGaranziaConsolidato . 
+source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 301
+
+mappingId	M:45 - timestampF
+target		:LegGar-{id_leg} :timestampF {ts} . 
+source		select id_leg, max(ts_fine_val) as ts from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0003r_leg_gar) group by id_leg
+
+mappingId	M:46 - LegameAttuale
+target		:LegGar-{id_leg} a :LegameAttuale . 
+source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C'
+
+mappingId	M:47 - LegameRilevanteCalcolato
+target		:LegGar-{id_leg} a :LegameRilevanteCalcolato . 
+source		select id_leg from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and fg_rilev_calc = 'S'
+
+mappingId	M:48 - LegameRilevanteEffettivo
+target		:LegGiur-{id_leg} a :LegameRilevanteEffettivo . 
+source		select id_leg from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'S' and fg_rilev_forz = '' and cd_stato_rich = 'C' union select id_leg from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:49 - LegameFatturato
+target		:LegEco-{id_leg} a :LegameFatturato . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401
+
+mappingId	M:50 - LegameFinanziamento
+target		:LegEco-{id_leg} a :LegameFinanziamento . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402
+
+mappingId	M:51 - LegameCashPooling 
+target		:LegEco-{id_leg} a :LegameCashPooling . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 403
+
+mappingId	M:52 - LegameFidiPlurimi
+target		:LegEco-{id_leg} a :LegameFidiPlurimi . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 404
+
+mappingId	M:53 - LegameGCOL
+target		:LegEco-{id_leg} a :LegameGCOL . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 405
+
+mappingId	M:54 - timestampF
+target		:LegEco-{id_leg} :timestampF {ts} . 
+source		select id_leg, max(ts_fine_val) as ts from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0004r_leg_econ) group by id_leg
+
+mappingId	M:55 - LegameAttuale
+target		:LegEco-{id_leg} a :LegameAttuale . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' 
+
+mappingId	M:56 - LegameRilevanteCalcolato
+target		:LegEcon-{id_leg} a :LegameRilevanteCalcolato . 
+source		select id_leg from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and fg_rilev_calc = 'S'
+
+mappingId	M:57 - LegameRilevanteEffettivo
+target		:LegEcon-{id_leg} a :LegameRilevanteEffettivo . 
+source		select id_leg from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'S' and fg_rilev_forz = '' and cd_stato_rich = 'C' union select id_leg from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:58 - LegameAmministatore
+target		:LegSoc-{id_leg} a :LegameAmministratore . 
+source		select id_leg from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 501
+
+mappingId	M:59 - LegameSLR
+target		:LegSoc-{id_leg} a :LegameSLR . 
+source		select id_leg from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 502
+
+mappingId	M:60 - LegameSIR
+target		:LegSoc-{id_leg} a :LegameSIR . 
+source		select id_leg from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 503
+
+mappingId	M:61 - timestampF
+target		:LegSoc-{id_leg} :timestampF {ts} . 
+source		select id_leg, max(ts_fine_val) as ts from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0005r_leg_soci) group by id_leg
+
+mappingId	M:62 - LegameAttuale
+target		:LegSoc-{id_leg} a :LegameAttuale . 
+source		select id_leg from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C'
+
+mappingId	M:63 - LegameRilevanteCalcolato
+target		:LegSoc-{id_leg} a :LegameRilevanteCalcolato . 
+source		select id_leg from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and fg_rilev_calc = 'S'
+
+mappingId	M:64 - LegameRilevanteEffettivo
+target		:LegSoc-{id_leg} a :LegameRilevanteEffettivo . 
+source		select id_leg from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'S' and fg_rilev_forz = '' and cd_stato_rich = 'C' union select id_leg from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:65 - LegamePatrimonialeManuale
+target		:LegPatr-{id_leg} a :LegamePatrimonialeManuale . 
+source		select id_leg from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' and cd_tp_legame = 601
+
+mappingId	M:66 - LegamePatrimonialeAutomativo
+target		:LegPatr-{id_leg} a :LegamePatrimonialeAutomatico . 
+source		 select id_leg from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' and cd_tp_legame = 602
+
+mappingId	M:67 - timestampF
+target		:LegPatr-{id_leg} :timestampF {ts} . 
+source		select id_leg, max(ts_fine_val) as ts from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0006r_beni_ent) group by id_leg
+
+mappingId	M:68 - LegameAttuale
+target		:LegPatr-{id_leg} a :LegameAttuale . 
+source		select id_leg from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C'
+
+mappingId	M:69 - LegameRilevanteCalcolato
+target		:LegPatr-{id_leg} a :LegameRilevanteCalcolato . 
+source		select id_leg from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' and fg_rilev_calc = 'S'
+
+mappingId	M:70 - LegameRilevanteEffettivo
+target		:LegPatr-{id_leg} a :LegameRilevanteEffettivo . 
+source		select id_leg from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'S' and fg_rilev_forz = '' and cd_stato_rich = 'C' union select id_leg from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:71 - IGCC, timestampI
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :IGCC {id_perimetro} ; :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val from gruppo.gz0102e_prm
+
+mappingId	M:72 - GCCAttuale
+target		:Gcc-{id_perimetro}_{ts_iniz_val} a :GCCAttuale . 
+source		select id_perimetro, ts_iniz_val from gruppo.gz0102e_prm
+
+mappingId	M:73 - ConnessioneCalcolata, haConnessioneCalcolata, gradoConnessioneCalcolato, timestampI
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :haConnessioneCalcolata :ConCalc-{id_perimetro}_{ts_iniz_val} . :ConCalc-{id_perimetro}_{ts_iniz_val} a :ConnessioneCalcolata; :gradoConnessioneCalcolato {cd_gr_conn_calc} ; :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val, cd_gr_conn_calc from gruppo.gz0102e_prm where cd_gr_conn_calc > 0
+
+mappingId	M:74 - timestampF
+target		:ConCalc-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		 select id_perimetro, ts_iniz_val, ts_fine_val from gruppo.gz0102e_prm where cd_gr_conn_calc > 0
+
+mappingId	M:75 - ConnessioneCalcolata, haConnessioneCalcolata, livelloConnessioneCalcolata, timestampI
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :haConnessioneCalcolata :ConCalc-{id_perimetro}_{ts_iniz_val} . :ConCalc-{id_perimetro}_{ts_iniz_val} a :ConnessioneCalcolata; :livelloConnessioneGaranzia {cd_gr_conn1} ; :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val, cd_gr_conn1 from gruppo.gz0102e_prm where cd_gr_conn1 > 0
+
+mappingId	M:76 - timestampF
+target		:ConCalc-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from gruppo.gz0102e_prm where cd_gr_conn1 > 0
+
+mappingId	M:77 - ConnessioneCalcolata, haConnessioneCalcolata, livelloConnessioneGiuridico, timestampI
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :haConnessioneCalcolata :ConCalc-{id_perimetro}_{ts_iniz_val} . :ConCalc-{id_perimetro}_{ts_iniz_val} a :ConnessioneCalcolata; :livelloConnessioneGiuridico {cd_gr_conn3} ; :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val, cd_gr_conn3 from gruppo.gz0102e_prm where cd_gr_conn3 > 0
+
+mappingId	M:78 - timestampF
+target		:ConCalc-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from gruppo.gz0102e_prm where cd_gr_conn3 > 0
+
+mappingId	M:79 - ConnessioneCalcolata, haConnessioneCalcolata, livelloConnessioneAltraNatura, timestampI
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :haConnessioneCalcolata :ConCalc-{id_perimetro}_{ts_iniz_val} . :ConCalc-{id_perimetro}_{ts_iniz_val} a :ConnessioneCalcolata; :livelloConnessioneAltraNatura {cd_gr_conn2} ; :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val, cd_gr_conn2 from gruppo.gz0102e_prm where cd_gr_conn2 > 0 
+
+mappingId	M:80 - timestampF
+target		:ConCalc-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from gruppo.gz0102e_prm where cd_gr_conn2 > 0
+
+mappingId	M:81 - ConnessioneForzata, haConnessioneForzata, gradoConnessioneForzato, timestampI
+target		:ConForz-{id_perimetro}_{ts_iniz_val} a :ConnessioneForzata; :gradoConnessioneForzato {cd_gr_conn_forz} ; :timestampI {ts_iniz_val} . :Gcc-{id_perimetro}_{ts_iniz_val} :haConnessioneForzata :ConForz-{id_perimetro}_{ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val, cd_gr_conn_forz from gruppo.gz0102e_prm where cd_gr_conn_forz > 0
+
+mappingId	M:82 - timestampF
+target		:ConForz-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from gruppo.gz0102e_prm where cd_gr_conn_forz > 0
+
+mappingId	M:83 - CalcoloRilevante, inEventoLegame, timestampI
+target		:LegGiur-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'S'
+
+mappingId	M:84 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'S'
+
+mappingId	M:85 - CalcoloNonRilevante, inEventoLegame, timestampI
+target		:LegGiur-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'N'
+
+mappingId	M:86 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'N'
+
+mappingId	M:87 - ForzaturaRilevante, inEventoLegame, timestampI
+target		:LegGiur-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'S'
+
+mappingId	M:88 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'S'
+
+mappingId	M:89 - ForzatoNonRilevante, inEventoLegame, timestampI
+target		:LegGiur-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'N'
+
+mappingId	M:90 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'N'
+
+mappingId	M:91 - CalcoloRilevante, inEventoLegame, timestampI
+target		:LegGar-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'S'
+
+mappingId	M:92 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'S'
+
+mappingId	M:93 - CalcoloNonRilevante, inEventoLegame, timestampI
+target		:LegGar-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'N'
+
+mappingId	M:94 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'N'
+
+mappingId	M:95 - ForzatoRilevante, inEventoLegame, timestampI
+target		:LegGar-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'S'
+
+mappingId	M:96 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'S'
+
+mappingId	M:97 - ForzatoNonRilevante, inEventoLegame, timestampI
+target		:LegGar-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'N'
+
+mappingId	M:98 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'N'
+
+mappingId	M:99 - CalcoloRilevante, inEventoLegame, timestampI
+target		:LegEco-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'S'
+
+mappingId	M:100 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'S'
+
+mappingId	M:101 - CalcoloNonRilevante, inEventoLegame, timestampI
+target		:LegEco-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'N'
+
+mappingId	M:102 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'N'
+
+mappingId	M:103 - ForzatoRilevante, inEventoLegame, timestampI
+target		:LegEco-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'S'
+
+mappingId	M:104 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'S'
+
+mappingId	M:105 - ForzatoNonRilevante, inEventoLegame, timestampI
+target		:LegEco-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'N'
+
+mappingId	M:106 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'N'
+
+mappingId	M:107 - CalcoloRilevante, inEventoLegame, timestampI
+target		:LegSoc-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'S'
+
+mappingId	M:108 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'S'
+
+mappingId	M:109 - CalcoloNonRilevante, inEventoLegame, timestampI
+target		:LegSoc-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'N'
+
+mappingId	M:110 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'N'
+
+mappingId	M:111 - ForzaturaRilevante, inEventoLegame, timestampI
+target		:LegSoc-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'S'
+
+mappingId	M:112 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'S'
+
+mappingId	M:113 - ForzatoNonRilevante, inEventoLegame, timestampI
+target		:LegSoc-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'N'
+
+mappingId	M:114 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'N'
+
+mappingId	M:115 - CalcoloRilevante, inEventoLegame, timestampI
+target		:LegPatr-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'S'
+
+mappingId	M:116 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'S'
+
+mappingId	M:117 - CalcoloNonRilevante, inEventoLegame, timestampI
+target		:LegPatr-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :CalcoloNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'N'
+
+mappingId	M:118 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'N'
+
+mappingId	M:119 - ForzatoRilevante, inEventoLegame, timestampI
+target		:LegPatr-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'S'
+
+mappingId	M:120 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'S'
+
+mappingId	M:121 - ForzatoNonRilevante, inEventoLegame, timestampI
+target		:LegPatr-{id_leg} :inEventoLegame :EventoLeg-{id_leg}_{ts_iniz_val} . :EventoLeg-{id_leg}_{ts_iniz_val} a :ForzatoNonRilevante; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'N'
+
+mappingId	M:122 - timestampF
+target		:EventoLeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'N'
+
+mappingId	M:123 - PerimetrazioneEffettiva, haCliente, inGCC, NGR, IGCC, timestampI	
+target		:Cl-{cd_ngr} :NGR {cd_ngr} . :Gcc-{id_perim_eff}_{ts_iniz_val} :IGCC {id_perim_eff} ; :timestampI {ts_iniz_val} . :Per-{cd_ngr}_{id_perim_eff}_{ts_iniz_val} a :PerimetrazioneEffettiva; :haCliente :Cl-{cd_ngr} ; :inGCC :Gcc-{id_perim_eff}_{ts_iniz_val} . 
+source		select cd_ngr, ts_iniz_val, id_perim_eff from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C'
+
+mappingId	M:124 - timestampF
+target		:Per-{cd_ngr}_{id_perim_eff}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, id_perim_eff, ts_fine_val from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C'
+
+mappingId	M:125 - PerimetrazioneEffettivaConEsclusioneRischio
+target		:Per-{cd_ngr}_{id_perim_eff}_{ts_iniz_val} a :PerimetrazioneEffettivaConEsclusioneRischio . 
+source		select cd_ngr, ts_iniz_val, id_perim_eff from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C' and fg_ent_iso = 'S'
+
+mappingId	M:126 - PerimetrazioneCalcolata, haCliente, inGCC, NGR, IGCC, timestampI
+target		:Cl-{cd_ngr} :NGR {cd_ngr} . :Per-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} a :PerimetrazioneCalcolata; :haCliente :Cl-{cd_ngr} ; :inGCC :Gcc-{id_perim_calc}_{ts_iniz_val} . :Gcc-{id_perim_calc}_{ts_iniz_val} :IGCC {id_perim_calc} ; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc from gruppo.gz0101e_prm_e where id_perim_calc > 0 and id_perim_eff = id_perim_calc and fg_escluso= 'N' and cd_stato_rich = 'C'
+
+mappingId	M:127 - PerimetrazioneAttuale
+target		:Per-{cd_ngr}_{id_perim_eff}_{ts_iniz_val} a :PerimetrazioneAttuale . 
+source		select cd_ngr, ts_iniz_val, id_perim_eff from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C'
+
+mappingId	M:128 - PeriodoValidita, timestampI
+target		:Perival-{cd_ngr}_{ts_iniz_val} a :PeriodoValidita; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, ts_iniz_val from GRUPPO.GZ0015E_GGE where fg_gge_rep = 'S'
+
+mappingId	M:129 - timestampF
+target		:Perival-{cd_ngr}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, ts_fine_val from GRUPPO.GZ0015E_GGE where fg_gge_rep = 'S' and cd_stato_rich = 'C'
+
+mappingId	M:130 - Coordinamento, IGCC, LaboratorioFidiCoordinatore, haCoordinamento, CodiceLaboratorioFidi, Banca, codiceABI, inCoordinamento, timestampI
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :IGCC {id_perimetro} ; :inCoordinamento :Coord-{id_perimetro}_{ts_iniz_val}_{cd_azienda} ; :timestampI {ts_iniz_val} . :Labfidico-{cd_lfc} a :Coordinamento, :LaboratorioFidiCoordinatore, :Banca; :haCoordinamento :Coord-{id_perimetro}_{ts_iniz_val}_{cd_azienda} ; :codiceLaboratorioFidi {cd_lfc} . :Coord-{id_perimetro}_{ts_iniz_val}_{cd_azienda} a :Coordinamento, :LaboratorioFidiCoordinatore, :Banca . :Bnc-{cd_azienda} a :Coordinamento, :LaboratorioFidiCoordinatore, :Banca; :codiceABI {cd_azienda} . 
+source		select id_perimetro, ts_iniz_val, cd_lfc, cd_azienda from GRUPPO.GZ0104E_PRM_LFC where cd_stato_rich = 'C'
+
+mappingId	M:131 - timestampF
+target		:Coord-{id_perimetro}_{ts_iniz_val}_{cd_azienda} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, cd_azienda, ts_fine_val from GRUPPO.GZ0104E_PRM_LFC where cd_stato_rich = 'C'
+
+mappingId	M:132 - CalcoloNelPerimetro, GCCRelativo, inEventoPerimetrazione, NGR, IGCC, timestampI
+target		:Cl-{cd_ngr} :inEventoPerimetrazione :Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} ; :NGR {cd_ngr} . :Gcc-{id_perim_calc}_{ts_iniz_val} :IGCC {id_perim_calc} ; :timestampI {ts_iniz_val} . :Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} a :CalcoloNelPerimetro; :GCCRelativo :Gcc-{id_perim_calc}_{ts_iniz_val} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C'
+
+mappingId	M:133 - timestampF
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc, ts_fine_val from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C'
+
+mappingId	M:134 - causalePerimetrazione
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} :causalePerimetrazione {cd_step} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc, cd_step from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step > 0
+
+mappingId	M:135 - causalePerimetrazione
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} :causalePerimetrazione {cd_step2} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc, cd_step2 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step2 > 0
+
+mappingId	M:136 - causalePerimetrazione
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} :causalePerimetrazione {cd_step3} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc, cd_step3 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step3 > 0
+
+mappingId	M:137 - causalePerimetrazione
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} :causalePerimetrazione {cd_step4} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc, cd_step4 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step4 > 0
+
+mappingId	M:138 - causalePerimetrazione
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} :causalePerimetrazione {cd_step5} . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc, cd_step5 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step5 > 0
+
+mappingId	M:139 - CalcoloNelPerimetroConEsclusioneRischio
+target		:Calper-{cd_ngr}_{id_perim_calc}_{ts_iniz_val} a :CalcoloNelPerimetroConEsclusioneRischio . 
+source		select cd_ngr, ts_iniz_val, id_perim_calc from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and fg_ent_iso = 'S'
+
+mappingId	M:140 - ForzaturaNelPerimetro, GCCRelatico, inEventoPerimetrazione, NGR, IGCC, timestampI
+target		:Cl-{cd_ngr} :inEventoPerimetrazione :Forzper-{cd_ngr}_{id_perim_forz}_{ts_iniz_val} ; :NGR {cd_ngr} . :Forzper-{cd_ngr}_{id_perim_forz}_{ts_iniz_val} a :ForzaturaNelPerimetro; :GCCRelativo :Gcc-{id_perim_forz}_{ts_iniz_val} . :Gcc-{id_perim_forz}_{ts_iniz_val} :IGCC {id_perim_forz} ; :timestampI {ts_iniz_val} . 
+source		select cd_ngr, ts_iniz_val, id_perim_forz from GRUPPO.GZ0101E_PRM_E where id_perim_forz > 0 and id_perim_forz = id_perim_eff and cd_stato_rich = 'C'
+
+mappingId	M:141 - ForzaturaNelPerimetroConEsclusioneRischio
+target		:Forzper-{cd_ngr}_{id_perim_forz}_{ts_iniz_val} a :ForzaturaNelPerimetroConEsclusioneRischio . 
+source		select cd_ngr, ts_iniz_val, id_perim_forz from GRUPPO.GZ0101E_PRM_E where id_perim_forz > 0 and id_perim_forz = id_perim_eff and cd_stato_rich = 'C' and fg_ent_iso = 'S'
+
+mappingId	M:142 - Isolamento, inEventoPerimetrazione, NGR
+target		:Cl-{cd_ngr} :inEventoPerimetrazione :Isol-{cd_ngr}_{ts_iniz_val} ; :NGR {cd_ngr} . :Isol-{cd_ngr}_{ts_iniz_val} a :Isolamento . 
+source		select cd_ngr, ts_iniz_val from GRUPPO.GZ0101E_PRM_E where id_perim_eff = 0 and id_perim_eff = id_perim_forz and cd_stato_rich = 'C'
+
+mappingId	M:143 - eSottoReportistica, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoReportistica :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:144 - eSottoReportistica, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoReportistica :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:145 - eSottoReportistica, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoReportistica :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:146 - eSottoReportistica, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoReportistica :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:147 - eSottoMonitoraggio, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoMonitoraggio :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:148 - eSottoMonitoraggio, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoMonitoraggio :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:149 - eSottoMonitoraggio, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoMonitoraggio :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:150 - eSottoMonitoraggio, IGCC
+target		:Gcc-{idgcc}_{tiper} :eSottoMonitoraggio :Perival-{ngr}_{tirm} ; :IGCC {idgcc} . 
+source		select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val
+
+mappingId	M:151 - CalcoloGradoDiConnessione, GCCRelativo, timestampI
+target		:ECalcGraConn-{id_perimetro}_{ts_iniz_val} a :CalcoloGradoDiConnessione; :GCCRelativo :Gcc-{id_perimetro}_{ts_iniz_val} . :EForzGraConn-{id_perimetro}_{ts_iniz_val} :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_calc > 0 and id_perimetro > 0 and cd_stato_rich = 'C'
+
+mappingId	M:152 - ForzaturaGradoDiConnessione, GCCRelativo, timestampI
+target		:EForzGraConn-{id_perimetro}_{ts_iniz_val} a :ForzaturaGradoDiConnessione; :GCCRelativo :Gcc-{id_perimetro}_{ts_iniz_val} ; :timestampI {ts_iniz_val} . 
+source		select id_perimetro, ts_iniz_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_forz > 0 and id_perimetro > 0 and cd_stato_rich = 'C'
+
+mappingId	M:153 - timestampF
+target		:ECalcGraConn-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_calc > 0 and id_perimetro > 0 and cd_stato_rich = 'C'
+
+mappingId	M:154 - timestampF
+target		:EForzGraConn-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_forz > 0 and id_perimetro > 0 and cd_stato_rich = 'C'
+
+mappingId	M:155 - GCCGiuridico
+target		:Gcc-{idgcc}_{ti} a :GCCGiuridico . 
+source		select perimetro.igcc as idgcc, perimetro.ts_iniz_val as ti from (select id_perimetro as igcc, ts_iniz_val from gruppo.gz0102e_prm where cd_stato_rich = 'C' and id_perimetro > 0 union select id_perim_eff as igcc, ts_iniz_val from gruppo.gz0101e_prm_e where cd_stato_rich = 'C' and id_perim_eff > 0) as perimetro, (select id_gruppo as iga from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0 union select id_gruppo as iga from gruppo.gz0007e_gruppi where cd_stato_rich = 'C' and id_gruppo > 0) as gruppo where perimetro.igcc = gruppo.iga
+
+mappingId	M:156 - GCCEconomico
+target		:Gcc-{gcce}_{tie} a :GCCEconomico . 
+source		select perimetroe.igcc as gcce, perimetroe.ts_iniz_val as tie from (select id_perimetro as igcc, ts_iniz_val from gruppo.gz0102e_prm where cd_stato_rich = 'C' and id_perimetro > 0 union select id_perim_eff as igcc, ts_iniz_val from gruppo.gz0101e_prm_e where cd_stato_rich = 'C' and id_perim_eff > 0) as perimetroe where perimetroe.igcc not in ( select perimetro.igcc from (select id_perimetro as igcc, ts_iniz_val from gruppo.gz0102e_prm where cd_stato_rich = 'C' and id_perimetro > 0 union select id_perim_eff as igcc, ts_iniz_val from gruppo.gz0101e_prm_e where cd_stato_rich = 'C' and id_perim_eff > 0) as perimetro, (select id_gruppo as iga from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0 union select id_gruppo as iga from gruppo.gz0007e_gruppi where cd_stato_rich = 'C' and id_gruppo > 0) as gruppo where perimetro.igcc = gruppo.iga )
+
+mappingId	M:157 - timestampI
+target		:LegGiur-{id_leg} :timestampI {ts} . 
+source		select id_leg, min(ts_iniz_val) as ts from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' group by id_leg
+
+mappingId	M:158 - timestampI
+target		:LegGar-{id_leg} :timestampI {ts} . 
+source		select id_leg, min(ts_iniz_val) as ts from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' group by id_leg
+
+mappingId	M:159 - timestampI
+target		:LegEco-{id_leg} :timestampI {ts} . 
+source		select id_leg, min(ts_iniz_val) as ts from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' group by id_leg
+
+mappingId	M:160 - timestampI
+target		:LegSoc-{id_leg} :timestampI {ts} . 
+source		select id_leg, min(ts_iniz_val) as ts from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' group by id_leg
+
+mappingId	M:161 - timestampI
+target		:LegPatr-{id_leg} :timestampI {ts} . 
+source		select id_leg, min(ts_iniz_val) as ts from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' group by id_leg
+
+mappingId	M:162 - PartecipazioneALegame, quota, timestampI, haPartecipazioneALegame
+target		:ParALeg-{id_leg}_{ts_iniz_val} a :PartecipazioneALegame; :quota {pc_qt_partecip} ; :timestampI {ts_iniz_val} . :LegGiur-{id_leg} :haPartecipazioneALegame :ParALeg-{id_leg}_{ts_iniz_val} . 
+source		select id_leg, pc_qt_partecip, ts_iniz_val from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 202 and pc_qt_partecip > 0
+
+mappingId	M:163 - timestampF
+target		:ParALeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 202
+
+mappingId	M:164 - eCollegato, eCollegante, tipoLegame, NGR
+target		:Cl-{cd_ngr1} :eCollegante :LegGiur-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . :Cl-{cd_ngr2} :eCollegato :LegGiur-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . :LegGiur-{id_leg} :tipoLegame {cd_tp_legame} . 
+source		select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C'
+
+mappingId	M:165 - GaranziaFGProposta, haFGProposto, timestampI, importoGaranziaFG
+target		:GarFgProp-{id_leg}_{ts_iniz_val} a :GaranziaFGProposta; :timestampI {ts_iniz_val} ; :importoGaranziaFG {im_garanzia} . :LegGar-{id_leg} :haFGProposto :GarFgProp-{id_leg}_{ts_iniz_val} . 
+source		select id_leg, im_garanzia, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302
+
+mappingId	M:166 - timestampF
+target		:GarFgProp-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_fine_val, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302
+
+mappingId	M:167 - proponeFG, Banca, codiceABI
+target		:Bnc-{cd_azienda} a :Banca; :codiceABI {cd_azienda} ; :proponeFG :GarFgProp-{id_leg}_{ts_iniz_val} . 
+source		select id_leg, cd_azienda, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302 and cd_azienda > 0
+
+mappingId	M:168 - GaranziaPEFProposta, haPEFProposto, importoGaranziaPEF, timestampI
+target		:GarPefProp-{id_leg}_{ts_iniz_val} a :GaranziaPEFProposta; :timestampI {ts_iniz_val} ; :importoGaranziaPEF {im_garanzia} . :LegGar-{id_leg} :haPEFProposto :GarPefProp-{id_leg}_{ts_iniz_val} . 
+source		select id_leg, im_garanzia, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303
+
+mappingId	M:169 - timestampF
+target		:GarPefProp-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_fine_val, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303
+
+mappingId	M:170 - proponePEF, Banca, codiceABI
+target		:Bnc-{cd_azienda} a :Banca; :codiceABI {cd_azienda} ; :proponePEF :GarPefProp-{id_leg}_{ts_iniz_val} . 
+source		select id_leg, cd_azienda, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303 and cd_azienda > 0
+
+mappingId	M:171 - GaranziaConsolidata, importoGaranziaConsolidato, haGaranziaConsolidata, timestampF
+target		:LegGar-{id_leg} :haGaranziaConsolidata :GaraCons-{id_leg}_{ts_iniz_val} . :GaraCons-{id_leg}_{ts_iniz_val} a :GaranziaConsolidata; :importoGaranziaConsolidata {im_garanzia} ; :timestampI {ts_iniz_val} . 
+source		select id_leg, im_garanzia, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 301
+
+mappingId	M:172 - timestampF
+target		:GaraCons-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, im_garanzia, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 301
+
+mappingId	M:173 - tipoLegame, eCollegato, eCollegante, NGR
+target		:Cl-{cd_ngr1} :eCollegante :LegGar-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . :LegGar-{id_leg} :tipoLegame {cd_tp_legame} . :Cl-{cd_ngr2} :eCollegato :LegGar-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . 
+source		select id_leg, cd_ngr1, cd_ngr2, cd_tp_legame, cd_azienda from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C'
+
+mappingId	M:174 - InformazioniFatturato, haInformazioniFatturato, timestampI
+target		:LegEco-{id_leg} :haInformazioniFatturato :InfoFat-{id_leg}_{ts_iniz_val} . :InfoFat-{id_leg}_{ts_iniz_val} a :InformazioniFatturato; :timestampI {ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401
+
+mappingId	M:175 - vendite
+target		:InfoFat-{id_leg}_{ts_iniz_val} :vendite {pc_vendite} . 
+source		select id_leg, pc_acquisti, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401 and pc_vendite > 0
+
+mappingId	M:176 - acquisti
+target		:InfoFat-{id_leg}_{ts_iniz_val} :acquisti {pc_acquisti} . 
+source		select id_leg, pc_acquisti, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401 and pc_acquisti >0
+
+mappingId	M:177 - timestampF
+target		:InfoFat-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401
+
+mappingId	M:178 - InformazioniFinanziamento, haInformazioniFinanziamento, timestampI
+target		:InfoFin-{id_leg}_{ts_iniz_val} a :InformazioniFinanziamento; :timestampI {ts_iniz_val} . :LegEco-{id_leg} :haInformazioniFinanziamento :InfoFin-{id_leg}_{ts_iniz_val} . 
+source		select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402
+
+mappingId	M:179 - credito
+target		:InfoFin-{id_leg}_{ts_iniz_val} :credito {pc_credito} . 
+source		select id_leg, ts_iniz_val, pc_credito from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402 and pc_credito > 0
+
+mappingId	M:180 - debito
+target		:InfoFin-{id_leg}_{ts_iniz_val} :debito {pc_debito} . 
+source		select id_leg, ts_iniz_val, pc_debito from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402 and pc_debito > 0
+
+mappingId	M:181 - timestampF
+target		:InfoFin-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402
+
+mappingId	M:182 - eCollegato, eCollegante, tipoLegame, NGR
+target		:LegEco-{id_leg} :tipoLegame {cd_tp_legame} . :Cl-{cd_ngr1} :eCollegante :LegEco-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . :Cl-{cd_ngr2} :eCollegato :LegEco-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . 
+source		select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C'
+
+mappingId	M:183 - quota, PartecipazioneALegame, haPartecipazioneALegame, timestampI
+target		:LegSoc-{id_leg} :haPartecipazioneALegame :ParALeg-{id_leg}_{ts_iniz_val} . :ParALeg-{id_leg}_{ts_iniz_val} a :PartecipazioneALegame; :quota {pc_qt_partecip} ; :timestampI {ts_iniz_val} . 
+source		select id_leg, pc_qt_partecip, ts_iniz_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 502 and pc_qt_partecip > 0
+
+mappingId	M:184 - timestampF
+target		:ParALeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 502 and pc_qt_partecip > 0
+
+mappingId	M:185 - quota, PartecipazioneALegame, haPartecipazioneALegame, timestampI
+target		:LegSoc-{id_leg} :haPartecipazioneALegame :ParALeg-{id_leg}_{ts_iniz_val} . :ParALeg-{id_leg}_{ts_iniz_val} a :PartecipazioneALegame; :quota {pc_qt_partecip} ; :timestampI {ts_iniz_val} . 
+source		select id_leg, pc_qt_partecip, ts_iniz_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 503 and pc_qt_partecip > 0
+
+mappingId	M:186 - timestampF
+target		:ParALeg-{id_leg}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 503 and pc_qt_partecip > 0
+
+mappingId	M:187 - eCollegato, eCollegante, tipoLegame, NGR
+target		:Cl-{cd_ngr1} :eCollegante :LegSoc-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . :LegSoc-{id_leg} :tipoLegame {cd_tp_legame} . :Cl-{cd_ngr2} :eCollegato :LegSoc-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . 
+source		select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C'
+
+mappingId	M:188 - eCollegato, eCollegante, tipoLegame, NGR
+target		:LegPatr-{id_leg} :tipoLegame {cd_tp_legame} . :Cl-{cd_ngr1} :eCollegante :LegPatr-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . :Cl-{cd_ngr2} :eCollegato :LegPatr-{id_leg} ; :NGR {cd_ngr1} , {cd_ngr2} . 
+source		select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C'
+
+mappingId	M:189 - timestampF
+target		:Gcc-{id_perimetro}_{ts_iniz_val} :timestampF {ts_fine_val} . 
+source		select id_perimetro, ts_iniz_val, ts_fine_val from gz0102e_prm
+]]
+

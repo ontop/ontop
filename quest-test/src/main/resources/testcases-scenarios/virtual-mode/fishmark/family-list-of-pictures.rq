@@ -1,0 +1,13 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?genus ?species ?picture ?photographer
+WHERE {
+   ?picID fd:picturesmain_SpecCode ?code ;
+   fd:picturesmain_PicName ?picture ; 
+   fd:picturesmain_AuthName ?photographer .
+   ?code fd:species_Species ?species;
+   fd:species_Genus ?genus ;
+   fd:species_FamCode ?fcode .
+   ?fcode fd:families_Family "Bothidae" .
+}

@@ -24,6 +24,7 @@
 		<module>quest-db</module>
 		<module>quest-rdb2rdf-compliance</module>
 
+		<module>quest-test</module>
 	</modules>
 
 	<profiles>

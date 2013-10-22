@@ -1,0 +1,11 @@
+# Use BIND to bind a service endpoint
+
+PREFIX : <http://example.org/> 
+PREFIX foaf: <http://xmlns.com/foaf/0.1/> 
+
+SELECT ?t1 ?t2 { 
+  [] foaf:name ?t1 . 
+  SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> { 
+     [] foaf:name ?t2 . 
+  } 
+} 

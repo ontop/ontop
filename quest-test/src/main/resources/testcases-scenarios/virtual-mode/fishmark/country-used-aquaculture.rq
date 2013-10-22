@@ -1,0 +1,17 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?genus ?species ?occurrence ?speciesAquaculture 
+WHERE {
+   ?nameID fd:comnames_ComName ?name .
+   ?nameID fd:comnames_C_Code ?ccode . 
+   ?nameID fd:comnames_SpecCode ?x.
+   ?x fd:species_Genus ?genus .
+   ?x fd:species_Species ?species .
+   ?x fd:species_UsedforAquaculture ?speciesAquaculture .
+   ?c fd:country_SpecCode ?x.
+   ?c fd:country_Status ?occurrence .
+   ?c fd:country_C_Code ?cf .
+   ?c fd:country_Aquaculture "commercial" .
+   ?cf fd:countref_PAESE "Lithuania" .  
+}

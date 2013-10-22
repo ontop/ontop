@@ -1,0 +1,3 @@
+PREFIX : <http://example/>
+SELECT (count(?res) as ?c)
+WHERE { ?res a [] . }

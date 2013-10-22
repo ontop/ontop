@@ -1,0 +1,100 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Numeric Type Tests" ;
+    mf:entries
+    ( 
+      :integer
+      :smallint
+      :bigint
+      :numeric
+      :real
+      :double
+      :serial
+      :bigserial
+    ) .
+
+:integer rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: INTEGER" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <integer.rq> ] ;
+    mf:result <integer.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:smallint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: SMALLINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <smallint.rq> ] ;
+    mf:result <smallint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+ :bigint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: BIGINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <bigint.rq> ] ;
+    mf:result <bigint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+ 
+ :numeric rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NUMERIC" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <numeric.rq> ] ;
+    mf:result <numeric.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+ :real rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: REAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <real.rq> ] ;
+    mf:result <real.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+ :double rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DOUBLE PRECISION" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <double.rq> ] ;
+    mf:result <double.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:serial rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: SERIAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <serial.rq> ] ;
+    mf:result <serial.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:bigserial rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: BIG SERIAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <bigserial.rq> ] ;
+    mf:result <bigserial.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .

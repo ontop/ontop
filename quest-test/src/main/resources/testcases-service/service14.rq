@@ -1,0 +1,12 @@
+# Test for SES 900
+
+PREFIX : <http://example.org/> 
+
+
+SELECT *
+{
+  SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> {
+  }
+  SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> { 
+  }   
+} 

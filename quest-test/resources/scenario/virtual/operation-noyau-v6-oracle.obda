@@ -1,0 +1,46 @@
+[PrefixDeclaration]
+:		http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+Operation_noyau:	ttp://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#2008
+Operation_noyau2:	ttp://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#2008-
+
+[SourceDeclaration]
+sourceUri	PROGOS-CRAQ
+connectionUrl	jdbc:oracle:thin:@craqenvt:1521:CRAQ
+username	CRAQ_SUV_T0
+password	CRAQ_SUV_T0
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	OperationPhysique
+target		:MontantOpe-{montantid} a :OperationPhysique, :Montant, :UniteTemporelle ; :aPourMontantDecimal {montantdecimal} ; :aPourType :Type-{TypeMontant} ; :aPourMode :Mode-{ModeMontant} ; :aPourUniteTemporelle :UtOpe-{montantid} . :UtOpe-{montantid} a :OperationPhysique, :Montant, :UniteTemporelle ; :aPourDepart {anneedepart} ; :aPourArrivee {anneeArrivee} ; :aPourDuree {Duree} . :Ope-{opeid} a :OperationPhysique, :Montant, :UniteTemporelle ; :aPourID {opeid} ; :aPourLibelle {libelle} ; :aPourMontant :MontantOpe-{montantid}, :MontantOpe-{montantid} . 
+source		select iddoss opeid, LBDOSS libelle, (iddoss ||'-Typedepense-ModePrevision') montantid, mtprevttc  montantdecimal, "Typedepense" typemontant, "ModePrevision" ModeMontant, ANCREAT anneedepart, "" anneearrive, "0" duree  from domope 
+]]
+
+[SourceDeclaration]
+sourceUri	CORIOLIS-CRAQ
+connectionUrl	jdbc:oracle:thin:@172.16.1.144:1521:CORIO
+username	CORIOLIS430
+password	CORIOLIS430
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	Mandat
+target		:UtMandat-{montantid} a :Mandat, :Montant, :UniteTemporelle ; :aPourDepart {anneedepart} ; :aPourArrivee {anneeArrivee} ; :aPourDuree {Duree} . :Mandat-{payeid} a :Mandat, :Montant, :UniteTemporelle ; :aPourId {payeid} ; :aPourMontant :MontantMandat-{montantid} . :MontantMandat-{montantid} a :Mandat, :Montant, :UniteTemporelle ; :aPourMontantDecimal {montantdecimal} ; :aPourType :Type-{TypeMontant} ; :aPourMode :Mode-{ModeMontant} ; :aPourUniteTemporelle :UtMandat-{montantid} . 
+source		select distinct ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ) payeid, ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ||'-TypeDepense-ModeTotal') montantid,  C.CNDGMONTTC  montantdecimal, "TypeDepense" typemontant, "ModeTotal" modemontant, C.CNDGDATREC datemontant from cndg C 
+
+mappingId	Mandat solde OperationPhysique
+target		:Mandat-{payeid} :solde :Ope-{opeid} . 
+source		select distinct ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ) payeid, O.OPEGCODIF opeid from cndg C, OPEG O  where C.COLLCOD=O.COLLCOD and C.OPEGANN=O.OPEGANN and C.OPEGCOD=O.OPEGCOD and C.OPEGNUM=O.OPEGNUM
+]]
+

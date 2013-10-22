@@ -1,0 +1,8 @@
+PREFIX : <http://example/>
+SELECT * 
+WHERE {
+	?a :p ?n
+	MINUS {
+		?a :q ?n .
+	}
+}

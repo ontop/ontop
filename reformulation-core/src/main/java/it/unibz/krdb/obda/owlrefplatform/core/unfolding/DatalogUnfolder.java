@@ -1591,7 +1591,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			}
 
 		}// end for rule body
-		freshRule.updateBody(newbody);
+
+		//freshRule.updateBody(newbody);
+		replaceInnerLJ(freshRule, newbody, termidx1);
 		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
 
 		OBDAVocabulary myNull = new OBDAVocabulary();
@@ -1602,6 +1604,41 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		// LJ data argument
 		freshRule = Unifier.applyUnifier(freshRule, unifier, false);
 		return freshRule;
+	}
+	
+	private void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
+			Stack<Integer> termidx) {
+		Function parentFunction = null;
+		if (termidx.size() > 1) {
+			/*
+			 * Its a nested term
+			 */
+			Term nestedTerm = null;
+			for (int y = 0; y < termidx.size() - 1; y++) {
+				int i = termidx.get(y);
+				if (nestedTerm == null)
+					nestedTerm = (Function) rule.getBody().get(i);
+				else
+				{
+					parentFunction = (Function) nestedTerm;
+					nestedTerm = ((Function) nestedTerm).getTerm(i);
+				}
+			}
+			//Function focusFunction = (Function) nestedTerm;
+			if (parentFunction == null) {
+				//its just one Left Join, replace rule body directly
+				rule.updateBody(replacementTerms);
+				return;
+			}
+			List <Term> tempTerms = parentFunction.getTerms();
+			tempTerms.remove(0);
+			List <Term> newTerms = new LinkedList<Term>();
+			newTerms.addAll(replacementTerms);
+			newTerms.addAll(tempTerms);
+			parentFunction.updateTerms(newTerms);
+		} else {
+			throw new RuntimeException("Unexpected OPTIONAL condition!");
+		}
 	}
 
 	/***

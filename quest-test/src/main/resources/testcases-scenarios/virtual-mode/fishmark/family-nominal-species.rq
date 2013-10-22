@@ -1,0 +1,11 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?species ?author ?genus 
+WHERE { 
+   ?SpeciesID fd:species_Author ?author ;
+   fd:species_Species ?species;
+   fd:species_Genus ?genus ;
+   fd:species_FamCode ?code .
+   ?code  fd:families_Family "Bothidae" . 
+}
