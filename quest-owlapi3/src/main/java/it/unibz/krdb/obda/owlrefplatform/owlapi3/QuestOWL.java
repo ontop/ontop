@@ -11,8 +11,16 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.impl.DisjointClassAxiomImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -478,12 +486,84 @@ public class QuestOWL extends OWLReasonerBase {
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
-		
-		
-		
-		
-		return true;
+		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
+	
+	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+		boolean isConsistent = true;
+		
+		//deal with disjoint classes
+		Set<DisjointDescriptionAxiom> disjointAxioms = translatedOntologyMerge.getDisjointDescriptionAxioms();
+		Iterator<DisjointDescriptionAxiom> it = disjointAxioms.iterator();
+		
+		//create ask query
+		String strQueryClass = "ASK {?x a <%s>; a <%s> }";
+		String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+		String strQuery = "";
+		
+		while (isConsistent && it.hasNext()) {		
+			
+			DisjointDescriptionAxiom dda = it.next();
+			if (dda instanceof DisjointClassAxiom) {
+				DisjointClassAxiom dc = (DisjointClassAxiom)dda;
+				strQuery = String.format(strQueryClass, dc.getFirst(), dc.getSecond());
+			} else if (dda instanceof DisjointPropertyAxiom) {
+				DisjointPropertyAxiom dp = (DisjointPropertyAxiom) dda;
+				strQuery = String.format(strQueryProp, dp.getFirst(), dp.getSecond());
+			}
+			
+			QuestStatement query;
+			try {
+				query = conn.createStatement();
+				ResultSet rs = query.execute(strQuery);
+				TupleResultSet trs = ((TupleResultSet)rs);
+				if (trs!= null && trs.nextRow()){
+					String value = trs.getConstant(0).getValue();
+					boolean b = Boolean.parseBoolean(value);
+					isConsistent = !b;
+				}
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return isConsistent;
+	}
+	
+	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+		boolean isConsistent = true;
+		
+		//deal with functional properties
+		Set<PropertyFunctionalAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
+		Iterator<PropertyFunctionalAxiom> itf = funcPropAxioms.iterator();
+		
+		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. }";
+		String strQuery = "";
+		
+		while (isConsistent && itf.hasNext()) {
+			
+			PropertyFunctionalAxiom pfa = itf.next();
+			String propFunc = pfa.getReferencedEntities().iterator().next().getName();
+			strQuery = String.format(strQueryFunc, propFunc, propFunc);
+			
+			QuestStatement query;
+			try {
+				query = conn.createStatement();
+				ResultSet rs = query.execute(strQuery);
+				TupleResultSet trs = ((TupleResultSet)rs);
+				if (trs!= null && trs.nextRow()){
+					String value = trs.getConstant(0).getValue();
+					boolean b = Boolean.parseBoolean(value);
+					isConsistent = !b;
+				}
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return isConsistent;
+	}
+	
 
 	public boolean isSatisfiable(OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {

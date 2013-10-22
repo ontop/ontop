@@ -10,12 +10,18 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLClassAssertionImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLClassAxiomImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 public class InconsistencyCheckingTest {
 
@@ -26,6 +32,9 @@ public class InconsistencyCheckingTest {
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
+		OWLClass c1 = Class(IRI.create(prefix + "Male"));
+		OWLClass c2 = Class(IRI.create(prefix + "Female"));
+		
 		OWLObjectProperty r1 = ObjectProperty(IRI.create(prefix + "#R1"));
 		OWLObjectProperty r1_1 = ObjectProperty(IRI.create(prefix + "#R1_1"));
 		OWLObjectProperty r2 = ObjectProperty(IRI.create(prefix + "#R2"));
@@ -34,12 +43,17 @@ public class InconsistencyCheckingTest {
 		OWLNamedIndividual b = NamedIndividual(IRI.create(prefix + "#b"));
 
 		OWLOntology ontology = Ontology(manager, //
+				Declaration(c1),
+				Declaration(c2),
 				Declaration(r1), //
 				Declaration(r1_1), //
 				Declaration(r2), //
 				SubObjectPropertyOf(r1_1, r2), //
 				DisjointObjectProperties(r1, r2), //
-				ObjectPropertyAssertion(r1_1, a, b), //
+				ClassAssertion(c1, a),
+				ClassAssertion(c2, a),
+				DisjointClasses(c1, c2), 
+				ObjectPropertyAssertion(r1, a, b), //
 				ObjectPropertyAssertion(r2, a, b) //
 		);
 
