@@ -50,10 +50,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	OWLObjectProperty r1 = ObjectProperty(IRI.create(prefix + "hasMother"));
 	OWLObjectProperty r2 = ObjectProperty(IRI.create(prefix + "hasFather"));
 	
-	OWLDataProperty d1 = DataProperty(IRI.create(prefix + "hasName"));
+	OWLDataProperty d1 = DataProperty(IRI.create(prefix + "hasAgeFirst"));
 	OWLDataProperty d2 = DataProperty(IRI.create(prefix + "hasAge"));
-	OWLDataPropertyRangeAxiom ra1 = DataPropertyRange(d1, Datatype(IRI.create(OWL2Datatype.XSD_STRING.getURI())));
-	OWLDataPropertyRangeAxiom ra2 = DataPropertyRange(d2, Integer());
 
 	OWLNamedIndividual a = NamedIndividual(IRI.create(prefix + "a"));
 	OWLNamedIndividual b = NamedIndividual(IRI.create(prefix + "b"));
@@ -68,8 +66,7 @@ public class InconsistencyCheckingTest extends TestCase{
 				Declaration(r1), //
 				Declaration(r2), //
 				Declaration(d1), //
-				Declaration(d2), //
-				ra1, ra2
+				Declaration(d2)
 		);
 	}
 	
@@ -124,8 +121,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	@Test
 	public void testDisjointDataPropInconsistency() throws OWLOntologyCreationException {
 
-		//hasName(a, Name), hasAge(a, Age), disjoint(hasName, hasAge) -> disjoint(String, Integer)
-		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal("Anna")));
+		//hasAgeFirst(a, 21), hasAge(a, 21), disjoint(hasAgeFirst, hasAge)
+		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
 		manager.addAxiom(ontology, DataPropertyAssertion(d2, a, Literal(21)));
 		manager.addAxiom(ontology, DisjointDataProperties(d1, d2));
 		
@@ -157,7 +154,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		//hasAge(a, 18), hasAge(a, 21), func(hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(18)));
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
-		manager.addAxiom(ontology, FunctionalDataProperty(d2));
+		manager.addAxiom(ontology, FunctionalDataProperty(d1));
 		
 		startReasoner();
 		
