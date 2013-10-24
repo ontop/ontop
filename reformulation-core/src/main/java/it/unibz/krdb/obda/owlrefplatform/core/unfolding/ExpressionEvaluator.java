@@ -896,9 +896,9 @@ public class ExpressionEvaluator {
 	private Term evalUriFunctionsWithSingleTerm(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Term term1 = uriFunction1.getTerm(0);
 		Term term2 = uriFunction2.getTerm(0);
-		if (!(term1 instanceof ValueConstant)) {
-			return null;
-		}
+//		if (!(term1 instanceof ValueConstant)) {
+//			return null;
+//		}
 		if (term2 instanceof Variable) {
 			if (isEqual) {
 				return fac.getFunctionEQ(term2, term1);
