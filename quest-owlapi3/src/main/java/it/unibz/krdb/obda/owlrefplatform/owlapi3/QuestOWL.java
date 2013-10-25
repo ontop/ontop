@@ -537,7 +537,7 @@ public class QuestOWL extends OWLReasonerBase {
 		Set<PropertyFunctionalAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
 		Iterator<PropertyFunctionalAxiom> itf = funcPropAxioms.iterator();
 		
-		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. }";
+		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
 		String strQuery = "";
 		
 		while (isConsistent && itf.hasNext()) {
