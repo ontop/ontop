@@ -49,6 +49,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -207,7 +208,10 @@ public class MappingAnalyzer {
 
 				// Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
-				for (Function atom : atomList) {
+				//for (Function atom : atomList) {
+				Iterator<Function> atomListIter = atomList.iterator();
+				while(atomListIter.hasNext()){
+					Function atom = atomListIter.next();
 					List<Term> terms = atom.getTerms();
 					List<Term> newterms = new LinkedList<Term>();
 					for (Term term : terms) {
@@ -459,14 +463,14 @@ public class MappingAnalyzer {
 				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
-				lookupTable.add(tableColumnName, index);
+				lookupTable.add(tableColumnName, columnName);
 				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
 				
 				// attribute name with table given name prefix
 				tableColumnName = tableGivenName + "." + columnName;
-				lookupTable.add(tableColumnName, index);
+				lookupTable.add(tableColumnName, columnName);
 				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
@@ -474,7 +478,7 @@ public class MappingAnalyzer {
 
 				// attribute name with table name prefix
 				tableColumnName = tableName + "." + columnname;
-				lookupTable.add(tableColumnName, index);
+				lookupTable.add(tableColumnName, columnName);
 				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
@@ -482,7 +486,7 @@ public class MappingAnalyzer {
 
 				// attribute name with table name prefix
 				tableColumnName = tableName + "." + COLUMNNAME;
-				lookupTable.add(tableColumnName, index);
+				lookupTable.add(tableColumnName, columnName);
 				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
@@ -490,9 +494,9 @@ public class MappingAnalyzer {
 				
 				// full qualified attribute name
 				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
-				lookupTable.add(qualifiedColumnName, index);
+				lookupTable.add(qualifiedColumnName, columnName);
 				if (aliasMap.containsKey(qualifiedColumnName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
+					lookupTable.add(aliasMap.get(qualifiedColumnName), columnName);
 				}
 				
 				// full qualified attribute name using table alias
