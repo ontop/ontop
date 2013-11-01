@@ -48,6 +48,12 @@ public interface OntologyFactory {
 	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
 	
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
+	
+	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2);
+	
+	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(Predicate p1, Predicate p2);
+	
+	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(Predicate p1, Predicate p2);
 
 	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
 
