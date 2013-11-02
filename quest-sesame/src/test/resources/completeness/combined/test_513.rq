@@ -1,0 +1,10 @@
+PREFIX : <http://obda.inf.unibz.it/ontologies/tests/dllitef/test_513.owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?x WHERE {
+?x :S ?y1 .
+?y1 :P ?y2 .
+?y3 :P ?y2 .
+?y4 :S ?y3 .
+?y4 a :B .
+}

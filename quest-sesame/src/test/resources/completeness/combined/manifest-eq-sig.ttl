@@ -50,6 +50,7 @@
       :test_510
       :test_511
       :test_512     
+      :test_513     
       :test_87a
       :test_87b
       :test_87c
@@ -538,6 +539,17 @@
         qt:query <test_512.rq>  ] ;
    mf:parameters <quest-eq-sig.properties> ;
    mf:result  <test_512.srx> .
+
+:test_513 rdf:type mf:CompletenessTest ;
+   mf:name "513" ;
+   rdfs:comment "qualified quantifier with inverse role (non-deterministic DAG optimisation)" ;
+   obdat:approval obdat:Approved ;
+   obdat:approvedBy "-ontop- team" ;
+   mf:action
+      [ qt:ontology <test_513.owl> ;
+        qt:query <test_513.rq>  ] ;
+   mf:parameters <quest-eq-sig.properties> ;
+   mf:result  <test_513.srx> .
 
 
 :test_87a rdf:type mf:CompletenessTest ;
