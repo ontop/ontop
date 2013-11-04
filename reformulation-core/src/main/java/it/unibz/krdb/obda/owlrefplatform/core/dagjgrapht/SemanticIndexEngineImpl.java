@@ -1,10 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -157,7 +155,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	@Override
 	public List<Interval> getIntervals(Description d) {
 
-		List<Interval> list= new LinkedList<Interval>();
+		
 		if(ranges.get(d)!=null)
 			return ranges.get(d).getIntervals();
 		SemanticIndexRange range= new SemanticIndexRange(-1, -1);

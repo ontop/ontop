@@ -5,12 +5,22 @@ import java.util.*;
 import org.jgrapht.*;
 
 
+/**
+ * Allows obtaining the strongly connected components of a directed graph. 
+ *
+ *The implemented algorithm follows Cheriyan-Mehlhorn/Gabow's algorithm
+ *Presented in Path-based depth-first search for strong and biconnected componentsby Gabow (2000).
+ *The running time is order of O(|V|+|E|)
+
+ *
+ *
+ */
 
 public class GabowSCC<V, E>
 {
     //~ Instance fields --------------------------------------------------------
 
-    // the graph to compute the strongly connected sets for
+    // the graph to compute the strongly connected sets 
     private final DirectedGraph<V, E> graph;
 
     // stores the vertices
@@ -22,9 +32,12 @@ public class GabowSCC<V, E>
 
 
     // maps vertices to their VertexNumber object
-    private Map<V, VertexNumber<V>> vertexToVertexName;
+    private Map<V, VertexNumber<V>> vertexToVertexNumber;
+    
+    //store the numbers
     private Deque<Integer> B = new ArrayDeque<Integer>();
     
+    //number of vertexes
     private int c; 
 
     //~ Constructors -----------------------------------------------------------
@@ -43,8 +56,7 @@ public class GabowSCC<V, E>
         }
 
         graph = directedGraph;
-        vertexToVertexName = null;
- 
+        vertexToVertexNumber = null;
         
         stronglyConnectedSets = null;
         
@@ -88,20 +100,18 @@ public class GabowSCC<V, E>
 
             
             // create VertexData objects for all vertices, store them
-            createVertexData();
+            createVertexNumber();
 
             // perform  DFS
-            for (VertexNumber<V> data : vertexToVertexName.values()) {
-//            	if(data.getVertex().toString().equals("http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker"))
-//            		System.out.println(Graphs.successorListOf(graph, data.getVertex()) );
+            for (VertexNumber<V> data : vertexToVertexNumber.values()) {
+            	
                 if (data.getNumber()==0) {
                     dfsVisit(graph, data);
                 }
             }
 
-       
-            
-            vertexToVertexName = null;
+                  
+            vertexToVertexNumber = null;
             stack =null;
             B=null;
         }
@@ -115,14 +125,15 @@ public class GabowSCC<V, E>
      * them
      * in a HashMap.
      */
-    private void createVertexData()
+    
+    private void createVertexNumber()
     {
     	c=graph.vertexSet().size();
-        vertexToVertexName =
+        vertexToVertexNumber =
             new HashMap<V, VertexNumber<V>>(c);
 
         for (V vertex : graph.vertexSet()) {
-            vertexToVertexName.put(
+            vertexToVertexNumber.put(
                 vertex,
                 new VertexNumber<V>(vertex, 0));
             
@@ -142,19 +153,14 @@ public class GabowSCC<V, E>
     	 VertexNumber<V> w;
     	 stack.add(v);
     	 B.add(v.setNumber(stack.size()-1));
-//    	 vertexToVertexName.put( v.getVertex(),v);
-//    	 System.out.println(vertexToVertexData.get(v.getVertex()).getNumber());
     	
 
                 // follow all edges
                	
                 	for (E edge : visitedGraph.outgoingEdgesOf(v.getVertex())) {
-                		w =  vertexToVertexName.get(
+                		w =  vertexToVertexNumber.get(
                                 visitedGraph.getEdgeTarget(edge));
-                
-                    
-//                    if(w.getVertex().toString().equals("http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker"))
-//                		System.out.println(Graphs.successorListOf(visitedGraph, v.getVertex())+ " "+v.getVertex());
+
 
                     if (w.getNumber()==0) {
                         dfsVisit(graph, w);
@@ -174,9 +180,7 @@ public class GabowSCC<V, E>
                 while (v.getNumber() <= (stack.size()-1)) {
                 	VertexNumber<V> r= stack.removeLast();
                  L.add(r.getVertex()); 
-//                 stack.remove(stack.size() - 1); 
                  r.setNumber(c);
-//                 vertexToVertexName.put( r.getVertex(),r);
                 } 
                 stronglyConnectedSets.add(L); 
                  } 
@@ -212,6 +216,8 @@ public class GabowSCC<V, E>
     	return number=n;
     	
     }
+    
+ 
 }
 
    

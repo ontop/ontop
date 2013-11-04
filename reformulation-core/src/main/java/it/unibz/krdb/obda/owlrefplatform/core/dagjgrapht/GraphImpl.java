@@ -12,7 +12,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 /** Use to build a simple graph.
  * 
- * A directed graph multiple edges are not permitted, but loops are. 
+ * A directed graph where multiple edges are not permitted, but loops are. 
  *
  */
 
@@ -34,9 +34,6 @@ public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> imp
 
 		
 	}
-
-
-
 
 
 	//return all roles in the graph
