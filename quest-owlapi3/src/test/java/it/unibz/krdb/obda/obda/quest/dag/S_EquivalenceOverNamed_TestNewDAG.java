@@ -93,7 +93,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			assertTrue(testAncestors(namedDag2,dag2,true));
 			assertTrue(testParents(dag2,namedDag2,true));
 			assertTrue(testParents(namedDag2, dag2,true));
-			assertTrue(checkVertexReduction(graph1, namedDag2, true));
+//			assertTrue(checkVertexReduction(graph1, namedDag2, true));
 			//check only if the number of edges is smaller
 			assertTrue(checkEdgeReduction(graph1, namedDag2, true));
 			assertTrue(checkforNamedVertexesOnly(namedDag2));
