@@ -32,7 +32,7 @@ public class S_NewGraphTest  extends TestCase{
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(roleowlfile)));
 
 		log.info("Translating");
 

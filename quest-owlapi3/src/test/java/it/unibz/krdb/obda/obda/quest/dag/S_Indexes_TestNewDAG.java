@@ -28,7 +28,7 @@ public class S_Indexes_TestNewDAG extends TestCase {
 	
 public void setUp(){
 		
-	input.add("src/test/resources/test/stockexchange-unittest.owl");
+//	input.add("src/test/resources/test/stockexchange-unittest.owl");
 		/** C -> B  -> A  C->A*/
 		input.add("src/test/resources/test/newDag/transitive.owl");
 		/** C -> B  -> A  C->D ->A C->A */

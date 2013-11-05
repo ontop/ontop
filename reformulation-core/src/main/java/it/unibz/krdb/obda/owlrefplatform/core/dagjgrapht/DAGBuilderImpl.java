@@ -586,7 +586,7 @@ public class DAGBuilderImpl implements DAGBuilder{
 
 		//each set contains vertices which together form a strongly connected component within the given graph
 		List<Set<Description>> equivalenceClassSets = inspector.stronglyConnectedSets();
-		processedNodes.clear();
+//		processedNodes.clear();
 
 		for (Set<Description> equivalenceClassSet : equivalenceClassSets) {
 
@@ -631,18 +631,17 @@ public class DAGBuilderImpl implements DAGBuilder{
 					if (equivalent instanceof OClass) {
 						notRepresentative =representative;
 						representative=equivalent;
-						namedElement=true;
+//						namedElement=true;
 						//						replacements.put(notRepresentative, representative);
 						//						equivalencesMap.put(notRepresentative, equivalenceSet);
 						break;
 					}
 				}
-				if(!namedElement)
-					representative = null; //if all propertysomerestriction they will be added later with another set with property
+//				if(!namedElement)
+//					representative = null; //if all propertysomerestriction they will be added later with another set with property
 			}
 
-			if(representative==null)
-				continue;
+			
 
 			processedNodes.add(representative);
 			//			equivalencesMap.put(representative, equivalenceClassSet);
@@ -651,11 +650,7 @@ public class DAGBuilderImpl implements DAGBuilder{
 
 
 				Description eliminatedNode = iterator.next();
-				if( eliminatedNode.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument").getPredicate(), false)))
-					System.out.println("Here!");
-
-				if( eliminatedNode.equals(fac.createPropertySomeRestriction(fac.createObjectProperty("http://www.owl-ontologies.com/Ontology1207768242.owl#isTradedIn").getPredicate(), true)))
-					System.out.println("Here!");
+				
 				//				Description eliminatedNode=replacements.get(equivalent);
 				//				if(eliminatedNode==null)
 				//					eliminatedNode=equivalent;
