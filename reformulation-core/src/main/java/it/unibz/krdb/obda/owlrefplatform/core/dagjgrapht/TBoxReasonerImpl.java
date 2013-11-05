@@ -739,88 +739,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return graph;
 	}
 
-	// public Ontology getSigmaOntology() {
-	//
-	// OntologyFactory descFactory = new OntologyFactoryImpl();
-	// Ontology sigma =
-	// descFactory.createOntology(OBDADataFactoryImpl.getIRI("sigma"));
-	//
-	// AbstractGraphIterator<Description, DefaultEdge> iterator= new
-	// BreadthFirstIterator<Description, DefaultEdge>((DAGImpl)dag);
-	// OntologyFactory fac = OntologyFactoryImpl.getInstance();
-	//
-	// while (iterator.hasNext()) {
-	// Description node = iterator.next();
-	// //edges with parents
-	// for(DefaultEdge edge: ((DAGImpl) dag).outgoingEdgesOf(node))
-	// if (((DAGImpl) dag).getEdgeSource(edge) instanceof ClassDescription) {
-	// ClassDescription sub = (ClassDescription)((DAGImpl)
-	// dag).getEdgeSource(edge);
-	// ClassDescription superp = (ClassDescription) ((DAGImpl)
-	// dag).getEdgeTarget(edge);
-	// if (superp instanceof PropertySomeRestriction)
-	// continue;
-	//
-	// Axiom ax = fac.createSubClassAxiom(sub, superp);
-	// sigma.addEntities(ax.getReferencedEntities());
-	// sigma.addAssertion(ax);
-	// } else {
-	// Property sub = (Property) ((DAGImpl) dag).getEdgeSource(edge);
-	// Property superp = (Property) ((DAGImpl) dag).getEdgeTarget(edge);
-	//
-	// Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-	// sigma.addEntities(ax.getReferencedEntities());
-	//
-	// sigma.addAssertion(ax);
-	// }
-	// Set<Description> equivalents = dag.getMapEquivalences().get(node);
-	// for(Description equivalent:equivalents){
-	// if(equivalent!=node){
-	// if (node instanceof ClassDescription) {
-	// ClassDescription sub = (ClassDescription) node;
-	// ClassDescription superp = (ClassDescription) equivalent;
-	// if (superp instanceof PropertySomeRestriction)
-	// continue;
-	//
-	// Axiom ax = fac.createSubClassAxiom(sub, superp);
-	// sigma.addEntities(ax.getReferencedEntities());
-	// sigma.addAssertion(ax);
-	// } else {
-	// Property sub = (Property) node;
-	// Property superp = (Property) equivalent;
-	//
-	// Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-	// sigma.addEntities(ax.getReferencedEntities());
-	//
-	// sigma.addAssertion(ax);
-	// }
-	//
-	// if (equivalent instanceof ClassDescription) {
-	// ClassDescription sub = (ClassDescription) equivalent;
-	// ClassDescription superp = (ClassDescription) node;
-	// if (superp instanceof PropertySomeRestriction)
-	// continue;
-	//
-	// Axiom ax = fac.createSubClassAxiom(sub, superp);
-	// sigma.addEntities(ax.getReferencedEntities());
-	// sigma.addAssertion(ax);
-	// } else {
-	// Property sub = (Property) equivalent;
-	// Property superp = (Property) node;
-	//
-	// Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-	// sigma.addEntities(ax.getReferencedEntities());
-	//
-	// sigma.addAssertion(ax);
-	// }
-	// }
-	// }
-	// }
-	//
-	//
-	// return sigma;
-	// }
-
+	
+	/***
+	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
+	 * relation of the original DAG gets extended to the reachability relation
+	 * of T and Sigma chains.
+	 * 
+	 * 
+	 */
+	
 	public void getChainDAG() {
 		if (dag != null) {
 			// move everything to a graph that admits cycles

@@ -107,7 +107,6 @@ public class DAGChainTest extends TestCase {
 			System.out.println("---- " + nodes);
 		}
 		
-//		res.clean();
 		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
 		reasoner.getChainDAG();
 
@@ -174,7 +173,6 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
 		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology, false);
-		DAG res = reasoner.getDAG();
 		reasoner.getChainDAG();
 
 		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(er, false)));
