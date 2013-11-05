@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.Description;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,12 +28,13 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	private DAGImpl namedDag;
 	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
+	private int index_counter = 1;
 
 	//listener on the depth first sort of the graph
 	public class IndexListener extends TraversalListenerAdapter<Description, DefaultEdge> {
 
 
-		private int index_counter = 1;
+		
 
 
 
@@ -121,18 +123,31 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		DirectedGraph<Description, DefaultEdge> reversed =
 				new EdgeReversedGraph<Description, DefaultEdge>(namedDag);
 
+		LinkedList<Description> roots = new LinkedList<Description>();
+		for (Description n : reversed.vertexSet()) {
+			if ((reversed.incomingEdgesOf(n)).isEmpty()) {
+				roots.add(n);
+			}
+		}
+		
+		for (Description root: roots){
 		//A depth first sort 
 		orderIterator =
-				new DepthFirstIterator<Description, DefaultEdge>(reversed);
+				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
+		
+		
 
 		//add Listener to create the indexes and ranges
 		orderIterator.addTraversalListener(new IndexListener(reversed));
+		
 
 		//		System.out.println("\nIndexing:");
 		while (orderIterator.hasNext()) {
-			orderIterator.next();
+			System.out.println(orderIterator.next());
 
 		}
+		}
+		index_counter=1;
 		//		System.out.println(indexes);
 		//		System.out.println(ranges);
 

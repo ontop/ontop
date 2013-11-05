@@ -51,8 +51,8 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 		Map<Description, Set<Description>> equivalencesDag = dag
 				.getMapEquivalences();
 		Map<Description, Description> replacementsDag = dag.getReplacements();
-		for (Description vertex : ((DAGImpl) dag).vertexSet()) {
-			if (equivalencesDag.containsKey(vertex)) {
+		for (Description vertex : equivalencesDag.keySet()) {
+			
 
 				HashSet<Description> equivalents = new HashSet<Description>();
 				for (Description equivalent : equivalencesDag.get(vertex)) {
@@ -60,7 +60,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 				}
 				equivalencesMap.put(vertex, new HashSet<Description>(
 						equivalents));
-			}
+			
 
 		}
 		for (Description eliminateNode : replacementsDag.keySet()) {
@@ -73,7 +73,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 		for (Description vertex : ((DAGImpl) dag).vertexSet()) {
 
 			// if the vertex has equivalent nodes leave only the named one
-			Set<Description> equivalences = checkEquivalences(vertex);
+//			Set<Description> equivalences = checkEquivalences(vertex);
 
 			// if the node is named keep it
 			if (namedClasses.contains(vertex) | property.contains(vertex)) {
