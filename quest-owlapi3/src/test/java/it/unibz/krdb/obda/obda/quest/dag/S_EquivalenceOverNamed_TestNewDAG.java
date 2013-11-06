@@ -31,7 +31,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
-		input.add("src/test/resources/test/stockexchange-unittest.owl");
+//		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		/** C = B -> ER -> A*/
 		input.add("src/test/resources/test/newDag/equivalents1.owl");
 		/** B -> A -> ER=C */
@@ -65,6 +65,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
+		
 
 
 

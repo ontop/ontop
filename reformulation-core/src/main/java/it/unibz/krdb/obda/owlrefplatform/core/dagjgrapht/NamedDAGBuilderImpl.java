@@ -44,8 +44,8 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 		reasoner = new TBoxReasonerImpl(dag);
 		// take classes, roles, equivalences map and replacements from the DAG
-		namedClasses = namedDag.getClasses();
-		property = namedDag.getRoles();
+		namedClasses = dag.getClasses();
+		property = dag.getRoles();
 
 		// clone the equivalences and replacements map
 		Map<Description, Set<Description>> equivalencesDag = dag
