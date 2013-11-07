@@ -781,8 +781,26 @@ public class DAGBuilderImpl implements DAGBuilder {
 					if (eliminatedNode.equals(representative)
 							& notRepresentative != null)
 						eliminatedNode = notRepresentative;
+					
+					Description replacement= replacements.get(eliminatedNode);
+					
 					replacements.put(eliminatedNode, representative);
 
+					/* check if the node has been already replaced by an other in the first part with property 
+					 * if substitute check if its replacements still has to be processed
+					 */
+					if(replacement!=null)
+					if(!processedClassNodes.contains(replacement))
+					{
+						processedClassNodes.add(eliminatedNode);
+						eliminatedNode=replacement;
+						replacements.put(eliminatedNode, representative);
+					}
+					else 
+					{
+						processedClassNodes.add(eliminatedNode);
+						continue;
+					}
 					// equivalencesMap.put(eliminatedNode, equivalenceClassSet);
 
 					// if(!modifiedGraph.containsVertex(eliminatedNode)){
