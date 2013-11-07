@@ -143,7 +143,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 
 		//		System.out.println("\nIndexing:");
 		while (orderIterator.hasNext()) {
-			System.out.println(orderIterator.next());
+			orderIterator.next();
 
 		}
 		}

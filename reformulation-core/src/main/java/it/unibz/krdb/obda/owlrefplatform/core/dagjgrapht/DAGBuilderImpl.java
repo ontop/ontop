@@ -270,21 +270,20 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 			}
 
-			// if(!ignore){ //I try to consider first the element that are
-			// connected
-			//
-			// for(Property p: namedRoles){
-			// Description inverse = fac.createProperty(p.getPredicate(),
-			// !p.isInverse());
-			// if(equivalenceSet.contains(p)){
-			// break;
-			// }
-			// if(equivalenceSet.contains(inverse)){
-			// ignore=true;
-			// break;
-			// }
-			// }
-			// }
+			 if(!ignore){ //I try to consider first the element that are connected
+			
+			 for(Property p: namedRoles){
+			 Description inverse = fac.createProperty(p.getPredicate(),
+			 !p.isInverse());
+			 if(equivalenceSet.contains(p)){
+			 break;
+			 }
+			 if(equivalenceSet.contains(inverse)){
+			 ignore=true;
+			 break;
+			 }
+			 }
+			 }
 
 			if (ignore)
 				continue;
