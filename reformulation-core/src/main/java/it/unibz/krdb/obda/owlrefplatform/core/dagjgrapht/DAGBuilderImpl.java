@@ -250,12 +250,14 @@ public class DAGBuilderImpl implements DAGBuilder {
 			/*
 			 * Avoiding processing nodes two times, but assign the equivalentMap
 			 */
-			boolean ignore = false;
+			boolean ignore=false, toName= false;
 
 			for (Description node : equivalenceSet) {
 
 				if (!ignore && processedNodes.contains(node)) {
 					ignore = true;
+					if(node instanceof Property)
+						toName=true;
 
 					// break;
 
@@ -270,22 +272,100 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 			}
 
-			 if(!ignore){ //I try to consider first the element that are connected
-			
-			 for(Property p: namedRoles){
-			 Description inverse = fac.createProperty(p.getPredicate(),
-			 !p.isInverse());
-			 if(equivalenceSet.contains(p)){
-			 break;
-			 }
-			 if(equivalenceSet.contains(inverse)){
-			 ignore=true;
-			 break;
-			 }
-			 }
-			 }
+			if(toName)
+			{
+				Iterator<Description> iterator = equivalenceSet.iterator();
+				Description first = iterator.next();
+				Description representative= replacements.get(first);
+				if(representative==null)
+					representative=first;
+				Description notRepresentative = null;
+
+				// if it is inverse I search a not inverse element as representative
+				if (((Property) representative).isInverse()) {
+					boolean notInverse = false;
+					for (Description equivalent : equivalenceSet) {
+						if (equivalent instanceof Property
+								&& !((Property) equivalent).isInverse()) {
+							notRepresentative = representative;
+							representative = equivalent;
+							notInverse = true;
+							for (Description element : equivalenceSet) {
+								if (element.equals(representative)){
+									replacements.remove(element);
+									modifiedGraph.addVertex(representative);
+									continue;
+									
+								}
+
+								replacements.put(element, representative);
+							}
+							 
+							 
+							break;
+						}
+					}
+					if (notInverse)
+					{
+						Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
+								modifiedGraph.incomingEdgesOf(notRepresentative));
+
+						for (DefaultEdge incEdge : edges) {
+							Description source = modifiedGraph
+									.getEdgeSource(incEdge);
+
+							modifiedGraph.removeAllEdges(source, notRepresentative);
+
+							if (source.equals(representative))
+								continue;
+
+							modifiedGraph.addEdge(source, representative);
+						}
+
+						edges = new HashSet<DefaultEdge>(
+								modifiedGraph.outgoingEdgesOf(notRepresentative));
+
+						for (DefaultEdge outEdge : edges) {
+							Description target = modifiedGraph
+									.getEdgeTarget(outEdge);
+
+							modifiedGraph.removeAllEdges(notRepresentative, target);
+
+							if (target.equals(representative))
+								continue;
+
+//			
+							modifiedGraph.addEdge(representative, target);
+
+						}
+
+						modifiedGraph.removeVertex(notRepresentative);
+
+						processedNodes.add(notRepresentative);
+					}
+					
+						
+				}
+				if (representative == null)
+					continue;
+			}
+//			 if(!ignore){ //I try to consider first the element that are connected
+//			
+//			 for(Property p: namedRoles){
+//			 Description inverse = fac.createProperty(p.getPredicate(),
+//			 !p.isInverse());
+//			 if(equivalenceSet.contains(p)){
+//			 break;
+//			 }
+//			 if(equivalenceSet.contains(inverse)){
+//			 ignore=true;
+//			 break;
+//			 }
+//			 }
+//			 }
 
 			if (ignore)
+				
 				continue;
 
 			Iterator<Description> iterator = equivalenceSet.iterator();
