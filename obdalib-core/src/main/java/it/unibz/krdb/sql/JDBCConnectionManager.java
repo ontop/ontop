@@ -609,23 +609,14 @@ public class JDBCConnectionManager {
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tableGivenName);
-					//rsColumns = md.getColumns(null, tableOwner, tblName, null);
-					/* New method getting columns for both tables and views */
-					
-					final String columnSelectQuery = "SELECT * FROM " + tableGivenName;
-					rsColumns = stmt.executeQuery(columnSelectQuery);
-					ResultSetMetaData rmd = rsColumns.getMetaData();
-					
-					//for (int pos = 1; rsColumns.next(); pos++) {
-					for(int pos = 1; pos <= rmd.getColumnCount(); pos++){
-						//final String columnName = rsColumns.getString("COLUMN_NAME");
-						final String columnName = rmd.getColumnName(pos); 
-						//final int dataType = rsColumns.getInt("DATA_TYPE");
-						final int dataType = rmd.getColumnType(pos);
+					rsColumns = md.getColumns(null, tableOwner, tblName, null);
+			
+					for (int pos = 1; rsColumns.next(); pos++) {
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
-						//final int isNullable = rsColumns.getInt("NULLABLE");
-						final int isNullable = rmd.isNullable(pos);
+						final int isNullable = rsColumns.getInt("NULLABLE");
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 					}
 					// Add this information to the DBMetadata
