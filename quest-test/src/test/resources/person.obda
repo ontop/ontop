@@ -1,0 +1,24 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#
+
+[SourceDeclaration]
+sourceUri	person
+connectionUrl	jdbc:mysql://10.7.20.39/optional_test
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-1006f0dbb06844d59f019373151efbb9
+target		:{id} a :Person ; :name {firstname} ; :age {age} ; :mbox {mbox} . 
+source		select id, firstname, age, mbox from people
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dde6
+target		:{id} a :Person ; :nick1 {nick1} . 
+source		select id, nick1 from people
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dde9
+target		:{id} a :Person ; :nick2 {nick2} . 
+source		select id, nick2 from people
+]]
+

@@ -1,4 +1,14 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.io;
+
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +35,15 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	public SimplePrefixManager() {
 		uriToPrefixMap = new HashMap<String, String>();
 		prefixToURIMap = new HashMap<String, String>();
+		initKnownPrefixes();
+	}
+
+	private void initKnownPrefixes() {
+		addPrefix(OBDAVocabulary.PREFIX_RDF, OBDAVocabulary.NS_RDF);
+		addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
+		addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
+		addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
+		addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
 	}
 
 	@Override
@@ -34,8 +53,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 			throw new NullPointerException("Prefix name must not be null");
 		}
 		if (!prefix.endsWith(":")) {
-			throw new IllegalArgumentException(
-					"Prefix names must end with a colon (:)");
+			throw new IllegalArgumentException("Prefix names must end with a colon (:)");
 		}
 		
 		prefixToURIMap.put(prefix, getProperPrefixURI(uri));
@@ -100,5 +118,4 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
 	}
-
 }

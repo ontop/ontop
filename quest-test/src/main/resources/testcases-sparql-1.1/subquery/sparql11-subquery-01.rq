@@ -1,0 +1,11 @@
+PREFIX : <http://example/>
+SELECT ?y ?ageNextYear
+WHERE {
+  :alice :knows ?y .
+  {
+    SELECT ?y (?age+1 as ?ageNextYear)
+    WHERE {
+      ?y :age ?age .
+    } 
+  }
+}

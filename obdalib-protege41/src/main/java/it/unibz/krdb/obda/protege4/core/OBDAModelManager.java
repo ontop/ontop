@@ -1,6 +1,13 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.protege4.core;
 
-import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
@@ -13,9 +20,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OBDAModelRefactorer;
+import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
@@ -144,8 +152,23 @@ public class OBDAModelManager implements Disposable {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 					IRI newiri = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
+					
+					if (newiri == null)
+						continue;
+					
 					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI();
+					
+					log.debug("Ontology ID changed");
+					log.debug("Old ID: {}", oldiri);
+					log.debug("New ID: {}", newiri);
+					
 					OBDAModel model = obdamodels.get(oldiri.toURI());
+					
+					if (model == null) {
+						setupNewOBDAModel();
+						model = getActiveOBDAModel();
+					}
+					
 					PrefixManager prefixManager = model.getPrefixManager();
 					prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, newiri.toURI().toString());
 
@@ -461,7 +484,7 @@ public class OBDAModelManager implements Disposable {
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
-					OBDAModelRefactorer refactorer = new OBDAModelRefactorer(activeOBDAModel, activeOntology);
+					OBDAModelValidator refactorer = new OBDAModelValidator(activeOBDAModel, activeOntology);
 					refactorer.run(); // adding type information to the mapping predicates.
 				} catch (Exception e) {
 					OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());

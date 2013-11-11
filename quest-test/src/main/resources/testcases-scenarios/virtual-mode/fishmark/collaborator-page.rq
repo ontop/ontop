@@ -1,0 +1,20 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?prename ?surname  ?email ?webpage ?fax ?institute ?street ?city ?country ?comments ?keywords ?year
+WHERE {
+   ?x fd:collaborators_Personnel "333"^^xsd:int .
+   OPTIONAL {?x fd:collaborators_Prename ?prename }.
+   OPTIONAL {?x fd:collaborators_Surname ?surname }.
+   OPTIONAL {?x fd:collaborators_E-mail ?email }.
+   OPTIONAL {?x fd:collaborators_StaffPhoto ?photo }.
+   OPTIONAL {?x fd:collaborators_WebPage ?webpage }.
+   OPTIONAL {?x fd:collaborators_FAX ?fax }.
+   OPTIONAL {?x fd:collaborators_Institute ?institute }.
+   OPTIONAL {?x fd:collaborators_Street ?street }.
+   OPTIONAL {?x fd:collaborators_City ?city }.
+   OPTIONAL {?x fd:collaborators_Country ?country }.
+   OPTIONAL {?x fd:collaborators_Comments ?comments }.
+   OPTIONAL {?x fd:collaborators_Keywords ?keywords }.
+   OPTIONAL {?x fd:collaborators_Year ?year }.
+}

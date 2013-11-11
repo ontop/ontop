@@ -1,8 +1,16 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -77,11 +85,11 @@ public class URIToFunctionMatcher implements Serializable {
 		if (existing.getFunctionSymbol().getArity() != constanturis.length)
 			return null;
 
-		List<NewLiteral> constantTerms = new LinkedList<NewLiteral>();
+		List<Term> constantTerms = new LinkedList<Term>();
 		for (String constantstr : constanturis) {
-			constantTerms.add(tFact.getValueConstant(constantstr));
+			constantTerms.add(tFact.getConstantLiteral(constantstr));
 		}
-		return tFact.getFunctionalTerm(existing.getFunctionSymbol(), constantTerms);
+		return tFact.getFunction(existing.getFunctionSymbol(), constantTerms);
 
 	}
 }

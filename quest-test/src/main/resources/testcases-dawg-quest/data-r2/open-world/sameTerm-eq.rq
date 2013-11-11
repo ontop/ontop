@@ -1,0 +1,11 @@
+# Test: sameTerm and eq
+# $Id: sameTerm-eq.rq,v 1.1 2007/06/18 20:07:56 lfeigenb Exp $
+
+PREFIX     :    <http://example/>
+
+SELECT *
+{
+    ?x1 :p ?v1 .
+    ?x2 :p ?v2 .
+    FILTER ( sameTerm(?v1, ?v2) && ?v1 = ?v2 )
+}

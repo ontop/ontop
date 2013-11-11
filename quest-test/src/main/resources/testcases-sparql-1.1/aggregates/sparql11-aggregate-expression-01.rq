@@ -1,0 +1,6 @@
+PREFIX : <http://example/>
+SELECT ?book (MIN(?r) * 2 AS ?doubleMin)
+WHERE { 
+        ?book :rating ?r . 
+}
+GROUP BY ?book

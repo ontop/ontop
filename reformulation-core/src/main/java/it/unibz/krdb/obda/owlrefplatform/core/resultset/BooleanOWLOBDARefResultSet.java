@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.Constant;
@@ -36,7 +44,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 		this.st = st;
 		try {
 			isTrue = set.next();
-			valueConstant = this.fac.getValueConstant(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+			valueConstant = this.fac.getConstantLiteral(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getMessage());
 		}

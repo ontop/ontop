@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package sesameWrapper;
 
 import it.unibz.krdb.obda.model.Predicate;
@@ -84,6 +92,10 @@ public class SemanticIndexManager {
 
 		log.debug("Semantic Index repository has been setup.");
 
+	}
+	
+	public void dropRepository() throws SQLException {
+		dataRepository.dropDBSchema(conn);
 	}
 
 	public void updateMetadata() throws SQLException {

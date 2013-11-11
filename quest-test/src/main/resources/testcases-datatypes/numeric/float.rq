@@ -1,0 +1,7 @@
+PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
+
+SELECT ?x ?y
+WHERE {
+   ?x a :Row; :hasFloat ?y
+   FILTER ( ?y = 1e+0 ) .
+}

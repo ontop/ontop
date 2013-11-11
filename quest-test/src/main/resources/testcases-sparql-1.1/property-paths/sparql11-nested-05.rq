@@ -1,0 +1,6 @@
+PREFIX :   <http://example.org/> 
+SELECT ?x ?y
+WHERE 
+{
+    ?x (:p1|:p2)/:p3* ?y
+}

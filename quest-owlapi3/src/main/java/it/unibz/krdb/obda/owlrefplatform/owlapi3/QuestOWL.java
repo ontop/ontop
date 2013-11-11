@@ -1,22 +1,35 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
+import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.impl.DisjointClassAxiomImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.utils.VersionInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +44,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -91,7 +103,6 @@ import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
-import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +111,7 @@ import org.slf4j.LoggerFactory;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQueryReasoner {
+public class QuestOWL extends OWLReasonerBase {
 
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -114,7 +125,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 	private DataPropertyHierarchyInfo dataPropertyHierarchyInfo = new DataPropertyHierarchyInfo();
 
-	private static final Version version = new Version(1, 7, 0, 0);
+	private Version version;
 
 	private boolean interrupted = false;
 
@@ -138,7 +149,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 	/* The merge and tranlsation of all loaded ontologies */
 	private Ontology translatedOntologyMerge;
 
-	private OBDAModel obdaModel;
+	private OBDAModel obdaModel = null;
 
 	private QuestPreferences preferences = new QuestPreferences();
 
@@ -167,11 +178,37 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 		man = rootOntology.getOWLOntologyManager();
 
-		this.obdaModel = obdaModel;
+		if (obdaModel != null)
+			this.obdaModel = (OBDAModel)obdaModel.clone();
+		
 		this.preferences.putAll(preferences);
 
+		extractVersion();
+		
 		prepareReasoner();
 
+	}
+
+	/**
+	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
+	 */
+	private void extractVersion() {
+		VersionInfo versonInfo = VersionInfo.getVersionInfo();
+		String versionString = versonInfo.getVersion();
+		String[] splits = versionString.split("\\.");
+		int major = 0;
+		int minor = 0;
+		int patch = 0;
+		int build = 0;
+		try {
+			major = Integer.parseInt(splits[0]);
+			minor = Integer.parseInt(splits[1]);
+			patch = Integer.parseInt(splits[2]);
+			build = Integer.parseInt(splits[3]);
+		} catch (Exception ex) {
+
+		}
+		version = new Version(major, minor, patch, build);
 	}
 
 	public void flush() {
@@ -187,17 +224,10 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		this.preferences = preferences;
 	}
 
-	@Override
-	public OWLStatement getStatement() throws OWLException {
+	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
-			OWLReasonerRuntimeException owlReasonerRuntimeException = new OWLReasonerRuntimeException(
-					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) {
-
-						/**
-						 * 
-						 */
-				private static final long serialVersionUID = 1L;
-				};
+			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
+					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) ;
 				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
 			throw owlReasonerRuntimeException;
 		}
@@ -336,13 +366,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
-	@Override
-	public void loadOBDAModel(OBDAModel model) {
-		obdaModel = (OBDAModel) model.clone();
-	}
 
-	@Override
-	public OWLConnection getConnection() throws OBDAException {
+
+	public QuestOWLConnection getConnection() throws OBDAException {
 		return owlconn;
 	}
 
@@ -460,8 +486,84 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
-		return true;
+		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
+	
+	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+		boolean isConsistent = true;
+		
+		//deal with disjoint classes
+		Set<DisjointDescriptionAxiom> disjointAxioms = translatedOntologyMerge.getDisjointDescriptionAxioms();
+		Iterator<DisjointDescriptionAxiom> it = disjointAxioms.iterator();
+		
+		//create ask query
+		String strQueryClass = "ASK {?x a <%s>; a <%s> }";
+		String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+		String strQuery = "";
+		
+		while (isConsistent && it.hasNext()) {		
+			
+			DisjointDescriptionAxiom dda = it.next();
+			if (dda instanceof DisjointClassAxiom) {
+				DisjointClassAxiom dc = (DisjointClassAxiom)dda;
+				strQuery = String.format(strQueryClass, dc.getFirst(), dc.getSecond());
+			} else if (dda instanceof DisjointPropertyAxiom) {
+				DisjointPropertyAxiom dp = (DisjointPropertyAxiom) dda;
+				strQuery = String.format(strQueryProp, dp.getFirst(), dp.getSecond());
+			}
+			
+			QuestStatement query;
+			try {
+				query = conn.createStatement();
+				ResultSet rs = query.execute(strQuery);
+				TupleResultSet trs = ((TupleResultSet)rs);
+				if (trs!= null && trs.nextRow()){
+					String value = trs.getConstant(0).getValue();
+					boolean b = Boolean.parseBoolean(value);
+					isConsistent = !b;
+				}
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return isConsistent;
+	}
+	
+	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+		boolean isConsistent = true;
+		
+		//deal with functional properties
+		Set<PropertyFunctionalAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
+		Iterator<PropertyFunctionalAxiom> itf = funcPropAxioms.iterator();
+		
+		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
+		String strQuery = "";
+		
+		while (isConsistent && itf.hasNext()) {
+			
+			PropertyFunctionalAxiom pfa = itf.next();
+			String propFunc = pfa.getReferencedEntities().iterator().next().getName();
+			strQuery = String.format(strQueryFunc, propFunc, propFunc);
+			
+			QuestStatement query;
+			try {
+				query = conn.createStatement();
+				ResultSet rs = query.execute(strQuery);
+				TupleResultSet trs = ((TupleResultSet)rs);
+				if (trs!= null && trs.nextRow()){
+					String value = trs.getConstant(0).getValue();
+					boolean b = Boolean.parseBoolean(value);
+					isConsistent = !b;
+				}
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return isConsistent;
+	}
+	
 
 	public boolean isSatisfiable(OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {

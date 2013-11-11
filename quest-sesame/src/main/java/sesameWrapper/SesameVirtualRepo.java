@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package sesameWrapper;
 
 import it.unibz.krdb.obda.model.OBDAException;
@@ -5,12 +13,18 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
+import it.unibz.krdb.sql.DBMetadata;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
+import java.util.Properties;
 
+import org.openrdf.model.Graph;
 import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
@@ -22,10 +36,60 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		this(name, null, obdaFile, existential, rewriting);
 	}
 	
+	public SesameVirtualRepo(String name, String obdaFile, String configFileName) throws Exception {
+		this(name, null, obdaFile, configFileName);
+	}
+	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		super();
+		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting));
+	}	
+	
+	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
+		super();
+		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName));
+	}
+	
+	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, String configFileName) throws Exception {
+		super();
+		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName));
+	}
 
+	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, QuestPreferences config) throws Exception {
+		this(name, tbox, mappings, null, config);
+	}
+	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
+		super();
+		createRepo(name, tbox, mappings, metadata, prop);
+	}
+	
+	/**
+	 * Generate QuestPreferences from a config file
+	 * @param configFileName - the path to the config file
+	 * @return the read QuestPreferences object
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private QuestPreferences getPreferencesFromFile(String configFileName) throws FileNotFoundException, IOException {
+		QuestPreferences pref = new QuestPreferences();
+		if (!configFileName.isEmpty()) {
+			File configFile = new File(URI.create(configFileName));
+			pref.readDefaultPropertiesFile(new FileInputStream(configFile));
+		} else {
+			pref.readDefaultPropertiesFile();
+		}
+		return pref;
+	}
+	
+	/**
+	 * Generate a QuestPreferences object from some passed
+	 * arguments as settings
+	 * @param existential - boolean to turn existential reasoning on or off (default=false)
+	 * @param rewriting - String to indicate rewriting technique to be used (default=TreeWitness)
+	 * @return the QuestPreferences object
+	 */
+	private QuestPreferences getPreferencesFromSettings(boolean existential, String rewriting) {
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		if (existential)
@@ -36,51 +100,40 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		else if (rewriting.equals("Default"))
 			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		
-		createRepo(name, tboxFile, obdaFile, pref);
+		return pref;
 	}
 	
-	public SesameVirtualRepo(String name, String obdaFile, String configFileName) throws Exception {
-		
-		this(name, null, obdaFile, configFileName);
+	private void createRepo(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
+	{
+		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}
-	
-	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
-		super();
-		QuestPreferences pref = new QuestPreferences();
-		if (!configFileName.isEmpty()) {
-			File configFile = new File(URI.create(configFileName));
-			pref.readDefaultPropertiesFile(new FileInputStream(configFile));
-		} else {
-			pref.readDefaultPropertiesFile();
-		}
-		
-		createRepo(name, tboxFile, obdaFile, pref);
-	}
-	
 	
 	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref) throws Exception
 	{
 		if (mappingFile == null) {
+			//if we have no mappings
 			this.virtualStore = new QuestDBVirtualStore(name, pref);
 			
 		} else {
+			//generate obdaURI
 			URI obdaURI;
 			if (mappingFile.startsWith("file:"))
 				obdaURI = URI.create(mappingFile);
 			else
 				 obdaURI = new File(mappingFile).toURI();
 		
-			if (tboxFile == null)
+			if (tboxFile == null) {
+				//if we have no owl file
 				this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);
-			else {
+			} else {
+				//if we have both owl and mappings file
+				//generate tboxURI
 				URI tboxURI;
 				if (tboxFile.startsWith("file:"))
 					 tboxURI = URI.create(tboxFile);
 				else 
 					tboxURI = new File(tboxFile).toURI();
-				this.virtualStore = new QuestDBVirtualStore(name, tboxURI,
-						obdaURI, pref);
+				this.virtualStore = new QuestDBVirtualStore(name, tboxURI,	obdaURI, pref);
 			}
 		}
 	}

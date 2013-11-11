@@ -1,15 +1,24 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
+import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
+import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,7 +34,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	private static final long serialVersionUID = 5789854661851692098L;
 	private Function head = null;
-	private List<Function> body = null;
+	private EventGeneratingList<Function> body = null;
 
 	private int hash = -1;
 	private boolean rehash = true;
@@ -39,13 +48,12 @@ public class CQIEImpl implements CQIE, ListListener {
 	private OBDAQueryModifiers modifiers = null;
 
 	// TODO Remove isBoolean from the signature and from any method
-	protected CQIEImpl(Function head, List<Function> body) {
-
+	protected CQIEImpl(Function head, List<Function> body) {		
 		// The syntax for CQ may contain no body, thus, this condition will
 		// check whether the construction of the link list is possible or not.
 		if (body != null) {
-			EventGeneratingArrayList<Function> eventbody = new EventGeneratingArrayList<Function>(body.size()*20);
-			eventbody.addAll(body);
+			EventGeneratingList<Function> eventbody = new EventGeneratingLinkedList<Function>();
+			eventbody.addAll(body);				
 			this.body = eventbody;
 
 			registerListeners(eventbody);
@@ -56,12 +64,39 @@ public class CQIEImpl implements CQIE, ListListener {
 		// will check whether we can look for the head terms or not.
 		if (head != null) {
 			this.head = head;
-			EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
+			EventGeneratingList<Term> headterms = (EventGeneratingList<Term>) head.getTerms();
 			headterms.addListener(this);
 		}
 	}
+	
+	// TODO Remove isBoolean from the signature and from any method
+		protected CQIEImpl(Function head, Function[] body) {
+			
+			
 
-	private void registerListeners(EventGeneratingArrayList<? extends NewLiteral> functions) {
+			// The syntax for CQ may contain no body, thus, this condition will
+			// check whether the construction of the link list is possible or not.
+			if (body != null) {
+				EventGeneratingList<Function> eventbody = new EventGeneratingLinkedList<Function>();
+				Collections.addAll(eventbody, body);
+				this.body = eventbody;
+
+				registerListeners(eventbody);
+				// TODO possible memory leak!!! we should also de-register when objects are removed
+			}
+
+			// The syntax for CQ may also contain no head, thus, this condition
+			// will check whether we can look for the head terms or not.
+			if (head != null) {
+				this.head = head;
+				EventGeneratingList<Term> headterms = (EventGeneratingList<Term>) head.getTerms();
+				headterms.addListener(this);
+			}
+		}
+		
+		
+
+	private void registerListeners(EventGeneratingList<? extends Term> functions) {
 
 		functions.addListener(this);
 
@@ -70,7 +105,7 @@ public class CQIEImpl implements CQIE, ListListener {
 				continue;
 			}
 			Function f = (Function) o;
-			EventGeneratingArrayList<NewLiteral> list = (EventGeneratingArrayList<NewLiteral>) f.getTerms();
+			EventGeneratingList<Term> list = (EventGeneratingList<Term>) f.getTerms();
 			list.addListener(this);
 			registerListeners(list);
 		}
@@ -87,7 +122,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void updateHead(Function head) {
 		this.head = head;
 
-		EventGeneratingArrayList<NewLiteral> headterms = (EventGeneratingArrayList<NewLiteral>) head.getTerms();
+		EventGeneratingList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
 		headterms.removeListener(this);
 		headterms.addListener(this);
 		listChanged();
@@ -102,7 +137,8 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public int hashCode() {
 		if (rehash) {
-			hash = toString().hashCode();
+			string = toString();
+			hash = string.hashCode();
 			rehash = false;
 		}
 		return hash;
@@ -110,10 +146,15 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public String toString() {
+		/* expensive, so only compute the string if necessary */
 		if (string == null) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(head.toString());
-			sb.append(SPACE + INV_IMPLIES + SPACE); // print " :- "
+			sb.append(SPACE);
+			sb.append(INV_IMPLIES);
+			sb.append(SPACE);
+			
+			
 
 			Iterator<Function> bit = body.iterator();
 			while (bit.hasNext()) {
@@ -121,7 +162,8 @@ public class CQIEImpl implements CQIE, ListListener {
 				sb.append(atom.toString());
 
 				if (bit.hasNext()) { // if there is a next atom.
-					sb.append(COMMA + SPACE); // print ", "
+					sb.append(COMMA);
+					sb.append(SPACE); // print ", "
 				}
 			}
 			string = sb.toString();
@@ -131,7 +173,7 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public CQIEImpl clone() {
-		Function copyHead = (Atom) head.clone();
+		Function copyHead = (Function)head.clone();
 		List<Function> copyBody = new ArrayList<Function>(body.size() + 10);
 
 		for (Function atom : body) {
@@ -178,7 +220,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
 		for (Function atom : body)
-			for (NewLiteral t : atom.getTerms()) {
+			for (Term t : atom.getTerms()) {
 				for (Variable v : t.getReferencedVariables())
 					vars.add(v);
 			}
@@ -210,5 +252,10 @@ public class CQIEImpl implements CQIE, ListListener {
 			}
 		}
 		return vars;
+	}
+
+	@Override
+	public boolean hasModifiers() {
+		return modifiers.hasModifiers();
 	}
 }

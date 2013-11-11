@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="President"/>
+    <variable name="Party"/>
+  </head>
+  <results>
+    <result>
+      <binding name="President"><uri>http://dbpedia.org/resource/Barack_Obama</uri></binding>
+      <binding name="Party"><uri>http://dbpedia.org/resource/Democratic_Party_(United_States)</uri></binding>
+    </result>
+    <result>
+      <binding name="President"><uri>http://dbpedia.org/resource/George_Washington</uri></binding>
+      <binding name="Party"><uri>http://dbpedia.org/resource/Independent_(politician)</uri></binding>
+    </result>
+    <result>
+      <binding name="President"><uri>http://dbpedia.org/resource/George_W._Bush</uri></binding>
+      <binding name="Party"><uri>http://dbpedia.org/resource/Republican_Party_(United_States)</uri></binding>
+    </result>
+    <result>
+      <binding name="President"><uri>http://dbpedia.org/resource/Bill_Clinton</uri></binding>
+      <binding name="Party"><uri>http://dbpedia.org/resource/Democratic_Party_(United_States)</uri></binding>
+    </result>
+    <result>
+      <binding name="President"><uri>http://dbpedia.org/resource/Franklin_D._Roosevelt</uri></binding>
+      <binding name="Party"><uri>http://dbpedia.org/resource/History_of_the_Democratic_Party_(United_States)</uri></binding>
+    </result>               
+  </results>
+</sparql>
+

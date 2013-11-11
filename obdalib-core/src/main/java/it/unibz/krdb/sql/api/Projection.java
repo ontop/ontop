@@ -1,16 +1,25 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 public class Projection implements Serializable {
 
 	private static final long serialVersionUID = -1926279507915359040L;
 	
-	private static final int SELECT_DEFAULT = 0;
-	private static final int SELECT_ALL = 1;
-	private static final int SELECT_DISTINCT = 2;
+	public static final int SELECT_DEFAULT = 0;
+	public static final int SELECT_ALL = 1;
+	public static final int SELECT_DISTINCT = 2;
 
 	private int type;
 
@@ -55,7 +64,7 @@ public class Projection implements Serializable {
 	 * @param columns
 	 *            The input column list.
 	 */
-	public void addAll(ArrayList<DerivedColumn> columns) {
+	public void addAll(List<DerivedColumn> columns) {
 		selectList.addAll(columns);
 	}
 
@@ -66,7 +75,7 @@ public class Projection implements Serializable {
 	 * @param columns
 	 *            The new column list.
 	 */
-	public void update(ArrayList<DerivedColumn> columns) {
+	public void update(List<DerivedColumn> columns) {
 		selectList.clear();
 		addAll(columns);
 	}

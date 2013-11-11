@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import it.unibz.krdb.obda.model.Function;
@@ -143,7 +151,7 @@ public class JDBCUtility implements Serializable {
 		String datetime = rdfliteral.getValue().replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');
 		int zlocation = datetime.indexOf('Z');
-		int minuslocation = datetime.indexOf('-');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
 		int pluslocation = datetime.indexOf('+');
 		StringBuilder bf = new StringBuilder(datetime);
 		if (zlocation != -1) {
@@ -191,7 +199,7 @@ public class JDBCUtility implements Serializable {
 	public String getSQLLexicalFormBoolean(ValueConstant rdfliteral) {
 		String value = rdfliteral.getValue().toLowerCase();
 		String sql = null;
-		if (value.equals("1") || value.equals("true")) {
+		if (value.equals("1") || value.equals("true") || value.equals("t")) {
 			switch (driver) {
 			case MYSQL:
 			case H2:
@@ -207,7 +215,7 @@ public class JDBCUtility implements Serializable {
 				sql = "'TRUE'";
 				break;
 			}
-		} else if (value.equals("0") || value.equals("false")) {
+		} else if (value.equals("0") || value.equals("false") || value.equals("f")) {
 			switch (driver) {
 			case MYSQL:
 			case H2:
@@ -227,5 +235,15 @@ public class JDBCUtility implements Serializable {
 			throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
 		}
 		return sql;
+	}
+
+
+
+
+	/**
+	 * @return
+	 */
+	public String getDummyTable() {
+		return "(SELECT 1)";
 	}
 }

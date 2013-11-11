@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -63,7 +71,7 @@ public class MappingVocabularyTranslator {
 					if (equivalent == null)
 						newatom = atom;
 					else {
-						newatom = dfac.getAtom(((OClass) equivalent).getPredicate(), atom.getTerms());
+						newatom = dfac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerms());
 
 					}
 				} else {
@@ -74,9 +82,9 @@ public class MappingVocabularyTranslator {
 					else {
 						Property equiprop = (Property) equivalent;
 						if (!equiprop.isInverse()) {
-							newatom = dfac.getAtom(equiprop.getPredicate(), atom.getTerms());
+							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms());
 						} else {
-							newatom = dfac.getAtom(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
+							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
 						}
 					}
 				}

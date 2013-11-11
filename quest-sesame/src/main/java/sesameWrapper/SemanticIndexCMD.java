@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package sesameWrapper;
 
 import it.unibz.krdb.obda.io.QueryIOManager;
@@ -20,8 +28,6 @@ import it.unibz.krdb.sql.JDBCConnectionManager;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
-
-import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;

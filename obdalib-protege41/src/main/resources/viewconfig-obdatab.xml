@@ -28,11 +28,11 @@
 
 		<VSNode splits="1.0">
 			<CNode>
-				<Component label="Datasource Manager">
+				<Component label="Datasource manager">
 					<Property id="pluginId"
 						value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent" />
 				</Component>
-				<Component label="Mapping Manager">
+				<Component label="Mapping manager">
 					<Property id="pluginId"
 						value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent" />
 				</Component>

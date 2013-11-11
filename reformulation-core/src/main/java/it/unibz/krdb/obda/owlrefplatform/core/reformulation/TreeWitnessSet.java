@@ -1,7 +1,15 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
@@ -67,7 +75,7 @@ public class TreeWitnessSet {
 		QueryFolding qf = new QueryFolding(propertiesCache); // in-place query folding, so copying is required when creating a tree witness
 		
 		for (Loop loop : cc.getQuantifiedVariables()) {
-			NewLiteral v = loop.getTerm();
+			Term v = loop.getTerm();
 			log.debug("QUANTIFIED VARIABLE {}", v); 
 			qf.newOneStepFolding(v);
 			
@@ -168,8 +176,8 @@ public class TreeWitnessSet {
 
 			saturated = false; 
 
-			NewLiteral rootNewLiteral = rootLoop.getTerm();
-			NewLiteral internalNewLiteral = internalLoop.getTerm();
+			Term rootNewLiteral = rootLoop.getTerm();
+			Term internalNewLiteral = internalLoop.getTerm();
 			for (TreeWitness tw : mergeable)  
 				if (tw.getRoots().contains(rootNewLiteral) && tw.getDomain().contains(internalNewLiteral)) {
 					log.debug("    ATTACHING A TREE WITNESS {}", tw);
@@ -342,7 +350,7 @@ public class TreeWitnessSet {
 	
 	static class PropertiesCache {
 		private Map<TermOrderedPair, Set<Property>> propertiesCache = new HashMap<TermOrderedPair, Set<Property>>();
-		private Map<NewLiteral, IntersectionOfConceptSets> conceptsCache = new HashMap<NewLiteral, IntersectionOfConceptSets>();
+		private Map<Term, IntersectionOfConceptSets> conceptsCache = new HashMap<Term, IntersectionOfConceptSets>();
 
 		private final TreeWitnessReasonerLite reasoner;
 		
@@ -351,7 +359,7 @@ public class TreeWitnessSet {
 		}
 		
 		public IntersectionOfConceptSets getLoopConcepts(Loop loop) {
-			NewLiteral t = loop.getTerm();
+			Term t = loop.getTerm();
 			IntersectionOfConceptSets subconcepts = conceptsCache.get(t); 
 			if (subconcepts == null) {				
 				subconcepts = reasoner.getSubConcepts(loop.getAtoms());
@@ -361,7 +369,7 @@ public class TreeWitnessSet {
 		}
 		
 		
-		public Set<Property> getEdgeProperties(Edge edge, NewLiteral root, NewLiteral nonroot) {
+		public Set<Property> getEdgeProperties(Edge edge, Term root, Term nonroot) {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Set<Property> properties = propertiesCache.get(idx);			
 			if (properties == null) {
@@ -388,10 +396,10 @@ public class TreeWitnessSet {
 	}
 	
 	private static class TermOrderedPair {
-		private final NewLiteral t0, t1;
+		private final Term t0, t1;
 		private final int hashCode;
 
-		public TermOrderedPair(NewLiteral t0, NewLiteral t1) {
+		public TermOrderedPair(Term t0, Term t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ (t1.hashCode() << 4);

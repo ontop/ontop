@@ -1,10 +1,20 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -55,8 +65,12 @@ public class OntologyImpl implements Ontology {
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
+	
+	private Set<DisjointDescriptionAxiom> disjointAxioms = new HashSet<DisjointDescriptionAxiom>();
 
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
+	
+	private Set<Assertion> aboxAssertions = new HashSet<Assertion>();
 
 	class ReservedPredicate extends HashSet<Predicate> {
 
@@ -163,12 +177,32 @@ public class OntologyImpl implements Ontology {
 			originalassertions.add(assertion);
 		} else if (assertion instanceof PropertyFunctionalAxiom) {
 			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
+		} else if (assertion instanceof DisjointDescriptionAxiom) {
+			disjointAxioms.add((DisjointDescriptionAxiom) assertion);
+		} else if (assertion instanceof Assertion) {
+			/*ABox assertions */
+			aboxAssertions.add((Assertion)assertion);
 		}
+	}
+	
+	@Override 
+	public Set<Assertion> getABox() {
+		return aboxAssertions;
 	}
 
 	@Override
 	public Set<Axiom> getAssertions() {
 		return originalassertions;
+	}
+	
+	@Override 
+	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms() {
+		return functionalAxioms;
+	}
+	
+	@Override 
+	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms() {
+		return disjointAxioms;
 	}
 
 	public String toString() {

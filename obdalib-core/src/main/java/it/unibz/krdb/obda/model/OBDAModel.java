@@ -1,6 +1,14 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano This source code is
+ * available under the terms of the Affero General Public License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
@@ -12,6 +20,26 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+/***
+ * A container for the database and mapping declarations needed to define a
+ * Virtual ABox or Virtual RDF graph. That is, this is a manager for a
+ * collection of JDBC databases and their corresponding mappings. It is used as
+ * input to any Quest instance (either OWLAPI or Sesame).
+ * 
+ * <p>
+ * OBDAModels are also used internally by the Protege plugin and many other
+ * utilities including the mapping materializer (to generate ABox assertions or
+ * RDF triples from a .obda file and a database).
+ * 
+ * <p>
+ * OBModels can be serialized and read to/from .obda files using
+ * {@link ModelIOManager}.
+ * 
+ * 
+ * @see ModelIOManager
+ * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ * 
+ */
 public interface OBDAModel extends Cloneable, Serializable {
 
 	public QueryController getQueryController();
@@ -42,7 +70,8 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void fireSourceParametersUpdated();
 
-	public void fireSourceNameUpdated(URI old, OBDADataSource neu);	// TODO remove
+	public void fireSourceNameUpdated(URI old, OBDADataSource neu); // TODO
+																	// remove
 
 	/**
 	 * Returns the list of all sources defined in this OBDA model. This list is
@@ -164,7 +193,7 @@ public interface OBDAModel extends Cloneable, Serializable {
 	public boolean declareObjectProperty(Predicate property);
 
 	public boolean declareDataProperty(Predicate property);
-	
+
 	public boolean unDeclarePredicate(Predicate predicate);
 
 	public boolean unDeclareClass(Predicate classname);

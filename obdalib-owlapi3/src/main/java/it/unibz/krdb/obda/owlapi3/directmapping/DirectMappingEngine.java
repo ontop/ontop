@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
@@ -12,6 +20,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
@@ -180,31 +189,37 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
+	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
+		model.addSource(source);
+		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
+	}
+	
+	
+	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws SQLException, DuplicateMappingException{			
 		if (baseuri == null || baseuri.isEmpty())
-			this.baseuri =  model.getPrefixManager().getDefaultPrefix();
-		List<TableDefinition> tables = conMan.getMetaData(source).getTableList();
+			this.baseuri = model.getPrefixManager().getDefaultPrefix();
+		List<TableDefinition> tables = metadata.getTableList();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
-		for(int i=0;i<tables.size();i++){
+		for (int i = 0; i < tables.size(); i++) {
 			TableDefinition td = tables.get(i);
-			mappingAxioms.addAll(getMapping(td, source));
-		}	
-		model.addMappings(source.getSourceID(), mappingAxioms);
-		for (URI uri : model.getMappings().keySet())
-			for (OBDAMappingAxiom mapping: model.getMappings().get(uri))
-			{
+			model.addMappings(sourceUri, getMapping(td, metadata, baseuri));
+		}
+		model.addMappings(sourceUri, mappingAxioms);
+		for (URI uri : model.getMappings().keySet()) {
+			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
 				OBDAQuery q = mapping.getTargetQuery();
-				CQIE rule = (CQIE)q;
-				for (Function f : rule.getBody())
-				{
-					if (f.getArity() ==1)
+				CQIE rule = (CQIE) q;
+				for (Function f : rule.getBody()) {
+					if (f.getArity() == 1)
 						model.declarePredicate(f.getFunctionSymbol());
-					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
+					else if (f.getFunctionSymbol().getType(1)
+							.equals(COL_TYPE.OBJECT))
 						model.declareObjectProperty(f.getFunctionSymbol());
 					else
 						model.declareDataProperty(f.getFunctionSymbol());
 				}
 			}
+		}
 	}
 	
 	/***
@@ -216,10 +231,19 @@ public class DirectMappingEngine {
 	 *  @return a new OBDAMappingAxiom 
 	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
+		return getMapping(table,conMan.getMetaData(source),baseuri);
+	}
+	
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-		DirectMappingAxiom dma = new DirectMappingAxiom(baseuri, table, conMan.getMetaData(source), dfac);
-		dma.setbaseuri(this.baseuri);
+		DirectMappingAxiom dma=null;
+		try {
+			dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		dma.setbaseuri(baseUri);
 		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
 		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx,dma.getSQL(), dma.getCQ()));

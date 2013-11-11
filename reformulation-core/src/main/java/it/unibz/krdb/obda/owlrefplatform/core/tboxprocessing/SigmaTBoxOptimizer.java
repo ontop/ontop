@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -13,7 +21,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -25,8 +32,6 @@ import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hp.hpl.jena.iri.IRIFactory;
 
 /**
  * Prune Ontology for redundant assertions based on dependencies
@@ -129,7 +134,7 @@ public class SigmaTBoxOptimizer {
 					}
 				}
 		}
-		log.debug("Finished semantic-reduction.");
+//		log.debug("Finished semantic-reduction.");
 		return rv;
 	}
 
@@ -138,7 +143,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant_role(parent, child))
 			return true;
 		else {
-			log.debug("Not directly redundant role {} {}", parent, child);
+//			log.debug("Not directly redundant role {} {}", parent, child);
 			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent, false)) {
 				Description child_prime=children_prime.iterator().next();
 
@@ -149,7 +154,7 @@ public class SigmaTBoxOptimizer {
 //				}
 			}
 		}
-		log.debug("Not redundant role {} {}", parent, child);
+//		log.debug("Not redundant role {} {}", parent, child);
 
 		return false;
 	}

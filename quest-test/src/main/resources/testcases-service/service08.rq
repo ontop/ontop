@@ -1,0 +1,12 @@
+# SERVICE join with pattern in the default graph
+
+PREFIX : <http://example.org/> 
+PREFIX foaf: <http://xmlns.com/foaf/0.1/> 
+
+SELECT ?s ?o
+{
+  ?s foaf:name ?o .
+  SERVICE <http://localhost:18080/openrdf/repositories/endpoint1> {
+    ?s foaf:interest :c .
+  }
+} 

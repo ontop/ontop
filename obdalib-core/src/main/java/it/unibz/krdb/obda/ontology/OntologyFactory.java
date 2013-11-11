@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.ontology;
 
 import it.unibz.krdb.obda.model.Constant;
@@ -40,6 +48,12 @@ public interface OntologyFactory {
 	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
 	
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
+	
+	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2);
+	
+	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(Predicate p1, Predicate p2);
+	
+	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(Predicate p1, Predicate p2);
 
 	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
 

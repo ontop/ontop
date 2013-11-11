@@ -1,0 +1,25 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>  
+
+# ordini arrivati a destinazione ma in ritardo (Base Giornaliera Assoluta)
+
+SELECT DISTINCT ?order
+WHERE
+{
+?order :relatesToITU ?itu;
+	:satisfies ?req;
+	:hasITUArrival ?terminal.
+?ituEvent :happensToITU ?itu;
+	a :Unloading;
+	:takesPlaceAt ?terminal;
+	:hasEventTime ?realtime.
+?req :hasRequestDate ?date.
+FILTER(?realtime != ?date &&
+?date<"2011-11-12T00:00:00.000Z"^^xsd:dateTime &&
+?date>="2011-11-11T00:00:00.000Z"^^xsd:dateTime)
+}
+ORDER BY ?order
+

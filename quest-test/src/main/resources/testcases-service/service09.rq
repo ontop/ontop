@@ -1,0 +1,11 @@
+# Use BIND to bind a service endpoint
+
+PREFIX : <http://example.org/> 
+
+SELECT ?s ?p ?o
+{
+  BIND (<http://localhost:18080/openrdf/repositories/endpoint1> as ?service) 
+  SERVICE ?service {
+    ?s ?p ?o
+  }
+} 

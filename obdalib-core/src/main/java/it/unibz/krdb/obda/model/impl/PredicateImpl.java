@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
@@ -111,5 +119,13 @@ public class PredicateImpl implements Predicate {
 	@Override
 	public boolean isDataTypePredicate() {
 		return this instanceof DataTypePredicate;
+	}
+
+	@Override
+	public boolean isTriplePredicate() {
+		if (arity == 3 && name.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+			return true;
+		}
+		return false;
 	}
 }

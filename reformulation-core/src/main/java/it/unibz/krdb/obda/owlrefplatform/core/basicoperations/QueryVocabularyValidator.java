@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Function;
@@ -146,13 +154,13 @@ public class QueryVocabularyValidator implements Serializable {
 			Function newatom = null;
 
 			if (equivalent instanceof OClass) {
-				newatom = fac.getAtom(((OClass) equivalent).getPredicate(), atom.getTerm(0));
+				newatom = fac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerm(0));
 			} else if (equivalent instanceof Property) {
 				Property equiproperty = (Property) equivalent;
 				if (!equiproperty.isInverse()) {
-					newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
+					newatom = fac.getFunction(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
 				} else {
-					newatom = fac.getAtom(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+					newatom = fac.getFunction(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 				}
 			}
 			body.set(i, newatom);

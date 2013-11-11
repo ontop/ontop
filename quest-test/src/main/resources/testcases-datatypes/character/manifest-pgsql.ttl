@@ -1,0 +1,122 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Character Type Tests" ;
+    mf:entries
+    ( 
+      :char
+      :varchar
+      :text
+      :character
+      :name
+      :char-graph
+      :varchar-graph
+      :text-graph
+      :character-graph
+      :name-graph
+    ) .
+
+:char rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <char.rq> ] ;
+    mf:result <char.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:char-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <char-graph.rq> ] ;
+    mf:result <char.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:varchar rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: VARCHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <varchar.rq> ] ;
+    mf:result <varchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:varchar-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: VARCHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <varchar-graph.rq> ] ;
+    mf:result <varchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:text rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TEXT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <text.rq> ] ;
+    mf:result <text.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:text-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TEXT-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <text-graph.rq> ] ;
+    mf:result <text.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:character rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHARACTER" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <character.rq> ] ;
+    mf:result <character.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:character-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHARACTER-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <character-graph.rq> ] ;
+    mf:result <character.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+    
+:name rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NAME" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <name.rq> ] ;
+    mf:result <name.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:name-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NAME-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <name-graph.rq> ] ;
+    mf:result <name.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .    

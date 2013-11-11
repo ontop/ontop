@@ -1,0 +1,3 @@
+PREFIX : <http://example/>
+SELECT ?author (count(?X) as ?nrOfBooks)
+WHERE { ?author :writesBook ?X . } GROUP BY ?author

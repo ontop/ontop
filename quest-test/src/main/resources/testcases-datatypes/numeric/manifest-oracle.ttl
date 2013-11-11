@@ -1,0 +1,122 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Numeric Type Tests" ;
+    mf:entries
+    ( 
+      :int
+      :integer
+      :smallint
+      :dec
+      :decimal
+      :number
+      :numeric
+      :real
+      :float
+      :double
+    ) .
+
+:int rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: INT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <int-oracle.rq> ] ;
+    mf:result <int.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:integer rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: INTEGER" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <integer-oracle.rq> ] ;
+    mf:result <integer.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:smallint rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: SMALLINT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <smallint-oracle.rq> ] ;
+    mf:result <smallint.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:dec rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DEC" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <dec.rq> ] ;
+    mf:result <dec.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+
+:decimal rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DECIMAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <decimal.rq> ] ;
+    mf:result <decimal.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+
+:number rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NUMBER" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <number.rq> ] ;
+    mf:result <number.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:numeric rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NUMERIC" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <numeric.rq> ] ;
+    mf:result <numeric.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:real rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: REAL" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <real.rq> ] ;
+    mf:result <real.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+
+:float rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: FLOAT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <float.rq> ] ;
+    mf:result <float.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+    
+:double rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DOUBLE PRECISION" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <double.rq> ] ;
+    mf:result <double.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .

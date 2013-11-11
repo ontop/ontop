@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
+
 package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -18,14 +27,12 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import com.hp.hpl.jena.iri.IRIFactory;
 
 public class DAGChainTest extends TestCase {
 
 	SemanticIndexHelper						helper				= new SemanticIndexHelper();
 
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final IRIFactory 		iriFactory			= OBDADataFactoryImpl.getIRIFactory();
 	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
 	public void test_simple_isa() {
@@ -103,9 +110,9 @@ public class DAGChainTest extends TestCase {
 
 		
 		
-		for (Description nodes: res.vertexSet()) {
-			System.out.println("---- " + nodes);
-		}
+//		for (Description nodes: res.vertexSet()) {
+//			System.out.println("---- " + nodes);
+//		}
 		
 		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
 		reasoner.getChainDAG();

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sparql xmlns='http://www.w3.org/2005/sparql-results#'>
+	<head>
+		<variable name='count'/>
+		<variable name='type'/>
+	</head>
+	<results>
+		<result>
+			<binding name='count'>
+				<literal datatype='http://www.w3.org/2001/XMLSchema#integer'>3</literal>
+			</binding>
+			<binding name='type'>
+				<uri>http://example.org/Letter</uri>
+			</binding>
+		</result>
+		<result>
+			<binding name='count'>
+				<literal datatype='http://www.w3.org/2001/XMLSchema#integer'>7</literal>
+			</binding>
+			<binding name='type'>
+				<uri>http://example.org/Day</uri>
+			</binding>
+		</result>
+		<result>
+			<binding name='count'>
+				<literal datatype='http://www.w3.org/2001/XMLSchema#integer'>10</literal>
+			</binding>
+			<binding name='type'>
+				<uri>http://example.org/Number</uri>
+			</binding>
+ 		</result>
+	</results>
+</sparql>

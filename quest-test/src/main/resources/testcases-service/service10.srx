@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="t1"/>
+    <variable name="t2"/>
+  </head>
+  <results>
+    <result>
+      <binding name="t1"><literal>Alan</literal></binding>
+      <binding name="t2"><literal>Bob</literal></binding>
+    </result>
+  </results>
+</sparql>
+

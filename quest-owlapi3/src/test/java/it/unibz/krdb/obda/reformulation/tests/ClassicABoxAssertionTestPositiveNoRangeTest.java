@@ -1,15 +1,20 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLConnection;
-import it.unibz.krdb.obda.owlapi3.OWLResultSet;
-import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
@@ -31,8 +36,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 	QuestOWL reasoner = null;
-	private OWLConnection conn;
-	private OWLStatement st;
+	private QuestOWLConnection conn;
+	private QuestOWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		QuestPreferences pref = new QuestPreferences();
@@ -63,7 +68,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		String prefix = "PREFIX : <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
-		OWLResultSet res = st.executeTuple(query);
+		QuestOWLResultSet res = st.executeTuple(query);
 		int count = 0;
 		int columns = res.getColumCount();
 		while (res.nextRow()) {
@@ -98,7 +103,11 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsBoolean() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :uboolean ?y}";
 		int count = executeQuery(query);
-		assertEquals(4, count);
+		// asserting 0 and false will result in only one axiom 
+		// same for 1 and true
+		// the result is a set of axioms
+		// hence we expect only 2
+		assertEquals(2, count);
 	}
 
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
@@ -116,13 +125,15 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsDouble() throws OWLException{
 		String query = "SELECT ?y WHERE {?x :udouble ?y}";
 		int count = executeQuery(query);
-		assertEquals(7, count);
+		// values 0 and -0 produce equivalent axioms
+		assertEquals(6, count);
 	}
 
 	public void testDataPropertyAssertionsFloat() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :ufloat ?y}";
 		int count = executeQuery(query);
-		assertEquals(7, count);
+		// values 0 and -0 produce equivalent axioms
+		assertEquals(6, count);
 	}
 
 	public void testDataPropertyAssertionsInt() throws OWLException{

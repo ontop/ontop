@@ -1,18 +1,24 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlapi3;
 
-import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.Vector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
@@ -41,10 +47,11 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			boolean isClass = isClass(p);
 			boolean isObjectProp = isObjectProperty(p);
 			boolean isDataProp = isDataProperty(p);
+			boolean isTriple = isTriple(p);
 
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp;
+			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isTriple;
 
 			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
 			if (isPredicateValid) {
@@ -90,5 +97,10 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
 		return obdaModel.isDeclaredDataProperty(predicate);
+	}
+	
+	@Override
+	public boolean isTriple(Predicate predicate){
+		return predicate.equals(OBDAVocabulary.QUEST_TRIPLE_PRED);
 	}
 }

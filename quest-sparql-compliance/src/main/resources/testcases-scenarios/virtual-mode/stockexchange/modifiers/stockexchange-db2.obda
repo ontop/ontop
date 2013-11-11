@@ -8,8 +8,8 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl jdbc:db2://10.7.20.39:50000/stock
-username	db2inst1
+connectionUrl jdbc:db2://10.7.20.39:50001/stock
+username	db2inst2
 password	fish
 driverClass	com.ibm.db2.jcc.DB2Driver
 

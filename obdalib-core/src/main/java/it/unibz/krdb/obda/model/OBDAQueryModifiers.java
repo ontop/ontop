@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.model;
 
 import java.util.ArrayList;
@@ -57,12 +65,20 @@ public class OBDAQueryModifiers {
 		return limit;
 	}
 
+	public boolean hasLimit() {
+		return limit != -1 ? true : false;
+	}
+
 	public void setOffset(long offset) {
 		this.offset = offset;
 	}
 
 	public long getOffset() {
 		return offset;
+	}
+
+	public boolean hasOffset() {
+		return offset != -1 ? true : false;
 	}
 
 	public void addOrderCondition(Variable var, int direction) {
@@ -74,8 +90,12 @@ public class OBDAQueryModifiers {
 		return orderConditions;
 	}
 
+	public boolean hasOrder() {
+		return !orderConditions.isEmpty() ? true : false;
+	}
+
 	public boolean hasModifiers() {
-		return isDistinct || limit != -1 || offset != -1 || !orderConditions.isEmpty();
+		return isDistinct || hasLimit() || hasOffset() || hasOrder();
 	}
 
 	/**

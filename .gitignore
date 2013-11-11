@@ -12,3 +12,4 @@ bin
 
 *.iml
 .idea
+plugin-runtime

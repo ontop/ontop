@@ -1,0 +1,32 @@
+[PrefixDeclaration]
+:		http://ontop.inf.unibz.it/test/datatypes#
+
+[SourceDeclaration]
+sourceUri	PgsqlTypes
+connectionUrl	jdbc:postgresql://10.7.20.39/datatypes
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Numeric Types
+target		:numeric-{id} a :Row ; :hasSmallInt {type_smallint} ; :hasInteger {type_integer} ; :hasBigInt {type_bigint} ; :hasNumeric {type_numeric} ; :hasReal {type_real} ; :hasDouble {type_double} ; :hasSerial {type_serial} ; :hasBigSerial {type_bigserial} . 
+source		select id, type_smallint, type_integer, type_bigint, type_numeric, type_real, type_double, type_serial, type_bigserial from "Numerics"
+
+mappingId	Character Types
+target		:character-{id} a :Row ; :hasVarChar {type_varchar} ; :hasCharacter {type_character} ; :hasText {type_text} ; :hasChar {type_char} ; :hasName {type_name} . 
+source		select id, type_varchar, type_character, type_text, type_char, type_name from "Characters"
+
+mappingId	Date-Time Types
+target		:datetime-{id} a :Row ; :hasTime {type_time} ; :hasTimeTZ {type_time_tz} ; :hasDate {type_date} ; :hasTimestamp {type_timestamp} ; :hasTimestampTZ {type_timestamp_tz} ; :hasInterval {type_interval} . 
+source		select id, type_timestamp, type_timestamp_tz, type_date, type_time, type_time_tz, type_interval from "DateTimes"
+
+mappingId	Boolean Types
+target		:boolean-{id} a :Row ; :hasBoolean {type_boolean} . 
+source		select id, type_boolean from "Booleans"
+
+mappingId	Binary Types
+target		:binary-{id} a :Row ; :hasBit {type_bit} ; :hasBinaryVarying {type_bitvarying} . 
+source		select id, type_bit, type_bitvarying from "Binaries"
+]]
+

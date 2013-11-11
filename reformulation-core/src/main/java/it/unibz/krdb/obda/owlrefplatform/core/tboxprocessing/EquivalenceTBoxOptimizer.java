@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.model.Predicate;
@@ -95,9 +103,25 @@ public class EquivalenceTBoxOptimizer {
 			Description rep=impliedDAG.getReplacements().get(desc); //check that the node is still the representative node
 			if(rep!=null)
 				desc=rep;
-			Property prop = (Property) desc;
-
+			Property prop = (Property) desc;	
 			
+				/*
+		 * Clearing the equivalences of the domain and ranges of the cycle's
+		 * head
+		 */
+		for(Description desc2:impliedDAG.vertexSet()){
+			if(!(desc2 instanceof Property))
+				continue;
+			Property prop2=(Property) desc2;
+		Description propNodeDomain =ofac.createPropertySomeRestriction(prop2.getPredicate(), prop.isInverse());
+
+		Description propNodeRange = ofac.createPropertySomeRestriction(prop2.getPredicate(), !prop.isInverse());
+		
+		if (impliedDAG.containsVertex(propNodeDomain) & impliedDAG.getMapEquivalences().get(propNodeDomain)!=null )
+			impliedDAG.getMapEquivalences().remove(propNodeDomain);
+		if (impliedDAG.containsVertex(propNodeRange) & impliedDAG.getMapEquivalences().get(propNodeRange)!=null )
+			impliedDAG.getMapEquivalences().remove(propNodeRange);
+		}
 
 			Collection<Description> equivalents = reasoner.getEquivalences(prop, false);
 			if(equivalents.size()>1)
@@ -107,7 +131,6 @@ public class EquivalenceTBoxOptimizer {
 					continue;
 				}
 
-				//we skip when is the case in which the inverse of the equivalent is the reference node
 				/*
 				 * each of the equivalents is redundant, we need to deal with
 				 * them and with their inverses!
@@ -181,7 +204,6 @@ public class EquivalenceTBoxOptimizer {
 //					removedNodes.add((Property) redundandEquivPropNodeInv);
 //					impliedDAG.removeVertex(redundandEquivPropNodeInv);
 				}
-			
 
 				removedNodes.add((Property) equivalent);
 
@@ -303,23 +325,7 @@ public class EquivalenceTBoxOptimizer {
 			}
 		}
 		
-		/*
-		 * Clearing the equivalences of the domain and ranges of the cycle's
-		 * head
-		 */
-		for(Description desc:impliedDAG.vertexSet()){
-			if(!(desc instanceof Property))
-				continue;
-			Property prop=(Property) desc;
-		Description propNodeDomain =ofac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
-
-		Description propNodeRange = ofac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
-		
-		if (impliedDAG.containsVertex(propNodeDomain) & impliedDAG.getMapEquivalences().get(propNodeDomain)!=null )
-			impliedDAG.getMapEquivalences().remove(propNodeDomain);
-		if (impliedDAG.containsVertex(propNodeRange) & impliedDAG.getMapEquivalences().get(propNodeRange)!=null )
-			impliedDAG.getMapEquivalences().remove(propNodeRange);
-		}
+	
 		/*
 		 * Processing all classes
 		 */

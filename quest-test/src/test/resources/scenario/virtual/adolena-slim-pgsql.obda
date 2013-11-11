@@ -1,0 +1,110 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+dc:		http://purl.org/dc/elements/1.1/
+NAP:		http://www.aurona.org/0AlleWerk/Navorsing/Ontologies/NAP/NAP#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+adolena:		http://ksg.meraka.co.za/adolena.owl#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+adolenaSlim:	http://ksg.meraka.co.za/adolenaSlim.owl#
+
+[SourceDeclaration]
+sourceUri	nap
+connectionUrl	jdbc:postgresql://localhost:5433/
+username	napdba
+password	ndeipi
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Wheelchair
+target		:Obj-{name}_{desc} a NAP:Wheelchair . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9328,9268,9292,9280) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Motorised Wheelchair
+target		:Obj-{name}_{desc} a NAP:Motorised_Wheelchair . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 9280 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Manual Wheelchair
+target		:Obj-{name}_{desc} a NAP:Manual_Wheelchair . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9268,9328,9292) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Foldable Wheelchair
+target		:Obj-{name}_{desc} a NAP:Foldable_Wheelchair . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9268,9328) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Light weight Foldable Wheelchair
+target		:Obj-{name}_{desc} a NAP:LightweightFoldable_Wheelchair . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9268,9328) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Light weight Wheelchair
+target		:Obj-{name}_{desc} a NAP:Lightweight_Wheelchair . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 9292 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Assistive Device
+target		:Obj-{name}_{desc} a NAP:AssistiveDevice . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (5588, 9292, 9268, 9280, 9328, 10311, 10323, 10335, 10431, 10527, 10827, 10743, 10347, 145643) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Communication Device
+target		:Obj-{name}_{desc} a NAP:Communication_Device . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (5588, 145643,10323,10335,10311,10347,10431) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Face To Face Communication Device
+target		:Obj-{name}_{desc} a NAP:FaceToFaceCommunicationDevice . 
+source		select name, description from name_contentelement , description_contentelement , content , i18ncontent , rainbowcontent where rainbowcontent.grouping_grouping_id in ( 10311,10347) and rainbowcontent .rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Face To Face Communication Software
+target		:Obj-{name}_{desc} a NAP:FaceToFaceCommunicationSoftware . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10347 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Symbol Board
+target		:Obj-{name}_{desc} a NAP:SymbolBoard . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10311 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Listen Device
+target		:Obj-{name}_{desc} a adolena:ListenDevice . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10431 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Reading Device
+target		:Obj-{name}_{desc} a adolena:ReadingDevice . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (10827, 10743) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Tactile Reading
+target		:Obj-{name}_{desc} a adolena:TactileReading . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10827 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Talking Reading
+target		:Obj-{name}_{desc} a adolena:TalkingReading . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10743 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Speech Device
+target		:Obj-{name}_{desc} a adolena:SpeechDevice . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10431 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Writing Device
+target		:Obj-{name}_{desc} a adolena:WritingDevice . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10527 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Braille Writing Device
+target		:Obj-{name}_{desc} a adolena:BrailleWritingDevice . 
+source		select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10527 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id
+
+mappingId	Upper Limb Mobility
+target		:Obj-{ability_descr} a NAP:UpperLimbMobility . 
+source		select * from ability where ability_id = '19'
+
+mappingId	Lower Limb Mobility
+target		:Obj-{ability_descr} a NAP:LowerLimbMobility . 
+source		select * from ability where ability_id = '20'
+
+mappingId	Assists with Upper Limb Mobility
+target		:Obj-{n}_{d} adolenaSlim:assistsWith :Obj-{ab1} . 
+source		select ability.ability_descr as ab1, name_contentelement.name as n, description_contentelement.description as d from ability, name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 9280 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id and ability.ability_id = 19
+]]
+

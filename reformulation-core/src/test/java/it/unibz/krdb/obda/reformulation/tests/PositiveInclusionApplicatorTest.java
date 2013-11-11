@@ -1,8 +1,16 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -36,42 +44,42 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	Predicate					s				= pfac.getPredicate("S", 2);
 	Predicate					q				= pfac.getPredicate("q", 1);
 
-	NewLiteral						x				= tfac.getVariable("x");
-	NewLiteral						y				= tfac.getVariable("y");
-	NewLiteral						z				= tfac.getVariable("z");
-	NewLiteral						m				= tfac.getVariable("m");
+	Term						x				= tfac.getVariable("x");
+	Term						y				= tfac.getVariable("y");
+	Term						z				= tfac.getVariable("z");
+	Term						m				= tfac.getVariable("m");
 
-	NewLiteral						u1				= tfac.getNondistinguishedVariable();
-	NewLiteral						u2				= tfac.getNondistinguishedVariable();
+	Term						u1				= tfac.getVariableNondistinguished();
+	Term						u2				= tfac.getVariableNondistinguished();
 
 	
 	public void setUp() throws Exception {
 
 		// q(y) :- R(x, y), R(x, z), S(y, m), S(z, m),
 
-		List<NewLiteral> terms1 = new LinkedList<NewLiteral>();
+		List<Term> terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(y);
-		Function a1 = tfac.getAtom(r, terms1);
+		Function a1 = tfac.getFunction(r, terms1);
 
-		List<NewLiteral> terms2 = new LinkedList<NewLiteral>();
+		List<Term> terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(z);
-		Function a2 = tfac.getAtom(r, terms2);
+		Function a2 = tfac.getFunction(r, terms2);
 
-		List<NewLiteral> terms3 = new LinkedList<NewLiteral>();
+		List<Term> terms3 = new LinkedList<Term>();
 		terms3.add(y);
 		terms3.add(m);
-		Function a3 = tfac.getAtom(s, terms3);
+		Function a3 = tfac.getFunction(s, terms3);
 
-		List<NewLiteral> terms4 = new LinkedList<NewLiteral>();
+		List<Term> terms4 = new LinkedList<Term>();
 		terms4.add(z);
 		terms4.add(m);
-		Function a4 = tfac.getAtom(s, terms4);
+		Function a4 = tfac.getFunction(s, terms4);
 
-		List<NewLiteral> termshead = new LinkedList<NewLiteral>();
+		List<Term> termshead = new LinkedList<Term>();
 		termshead.add(x);
-		Function head = tfac.getAtom(q, termshead);
+		Function head = tfac.getFunction(q, termshead);
 
 		LinkedList<Function> body = new LinkedList<Function>();
 		body.add(a1);
@@ -81,83 +89,83 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		initialquery1 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<NewLiteral>();
+		terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(u1);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunction(r, terms1);
 
-		terms2 = new LinkedList<NewLiteral>();
+		terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(u2);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunction(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<NewLiteral>();
+		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunction(q, termshead);
 
 		initialquery2 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<NewLiteral>();
+		terms1 = new LinkedList<Term>();
 		terms1.add(u1);
 		terms1.add(x);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunction(r, terms1);
 
-		terms2 = new LinkedList<NewLiteral>();
+		terms2 = new LinkedList<Term>();
 		terms2.add(u2);
 		terms2.add(x);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunction(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<NewLiteral>();
+		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunction(q, termshead);
 
 		initialquery3 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<NewLiteral>();
+		terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(u1);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunction(r, terms1);
 
-		terms2 = new LinkedList<NewLiteral>();
+		terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(y);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunction(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<NewLiteral>();
+		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunction(q, termshead);
 
 		initialquery4 = tfac.getCQIE(head, body);
 
-		terms1 = new LinkedList<NewLiteral>();
+		terms1 = new LinkedList<Term>();
 		terms1.add(u1);
 		terms1.add(x);
-		a1 = tfac.getAtom(r, terms1);
+		a1 = tfac.getFunction(r, terms1);
 
-		terms2 = new LinkedList<NewLiteral>();
+		terms2 = new LinkedList<Term>();
 		terms2.add(y);
 		terms2.add(x);
-		a2 = tfac.getAtom(r, terms2);
+		a2 = tfac.getFunction(r, terms2);
 
 		body = new LinkedList<Function>();
 		body.add(a1);
 		body.add(a2);
 
-		termshead = new LinkedList<NewLiteral>();
+		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = tfac.getAtom(q, termshead);
+		head = tfac.getFunction(q, termshead);
 
 		initialquery5 = tfac.getCQIE(head, body);
 

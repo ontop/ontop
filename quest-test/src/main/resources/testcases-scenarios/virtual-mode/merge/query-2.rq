@@ -1,0 +1,4 @@
+PREFIX : <http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819625360.owl#>
+SELECT * 
+WHERE
+{?person a :Person; :name ?name}

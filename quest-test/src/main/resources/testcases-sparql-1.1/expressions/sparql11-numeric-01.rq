@@ -1,0 +1,7 @@
+PREFIX  dc:  <http://purl.org/dc/elements/1.1/>
+PREFIX  ns:  <http://example.org/ns#>
+SELECT  ?title (?p*(1-?discount) AS ?price)
+   { ?x ns:price ?p .
+     ?x dc:title ?title . 
+     ?x ns:discount ?discount 
+   }

@@ -1,8 +1,16 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -19,7 +27,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.iri.IRIFactory;
+//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class DBMetadataUtil {
 
@@ -73,11 +81,11 @@ public class DBMetadataUtil {
 					Predicate p1 = fac.getPredicate(table1, def.countAttribute());
 					Predicate p2 = fac.getPredicate(table2, def2.countAttribute());
 					
-					List<NewLiteral> terms1 = new ArrayList<NewLiteral>();
+					List<Term> terms1 = new ArrayList<Term>();
 					for (int i=0; i<def.countAttribute(); i++) {
 						 terms1.add(fac.getVariable("t"+(i+1)));
 					}
-					List<NewLiteral> terms2 = new ArrayList<NewLiteral>();
+					List<Term> terms2 = new ArrayList<Term>();
 					for (int i=0; i<def2.countAttribute(); i++) {
 						 terms2.add(fac.getVariable("p"+(i+1)));
 					}
@@ -86,8 +94,8 @@ public class DBMetadataUtil {
 						Integer pos2 = positionMatch.get(pos1);
 						terms1.set(pos1, terms2.get(pos2));
 					}
-					Function head = fac.getAtom(p2, terms2);
-					Function body1 = fac.getAtom(p1, terms1);
+					Function head = fac.getFunction(p2, terms2);
+					Function body1 = fac.getFunction(p1, terms1);
 					List<Function> body = new ArrayList<Function>();
 					body.add(body1);
 					

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package sesameWrapper;
 
 import it.unibz.krdb.obda.model.OBDAException;
@@ -75,7 +83,7 @@ public abstract class SesameAbstractRepo implements
 		// Once shut down, the repository can no longer be used until it is
 		// re-initialized.
 		isinitialized=false;
-		if(repoConnection.isOpen())
+		if(repoConnection!=null && repoConnection.isOpen())
 			repoConnection.close();
 		
 	}

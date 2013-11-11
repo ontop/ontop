@@ -1,9 +1,17 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.NewLiteral;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
@@ -84,9 +92,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private static Function getHeadAtom(String base, String suffix, List<NewLiteral> arguments) {
+	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
 		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
-		return fac.getAtom(predicate, arguments);
+		return fac.getFunction(predicate, arguments);
 	}
 	
 	/*
@@ -94,20 +102,20 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, NewLiteral r0)  {
+	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
 		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
-		NewLiteral x = fac.getNondistinguishedVariable(); 
+		Term x = fac.getVariableNondistinguished(); 
 		
 		for (BasicClassDescription con : concepts) {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
-				atom = fac.getAtom(((OClass)con).getPredicate(), r0);
+				atom = fac.getFunction(((OClass)con).getPredicate(), r0);
 			}
 			else {
 				PropertySomeRestriction some = (PropertySomeRestriction)con;
-				atom = (!some.isInverse()) ?  fac.getAtom(some.getPredicate(), r0, x) : fac.getAtom(some.getPredicate(), x, r0);  						 
+				atom = (!some.isInverse()) ?  fac.getFunction(some.getPredicate(), r0, x) : fac.getFunction(some.getPredicate(), x, r0);  						 
 			}
 			genAtoms.add(atom);
 		}
@@ -126,7 +134,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
 		if (cc.hasNoFreeTerms()) {  
-			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getNondistinguishedVariable())) {
+			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {
 				output.appendRule(fac.getCQIE(headAtom, cache.getExtAtom(a))); 
 			}
 		}
@@ -137,15 +145,15 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			MinimalCQProducer twf = new MinimalCQProducer(reasoner); 
 			
 			// equality atoms
-			Iterator<NewLiteral> i = tw.getRoots().iterator();
-			NewLiteral r0 = i.next();
+			Iterator<Term> i = tw.getRoots().iterator();
+			Term r0 = i.next();
 			while (i.hasNext()) 
-				twf.addNoCheck(fac.getEQAtom(i.next(), r0));
+				twf.addNoCheck(fac.getFunctionEQ(i.next(), r0));
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
 				Predicate predicate = a.getFunctionSymbol();
-				twf.add((predicate.getArity() == 1) ? fac.getAtom(predicate, r0) : fac.getAtom(predicate, r0, r0));
+				twf.add((predicate.getArity() == 1) ? fac.getFunction(predicate, r0) : fac.getFunction(predicate, r0, r0));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
@@ -355,10 +363,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			if (ext != null) {
 				usedExts = true;        // usedExts.add(ext);
 				if (a.getArity() == 1) 
-					return fac.getAtom(ext, a.getTerm(0));
+					return fac.getFunction(ext, a.getTerm(0));
 				else {
 					assert (a.getArity() == 2);
-					return fac.getAtom(ext, a.getTerm(0), a.getTerm(1));
+					return fac.getFunction(ext, a.getTerm(0), a.getTerm(1));
 				}
 			}
 			return a;

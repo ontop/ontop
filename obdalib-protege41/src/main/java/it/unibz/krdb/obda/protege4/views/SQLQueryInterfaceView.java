@@ -1,11 +1,19 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.protege4.views;
 
-import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
-import it.unibz.krdb.obda.gui.swing.panel.SQLQueryPanel;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
+import it.unibz.krdb.obda.protege4.panels.DatasourceSelector;
+import it.unibz.krdb.obda.protege4.panels.SQLQueryPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,8 +26,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.Logger;
+
+//import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
@@ -29,7 +40,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 
 	OBDAModelManager apic;
 
-	private static final Logger log = Logger.getLogger(SQLQueryInterfaceView.class);
+	private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
 	
 	@Override
 	protected void disposeOWLView() {

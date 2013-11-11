@@ -4,25 +4,32 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.8</version>
+		<version>1.9</version>
 	</parent>
 	<artifactId>quest-sesame</artifactId>
 	<name>quest-sesame</name>
-	<description>This is the Sesame API implementation basedon Quest</description>
+	<description>This is the Sesame API implementation based on Quest</description>
 
 	<dependencies>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<scope>test</scope>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -33,29 +40,38 @@
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<artifactId>obdalib-sesame</artifactId>
+			<groupId>inf.unibz.it.obda</groupId>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency> 
 		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.8</version>
+			<version>1.9</version>
 		</dependency>
-		<dependency>
-			<!-- this includes ALL seasame -->
-			<groupId>org.openrdf.sesame</groupId>
+		 <!-- <dependency> -->
+		<!--	this includes ALL seasame, dont keep this! -->
+		<!-- 	<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
+			<scope>test</scope>
+		</dependency> --> 
+	<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
-
 		<!-- These will download some of the sources -->
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
@@ -65,6 +81,25 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-api</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryparser-sparql</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-manager</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		
+		
+		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-text</artifactId>
@@ -72,34 +107,33 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-api</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-rdfxml</artifactId>
-			<version>2.6.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-n3</artifactId>
-			<version>2.6.9</version>
+		</dependency> 
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-ntriples</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.directory.studio</groupId>
 			<artifactId>org.apache.commons.logging</artifactId>
-			<version>1.1.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 	
 	<build>
@@ -108,6 +142,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
+					
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
@@ -116,6 +151,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

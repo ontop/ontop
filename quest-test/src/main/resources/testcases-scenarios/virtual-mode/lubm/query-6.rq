@@ -1,0 +1,8 @@
+# Query6
+# This query queries about only one class. But it assumes both the explicit
+# subClassOf relationship between UndergraduateStudent and Student and the
+# implicit one between GraduateStudent and Student. In addition, it has large
+# input and low selectivity.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+SELECT ?X WHERE {?X rdf:type ub:Student}
