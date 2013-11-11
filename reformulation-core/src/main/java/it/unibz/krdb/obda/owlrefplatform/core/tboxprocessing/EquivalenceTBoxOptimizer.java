@@ -18,8 +18,6 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -29,10 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.BreadthFirstIterator;
 
 /***
  * An optimizer that will eliminate equivalences implied by the ontology,
@@ -189,16 +183,22 @@ public class EquivalenceTBoxOptimizer {
 						
 					}
 					
-					impliedDAG.getReplacements().remove(redundandEquivPropNodeInv);
+					
 					
 					impliedDAG.removeVertex(redundandEquivPropNodeInv);
-					impliedDAG.getMapEquivalences().remove(redundandEquivPropNodeInv);
+					
 					removedNodes.add((Property) redundandEquivPropNodeInv);
 					
 					//assign the new representative to the equivalent nodes
 					for(Description equivInverse: impliedDAG.getMapEquivalences().get(nonredundandPropNodeInv)){
+						if(equivInverse.equals(nonredundandPropNodeInv)){
+							impliedDAG.getReplacements().remove(nonredundandPropNodeInv);
+							continue;
+						}
 						impliedDAG.getReplacements().put(equivInverse, nonredundandPropNodeInv);
 					}
+					
+					impliedDAG.getMapEquivalences().remove(redundandEquivPropNodeInv);
 
 					
 //					removedNodes.add((Property) redundandEquivPropNodeInv);
@@ -266,11 +266,16 @@ public class EquivalenceTBoxOptimizer {
 				
 				
 				
-				impliedDAG.getReplacements().remove(directRedundantNode);
+				
 				for(Description equivInverse: impliedDAG.getMapEquivalences().get(directRedundantNode)){
+					if(equivInverse.equals(equivalentNode)){
+							impliedDAG.getReplacements().remove(equivalentNode);
+						continue;
+					}
 					impliedDAG.getReplacements().put(equivInverse,equivalentNode);
 					
 				}
+				impliedDAG.getReplacements().remove(directRedundantNode);
 				impliedDAG.removeVertex(directRedundantNode);
 								
 
@@ -315,10 +320,14 @@ public class EquivalenceTBoxOptimizer {
 				
 		
 
-				impliedDAG.getReplacements().remove(directRedundantNode);
+				
 				for(Description equivInverse: impliedDAG.getMapEquivalences().get(directRedundantNode)){
+					if(equivInverse.equals(equivalentNode)){
+						impliedDAG.getReplacements().remove(equivalentNode);
+						continue;}
 					impliedDAG.getReplacements().put(equivInverse, equivalentNode);
 				}
+				impliedDAG.getReplacements().remove(directRedundantNode);
 				impliedDAG.removeVertex(directRedundantNode);
 
 //				equivalentNode.getDescendants().remove(directRedundantNode);
@@ -422,32 +431,33 @@ public class EquivalenceTBoxOptimizer {
 				
 				
 			}
-			for(Description equivalent:reasoner.getEquivalences(node, false)){
-				if(!equivalent.equals(node)){
-					Axiom axiom = null;
-					if (node instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent);
-						
-					} else {
-						
-						axiom = ofac.createSubPropertyAxiom((Property) node, (Property) equivalent);
-						
-
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					
-					if (equivalent instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node);
-						
-					} else{
-						axiom = ofac.createSubPropertyAxiom((Property) equivalent, (Property) node);
-						
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					}
-				}
+//			for(Description equivalent:reasoner.getEquivalences(node, false)){
+//				if(!equivalent.equals(node)){
+//					Axiom axiom = null;
+//					if (node instanceof ClassDescription) {
+//						axiom = ofac.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent);
+//						
+//					} else {
+//						
+//						axiom = ofac.createSubPropertyAxiom((Property) node, (Property) equivalent);
+//						
+//
+//					}
+//					optimalTBox.addEntities(axiom.getReferencedEntities());
+//					optimalTBox.addAssertion(axiom);
+//					
+//					if (equivalent instanceof ClassDescription) {
+//						axiom = ofac.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node);
+//						
+//					} else{
+//						axiom = ofac.createSubPropertyAxiom((Property) equivalent, (Property) node);
+//						
+//					}
+//					optimalTBox.addEntities(axiom.getReferencedEntities());
+//					optimalTBox.addAssertion(axiom);
+//					}
+//				}
+			
 			
 		}
 
