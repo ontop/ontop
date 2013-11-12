@@ -30,43 +30,43 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 	public void setUp(){
 		
 		
-		
-		input.add("src/test/resources/test/stockexchange-unittest.owl");
-		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
-		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
-		/** C = B -> ER -> A*/
-		input.add("src/test/resources/test/newDag/equivalents1.owl");
-		/** B -> A -> ER=C */
-		input.add("src/test/resources/test/newDag/equivalents2.owl");
-		/** C->B = ER -> A*/
-		input.add("src/test/resources/test/newDag/equivalents3.owl");
-		/** ER-> A=B=C */
-		input.add("src/test/resources/test/newDag/equivalents4.owl");
-		/** C=ER=A->B */
-		input.add("src/test/resources/test/newDag/equivalents5.owl");
-		/** D-> ER=C=B -> A*/
-		input.add("src/test/resources/test/newDag/equivalents6.owl");
-		/** P-> ER=B -> A  C=L ->ES-> ER */
-		input.add("src/test/resources/test/newDag/equivalents7.owl");
-		/** B->A=ET->ER C->ES=D->A*/
-		input.add("src/test/resources/test/newDag/equivalents8.owl");
-
-		/** C = B -> ER- -> A*/
-		input.add("src/test/resources/test/newDag/inverseEquivalents1.owl");
-		/** B -> A -> ER- = C */
-		input.add("src/test/resources/test/newDag/inverseEquivalents2.owl");
-		/** C->B = ER- -> A*/
-		input.add("src/test/resources/test/newDag/inverseEquivalents3.owl");
-		/** ER- -> A=B=C */
-		input.add("src/test/resources/test/newDag/inverseEquivalents4.owl");
-		/** C=ER- =A->B */
-		input.add("src/test/resources/test/newDag/inverseEquivalents5.owl");
-		/** D-> ER- =C=B -> A*/
-		input.add("src/test/resources/test/newDag/inverseEquivalents6.owl");
-		/** P-> ER- =B -> A  C=L ->ES- -> ER- */
-		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
-		/** B->A=ET- ->ER- C->ES- = D->A*/
-		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
+		input.add("src/test/resources/test/equivalence/test_404.owl");
+//		input.add("src/test/resources/test/stockexchange-unittest.owl");
+//		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
+//		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
+//		/** C = B -> ER -> A*/
+//		input.add("src/test/resources/test/newDag/equivalents1.owl");
+//		/** B -> A -> ER=C */
+//		input.add("src/test/resources/test/newDag/equivalents2.owl");
+//		/** C->B = ER -> A*/
+//		input.add("src/test/resources/test/newDag/equivalents3.owl");
+//		/** ER-> A=B=C */
+//		input.add("src/test/resources/test/newDag/equivalents4.owl");
+//		/** C=ER=A->B */
+//		input.add("src/test/resources/test/newDag/equivalents5.owl");
+//		/** D-> ER=C=B -> A*/
+//		input.add("src/test/resources/test/newDag/equivalents6.owl");
+//		/** P-> ER=B -> A  C=L ->ES-> ER */
+//		input.add("src/test/resources/test/newDag/equivalents7.owl");
+//		/** B->A=ET->ER C->ES=D->A*/
+//		input.add("src/test/resources/test/newDag/equivalents8.owl");
+//
+//		/** C = B -> ER- -> A*/
+//		input.add("src/test/resources/test/newDag/inverseEquivalents1.owl");
+//		/** B -> A -> ER- = C */
+//		input.add("src/test/resources/test/newDag/inverseEquivalents2.owl");
+//		/** C->B = ER- -> A*/
+//		input.add("src/test/resources/test/newDag/inverseEquivalents3.owl");
+//		/** ER- -> A=B=C */
+//		input.add("src/test/resources/test/newDag/inverseEquivalents4.owl");
+//		/** C=ER- =A->B */
+//		input.add("src/test/resources/test/newDag/inverseEquivalents5.owl");
+//		/** D-> ER- =C=B -> A*/
+//		input.add("src/test/resources/test/newDag/inverseEquivalents6.owl");
+//		/** P-> ER- =B -> A  C=L ->ES- -> ER- */
+//		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
+//		/** B->A=ET- ->ER- C->ES- = D->A*/
+//		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
 		
 
 

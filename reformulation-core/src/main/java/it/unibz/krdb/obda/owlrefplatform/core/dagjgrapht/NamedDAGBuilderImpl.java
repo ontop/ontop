@@ -80,7 +80,61 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 				continue;
 			}
-
+			
+			Set<Description> namedEquivalences = reasoner.getEquivalences(vertex,
+					true);
+			if(!namedEquivalences.isEmpty())
+			{
+//				change the representative node
+				 
+				 Description newReference= namedEquivalences.iterator().next();
+				 replacements.remove(newReference);
+				 namedDag.addVertex(newReference);
+				
+				 Set<Description> allEquivalences = reasoner.getEquivalences(vertex,
+							false);
+				 Iterator<Description> e= allEquivalences.iterator();
+				 while(e.hasNext()){
+					 if(e.equals(newReference))
+						 continue;
+				 Description node =e.next();
+				 replacements.put(node, newReference);
+				 }
+				 
+				 /*
+					 * Re-pointing all links to and from the eliminated node to the
+					 new
+					 * representative node
+					 */
+					
+					 Set<DefaultEdge> edges = new
+					 HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
+					 for (DefaultEdge incEdge : edges) {
+					 Description source = namedDag.getEdgeSource(incEdge);
+					 namedDag.removeAllEdges(source, vertex);
+					
+					 if (source.equals(newReference))
+					 continue;
+					
+					 namedDag.addEdge(source, newReference);
+					 }
+					
+					 edges = new
+					 HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(vertex));
+					 for (DefaultEdge outEdge : edges) {
+					 Description target = namedDag.getEdgeTarget(outEdge);
+					 namedDag.removeAllEdges(vertex, target);
+					
+					 if (target.equals(newReference))
+					 continue;
+					 namedDag.addEdge(newReference, target);
+					 }
+					
+					 namedDag.removeVertex(vertex);
+					 
+			}
+			else
+			{
 			// Description reference = replacements.get(vertex);
 
 			// /** if the node is not named and it's representative delete it
@@ -163,6 +217,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 			namedDag.removeVertex(vertex);
 			// }
+			}
 
 		}
 

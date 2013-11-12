@@ -238,8 +238,12 @@ public class EquivalenceTBoxOptimizer {
 						equivalent.isInverse());
 				impliedDAG.addVertex(equivalentNode); 
 				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null)
-					impliedDAG.getMapEquivalences().get(equivalentNode).remove(directRedundantNode);
-
+				{
+					Set<Description> equivalences = impliedDAG.getMapEquivalences().get(equivalentNode);
+					equivalences.remove(directRedundantNode);
+					
+					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
+				}
 
 				
 					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode, false)) {
@@ -291,8 +295,12 @@ public class EquivalenceTBoxOptimizer {
 						!equivalent.isInverse());
 				impliedDAG.addVertex(equivalentNode);
 				
-				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null)
-				impliedDAG.getMapEquivalences().get(equivalentNode).remove(directRedundantNode);
+				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null){
+					Set<Description> equivalences = impliedDAG.getMapEquivalences().get(equivalentNode);
+					equivalences.remove(directRedundantNode);
+					
+					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
+				}
 				
 
 				
@@ -384,10 +392,19 @@ public class EquivalenceTBoxOptimizer {
 			}
 
 			if(impliedDAG.getMapEquivalences().get(classNode)!=null)
-			impliedDAG.getMapEquivalences().get(classNode).removeAll(redundantClasses);
+			{
+				Set<Description> equivalences = impliedDAG.getMapEquivalences().get(classNode);
+				equivalences.removeAll(redundantClasses);
+				impliedDAG.getMapEquivalences().put(classNode, equivalences);
+			}
+			
+
 			
 			for (Description replacement : replacements){
-				impliedDAG.getMapEquivalences().get(classNode).add(replacement);
+				
+				Set<Description> equivalences = impliedDAG.getMapEquivalences().get(classNode);
+				equivalences.add(replacement);
+				impliedDAG.getMapEquivalences().put(classNode, equivalences);
 				impliedDAG.getReplacements().put(replacement, classNode);
 			}
 
@@ -431,32 +448,32 @@ public class EquivalenceTBoxOptimizer {
 				
 				
 			}
-//			for(Description equivalent:reasoner.getEquivalences(node, false)){
-//				if(!equivalent.equals(node)){
-//					Axiom axiom = null;
-//					if (node instanceof ClassDescription) {
-//						axiom = ofac.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent);
-//						
-//					} else {
-//						
-//						axiom = ofac.createSubPropertyAxiom((Property) node, (Property) equivalent);
-//						
-//
-//					}
-//					optimalTBox.addEntities(axiom.getReferencedEntities());
-//					optimalTBox.addAssertion(axiom);
-//					
-//					if (equivalent instanceof ClassDescription) {
-//						axiom = ofac.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node);
-//						
-//					} else{
-//						axiom = ofac.createSubPropertyAxiom((Property) equivalent, (Property) node);
-//						
-//					}
-//					optimalTBox.addEntities(axiom.getReferencedEntities());
-//					optimalTBox.addAssertion(axiom);
-//					}
-//				}
+			for(Description equivalent:reasoner.getEquivalences(node, false)){
+				if(!equivalent.equals(node)){
+					Axiom axiom = null;
+					if (node instanceof ClassDescription) {
+						axiom = ofac.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent);
+						
+					} else {
+						
+						axiom = ofac.createSubPropertyAxiom((Property) node, (Property) equivalent);
+						
+
+					}
+					optimalTBox.addEntities(axiom.getReferencedEntities());
+					optimalTBox.addAssertion(axiom);
+					
+					if (equivalent instanceof ClassDescription) {
+						axiom = ofac.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node);
+						
+					} else{
+						axiom = ofac.createSubPropertyAxiom((Property) equivalent, (Property) node);
+						
+					}
+					optimalTBox.addEntities(axiom.getReferencedEntities());
+					optimalTBox.addAssertion(axiom);
+					}
+				}
 			
 			
 		}
