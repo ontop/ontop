@@ -2,15 +2,24 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
 
 /** Build a DAG with only the named descriptions */
 
@@ -25,6 +34,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 	DAGImpl namedDag;
 
 	private TBoxReasonerImpl reasoner;
+	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
 	public NamedDAGBuilderImpl(DAG dag) {
 
@@ -70,35 +80,90 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 		}
 
-		for (Description vertex : ((DAGImpl) dag).vertexSet()) {
+		GraphIterator<Description, DefaultEdge> orderIterator;
 
-			// if the vertex has equivalent nodes leave only the named one
-//			Set<Description> equivalences = checkEquivalences(vertex);
+		//test with a reversed graph so that the smallest index will be given to the higher ancestor
+		DirectedGraph<Description, DefaultEdge> reversed =
+				new EdgeReversedGraph<Description, DefaultEdge>((DAGImpl)dag);
 
-			// if the node is named keep it
-			if (namedClasses.contains(vertex) | property.contains(vertex)) {
-
+		LinkedList<Description> roots = new LinkedList<Description>();
+		for (Description n : reversed.vertexSet()) {
+			if ((reversed.incomingEdgesOf(n)).isEmpty()) {
+				roots.add(n);
+			}
+		}
+		Set<Description >processedNodes= new HashSet<Description>();
+		
+		for (Description root: roots){
+		//A depth first sort 
+		orderIterator =
+				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
+		while (orderIterator.hasNext()) 
+		{
+			Description node= orderIterator.next();
+			if(processedNodes.contains(node))
+				continue;
+			if (namedClasses.contains(node) | property.contains(node)) {
+				
+				processedNodes.add(node);
 				continue;
 			}
 			
-			Set<Description> namedEquivalences = reasoner.getEquivalences(vertex,
-					true);
+			if(node instanceof Property)
+			{
+				Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
+				if(processedNodes.contains(posNode))
+				{
+					Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
+							namedDag.incomingEdgesOf(node));
+
+					// I do a copy of the dag not to remove edges that I still need to
+					// consider in the loops
+					DAGImpl copyDAG = (DAGImpl) namedDag.clone();
+					Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
+							copyDAG.outgoingEdgesOf(node));
+					for (DefaultEdge incEdge : incomingEdges) {
+
+						Description source = namedDag.getEdgeSource(incEdge);
+						namedDag.removeAllEdges(source, node);
+
+						for (DefaultEdge outEdge : outgoingEdges) {
+							Description target = copyDAG.getEdgeTarget(outEdge);
+							namedDag.removeAllEdges(node, target);
+
+							if (source.equals(target))
+								continue;
+							namedDag.addEdge(source, target);
+						}
+
+					}
+
+					namedDag.removeVertex(node);
+					processedNodes.add(node);
+					
+					
+				
+					continue;
+				}
+			}
+			
+			Set<Description> namedEquivalences = reasoner.getEquivalences(node,true);
 			if(!namedEquivalences.isEmpty())
 			{
-//				change the representative node
-				 
-				 Description newReference= namedEquivalences.iterator().next();
+				Description newReference= namedEquivalences.iterator().next();
 				 replacements.remove(newReference);
 				 namedDag.addVertex(newReference);
 				
-				 Set<Description> allEquivalences = reasoner.getEquivalences(vertex,
+				 Set<Description> allEquivalences = reasoner.getEquivalences(node,
 							false);
 				 Iterator<Description> e= allEquivalences.iterator();
 				 while(e.hasNext()){
-					 if(e.equals(newReference))
+					 Description vertex =e.next();
+				 
+					 if(vertex.equals(newReference))
 						 continue;
-				 Description node =e.next();
-				 replacements.put(node, newReference);
+				 
+				 replacements.put(vertex, newReference);
 				 }
 				 
 				 /*
@@ -108,10 +173,10 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 					 */
 					
 					 Set<DefaultEdge> edges = new
-					 HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
+					 HashSet<DefaultEdge>(namedDag.incomingEdgesOf(node));
 					 for (DefaultEdge incEdge : edges) {
 					 Description source = namedDag.getEdgeSource(incEdge);
-					 namedDag.removeAllEdges(source, vertex);
+					 namedDag.removeAllEdges(source, node);
 					
 					 if (source.equals(newReference))
 					 continue;
@@ -120,106 +185,91 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 					 }
 					
 					 edges = new
-					 HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(vertex));
+					 HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(node));
 					 for (DefaultEdge outEdge : edges) {
 					 Description target = namedDag.getEdgeTarget(outEdge);
-					 namedDag.removeAllEdges(vertex, target);
+					 namedDag.removeAllEdges(node, target);
 					
 					 if (target.equals(newReference))
 					 continue;
 					 namedDag.addEdge(newReference, target);
 					 }
 					
-					 namedDag.removeVertex(vertex);
+					 namedDag.removeVertex(node);
+					 processedNodes.add(node);
 					 
+					 /*remove the invertex*/
+					 
+					 if(node instanceof Property)
+						{
+							Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
+							
+								Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
+										namedDag.incomingEdgesOf(posNode));
+
+								// I do a copy of the dag not to remove edges that I still need to
+								// consider in the loops
+								DAGImpl copyDAG = (DAGImpl) namedDag.clone();
+								Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
+										copyDAG.outgoingEdgesOf(posNode));
+								for (DefaultEdge incEdge : incomingEdges) {
+
+									Description source = namedDag.getEdgeSource(incEdge);
+									namedDag.removeAllEdges(source, posNode);
+
+									for (DefaultEdge outEdge : outgoingEdges) {
+										Description target = copyDAG.getEdgeTarget(outEdge);
+										namedDag.removeAllEdges(posNode, target);
+
+										if (source.equals(target))
+											continue;
+										namedDag.addEdge(source, target);
+									}
+
+								}
+
+								namedDag.removeVertex(posNode);
+								
+								
+							
+								continue;
+							}
+					 
+					 	
 			}
-			else
-			{
-			// Description reference = replacements.get(vertex);
+			else{
+				Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
+						namedDag.incomingEdgesOf(node));
 
-			// /** if the node is not named and it's representative delete it
-			// and repoint all links */
-			//
-			// if(!equivalences.isEmpty()){ //node is not named and there are
-			// equivalent named classes
-			//
-			//
-			// //change the representative node
-			// Iterator<Description> e=equivalences.iterator();
-			// Description newReference= e.next();
-			// replacements.remove(newReference);
-			// namedDag.addVertex(newReference);
-			//
-			// while(e.hasNext()){
-			// Description node =e.next();
-			// replacements.put(node, newReference);
-			// }
-			//
-			// /*
-			// * Re-pointing all links to and from the eliminated node to the
-			// new
-			// * representative node
-			// */
-			//
-			// Set<DefaultEdge> edges = new
-			// HashSet<DefaultEdge>(namedDag.incomingEdgesOf(vertex));
-			// for (DefaultEdge incEdge : edges) {
-			// Description source = namedDag.getEdgeSource(incEdge);
-			// namedDag.removeAllEdges(source, vertex);
-			//
-			// if (source.equals(newReference))
-			// continue;
-			//
-			// namedDag.addEdge(source, newReference);
-			// }
-			//
-			// edges = new
-			// HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(vertex));
-			// for (DefaultEdge outEdge : edges) {
-			// Description target = namedDag.getEdgeTarget(outEdge);
-			// namedDag.removeAllEdges(vertex, target);
-			//
-			// if (target.equals(newReference))
-			// continue;
-			// namedDag.addEdge(newReference, target);
-			// }
-			//
-			// namedDag.removeVertex(vertex);
-			// }
-			//
-			// else{ //representative node without equivalents
-			// add edge between the first of the ancestor that it's still
-			// present and its child
+				// I do a copy of the dag not to remove edges that I still need to
+				// consider in the loops
+				DAGImpl copyDAG = (DAGImpl) namedDag.clone();
+				Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
+						copyDAG.outgoingEdgesOf(node));
+				for (DefaultEdge incEdge : incomingEdges) {
 
-			Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
-					namedDag.incomingEdgesOf(vertex));
+					Description source = namedDag.getEdgeSource(incEdge);
+					namedDag.removeAllEdges(source, node);
 
-			// I do a copy of the dag not to remove edges that I still need to
-			// consider in the loops
-			DAGImpl copyDAG = (DAGImpl) namedDag.clone();
-			Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
-					copyDAG.outgoingEdgesOf(vertex));
-			for (DefaultEdge incEdge : incomingEdges) {
+					for (DefaultEdge outEdge : outgoingEdges) {
+						Description target = copyDAG.getEdgeTarget(outEdge);
+						namedDag.removeAllEdges(node, target);
 
-				Description source = namedDag.getEdgeSource(incEdge);
-				namedDag.removeAllEdges(source, vertex);
+						if (source.equals(target))
+							continue;
+						namedDag.addEdge(source, target);
+					}
 
-				for (DefaultEdge outEdge : outgoingEdges) {
-					Description target = copyDAG.getEdgeTarget(outEdge);
-					namedDag.removeAllEdges(vertex, target);
-
-					if (source.equals(target))
-						continue;
-					namedDag.addEdge(source, target);
 				}
 
+				namedDag.removeVertex(node);
+				processedNodes.add(node);
 			}
-
-			namedDag.removeVertex(vertex);
-			// }
-			}
-
+			
 		}
+		
+		}
+		
 
 		namedDag.setMapEquivalences(equivalencesMap);
 		namedDag.setReplacements(replacements);
@@ -227,32 +277,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 	}
 
-	/** using the TBoxReasoner keeps only the equivalent named nodes */
-
-	private Set<Description> checkEquivalences(Description vertex) {
-		// delete from equivalencesMap and assign a new representative node
-		Set<Description> namedEquivalences = reasoner.getEquivalences(vertex,
-				true);
-		Set<Description> allEquivalences = reasoner.getEquivalences(vertex,
-				false);
-		;
-
-		Iterator<Description> e = allEquivalences.iterator();
-
-		while (e.hasNext()) {
-			Description node = e.next();
-			if (namedEquivalences.contains(node)
-					&& namedEquivalences.size() > 1) {
-				equivalencesMap.put(node, namedEquivalences);
-			} else {
-				replacements.remove(node);
-				equivalencesMap.remove(node);
-
-			}
-		}
-		return namedEquivalences;
-
-	}
+	
 
 	@Override
 	public DAGImpl getDAG() {
