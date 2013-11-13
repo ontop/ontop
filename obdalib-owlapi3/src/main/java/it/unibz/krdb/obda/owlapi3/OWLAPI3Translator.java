@@ -470,6 +470,10 @@ public class OWLAPI3Translator {
 
 				} else if (axiom instanceof OWLDisjointClassesAxiom) {
 					OWLDisjointClassesAxiom aux = (OWLDisjointClassesAxiom) axiom;
+					for (OWLClassExpression disjClass : aux.getClassExpressionsAsList()) {
+						if (!(disjClass instanceof OWLClass))
+						throw new TranslationException("Invalid class expression in disjoint class axiom: "+disjClass.toString());
+					}
 					Set<OWLClass> disjointClasses = aux.getClassesInSignature();
 					Iterator<OWLClass> iter = disjointClasses.iterator();
 					if (!iter.hasNext())
