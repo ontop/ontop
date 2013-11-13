@@ -192,6 +192,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean bObtainFromOntology = true;
 
 	private boolean bObtainFromMappings = true;
+	
+	private boolean obtainFullMetadata = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -411,6 +413,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		aboxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 		aboxSchemaType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
+		
+		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -672,14 +676,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			//if the metadata was not already set
 			if (metadata == null) {
-				
-				//metadata = JDBCConnectionManager.getMetaData(localConnection);
-				//This is the NEW way of obtaining part of the metadata (the schema.table names) by
-				//parsing the mappings
-				MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
-				metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
-				// This call should be used if the ParsedMappings are reused for the parsing below
-				mParser.addViewDefs(metadata);
+				// if we have to parse the full metadata or just the table list in the mappings
+				if (obtainFullMetadata) {
+					metadata = JDBCConnectionManager.getMetaData(localConnection);
+				} else {
+					// This is the NEW way of obtaining part of the metadata
+					// (the schema.table names) by parsing the mappings
+					MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
+					// This call should be used if the ParsedMappings 
+					// are reused for the parsing below
+					mParser.addViewDefs(metadata);
+				}
 			}
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
