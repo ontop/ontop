@@ -18,7 +18,7 @@ import java.util.Set;
 
 
 /** 
- * Interface to the DAG
+ * Interface to the DAG and the named DAG
  *  */
 public interface DAG {
 

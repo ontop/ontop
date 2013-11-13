@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
+
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
@@ -20,8 +29,9 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * Starting from a graph build a DAG. Consider equivalences, redundancies and
- * transitive reduction
+ * Starting from a graph build a DAG. 
+ * Considering  equivalences and redundancies, it eliminates cycles executes
+ * transitive reduction.
  */
 
 public class DAGBuilderImpl implements DAGBuilder {
@@ -42,10 +52,11 @@ public class DAGBuilderImpl implements DAGBuilder {
 	private GraphImpl modifiedGraph;
 
 	/**
-	 * *Construct a DAG starting from a given graph
+	 * *Construct a DAG starting from a given graph 
 	 * 
-	 * @param graph
+	 * @param graph needs a graph with or without cycles 
 	 */
+	
 	public DAGBuilderImpl(Graph graph) {
 
 		// temporary graph to be transformed in DAG
@@ -86,7 +97,9 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * *Construct a DAG starting from a given graph with already known
 	 * equivalent nodes and representative nodes
 	 * 
-	 * @param graph
+	 * @param graph needs a graph with or without cycles
+	 * @param equivalents a map between the node and its equivalent nodes
+	 * @param representatives a map between the node and its representive node
 	 */
 	public DAGBuilderImpl(Graph graph,
 			Map<Description, Set<Description>> equivalents,
@@ -208,6 +221,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * from the graph. The result of this transformation is that the graph
 	 * becomes a DAG.
 	 * 
+	 * 
 	 * <p>
 	 * In the process two objects are generated, an 'Equivalence map' and a
 	 * 'replacementMap'. The first can be used to get the implied equivalences
@@ -239,8 +253,9 @@ public class DAGBuilderImpl implements DAGBuilder {
 		 * or nodes for inverse descriptions has already been processed.
 		 */
 		Set<Description> processedNodes = new HashSet<Description>();
+		Set<Description> chosenNodes = new HashSet<Description>();
 
-		Set<Property> namedRoles = graph.getRoles();
+		
 
 		for (Set<Description> equivalenceSet : equivalenceSets) {
 
@@ -250,14 +265,12 @@ public class DAGBuilderImpl implements DAGBuilder {
 			/*
 			 * Avoiding processing nodes two times, but assign the equivalentMap
 			 */
-			boolean ignore=false, toName= false;
+			boolean ignore = false;
 
 			for (Description node : equivalenceSet) {
 
 				if (!ignore && processedNodes.contains(node)) {
 					ignore = true;
-					if(node instanceof Property)
-						toName=true;
 
 					// break;
 
@@ -272,102 +285,56 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 			}
 
-//			if(toName)
-//			{
-//				Iterator<Description> iterator = equivalenceSet.iterator();
-//				Description first = iterator.next();
-//				Description representative= replacements.get(first);
-//				if(representative==null)
-//					representative=first;
-//				Description notRepresentative = null;
-//
-//				// if it is inverse I search a not inverse element as representative
-//				if (((Property) representative).isInverse()) {
-//					boolean notInverse = false;
-//					for (Description equivalent : equivalenceSet) {
-//						if (equivalent instanceof Property
-//								&& !((Property) equivalent).isInverse()) {
-//							notRepresentative = representative;
-//							representative = equivalent;
-//							notInverse = true;
-//							for (Description element : equivalenceSet) {
-//								if (element.equals(representative)){
-//									replacements.remove(element);
-//									modifiedGraph.addVertex(representative);
-//									continue;
-//									
-//								}
-//
-//								replacements.put(element, representative);
-//							}
-//							 
-//							 
-//							break;
-//						}
-//					}
-//					if (notInverse)
-//					{
-//						Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
-//								modifiedGraph.incomingEdgesOf(notRepresentative));
-//
-//						for (DefaultEdge incEdge : edges) {
-//							Description source = modifiedGraph
-//									.getEdgeSource(incEdge);
-//
-//							modifiedGraph.removeAllEdges(source, notRepresentative);
-//
-//							if (source.equals(representative))
-//								continue;
-//
-//							modifiedGraph.addEdge(source, representative);
-//						}
-//
-//						edges = new HashSet<DefaultEdge>(
-//								modifiedGraph.outgoingEdgesOf(notRepresentative));
-//
-//						for (DefaultEdge outEdge : edges) {
-//							Description target = modifiedGraph
-//									.getEdgeTarget(outEdge);
-//
-//							modifiedGraph.removeAllEdges(notRepresentative, target);
-//
-//							if (target.equals(representative))
-//								continue;
-//
-////			
-//							modifiedGraph.addEdge(representative, target);
-//
-//						}
-//
-//						modifiedGraph.removeVertex(notRepresentative);
-//
-//						processedNodes.add(notRepresentative);
-//					}
-//					
-//						
-//				}
-//				if (representative == null)
-//					continue;
-//			}
-//			 if(!ignore){ //I try to consider first the element that are connected
-//			
-//			 for(Property p: namedRoles){
-//			 Description inverse = fac.createProperty(p.getPredicate(),
-//			 !p.isInverse());
-//			 if(equivalenceSet.contains(p)){
-//			 break;
-//			 }
-//			 if(equivalenceSet.contains(inverse)){
-//			 ignore=true;
-//			 break;
-//			 }
-//			 }
-//			 }
+			/*
+			 * We consider first the elements that are connected with other
+			 * named roles, checking if between their parents there is an
+			 * already assigned named role or an inverse
+			 */
+
+			if (!ignore) {
+
+				Iterator<Description> iterator = equivalenceSet.iterator();
+				while (iterator.hasNext()) {
+					Description representative = iterator.next();
+
+					Set<DefaultEdge> edges = modifiedGraph
+							.outgoingEdgesOf(representative);
+					for (DefaultEdge outEdge : edges) {
+						Description target = modifiedGraph
+								.getEdgeTarget(outEdge);
+
+						if (processedNodes.contains(target))
+							if (((Property) target).isInverse()) {
+								ignore = true;
+								chosenNodes.addAll(equivalenceSet);
+								break;
+							}
+
+						if (chosenNodes.contains(target)) {
+
+							ignore = true;
+							chosenNodes.addAll(equivalenceSet);
+							break;
+						}
+
+						//
+
+					}
+					if (ignore)
+						break;
+				}
+				
+
+			}
 
 			if (ignore)
-				
+
 				continue;
 
+			/* Assign the representative role with its inverse, domain and range
+			 * 
+			 */
+			
 			Iterator<Description> iterator = equivalenceSet.iterator();
 			Description representative = iterator.next();
 			Description notRepresentative = null;
@@ -422,6 +389,8 @@ public class DAGBuilderImpl implements DAGBuilder {
 			existMap.add(domain);
 			inverseMap.add(inverse);
 
+			//remove all the equivalent node (eliminatedNode)
+			
 			while (iterator.hasNext()) {
 				Description eliminatedNode = iterator.next();
 				if (eliminatedNode.equals(representative)
@@ -502,13 +471,16 @@ public class DAGBuilderImpl implements DAGBuilder {
 					// if(r!=null)
 					// equivRangeNode= r;
 
-					// particular case in which the representative is in a cycle
-					// with its inverse
+					/* 
+					 * Particular case in which the representative is in a cycle
+					 * with its inverse. We add everything to the named role. 
+					 */
+					
 					if (equivinverseNode.equals((Property) representative)) {
 
 						processedNodes.add(equivDomainNode);
 
-						// this for domain
+						
 						Set<DefaultEdge> edgesDomain = new HashSet<DefaultEdge>(
 								modifiedGraph.incomingEdgesOf(equivDomainNode));
 
@@ -659,7 +631,6 @@ public class DAGBuilderImpl implements DAGBuilder {
 						}
 
 						modifiedGraph.removeVertex(equivRangeNode);
-						
 
 						replacements.put(equivinverseNode, inverse);
 
@@ -671,21 +642,13 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 			}
 
-			// //equivalentMap for the inverse
-			// for(Description nodeInverse:inverseMap ){
-			// equivalencesMap.put(nodeInverse, inverseMap);
-			// }
-			//
-			// for(Description nodeExist:existMap ){
-			// equivalencesMap.put(nodeExist, existMap);
-			// }
-			//
-			// for(Description nodeExistInverse:existInverseMap){
-			// equivalencesMap.put(nodeExistInverse, existInverseMap);
-			// }
+			
 		}
 
-		// second check of the strongly connected components for the classes
+		/*
+		 * Second check of the strongly connected components for the classes
+		 * 
+		 */
 		List<Set<Description>> equivalenceClassSets = inspector
 				.stronglyConnectedSets();
 		Set<Description> processedClassNodes = new HashSet<Description>();
@@ -696,9 +659,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 			if (equivalenceClassSet.size() < 2)
 				continue;
-			/*
-			 * Avoiding processing nodes two times, but assign the equivalentMap
-			 */
+			
 			boolean ignore = false;
 			for (Description node : equivalenceClassSet) {
 
@@ -719,8 +680,11 @@ public class DAGBuilderImpl implements DAGBuilder {
 			if (representative == null)
 				representative = node;
 
-			// if a node has already been assigned I check if it is named, if
-			// not substitute
+			/*
+			 *  if a node has already been assigned I check if it is named,
+			 *  if not it is substitute with an equivalent named node if it is present
+			 */
+			
 			if (processedNodes.contains(representative)) {
 				Description notRepresentative = null;
 
@@ -737,25 +701,23 @@ public class DAGBuilderImpl implements DAGBuilder {
 							break;
 						}
 					}
-					
-					// //if all propertysomerestriction they have been added
-					// before with property
-					if (!namedElement) 
-						continue;
-					
-					
-						for (Description element : equivalenceClassSet) {
-							if (element.equals(representative)){
-								replacements.remove(element);
-								continue;
-								
-							}
 
-							replacements.put(element, representative);
+					// //if all propertysomerestriction they have been added
+					// before when working over roles
+					
+					if (!namedElement)
+						continue;
+
+					for (Description element : equivalenceClassSet) {
+						if (element.equals(representative)) {
+							replacements.remove(element);
+							continue;
+
 						}
 
-					
-					
+						replacements.put(element, representative);
+					}
+
 				}
 				processedClassNodes.add(representative);
 
@@ -803,14 +765,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 						if (target.equals(representative))
 							continue;
 
-//						Description value = replacements.get(target);
-//						if (value != null)
-//							if (value.equals(eliminatedNode)) {
-//								replacements.put(target, representative);
-
-								// equivalencesMap.put(target,
-								// equivalenceClassSet);
-//							}
+						
 						modifiedGraph.addEdge(representative, target);
 
 					}
@@ -820,14 +775,14 @@ public class DAGBuilderImpl implements DAGBuilder {
 					processedClassNodes.add(eliminatedNode);
 				}
 
-			} else {
+			} else { // If a node has not yet been assigned
 
-				// Description representative= node;
+				
 				Description notRepresentative = null;
 
 				// I want to consider a named class as representative element
 				if (representative instanceof PropertySomeRestriction) {
-					boolean namedElement = false;
+					
 					for (Description equivalent : equivalenceClassSet) {
 						// Description equivalent=replacements.get(e);
 						// if(equivalent==null)
@@ -843,9 +798,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 							break;
 						}
 					}
-					// if(!namedElement)
-					// representative = null; //if all propertysomerestriction
-					// they will be added later with another set with property
+					
 				}
 
 				processedClassNodes.add(representative);
@@ -855,38 +808,30 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 					Description eliminatedNode = iterator.next();
 
-					// Description eliminatedNode=replacements.get(equivalent);
-					// if(eliminatedNode==null)
-					// eliminatedNode=equivalent;
+					
 					if (eliminatedNode.equals(representative)
 							& notRepresentative != null)
 						eliminatedNode = notRepresentative;
-					
-					Description replacement= replacements.get(eliminatedNode);
-					
+
+					Description replacement = replacements.get(eliminatedNode);
+
 					replacements.put(eliminatedNode, representative);
 
-					/* check if the node has been already replaced by an other in the first part with property 
-					 * if substitute check if its replacements still has to be processed
+					/*
+					 * check if the node has been already replaced by an other
+					 * in the first part with property if substitute check if
+					 * its replacements still has to be processed
 					 */
-					if(replacement!=null)
-					if(!processedClassNodes.contains(replacement))
-					{
-						processedClassNodes.add(eliminatedNode);
-						eliminatedNode=replacement;
-						replacements.put(eliminatedNode, representative);
-					}
-					else 
-					{
-						processedClassNodes.add(eliminatedNode);
-						continue;
-					}
-					// equivalencesMap.put(eliminatedNode, equivalenceClassSet);
-
-					// if(!modifiedGraph.containsVertex(eliminatedNode)){
-					// System.out.println(eliminatedNode);
-					// continue;
-					// }
+					if (replacement != null)
+						if (!processedClassNodes.contains(replacement)) {
+							processedClassNodes.add(eliminatedNode);
+							eliminatedNode = replacement;
+							replacements.put(eliminatedNode, representative);
+						} else {
+							processedClassNodes.add(eliminatedNode);
+							continue;
+						}
+					
 					/*
 					 * Re-pointing all links to and from the eliminated node to
 					 * the representative node
@@ -919,14 +864,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 						if (target.equals(representative))
 							continue;
 
-//						Description value = replacements.get(target);
-//						if (value != null)
-//							if (value.equals(eliminatedNode)) {
-//								replacements.put(target, representative);
-//
-//								// equivalencesMap.put(target,
-//								// equivalenceClassSet);
-//							}
+						
 						modifiedGraph.addEdge(representative, target);
 
 					}

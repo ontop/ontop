@@ -30,7 +30,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 	public void setUp(){
 		
 		
-		input.add("src/test/resources/test/equivalence/test_404.owl");
+		
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");

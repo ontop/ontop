@@ -237,8 +237,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getEnd());
 
 		Description d = pureIsa.getReplacements().get(
-				ofac.createObjectProperty(testURI + "A1", true));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A2")));
+				ofac.createObjectProperty(testURI + "A2"));
+		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A1",true)));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "A3"));
@@ -255,8 +255,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getEnd());
 
 		d = pureIsa.getReplacements().get(
-				ofac.createObjectProperty(testURI + "C1", true));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "C2")));
+				ofac.createObjectProperty(testURI + "C2"));
+		assertTrue(d.equals(ofac.createObjectProperty(testURI + "C1",true)));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "C3"));
@@ -274,8 +274,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getEnd());
 
 		d = pureIsa.getReplacements().get(
-				ofac.createObjectProperty(testURI + "B3", true));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "B2")));
+				ofac.createObjectProperty(testURI + "B2"));
+		assertTrue(d.equals(ofac.createObjectProperty(testURI + "B3",true)));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "B3"));

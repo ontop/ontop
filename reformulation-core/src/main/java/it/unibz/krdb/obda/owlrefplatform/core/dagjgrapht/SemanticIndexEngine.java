@@ -6,7 +6,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import java.util.List;
 import java.util.Map;
 
-/** An interface for the class SemanticIndexEngine that build the indexes for the DAG
+/** 
+ * An interface for the class SemanticIndexEngine that builds the indexes for the DAG
  * 
  */
 

@@ -18,7 +18,9 @@ import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
 
-/** Build the indexes for the DAG
+/** 
+ * 
+ * Build the indexes for the DAG
  * create a map with the index and the intervals for each node in the graph
  * 
  * 
@@ -30,13 +32,13 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
 	private int index_counter = 1;
 
-	//listener on the depth first sort of the graph
+	
+  /**
+  * Create a Listener that creates the index for each node visited in depth first search.
+  * extends TraversalListenerAdapter from JGrapht
+  *
+  */
 	public class IndexListener extends TraversalListenerAdapter<Description, DefaultEdge> {
-
-
-		
-
-
 
 		DirectedGraph <Description, DefaultEdge> g;
 		private boolean newComponent;
@@ -80,8 +82,10 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		}
 	}
 
-	/**  Merge the indexes of the current connected component 
-	 * @param Description d  is the root node */
+	/**  
+	 * Merge the indexes of the current connected component 
+	 * @param d  is the root node 
+	 * */
 	private void mergeRangeNode(Description d) {
 
 		DirectedGraph<Description, DefaultEdge> reversed =
@@ -116,7 +120,9 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		}
 
 	}
+	
 	private void construct(){
+		
 		GraphIterator<Description, DefaultEdge> orderIterator;
 
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
@@ -148,8 +154,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		}
 		}
 		index_counter=1;
-		//		System.out.println(indexes);
-		//		System.out.println(ranges);
+		
 
 	}
 

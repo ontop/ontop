@@ -10,9 +10,7 @@ import java.io.Serializable;
  */
 public class Interval implements Comparable<Interval>, Serializable {
 
-    /**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 3982860811012207357L;
 	final int start;
 	final int end;

@@ -8,11 +8,10 @@ import java.util.List;
 /**
  * Represents a set of continues intervals
  */
+
 public class SemanticIndexRange implements Serializable {
 
-    /**
-	 * 
-	 */
+  
 	private static final long serialVersionUID = 8420832314126437803L;
 	private List<Interval> intervals = new LinkedList<Interval>();
 

@@ -2,7 +2,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 
 
-/**Interface for a DAG with only the named description. */
+/**
+ * Interface to build a DAG with only named descriptions.
+ * 
+ */
 
 public interface NamedDAGBuilder {
 

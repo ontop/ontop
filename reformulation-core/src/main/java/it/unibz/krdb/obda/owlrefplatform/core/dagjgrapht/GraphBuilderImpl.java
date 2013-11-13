@@ -18,8 +18,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 /**
  * Builds a graph starting from the axioms of a TBox.
- * 
- *
+
  */
 
 
@@ -31,7 +30,9 @@ public class GraphBuilderImpl implements GraphBuilder{
 	
 
 	/**
-	 * Build the graph from the TBox axioms
+	 * Build the graph from the TBox axioms of the ontology
+	 * 
+	 * @param ontology TBox containing the axioms
 	 */
 	public GraphBuilderImpl (Ontology ontology){
 		
@@ -117,8 +118,14 @@ public class GraphBuilderImpl implements GraphBuilder{
 
 
 	}
-
-	//we build a graph starting from assertions of a TBox
+	/**
+	 * Build the graph starting from assertion of a TBox 
+	 * @param assertions assertions of an ontology
+	 * @param concepts concepts of an ontology
+	 * @param roles roles of an ontology
+	 * 
+	 */
+	
 	public GraphBuilderImpl (Collection<Axiom> assertions, Set<Predicate> concepts, Set<Predicate> roles){
 		for (Predicate conceptp : concepts) {
 			ClassDescription concept = descFactory.createClass(conceptp);
@@ -171,6 +178,10 @@ public class GraphBuilderImpl implements GraphBuilder{
 	}
 
 @Override
+	/**
+	 * Give the graph
+	 * @return graph return the created graph
+	 */
 	public  Graph  getGraph(){
 
 		return graph;

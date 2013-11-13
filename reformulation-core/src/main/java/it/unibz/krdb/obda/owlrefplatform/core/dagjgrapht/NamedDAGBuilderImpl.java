@@ -5,7 +5,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,11 +16,13 @@ import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
-/** Build a DAG with only the named descriptions */
+/** 
+ * Build a DAG with only the named descriptions 
+ * 
+ * */
 
 public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
@@ -36,6 +37,11 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 	private TBoxReasonerImpl reasoner;
 	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
+	/**
+	 * Constructor for the NamedDAGBuilder
+	 * @param dag the DAG from which we want to mantain only the named descriptions
+	 */
+	
 	public NamedDAGBuilderImpl(DAG dag) {
 
 		namedDag = new DAGImpl(DefaultEdge.class);
@@ -53,6 +59,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 		}
 
 		reasoner = new TBoxReasonerImpl(dag);
+		
 		// take classes, roles, equivalences map and replacements from the DAG
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();
@@ -82,7 +89,11 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 		GraphIterator<Description, DefaultEdge> orderIterator;
 
-		//test with a reversed graph so that the smallest index will be given to the higher ancestor
+		/*
+		 * Test with a reversed graph so that the incoming edges 
+		 * represent the parents of the node
+		 */
+		
 		DirectedGraph<Description, DefaultEdge> reversed =
 				new EdgeReversedGraph<Description, DefaultEdge>((DAGImpl)dag);
 
@@ -92,17 +103,29 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 				roots.add(n);
 			}
 		}
-		Set<Description >processedNodes= new HashSet<Description>();
+		
+		Set<Description> processedNodes= new HashSet<Description>();
 		
 		for (Description root: roots){
-		//A depth first sort 
+		
+		/* 
+		 * A depth first sort from each root of the DAG.
+		 * If the node is named we keep it, otherwise we remove it and 
+		 * we connect all its descendants to all its ancestors.
+		 * 
+		 * 
+		 */
 		orderIterator =
 				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
+		
+		
 		while (orderIterator.hasNext()) 
 		{
 			Description node= orderIterator.next();
+			
 			if(processedNodes.contains(node))
 				continue;
+			
 			if (namedClasses.contains(node) | property.contains(node)) {
 				
 				processedNodes.add(node);
@@ -280,6 +303,10 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 	
 
 	@Override
+	/**
+	 * Allows to take the constructed named DAG
+	 * @return DAGImpl the constructed named DAG
+	 */
 	public DAGImpl getDAG() {
 		return namedDag;
 	}

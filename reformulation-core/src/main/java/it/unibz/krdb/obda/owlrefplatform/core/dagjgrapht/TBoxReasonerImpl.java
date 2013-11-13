@@ -34,8 +34,7 @@ import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
- * Retrieve all the connections built in DAG or graph
- * 
+ * Allows to reason over the TBox using  DAG or graph
  * 
  */
 
@@ -70,6 +69,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		property = dag.getRoles();
 	}
 
+	/**
+	 * Constructor using a DAG or a named DAG
+	 * @param dag DAG to be used for resoning
+	 */
 	public TBoxReasonerImpl(DAG dag) {
 		this.dag = (DAGImpl) dag;
 		namedClasses = dag.getClasses();
@@ -77,7 +80,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	}
 
-	// reasoner on the graph (cycles admitted)
+	
+	/**
+	 * Constructor using a graph (cycles admitted)
+	 * @param dag DAG to be used for reasoning
+	 */
 	public TBoxReasonerImpl(Graph graph) {
 		this.graph = (GraphImpl) graph;
 		namedClasses = graph.getClasses();
@@ -88,10 +95,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 
+	 * @param desc node that we want to know the direct children
 	 * @param named
 	 *            when it's true only the children that correspond to named
 	 *            classes and property are returned
-	 * @result we return a set of set of description to distinguish between
+	 * @return we return a set of set of description to distinguish between
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
@@ -189,7 +197,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return Collections.unmodifiableSet(result);
 	}
 
-	// private method that searches for the first named children
+	/*
+	 *  Private method that searches for the first named children
+	 */
 
 	private Set<Set<Description>> getNamedChildren(Description desc) {
 		if (dag != null) {
@@ -211,7 +221,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				if (equivalenceSet.contains(source)) {
 					continue;
 				}
-				Set<Description> equivalences = getEquivalences(source, false);
+//				Set<Description> equivalences = getEquivalences(source, false);
 
 				Set<Description> namedEquivalences = getEquivalences(source,
 						true);
@@ -271,9 +281,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	/**
 	 * return the direct parents starting from the given node of the dag
 	 * 
+	 * @param desc node from which we want to know the direct parents
 	 * @param named
 	 *            when it's true only the parents that correspond to named
 	 *            classes or property are returned
+	 *            
+	 * @return we return a set of set of description to distinguish between
+	 *         different nodes and equivalent nodes. equivalent nodes will be in
+	 *         the same set of description
 	 * */
 
 	@Override
@@ -367,7 +382,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return Collections.unmodifiableSet(result);
 	}
 
-	// private method that search for the first named parents
+	/*
+	 *  private method that search for the first named parents
+	 */
+	
 	private Set<Set<Description>> getNamedParents(Description desc) {
 		if (dag != null) {
 			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
@@ -442,12 +460,16 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	/**
-	 * traverse the graph return the descendants starting from the given node of
+	 * Traverse the graph return the descendants starting from the given node of
 	 * the dag
 	 * 
+	 * @param desc node we want to know the descendants
 	 * @param named
 	 *            when it's true only the descendants that are named classes or
 	 *            property are returned
+	 *@return we return a set of set of description to distinguish between
+	 *         different nodes and equivalent nodes. equivalent nodes will be in
+	 *         the same set of description
 	 */
 	@Override
 	public Set<Set<Description>> getDescendants(Description desc, boolean named) {
@@ -505,7 +527,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			Description current = iterator.next();
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(current, named);
+//			Set<Description> equivalenceSet = getEquivalences(current, named);
 			// iterate over the subsequent nodes, they are all descendant of
 			// desc
 			while (iterator.hasNext()) {
@@ -540,13 +562,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	/**
-	 * traverse the graph return the ancestors starting from the given node of
+	 * Traverse the graph return the ancestors starting from the given node of
 	 * the dag
 	 * 
+	 * @param desc node we want to know the ancestors
 	 * @param named
 	 *            when it's true only the ancestors that are named classes or
 	 *            property are returned
+	 * @return we return a set of set of description to distinguish between
+	 *         different nodes and equivalent nodes. equivalent nodes will be in
+	 *         the same set of description
 	 */
+	
 	@Override
 	public Set<Set<Description>> getAncestors(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
@@ -560,7 +587,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					node);
 
 			// I don't want to consider the current node
-			Description start = iterator.next();
+//			Description start = iterator.next();
 
 			Description startNode = desc;
 			Set<Description> sourcesStart = getEquivalences(startNode, named);
@@ -596,7 +623,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			Description current = iterator.next();
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(current, named);
+//			Set<Description> equivalenceSet = getEquivalences(current, named);
 			// iterate over the subsequent nodes, they are all ancestor of desc
 			while (iterator.hasNext()) {
 				Description node = iterator.next();
@@ -630,12 +657,17 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	/**
-	 * return the equivalences starting from the given node of the dag
+	 * Return the equivalences starting from the given node of the dag
 	 * 
+	 * @param desc node we want to know the ancestors
+
 	 * @param named
-	 *            when it's true only the equivalences that are named classes or
+	 *            when it's <code> true </code> only the equivalences that are named classes or
 	 *            property are returned
+	 *            
+	 * @return we return a set of description with equivalent nodes 
 	 */
+	
 	@Override
 	public Set<Description> getEquivalences(Description desc, boolean named) {
 		// equivalences over a dag
@@ -719,6 +751,16 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		}
 	}
+	
+	/**
+	 * Return all the nodes in the DAG or graph
+	 * 
+	 * @param named when it's <code> true </code> only the named classes or
+	 *            property are returned 
+	 * @return we return a set of set of description to distinguish between
+	 *         different nodes and equivalent nodes. equivalent nodes will be in
+	 *         the same set of description
+	 */
 
 	public Set<Set<Description>> getNodes(boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
@@ -954,7 +996,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 						firstDescendant);
 				if (descendant == null)
 					descendant = firstDescendant;
-				Axiom axiom = null;
+//				Axiom axiom = null;
 				/*
 				 * Creating subClassOf or subPropertyOf axioms
 				 */
