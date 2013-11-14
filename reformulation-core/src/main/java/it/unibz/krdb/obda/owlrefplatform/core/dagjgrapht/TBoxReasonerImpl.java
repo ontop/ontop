@@ -587,7 +587,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					node);
 
 			// I don't want to consider the current node
-//			Description start = iterator.next();
+			iterator.next();
 
 			Description startNode = desc;
 			Set<Description> sourcesStart = getEquivalences(startNode, named);
