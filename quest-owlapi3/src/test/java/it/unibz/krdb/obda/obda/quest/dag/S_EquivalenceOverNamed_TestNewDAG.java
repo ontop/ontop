@@ -61,8 +61,10 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents4.owl");
 		/** C=ER- =A->B */
 		input.add("src/test/resources/test/newDag/inverseEquivalents5.owl");
-		/** D-> ER- =C=B -> A*/
+		/** D-> ER  ER- =C=B -> A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents6.owl");
+		/** D->  ER- =C=B -> A*/
+		input.add("src/test/resources/test/newDag/inverseEquivalents6b.owl");
 		/** P-> ER- =B -> A  C=L ->ES- -> ER- */
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/

@@ -31,7 +31,7 @@ public class DAGPerformanceTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
 
-	int size = 1000;
+	int size = 100000;
 	int maxdepth = 10;
 
 	private class LevelRange {

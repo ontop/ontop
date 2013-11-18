@@ -63,6 +63,8 @@ public void setUp(){
 		input.add("src/test/resources/test/newDag/inverseEquivalents5.owl");
 		/** D-> ER- =C=B -> A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents6.owl");
+		/** D->  ER- =C=B -> A*/
+		input.add("src/test/resources/test/newDag/inverseEquivalents6b.owl");
 		/** P-> ER- =B -> A  C=L ->ES- -> ER- */
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
@@ -87,7 +89,7 @@ public void testIndexes() throws Exception{
 		log.info("named graph {}", namedDag);
 		
 		
-		testIndexes(namedDag);
+		assertTrue(testIndexes(namedDag));
 
 
 	}
@@ -95,7 +97,7 @@ public void testIndexes() throws Exception{
 
 private boolean testIndexes( DAGImpl dag){
 	TBoxReasonerImpl reasoner= new TBoxReasonerImpl(dag);
-	boolean result=false;
+	boolean result=true;
 	
 	
 	//create semantic index
@@ -109,12 +111,11 @@ private boolean testIndexes( DAGImpl dag){
 		for(Description parent: Graphs.successorListOf(dag, vertex)){
 			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
 			
-			if(result)
+			if(!result)
 				break;
 		}
 		
-		if(!result)
-			break;
+		
 	}
 	
 	log.info("indexes {}", indexes);
