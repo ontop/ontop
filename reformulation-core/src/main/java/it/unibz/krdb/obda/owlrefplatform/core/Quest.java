@@ -58,6 +58,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
@@ -191,6 +192,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean bObtainFromOntology = true;
 
 	private boolean bObtainFromMappings = true;
+	
+	private boolean obtainFullMetadata = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -410,6 +413,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		aboxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 		aboxSchemaType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
+		
+		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -667,10 +672,22 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
+
+			
 			//if the metadata was not already set
 			if (metadata == null) {
-
-				metadata = JDBCConnectionManager.getMetaData(localConnection);
+				// if we have to parse the full metadata or just the table list in the mappings
+				if (obtainFullMetadata) {
+					metadata = JDBCConnectionManager.getMetaData(localConnection);
+				} else {
+					// This is the NEW way of obtaining part of the metadata
+					// (the schema.table names) by parsing the mappings
+					MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
+					// This call should be used if the ParsedMappings 
+					// are reused for the parsing below
+					mParser.addViewDefs(metadata);
+				}
 			}
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
@@ -688,6 +705,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
+			
 			/***
 			 * Starting mapping processing
 			 */
@@ -704,12 +722,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/**
 			 * Expand the meta mapping 
 			 */
-			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
+			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
 			
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
-			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
+			
+			
+			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
@@ -845,6 +866,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
+		//MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()));
 		MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();

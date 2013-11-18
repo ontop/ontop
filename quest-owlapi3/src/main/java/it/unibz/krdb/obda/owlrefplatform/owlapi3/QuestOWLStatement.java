@@ -111,7 +111,9 @@ public class QuestOWLStatement {
 	public QuestOWLResultSet executeTuple(String query) throws OWLException {
 		if (SPARQLQueryUtility.isSelectQuery(query) || SPARQLQueryUtility.isAskQuery(query)) {
 		try {
-			return new QuestOWLResultSet((TupleResultSet) st.execute(query), this);
+			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
+			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}} else {

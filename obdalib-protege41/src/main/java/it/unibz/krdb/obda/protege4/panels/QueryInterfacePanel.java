@@ -166,7 +166,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowAll.setText("All");
         chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
+        chkShowAll.setPreferredSize(new java.awt.Dimension(55, 23));
         chkShowAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowAllActionPerformed(evt);
@@ -176,9 +176,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowShortURI.setText("Short IRI");
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
+        chkShowShortURI.setMaximumSize(new java.awt.Dimension(95, 23));
+        chkShowShortURI.setMinimumSize(new java.awt.Dimension(95, 23));
+        chkShowShortURI.setPreferredSize(new java.awt.Dimension(95, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();

@@ -95,7 +95,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -192,7 +192,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -297,7 +297,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -469,7 +469,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -550,12 +550,12 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql1 = "SELECT fn, ln FROM data";
-		String sql2 = "SELECT fn, ln FROM data";
-		String sql3 = "SELECT fn, ln FROM data";
-		String sql4 = "SELECT fn, ln, age FROM data";
-		String sql5 = "SELECT fn, ln, schooluri FROM data";
-		String sql6 = "SELECT fn, ln, schooluri FROM data";
+		String sql1 = "SELECT \"fn\", \"ln\" FROM \"data\"";
+		String sql2 = "SELECT \"fn\", \"ln\" FROM \"data\"";
+		String sql3 = "SELECT \"fn\", \"ln\" FROM \"data\"";
+		String sql4 = "SELECT \"fn\", \"ln\", \"age\" FROM \"data\"";
+		String sql5 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
+		String sql6 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -608,7 +608,6 @@ try{
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 		
-
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();

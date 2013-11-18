@@ -15,17 +15,42 @@ public class TablePrimary implements ITable {
 	private String schema;
 	private String name;
 	private String alias;
+	
+	/*
+	 * This two fields are new to handle quoted names in multi schema.
+	 * tablename is the cleaned name of the table. GivenName is the name with quotes, upper case,
+	 * that is, exactly as given by the user. 
+	 */
+	private String tableName;
+	private String givenName;
 
 	public TablePrimary(String name) {
 		this("", name);
 	}
 	
 	public TablePrimary(String schema, String name) {
-		setSchema(schema);
-		setName(name);
-		setAlias("");
+		this(schema, name, name);
 	}
 
+	/*
+	 * This constructor is used when we take the table names from the mappings.
+	 * 
+	 */
+	public TablePrimary(String schema, String tableName, String givenName) {
+			setSchema(schema);
+			setTableName(tableName);
+			setGivenName(givenName);
+			setName(givenName);
+			setAlias("");
+			
+		}
+	/**
+	 * @param givenName The table name exactly as it appears in the source sql query of the mapping, possibly with prefix and quotes
+	 */
+	public void setGivenName(String givenName) {
+		this.givenName = givenName;
+	}
+	
 	public void setSchema(String schema) {
 		this.schema = schema;
 	}
@@ -33,11 +58,29 @@ public class TablePrimary implements ITable {
 	public String getSchema() {
 		return schema;
 	}
+	/**
+	 * The table name (without prefix and without quotation marks)
+	* @param tableName 
+	*/
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 	
 	public void setName(String name) {
 		this.name = name;
 	}
+	/**
+	 * @return The table name exactly as it appears in the source sql query of the mapping, 
+	 * possibly with prefix and quotes
+	 */
+	public String getGivenName() {
+		return givenName;
+	}
 
+	public String getTableName() {
+		return tableName;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -55,14 +98,32 @@ public class TablePrimary implements ITable {
 
 	@Override
 	public String toString() {
+		/*
 		String str = "";
 		if (schema != "") {
 			str += schema + ".";
 		}			
-		str += name;
+		str += tableName;
 		if (alias != "") {
 			str += " as " + alias;
 		}
-		return str;
+		*/
+		return givenName;
+	}
+
+	/**
+	 * Called from the MappingParser:getTables. 
+	 * Needed to remove duplicates from the list of tables
+	 */
+	@Override
+	public boolean equals(Object t){
+		if(t instanceof TablePrimary){
+			TablePrimary tp = (TablePrimary) t;
+			return this.givenName.equals(tp.getGivenName())
+					&& ((this.alias == null && tp.getAlias() == null)
+							|| this.alias.equals(tp.getAlias())
+							);
+		}
+		return false;
 	}
 }

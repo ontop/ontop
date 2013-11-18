@@ -49,6 +49,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -82,11 +83,18 @@ public class MappingAnalyzer {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
 				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
+				
+				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
+				// Currently disabled, to prevent interference with the MetaMappingExpander
+				//QueryTree queryTree = axiom.getSourceQueryTree();
+
+				
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 				// Construct the SQL query tree from the source query
 				QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
-
+				 
+				
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryTree);
 
@@ -97,7 +105,7 @@ public class MappingAnalyzer {
 				ArrayList<Function> atoms = new ArrayList<Function>();
 				for (Relation table : tableList) {
 					// Construct the URI from the table name
-					String tableName = table.getName();
+					String tableName = table.getGivenName();
 					String predicateName = tableName;
 
 					// Construct the predicate using the table name
@@ -200,7 +208,10 @@ public class MappingAnalyzer {
 
 				// Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
-				for (Function atom : atomList) {
+				//for (Function atom : atomList) {
+				Iterator<Function> atomListIter = atomList.iterator();
+				while(atomListIter.hasNext()){
+					Function atom = atomListIter.next();
 					List<Term> terms = atom.getTerms();
 					List<Term> newterms = new LinkedList<Term>();
 					for (Term term : terms) {
@@ -412,10 +423,14 @@ public class MappingAnalyzer {
 		int offset = 0; // the index offset
 
 		for (Relation table : tableList) {
-			String tableName = table.getName();
-			DataDefinition def = dbMetaData.getDefinition(tableName);
+			String tableName = table.getTableName();
+			String tableGivenName = table.getGivenName();
+			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
 			if (def == null) {
-				throw new RuntimeException("Definition not found for table '" + tableName + "'.");
+				 def = dbMetaData.getDefinition(tableName);
+				 if (def == null) {
+					 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
+				 }
 			}
 			int size = def.countAttribute();
 
@@ -424,17 +439,64 @@ public class MappingAnalyzer {
 				int index = i + offset;
 				
 				// simple attribute name
-				String columnName = dbMetaData.getAttributeName(tableName, i);
+				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
+				
+				String COLUMNNAME = columnName.toUpperCase();
+				String columnname = columnName.toLowerCase();
+				
 				lookupTable.add(columnName, index);
 				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(columnName), columnName);
 				}
 				
+				// If the column name in the select string is in lower case
+				if (aliasMap.containsKey(columnname)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(columnname), columnName);
+				}
+				
+
+				// If the column name in the select string is in upper case
+				if (aliasMap.containsKey(COLUMNNAME)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
+				}
+				
+				
+				// attribute name with table name prefix
+				String tableColumnName = tableName + "." + columnName;
+				lookupTable.add(tableColumnName, index);
+				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
+				}
+				
+				// attribute name with table given name prefix
+				String givenTableColumnName = tableGivenName + "." + columnName;
+				lookupTable.add(givenTableColumnName, tableColumnName);
+				if (aliasMap.containsKey(givenTableColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(givenTableColumnName), tableColumnName);
+				}
+				
+
+				// attribute name with table name prefix
+				String tablecolumnname = tableName + "." + columnname;
+				//lookupTable.add(tablecolumnname, tableColumnName);
+				if (aliasMap.containsKey(tablecolumnname)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tablecolumnname), tableColumnName);
+				}
+
+
+				// attribute name with table name prefix
+				String tableCOLUMNNAME = tableName + "." + COLUMNNAME;
+				//lookupTable.add(tableColumnName, columnName);
+				if (aliasMap.containsKey(tableCOLUMNNAME)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tableCOLUMNNAME), tableColumnName);
+				}
+
+				
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
-				lookupTable.add(qualifiedColumnName, index);
+				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
+				lookupTable.add(qualifiedColumnName, tableColumnName);
 				if (aliasMap.containsKey(qualifiedColumnName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
+					lookupTable.add(aliasMap.get(qualifiedColumnName), tableColumnName);
 				}
 				
 				// full qualified attribute name using table alias
@@ -442,14 +504,15 @@ public class MappingAnalyzer {
 				if (!tableAlias.isEmpty()) {
 					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
-					if (aliasMap.containsKey(columnName)) {
-						lookupTable.add(aliasMap.get(columnName), columnName);
-					}
-					if (aliasMap.containsKey(qualifiedColumnName)) {
-						lookupTable.add(aliasMap.get(qualifiedColumnName), qualifiedColumnName);
-					}
 					if (aliasMap.containsKey(qualifiedColumnAlias)) {
 						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);
+					}
+					if (aliasMap.containsKey(qualifiedColumnAlias.toLowerCase())) {
+						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toLowerCase()), qualifiedColumnAlias);
+					}
+
+					if (aliasMap.containsKey(qualifiedColumnAlias.toUpperCase())) {
+						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toUpperCase()), qualifiedColumnAlias);
 					}
 				}
 			}
