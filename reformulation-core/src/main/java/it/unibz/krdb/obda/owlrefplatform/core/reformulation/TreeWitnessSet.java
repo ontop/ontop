@@ -214,7 +214,8 @@ public class TreeWitnessSet {
 		Collection<TreeWitnessGenerator> twg = null;
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
 		for (TreeWitnessGenerator g : reasoner.getGenerators()) {
-			if (!qf.getProperties().contains(g.getProperty())) {
+			Set<Property> subp = qf.getProperties();
+			if ((subp == null) || !subp.contains(g.getProperty())) {
 				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
 				continue;
 			}
