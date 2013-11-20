@@ -1,7 +1,10 @@
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.sql.api.RelationJSQL;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -74,7 +77,7 @@ import net.sf.jsqlparser.statement.update.Update;
  */
 public class TablesNameParser implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
 
-	private List<Table> tables;
+	private List<RelationJSQL> tables;
 	/**
 	 * There are special names, that are not table names but are parsed as
 	 * tables. These names are collected here and are not included in the tables
@@ -88,9 +91,9 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	 * @param delete
 	 * @return
 	 */
-	public List<Table> getTableList(Delete delete) {
+	public List<RelationJSQL> getTableList(Delete delete) {
 		init();
-		tables.add(delete.getTable());
+		tables.add(new RelationJSQL(delete.getTable()));
 		delete.getWhere().accept(this);
 
 		return tables;
@@ -102,9 +105,9 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	 * @param insert
 	 * @return
 	 */
-	public List<Table> getTableList(Insert insert) {
+	public List<RelationJSQL> getTableList(Insert insert) {
 		init();
-		tables.add(insert.getTable());
+		tables.add( new RelationJSQL (insert.getTable()));
 		if (insert.getItemsList() != null) {
 			insert.getItemsList().accept(this);
 		}
@@ -118,9 +121,9 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	 * @param replace
 	 * @return
 	 */
-	public List<Table> getTableList(Replace replace) {
+	public List<RelationJSQL> getTableList(Replace replace) {
 		init();
-		tables.add(replace.getTable());
+		tables.add(new RelationJSQL(replace.getTable()));
 		if (replace.getExpressions() != null) {
 			for (Expression expression : replace.getExpressions()) {
 				expression.accept(this);
@@ -139,7 +142,7 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	 * @param select
 	 * @return
 	 */
-	public List<Table> getTableList(Select select) {
+	public List<RelationJSQL> getTableList(Select select) {
 		init();
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -157,9 +160,9 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	 * @param update
 	 * @return
 	 */
-	public List<Table> getTableList(Update update) {
+	public List<RelationJSQL> getTableList(Update update) {
 		init();
-		tables.add(update.getTable());
+		tables.add(new RelationJSQL(update.getTable()));
 		if (update.getExpressions() != null) {
 			for (Expression expression : update.getExpressions()) {
 				expression.accept(this);
@@ -208,7 +211,7 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	public void visit(Table tableName) {
 		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())
 				&& !tables.contains(tableName)) {
-			tables.add(tableName);
+			tables.add(new RelationJSQL(tableName));
 		}
 	}
 
@@ -469,7 +472,7 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 
 	private void init() {
 		otherItemNames = new ArrayList<String>();
-		tables = new ArrayList<Table>();
+		tables = new ArrayList<RelationJSQL>();
 	}
 
 	@Override

@@ -15,28 +15,6 @@ import it.unibz.krdb.sql.api.ParsedQueryTree;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.TablePrimary;
-import net.sf.jsqlparser.schema.Table;
-
-import java.util.ArrayList;
-
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
-
-import java.util.ArrayList;
-
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
-
-import java.util.ArrayList;
-
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
 
 import java.util.ArrayList;
 
@@ -118,8 +96,11 @@ public class SQLQueryTranslator {
 		try {
 			stm = CCJSqlParserUtil.parse(query);
 			Select select = (Select)stm;
+			TablesNameParser tnp= new TablesNameParser();
+			System.out.println(tnp.getTableList(select));
+			
 			TablesVisitor vis = new TablesVisitor();
-			System.out.println(vis.getJoinConditions(select).toString());
+//			System.out.println(vis.getJoinConditions(select).toString());
 		//	System.out.println(vis.getAliasMap(select));
 		} catch (JSQLParserException e) {
 			// TODO Auto-generated catch block
@@ -218,7 +199,7 @@ public class SQLQueryTranslator {
 	}
 	
 	private QueryTree createViewTree(String viewName, String query) {		
-		Table view = new Table(null, viewName);
+		TablePrimary view = new TablePrimary("", viewName, viewName);
 		QueryTree queryTree = new QueryTree(new Relation(view));
 
 		return queryTree;
