@@ -10,6 +10,7 @@ package it.unibz.krdb.obda.parser;
 
 import java.util.HashMap;
 
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -41,21 +42,24 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor{
 
 	@Override
 	public void visit(AllColumns columns) {
-		columns.accept(this);
+		//columns.accept(this);
 		
 	}
 
 	@Override
 	public void visit(AllTableColumns tableColumns) {
-		tableColumns.accept(this);
+		//tableColumns.accept(this);
 	}
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		if (selectExpr.getAlias() != null)
-			aliasMap.put(selectExpr.toString(), selectExpr.getAlias());
+		if (selectExpr.getAlias() != null) {
+			Expression e = selectExpr.getExpression();
+			
+			aliasMap.put(e.toString(), selectExpr.getAlias());
+	
+		}
 	}
-
 	@Override
 	public void visit(SetOperationList arg0) {
 		// TODO Auto-generated method stub
