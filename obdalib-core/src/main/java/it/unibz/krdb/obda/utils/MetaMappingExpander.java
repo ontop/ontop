@@ -111,7 +111,7 @@ public class MetaMappingExpander {
 				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
 				
 				// Construct the SQL query tree from the source query
-				QueryTree sourceQueryTree = translator.contructQueryTree(sourceQuery.toString());
+				QueryTree sourceQueryTree = translator.constructQueryTree(sourceQuery.toString());
 				
 				Projection distinctParamsProjection = new Projection();
 				

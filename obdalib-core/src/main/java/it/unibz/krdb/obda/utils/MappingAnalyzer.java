@@ -12,12 +12,12 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
@@ -38,6 +38,7 @@ import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
 import it.unibz.krdb.sql.api.Parenthesis;
+import it.unibz.krdb.sql.api.ParsedQueryTree;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
@@ -92,8 +93,8 @@ public class MappingAnalyzer {
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 				// Construct the SQL query tree from the source query
-				QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
-				 
+				QueryTree queryTree = translator.constructQueryTree(sourceQuery.toString());
+				 ParsedQueryTree qt = translator.parseQueryTree(sourceQuery.toString());
 				
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryTree);
