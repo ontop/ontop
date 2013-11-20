@@ -8,14 +8,8 @@
  */
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedQueryTree;
 import it.unibz.krdb.sql.api.QueryTree;
-
-import java.sql.Types;
-
 import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -748,7 +742,7 @@ public class ParserTest extends TestCase {
 			System.out.println("  Tables: " + tnp.getTableList(select));
 //			System.out.println("  Projection: " + queryTree.getProjection());
 //			System.out.println("  Selection: " + ((queryTree.getSelection() == null) ? "--" : queryTree.getSelection()));
-//			System.out.println("  Aliases: " + (queryTree.getAliasMap().isEmpty() ? "--" : queryTree.getAliasMap()));
+			System.out.println("  Aliases: " + (tnp.getAliasMap(select).isEmpty() ? "--" : tnp.getAliasMap(select)));
 //			System.out.println("  Join conditions: " + (queryTree.getJoinCondition().isEmpty() ? "--" : queryTree.getJoinCondition()));
 		} else {
 			System.out.println("Parser JSQL doesn't support for query: " + queryText);

@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -59,11 +60,16 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.replace.Replace;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubJoin;
@@ -75,9 +81,17 @@ import net.sf.jsqlparser.statement.update.Update;
 /**
  * Find all used tables within an select statement.
  */
-public class TablesNameParser implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
+public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
 
+	/**
+	 * Store the table selected, updated, deleted or replaced by the SQL query in Relations
+	 */
+	
 	private List<RelationJSQL> tables;
+	
+	private List<RelationJSQL> projection;
+	
+	private HashMap<String, String> aliases;
 	/**
 	 * There are special names, that are not table names but are parsed as
 	 * tables. These names are collected here and are not included in the tables
@@ -153,6 +167,26 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 
 		return tables;
 	}
+	
+	/**
+	 * Main entry for this Tool class. A list of alias is returned.
+	 *
+	 * @param select
+	 * @return
+	 */
+	public HashMap<String, String> getAliasMap(Select select) {
+		init();
+		if (select.getWithItemsList() != null) {
+			for (WithItem withItem : select.getWithItemsList()) {
+				withItem.accept(this);
+			}
+		}
+		select.getSelectBody().accept(this);
+
+		return aliases;
+	}
+	
+	
 
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
@@ -195,6 +229,11 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		plainSelect.getFromItem().accept(this);
+		if (plainSelect.getSelectItems() != null) {
+			for (SelectItem select : plainSelect.getSelectItems()) {
+				select.accept(this);
+			}
+		}
 
 		if (plainSelect.getJoins() != null) {
 			for (Join join : plainSelect.getJoins()) {
@@ -473,6 +512,7 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
 	private void init() {
 		otherItemNames = new ArrayList<String>();
 		tables = new ArrayList<RelationJSQL>();
+		aliases = new HashMap<String, String>();
 	}
 
 	@Override
@@ -482,4 +522,23 @@ public class TablesNameParser implements SelectVisitor, FromItemVisitor, Express
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
     }
+
+	@Override
+	public void visit(AllColumns allColumns) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(AllTableColumns allTableColumns) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SelectExpressionItem selectExpressionItem) {
+		String selectItem= selectExpressionItem.getExpression().toString();
+		String alias =selectExpressionItem.getAlias();
+		aliases.put(selectItem, alias);
+	}
 }
