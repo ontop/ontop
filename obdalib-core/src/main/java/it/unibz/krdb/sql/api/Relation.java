@@ -8,6 +8,8 @@
  */
 package it.unibz.krdb.sql.api;
 
+import net.sf.jsqlparser.schema.Table;
+
 /**
  * The Relation class is a wrapper class that make the
  * {@link TablePrimary} class compatible with the 
@@ -17,14 +19,14 @@ public class Relation extends RelationalAlgebra {
 
 	private static final long serialVersionUID = 8464933976477745339L;
 	
-	private TablePrimary table;
+	private Table table;
 	
-	public Relation(TablePrimary table) {
+	public Relation(Table table) {
 		this.table = table;
 	}
 	
 	public String getSchema() {
-		return table.getSchema();
+		return table.getSchemaName();
 	}
 	
 	public String getName() {
@@ -32,11 +34,11 @@ public class Relation extends RelationalAlgebra {
 	}
 	
 	public String getTableName() {
-		return table.getTableName();
+		return table.getName();
 	}
 	
 	public String getGivenName() {
-		return table.getGivenName();
+		return table.getWholeTableName();
 	}
 	public String getAlias() {
 		return table.getAlias();

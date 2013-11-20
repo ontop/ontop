@@ -8,14 +8,35 @@
  */
 package it.unibz.krdb.obda.parser;
 
-import java.util.ArrayList;
-
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.ParsedQueryTree;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.TablePrimary;
+import net.sf.jsqlparser.schema.Table;
+
+import java.util.ArrayList;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
+
+import java.util.ArrayList;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
+
+import java.util.ArrayList;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -67,7 +88,7 @@ public class SQLQueryTranslator {
 	 * @return A QueryTree (possible with null values and errors)
 	 */
 	public QueryTree constructQueryTreeNoView(String query){
-		return contructQueryTree(query, false);
+		return constructQueryTree(query, false);
 	}
 	
 
@@ -80,12 +101,31 @@ public class SQLQueryTranslator {
 	 * @param query The sql query to be parsed
 	 * @return A QueryTree (possible just the name of a generated view)
 	 */
-	public QueryTree contructQueryTree(String query) {
-		return contructQueryTree(query, true);
+	public QueryTree constructQueryTree(String query) {
+		return constructQueryTree(query, true);
+	}
+	
+	public ParsedQueryTree parseQueryTree(String query) {
+		Statement stm;
+		ParsedQueryTree queryTree = null;
+		try {
+			stm = CCJSqlParserUtil.parse(query);
+			Select select = (Select)stm;
+			TablesVisitor vis = new TablesVisitor();
+			System.out.println(vis.getJoinConditions(select).toString());
+		//	System.out.println(vis.getAliasMap(select));
+		} catch (JSQLParserException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+			
+		return queryTree;
 	}
 	
 		
-	private QueryTree contructQueryTree(String query, boolean generateViews) {
+	private QueryTree constructQueryTree(String query, boolean generateViews) {
 		ANTLRStringStream inputStream = new ANTLRStringStream(query);
 		SQL99Lexer lexer = new SQL99Lexer(inputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -171,7 +211,7 @@ public class SQLQueryTranslator {
 	}
 	
 	private QueryTree createViewTree(String viewName, String query) {		
-		TablePrimary view = new TablePrimary("", viewName, viewName);
+		Table view = new Table(null, viewName);
 		QueryTree queryTree = new QueryTree(new Relation(view));
 
 		return queryTree;

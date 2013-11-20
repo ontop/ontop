@@ -12,7 +12,17 @@ import it.unibz.krdb.sql.util.BinaryTree;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.util.TablesNamesFinder;
+
+
 
 /**
  * A tree structure to represent SQL query string.
@@ -83,23 +93,39 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	public ArrayList<Relation> getTableSet() {
 		ArrayList<Relation> tableList = new ArrayList<Relation>();
 		Stack<QueryTree> nodes = new Stack<QueryTree>();
-
-		nodes.push(this);
-		QueryTree currentNode = null;
-		while (!nodes.isEmpty()) {
-			currentNode = nodes.pop();
-			QueryTree right = currentNode.right();
-			if (right != null) {
-				nodes.push(right);
-			}
-			QueryTree left = currentNode.left();
-			if (left != null) {
-				nodes.push(left);
-			}
-			if (currentNode.isLeaf()) {
-				tableList.add((Relation) currentNode.value());
-			}
+		
+		Statement statement=null;
+		try {
+			statement = CCJSqlParserUtil.parse("SELECT * FROM MY_TABLE1");
+		} catch (JSQLParserException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		Select selectStatement = (Select) statement;
+		TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+		List<Table> tables =null;
+//		tables= tablesNamesFinder.getTableList(selectStatement);
+		for( Table table: tables)
+		{
+			tableList.add(new Relation(table));
+		}
+
+//		nodes.push(this);
+//		QueryTree currentNode = null;
+//		while (!nodes.isEmpty()) {
+//			currentNode = nodes.pop();
+//			QueryTree right = currentNode.right();
+//			if (right != null) {
+//				nodes.push(right);
+//			}
+//			QueryTree left = currentNode.left();
+//			if (left != null) {
+//				nodes.push(left);
+//			}
+//			if (currentNode.isLeaf()) {
+//				tableList.add((Relation) currentNode.value());
+//			}
+//		}
 		return tableList;
 	}
 	
