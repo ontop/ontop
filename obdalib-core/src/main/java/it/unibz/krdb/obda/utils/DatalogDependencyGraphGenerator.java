@@ -106,6 +106,31 @@ public class DatalogDependencyGraphGenerator {
 		extensionalPredicates.removeAll(ruleIndex.keySet());
 
 	}
+
+	public DatalogDependencyGraphGenerator(List<CQIE> program) {
+		for (CQIE rule : program) {
+
+			updateRuleIndex(rule);
+			
+			updatePredicateDependencyGraph(rule);
+		}
+
+		generateRuleDependencyGraph(program);
+		generateOrderedDepGraph();
+
+		/**
+		 * 
+		 * Intuitively, the predicates in the datalog program without
+		 * definitions *
+		 * 
+		 * <pre>
+		 * extensionalPredicates = vertices(predicateDependencyGraph) - ruleIndex.keys()
+		 * </pre>
+		 */
+		extensionalPredicates.addAll(predicateDependencyGraph.vertexSet());
+		extensionalPredicates.removeAll(ruleIndex.keySet());
+
+	}
 	
 	/**
 	 * This method takes a rule and populates the ruleIndex field.
@@ -152,7 +177,26 @@ public class DatalogDependencyGraphGenerator {
 		}
 	}
 
-	
+	private void generateRuleDependencyGraph(List<CQIE> program) {
+		for (CQIE rule : program) {
+			ruleDependencyGraph.addVertex(rule);
+			Predicate headPred = rule.getHead().getFunctionSymbol();
+			Set<DefaultEdge> ontgoingEdges = predicateDependencyGraph
+					.outgoingEdgesOf(headPred);
+
+			for (DefaultEdge e : ontgoingEdges) {
+				Predicate edgeTarget = predicateDependencyGraph
+						.getEdgeTarget(e);
+				List<CQIE> rules = ruleIndex.get(edgeTarget);
+				if (rules != null) {
+					for (CQIE dependentRule : rules) {
+						ruleDependencyGraph.addVertex(dependentRule);
+						ruleDependencyGraph.addEdge(rule, dependentRule);
+					}
+				}
+			}
+		}
+	}
 	
 	/**
 	 * 

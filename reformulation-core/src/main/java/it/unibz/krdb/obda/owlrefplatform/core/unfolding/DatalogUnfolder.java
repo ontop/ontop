@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -207,6 +208,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 
 		computePartialEvaluation(workingSet);
+		//computePartialEvaluationNew(workingSet);
 
 		LinkedHashSet<CQIE> result = new LinkedHashSet<CQIE>();
 		for (CQIE query : workingSet) {
@@ -1169,6 +1171,72 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return rcount[1];
 	}
 
+	// New method
+	public int computePartialEvaluationNew(List<CQIE> workingList) {
+
+		int[] rcount = { 0, 0 };
+		
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
+		
+		Map<Predicate, List<CQIE>> ruleIndex = depGraph.getRuleIndex();
+		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
+		Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+
+		for (int predIdx = 0; predIdx < predicatesInBottomUp.size(); predIdx++) {
+
+			List <CQIE> ruleList = ruleIndex.get(predicatesInBottomUp.get(predIdx));
+			if (ruleList == null) continue;
+			for (CQIE rule: ruleList) {
+			
+
+			Stack<Integer> termidx = new Stack<Integer>();
+
+			List<Function> currentTerms = rule.getBody();
+			List<Term> tempList = new LinkedList<Term>();
+			for (Function a : currentTerms) {
+				tempList.add(a);
+			}
+
+			List<CQIE> result = computePartialEvaluation(tempList, rule, rcount, termidx, false);
+
+			if (result == null) {
+
+				/*
+				 * If the result is null the rule is logically empty
+				 */
+				//workingList.remove(queryIdx);
+				//queryIdx -= 1;
+				continue;
+			} else if (result.size() == 0) {
+
+				/*
+				 * This rule is already a partial evaluation
+				 */
+				continue;
+			}
+
+			/*
+			 * One more step in the partial evaluation was computed, we need to
+			 * remove the old query and add the result instead. Each of the new
+			 * queries could still require more steps of evaluation, so we
+			 * decrease the index.
+			 */
+//			workingList.remove(queryIdx);
+//			for (CQIE newquery : result) {
+//				if (!workingList.contains(newquery)) {
+//					workingList.add(queryIdx, newquery);
+//				}
+//			}
+//			queryIdx -= 1;
+		}
+		
+	}
+		return rcount[1];
+	}
+
+
+	
+	
 	/***
 	 * Goes trhough each term, and recursively each inner term trying to resovle
 	 * each atom. Returns an empty list if the partial evaluation is completed

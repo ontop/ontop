@@ -38,6 +38,12 @@
     <Declaration>
         <DataProperty IRI="#nick2"/>
     </Declaration>
+    <Declaration>
+        <DataProperty IRI="#salary"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#city"/>
+    </Declaration>
     <SubDataPropertyOf>
         <DataProperty IRI="#mbox"/>
         <DataProperty abbreviatedIRI="owl:topDataProperty"/>

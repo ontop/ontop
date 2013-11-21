@@ -3,7 +3,7 @@
 
 [SourceDeclaration]
 sourceUri	person
-connectionUrl	jdbc:mysql://10.7.20.39/optional_test
+connectionUrl	jdbc:mysql://obdalin3/optional_test
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
@@ -20,5 +20,18 @@ source		select id, nick1 from people
 mappingId	MAPID-4084a8e6ade54712badf59afa3c8dde9
 target		:{id} a :Person ; :nick2 {nick2} . 
 source		select id, nick2 from people
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dda1
+target		:{id} a :Person ; :salary {salary} . 
+source		select id, salary from salary1
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dda2
+target		:{id} a :Person ; :salary {salary} . 
+source		select id, salary from salary2
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dda3
+target		:{id} a :Person ; :city {city} . 
+source		select id, city from address
+
 ]]
 
