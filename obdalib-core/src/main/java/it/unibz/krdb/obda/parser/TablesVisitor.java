@@ -30,6 +30,7 @@ import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
@@ -420,5 +421,11 @@ public class TablesVisitor implements SelectVisitor, FromItemVisitor, Expression
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
     }
+
+	@Override
+	public void visit(OracleHierarchicalExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

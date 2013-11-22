@@ -27,7 +27,15 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor{
 	HashMap<String,String> aliasMap;
 	
 	public HashMap<String,String> getAliasMap(Select select) {
+		
 		aliasMap = new HashMap<String, String>();
+		
+		if (select.getWithItemsList() != null) {
+			for (WithItem withItem : select.getWithItemsList()) {
+				withItem.accept(this);
+			}
+		}
+		
 		select.getSelectBody().accept(this);
 		return aliasMap;
 	}

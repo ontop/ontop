@@ -113,7 +113,7 @@ public class ParsedQueryTree extends BinaryTree<RelationalAlgebra> {
 	/**
 	 * Returns all the tables in this query tree.
 	 */
-	public List<RelationJSQL> getTableSet() {
+	public ArrayList<RelationJSQL> getTableSet() {
 		return tnp.getTableList(select);
 	}
 	

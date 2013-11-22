@@ -24,6 +24,7 @@ import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
@@ -87,7 +88,7 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
 	 * Store the table selected, updated, deleted or replaced by the SQL query in Relations
 	 */
 	
-	private List<RelationJSQL> tables;
+	private ArrayList<RelationJSQL> tables;
 	
 	private List<RelationJSQL> projection;
 	
@@ -156,7 +157,7 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
 	 * @param select
 	 * @return
 	 */
-	public List<RelationJSQL> getTableList(Select select) {
+	public ArrayList<RelationJSQL> getTableList(Select select) {
 		init();
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -539,6 +540,13 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
 	public void visit(SelectExpressionItem selectExpressionItem) {
 		String selectItem= selectExpressionItem.getExpression().toString();
 		String alias =selectExpressionItem.getAlias();
+		if(alias!=null)
 		aliases.put(selectItem, alias);
+	}
+
+	@Override
+	public void visit(OracleHierarchicalExpression arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }
