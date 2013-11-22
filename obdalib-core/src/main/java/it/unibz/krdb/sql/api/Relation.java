@@ -31,6 +31,13 @@ public class Relation extends RelationalAlgebra {
 		return table.getName();
 	}
 	
+	public String getTableName() {
+		return table.getTableName();
+	}
+	
+	public String getGivenName() {
+		return table.getGivenName();
+	}
 	public String getAlias() {
 		return table.getAlias();
 	}
@@ -43,5 +50,12 @@ public class Relation extends RelationalAlgebra {
 	@Override
 	public Relation clone() {
 		return new Relation(table);
+	}
+	
+	@Override
+	public boolean equals(Object r){
+		if(r instanceof Relation)
+			return this.table.equals(((Relation)r).table);
+		return false;
 	}
 }

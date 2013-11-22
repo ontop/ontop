@@ -126,7 +126,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
+		QuestOWL questOWL = new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
+		return questOWL;
 	}
 
 }

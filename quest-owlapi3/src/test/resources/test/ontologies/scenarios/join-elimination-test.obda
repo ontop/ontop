@@ -11,10 +11,10 @@ driverClass	org.h2.Driver
 [MappingDeclaration] @collection [[
 mappingId	MAPID-1d25828d399c404db4a23ce60634d182
 target		:object1-{id} :R :object2-{id} . :object2-{id} a :A . 
-source		select id from address where number = 1
+source		select "id" from "address" where number = 1
 
 mappingId	MAPID-1d25828d399c404db4a23ce60634d182(0)
 target		:object1-{id} :R :object2-{id} . :object2-{id} a :B . 
-source		select id from address where number = 2
+source		select "id" from "address" where number = 2
 ]]
 

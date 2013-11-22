@@ -84,7 +84,6 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	
@@ -113,9 +112,7 @@
         <version>2.16</version>
         <configuration>
           <excludes>
-          	<!-- Known issue, this test is currently failing, it was ignored in 1.9 release -->
-			<exclude>**/PropertyCharacteristicTest.java</exclude>
-			<!-- H2 case sensitivity is failing (sometimes) -->
+          	<!-- H2 case sensitivity is failing (sometimes) -->
 			<exclude>**/MetaMappingVirtualABoxTest.java</exclude>
           </excludes>
         </configuration>
