@@ -159,9 +159,10 @@ public class OntologyImpl implements Ontology {
 		if (originalassertions.contains(assertion)) {
 			return;
 		}
-		if (!referencesPredicates(assertion.getReferencedEntities())) {
+		Set<Predicate> referencedEntities = assertion.getReferencedEntities();
+		if (!referencesPredicates(referencedEntities)) {
 			IllegalArgumentException ex = new IllegalArgumentException("At least one of these predicates is unknown: "
-					+ assertion.getReferencedEntities().toString());
+					+ referencedEntities.toString());
 			throw ex;
 		}
 		isSaturated = false;

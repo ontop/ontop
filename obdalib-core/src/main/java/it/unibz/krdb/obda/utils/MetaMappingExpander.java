@@ -110,6 +110,11 @@ public class MetaMappingExpander {
 				
 				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
 				
+				if (varsInTemplate.isEmpty()){
+					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
+				}
+			
+				
 				// Construct the SQL query tree from the source query
 				QueryTree sourceQueryTree = translator.contructQueryTree(sourceQuery.toString());
 				
