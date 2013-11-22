@@ -181,7 +181,7 @@ public class OWLAPI3Translator {
 		if (entity instanceof OWLClass) {
 			/* We ignore TOP and BOTTOM (Thing and Nothing) */
 			if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
-				//return null;
+				return null;
 			}
 			String uri = entity.getIRI().toString();
 
