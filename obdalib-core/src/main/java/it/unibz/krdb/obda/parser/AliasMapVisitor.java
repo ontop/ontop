@@ -42,6 +42,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor{
 	
 	@Override
 	public void visit(PlainSelect plainSelect) {
+		
 		for (SelectItem item : plainSelect.getSelectItems())
 		{
 			item.accept(this);

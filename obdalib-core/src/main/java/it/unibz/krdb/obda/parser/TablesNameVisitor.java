@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.api.RelationJSQL;
@@ -82,17 +90,14 @@ import net.sf.jsqlparser.statement.update.Update;
 /**
  * Find all used tables within an select statement.
  */
-public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
+public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
 
 	/**
 	 * Store the table selected, updated, deleted or replaced by the SQL query in Relations
 	 */
 	
 	private ArrayList<RelationJSQL> tables;
-	
-	private List<RelationJSQL> projection;
-	
-	private HashMap<String, String> aliases;
+
 	/**
 	 * There are special names, that are not table names but are parsed as
 	 * tables. These names are collected here and are not included in the tables
@@ -169,23 +174,7 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
 		return tables;
 	}
 	
-	/**
-	 * Main entry for this Tool class. A list of alias is returned.
-	 *
-	 * @param select
-	 * @return
-	 */
-	public HashMap<String, String> getAliasMap(Select select) {
-		init();
-		if (select.getWithItemsList() != null) {
-			for (WithItem withItem : select.getWithItemsList()) {
-				withItem.accept(this);
-			}
-		}
-		select.getSelectBody().accept(this);
 
-		return aliases;
-	}
 	
 	
 
@@ -230,11 +219,6 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		plainSelect.getFromItem().accept(this);
-		if (plainSelect.getSelectItems() != null) {
-			for (SelectItem select : plainSelect.getSelectItems()) {
-				select.accept(this);
-			}
-		}
 
 		if (plainSelect.getJoins() != null) {
 			for (Join join : plainSelect.getJoins()) {
@@ -513,7 +497,7 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
 	private void init() {
 		otherItemNames = new ArrayList<String>();
 		tables = new ArrayList<RelationJSQL>();
-		aliases = new HashMap<String, String>();
+
 	}
 
 	@Override
@@ -523,26 +507,6 @@ public class TablesNameParser implements SelectItemVisitor, SelectVisitor, FromI
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
     }
-
-	@Override
-	public void visit(AllColumns allColumns) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(AllTableColumns allTableColumns) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(SelectExpressionItem selectExpressionItem) {
-		String selectItem= selectExpressionItem.getExpression().toString();
-		String alias =selectExpressionItem.getAlias();
-		if(alias!=null)
-		aliases.put(selectItem, alias);
-	}
 
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {

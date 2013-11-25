@@ -11,7 +11,6 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.ParsedQueryTree;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.TablePrimary;
@@ -90,27 +89,6 @@ public class SQLQueryTranslator {
 		return constructQueryTree(query, true);
 	}
 	
-	public ParsedQueryTree parseQueryTree(String query) {
-		Statement stm;
-		ParsedQueryTree queryTree = null;
-		try {
-			stm = CCJSqlParserUtil.parse(query);
-			Select select = (Select)stm;
-			TablesNameParser tnp= new TablesNameParser();
-			System.out.println(tnp.getTableList(select));
-			
-			TablesVisitor vis = new TablesVisitor();
-//			System.out.println(vis.getJoinConditions(select).toString());
-		//	System.out.println(vis.getAliasMap(select));
-		} catch (JSQLParserException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-			
-		return queryTree;
-	}
 	
 		
 	private QueryTree constructQueryTree(String query, boolean generateViews) {

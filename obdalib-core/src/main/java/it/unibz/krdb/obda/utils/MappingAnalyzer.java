@@ -38,7 +38,6 @@ import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
 import it.unibz.krdb.sql.api.Parenthesis;
-import it.unibz.krdb.sql.api.ParsedQueryTree;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
@@ -94,8 +93,7 @@ public class MappingAnalyzer {
 
 				// Construct the SQL query tree from the source query
 				QueryTree queryTree = translator.constructQueryTree(sourceQuery.toString());
-				 ParsedQueryTree qt = translator.parseQueryTree(sourceQuery.toString());
-				
+								
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryTree);
 

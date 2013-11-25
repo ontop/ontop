@@ -93,7 +93,6 @@
 					<target>1.6</target>
 					<excludes>
 						<exclude>**/TBoxDAGImpl.java</exclude>
-						<exclude>**/dagjgrapht/*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
 					<testExcludes>

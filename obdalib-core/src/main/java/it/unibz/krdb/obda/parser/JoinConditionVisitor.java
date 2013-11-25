@@ -6,6 +6,7 @@
  * Please see LICENSE.txt for full license terms, including the availability of
  * proprietary exceptions.
  */
+
 package it.unibz.krdb.obda.parser;
 
 import java.util.ArrayList;
@@ -67,10 +68,23 @@ import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.WithItem;
 
+/**
+ * 
+ * Visitor class allows to retrieve the JoinConditions in a select statement.
+ *
+ */
+
 public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 	
 	List<String> joinConditions;
 	
+	/**
+	 * Obtain the join conditions in a format "expression condition expression"
+	 * for example "table1.home = table2.house"
+	 * 
+	 * @param select statement with the parsed query
+	 * @return a list of string containing the join conditions
+	 */
 	public List<String> getJoinConditions(Select select) {
 		joinConditions = new ArrayList<String>();
 		select.getSelectBody().accept(this);
@@ -83,8 +97,22 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 		if (joins != null)
 		for (Join join : joins){
 			Expression expr = join.getOnExpression();
-			expr.accept(this);
-			joinConditions.add(expr.toString());
+			
+			
+			if (join.getUsingColumns()!=null)
+				for (Column column : join.getUsingColumns()){
+					joinConditions.add(plainSelect.getFromItem()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
+				}
+					
+			else{
+				if(expr!=null)
+					joinConditions.add(expr.toString());
+				else
+					if(join.isSimple())
+						joinConditions.add(plainSelect.getWhere().toString());
+					
+			}
+				
 		}
 	}
 
@@ -198,14 +226,14 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(AndExpression arg0) {
-		arg0.getLeftExpression().accept(this);
-		arg0.getRightExpression().accept(this);
+//		arg0.getLeftExpression().accept(this);
+//		arg0.getRightExpression().accept(this);
 		
 	}
 	@Override
 	public void visit(OrExpression arg0) {
-		arg0.getLeftExpression().accept(this);
-		arg0.getRightExpression().accept(this);
+//		arg0.getLeftExpression().accept(this);
+//		arg0.getRightExpression().accept(this);
 		
 	}
 
@@ -217,16 +245,16 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(EqualsTo arg0) {
-		Expression left = arg0.getLeftExpression();
-		Expression right = arg0.getRightExpression();
-		if ((left instanceof Column || left instanceof AnalyticExpression) && 
-				(right instanceof Column || right  instanceof AnalyticExpression)) {
-			joinConditions.add(left + "=" + right);
-
-		} else {
-			left.accept(this);
-			right.accept(this);
-		}
+//		Expression left = arg0.getLeftExpression();
+//		Expression right = arg0.getRightExpression();
+//		if ((left instanceof Column || left instanceof AnalyticExpression) && 
+//				(right instanceof Column || right  instanceof AnalyticExpression)) {
+//			joinConditions.add(left + "=" + right);
+//
+//		} else {
+//			left.accept(this);
+//			right.accept(this);
+//		}
 	}
 
 	@Override
@@ -279,8 +307,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Column arg0) {
-		// TODO Auto-generated method stub
-		
+		joinConditions.add(arg0.getWholeColumnName());
+//		arg0.getRightExpression().accept(this);
 	}
 
 	@Override
