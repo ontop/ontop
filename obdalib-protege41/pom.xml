@@ -7,30 +7,9 @@
 		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
+
 	<artifactId>obdalib-protege41</artifactId>
 	<name>obdalib-protege41</name>
-
-	<repositories>
-		<!-- This repository holds protege 4 and obdalib related dependencies, 
-			the machine will change soon to obdavm instead of obdalin -->
-		<repository>
-			<id>obda.inf.unibz.it</id>
-			<name>FUB OBDA Maven repository</name>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>thirdparty-releases</id>
-			<name>JBoss Thirdparty Releases</name>
-			<url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -127,23 +106,6 @@
 			</exclusions>
 		</dependency>
 
-
-		<!-- <dependency> <groupId>inf.unibz.it.obda</groupId> <artifactId>quest-sesame</artifactId> 
-			<version>1.8</version> </dependency> -->
-
-		<!-- All the following dependencies are required at compilation or runtime 
-			and are not available in the OSGi, or Protege 4 classpath. They must be packed 
-			together with the bundle. They have a default scope of runtime and compilation -->
-
-		<!-- <dependency> <groupId>org.jgraph</groupId> <artifactId>jgrapht</artifactId> 
-			</dependency> <dependency> <groupId>org.jgraph</groupId> <artifactId>jgraph</artifactId> 
-			</dependency> -->
-
-		<!-- -->
-		<!-- <dependency> <groupId>com.ibm.icu</groupId> <artifactId>icu4j</artifactId> 
-			</dependency> -->
-		<!-- <dependency> <groupId>activemq</groupId> <artifactId>relaxngDatatype</artifactId> 
-			</dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -157,13 +119,7 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>xsdlib</groupId> <artifactId>xsdlib</artifactId> 
-			</dependency> <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
-			</dependency> -->
-
-		<!-- <dependency> <groupId>org.openrdf.sesame</groupId> <artifactId>sesame-runtime</artifactId> 
-			</dependency> -->
-
+		
 		<!-- These will download some of the sources -->
 
 		<!-- JDBC Drivers -->
@@ -181,29 +137,16 @@
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
-			<groupId>org.protege</groupId>
+			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.core.application</artifactId>
-			<version>4.1.0-b239</version>
+			<version>4.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.protege</groupId>
+			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.owl</artifactId>
-			<version>4.1.0-b239</version>
-			<classifier>jar</classifier>
-			<scope>provided</scope>
+			<version>4.3.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.semanticweb</groupId>
-			<artifactId>org.semanticweb.owl.owlapi</artifactId>
-			<version>4.1.0-b239</version>
-			<classifier>jar</classifier>
-			<scope>provided</scope>
-		</dependency>
-		<!-- <dependency> <groupId>commons-logging</groupId> <artifactId>commons-logging</artifactId> 
-			</dependency> -->
-		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>log4j-over-slf4j</artifactId> 
-			</dependency> -->
 
 		<!-- transitive dependencies -->
 		<dependency>
