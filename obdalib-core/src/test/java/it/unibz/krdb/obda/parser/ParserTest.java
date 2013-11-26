@@ -362,6 +362,19 @@ public class ParserTest extends TestCase {
 		printSQL("test_3_8", result2);
 		assertFalse(result2);
 	}
+	
+	// NO SUPPORT SQL
+	public void test_3_8_1(){ 
+		//ANY AND SOME are the same
+		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
+				+"WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)");
+		printJSQL("test_3_8_1", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT DISTINCT maker FROM Product "
+				+"WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)");
+		printSQL("test_3_8_1", result2);
+		assertFalse(result2);
+	}
 
 	// NO SUPPORT BY BOTH
 	public void test_3_9() {
@@ -403,6 +416,18 @@ public class ParserTest extends TestCase {
 		assertTrue(result2);
 	}
 
+	// NO SUPPORT SQL
+	public void test_4_4() {
+		final boolean result = parseJSQL("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("  
+				+"SELECT ord_amount FROM orders WHERE ord_amount=2000)");
+		printJSQL("test_4_4", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("  
+				+"SELECT ord_amount FROM orders WHERE ord_amount=2000)");
+		printSQL("test_4_4", result2);
+		assertFalse(result2);
+	}
+	
 	public void test_5_1() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 JOIN grade t2 ON t1.id=t2.st_id");
 		printJSQL("test_5_1", result);
@@ -699,19 +724,19 @@ public class ParserTest extends TestCase {
 	
 	public void test_10_1() {
 		final boolean result = parseJSQL("SELECT name from grade, student where passed = TRUE AND course = 'CS001' AND ( (score = 8 AND mark = 'B') OR (score = 7 AND mark = 'C') OR (score >= 9 AND mark = 'A') )");
-		printJSQL("test_9_5", result);
+		printJSQL("test_10_1", result);
 		assertTrue(result);
 		final boolean result2 = parseSQL("SELECT name from grade, student where passed = TRUE AND course = 'CS001' AND ( (score = 8 AND mark = 'B') OR (score = 7 AND mark = 'C') OR (score >= 9 AND mark = 'A') )");
-		printSQL("test_9_5", result2);
+		printSQL("test_10_1", result2);
 		assertTrue(result2);
 	}
 
 	public void test_10_2() {
 		final boolean result = parseJSQL("SELECT name from grade, student where passed = FALSE AND ( course = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
-		printJSQL("test_9_5", result);
+		printJSQL("test_10_2", result);
 		assertTrue(result);
 		final boolean result2 = parseSQL("SELECT name from grade, student where passed = FALSE AND ( course = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
-		printSQL("test_9_5", result2);
+		printSQL("test_10_2", result2);
 		assertTrue(result2);
 	}
 	
@@ -741,7 +766,7 @@ public class ParserTest extends TestCase {
 			System.out.println(title + ": " + queryText);
 			System.out.println("  Tables: " + queryP.getTableSet());
 			System.out.println("  Projection: " + queryP.getProjection());
-//			System.out.println("  Selection: " + ((queryTree.getSelection() == null) ? "--" : queryTree.getSelection()));
+			System.out.println("  Selection: " + ((queryP.getSelection().isEmpty()) ? "--" : queryP.getSelection()));
 			System.out.println("  Aliases: " + (queryP.getAliasMap().isEmpty() ? "--" : queryP.getAliasMap()));
 			System.out.println("  Join conditions: " + (queryP.getJoinCondition().isEmpty() ? "--" : queryP.getJoinCondition()));
 		} else {

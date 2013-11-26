@@ -11,6 +11,7 @@ package it.unibz.krdb.sql.api;
 import it.unibz.krdb.obda.parser.AliasMapVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
+import it.unibz.krdb.obda.parser.SelectionVisitor;
 import it.unibz.krdb.obda.parser.TablesNameVisitor;
 
 import java.util.ArrayList;
@@ -98,19 +99,20 @@ public class ParsedQuery {
 	/**
 	 * Get the object construction for the WHERE clause.
 	 */
-//	public Selection getSelection() {
-//		return this.value().getSelection();
-//	}
+	public ArrayList<SelectionJSQL> getSelection() {
+		SelectionVisitor sel= new SelectionVisitor();
+		return sel.getSelection(select);
+	}
 	
-	public ProjectionJSQL getProjection() {
+	/**
+	 * Get the object construction for the SELECT clause.
+	 */
+	public ArrayList<ProjectionJSQL> getProjection() {
 		ProjectionVisitor proj = new ProjectionVisitor();
 		return proj.getProjection(select);
 	}
 	
-	/**
-	 * Algorithm for browsing the tree in pre-order traversal.
-	 */
-	
+
 
 
 	

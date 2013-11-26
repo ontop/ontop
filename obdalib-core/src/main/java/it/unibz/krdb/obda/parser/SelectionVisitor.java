@@ -10,9 +10,10 @@
 package it.unibz.krdb.obda.parser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
+import it.unibz.krdb.sql.api.AllComparison;
+import it.unibz.krdb.sql.api.AnyComparison;
+import it.unibz.krdb.sql.api.SelectionJSQL;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -61,7 +62,6 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
@@ -70,134 +70,131 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
+ * Visitor class to retrieve the selection of the statement (WHERE expressions)
  * 
- * Visitor class allows to retrieve the JoinConditions in a select statement.
- *
+ * 
  */
-
-public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
+public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
-	List<String> joinConditions;
+	ArrayList<SelectionJSQL> selections;
+	SelectionJSQL selection;
 	
 	/**
-	 * Obtain the join conditions in a format "expression condition expression"
-	 * for example "table1.home = table2.house"
-	 * 
-	 * @param select statement with the parsed query
-	 * @return a list of string containing the join conditions
+	 * Give the WHERE clause of the select statement
+	 * @param select the parsed select statement
+	 * @return a SelectionJSQL
 	 */
-	public List<String> getJoinConditions(Select select) {
-		joinConditions = new ArrayList<String>();
+	public ArrayList<SelectionJSQL> getSelection(Select select)
+	{
+		
+		selections= new ArrayList<SelectionJSQL>();
+		if (select.getWithItemsList() != null) {
+			for (WithItem withItem : select.getWithItemsList()) {
+				withItem.accept(this);
+			}
+		}
 		select.getSelectBody().accept(this);
-		return joinConditions;
+		return selections;
+		
 	}
 
 	@Override
 	public void visit(PlainSelect plainSelect) {
-		List<Join> joins = plainSelect.getJoins();
-		if (joins != null)
-		for (Join join : joins){
-			Expression expr = join.getOnExpression();
-			
-			
-			if (join.getUsingColumns()!=null)
-				for (Column column : join.getUsingColumns()){
-					joinConditions.add(plainSelect.getFromItem()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
-				}
-					
-			else{
-				if(expr!=null)
-//					joinConditions.add(expr.toString());
-					expr.accept(this);
-//				else
-//					if(join.isSimple())
-//						joinConditions.add(plainSelect.getWhere().toString());
-					
-			}
-				
-		}
+		
+		selection= new SelectionJSQL();
+		
+         if (plainSelect.getWhere() != null) {
+                 Expression where=plainSelect.getWhere();
+                 where.accept(this);
+                 if(where instanceof BinaryExpression)
+                	 selection.addCondition((BinaryExpression) where);
+                 selections.add(selection); 
+         }
+         
+        
+         
+		
 	}
 
 	@Override
-	public void visit(SetOperationList arg0) {
+	public void visit(SetOperationList setOpList) {
+		
+	}
+
+	@Override
+	public void visit(WithItem withItem) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(WithItem arg0) {
+	public void visit(NullValue nullValue) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(NullValue arg0) {
+	public void visit(Function function) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(Function arg0) {
+	public void visit(InverseExpression inverseExpression) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(InverseExpression arg0) {
+	public void visit(JdbcParameter jdbcParameter) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(JdbcParameter arg0) {
+	public void visit(JdbcNamedParameter jdbcNamedParameter) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(JdbcNamedParameter arg0) {
+	public void visit(DoubleValue doubleValue) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(DoubleValue arg0) {
+	public void visit(LongValue longValue) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(LongValue arg0) {
+	public void visit(DateValue dateValue) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(DateValue arg0) {
+	public void visit(TimeValue timeValue) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(TimeValue arg0) {
+	public void visit(TimestampValue timestampValue) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(TimestampValue arg0) {
+	public void visit(Parenthesis parenthesis) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visit(Parenthesis arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(StringValue arg0) {
+	public void visit(StringValue stringValue) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -209,229 +206,225 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 	}
 
 	@Override
-	public void visit(Division arg0) {
-		visitBinaryExpression(arg0);
+	public void visit(Division division) {
+		visitBinaryExpression(division);
 		
 	}
 
 	@Override
-	public void visit(Multiplication arg0) {
-		visitBinaryExpression(arg0);
+	public void visit(Multiplication multiplication) {
+		visitBinaryExpression(multiplication);
 		
 	}
 
 	@Override
-	public void visit(Subtraction arg0) {
-		visitBinaryExpression(arg0);
+	public void visit(Subtraction subtraction) {
+		visitBinaryExpression(subtraction);
 		
 	}
 
 	@Override
-	public void visit(AndExpression arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-	@Override
-	public void visit(OrExpression arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(Between arg0) {
+	public void visit(AndExpression andExpression) {
+		visitBinaryExpression(andExpression);
 		
 		
 	}
 
+	@Override
+	public void visit(OrExpression orExpression) {
+		visitBinaryExpression(orExpression);
+		
+		
+	}
+
+	@Override
+	public void visit(Between between) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(EqualsTo equalsTo) {
+		visitBinaryExpression(equalsTo);
+		
+	}
+
+	@Override
+	public void visit(GreaterThan greaterThan) {
+		visitBinaryExpression(greaterThan);
+		
+	}
+
+	@Override
+	public void visit(GreaterThanEquals greaterThanEquals) {
+		visitBinaryExpression(greaterThanEquals);
+		
+	}
+
+	@Override
+	public void visit(InExpression inExpression) {
+		selection.addCondition(inExpression);
+		
+	}
+
+	@Override
+	public void visit(IsNullExpression isNullExpression) {
+		selection.addCondition(isNullExpression);
+		
+	}
+
+	@Override
+	public void visit(LikeExpression likeExpression) {
+		visitBinaryExpression(likeExpression);
+		
+	}
+
+	@Override
+	public void visit(MinorThan minorThan) {
+		visitBinaryExpression(minorThan);
+		
+	}
+
+	@Override
+	public void visit(MinorThanEquals minorThanEquals) {
+		visitBinaryExpression(minorThanEquals);
+		
+	}
+
+	@Override
+	public void visit(NotEqualsTo notEqualsTo) {
+		visitBinaryExpression(notEqualsTo);
+		
+	}
+
+	@Override
+	public void visit(Column tableColumn) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SubSelect subSelect) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(CaseExpression caseExpression) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(WhenClause whenClause) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(ExistsExpression existsExpression) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(AllComparisonExpression allComparisonExpression) {
+		selection.addCondition(allComparisonExpression);
+		
+	}
+
+	@Override
+	public void visit(AnyComparisonExpression anyComparisonExpression) {
+		selection.addCondition(anyComparisonExpression);
+		
+	}
+
+	@Override
+	public void visit(Concat concat) {
+		visitBinaryExpression(concat);
+		
+	}
+
+	@Override
+	public void visit(Matches matches) {
+		visitBinaryExpression(matches);
+		
+	}
+
+	@Override
+	public void visit(BitwiseAnd bitwiseAnd) {
+		visitBinaryExpression(bitwiseAnd);
+		
+	}
+
+	@Override
+	public void visit(BitwiseOr bitwiseOr) {
+		visitBinaryExpression(bitwiseOr);
+		
+	}
+
+	@Override
+	public void visit(BitwiseXor bitwiseXor) {
+		visitBinaryExpression(bitwiseXor);
+		
+	}
+
+	@Override
+	public void visit(CastExpression cast) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(Modulo modulo) {
+		visitBinaryExpression(modulo);
+		
+	}
+
+	@Override
+	public void visit(AnalyticExpression aexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(ExtractExpression eexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(IntervalExpression iexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(OracleHierarchicalExpression oexpr) {
+		
+		
+	}
+	
 	public void visitBinaryExpression(BinaryExpression binaryExpression) {
 		Expression left =binaryExpression.getLeftExpression();
 		Expression right =binaryExpression.getRightExpression();
-		
+		if (right instanceof AnyComparisonExpression){
+			right = new AnyComparison(((AnyComparisonExpression) right).getSubSelect());
+			binaryExpression.setRightExpression(right);
+		}
+		if (right instanceof AllComparisonExpression){
+			right = new AllComparison(((AllComparisonExpression) right).getSubSelect());
+			binaryExpression.setRightExpression(right);
+		}
 		if (!(left instanceof BinaryExpression) && 
 				!(right instanceof BinaryExpression)) {
-			joinConditions.add(binaryExpression.toString());
+//			selection.addCondition(binaryExpression);
 		}
 		else
 		{
 			left.accept(this);
 			right.accept(this);
 		}
-		
-	}
-	@Override
-	public void visit(EqualsTo arg0) {
-		visitBinaryExpression(arg0);
-//		Expression left = arg0.getLeftExpression();
-//		Expression right = arg0.getRightExpression();
-//		if ((left instanceof Column || left instanceof AnalyticExpression) && 
-//				(right instanceof Column || right  instanceof AnalyticExpression)) {
-//			joinConditions.add(left + "=" + right);
-//
-//		} else {
-//			left.accept(this);
-//			right.accept(this);
-//		}
-	}
-
-	@Override
-	public void visit(GreaterThan arg0) {
-		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(GreaterThanEquals arg0) {
-		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(InExpression arg0) {
-		
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(IsNullExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(LikeExpression arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(MinorThan arg0) {
-		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(MinorThanEquals arg0) {
-		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(NotEqualsTo arg0) {
-		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(Column arg0) {
-		joinConditions.add(arg0.getWholeColumnName());
-//		arg0.getRightExpression().accept(this);
-	}
-
-	@Override
-	public void visit(SubSelect arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(CaseExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(WhenClause arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(ExistsExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(AllComparisonExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(AnyComparisonExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(Concat arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(Matches arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(BitwiseAnd arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(BitwiseOr arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(BitwiseXor arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(CastExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(Modulo arg0) {
-		visitBinaryExpression(arg0);
-		
-	}
-
-	@Override
-	public void visit(AnalyticExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(ExtractExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(IntervalExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(OracleHierarchicalExpression arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 

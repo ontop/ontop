@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.parser;
 
+import java.util.ArrayList;
+
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -15,6 +17,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
+ * Usually only one projection is returned, except when we have a union
  * 
  * @author Sarah
  *
@@ -22,18 +25,20 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 	
-	ProjectionJSQL projections;
-	boolean distinctOn = false;
+	ArrayList<ProjectionJSQL> projections; //create a list of projections 
+	ProjectionJSQL projection;
+	boolean bdistinctOn = false;
+	
 	
 	/**
-	 * Return the Projection with the expressions between SELECT and FROM
+	 * Return the list of Projection with the expressions between SELECT and FROM
 	 * @param select parsed statement
 	 * @return
 	 */
 	
-	public ProjectionJSQL getProjection(Select select) {
+	public ArrayList<ProjectionJSQL> getProjection(Select select) {
 		
-		projections = new ProjectionJSQL();
+		projections = new ArrayList<ProjectionJSQL>();
 		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -49,23 +54,25 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		
+		projection= new ProjectionJSQL();
 		Distinct distinct= plainSelect.getDistinct();
 		if(distinct!=null) // for SELECT DISTINCT [ON (...)]
 			{
 			
 			if(distinct.getOnSelectItems()!=null){
 				
-				distinctOn=true;
-				projections.setType(ProjectionJSQL.SELECT_DISTINCT_ON);
+				bdistinctOn=true;
+				
 				
 			for(SelectItem item : distinct.getOnSelectItems())
 			{
 				item.accept(this);
 			}
-				distinctOn=false;
+				bdistinctOn=false;
 			}
 			else
-				projections.setType(ProjectionJSQL.SELECT_DISTINCT);
+			projection.setType(ProjectionJSQL.SELECT_DISTINCT);
+				
 		}
 		
 		
@@ -74,11 +81,17 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 			item.accept(this);
 		}
 		
+		projections.add(projection);
+		
 	}
 
+	/* visit also the Operation as UNION */
 	@Override
-	public void visit(SetOperationList setOpList) {
-		// TODO Auto-generated method stub
+	public void visit(SetOperationList setOpList) { 
+		for (PlainSelect ps: setOpList.getPlainSelects())
+		{
+			ps.accept(this);
+		}
 		
 	}
 
@@ -89,20 +102,21 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 	}
 	@Override
 	public void visit(AllColumns allColumns) {
-		projections.add(allColumns);
+		projection.add(allColumns);
 		
 	}
 
 	@Override
-	public void visit(AllTableColumns allTableColumns) {
-		projections.add(allTableColumns);
+	public void visit(AllTableColumns allTableColumns) {	
+		projection.add(allTableColumns);
+		
 		
 	}
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		
-	 projections.add(selectExpr, distinctOn);
+	 projection.add(selectExpr, bdistinctOn);
+	 
 		
 	}
 

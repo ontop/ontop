@@ -65,10 +65,15 @@ public class ProjectionJSQL implements Serializable {
 	 *            The input column object.
 	 */
 	public void add(SelectExpressionItem column, boolean distinctOn) {
-		if (distinctOn)
+		if (distinctOn){
+			
+			this.setType(ProjectionJSQL.SELECT_DISTINCT_ON);
 			selectDistinctList.add(column);
-		else
+		}
+		else{
+		
 		selectList.add(column);
+		}
 	}
 
 	/**
