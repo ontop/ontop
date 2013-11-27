@@ -11,20 +11,24 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.ParsedQuery;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
+import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TablePrimary;
 
 import java.util.ArrayList;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.openrdf.query.parser.QueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,47 +75,71 @@ public class SQLQueryTranslator {
 	 * @param query The sql query to be parsed
 	 * @return A QueryTree (possible with null values and errors)
 	 */
-	public QueryTree constructQueryTreeNoView(String query){
-		return constructQueryTree(query, false);
+	public ParsedQuery constructParserNoView(String query){
+		return constructParser(query, false);
 	}
+//	public QueryTree constructQueryTreeNoView(String query){
+//		return constructQueryTree(query, false);
+//	}
 	
 
 
 	/**
-	 * Called from MappingAnalyzer:createLookupTable. Returns the query tree, or, if there are
+	 * Called from MappingAnalyzer:createLookupTable. Returns the parsed query, or, if there are
 	 * syntax error, the name of a generated view, even if there were 
-	 * parsing errors. This is because the Parsed
+	 * parsing errors. 
 	 * 
 	 * @param query The sql query to be parsed
-	 * @return A QueryTree (possible just the name of a generated view)
+	 * @return A ParsedQuery (possible just the name of a generated view)
 	 */
-	public QueryTree constructQueryTree(String query) {
-		return constructQueryTree(query, true);
+	public ParsedQuery constructParser(String query) {
+		return constructParser(query, true);
 	}
 	
+//	public QueryTree constructQueryTree(String query) {
+//		return constructQueryTree(query, true);
+//	}
 	
+	
+	private ParsedQuery constructParser (String query, boolean generateViews){
 		
-	private QueryTree constructQueryTree(String query, boolean generateViews) {
-		ANTLRStringStream inputStream = new ANTLRStringStream(query);
-		SQL99Lexer lexer = new SQL99Lexer(inputStream);
-		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-		SQL99Parser parser = new SQL99Parser(tokenStream);
-
-		QueryTree queryTree = null;
+		ParsedQuery queryParser = null;
 		try {
-			queryTree = parser.parse();
-		} catch (RecognitionException e) {
-			// Does nothing
+			queryParser = new ParsedQuery(query);
+		} catch (JSQLParserException e) {
+			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
 		}
 		
-		if (queryTree == null || (parser.getNumberOfSyntaxErrors() != 0 && generateViews)) {
-			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
-			queryTree = createView(query);
-		}		
-		return queryTree;
+		if (queryParser == null && generateViews )
+			queryParser = createView(query);
+		
+		return queryParser;
+		
+		
 	}
+		
+//	private QueryTree constructQueryTree(String query, boolean generateViews) {
+//		ANTLRStringStream inputStream = new ANTLRStringStream(query);
+//		SQL99Lexer lexer = new SQL99Lexer(inputStream);
+//		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+//		SQL99Parser parser = new SQL99Parser(tokenStream);
+//
+//		QueryTree queryTree = null;
+//		try {
+//			queryTree = parser.parse();
+//		} catch (RecognitionException e) {
+//			// Does nothing
+//		}
+//		
+//		if (queryTree == null || (parser.getNumberOfSyntaxErrors() != 0 && generateViews)) {
+//			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
+//			queryTree = createView(query);
+//		}		
+//		return queryTree;
+//	}
 	
-	private QueryTree createView(String query) {
+	private ParsedQuery createView(String query){
+		
 		String viewName = String.format("view_%s", id_counter++);
 		
 		ViewDefinition vd = createViewDefintion(viewName, query);
@@ -121,9 +149,23 @@ public class SQLQueryTranslator {
 		else
 			viewDefinitions.add(vd);
 		
-		QueryTree vt = createViewTree(viewName, query);
+		ParsedQuery vt = createViewParsed(viewName, query);
 		return vt;
 	}
+	
+//	private QueryTree createView(String query) {
+//		String viewName = String.format("view_%s", id_counter++);
+//		
+//		ViewDefinition vd = createViewDefintion(viewName, query);
+//		
+//		if(dbMetaData != null)
+//			dbMetaData.add(vd);
+//		else
+//			viewDefinitions.add(vd);
+//		
+//		QueryTree vt = createViewTree(viewName, query);
+//		return vt;
+//	}
 		
 	private ViewDefinition createViewDefintion(String viewName, String query) {
 		int start = 6; // the keyword 'select'
@@ -176,10 +218,18 @@ public class SQLQueryTranslator {
 		return viewDefinition;
 	}
 	
-	private QueryTree createViewTree(String viewName, String query) {		
-		TablePrimary view = new TablePrimary("", viewName, viewName);
-		QueryTree queryTree = new QueryTree(new Relation(view));
+	
+	private ParsedQuery createViewParsed(String viewName, String query) {		
+		Table view = new Table("", viewName);
+		ParsedQuery queryParsed = new ParsedQuery(new RelationJSQL(view));
 
-		return queryTree;
+		return queryParsed;
 	}
+	
+//	private QueryTree createViewTree(String viewName, String query) {		
+//		TablePrimary view = new TablePrimary("", viewName, viewName);
+//		QueryTree queryTree = new QueryTree(new Relation(view));
+//
+//		return queryTree;
+//	}
 }

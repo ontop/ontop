@@ -39,6 +39,8 @@ public class ParsedQuery {
 	 
 	private Select select;
 	
+	private RelationJSQL view;
+	
 	
 	/**
 	 * Constructs an empty query.
@@ -64,6 +66,12 @@ public class ParsedQuery {
 				
 			}
 
+		
+	}
+	
+	public ParsedQuery(RelationJSQL value) {
+		
+		view = value;
 		
 	}
 
