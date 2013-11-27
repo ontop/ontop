@@ -754,6 +754,7 @@ public class ParserTest extends TestCase {
 		try {
 			 queryP = new ParsedQuery(input);
 		} catch (JSQLParserException e) {
+			
 			return false;
 		}
 
@@ -768,6 +769,7 @@ public class ParserTest extends TestCase {
 			System.out.println("  Projection: " + queryP.getProjection());
 			System.out.println("  Selection: " + ((queryP.getSelection().isEmpty()) ? "--" : queryP.getSelection()));
 			System.out.println("  Aliases: " + (queryP.getAliasMap().isEmpty() ? "--" : queryP.getAliasMap()));
+			System.out.println("  GroupBy: " +  queryP.getGroupByClause());
 			System.out.println("  Join conditions: " + (queryP.getJoinCondition().isEmpty() ? "--" : queryP.getJoinCondition()));
 		} else {
 			System.out.println("Parser JSQL doesn't support for query: " + queryText);

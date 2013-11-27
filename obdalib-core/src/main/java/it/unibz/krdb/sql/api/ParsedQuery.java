@@ -8,6 +8,8 @@
  */
 package it.unibz.krdb.sql.api;
 
+import it.unibz.krdb.obda.parser.AggregationJSQL;
+import it.unibz.krdb.obda.parser.AggregationVisitor;
 import it.unibz.krdb.obda.parser.AliasMapVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
@@ -113,18 +115,18 @@ public class ParsedQuery {
 	}
 	
 
-
-
 	
 	/**
 	 * Constructs the GROUP BY statement based on the Aggregation
 	 * object.
 	 */
-	private String getGroupByClause(Aggregation agg) {
-		String groupByClause = "";
-		if (agg != null) {
-			groupByClause = agg.toString();
-		}
+	public AggregationJSQL getGroupByClause() {
+		AggregationVisitor agg = new AggregationVisitor();
+		
+			AggregationJSQL groupByClause;
+			groupByClause = agg.getAggregation(select);
+			
+		
 		return groupByClause;
 	}
 	
