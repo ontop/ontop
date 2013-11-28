@@ -77,7 +77,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 	
-	List<String> joinConditions;
+	ArrayList<String> joinConditions;
 	
 	/**
 	 * Obtain the join conditions in a format "expression condition expression"
@@ -86,7 +86,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 	 * @param select statement with the parsed query
 	 * @return a list of string containing the join conditions
 	 */
-	public List<String> getJoinConditions(Select select) {
+	public ArrayList<String> getJoinConditions(Select select) {
 		joinConditions = new ArrayList<String>();
 		select.getSelectBody().accept(this);
 		return joinConditions;

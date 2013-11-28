@@ -101,7 +101,7 @@ public class ParsedQuery {
 	 * Get the string construction of the join condition. The string has the
 	 * format of "VAR1=VAR2".
 	 */
-	public List<String> getJoinCondition() {
+	public ArrayList<String> getJoinCondition() {
 		JoinConditionVisitor joinCV = new JoinConditionVisitor();
 		return joinCV.getJoinConditions(select);
 	}

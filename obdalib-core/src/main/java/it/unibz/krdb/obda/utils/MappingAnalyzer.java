@@ -9,6 +9,7 @@
 package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.CQIE;
+import net.sf.jsqlparser.expression.StringValue;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -38,11 +39,14 @@ import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
 import it.unibz.krdb.sql.api.Parenthesis;
+import it.unibz.krdb.sql.api.ParsedQuery;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
+import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.RightParenthesis;
 import it.unibz.krdb.sql.api.Selection;
+import it.unibz.krdb.sql.api.SelectionJSQL;
 import it.unibz.krdb.sql.api.StringLiteral;
 
 import java.text.ParseException;
@@ -53,6 +57,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
+
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.TimeValue;
+import net.sf.jsqlparser.expression.TimestampValue;
+import net.sf.jsqlparser.schema.Column;
 
 //import com.hp.hpl.jena.iri.IRI;
 
@@ -92,17 +105,17 @@ public class MappingAnalyzer {
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 				// Construct the SQL query tree from the source query
-				QueryTree queryTree = translator.constructQueryTree(sourceQuery.toString());
+				ParsedQuery queryParsed = translator.constructParser(sourceQuery.toString());
 								
 				// Create a lookup table for variable swapping
-				LookupTable lookupTable = createLookupTable(queryTree);
+				LookupTable lookupTable = createLookupTable(queryParsed);
 
 				// We can get easily the table from the SQL query tree
-				ArrayList<Relation> tableList = queryTree.getTableSet();
+				ArrayList<RelationJSQL> tableList = queryParsed.getTableSet();
 
 				// Construct the body from the source query
 				ArrayList<Function> atoms = new ArrayList<Function>();
-				for (Relation table : tableList) {
+				for (RelationJSQL table : tableList) {
 					// Construct the URI from the table name
 					String tableName = table.getGivenName();
 					String predicateName = tableName;
@@ -128,7 +141,7 @@ public class MappingAnalyzer {
 				}
 
 				// For the join conditions
-				ArrayList<String> joinConditions = queryTree.getJoinCondition();
+				ArrayList<String> joinConditions =  queryParsed.getJoinCondition();
 				for (String predicate : joinConditions) {
 					String[] value = predicate.split("=");
 					String leftValue = value[0];
@@ -148,18 +161,19 @@ public class MappingAnalyzer {
 				}
 
 				// For the selection "where" clause conditions
-				Selection selection = queryTree.getSelection();
-				if (selection != null) {
+				ArrayList<SelectionJSQL> selections = queryParsed.getSelection();
+				if (!selections.isEmpty()) {
+					for(SelectionJSQL selection: selections){
 					// Stack for filter function
 					Stack<Function> filterFunctionStack = new Stack<Function>();
 					// Stack for boolean algebra predicate
 					Stack<BooleanAlgebraPredicate> booleanPredicateStack = new Stack<BooleanAlgebraPredicate>();
 					
-					List<ICondition> conditions = selection.getRawConditions();
+					List<Expression> conditions = selection.getRawConditions();
 					for (int i = 0; i < conditions.size(); i++) {
 						Object element = conditions.get(i);
-						if (element instanceof ComparisonPredicate) {
-							ComparisonPredicate pred = (ComparisonPredicate) element;
+						if (element instanceof BinaryExpression) {
+							BinaryExpression pred = (BinaryExpression) element;
 							Function filterFunction = getFunction(pred, lookupTable);
 							if (hasBooleanOperator(booleanPredicateStack)) {
 								BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();
@@ -203,6 +217,7 @@ public class MappingAnalyzer {
 					} else {						
 						throwInvalidFilterExpressionException(filterFunctionStack);
 					}
+				}
 				}
 
 				// Construct the head from the target query.
@@ -307,9 +322,9 @@ public class MappingAnalyzer {
 		}
 	}
 
-	private Function getFunction(ComparisonPredicate pred, LookupTable lookupTable) {
-		IValueExpression left = pred.getValueExpressions()[0];
-		IValueExpression right = pred.getValueExpressions()[1];
+	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
+		Expression left = pred.getLeftExpression();
+		Expression right = pred.getRightExpression();
 
 		String leftValueName = left.toString();
 		String termLeftName = lookupTable.lookup(leftValueName);
@@ -320,35 +335,44 @@ public class MappingAnalyzer {
 
 		String termRightName = "";
 		Term t2 = null;
-		if (right instanceof ReferenceValueExpression) {
-			String rightValueName = right.toString();
+		if (right instanceof Column) {
+			String rightValueName = ((Column) right).getColumnName();
 			termRightName = lookupTable.lookup(rightValueName);
 			if (termRightName == null) {
 				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
 			}
 			t2 = dfac.getVariable(termRightName);
-		} else if (right instanceof Literal) {
-			Literal literal = (Literal) right;
-			termRightName = literal.get().toString();
-			if (literal instanceof StringLiteral) {
-				boolean isDateTime = containDateTimeString(termRightName);
-				if (isDateTime) {
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
-				} else {
+		} else 
+			
+			
+			if (right instanceof StringValue) {
+				termRightName= ((StringValue) right).getValue();
+				if(termRightName.equals("true") || termRightName.equals("false"))
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
+				else
 					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
-				}
-			} else if (literal instanceof IntegerLiteral) {
+				
+			}else if (right instanceof DateValue) {
+					termRightName= ((DateValue) right).getValue().toString();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+			}else if ( right instanceof TimeValue) {
+				termRightName= ((TimeValue) right).getValue().toString();
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+			}else if (right instanceof TimestampValue) {
+				termRightName= ((TimestampValue) right).getValue().toString();
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+			}else if (right instanceof LongValue) {
+				termRightName= ((LongValue) right).getStringValue();
 				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
-			} else if (literal instanceof DecimalLiteral) {
+			} else if (right instanceof DoubleValue) {
+				termRightName= ((DoubleValue) right).toString();
 				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
-			} else if (literal instanceof BooleanLiteral) {
-				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
 			} else {
+				termRightName= right.toString();
 				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 			}
-		}
 
-		Operator op = pred.getOperator();
+		String op = pred.getStringExpression();
 
 		Function funct = null;
 		switch (op) {
@@ -410,18 +434,18 @@ public class MappingAnalyzer {
 		return result;
 	}
 
-	private LookupTable createLookupTable(QueryTree queryTree) {
+	private LookupTable createLookupTable(ParsedQuery queryParsed) {
 		LookupTable lookupTable = new LookupTable();
 
 		// Collect all the possible column names from tables.
-		ArrayList<Relation> tableList = queryTree.getTableSet();
+		ArrayList<RelationJSQL> tableList = queryParsed.getTableSet();
 
 		// Collect all known column aliases
-		HashMap<String, String> aliasMap = queryTree.getAliasMap();
+		HashMap<String, String> aliasMap = queryParsed.getAliasMap();
 		
 		int offset = 0; // the index offset
 
-		for (Relation table : tableList) {
+		for (RelationJSQL table : tableList) {
 			String tableName = table.getTableName();
 			String tableGivenName = table.getGivenName();
 			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
