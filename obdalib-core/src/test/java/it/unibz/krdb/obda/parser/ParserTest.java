@@ -254,11 +254,11 @@ public class ParserTest extends TestCase {
 
 	public void test_2_10() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t1.grade FROM \"public\".\"student\" as t1 "
-				+ "WHERE t1.grede is not null AND t1.name<>'John'");
+				+ "WHERE t1.grade is not null AND t1.name<>'John'");
 		printJSQL("test_2_10", result);
 		assertTrue(result);
 		final boolean result2 = parseSQL("SELECT t1.id, t1.name, t1.grade FROM \"public\".\"student\" as t1 "
-				+ "WHERE t1.grede is not null AND t1.name<>'John'");
+				+ "WHERE t1.grade is not null AND t1.name<>'John'");
 		printSQL("test_2_10", result2);
 		assertTrue(result2);
 	}
@@ -383,6 +383,18 @@ public class ParserTest extends TestCase {
 		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT SOME(id) FROM student");
 		printSQL("test_3_9", result2);
+		assertFalse(result2);
+	}
+	
+	public void test_3_9_1(){ 
+		//ANY AND SOME are the same
+		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
+				+"WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)");
+		printJSQL("test_3_9_1", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT DISTINCT maker FROM Product "
+				+"WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)");
+		printSQL("test_3_9_1", result2);
 		assertFalse(result2);
 	}
 

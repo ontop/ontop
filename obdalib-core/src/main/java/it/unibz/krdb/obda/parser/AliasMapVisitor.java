@@ -10,6 +10,10 @@ package it.unibz.krdb.obda.parser;
 
 import java.util.HashMap;
 
+/** 
+ * Class to create an Alias Map for the select statement
+ */
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -25,6 +29,12 @@ import net.sf.jsqlparser.statement.select.WithItem;
 public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor{
 
 	HashMap<String,String> aliasMap;
+	
+	/**
+	 * Return a map between the column in the select statement and its alias.
+	 * @param select parsed query 
+	 * @return
+	 */
 	
 	public HashMap<String,String> getAliasMap(Select select) {
 		
@@ -51,13 +61,13 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor{
 
 	@Override
 	public void visit(AllColumns columns) {
-		//columns.accept(this);
+		
 		
 	}
 
 	@Override
 	public void visit(AllTableColumns tableColumns) {
-		//tableColumns.accept(this);
+		
 	}
 
 	@Override

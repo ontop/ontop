@@ -9,6 +9,11 @@
 package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
+
+/**
+ * Store the information about the Projection of the parsed query. (between SELECT... FROM)
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -34,6 +39,10 @@ public class ProjectionJSQL implements Serializable {
 	private ArrayList<SelectExpressionItem> selectDistinctList; //for the cases with DISTINCT ON
 	private AllColumns allcolumns; //for the cases as SELECT *
 	private AllTableColumns tablecolumns; //for the cases as SELECT table.*
+	
+	/** 
+	 * A new Projection JSQL. It returns the select list or select distinct list. Recognize * sign.
+	 */
 
 	public ProjectionJSQL() {
 		selectList = new ArrayList<SelectExpressionItem>();

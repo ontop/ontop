@@ -9,7 +9,6 @@
 package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.CQIE;
-import net.sf.jsqlparser.expression.StringValue;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -24,30 +23,13 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.BooleanAlgebraPredicate;
-import it.unibz.krdb.sql.api.BooleanLiteral;
 import it.unibz.krdb.sql.api.BooleanOperator;
-import it.unibz.krdb.sql.api.ComparisonPredicate;
-import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
-import it.unibz.krdb.sql.api.DecimalLiteral;
-import it.unibz.krdb.sql.api.ICondition;
-import it.unibz.krdb.sql.api.IValueExpression;
-import it.unibz.krdb.sql.api.IntegerLiteral;
-import it.unibz.krdb.sql.api.LeftParenthesis;
-import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.NullPredicate;
-import it.unibz.krdb.sql.api.OrOperator;
-import it.unibz.krdb.sql.api.Parenthesis;
+import net.sf.jsqlparser.expression.Parenthesis;
 import it.unibz.krdb.sql.api.ParsedQuery;
-import it.unibz.krdb.sql.api.QueryTree;
-import it.unibz.krdb.sql.api.ReferenceValueExpression;
-import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.RelationJSQL;
-import it.unibz.krdb.sql.api.RightParenthesis;
-import it.unibz.krdb.sql.api.Selection;
 import it.unibz.krdb.sql.api.SelectionJSQL;
-import it.unibz.krdb.sql.api.StringLiteral;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -63,8 +45,21 @@ import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
+import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
+import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
+import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 
 //import com.hp.hpl.jena.iri.IRI;
@@ -140,12 +135,12 @@ public class MappingAnalyzer {
 					atoms.add(atom);
 				}
 
-				// For the join conditions
+				// For the join conditions WE STILL NEED TO CONSIDER NOT EQUI JOIN
 				ArrayList<String> joinConditions =  queryParsed.getJoinCondition();
 				for (String predicate : joinConditions) {
 					String[] value = predicate.split("=");
-					String leftValue = value[0];
-					String rightValue = value[1];
+					String leftValue = value[0].trim();
+					String rightValue = value[1].trim();
 					String lookup1 = lookupTable.lookup(leftValue);
 					String lookup2 = lookupTable.lookup(rightValue);
 					if (lookup1 == null)
@@ -164,59 +159,29 @@ public class MappingAnalyzer {
 				ArrayList<SelectionJSQL> selections = queryParsed.getSelection();
 				if (!selections.isEmpty()) {
 					for(SelectionJSQL selection: selections){
-					// Stack for filter function
-					Stack<Function> filterFunctionStack = new Stack<Function>();
-					// Stack for boolean algebra predicate
-					Stack<BooleanAlgebraPredicate> booleanPredicateStack = new Stack<BooleanAlgebraPredicate>();
 					
 					List<Expression> conditions = selection.getRawConditions();
 					for (int i = 0; i < conditions.size(); i++) {
 						Object element = conditions.get(i);
 						if (element instanceof BinaryExpression) {
 							BinaryExpression pred = (BinaryExpression) element;
+							
 							Function filterFunction = getFunction(pred, lookupTable);
-							if (hasBooleanOperator(booleanPredicateStack)) {
-								BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();
-								Function otherFilterFunction = filterFunctionStack.pop();
-								filterFunction = createBooleanFunction(otherFilterFunction, filterFunction, op);
-							}
-							filterFunctionStack.push(filterFunction);
-						} else if (element instanceof NullPredicate) {
-							NullPredicate pred = (NullPredicate) element;
+							
+							
+						} else if (element instanceof IsNullExpression) {
+							IsNullExpression pred = (IsNullExpression) element;
 							Function filterFunction = getFunction(pred, lookupTable);
-							if (hasBooleanOperator(booleanPredicateStack)) {
-								BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();
-								Function otherFilterFunction = filterFunctionStack.pop();
-								filterFunction = createBooleanFunction(otherFilterFunction, filterFunction, op);
+						
+							
+						} else if (element instanceof Parenthesis) {
+							Parenthesis pred = (Parenthesis) element;
+		
+								manageParenthesis(pred,lookupTable);
 							}
-							filterFunctionStack.push(filterFunction);
-						} else if (element instanceof BooleanAlgebraPredicate) {
-							BooleanAlgebraPredicate pred = (BooleanAlgebraPredicate) element;
-							if (pred instanceof BooleanOperator) {
-								BooleanOperator op = (BooleanOperator) pred;
-								manageBooleanOperator(op, booleanPredicateStack);
-							} else if (pred instanceof Parenthesis) {
-								Parenthesis paren = (Parenthesis) pred;
-								manageParenthesis(paren, booleanPredicateStack, filterFunctionStack);
-							}
-						}
+						
 					}
 					
-					// Check if there are still boolean operators left in the stack
-					while (!booleanPredicateStack.isEmpty()) {
-						BooleanOperator op = (BooleanOperator) booleanPredicateStack.pop();					
-						Function filterFunction = createBooleanFunction(filterFunctionStack, op);
-						filterFunctionStack.push(filterFunction);
-					}
-					
-					// The filter function stack must have 1 element left
-					if (filterFunctionStack.size() == 1) {
-						Function filterFunction = filterFunctionStack.pop();
-						Function atom = dfac.getFunction(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
-						atoms.add(atom);
-					} else {						
-						throwInvalidFilterExpressionException(filterFunctionStack);
-					}
 				}
 				}
 
@@ -253,60 +218,20 @@ public class MappingAnalyzer {
 		return datalog;
 	}
 	
-	private void throwInvalidFilterExpressionException(Stack<Function> filterFunctionStack) {
-		StringBuilder filterExpression = new StringBuilder();
-		while (!filterFunctionStack.isEmpty()) {
-			filterExpression.append(filterFunctionStack.pop());
-		}
-		throw new RuntimeException("Illegal filter expression: " + filterExpression.toString());
-	}
+	/*
+	 * Used to retrieve the expression contained in the parentesis. Call getFunction 
+	 */
 
-	private void manageBooleanOperator(BooleanOperator op, Stack<BooleanAlgebraPredicate> booleanPredicateStack) {
-		booleanPredicateStack.push(op);
-	}
-	
-	private void manageParenthesis(Parenthesis paren, Stack<BooleanAlgebraPredicate> booleanPredicateStack, Stack<Function> filterFunctionStack) {
-		if (paren instanceof LeftParenthesis) {
-			booleanPredicateStack.push(paren);
-		} else if (paren instanceof RightParenthesis) {
-			while (true) {
-				BooleanAlgebraPredicate predicate = booleanPredicateStack.pop();		
-				if (predicate instanceof LeftParenthesis) {
-					break;
-				}
-				BooleanOperator op = (BooleanOperator) predicate;					
-				Function filterFunction = createBooleanFunction(filterFunctionStack, op);
-				filterFunctionStack.push(filterFunction);
-			}
+	private void manageParenthesis(Parenthesis paren, LookupTable lookupTable){
+		Expression inside = paren.getExpression();
+		if (inside instanceof BinaryExpression){
+			BinaryExpression insideB= (BinaryExpression) inside;
+			getFunction(insideB, lookupTable);
 		}
 	}
 	
-	private Function createBooleanFunction(Stack<Function> filterFunctionStack, BooleanOperator op) {
-		Function rightFunction = filterFunctionStack.pop();
-		Function leftFunction = filterFunctionStack.pop();
-		return createBooleanFunction(leftFunction, rightFunction, op);
-	}
-
-	private Function createBooleanFunction(Function leftFunction, Function rightFunction, BooleanOperator op) {
-		Function booleanFunction = null;
-		if (op instanceof AndOperator) {
-			booleanFunction = dfac.getFunctionAND(leftFunction, rightFunction);
-		} else if (op instanceof OrOperator) {
-			booleanFunction = dfac.getFunctionOR(leftFunction, rightFunction);
-		}
-		return booleanFunction;
-	}
-
-	private boolean hasBooleanOperator(Stack<BooleanAlgebraPredicate> boolStack) {
-		if (!boolStack.isEmpty()) {
-			BooleanAlgebraPredicate pred = boolStack.peek();
-			return (pred instanceof BooleanOperator) ? true : false;
-		}
-		return false;
-	}
-	
-	private Function getFunction(NullPredicate pred, LookupTable lookupTable) {
-		IValueExpression column = pred.getValueExpression();
+	private Function getFunction(IsNullExpression pred, LookupTable lookupTable) {
+		Expression column = pred.getLeftExpression();
 
 		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
@@ -315,12 +240,84 @@ public class MappingAnalyzer {
 		}
 		Term var = dfac.getVariable(variableName);
 
-		if (pred.useIsNullOperator()) {
+		if (!pred.isNot()) {
 			return dfac.getFunctionIsNull(var);
 		} else {
 			return dfac.getFunctionIsNotNull(var);
 		}
 	}
+
+//	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
+//		Expression left = pred.getLeftExpression();
+//		Expression right = pred.getRightExpression();
+//
+//		String leftValueName = left.toString();
+//		String termLeftName = lookupTable.lookup(leftValueName);
+//		if (termLeftName == null) {
+//			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
+//		}
+//		Term t1 = dfac.getVariable(termLeftName);
+//
+//		String termRightName = "";
+//		Term t2 = null;
+//		if (right instanceof Column) {
+//			String rightValueName = ((Column) right).getColumnName();
+//			termRightName = lookupTable.lookup(rightValueName);
+//			if (termRightName == null) {
+//				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
+//			}
+//			t2 = dfac.getVariable(termRightName);
+//		} else 
+//			
+//			
+//			if (right instanceof StringValue) {
+//				termRightName= ((StringValue) right).getValue();
+//				if(termRightName.equals("true") || termRightName.equals("false"))
+//					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
+//				else
+//					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
+//				
+//			}else if (right instanceof DateValue) {
+//					termRightName= ((DateValue) right).getValue().toString();
+//					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+//			}else if ( right instanceof TimeValue) {
+//				termRightName= ((TimeValue) right).getValue().toString();
+//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+//			}else if (right instanceof TimestampValue) {
+//				termRightName= ((TimestampValue) right).getValue().toString();
+//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+//			}else if (right instanceof LongValue) {
+//				termRightName= ((LongValue) right).getStringValue();
+//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+//			} else if (right instanceof DoubleValue) {
+//				termRightName= ((DoubleValue) right).toString();
+//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
+//			} else {
+//				termRightName= right.toString();
+//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
+//			}
+//
+//		String op = pred.getStringExpression().toLowerCase();
+//		
+//
+//		Function funct = null;
+//		if(op.equals("="))
+//			funct = dfac.getFunctionEQ(t1, t2);
+//		else if(op.equals(">"))
+//			funct = dfac.getFunctionGT(t1, t2); 
+//		else if(op.equals("<")) 
+//			funct = dfac.getFunctionLT(t1, t2);
+//		else if(op.equals(">="))
+//			funct = dfac.getFunctionGTE(t1, t2);
+//		else if(op.equals("<="))
+//			funct = dfac.getFunctionLTE(t1, t2);
+//		else if(op.equals("<>"))
+//			funct = dfac.getFunctionNEQ(t1, t2);
+//		else
+//			throw new RuntimeException("Unknown opertor: " + op);
+//		
+//		return funct;
+//	}
 
 	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
 		Expression left = pred.getLeftExpression();
@@ -372,19 +369,35 @@ public class MappingAnalyzer {
 				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 			}
 
-		String op = pred.getStringExpression();
+		String op = pred.getStringExpression().toLowerCase();
+		
 
 		Function funct = null;
-		switch (op) {
-		case EQ: funct = dfac.getFunctionEQ(t1, t2); break;
-		case GT: funct = dfac.getFunctionGT(t1, t2); break;
-		case LT: funct = dfac.getFunctionLT(t1, t2); break;
-		case GE: funct = dfac.getFunctionGTE(t1, t2); break;
-		case LE: funct = dfac.getFunctionLTE(t1, t2); break;
-		case NE: funct = dfac.getFunctionNEQ(t1, t2); break;
-		default:
-			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
-		}
+		if( pred instanceof EqualsTo)
+			funct = dfac.getFunctionEQ(t1, t2);
+		else if(pred instanceof GreaterThan)
+			funct = dfac.getFunctionGT(t1, t2); 
+		else if(pred instanceof MinorThan) 
+			funct = dfac.getFunctionLT(t1, t2);
+		else if(pred instanceof GreaterThanEquals)
+			funct = dfac.getFunctionGTE(t1, t2);
+		else if(pred instanceof MinorThanEquals)
+			funct = dfac.getFunctionLTE(t1, t2);
+		else if(pred instanceof NotEqualsTo)
+			funct = dfac.getFunctionNEQ(t1, t2);
+		else if (pred instanceof AndExpression)
+			funct = dfac.getFunctionAND(t1, t2);
+		else if (pred instanceof OrExpression)
+			funct = dfac.getFunctionOR(t1, t2);
+		else if (pred instanceof Addition)
+			funct = dfac.getFunctionAdd(t1, t2);
+		else if (pred instanceof Subtraction)
+			funct = dfac.getFunctionSubstract(t1, t2);
+		else if (pred instanceof Multiplication)
+			funct = dfac.getFunctionMultiply(t1, t2);
+		else
+			throw new RuntimeException("Unknown opertor: " + op);
+		
 		return funct;
 	}
 
@@ -524,7 +537,7 @@ public class MappingAnalyzer {
 				
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
-				if (!tableAlias.isEmpty()) {
+				if (tableAlias!=null) {
 					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
 					if (aliasMap.containsKey(qualifiedColumnAlias)) {

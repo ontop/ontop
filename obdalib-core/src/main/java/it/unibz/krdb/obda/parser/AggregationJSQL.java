@@ -15,9 +15,8 @@ public class AggregationJSQL {
 private static final long serialVersionUID = 5806057160397315905L;
 	
 	/**
-	 * Collection of grouping columns. Uses {@link GroupingElement}
-	 * as the grouping unit. Each grouping unit can contain
-	 * one or several {@link ColumnReference}.
+	 * Collection of grouping columns  {@link Expression}. Each grouping unit can contain
+	 * one or several {@link Column}.
 	 */
 	private List<Expression> groupingList;
 	
@@ -25,10 +24,7 @@ private static final long serialVersionUID = 5806057160397315905L;
 		groupingList = new ArrayList<Expression>();
 	}
 	
-	
-	
-	
-	
+		
 	/**
 	 * Inserts a grouping element to the list. Use this method
 	 * if users can define this object already.

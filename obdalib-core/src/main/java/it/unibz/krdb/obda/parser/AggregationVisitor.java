@@ -17,12 +17,18 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 
 /**
- * Find all used tables within an select statement.
+ * Find all the table used for GROUP BY in the statement.
  */
+
 public class AggregationVisitor implements SelectVisitor {
 
 	AggregationJSQL aggregation= new AggregationJSQL();
 	
+	/**
+	 * Return a {@link AggregationSQL} containing GROUP BY statement
+	 * @param select 
+	 * @return
+	 */
 	public AggregationJSQL getAggregation(Select select){
 		
 		if (select.getWithItemsList() != null) {

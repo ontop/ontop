@@ -18,8 +18,6 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
  * Usually only one projection is returned, except when we have a union
- * 
- * @author Sarah
  *
  */
 

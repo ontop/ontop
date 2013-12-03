@@ -28,7 +28,8 @@ import net.sf.jsqlparser.statement.select.Select;
 
 
 /**
- * A tree structure to represent SQL query string.
+ * A  structure to store the parsed SQL query string. 
+ * It returns the information about the query using the visitor classes
  */
 public class ParsedQuery {
 

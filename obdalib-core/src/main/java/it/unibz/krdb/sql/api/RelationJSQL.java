@@ -12,8 +12,8 @@ import net.sf.jsqlparser.schema.Table;
 
 /**
  * The Relation class is a wrapper class that make the
- * {@link TablePrimary} class compatible with the 
- * abstraction in the {@link QueryTree}.
+ * {@link Table} class compatible with the 
+ * abstraction in the {@link ParsedQuery}.
  */
 public class RelationJSQL extends RelationalAlgebra {
 

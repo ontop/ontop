@@ -72,12 +72,12 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Visitor class to retrieve the selection of the statement (WHERE expressions)
  * 
- * 
  */
 public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
 	ArrayList<SelectionJSQL> selections;
 	SelectionJSQL selection;
+	boolean binaryExp =false; // true when the binary expression contains all other expressions
 	
 	/**
 	 * Give the WHERE clause of the select statement
@@ -105,9 +105,13 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		
          if (plainSelect.getWhere() != null) {
                  Expression where=plainSelect.getWhere();
-                 where.accept(this);
-                 if(where instanceof BinaryExpression)
+                 if(where instanceof BinaryExpression){
                 	 selection.addCondition((BinaryExpression) where);
+                	 binaryExp=true;
+                 }
+                 where.accept(this);
+                 
+                 
                  selections.add(selection); 
          }
          
@@ -263,12 +267,14 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(InExpression inExpression) {
+		if(binaryExp==false)
 		selection.addCondition(inExpression);
 		
 	}
 
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
+		if(binaryExp==false)
 		selection.addCondition(isNullExpression);
 		
 	}
@@ -329,12 +335,14 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
+		if(binaryExp==false)
 		selection.addCondition(allComparisonExpression);
 		
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
+		if(binaryExp==false)
 		selection.addCondition(anyComparisonExpression);
 		
 	}
@@ -404,6 +412,11 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		
 		
 	}
+	
+	/*
+	 * We handle differently AnyComparisonExpression and AllComparisonExpression
+	 *  since they do not have a toString method, we substitute them with ad hoc classes
+	 */
 	
 	public void visitBinaryExpression(BinaryExpression binaryExpression) {
 		Expression left =binaryExpression.getLeftExpression();
