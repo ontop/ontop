@@ -17,13 +17,12 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
- * Usually only one projection is returned, except when we have a union
  *
  */
 
 public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 	
-	ArrayList<ProjectionJSQL> projections; //create a list of projections 
+//	ArrayList<ProjectionJSQL> projections; //create a list of projections if we want to consider union 
 	ProjectionJSQL projection;
 	boolean bdistinctOn = false;
 	
@@ -34,9 +33,9 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 	 * @return
 	 */
 	
-	public ArrayList<ProjectionJSQL> getProjection(Select select) {
+	public ProjectionJSQL getProjection(Select select) {
 		
-		projections = new ArrayList<ProjectionJSQL>();
+//		projections = new ArrayList<ProjectionJSQL>(); //used if we want to consider UNION
 		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -45,10 +44,16 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 		}
 		select.getSelectBody().accept(this);
 		
-		return projections;	
+		return projection;	
 		
 	}
 
+	/*
+	 * visit Plainselect, search for the SelectExpressionItems
+	 * Stored in ProjectionSQL 
+	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+	 */
+	
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		
@@ -79,31 +84,45 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 			item.accept(this);
 		}
 		
-		projections.add(projection);
+//		projections.add(projection);
 		
 	}
 
-	/* visit also the Operation as UNION */
+	/* visit also the Operation as UNION
+	 * it is not supported now */
 	@Override
 	public void visit(SetOperationList setOpList) { 
-		for (PlainSelect ps: setOpList.getPlainSelects())
-		{
-			ps.accept(this);
-		}
+//		for (PlainSelect ps: setOpList.getPlainSelects())
+//		{
+//			ps.accept(this);
+//		}
 		
 	}
 
+	/* 
+	 * Search for select in WITH statement
+	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.WithItem)
+	 */
 	@Override
 	public void visit(WithItem withItem) {
 		withItem.getSelectBody().accept(this);
 		
 	}
+	
+	/*
+	 * Add the projection in the case of SELECT *
+	 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.AllColumns)
+	 */
 	@Override
 	public void visit(AllColumns allColumns) {
 		projection.add(allColumns);
 		
 	}
 
+	/*
+	 * Add the projection in the case of SELECT table.*
+	 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.AllTableColumns)
+	 */
 	@Override
 	public void visit(AllTableColumns allTableColumns) {	
 		projection.add(allTableColumns);
@@ -111,6 +130,10 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 		
 	}
 
+	/*
+	 * Add the projection for the selectExpressionItem, distinguing between select all and select distinct
+	 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.SelectExpressionItem)
+	 */
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
 	 projection.add(selectExpr, bdistinctOn);

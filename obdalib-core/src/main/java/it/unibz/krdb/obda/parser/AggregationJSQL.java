@@ -1,13 +1,17 @@
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.sql.api.ColumnReference;
-import it.unibz.krdb.sql.api.GroupingElement;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
+
+/**
+ * Class for an Aggregation, it contains the GROUP BY statement.
+ *
+ *
+ */
+		
 
 public class AggregationJSQL {
 
@@ -15,7 +19,7 @@ public class AggregationJSQL {
 private static final long serialVersionUID = 5806057160397315905L;
 	
 	/**
-	 * Collection of grouping columns  {@link Expression}. Each grouping unit can contain
+	 * Collection of grouping columns in {@link Expression}. Each grouping unit can contain
 	 * one or several {@link Column}.
 	 */
 	private List<Expression> groupingList;
@@ -32,7 +36,7 @@ private static final long serialVersionUID = 5806057160397315905L;
 	 * @param group
 	 * 			The grouping element.
 	 */
-	public void add(Expression group) {
+	public void add(Column group) {
 		groupingList.add(group);
 	}
 	

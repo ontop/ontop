@@ -22,7 +22,9 @@ import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
 import it.unibz.krdb.sql.api.DerivedColumn;
 import it.unibz.krdb.sql.api.IValueExpression;
+import it.unibz.krdb.sql.api.ParsedQuery;
 import it.unibz.krdb.sql.api.Projection;
+import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.RelationalAlgebra;
 import it.unibz.krdb.sql.api.Selection;
@@ -35,6 +37,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,15 +115,16 @@ public class MetaMappingExpander {
 				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
 				
 				// Construct the SQL query tree from the source query
-				QueryTree sourceQueryTree = translator.constructQueryTree(sourceQuery.toString());
+				ParsedQuery sourceQueryParsed = translator.constructParser(sourceQuery.toString());
 				
-				Projection distinctParamsProjection = new Projection();
+				ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
 				
 				distinctParamsProjection.setType(Projection.SELECT_DISTINCT);
 				
-				ArrayList<DerivedColumn> columnList = sourceQueryTree.getProjection().getColumnList();
+				//we are considering only the first projection needs to add support to UNION
+				ArrayList<SelectExpressionItem> columnList = sourceQueryParsed.getProjection().get(0).getColumnList();
 				
-				List<DerivedColumn> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
+				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 				
 				distinctParamsProjection.addAll(columnsForTemplate);
 				
@@ -127,10 +132,10 @@ public class MetaMappingExpander {
 				 * The query for params is almost the same with the original source query, except that
 				 * we only need to distinct project the columns needed for the template expansion 
 				 */
-				RelationalAlgebra ra = sourceQueryTree.value().clone();
+				RelationalAlgebra ra = sourceQueryParsed.value().clone();
 				ra.setProjection(distinctParamsProjection);
 				
-				QueryTree distinctQueryTree = new QueryTree(ra, sourceQueryTree.left(), sourceQueryTree.right());
+				QueryTree distinctQueryTree = new QueryTree(ra, sourceQueryParsed.left(), sourceQueryParsed.right());
 				
 				String distinctParamsSQL = distinctQueryTree.toString();
 				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
@@ -160,7 +165,7 @@ public class MetaMappingExpander {
 				for(List<String> params : paramsForClassTemplate) {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
-							bodyAtom, sourceQueryTree, columnsForTemplate,
+							bodyAtom, sourceQueryParsed, columnsForTemplate,
 							columnsForValues, params, arity);
 										
 					expandedMappings.add(newMapping);	
@@ -288,15 +293,15 @@ public class MetaMappingExpander {
 	 * @param columnList
 	 * @return
 	 */
-	private List<DerivedColumn> getColumnsForTemplate(List<Variable> varsInTemplate,
-			ArrayList<DerivedColumn> columnList) {
-		List<DerivedColumn> columnsForTemplate = new ArrayList<DerivedColumn>();
+	private List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
+			ArrayList<SelectExpressionItem> columnList) {
+		List<SelectExpressionItem> columnsForTemplate = new ArrayList<SelectExpressionItem>();
 
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
-			for (DerivedColumn column : columnList) {
-				if ((column.hasAlias() && column.getAlias().equals(var.getName())) //
-						|| (!column.hasAlias() && column.getName().equals(var.getName()))) {
+			for (SelectExpressionItem column : columnList) {
+				if ((column.getAlias()==null && column.getExpression().toString().equals(var.getName())) ||
+						(column.getAlias()!=null && column.getAlias().equals(var.getName()))) {
 					columnsForTemplate.add(column);
 					found = true;
 					break;

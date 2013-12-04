@@ -159,16 +159,19 @@ public class MappingAnalyzer {
 				ArrayList<SelectionJSQL> selections = queryParsed.getSelection();
 				if (!selections.isEmpty()) {
 					for(SelectionJSQL selection: selections){
-					
+						// Stack for filter function
+						Stack<Function> filterFunctionStack = new Stack<Function>();
+						
 					List<Expression> conditions = selection.getRawConditions();
 					for (int i = 0; i < conditions.size(); i++) {
 						Object element = conditions.get(i);
 						if (element instanceof BinaryExpression) {
 							BinaryExpression pred = (BinaryExpression) element;
-							
+						
 							Function filterFunction = getFunction(pred, lookupTable);
 							
-							
+							filterFunctionStack.push(filterFunction);
+
 						} else if (element instanceof IsNullExpression) {
 							IsNullExpression pred = (IsNullExpression) element;
 							Function filterFunction = getFunction(pred, lookupTable);
@@ -181,10 +184,21 @@ public class MappingAnalyzer {
 							}
 						
 					}
+				
+					// The filter function stack must have 1 element left
+					if (filterFunctionStack.size() == 1) {
+						Function filterFunction = filterFunctionStack.pop();
+						Function atom = dfac.getFunction(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
+						atoms.add(atom);
+					} else {						
+						throwInvalidFilterExpressionException(filterFunctionStack);
+					}
 					
 				}
 				}
 
+				
+				
 				// Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
 				//for (Function atom : atomList) {
@@ -218,16 +232,25 @@ public class MappingAnalyzer {
 		return datalog;
 	}
 	
+	private void throwInvalidFilterExpressionException(Stack<Function> filterFunctionStack) {
+		StringBuilder filterExpression = new StringBuilder();
+		while (!filterFunctionStack.isEmpty()) {
+			filterExpression.append(filterFunctionStack.pop());
+		}
+		throw new RuntimeException("Illegal filter expression: " + filterExpression.toString());
+	}
+	
 	/*
 	 * Used to retrieve the expression contained in the parentesis. Call getFunction 
 	 */
 
-	private void manageParenthesis(Parenthesis paren, LookupTable lookupTable){
+	private Function manageParenthesis(Parenthesis paren, LookupTable lookupTable){
 		Expression inside = paren.getExpression();
 		if (inside instanceof BinaryExpression){
 			BinaryExpression insideB= (BinaryExpression) inside;
-			getFunction(insideB, lookupTable);
+			return getFunction(insideB, lookupTable);
 		}
+		throw new RuntimeException("Empty or irregular parenthesis: " + paren);
 	}
 	
 	private Function getFunction(IsNullExpression pred, LookupTable lookupTable) {
@@ -247,91 +270,38 @@ public class MappingAnalyzer {
 		}
 	}
 
-//	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
-//		Expression left = pred.getLeftExpression();
-//		Expression right = pred.getRightExpression();
-//
-//		String leftValueName = left.toString();
-//		String termLeftName = lookupTable.lookup(leftValueName);
-//		if (termLeftName == null) {
-//			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
-//		}
-//		Term t1 = dfac.getVariable(termLeftName);
-//
-//		String termRightName = "";
-//		Term t2 = null;
-//		if (right instanceof Column) {
-//			String rightValueName = ((Column) right).getColumnName();
-//			termRightName = lookupTable.lookup(rightValueName);
-//			if (termRightName == null) {
-//				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
-//			}
-//			t2 = dfac.getVariable(termRightName);
-//		} else 
-//			
-//			
-//			if (right instanceof StringValue) {
-//				termRightName= ((StringValue) right).getValue();
-//				if(termRightName.equals("true") || termRightName.equals("false"))
-//					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
-//				else
-//					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
-//				
-//			}else if (right instanceof DateValue) {
-//					termRightName= ((DateValue) right).getValue().toString();
-//					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-//			}else if ( right instanceof TimeValue) {
-//				termRightName= ((TimeValue) right).getValue().toString();
-//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-//			}else if (right instanceof TimestampValue) {
-//				termRightName= ((TimestampValue) right).getValue().toString();
-//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-//			}else if (right instanceof LongValue) {
-//				termRightName= ((LongValue) right).getStringValue();
-//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
-//			} else if (right instanceof DoubleValue) {
-//				termRightName= ((DoubleValue) right).toString();
-//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
-//			} else {
-//				termRightName= right.toString();
-//				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
-//			}
-//
-//		String op = pred.getStringExpression().toLowerCase();
-//		
-//
-//		Function funct = null;
-//		if(op.equals("="))
-//			funct = dfac.getFunctionEQ(t1, t2);
-//		else if(op.equals(">"))
-//			funct = dfac.getFunctionGT(t1, t2); 
-//		else if(op.equals("<")) 
-//			funct = dfac.getFunctionLT(t1, t2);
-//		else if(op.equals(">="))
-//			funct = dfac.getFunctionGTE(t1, t2);
-//		else if(op.equals("<="))
-//			funct = dfac.getFunctionLTE(t1, t2);
-//		else if(op.equals("<>"))
-//			funct = dfac.getFunctionNEQ(t1, t2);
-//		else
-//			throw new RuntimeException("Unknown opertor: " + op);
-//		
-//		return funct;
-//	}
 
 	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
 		Expression left = pred.getLeftExpression();
 		Expression right = pred.getRightExpression();
-
+		
 		String leftValueName = left.toString();
 		String termLeftName = lookupTable.lookup(leftValueName);
+		Term t1=null;
 		if (termLeftName == null) {
+			if(left instanceof BinaryExpression)
+				t1=getFunction((BinaryExpression) left, lookupTable);
+			else if (left instanceof IsNullExpression)
+				t1=getFunction((IsNullExpression) left, lookupTable);
+			else if (left instanceof Parenthesis){
+				//do something else probably manage
+			}
+			else
 			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
 		}
-		Term t1 = dfac.getVariable(termLeftName);
-
+		else{
+		t1 = dfac.getVariable(termLeftName);
+		}
 		String termRightName = "";
 		Term t2 = null;
+		if(right instanceof BinaryExpression)
+			t2=getFunction((BinaryExpression) right, lookupTable);
+		else if (right instanceof IsNullExpression)
+			t2=getFunction((IsNullExpression) right, lookupTable);
+		else if (right instanceof Parenthesis){
+			//do something else probably manage
+		}
+		else
 		if (right instanceof Column) {
 			String rightValueName = ((Column) right).getColumnName();
 			termRightName = lookupTable.lookup(rightValueName);
@@ -371,7 +341,7 @@ public class MappingAnalyzer {
 
 		String op = pred.getStringExpression().toLowerCase();
 		
-
+		
 		Function funct = null;
 		if( pred instanceof EqualsTo)
 			funct = dfac.getFunctionEQ(t1, t2);
@@ -399,25 +369,9 @@ public class MappingAnalyzer {
 			throw new RuntimeException("Unknown opertor: " + op);
 		
 		return funct;
+		
 	}
 
-	private boolean containDateTimeString(String value) {
-		final String[] formatStrings = { "yyyy-MM-dd HH:mm:ss.SS", 
-				"yyyy-MM-dd HH:mm:ss", 
-				"yyyy-MM-dd", 
-				"yyyy-MM-dd'T'HH:mm:ssZ",
-				"yyyy-MM-dd'T'HH:mm:ss.sZ" };
-
-		for (String formatString : formatStrings) {
-			try {
-				new SimpleDateFormat(formatString).parse(value);
-				return true;
-			} catch (ParseException e) {
-				// NO-OP
-			}
-		}
-		return false; // the string doesn't contain date time info if none of the formats is suitable.
-	}
 
 	/**
 	 * Returns a new term with the updated references.

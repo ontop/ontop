@@ -110,7 +110,7 @@ public class ParsedQuery {
 	/**
 	 * Get the object construction for the WHERE clause.
 	 */
-	public ArrayList<SelectionJSQL> getSelection() {
+	public SelectionJSQL getSelection() {
 		SelectionVisitor sel= new SelectionVisitor();
 		return sel.getSelection(select);
 	}
@@ -118,7 +118,7 @@ public class ParsedQuery {
 	/**
 	 * Get the object construction for the SELECT clause.
 	 */
-	public ArrayList<ProjectionJSQL> getProjection() {
+	public ProjectionJSQL getProjection() {
 		ProjectionVisitor proj = new ProjectionVisitor();
 		return proj.getProjection(select);
 	}

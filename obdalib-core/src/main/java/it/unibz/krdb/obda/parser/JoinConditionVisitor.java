@@ -10,7 +10,6 @@
 package it.unibz.krdb.obda.parser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -61,12 +60,17 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.ValuesList;
 import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
@@ -75,7 +79,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
  *
  */
 
-public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
+public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
 	
 	ArrayList<String> joinConditions;
 	
@@ -89,12 +93,22 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 	public ArrayList<String> getJoinConditions(Select select) {
 		joinConditions = new ArrayList<String>();
 		select.getSelectBody().accept(this);
+	
 		return joinConditions;
 	}
 
+	/*
+	 * visit Plainselect, search for the join conditions, we do not consider the simple join that are considered for selection
+	 * 
+	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+	 */
 	@Override
 	public void visit(PlainSelect plainSelect) {
+		
+		plainSelect.getFromItem().accept(this);
+		
 		List<Join> joins = plainSelect.getJoins();
+		
 		if (joins != null)
 		for (Join join : joins){
 			Expression expr = join.getOnExpression();
@@ -119,118 +133,167 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 	}
 
 	@Override
-	public void visit(SetOperationList arg0) {
-		// TODO Auto-generated method stub
+	public void visit(SetOperationList operations) {
+		// we do not consider the case of union
+		/*for (PlainSelect plainSelect: operations.getPlainSelects()){
+			plainSelect.getFromItem().accept(this);
+			
+			List<Join> joins = plainSelect.getJoins();
+			
+			if (joins != null)
+			for (Join join : joins){
+				Expression expr = join.getOnExpression();
+				
+				
+				if (join.getUsingColumns()!=null)
+					for (Column column : join.getUsingColumns()){
+						joinConditions.add(plainSelect.getFromItem()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
+					}
+						
+				else{
+					if(expr!=null)
+//						joinConditions.add(expr.toString());
+						expr.accept(this);
+//					
+						
+				}
+			}
+		}*/
 		
 	}
 
 	@Override
 	public void visit(WithItem arg0) {
-		// TODO Auto-generated method stub
+		// we do not consider the case of with
 		
 	}
 
 	@Override
 	public void visit(NullValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(Function arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(InverseExpression arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(JdbcParameter arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(JdbcNamedParameter arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(DoubleValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(LongValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(DateValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(TimeValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(TimestampValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(Parenthesis arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
 	@Override
 	public void visit(StringValue arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything 
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Addition)
+	 */
 	@Override
 	public void visit(Addition addition) {
 		visitBinaryExpression(addition);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Division)
+	 */
 	@Override
 	public void visit(Division arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Multiplication)
+	 */
 	@Override
 	public void visit(Multiplication arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Subtraction)
+	 */
 	@Override
 	public void visit(Subtraction arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.conditional.AndExpression)
+	 */
 	@Override
 	public void visit(AndExpression arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
+	
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.conditional.OrExpression)
+	 */
 	@Override
 	public void visit(OrExpression arg0) {
 		visitBinaryExpression(arg0);
@@ -239,10 +302,16 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Between arg0) {
-		
+	//we do not consider the case of BETWEEN	
 		
 	}
 
+	/*
+	 * We store in join conditions the binary expression that are not nested, 
+	 * for the others we continue to visit the subexpression
+	 * Example: AndExpression and OrExpression always have subexpression.
+	 */
+	
 	public void visitBinaryExpression(BinaryExpression binaryExpression) {
 		Expression left =binaryExpression.getLeftExpression();
 		Expression right =binaryExpression.getRightExpression();
@@ -258,6 +327,11 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 		}
 		
 	}
+	
+	/*
+	 *  We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.EqualsTo)
+	 */
 	@Override
 	public void visit(EqualsTo arg0) {
 		visitBinaryExpression(arg0);
@@ -273,126 +347,183 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 //		}
 	}
 
+	/*
+	 *  We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.GreaterThan)
+	 */
 	@Override
 	public void visit(GreaterThan arg0) {
 		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
+		
 		
 	}
 
+	/*
+	 *  We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals)
+	 */
 	@Override
 	public void visit(GreaterThanEquals arg0) {
 		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
+		
 		
 	}
 
+
 	@Override
 	public void visit(InExpression arg0) {
+		//we do not support the case for IN condition
 		
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(IsNullExpression arg0) {
-		// TODO Auto-generated method stub
+		//we do not execute anything
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.LikeExpression)
+	 */
 	@Override
 	public void visit(LikeExpression arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThan)
+	 */
 	@Override
 	public void visit(MinorThan arg0) {
 		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
+		
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(MinorThanEquals arg0) {
 		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
+		
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.NotEqualsTo)
+	 */
 	@Override
 	public void visit(NotEqualsTo arg0) {
 		visitBinaryExpression(arg0);
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void visit(Column arg0) {
-		joinConditions.add(arg0.getWholeColumnName());
+		//we do not execute anything
+//		joinConditions.add(arg0.getWholeColumnName());
 //		arg0.getRightExpression().accept(this);
 	}
-
+	
+	/*
+	 * We visit also the subselect to find nested joins
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.statement.select.SubSelect)
+	 */
 	@Override
-	public void visit(SubSelect arg0) {
-		// TODO Auto-generated method stub
+	public void visit(SubSelect sub) {
+		sub.getSelectBody().accept(this);
 		
 	}
 
 	@Override
 	public void visit(CaseExpression arg0) {
-		// TODO Auto-generated method stub
+		// we do not support case expression
 		
 	}
 
 	@Override
 	public void visit(WhenClause arg0) {
-		// TODO Auto-generated method stub
+		// we do not support when expression
 		
 	}
 
 	@Override
-	public void visit(ExistsExpression arg0) {
-		// TODO Auto-generated method stub
-		
+	public void visit(ExistsExpression exists) {
+		// we do not support exists
 	}
 
+	/*
+	 * We visit the subselect in ALL(...)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.AllComparisonExpression)
+	 */
 	@Override
-	public void visit(AllComparisonExpression arg0) {
-		// TODO Auto-generated method stub
+	public void visit(AllComparisonExpression all) {
+		all.getSubSelect().getSelectBody().accept(this);;
 		
 	}
 
+	/*
+	 * We visit the subselect in ANY(...)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.AnyComparisonExpression)
+	 */
 	@Override
-	public void visit(AnyComparisonExpression arg0) {
-		// TODO Auto-generated method stub
+	public void visit(AnyComparisonExpression any) {
+		any.getSubSelect().getSelectBody();
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(Concat arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(Matches arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(BitwiseAnd arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(BitwiseOr arg0) {
 		visitBinaryExpression(arg0);
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(BitwiseXor arg0) {
 		visitBinaryExpression(arg0);
@@ -401,10 +532,14 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(CastExpression arg0) {
-		// TODO Auto-generated method stub
+		// we do not consider CAST expression
 		
 	}
 
+	/*
+	 * We handle in the same way all BinaryExpression
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.MinorThanEquals)
+	 */
 	@Override
 	public void visit(Modulo arg0) {
 		visitBinaryExpression(arg0);
@@ -413,25 +548,70 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(AnalyticExpression arg0) {
-		// TODO Auto-generated method stub
+		// we do not consider AnalyticExpression
 		
 	}
 
 	@Override
 	public void visit(ExtractExpression arg0) {
-		// TODO Auto-generated method stub
+		// we do not consider ExtractExpression
 		
 	}
 
 	@Override
 	public void visit(IntervalExpression arg0) {
-		// TODO Auto-generated method stub
+		// we do not consider IntervalExpression
 		
 	}
 
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {
-		// TODO Auto-generated method stub
+		// we do not consider OracleHierarchicalExpression
+		
+	}
+
+	@Override
+	public void visit(Table tableName) {
+		// we do not execute anything
+		
+	}
+
+	/*
+	 * search for the subjoin conditions, we do not consider the simple join that are consiedered for selection
+	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.statement.select.SubJoin)
+	 */
+	@Override
+	public void visit(SubJoin subjoin) {
+		Join join =subjoin.getJoin();
+		Expression expr = join.getOnExpression();
+		
+		
+		if (join.getUsingColumns()!=null)
+			for (Column column : join.getUsingColumns()){
+				joinConditions.add(subjoin.getLeft()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
+			}
+				
+		else{
+			if(expr!=null)
+//				joinConditions.add(expr.toString());
+				expr.accept(this);
+		}
+		
+	}
+
+	/*
+	 *  We visit also the lateralsubselect to find nested joins
+	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.statement.select.LateralSubSelect)
+	 */
+	@Override
+	public void visit(LateralSubSelect lateralSubSelect) {
+		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
+		
+	}
+
+	@Override
+	public void visit(ValuesList valuesList) {
+		// we do not execute anything
 		
 	}
 
