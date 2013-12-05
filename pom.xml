@@ -28,6 +28,18 @@
 		<url>git@github.com:ontop/ontop.git</url>
 	</scm>
 
+	<developers>
+		<developer>
+			<id>ghxiao</id>
+			<name>Guohui Xiao</name>
+			<email>xiao@inf.unibz.it</email>
+		</developer>
+		<developer>
+			<id>martinrezk</id>
+			<name>Martin Rezk</name>
+		</developer>
+	</developers>
+
 	<dependencies>
 	</dependencies>
 
