@@ -74,18 +74,9 @@
 	</properties>
 
 	<repositories>
-	<!-- 
-		<repository>
-			<id>sesame-official-repository</id>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		 -->
+		<!-- <repository> <id>sesame-official-repository</id> <url>http://repo.aduna-software.org/maven2/releases</url> 
+			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>true</enabled> 
+			</snapshots> </repository> -->
 		<repository>
 			<id>bolzano-nexus-public</id>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
@@ -98,11 +89,6 @@
 		</repository>
 	</repositories>
 
-	<!-- <distributionManagement> <snapshotRepository> <id>bolzano-obda-snapshots</id> 
-		<name>Maven Bolzano OBDA snapshots repository</name> <url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-snapshots/</url> 
-		</snapshotRepository> <repository> <id>bolzano-obda-release</id> <name>Maven 
-		Bolzano OBDA release repository</name> <url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-release/</url> 
-		</repository> </distributionManagement> -->
 
 	<build>
 		<pluginManagement>
@@ -127,6 +113,44 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- explicitly define maven-deploy-plugin after other to force exec 
+					order -->
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
