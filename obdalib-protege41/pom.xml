@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.9</version>
+		<version>2.0.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 
 
@@ -36,12 +36,12 @@
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
@@ -56,18 +56,18 @@
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-db</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
@@ -82,18 +82,18 @@
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-sesame</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 
 		</dependency>
 		<dependency>
 			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>1.9</version>
+			<version>2.0.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
