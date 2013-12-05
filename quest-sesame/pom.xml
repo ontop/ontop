@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
+		<groupId>it.unibz.inf.ontop</groupId>
 		<version>1.9</version>
 	</parent>
 	<artifactId>quest-sesame</artifactId>
@@ -28,7 +28,7 @@
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<version>1.9</version>
 			<exclusions>
 				<exclusion>
@@ -39,27 +39,27 @@
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-sesame</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<version>1.9</version>
 		</dependency> 
 		<dependency>
 			<artifactId>quest-db</artifactId>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<version>1.9</version>
 		</dependency>
 		 <!-- <dependency> -->

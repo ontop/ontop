@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
+		<groupId>it.unibz.inf.ontop</groupId>
 		<version>1.9</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>

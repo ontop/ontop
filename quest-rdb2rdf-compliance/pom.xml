@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
   	<parent>
     	<artifactId>obdalib-parent</artifactId>
-    	<groupId>inf.unibz.it.obda</groupId>
+    	<groupId>it.unibz.inf.ontop</groupId>
     	<version>1.9</version>
   	</parent>
   	
@@ -25,17 +25,17 @@
 				<scope>test</scope>
 		</dependency>
 		<!-- <dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.8</version>
 		</dependency> -->
 		<!-- <dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.8</version>
 		</dependency>  -->
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-sesame</artifactId>
 			<version>1.9</version>
 		</dependency>

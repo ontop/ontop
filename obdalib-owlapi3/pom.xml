@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
+		<groupId>it.unibz.inf.ontop</groupId>
 		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
@@ -12,7 +12,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.9</version>
 		</dependency>

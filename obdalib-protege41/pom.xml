@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
+		<groupId>it.unibz.inf.ontop</groupId>
 		<version>1.9</version>
 		<relativePath>..</relativePath>
 	</parent>
@@ -23,7 +23,7 @@
 		<!-- These are dependencies to the OBDA related classes. -->
 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.9</version>
 		</dependency>
@@ -34,12 +34,12 @@
 		<!-- Reasoner libraries -->
 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.9</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-owlapi3</artifactId>
 			<version>1.9</version>
 			<exclusions>
@@ -54,18 +54,18 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-db</artifactId>
 			<version>1.9</version>
 		</dependency>
 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.9</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
 			<version>1.9</version>
 			<exclusions>
@@ -80,18 +80,18 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.9</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>obdalib-sesame</artifactId>
 			<version>1.9</version>
 
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
+			<groupId>it.unibz.inf.ontop</groupId>
 			<artifactId>quest-sesame</artifactId>
 			<version>1.9</version>
 			<exclusions>
@@ -322,8 +322,8 @@
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
-						<!-- <Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
-						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
+						<!-- <Embed-Dependency>*;groupId=it.unibz.inf.ontop;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
+						<Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
 
 						<Bundle-Name>-ontopPro-</Bundle-Name>
 						<!-- necessary for protege 4 plugins -->
