@@ -36,9 +36,9 @@ public class ParsedQuery {
 	private static final long serialVersionUID = -4590590361733833782L;
 
 	private String query; 
-	private Statement stm; //the parsed query
+	private Statement stm;
 	 
-	private Select select;
+	private Select select; //the parsed query
 	
 	private RelationJSQL view;
 	
@@ -66,18 +66,30 @@ public class ParsedQuery {
 				select = (Select)stm;
 				
 			}
+			else 
+				throw new JSQLParserException("The inserted query is not a SELECT statement");
 
 		
 	}
 	
-	public ParsedQuery(RelationJSQL value) {
-		
-		view = value;
-		
+	public ParsedQuery(Statement statement) throws JSQLParserException{
+		query= stm.toString();
+		stm= statement;
+		if (stm instanceof Select) {
+			select = (Select)stm;
+			
+		}
+		else 
+			throw new JSQLParserException("The inserted query is not a SELECT statement");
 	}
+	
+//	public ParsedQuery(RelationJSQL value) {
+//		
+//		view = value;
+//		
+//	}
 
-	
-	
+	@Override
 	public String toString() {
 		return select.toString(); 
 	}
@@ -122,6 +134,16 @@ public class ParsedQuery {
 		ProjectionVisitor proj = new ProjectionVisitor();
 		return proj.getProjection(select);
 	}
+	/**
+	 * Set the object construction for the SELECT clause, 
+	 * modifying the current statement
+	 * @param projection
+	 */
+	
+	public void setProjection(ProjectionJSQL projection) {
+		ProjectionVisitor proj = new ProjectionVisitor();
+		proj.setProjection(select, projection);
+	}
 	
 
 	
@@ -137,6 +159,14 @@ public class ParsedQuery {
 			
 		
 		return groupByClause;
+	}
+	
+	public Statement getStatement(){
+		return select;
+	}
+	
+	public void setStatement(Select statement){
+		select= statement;
 	}
 	
 }

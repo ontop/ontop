@@ -130,7 +130,7 @@ public class ProjectionJSQL implements Serializable {
 	/**
 	 * Retrieves all columns that are mentioned in the SELECT clause.
 	 */
-	public ArrayList<SelectExpressionItem> getColumnList() {
+	public List<SelectExpressionItem> getColumnList() {
 		return selectList;
 	}
 	

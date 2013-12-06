@@ -23,6 +23,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -218,10 +219,20 @@ public class SQLQueryTranslator {
 		return viewDefinition;
 	}
 	
-	
+	//check if it is correct I create a new statement and add the table information in the FROMitem expression
 	private ParsedQuery createViewParsed(String viewName, String query) {		
 		Table view = new Table("", viewName);
-		ParsedQuery queryParsed = new ParsedQuery(new RelationJSQL(view));
+		PlainSelect body = new PlainSelect();
+		body.setFromItem(view);
+		Select select= new Select();
+		select.setSelectBody(body);
+		ParsedQuery queryParsed = null;
+		try {
+			queryParsed = new ParsedQuery(select);
+		} catch (JSQLParserException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return queryParsed;
 	}

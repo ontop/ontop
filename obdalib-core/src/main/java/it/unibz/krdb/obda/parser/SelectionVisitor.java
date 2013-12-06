@@ -108,11 +108,12 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		
-		selection= new SelectionJSQL();
+		
 		
          if (plainSelect.getWhere() != null) {
                  Expression where=plainSelect.getWhere();
                  if(where instanceof BinaryExpression){
+                	 selection= new SelectionJSQL();
                 	 selection.addCondition((BinaryExpression) where);
                 	 binaryExp=true;
                  }
@@ -315,9 +316,10 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(InExpression inExpression) {
-		if(binaryExp==false)
-		selection.addCondition(inExpression);
-		
+		if(binaryExp==false){
+			selection= new SelectionJSQL();
+			selection.addCondition(inExpression);
+		}
 	}
 
 	/*
@@ -326,8 +328,10 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
-		if(binaryExp==false)
-		selection.addCondition(isNullExpression);
+		if(binaryExp==false){
+			selection= new SelectionJSQL();
+			selection.addCondition(isNullExpression);
+		}
 		
 	}
 
@@ -412,9 +416,11 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		if(binaryExp==false)
-		selection.addCondition(allComparisonExpression);
-		
+		if(binaryExp==false){
+			
+			selection= new SelectionJSQL();
+			selection.addCondition(allComparisonExpression);
+		}
 	}
 
 	/*
@@ -423,9 +429,11 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		if(binaryExp==false)
-		selection.addCondition(anyComparisonExpression);
+		if(binaryExp==false){
+			selection= new SelectionJSQL();
 		
+			selection.addCondition(anyComparisonExpression);
+		}
 	}
 
 	/*

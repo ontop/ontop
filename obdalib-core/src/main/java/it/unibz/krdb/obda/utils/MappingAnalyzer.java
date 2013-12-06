@@ -156,15 +156,15 @@ public class MappingAnalyzer {
 				}
 
 				// For the selection "where" clause conditions
-				ArrayList<SelectionJSQL> selections = queryParsed.getSelection();
-				if (!selections.isEmpty()) {
-					for(SelectionJSQL selection: selections){
+				SelectionJSQL selection = queryParsed.getSelection();
+				if (selection!=null) {
+					
 						// Stack for filter function
 						Stack<Function> filterFunctionStack = new Stack<Function>();
 						
-					List<Expression> conditions = selection.getRawConditions();
-					for (int i = 0; i < conditions.size(); i++) {
-						Object element = conditions.get(i);
+					Expression conditions = selection.getRawConditions();
+					
+						Object element = conditions;
 						if (element instanceof BinaryExpression) {
 							BinaryExpression pred = (BinaryExpression) element;
 						
@@ -183,7 +183,7 @@ public class MappingAnalyzer {
 								manageParenthesis(pred,lookupTable);
 							}
 						
-					}
+					
 				
 					// The filter function stack must have 1 element left
 					if (filterFunctionStack.size() == 1) {
@@ -194,7 +194,7 @@ public class MappingAnalyzer {
 						throwInvalidFilterExpressionException(filterFunctionStack);
 					}
 					
-				}
+				
 				}
 
 				

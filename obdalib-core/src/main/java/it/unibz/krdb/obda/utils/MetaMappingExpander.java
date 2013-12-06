@@ -11,13 +11,11 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
 import it.unibz.krdb.sql.api.DerivedColumn;
@@ -28,6 +26,7 @@ import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.RelationalAlgebra;
 import it.unibz.krdb.sql.api.Selection;
+import it.unibz.krdb.sql.api.SelectionJSQL;
 import it.unibz.krdb.sql.api.StringLiteral;
 
 import java.net.URI;
@@ -38,7 +37,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.expression.StringValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,8 +128,8 @@ public class MetaMappingExpander {
 				
 				distinctParamsProjection.setType(Projection.SELECT_DISTINCT);
 				
-				//we are considering only the first projection needs to add support to UNION
-				ArrayList<SelectExpressionItem> columnList = sourceQueryParsed.getProjection().get(0).getColumnList();
+				
+				ArrayList<SelectExpressionItem> columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
 				
 				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 				
@@ -132,12 +139,19 @@ public class MetaMappingExpander {
 				 * The query for params is almost the same with the original source query, except that
 				 * we only need to distinct project the columns needed for the template expansion 
 				 */
-				RelationalAlgebra ra = sourceQueryParsed.value().clone();
-				ra.setProjection(distinctParamsProjection);
 				
-				QueryTree distinctQueryTree = new QueryTree(ra, sourceQueryParsed.left(), sourceQueryParsed.right());
+				ParsedQuery distinctParsedQuery = null;
+				try {
+					distinctParsedQuery = new ParsedQuery(sourceQueryParsed.getStatement());
+					
+				} catch (JSQLParserException e1) {
+					
+					e1.printStackTrace();
+				}
+
+				distinctParsedQuery.setProjection(distinctParamsProjection);
 				
-				String distinctParamsSQL = distinctQueryTree.toString();
+				String distinctParamsSQL = distinctParsedQuery.toString();
 				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
 				
 				
@@ -157,7 +171,7 @@ public class MetaMappingExpander {
 					e.printStackTrace();
 				}
 				
-				List<DerivedColumn> columnsForValues = new ArrayList<DerivedColumn>(columnList);
+				List<SelectExpressionItem>  columnsForValues = new ArrayList<SelectExpressionItem>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
 				
 				String id = mapping.getId();
@@ -208,16 +222,16 @@ public class MetaMappingExpander {
 	 * 
 	 * @param targetQuery
 	 * @param bodyAtom
-	 * @param sourceQueryTree
+	 * @param sourceParsedQuery
 	 * @param columnsForTemplate
 	 * @param columnsForValues
 	 * @param params
 	 * @return
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
-			Function bodyAtom, QueryTree sourceQueryTree,
-			List<DerivedColumn> columnsForTemplate,
-			List<DerivedColumn> columnsForValues,
+			Function bodyAtom, ParsedQuery sourceParsedQuery,
+			List<SelectExpressionItem> columnsForTemplate,
+			List<SelectExpressionItem> columnsForValues,
 			List<String> params, int arity) {
 		
 		/*
@@ -234,52 +248,54 @@ public class MetaMappingExpander {
 		/*
 		 * new Selection 
 		 */
-		Selection selection = sourceQueryTree.getSelection();
-		Selection newSelection;
+		SelectionJSQL selection = sourceParsedQuery.getSelection();
+		SelectionJSQL newSelection;
 		if(selection != null){
-			newSelection = selection.clone();
+			newSelection = selection;
 		} else {
-			newSelection = new Selection();
+			newSelection = new SelectionJSQL();
 		}
 		
-		try {
-			int j = 0;
-			
-			for(DerivedColumn column : columnsForTemplate){
-				IValueExpression columnRefExpression = column.getValueExpression();
+			int j=0;
+			for(SelectExpressionItem column : columnsForTemplate){
+				Expression columnRefExpression = column.getExpression();
 				
-				StringLiteral clsStringLiteral = new StringLiteral(params.get(j));
-				//if(j != 0){
-				//if (newSelection.conditionSize() > 0){
-				if(newSelection.getRawConditions().size() > 0){
-					newSelection.addOperator(new AndOperator());
+				StringValue clsStringValue = new StringValue(params.get(j));
+				
+				BinaryExpression condition = new EqualsTo();
+				condition.setLeftExpression(columnRefExpression);
+				condition.setRightExpression(clsStringValue);
+				
+
+				if(newSelection.getRawConditions()!=null){
+					BinaryExpression andOperator = new AndExpression(newSelection.getRawConditions(), condition);
+					newSelection.addCondition(andOperator);
 				}
-				ComparisonPredicate condition = new ComparisonPredicate(columnRefExpression, clsStringLiteral, ComparisonPredicate.Operator.EQ);
+				else
 				newSelection.addCondition(condition);
-				j++;
-				
+				j++;	
 			}
 			
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+			
 		
 		/*
 		 * new Projection
 		 */
-		Projection newProjection = new Projection();
+		ProjectionJSQL newProjection = new ProjectionJSQL();
 		newProjection.addAll(columnsForValues);
 		
 		/*
-		 * new algebra for the source query
+		 * new statement for the source query
 		 */
-		RelationalAlgebra ra = sourceQueryTree.value().clone();
-		ra.setSelection(newSelection);
-		ra.setProjection(newProjection);
 		
 		
-		QueryTree newSourceQueryTree = new QueryTree(ra, sourceQueryTree.left(), sourceQueryTree.right());
-		String newSourceQuerySQL = newSourceQueryTree.toString();
+		
+		ParsedQuery newSourceParsedQuery=  new ParsedQuery(sourceParsedQuery.getStatement());
+		//missing SetSelection
+		newSourceParsedQuery.setProjection(newProjection);
+		
+		QueryTree newSourceQueryTree = new QueryTree(ra, sourceParsedQuery.left(), sourceParsedQuery.right());
+		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
 		OBDARDBMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, newTargetQuery);

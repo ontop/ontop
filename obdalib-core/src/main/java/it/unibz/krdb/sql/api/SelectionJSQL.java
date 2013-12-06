@@ -9,8 +9,6 @@
 package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -27,10 +25,10 @@ public class SelectionJSQL implements Serializable{
 	/**
 	 * Collection of expressions.
 	 */
-	private LinkedList<Expression> conditions;
+	private Expression conditions;
 	
 	public SelectionJSQL() { 
-		conditions = new LinkedList<Expression>();
+		conditions=null;
 	}
 	
 	/**
@@ -42,7 +40,7 @@ public class SelectionJSQL implements Serializable{
 	 */
 	public void addCondition(BinaryExpression predicate){
 		
-		conditions.add(predicate);
+		conditions= predicate;
 	}
 	
 	/**
@@ -54,12 +52,12 @@ public class SelectionJSQL implements Serializable{
 	 */
 	public void addCondition(IsNullExpression predicate) {
 		
-		conditions.add(predicate);
+		conditions =predicate;
 	}
 	
 	public void addCondition(InExpression predicate){
 		
-		conditions.add(predicate);
+		conditions = predicate;
 	}
 	
 	/**
@@ -80,67 +78,33 @@ public class SelectionJSQL implements Serializable{
 			
 		}
 	}
-
-	/**
-	 * Updates the conditions list in this selection. Any existing
-	 * conditions are going to be replaced by the new specification.
-	 * 
-	 * @param specification
-	 * 			The new collection of conditions and boolean operator.
-	 *
-	 */
-	public void update(Queue<Object> specification)  {
-		conditions.clear();
-		copy(specification);
-	}
 	
-	/**
-	 * Returns the number of boolean conditions.
-	 */
-	public int conditionSize() {
-		return conditions.size();
-	}
-	
-	
-	
-	public List<Expression> getRawConditions() {
+	public Expression getRawConditions() {
 		return conditions;
 	}
-	
 	
 	
 	@Override
 	public String toString() {
 		String str = "where";
-		
-		for (Object obj : conditions) {
 			
 			str += " ";
-			if(obj instanceof AnyComparisonExpression)
-				str += "ANY ("+((AnyComparisonExpression) obj).getSubSelect().toString()+")";
-			else
-			str += obj.toString();
-		}
+			str += conditions.toString();
+		
 		return str;
-	}
-	
-	public SelectionJSQL clone(){
-		 SelectionJSQL newSelection = new SelectionJSQL();
-		 newSelection.conditions = new LinkedList<Expression>(conditions);
-		 return newSelection;
 	}
 
 	public void addCondition(AnyComparisonExpression predicate) {
 		
 		AnyComparison comparison = new AnyComparison(predicate.getSubSelect());
-		conditions.add(comparison);
+		conditions = comparison;
 		
 	}
 
 	public void addCondition(AllComparisonExpression predicate) {
 		
 		AllComparison comparison = new AllComparison(predicate.getSubSelect());
-		conditions.add(comparison);
+		conditions =comparison;
 		
 	}
 }
