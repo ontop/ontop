@@ -456,10 +456,10 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Translated query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
+			//DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 			//removeNonAnswerQueries(program);
 
-			program = unfolder.unfold(program, "ans1");
+			//program = unfolder.unfold(program, "ans1");
 
 			log.debug("Flattened query: \n{}", program);
 		} catch (Exception e) {

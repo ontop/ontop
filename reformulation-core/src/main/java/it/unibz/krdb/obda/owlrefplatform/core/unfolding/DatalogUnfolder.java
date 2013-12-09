@@ -207,8 +207,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			DatalogNormalizer.enforceEqualities(query, false);
 		}
 
-		computePartialEvaluation(workingSet);
-		//computePartialEvaluationNew(workingSet);
+		//computePartialEvaluation(workingSet);
+		computePartialEvaluationNew(workingSet);
 
 		LinkedHashSet<CQIE> result = new LinkedHashSet<CQIE>();
 		for (CQIE query : workingSet) {
@@ -1174,7 +1174,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// New method
 	public int computePartialEvaluationNew(List<CQIE> workingList) {
 
-		int[] rcount = { 0, 0 };
+		int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 		
@@ -1182,12 +1182,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 		Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 
-		for (int predIdx = 0; predIdx < predicatesInBottomUp.size(); predIdx++) {
-
-			List <CQIE> ruleList = ruleIndex.get(predicatesInBottomUp.get(predIdx));
-			if (ruleList == null) continue;
-			for (CQIE rule: ruleList) {
+		//for (int predIdx = 0; predIdx < predicatesInBottomUp.size(); predIdx++) {
+		for (int queryIdx = workingList.size() - 1; queryIdx > 0; queryIdx--) {	
 			
+			CQIE rule = workingList.get(queryIdx);
 
 			Stack<Integer> termidx = new Stack<Integer>();
 
@@ -1204,7 +1202,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				/*
 				 * If the result is null the rule is logically empty
 				 */
-				//workingList.remove(queryIdx);
+				workingList.remove(queryIdx);
 				//queryIdx -= 1;
 				continue;
 			} else if (result.size() == 0) {
@@ -1221,16 +1219,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 * queries could still require more steps of evaluation, so we
 			 * decrease the index.
 			 */
-//			workingList.remove(queryIdx);
-//			for (CQIE newquery : result) {
-//				if (!workingList.contains(newquery)) {
-//					workingList.add(queryIdx, newquery);
-//				}
-//			}
-//			queryIdx -= 1;
+			workingList.remove(queryIdx);
+			for (CQIE newquery : result) {
+				if (!workingList.contains(newquery)) {
+					workingList.add(queryIdx, newquery);
+				}
+			}
+			//queryIdx -= 1;
 		}
 		
-	}
+	
 		return rcount[1];
 	}
 
@@ -1400,9 +1398,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				result.add(newRuleWithNullBindings);
 			}
 		} else {
-			// Note, in this step result may get new CQIEs inside
-			result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin,
-					isSecondAtomInLeftJoin);
+			
+			//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+			result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
 		}
 
 		if (result == null) {
