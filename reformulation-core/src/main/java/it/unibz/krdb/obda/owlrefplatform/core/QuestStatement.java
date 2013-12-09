@@ -405,16 +405,7 @@ public class QuestStatement implements OBDAStatement {
 		throw new OBDAException("Error, the result set was null");
 	}
 
-	/**
-	 * Translates a SPARQL query into Datalog dealing with equivalences and
-	 * verifying that the vocabulary of the query matches the one in the
-	 * ontology. If there are equivalences to handle, this is where its done
-	 * (i.e., renaming atoms that use predicates that have been replaced by a
-	 * canonical one.
-	 * 
-	 * @param query
-	 * @return
-	 */
+
 //	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
 //
 //		// Contruct the datalog program object from the query string
@@ -444,7 +435,16 @@ public class QuestStatement implements OBDAStatement {
 //		program = validator.replaceEquivalences(program);
 //		return program;
 //	}
-	
+	/**
+	 * Translates a SPARQL query into Datalog dealing with equivalences and
+	 * verifying that the vocabulary of the query matches the one in the
+	 * ontology. If there are equivalences to handle, this is where its done
+	 * (i.e., renaming atoms that use predicates that have been replaced by a
+	 * canonical one.
+	 * 
+	 * @param query
+	 * @return
+	 */
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
 		try {

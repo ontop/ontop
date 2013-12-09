@@ -42,7 +42,11 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * Class to check the translation of the combination of Optional/Union in SPARQL into Datalog, and finally 
+ * SQL
+ * @author Minda, Guohui, mrezk
+ */
 public class LeftJoinTestVirtual extends TestCase {
 
 	private OBDADataFactory fac;
