@@ -78,6 +78,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 //	ArrayList<SelectionJSQL> selections; // add if we want to consider the UNION case
 	SelectionJSQL selection;
 	boolean binaryExp =false; // true when the binary expression contains all other expressions
+	boolean setSel=false;
 	
 	/**
 	 * Give the WHERE clause of the select statement
@@ -97,6 +98,14 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		return selection;
 		
 	}
+	
+	public void setSelection(Select select, SelectionJSQL selection){
+		
+		setSel= true;
+		this.selection=selection;
+		
+		select.getSelectBody().accept(this);
+	}
 
 	/*
 	 * visit Plainselect, search for the where structure that returns an Expression
@@ -108,8 +117,18 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		
+		/*
+		 * First check if we are setting a new selection. Add the expression contained in the SelectionJSQL
+		 * in the WHERE clause.
+		 */
 		
+		if(setSel){
+			plainSelect.setWhere(selection.getRawConditions());
+			
+		}
 		
+		else{
+			
          if (plainSelect.getWhere() != null) {
                  Expression where=plainSelect.getWhere();
                  if(where instanceof BinaryExpression){
@@ -122,7 +141,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
                  
 //                 selections.add(selection); 
          }
-         
+		}
         
          
 		

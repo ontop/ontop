@@ -174,8 +174,6 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		return tables;
 	}
 	
-
-	
 	
 
 	/**

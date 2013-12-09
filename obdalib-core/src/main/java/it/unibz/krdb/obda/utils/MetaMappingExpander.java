@@ -262,6 +262,7 @@ public class MetaMappingExpander {
 				
 				StringValue clsStringValue = new StringValue(params.get(j));
 				
+				//we are considering only equivalences
 				BinaryExpression condition = new EqualsTo();
 				condition.setLeftExpression(columnRefExpression);
 				condition.setRightExpression(clsStringValue);
@@ -286,15 +287,21 @@ public class MetaMappingExpander {
 		
 		/*
 		 * new statement for the source query
+		 * we create a new statement with the changed projection and selection
 		 */
 		
+		ParsedQuery newSourceParsedQuery = null;
+		try {
+			newSourceParsedQuery = new ParsedQuery(sourceParsedQuery.getStatement());
+			newSourceParsedQuery.setProjection(newProjection);
+			newSourceParsedQuery.setSelection(newSelection);
+			
+		} catch (JSQLParserException e) {
+			
+			e.printStackTrace();
+		}
 		
 		
-		ParsedQuery newSourceParsedQuery=  new ParsedQuery(sourceParsedQuery.getStatement());
-		//missing SetSelection
-		newSourceParsedQuery.setProjection(newProjection);
-		
-		QueryTree newSourceQueryTree = new QueryTree(ra, sourceParsedQuery.left(), sourceParsedQuery.right());
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 

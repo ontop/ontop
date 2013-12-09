@@ -145,6 +145,16 @@ public class ParsedQuery {
 		proj.setProjection(select, projection);
 	}
 	
+	/**
+	 * Set the object construction for the WHERE clause, 
+	 * modifying the current statement
+	 * @param selection
+	 */
+	
+	public void setSelection(SelectionJSQL selection) {
+		SelectionVisitor sel = new SelectionVisitor();
+		sel.setSelection(select, selection);
+	}
 
 	
 	/**

@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.Relation;
+import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -210,12 +211,12 @@ public class JDBCConnectionManager {
 	 *            The database id.
 	 * @return The database meta data object.
 	 */
-	public DBMetadata getMetaData(OBDADataSource sourceId, ArrayList<Relation> tables) throws SQLException {
+	public DBMetadata getMetaData(OBDADataSource sourceId, ArrayList<RelationJSQL> tables) throws SQLException {
 		Connection conn = getConnection(sourceId);
 		return getMetaData(conn, tables);
 	}
 	
-	public static DBMetadata getMetaData(Connection conn, ArrayList<Relation> tables) throws SQLException {
+	public static DBMetadata getMetaData(Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
 		if (tables == null || tables.isEmpty())
 			return getMetaData(conn);
 		DBMetadata metadata = null;
@@ -295,7 +296,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * @param tables 
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		
@@ -308,10 +309,10 @@ public class JDBCConnectionManager {
 		 *  table names from the source sql of the mappings, given as the parameter tables
 		 */
 
-		Iterator<Relation> table_iter = tables.iterator();
+		Iterator<RelationJSQL> table_iter = tables.iterator();
 		/* Obtain the column information for each relational object */
 		while (table_iter.hasNext()) {
-			Relation table = table_iter.next();
+			RelationJSQL table = table_iter.next();
 			ResultSet rsColumns = null;
 			Set<String> tableColumns = new HashSet<String>();
 			String tblName = table.getTableName();
@@ -561,7 +562,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * @param tables 
 	 */
-	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;
@@ -581,10 +582,10 @@ public class JDBCConnectionManager {
 			 *  table names from the source sql of the mappings, given as the parameter tables
 			 */
 			
-			Iterator<Relation> table_iter = tables.iterator();
+			Iterator<RelationJSQL> table_iter = tables.iterator();
 			/* Obtain the column information for each relational object */
 			while (table_iter.hasNext()) {
-				Relation table = table_iter.next();
+				RelationJSQL table = table_iter.next();
 				ResultSet rsColumns = null;
 				try {
 //					String tblName = resultSet.getString("object_name");

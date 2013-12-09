@@ -77,7 +77,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor{
 		 * We first check if we are setting a new projection for SELECT clause, 
 		 * we distinguish between select, select distinct and select distinct on 
 		 */
-		if(setProj==true){
+		if(setProj){
 			
 			if(projection.getType().equals("select distinct on")){
 				Distinct distinct = new Distinct();
