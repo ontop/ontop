@@ -8,8 +8,8 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>obdalib-protege41</artifactId>
-	<name>obdalib-protege41</name>
+	<artifactId>ontop-protege4</artifactId>
+	<name>ontop protege4 plugin</name>
 
 	<dependencies>
 		<dependency>
