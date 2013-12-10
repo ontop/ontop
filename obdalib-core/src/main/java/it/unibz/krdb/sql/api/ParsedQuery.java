@@ -73,8 +73,9 @@ public class ParsedQuery {
 	}
 	
 	public ParsedQuery(Statement statement) throws JSQLParserException{
-		query= stm.toString();
+		
 		stm= statement;
+		query= stm.toString();
 		if (stm instanceof Select) {
 			select = (Select)stm;
 			

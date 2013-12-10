@@ -104,6 +104,41 @@ public class ParserTest extends TestCase {
 		printSQL("test_1_5", result2);
 		assertTrue(result2);
 	}
+	
+	//NO SUPPORT JSQL PARSER VALUE is considered as a SQL function 
+	public void test_1_5_extra() {
+		
+		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
+		printJSQL("test_1_5_extra", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
+		printSQL("test_1_5_extra", result2);
+		assertTrue(result2);
+	}
+	//NO SUPPORT JSQL PARSER VALUE is considered as a SQL function 
+	public void test_1_5_extra_2() {
+		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
+		printJSQL("test_1_5_extra_2", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT id, name as alias1, value as alias2 FROM table1");
+		printSQL("test_1_5_extra_2", result2);
+		assertTrue(result2);
+		
+	}
+	
+	
+		public void test_1_5_extra_3() {
+			final boolean result = parseJSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
+			printJSQL("test_1_5_extra_3", result);
+			assertTrue(result);
+			final boolean result2 = parseSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
+			printSQL("test_1_5_extra_3", result2);
+			assertTrue(result2);
+			
+		}
+		
+	
+	
 
 	// NO SUPPORT SQL
 	public void test_1_6_1() {

@@ -322,7 +322,7 @@ public class JDBCConnectionManager {
 			 */
 			String tableGivenName = table.getGivenName();
 			String tableSchema;
-			if( table.getSchema().length() > 0)
+			if( table.getSchema()!=null)
 				tableSchema = table.getSchema();
 			else
 				tableSchema = null;

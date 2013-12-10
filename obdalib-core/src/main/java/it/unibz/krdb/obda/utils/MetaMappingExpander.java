@@ -16,18 +16,9 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.api.AndOperator;
-import it.unibz.krdb.sql.api.ComparisonPredicate;
-import it.unibz.krdb.sql.api.DerivedColumn;
-import it.unibz.krdb.sql.api.IValueExpression;
 import it.unibz.krdb.sql.api.ParsedQuery;
-import it.unibz.krdb.sql.api.Projection;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
-import it.unibz.krdb.sql.api.QueryTree;
-import it.unibz.krdb.sql.api.RelationalAlgebra;
-import it.unibz.krdb.sql.api.Selection;
 import it.unibz.krdb.sql.api.SelectionJSQL;
-import it.unibz.krdb.sql.api.StringLiteral;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -40,12 +31,10 @@ import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.expression.StringValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,12 +110,16 @@ public class MetaMappingExpander {
 				
 				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
 				
+				if (varsInTemplate.isEmpty()){
+					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
+				}
+				
 				// Construct the SQL query tree from the source query
 				ParsedQuery sourceQueryParsed = translator.constructParser(sourceQuery.toString());
 				
 				ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
 				
-				distinctParamsProjection.setType(Projection.SELECT_DISTINCT);
+				distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
 				
 				
 				ArrayList<SelectExpressionItem> columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
@@ -260,7 +253,7 @@ public class MetaMappingExpander {
 			for(SelectExpressionItem column : columnsForTemplate){
 				Expression columnRefExpression = column.getExpression();
 				
-				StringValue clsStringValue = new StringValue(params.get(j));
+				StringValue clsStringValue = new StringValue("'"+params.get(j)+"'");
 				
 				//we are considering only equivalences
 				BinaryExpression condition = new EqualsTo();
@@ -323,7 +316,12 @@ public class MetaMappingExpander {
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
-				if ((column.getAlias()==null && column.getExpression().toString().equals(var.getName())) ||
+				String expression=column.getExpression().toString();
+				if(expression.contains("\"")) //remove the quotes when present to compare with var
+					expression= expression.substring(1, expression.length()-1);
+					
+				
+				if ((column.getAlias()==null && expression.equals(var.getName())) ||
 						(column.getAlias()!=null && column.getAlias().equals(var.getName()))) {
 					columnsForTemplate.add(column);
 					found = true;
