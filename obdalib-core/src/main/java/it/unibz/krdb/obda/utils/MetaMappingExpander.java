@@ -420,7 +420,7 @@ public class MetaMappingExpander {
 		} else if (arity == 2){
 			uriTermForPredicate = (Function) atom.getTerm(1);	
 		} else {
-			throw new IllegalArgumentException("The parameter airty should be 1 or 2");
+			throw new IllegalArgumentException("The parameter arity should be 1 or 2");
 		}
 		return uriTermForPredicate;
 	}

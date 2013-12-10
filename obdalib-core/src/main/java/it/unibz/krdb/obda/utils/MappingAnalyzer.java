@@ -304,19 +304,21 @@ public class MappingAnalyzer {
 		else
 		if (right instanceof Column) {
 			String rightValueName = ((Column) right).getColumnName();
+			if(termRightName.equals("true") || termRightName.equals("false"))
+				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
+			else{
 			termRightName = lookupTable.lookup(rightValueName);
 			if (termRightName == null) {
 				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
 			}
 			t2 = dfac.getVariable(termRightName);
+			}
 		} else 
 			
 			
 			if (right instanceof StringValue) {
 				termRightName= ((StringValue) right).getValue();
-				if(termRightName.equals("true") || termRightName.equals("false"))
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
-				else
+
 					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
 				
 			}else if (right instanceof DateValue) {

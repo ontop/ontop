@@ -164,7 +164,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 */
 	public ArrayList<RelationJSQL> getTableList(Select select) {
 		init();
-		if (select.getWithItemsList() != null) {
+ 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
 			}

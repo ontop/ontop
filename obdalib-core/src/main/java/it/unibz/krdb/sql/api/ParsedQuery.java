@@ -66,6 +66,7 @@ public class ParsedQuery {
 				select = (Select)stm;
 				
 			}
+			//catch exception about wrong inserted columns
 			else 
 				throw new JSQLParserException("The inserted query is not a SELECT statement");
 
