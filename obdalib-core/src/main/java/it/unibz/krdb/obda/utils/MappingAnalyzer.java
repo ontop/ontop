@@ -304,7 +304,7 @@ public class MappingAnalyzer {
 		else
 		if (right instanceof Column) {
 			String rightValueName = ((Column) right).getColumnName();
-			if(termRightName.equals("true") || termRightName.equals("false"))
+			if(rightValueName.toLowerCase().equals("true") || rightValueName.toLowerCase().equals("false"))
 				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.BOOLEAN);
 			else{
 			termRightName = lookupTable.lookup(rightValueName);
