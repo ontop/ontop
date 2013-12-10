@@ -106,16 +106,7 @@
 	</dependencies>
                           
 	<repositories>
-		<repository>
-			<id>sesame-official-repository</id>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases> 
-			 <snapshots>
-    				<enabled>true</enabled>
-    			</snapshots>
-		</repository>
+		
 		<repository>
 			<id>bolzano-nexus-public</id>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>

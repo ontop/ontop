@@ -22,9 +22,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
@@ -56,19 +56,14 @@
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
-		 <!-- <dependency> -->
-		<!--	this includes ALL seasame, dont keep this! -->
-		<!-- 	<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-runtime</artifactId>
-			<scope>test</scope>
-		</dependency> --> 
-	<dependency>
+
+		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
@@ -76,12 +71,12 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
-		</dependency>     
+		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-api</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-api</artifactId>
@@ -90,16 +85,16 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-manager</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-		
-		
-		
+
+
+
+
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-text</artifactId>
@@ -119,30 +114,27 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-n3</artifactId>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-ntriples</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.apache.directory.studio</groupId>
-			<artifactId>org.apache.commons.logging</artifactId>
-		</dependency> -->
+
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					
+
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>

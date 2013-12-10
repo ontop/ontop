@@ -30,37 +30,7 @@
 			<artifactId>reformulation-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<artifactId>quest-owlapi3</artifactId>
-			<version>1.8</version>
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<artifactId>obdalib-sesame</artifactId>
-			<version>1.8</version>
-		</dependency> -->
-		<!-- <dependency>
-			this includes ALL seasame
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-runtime</artifactId>
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-api</artifactId>
-		</dependency> -->
-<!-- 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-api</artifactId>
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-api</artifactId>		
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-apibinding</artifactId>
-		</dependency> -->
+	
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>

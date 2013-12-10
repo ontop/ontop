@@ -119,21 +119,6 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 
-		
-		<!-- These will download some of the sources -->
-
-		<!-- JDBC Drivers -->
-
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<type>jar</type>
-		</dependency>
-
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
