@@ -119,18 +119,26 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgrapht</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+		</dependency>
+
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.core.application</artifactId>
-			<version>4.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.owl</artifactId>
-			<version>4.3.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- transitive dependencies -->
@@ -240,7 +248,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-1.9</finalName>
+		<finalName>it.unibz.inf.obda.p4plugin-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
