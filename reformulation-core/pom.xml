@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>1.9.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>reformulation-core</artifactId>
 	<name>quest-core</name>
