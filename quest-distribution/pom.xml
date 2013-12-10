@@ -13,34 +13,34 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>quest-db</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>it.unibz.inf.ontop</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>quest-sesame</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>

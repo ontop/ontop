@@ -28,8 +28,8 @@
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<version>2.0.0-SNAPSHOT</version>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -39,28 +39,28 @@
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<version>2.0.0-SNAPSHOT</version>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<artifactId>obdalib-sesame</artifactId>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<version>2.0.0-SNAPSHOT</version>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<version>2.0.0-SNAPSHOT</version>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<version>2.0.0-SNAPSHOT</version>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 		</dependency> 
 		<dependency>
 			<artifactId>quest-db</artifactId>
-			<groupId>it.unibz.inf.ontop</groupId>
-			<version>2.0.0-SNAPSHOT</version>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 		</dependency>
 		 <!-- <dependency> -->
 		<!--	this includes ALL seasame, dont keep this! -->
