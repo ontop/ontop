@@ -385,7 +385,7 @@
 				<artifactId>sesame-rio-languages</artifactId>
 				<version>2.7.6</version>
 			</dependency>
-
+			
 			<!-- JDBC Drivers -->
 
 			<dependency>
