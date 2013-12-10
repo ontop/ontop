@@ -202,15 +202,11 @@
 				<version>2.7.1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.jgraph</groupId>
-				<artifactId>jgrapht</artifactId>
-				<version>0.8.3</version>
+  				<groupId>net.sf.jgrapht</groupId>
+  				<artifactId>jgrapht</artifactId>
+  				<version>0.8.3</version>
 			</dependency>
-			<dependency>
-				<groupId>org.jgraph</groupId>
-				<artifactId>jgraph</artifactId>
-				<version>0.8.3</version>
-			</dependency>
+			
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>

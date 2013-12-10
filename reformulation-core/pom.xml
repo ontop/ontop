@@ -41,6 +41,10 @@
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency> 
 
+ 		<dependency>
+  			<groupId>net.sf.jgrapht</groupId>
+  			<artifactId>jgrapht</artifactId>
+		</dependency>
 			
 		<dependency>
 			<groupId>postgresql</groupId>
@@ -53,14 +57,8 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-	  <dependency>
-			<groupId>org.jgraph</groupId>
-			<artifactId>jgrapht</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jgraph</groupId>
-			<artifactId>jgraph</artifactId>
-		</dependency> 
+
+			
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
