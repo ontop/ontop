@@ -57,7 +57,7 @@ public class RelationJSQL extends RelationalAlgebra {
 	@Override
 	public boolean equals(Object r){
 		if(r instanceof RelationJSQL)
-			return this.table.equals(((RelationJSQL)r).table);
+			return this.table.getWholeTableName().equals(((RelationJSQL)r).table.getWholeTableName());
 		return false;
 	}
 }

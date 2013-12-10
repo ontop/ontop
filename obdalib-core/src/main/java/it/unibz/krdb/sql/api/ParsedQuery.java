@@ -75,14 +75,27 @@ public class ParsedQuery {
 	
 	public ParsedQuery(Statement statement) throws JSQLParserException{
 		
-		stm= statement;
-		query= stm.toString();
+		query = statement.toString();
+		 
+		
+		stm = CCJSqlParserUtil.parse(query);
 		if (stm instanceof Select) {
 			select = (Select)stm;
 			
 		}
+		//catch exception about wrong inserted columns
 		else 
 			throw new JSQLParserException("The inserted query is not a SELECT statement");
+//		if (statement instanceof Select) {
+//			Select newStatement = new Select();
+//			newStatement.setSelectBody(((Select) statement).getSelectBody());
+//			select = newStatement;
+//			stm= newStatement;
+//			query= newStatement.toString();
+//			
+//		}
+//		else 
+//			throw new JSQLParserException("The inserted query is not a SELECT statement");
 	}
 	
 //	public ParsedQuery(RelationJSQL value) {

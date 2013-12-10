@@ -433,6 +433,8 @@ public class MappingAnalyzer {
 				// simple attribute name
 				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
 				
+				String quotedName = "\""+columnName+"\"";
+				
 				String COLUMNNAME = columnName.toUpperCase();
 				String columnname = columnName.toLowerCase();
 				
@@ -452,6 +454,10 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
 				}
 				
+				// If the column name in the select string is in double quotes
+				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(quotedName), columnName);
+				}
 				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
@@ -467,6 +473,12 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(givenTableColumnName), tableColumnName);
 				}
 				
+				// attribute name with table given name prefix
+				String givenTablequotedName = tableGivenName + "." + quotedName;
+//				lookupTable.add(givenTablequotedName, tableColumnName);
+				if (aliasMap.containsKey(givenTablequotedName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(givenTablequotedName), tableColumnName);
+				}
 
 				// attribute name with table name prefix
 				String tablecolumnname = tableName + "." + columnname;
