@@ -8,13 +8,13 @@
 		<groupId>it.unibz.inf.ontop</groupId>
 		<version>1.9.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>reformulation-core</artifactId>
-	<name>reformulation-core</name>
+	<artifactId>ontop-reformulation-core</artifactId>
+	<name>ontop-reformulation-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>obdalib-core</artifactId>
+			<artifactId>ontop-obdalib-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

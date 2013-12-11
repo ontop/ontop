@@ -5,12 +5,13 @@
     <groupId>it.unibz.inf.ontop</groupId>
     <version>1.9.1-SNAPSHOT</version>
   </parent>
-  <artifactId>obdalib-sesame</artifactId>
+  <artifactId>ontop-obdalib-sesame</artifactId>
+  <name>ontop-obdalib-sesame</name>
   
   
 	<dependencies>
 		<dependency>
-			<artifactId>obdalib-core</artifactId>
+			<artifactId>ontop-obdalib-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 			<exclusions>

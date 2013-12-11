@@ -7,39 +7,39 @@
 		<version>1.9.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>quest-distribution</artifactId>
-	<name>quest-distribution</name>
+	<artifactId>ontop-distribution</artifactId>
+	<name>ontop-distribution</name>
 	<description>Builds the distribution files for quest and the core apis.</description>
 	
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>quest-owlapi3</artifactId>
+			<artifactId>ontop-quest-owlapi3</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>reformulation-core</artifactId>
+			<artifactId>ontop-reformulation-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>obdalib-core</artifactId>
+			<artifactId>ontop-obdalib-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>quest-db</artifactId>
+			<artifactId>ontop-quest-db</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>quest-sesame</artifactId>
+			<artifactId>ontop-quest-sesame</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

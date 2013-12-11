@@ -7,13 +7,13 @@
 		<version>1.9.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>obdalib-owlapi3</artifactId>
-	<name>obdalib-owlapi3</name>
+	<artifactId>ontop-obdalib-owlapi3</artifactId>
+	<name>ontop-obdalib-owlapi3</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>obdalib-core</artifactId>
+			<artifactId>ontop-obdalib-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		

@@ -6,8 +6,8 @@
 		<groupId>it.unibz.inf.ontop</groupId>
 		<version>1.9.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>quest-sesame</artifactId>
-	<name>quest-sesame</name>
+	<artifactId>ontop-quest-sesame</artifactId>
+	<name>ontop-quest-sesame</name>
 	<description>This is the Sesame API implementation based on Quest</description>
 
 	<dependencies>
@@ -27,7 +27,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<artifactId>obdalib-core</artifactId>
+			<artifactId>ontop-obdalib-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -38,27 +38,27 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<artifactId>obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>obdalib-sesame</artifactId>
+			<artifactId>ontop-obdalib-sesame</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>reformulation-core</artifactId>
+			<artifactId>ontop-reformulation-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>quest-owlapi3</artifactId>
+			<artifactId>ontop-quest-owlapi3</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>quest-db</artifactId>
+			<artifactId>ontop-quest-db</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>

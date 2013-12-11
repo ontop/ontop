@@ -7,8 +7,8 @@
 		<version>1.9.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>quest-sparql-compliance</artifactId>
-	<name>sparql-compliance-tests</name>
+	<artifactId>ontop-sparql-compliance</artifactId>
+	<name>ontop-sparql-compliance</name>
 	
 	<dependencies>
 		<dependency>
@@ -25,22 +25,22 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>obdalib-core</artifactId>
+			<artifactId>ontop-obdalib-core</artifactId>
 			<version>1.9.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
 			<version>1.9.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>reformulation-core</artifactId>
+			<artifactId>ontop-reformulation-core</artifactId>
 			<version>1.9.1-SNAPSHOT</version>
 		</dependency> 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>quest-sesame</artifactId>
+			<artifactId>ontop-quest-sesame</artifactId>
 			<version>1.9.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>

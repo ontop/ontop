@@ -8,10 +8,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>obdalib-core</artifactId>
+	<artifactId>ontop-obdalib-core</artifactId>
 	<packaging>jar</packaging>
-	<name>obdalib-core</name>
-	<url>http://maven.apache.org</url>
+	<name>ontop-obdalib-core</name>
 
 	<dependencies>
 	 <dependency>
@@ -43,8 +42,6 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		
 	</dependencies>
 	
 	<build>
@@ -60,9 +57,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				
 			</plugin>
-
 		</plugins>
 	</build>
 </project>
