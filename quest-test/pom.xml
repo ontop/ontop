@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>inf.unibz.it.obda</groupId>
-    <artifactId>obdalib-parent</artifactId>
-    <version>1.9</version>
+    <groupId>it.unibz.inf.ontop</groupId>
+    <artifactId>ontop</artifactId>
+    <version>1.10.0-SNAPSHOT</version>
   </parent>
-  <artifactId>quest-test</artifactId>
+  <artifactId>ontop-test</artifactId>
 
 	<dependencies>
 		<dependency>
@@ -21,24 +21,24 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-reformulation-core</artifactId>
+			<version>${project.version}</version>
 		</dependency> 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-sesame</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-sesame</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -104,16 +104,6 @@
                           
 	<repositories>
 		<repository>
-			<id>sesame-official-repository</id>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases> 
-			 <snapshots>
-    				<enabled>true</enabled>
-    			</snapshots>
-		</repository>
-		<repository>
 			<id>bolzano-nexus-public</id>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
 			<releases>
@@ -130,21 +120,27 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
- 					
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-		<plugin>
-        	<groupId>org.apache.maven.plugins</groupId>
-        	<artifactId>maven-surefire-plugin</artifactId>
-        	<version>2.16</version>
-        	<configuration>
-          		<skipTests>true</skipTests>
-        	</configuration>
-      	</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.16</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
-	
+
 	</build>
 
 
