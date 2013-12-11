@@ -18,6 +18,9 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
+import it.unibz.krdb.obda.ontology.DisjointDataPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
 import it.unibz.krdb.obda.ontology.LanguageProfile;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -61,6 +64,9 @@ import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
+import org.semanticweb.owlapi.model.OWLDisjointDataPropertiesAxiom;
+import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentDataPropertiesAxiom;
@@ -150,6 +156,8 @@ public class OWLAPI3Translator {
 			translation.addRoles(aux.getRoles());
 			translation.addAssertions(aux.getAssertions());
 			translation.getABox().addAll(aux.getABox());
+			translation.getDisjointDescriptionAxioms().addAll(aux.getDisjointDescriptionAxioms());
+			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());
 		}
 		/* we translated successfully, now we append the new assertions */
 
@@ -449,7 +457,7 @@ public class OWLAPI3Translator {
 					PropertyFunctionalAxiom funct = ofac.createPropertyFunctionalAxiom(role);
 
 					dl_onto.addAssertion(funct);
-
+					
 				} else if (axiom instanceof OWLInverseFunctionalObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
@@ -460,6 +468,47 @@ public class OWLAPI3Translator {
 
 					dl_onto.addAssertion(funct);
 
+				} else if (axiom instanceof OWLDisjointClassesAxiom) {
+					OWLDisjointClassesAxiom aux = (OWLDisjointClassesAxiom) axiom;
+					for (OWLClassExpression disjClass : aux.getClassExpressionsAsList()) {
+						if (!(disjClass instanceof OWLClass))
+						throw new TranslationException("Invalid class expression in disjoint class axiom: "+disjClass.toString());
+					}
+					Set<OWLClass> disjointClasses = aux.getClassesInSignature();
+					Iterator<OWLClass> iter = disjointClasses.iterator();
+					if (!iter.hasNext())
+						throw new TranslationException();
+					OClass c1 = ofac.createClass(iter.next().toStringID());
+					OClass c2 = ofac.createClass(iter.next().toStringID());
+					DisjointClassAxiom disj = ofac.createDisjointClassAxiom(c1, c2);
+					
+					dl_onto.addAssertion(disj);
+							
+				} else if (axiom instanceof OWLDisjointDataPropertiesAxiom) {
+					OWLDisjointDataPropertiesAxiom aux = (OWLDisjointDataPropertiesAxiom) axiom;
+					Set<OWLDataProperty> disjointProps = aux.getDataPropertiesInSignature();
+					Iterator<OWLDataProperty> iter = disjointProps.iterator();
+					if (!iter.hasNext())
+						throw new TranslationException();
+					Property p1 = ofac.createDataProperty(iter.next().toStringID());
+					Property p2 = ofac.createDataProperty(iter.next().toStringID());
+					DisjointDataPropertyAxiom disj = ofac.createDisjointDataPropertyAxiom(p1.getPredicate(), p2.getPredicate());
+					
+					dl_onto.addAssertion(disj);
+					
+				} else if (axiom instanceof OWLDisjointObjectPropertiesAxiom) {
+					OWLDisjointObjectPropertiesAxiom aux = (OWLDisjointObjectPropertiesAxiom) axiom;
+					Set<OWLObjectProperty> disjointProps = aux.getObjectPropertiesInSignature();
+					Iterator<OWLObjectProperty> iter = disjointProps.iterator();
+					if (!iter.hasNext())
+						throw new TranslationException();
+					Property p1 = ofac.createObjectProperty(iter.next().toStringID());
+					Property p2 = ofac.createObjectProperty(iter.next().toStringID());
+					DisjointObjectPropertyAxiom disj = ofac.createDisjointObjectPropertyAxiom(p1.getPredicate(), p2.getPredicate());
+					
+					dl_onto.addAssertion(disj);
+				
+				
 				} else if (axiom instanceof OWLIndividualAxiom) {
 					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
 					if (translatedAxiom != null)

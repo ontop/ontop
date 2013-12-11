@@ -53,14 +53,14 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
+	  <dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgrapht</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgraph</artifactId>
-		</dependency> -->
+		</dependency> 
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
@@ -92,8 +92,6 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<excludes>
-						<exclude>**/TBoxDAGImpl.java</exclude>
-						<exclude>**/dagjgrapht/*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
 					<testExcludes>

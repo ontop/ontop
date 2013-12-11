@@ -19,6 +19,9 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
+import it.unibz.krdb.obda.ontology.DisjointDataPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -167,4 +170,22 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		}
 		return createDataPropertyAssertion(attribute, o1, (ValueConstant) o2);
 	}
+
+	@Override
+	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2) {
+		return new DisjointClassAxiomImpl(c1, c2);
+	}
+
+	@Override
+	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(
+			Predicate p1, Predicate p2) {
+			return new DisjointDataPropertyAxiomImpl(p1, p2);
+	}
+	
+	@Override
+	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(
+			Predicate p1, Predicate p2) {
+			return new DisjointObjectPropertyAxiomImpl(p1, p2);
+	}
+
 }

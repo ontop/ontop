@@ -8,6 +8,8 @@
  */
 package it.unibz.krdb.obda.parser;
 
+import java.util.ArrayList;
+
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
@@ -25,6 +27,10 @@ public class SQLQueryTranslator {
 
 	private DBMetadata dbMetaData;
 	
+	//This field will contain all the target SQL from the 
+	//mappings that could not be parsered by the parser.
+	private ArrayList<ViewDefinition> viewDefinitions;
+	
 	private static int id_counter;
 	
 	private static Logger log = LoggerFactory.getLogger(SQLQueryTranslator.class);
@@ -33,8 +39,53 @@ public class SQLQueryTranslator {
 		this.dbMetaData = dbMetaData;
 		id_counter = 0;		
 	}
+	
+	/*
+	 * This constructor is used when the tables names and schemas are taken from the mappings
+	 */
+	public SQLQueryTranslator() {
+		this.viewDefinitions = new ArrayList<ViewDefinition>();
+		this.dbMetaData = null;
+		id_counter = 0;		
+	}
+	
+	/*
+	 *  Returns all the target SQL from the 
+	 *  mappings that could not be parsered by the parser.
+	 */
+	public ArrayList<ViewDefinition> getViewDefinitions(){
+		return this.viewDefinitions;
+	}
 
+	/**
+	 * Called from ParsedMapping. Returns the query tree, even if there were 
+	 * parsing errors. This is because the ParsedMapping only need the table names,
+	 * and it needs them, especially in the cases like "select *", that are treated like parsing
+	 * errors, but are treated by preprocessProjection
+	 * 
+	 * @param query The sql query to be parsed
+	 * @return A QueryTree (possible with null values and errors)
+	 */
+	public QueryTree constructQueryTreeNoView(String query){
+		return contructQueryTree(query, false);
+	}
+	
+
+
+	/**
+	 * Called from MappingAnalyzer:createLookupTable. Returns the query tree, or, if there are
+	 * syntax error, the name of a generated view, even if there were 
+	 * parsing errors. This is because the Parsed
+	 * 
+	 * @param query The sql query to be parsed
+	 * @return A QueryTree (possible just the name of a generated view)
+	 */
 	public QueryTree contructQueryTree(String query) {
+		return contructQueryTree(query, true);
+	}
+	
+		
+	private QueryTree contructQueryTree(String query, boolean generateViews) {
 		ANTLRStringStream inputStream = new ANTLRStringStream(query);
 		SQL99Lexer lexer = new SQL99Lexer(inputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -47,7 +98,7 @@ public class SQLQueryTranslator {
 			// Does nothing
 		}
 		
-		if (parser.getNumberOfSyntaxErrors() != 0) {
+		if (queryTree == null || (parser.getNumberOfSyntaxErrors() != 0 && generateViews)) {
 			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
 			queryTree = createView(query);
 		}		
@@ -58,7 +109,11 @@ public class SQLQueryTranslator {
 		String viewName = String.format("view_%s", id_counter++);
 		
 		ViewDefinition vd = createViewDefintion(viewName, query);
-		dbMetaData.add(vd);
+		
+		if(dbMetaData != null)
+			dbMetaData.add(vd);
+		else
+			viewDefinitions.add(vd);
 		
 		QueryTree vt = createViewTree(viewName, query);
 		return vt;
@@ -116,7 +171,7 @@ public class SQLQueryTranslator {
 	}
 	
 	private QueryTree createViewTree(String viewName, String query) {		
-		TablePrimary view = new TablePrimary(viewName);
+		TablePrimary view = new TablePrimary("", viewName, viewName);
 		QueryTree queryTree = new QueryTree(new Relation(view));
 
 		return queryTree;

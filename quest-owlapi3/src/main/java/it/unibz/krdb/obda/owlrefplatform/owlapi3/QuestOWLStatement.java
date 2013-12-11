@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
@@ -108,10 +109,15 @@ public class QuestOWLStatement {
 	}
 
 	public QuestOWLResultSet executeTuple(String query) throws OWLException {
+		if (SPARQLQueryUtility.isSelectQuery(query) || SPARQLQueryUtility.isAskQuery(query)) {
 		try {
-			return new QuestOWLResultSet((TupleResultSet) st.execute(query), this);
+			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
+			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
+		}} else {
+			throw new RuntimeException("Query is not tuple query (SELECT / ASK).");
 		}
 	}
 
@@ -125,11 +131,14 @@ public class QuestOWLStatement {
 	}
 
 	public List<OWLAxiom> executeGraph(String query) throws OWLException {
+		if (SPARQLQueryUtility.isConstructQuery(query) || SPARQLQueryUtility.isDescribeQuery(query)) {
 		try {
 			GraphResultSet resultSet = (GraphResultSet) st.execute(query);
 			return createOWLIndividualAxioms(resultSet);
 		} catch (Exception e) {
 			throw new OWLOntologyCreationException(e);
+		}} else {
+			throw new RuntimeException("Query is not graph query (CONSTRUCT / DESCRIBE).");
 		}
 	}
 

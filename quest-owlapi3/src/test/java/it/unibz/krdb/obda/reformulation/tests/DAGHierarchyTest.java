@@ -8,16 +8,23 @@
  */
 package it.unibz.krdb.obda.reformulation.tests;
 
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -28,346 +35,482 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class DAGHierarchyTest extends TestCase {
 	/**
-	 * A -> B, B -> {E, F}, {C, D} -> {E, F} with A, B, C, D, E, F are atomic concepts.
+	 * A -> B, B -> {E, F}, {C, D} -> {E, F} with A, B, C, D, E, F are atomic
+	 * concepts.
 	 */
 	private final String inputFile1 = "src/test/resources/test/dag/test-class-hierarchy.owl";
-	
+
 	/**
-	 * P -> Q, Q -> {T, U}, {R, S} -> {T, U} with P, Q, R, S, T, U are atomic roles.
+	 * P -> Q, Q -> {T, U}, {R, S} -> {T, U} with P, Q, R, S, T, U are atomic
+	 * roles.
 	 */
 	private final String inputFile2 = "src/test/resources/test/dag/test-role-hierarchy.owl";
 
 	/**
-	 * List all the descendants of a class in the TBox with having equivalent classes into account.
+	 * List all the descendants of a class in the TBox with having equivalent
+	 * classes into account.
 	 */
 	public void testDescendantClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(inputFile1));
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
+				inputFile1));
 		Ontology onto = t.translate(owlonto);
-		DAG dag = DAGConstructor.getISADAG(onto);
+		// generate Graph
+		GraphBuilder change = new GraphBuilderImpl(onto);
 
-		DAG pureIsa = DAGConstructor.filterPureISA(dag);
-		pureIsa.clean();
-		pureIsa.index();
+		GraphImpl graph = (GraphImpl) change.getGraph();
 
-		DAGOperations.buildDescendants(pureIsa);
-			
+		// generate DAG
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
+		// generate named DAG
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
+
+		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		/** 
+		/**
 		 * The initial node is Node A.
 		 */
-		DAGNode initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "A"));
-		Set<DAGNode> descendants = initialNode.getDescendants();
-		
+		Description initialNode = ofac.createClass(ontoURI + "A");
+		Set<Set<Description>> descendants = namedReasoner.getDescendants(
+				initialNode, true);
+
 		assertEquals(descendants.size(), 0);
-		
-		/** 
+
+		/**
 		 * The initial node is Node B.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "B"));
-		descendants = initialNode.getDescendants();
-		
+		initialNode = ofac.createClass(ontoURI + "B");
+		descendants = namedReasoner.getDescendants(initialNode, true);
+
 		assertEquals(descendants.size(), 1);
-		
-		DAGNode A = pureIsa.getClassNode(ofac.createClass(ontoURI + "A"));
-		assertTrue(descendants.contains(A));
-		
+
+		Description A = ofac.createClass(ontoURI + "A");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(A, true)));
+
 		/**
 		 * The initial node is Node C.
 		 */
-		// There is no test for this node because the API will always suggest Node C is not
-		// exist and it has been replaced by Node D (i.e., Class C is equivalent with Class D)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node C is not
+		// exist and it has been replaced by Node D (i.e., Class C is equivalent
+		// with Class D)
+
+		/**
 		 * The initial node is Node D.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "D"));
-		descendants = initialNode.getDescendants();
-		
+		initialNode = ofac.createClass(ontoURI + "D");
+		descendants = namedReasoner.getDescendants(initialNode, true);
+
 		assertEquals(descendants.size(), 1);
-		
-		DAGNode C = new DAGNode(ofac.createClass(ontoURI + "C"));
-		assertTrue(descendants.contains(C));
-		
-		/** 
+
+		Description C = ofac.createClass(ontoURI + "C");
+		Set<Description> equivalents = new HashSet<Description>();
+		equivalents.add(C);
+		assertTrue(descendants.contains(equivalents));
+
+		/**
 		 * The initial node is Node E.
 		 */
-		// There is no test for this node because the API will always suggest Node E is not
-		// exist and it has been replaced by Node F (i.e., Class E is equivalent with Class F)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node E is not
+		// exist and it has been replaced by Node F (i.e., Class E is equivalent
+		// with Class F)
+
+		/**
 		 * The initial node is Node F.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "F"));
-		descendants = initialNode.getDescendants();
-		
-		assertEquals(descendants.size(), 5);
-		
-		A = pureIsa.getClassNode(ofac.createClass(ontoURI + "A"));
-		assertTrue(descendants.contains(A));
-		DAGNode B = pureIsa.getClassNode(ofac.createClass(ontoURI + "B"));
-		assertTrue(descendants.contains(B));
-		C = new DAGNode(ofac.createClass(ontoURI + "C")); // equivalent class
-		assertTrue(descendants.contains(C));
-		DAGNode D = pureIsa.getClassNode(ofac.createClass(ontoURI + "D"));
-		assertTrue(descendants.contains(D));
-		DAGNode E = new DAGNode(ofac.createClass(ontoURI + "E")); // equivalent class
-		assertTrue(descendants.contains(E));
+		initialNode = ofac.createClass(ontoURI + "F");
+		descendants = namedReasoner.getDescendants(initialNode, true);
+		int size = 0;
+		for (Set<Description> d : descendants)
+
+			size += d.size();
+
+		assertEquals(size, 5);
+
+		A = ofac.createClass(ontoURI + "A");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(A, true)));
+		Description B = ofac.createClass(ontoURI + "B");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(B, true)));
+		C = ofac.createClass(ontoURI + "C"); // equivalent class
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(C, true)));
+		Description D = ofac.createClass(ontoURI + "D");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(D, true)));
+		Description E = ofac.createClass(ontoURI + "E"); // equivalent class
+		equivalents = new HashSet<Description>();
+		equivalents.add(E);
+		assertTrue(descendants.contains(equivalents));
 	}
 
 	/**
-	 * List all the ancestors of a class in the TBox with having equivalent classes into account.
+	 * List all the ancestors of a class in the TBox with having equivalent
+	 * classes into account.
 	 */
 	public void testAncestorClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(inputFile1));
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
+				inputFile1));
 		Ontology onto = t.translate(owlonto);
-		DAG dag = DAGConstructor.getISADAG(onto);
 
-		DAG pureIsa = DAGConstructor.filterPureISA(dag);
-		pureIsa.clean();
-		pureIsa.index();
+		// generate Graph
+		GraphBuilder change = new GraphBuilderImpl(onto);
 
-		DAGOperations.buildAncestors(pureIsa);
-		
+		GraphImpl graph = (GraphImpl) change.getGraph();
+
+		// generate DAG
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
+		// generate named DAG
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
+
+		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		/** 
+		/**
 		 * The initial node is Node A.
 		 */
-		DAGNode initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "A"));
-		Set<DAGNode> ancestors = initialNode.getAncestors();
-		
-		assertEquals(ancestors.size(), 3);
-		
-		DAGNode B = pureIsa.getClassNode(ofac.createClass(ontoURI + "B"));
-		assertTrue(ancestors.contains(B));
-		DAGNode E = new DAGNode(ofac.createClass(ontoURI + "E")); // equivalent class
-		assertTrue(ancestors.contains(E));
-		DAGNode F = pureIsa.getClassNode(ofac.createClass(ontoURI + "F"));
-		assertTrue(ancestors.contains(F));		
-		
-		/** 
+
+		Description initialNode = ofac.createClass(ontoURI + "A");
+		Set<Set<Description>> ancestors = namedReasoner.getAncestors(
+				initialNode, true);
+
+		int size = 0;
+		for (Set<Description> a : ancestors)
+
+			size += a.size();
+
+		assertEquals(size, 3);
+
+		Description B = ofac.createClass(ontoURI + "B");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(B, true)));
+		Description E = ofac.createClass(ontoURI + "E"); // equivalent
+															// class
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(E, true)));
+		Description F = ofac.createClass(ontoURI + "F");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(F, true)));
+
+		/**
 		 * The initial node is Node B.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "B"));
-		ancestors = initialNode.getAncestors();
-		
-		assertEquals(ancestors.size(), 2);
-		
-		F = pureIsa.getClassNode(ofac.createClass(ontoURI + "F"));
-		assertTrue(ancestors.contains(F));		
-		E = new DAGNode(ofac.createClass(ontoURI + "E")); // equivalent class
-		assertTrue(ancestors.contains(E));
-		
+		initialNode = ofac.createClass(ontoURI + "B");
+		ancestors = namedReasoner.getAncestors(initialNode, true);
+
+		size = 0;
+		for (Set<Description> a : ancestors)
+
+			size += a.size();
+
+		assertEquals(size, 2);
+
+		F = ofac.createClass(ontoURI + "F");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(F, true)));
+		E = ofac.createClass(ontoURI + "E"); // equivalent class
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(E, true)));
+
 		/**
 		 * The initial node is Node C.
 		 */
-		// There is no test for this node because the API will always suggest Node C is not
-		// exist and it has been replaced by Node D (i.e., Class C is equivalent with Class D)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node C is not
+		// exist and it has been replaced by Node D (i.e., Class C is equivalent
+		// with Class D)
+
+		/**
 		 * The initial node is Node D.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "D"));
-		ancestors = initialNode.getAncestors();
-		
-		assertEquals(ancestors.size(), 3);
-		
-		DAGNode C = new DAGNode(ofac.createClass(ontoURI + "C")); // equivalent class
-		assertTrue(ancestors.contains(C));
-		E = new DAGNode(ofac.createClass(ontoURI + "E")); // equivalent class
-		assertTrue(ancestors.contains(E));
-		F = pureIsa.getClassNode(ofac.createClass(ontoURI + "F"));
-		assertTrue(ancestors.contains(F));
-		
-		/** 
+		initialNode = ofac.createClass(ontoURI + "D");
+		ancestors = namedReasoner.getAncestors(initialNode, true);
+
+		size = 0;
+		for (Set<Description> a : ancestors)
+
+			size += a.size();
+
+		assertEquals(size, 3);
+
+		Description C = ofac.createClass(ontoURI + "C"); // equivalent
+															// class
+		Set<Description> equivalents = new HashSet<Description>();
+		equivalents.add(C);
+		assertTrue(ancestors.contains(equivalents));
+		E = ofac.createClass(ontoURI + "E"); // equivalent class
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(E, true)));
+		F = ofac.createClass(ontoURI + "F");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(F, true)));
+
+		/**
 		 * The initial node is Node E.
 		 */
-		// There is no test for this node because the API will always suggest Node E is not
-		// exist and it has been replaced by Node F (i.e., Class E is equivalent with Class F)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node E is not
+		// exist and it has been replaced by Node F (i.e., Class E is equivalent
+		// with Class F)
+
+		/**
 		 * The initial node is Node F.
 		 */
-		initialNode = pureIsa.getClassNode(ofac.createClass(ontoURI + "F"));
-		ancestors = initialNode.getAncestors();
-		
+		initialNode = ofac.createClass(ontoURI + "F");
+		ancestors = namedReasoner.getAncestors(initialNode, true);
+
 		assertEquals(ancestors.size(), 1);
-		
-		E = new DAGNode(ofac.createClass(ontoURI + "E")); // equivalent class
-		assertTrue(ancestors.contains(E));
+
+		E = ofac.createClass(ontoURI + "E"); // equivalent class
+		equivalents = new HashSet<Description>();
+		equivalents.add(E);
+		assertTrue(ancestors.contains(equivalents));
 	}
-	
+
 	/**
-	 * List all the descendants of a role in the TBox with having equivalent roles into account.
+	 * List all the descendants of a role in the TBox with having equivalent
+	 * roles into account.
 	 */
-	public void testDescendantRoles() throws Exception {	
+	public void testDescendantRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(inputFile2));
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
+				inputFile2));
 		Ontology onto = t.translate(owlonto);
-		DAG dag = DAGConstructor.getISADAG(onto);
+		
+		// generate Graph
+		GraphBuilder change = new GraphBuilderImpl(onto);
 
-		DAG pureIsa = DAGConstructor.filterPureISA(dag);
-		pureIsa.clean();
-		pureIsa.index();
+		GraphImpl graph = (GraphImpl) change.getGraph();
 
-		DAGOperations.buildDescendants(pureIsa);
-			
+		// generate DAG
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
+		// generate named DAG
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
+
+		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		/** 
+		/**
 		 * The initial node is Node P.
 		 */
-		DAGNode initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "P"));
-		Set<DAGNode> descendants = initialNode.getDescendants();
-		
+		Description initialNode = ofac.createObjectProperty(ontoURI + "P");
+		Set<Set<Description>> descendants = namedReasoner.getDescendants(
+				initialNode, true);
+
 		assertEquals(descendants.size(), 0);
-		
-		/** 
+
+		/**
 		 * The initial node is Node Q.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "Q"));
-		descendants = initialNode.getDescendants();
+		initialNode = ofac.createObjectProperty(ontoURI + "Q");
+		descendants = namedReasoner.getDescendants(initialNode, true);
 		
 		assertEquals(descendants.size(), 1);
-		
-		DAGNode P = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "P"));
-		assertTrue(descendants.contains(P));
-		
+
+		Description P = ofac.createObjectProperty(ontoURI + "P");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(P, true)));
+
 		/**
 		 * The initial node is Node R.
 		 */
-		// There is no test for this node because the API will always suggest Node R is not
-		// exist and it has been replaced by Node S (i.e., Role R is equivalent with Role S)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node R is not
+		// exist and it has been replaced by Node S (i.e., Role R is equivalent
+		// with Role S)
+
+		/**
 		 * The initial node is Node S.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "S"));
-		descendants = initialNode.getDescendants();
-		
+		initialNode = ofac.createObjectProperty(ontoURI	+ "S");
+		descendants = namedReasoner.getDescendants(initialNode, true);
+
 		assertEquals(descendants.size(), 1);
-		
-		DAGNode R = new DAGNode(ofac.createObjectProperty(ontoURI + "R"));
-		assertTrue(descendants.contains(R));
-		
-		/** 
+
+		Description R = ofac.createObjectProperty(ontoURI + "R");
+		Set<Description> equivalents = new HashSet<Description>();
+		equivalents.add(R);
+		assertTrue(descendants.contains(equivalents));
+
+		/**
 		 * The initial node is Node T.
 		 */
-		// There is no test for this node because the API will always suggest Node T is not
-		// exist and it has been replaced by Node U (i.e., Role T is equivalent with Role U)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node T is not
+		// exist and it has been replaced by Node U (i.e., Role T is equivalent
+		// with Role U)
+
+		/**
 		 * The initial node is Node U.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "U"));
-		descendants = initialNode.getDescendants();
+		initialNode = ofac.createObjectProperty(ontoURI+ "U");
+		descendants = namedReasoner.getDescendants(initialNode, true);
+
+		int size = 0;
+		for (Set<Description> d : descendants)
+
+			size += d.size();
+
+		assertEquals(size, 5);
 		
-		assertEquals(descendants.size(), 5);
-		
-		P = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "P"));
-		assertTrue(descendants.contains(P));
-		DAGNode Q = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "Q"));
-		assertTrue(descendants.contains(Q));
-		R = new DAGNode(ofac.createObjectProperty(ontoURI + "R")); // equivalent role
-		assertTrue(descendants.contains(R));
-		DAGNode S = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "S"));
-		assertTrue(descendants.contains(S));
-		DAGNode T = new DAGNode(ofac.createObjectProperty(ontoURI + "T")); // equivalent role
-		assertTrue(descendants.contains(T));
+		P = ofac.createObjectProperty(ontoURI + "P");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(P, true)));
+		Description Q = ofac.createObjectProperty(ontoURI + "Q");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(Q, true)));
+		R = ofac.createObjectProperty(ontoURI + "R"); // equivalent
+																	// role
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(R, true)));
+		Description S = ofac.createObjectProperty(ontoURI + "S");
+		assertTrue(descendants.contains(namedReasoner.getEquivalences(S, true)));
+		Description T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
+		 equivalents = new HashSet<Description>();
+		equivalents.add(T);													// role
+		assertTrue(descendants.contains(equivalents));
 	}
 
 	/**
-	 * List all the ancestors of a role in the TBox with having equivalent roles into account.
+	 * List all the ancestors of a role in the TBox with having equivalent roles
+	 * into account.
 	 */
 	public void testAncestorRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(inputFile2));
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
+				inputFile2));
 		Ontology onto = t.translate(owlonto);
-		DAG dag = DAGConstructor.getISADAG(onto);
+		// generate Graph
+		GraphBuilder change = new GraphBuilderImpl(onto);
 
-		DAG pureIsa = DAGConstructor.filterPureISA(dag);
-		pureIsa.clean();
-		pureIsa.index();
+		GraphImpl graph = (GraphImpl) change.getGraph();
 
-		DAGOperations.buildAncestors(pureIsa);
+		// generate DAG
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
+		// generate named DAG
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
+
+		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		/** 
+		/**
 		 * The initial node is Node P.
 		 */
-		DAGNode initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "P"));
-		Set<DAGNode> ancestors = initialNode.getAncestors();
-		
-		assertEquals(ancestors.size(), 3);
-		
-		DAGNode Q = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "Q"));
-		assertTrue(ancestors.contains(Q));
-		DAGNode T = new DAGNode(ofac.createObjectProperty(ontoURI + "T")); // equivalent role
-		assertTrue(ancestors.contains(T));
-		DAGNode U = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "U"));
-		assertTrue(ancestors.contains(U));		
-		
-		/** 
+		Description initialNode = ofac
+				.createObjectProperty(ontoURI + "P");
+		Set<Set<Description>> ancestors = namedReasoner.getAncestors(
+				initialNode, true);
+
+		int size = 0;
+		for (Set<Description> a : ancestors)
+
+			size += a.size();
+
+		assertEquals(size, 3);
+
+		Description Q = ofac.createObjectProperty(ontoURI + "Q");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(Q, true)));
+		Description T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
+																			// role
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(T, true)));
+		Description U = ofac.createObjectProperty(ontoURI + "U");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(U, true)));
+
+		/**
 		 * The initial node is Node Q.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "Q"));
-		ancestors = initialNode.getAncestors();
+		initialNode = ofac.createObjectProperty(ontoURI+ "Q");
+		ancestors = namedReasoner.getAncestors(
+				initialNode, true);
+
+		size = 0;
+		for (Set<Description> a : ancestors)
+
+			size += a.size();
+
+		assertEquals(size, 2);
+
+		T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
+																	// role
 		
-		assertEquals(ancestors.size(), 2);
-		
-		T = new DAGNode(ofac.createObjectProperty(ontoURI + "T")); // equivalent role
-		assertTrue(ancestors.contains(T));
-		U = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "U"));
-		assertTrue(ancestors.contains(U));		
-		
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(T, true)));
+		U = ofac.createObjectProperty(ontoURI + "U");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(U, true)));
+
 		/**
 		 * The initial node is Node R.
 		 */
-		// There is no test for this node because the API will always suggest Node R is not
-		// exist and it has been replaced by Node S (i.e., Role R is equivalent with Role S)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node R is not
+		// exist and it has been replaced by Node S (i.e., Role R is equivalent
+		// with Role S)
+
+		/**
 		 * The initial node is Node S.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "S"));
-		ancestors = initialNode.getAncestors();
+		initialNode = ofac.createObjectProperty(ontoURI+ "S");
+		ancestors = namedReasoner.getAncestors(
+				initialNode, true);
+
+		size = 0;
+		for (Set<Description> a : ancestors)
+
+			size += a.size();
+
+		assertEquals(size,3);
+
+		Description R = ofac.createObjectProperty(ontoURI + "R"); // equivalent
+																			// role
+		Set<Description> equivalents = new HashSet<Description>();
+		equivalents.add(R);
+		assertTrue(ancestors.contains(equivalents));
+		T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
+																	// role
 		
-		assertEquals(ancestors.size(), 3);
-		
-		DAGNode R = new DAGNode(ofac.createObjectProperty(ontoURI + "R")); // equivalent role
-		assertTrue(ancestors.contains(R));
-		T = new DAGNode(ofac.createObjectProperty(ontoURI + "T")); // equivalent role
-		assertTrue(ancestors.contains(T));
-		U = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "U"));
-		assertTrue(ancestors.contains(U));
-		
-		/** 
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(T, true)));
+		U =ofac.createObjectProperty(ontoURI + "U");
+		assertTrue(ancestors.contains(namedReasoner.getEquivalences(U, true)));
+
+		/**
 		 * The initial node is Node T.
 		 */
-		// There is no test for this node because the API will always suggest Node T is not
-		// exist and it has been replaced by Node U (i.e., Role T is equivalent with Role U)
-		
-		/** 
+		// There is no test for this node because the API will always suggest
+		// Node T is not
+		// exist and it has been replaced by Node U (i.e., Role T is equivalent
+		// with Role U)
+
+		/**
 		 * The initial node is Node U.
 		 */
-		initialNode = pureIsa.getRoleNode(ofac.createObjectProperty(ontoURI + "U"));
-		ancestors = initialNode.getAncestors();
-		
+		initialNode = ofac.createObjectProperty(ontoURI
+				+ "U");
+		ancestors = namedReasoner.getAncestors(
+				initialNode, true);
+
 		assertEquals(ancestors.size(), 1);
+
+		T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
+																	// role
+		equivalents = new HashSet<Description>();
+		equivalents.add(T);
+		assertTrue(ancestors.contains(equivalents));
 		
-		T = new DAGNode(ofac.createObjectProperty(ontoURI + "T")); // equivalent role
-		assertTrue(ancestors.contains(T));
 	}
 }

@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 public class YAGOTest {
 	
     private final static String dataFile = "yago2core_20110315.n3";
@@ -36,6 +38,7 @@ public class YAGOTest {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+   
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         Ontology onto = parse_tbox(dataFile);

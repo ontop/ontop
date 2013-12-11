@@ -60,9 +60,9 @@ public class MetaMappingExpander {
 	 * @param connection
 	 * @param metadata
 	 */
-	public MetaMappingExpander(Connection connection, DBMetadata metadata) {
+	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
-		translator = new SQLQueryTranslator(metadata);
+		translator = new SQLQueryTranslator();
 		expandedMappings = new ArrayList<OBDAMappingAxiom>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}

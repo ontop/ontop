@@ -1,6 +1,5 @@
 language: java
 
-# whitelist
-branches:
-  only:
-    - develop
+jdk:
+  - oraclejdk7
+
