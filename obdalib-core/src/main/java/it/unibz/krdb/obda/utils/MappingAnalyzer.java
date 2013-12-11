@@ -502,7 +502,7 @@ public class MappingAnalyzer {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (!tableAlias.isEmpty()) {
-					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
+					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
 					if (aliasMap.containsKey(qualifiedColumnAlias)) {
 						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);
@@ -514,7 +514,7 @@ public class MappingAnalyzer {
 					if (aliasMap.containsKey(qualifiedColumnAlias.toUpperCase())) {
 						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toUpperCase()), qualifiedColumnAlias);
 					}
-				}
+				}					
 			}
 			offset += size;
 		}
