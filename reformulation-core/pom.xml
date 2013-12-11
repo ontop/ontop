@@ -9,7 +9,7 @@
 		<version>1.9.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>reformulation-core</artifactId>
-	<name>quest-core</name>
+	<name>reformulation-core</name>
 
 	<dependencies>
 		<dependency>

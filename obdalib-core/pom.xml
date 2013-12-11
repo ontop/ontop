@@ -8,7 +8,6 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>obdalib-core</artifactId>
 	<packaging>jar</packaging>
 	<name>obdalib-core</name>

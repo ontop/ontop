@@ -30,13 +30,32 @@
 
 	<developers>
 		<developer>
+			<id>marianormuro</id>
+			<name>Mariano Rodriguez Muro</name>
+		</developer>
+		<developer>
 			<id>ghxiao</id>
 			<name>Guohui Xiao</name>
-			<email>xiao@inf.unibz.it</email>
 		</developer>
 		<developer>
 			<id>martinrezk</id>
 			<name>Martin Rezk</name>
+		</developer>
+		<developer>
+			<id>johardi</id>
+			<name>Josef Hardi</name>
+		</developer>
+		<developer>
+			<id>tibagosi</id>
+			<name>Timea Bagosi</name>
+		</developer>
+		<developer>
+			<id>mislusnys</id>
+			<name>Mindaugas Slusnys</name>
+		</developer>
+		<developer>
+			<id>skomlaebri</id>
+			<name>Sarah Komla-Ebri</name>
 		</developer>
 	</developers>
 

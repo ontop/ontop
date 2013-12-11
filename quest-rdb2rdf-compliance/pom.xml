@@ -65,7 +65,6 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-    				
  					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
@@ -77,6 +76,13 @@
           			<skipTests>true</skipTests>
         		</configuration>
       		</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
