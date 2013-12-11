@@ -557,7 +557,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * Currently only retrieves metadata for the tables listed
 	 * 
-	 * Future plan to retrive all tables when this list is empty?
+	 * Future plan to retrieve all tables when this list is empty?
 	 * 
 	 * @param tables 
 	 */
@@ -565,7 +565,7 @@ public class JDBCConnectionManager {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;
-				
+		ResultSet synonyms = null;
 		try {
 			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();
@@ -576,11 +576,37 @@ public class JDBCConnectionManager {
 			if (resultSet.next()) {
 				loggedUser = resultSet.getString("user");
 			}
+			resultSet.close();
+			resultSet = null;
 			/**
-			 *  The sql to extract table names is now removed, since we instead use the
-			 *  table names from the source sql of the mappings, given as the parameter tables
+			 * Fetches all the oracle synonyms and stores them in a nested hash map.
+			 * The outer hashmap is keyed by owner / schema name
+			 * The inner is keyed by table name
+			 * The inner values are arrays of length 2 that describe the
+			 * table the synonym refers to. The first element is the
+			 * owner of the referred table, and the second is the name of the table itself
 			 */
+			/*HashMap<String, HashMap<String, String[]>> all_synonyms = new HashMap<String, HashMap<String, String[]>>();
+			final String synonymsQuery = "SELECT owner, synonym_name, table_owner, table_name from user_synonyms";
+			synonyms = stmt.executeQuery(synonymsQuery);
+			while(synonyms.next()){
+				String owner = synonyms.getString("owner");
+				String synonym_name = synonyms.getString("synonym_name");
+				String[] table_ref = new String[2];
+				table_ref[0] = synonyms.getString("table_owner");
+				table_ref[1] = synonyms.getString("table_name");
+				if(! all_synonyms.containsKey(owner))
+					all_synonyms.put(owner, new HashMap<String, String[]>());
+				all_synonyms.get(owner).put(synonym_name, table_ref);
+			}
+			synonyms.close();
+			synonyms = null;*/
 			
+			/**
+			 * The tables contains all tables which occur in the sql source queries
+			 * Note that different spellings (casing, quotation marks, optional schema prefix) 
+			 * may lead to the same table occurring several times 
+			 */
 			Iterator<Relation> table_iter = tables.iterator();
 			/* Obtain the column information for each relational object */
 			while (table_iter.hasNext()) {
@@ -589,7 +615,7 @@ public class JDBCConnectionManager {
 				try {
 //					String tblName = resultSet.getString("object_name");
 //					tableOwner = resultSet.getString("owner_name");
-					String tblName = table.getTableName();
+					String tblName = table.getTableName().toUpperCase();
 					/**
 					 * givenTableName is exactly the name the user provided, including schema prefix if that was
 					 * provided, otherwise without.
@@ -602,9 +628,10 @@ public class JDBCConnectionManager {
 					 */
 					String tableOwner;
 					if( table.getSchema().length() > 0)
-						tableOwner = table.getSchema();
+						tableOwner = table.getSchema().toUpperCase();
 					else
 						tableOwner = loggedUser;
+						
 					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
@@ -632,6 +659,9 @@ public class JDBCConnectionManager {
 		} finally {
 			if (resultSet != null) {
 				resultSet.close();
+			}
+			if (synonyms != null) {
+				synonyms.close();
 			}
 			if (stmt != null) {
 				stmt.close();
