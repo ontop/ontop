@@ -1,7 +1,7 @@
 CREATE TABLE "table1" (
     "id" integer NOT NULL,
     "name" character varying(100) NOT NULL,
-    "value" integer NOT NULL,
+    "val" integer NOT NULL,
 );
 
 CREATE TABLE "table2" (
@@ -12,7 +12,7 @@ CREATE TABLE "table2" (
 CREATE TABLE "table3" (
     "id" integer NOT NULL,
     "variable" character varying(100) NOT NULL,
-    "value" integer NOT NULL,
+    "val" integer NOT NULL,
 );
 
 INSERT INTO "table1" VALUES (100, 'a', 1);
