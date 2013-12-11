@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE OBDA [
-   <!ENTITY quest: 'http://obda.org/quest#'>
-   <!ENTITY : 'http://www.kro.com/ontologies/ancestors2#'>
-]>
-<OBDA version="1.0" xml:base="http://www.kro.com/ontologies/ancestors2#" xmlns="http://www.kro.com/ontologies/ancestors2#" xmlns::="http://www.kro.com/ontologies/ancestors2#" xmlns:quest:="http://obda.org/quest#">
-  <SavedQueries/>
-</OBDA>
