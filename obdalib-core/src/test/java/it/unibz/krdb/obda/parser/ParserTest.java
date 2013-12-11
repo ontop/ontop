@@ -110,7 +110,7 @@ public class ParserTest extends TestCase {
 		
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		printJSQL("test_1_5_extra", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		printSQL("test_1_5_extra", result2);
 		assertTrue(result2);
@@ -119,7 +119,7 @@ public class ParserTest extends TestCase {
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printSQL("test_1_5_extra_2", result2);
 		assertTrue(result2);
