@@ -63,19 +63,19 @@
 	</dependencies>
 
 	<modules>
-		<module>ontop-obdalib-core</module>
-		<module>ontop-reformulation-core</module>
-		<module>ontop-obdalib-owlapi3</module>
-		<module>ontop-protege4</module>
-		<module>ontop-obdalib-sesame</module>
-		<module>ontop-quest-owlapi3</module>
-		<module>ontop-quest-distribution</module>
-		<module>ontop-sparql-compliance</module>
-		<module>ontop-quest-sesame</module>
-		<module>ontop-quest-db</module>
-		<module>ontop-rdb2rdf-compliance</module>
+		<module>obdalib-core</module>
+		<module>reformulation-core</module>
+		<module>obdalib-owlapi3</module>
+		<module>obdalib-protege41</module>
+		<module>obdalib-sesame</module>
+		<module>quest-owlapi3</module>
+		<module>quest-distribution</module>
+		<module>quest-sparql-compliance</module>
+		<module>quest-sesame</module>
+		<module>quest-db</module>
+		<module>quest-rdb2rdf-compliance</module>
 
-		<module>ontop-test</module>
+		<module>quest-test</module>
 	</modules>
 
 	<profiles>
