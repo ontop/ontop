@@ -23,16 +23,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.BooleanAlgebraPredicate;
-import it.unibz.krdb.sql.api.BooleanOperator;
-import it.unibz.krdb.sql.api.NullPredicate;
-import net.sf.jsqlparser.expression.Parenthesis;
 import it.unibz.krdb.sql.api.ParsedQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,6 +39,7 @@ import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -175,12 +170,14 @@ public class MappingAnalyzer {
 						} else if (element instanceof IsNullExpression) {
 							IsNullExpression pred = (IsNullExpression) element;
 							Function filterFunction = getFunction(pred, lookupTable);
+							filterFunctionStack.push(filterFunction);
 						
 							
 						} else if (element instanceof Parenthesis) {
 							Parenthesis pred = (Parenthesis) element;
 		
-								manageParenthesis(pred,lookupTable);
+							Function filterFunction = manageParenthesis(pred,lookupTable);
+							filterFunctionStack.push(filterFunction);
 							}
 						
 					
@@ -284,7 +281,7 @@ public class MappingAnalyzer {
 			else if (left instanceof IsNullExpression)
 				t1=getFunction((IsNullExpression) left, lookupTable);
 			else if (left instanceof Parenthesis){
-				//do something else probably manage
+				t1= manageParenthesis((Parenthesis) left, lookupTable);
 			}
 			else
 			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
@@ -373,7 +370,6 @@ public class MappingAnalyzer {
 		return funct;
 		
 	}
-
 
 	/**
 	 * Returns a new term with the updated references.
