@@ -24,7 +24,7 @@ import org.jgrapht.traverse.GraphIterator;
  * 
  * */
 
-public class NamedDAGBuilderImpl implements NamedDAGBuilder {
+public class NamedDAGBuilderImpl /*implements NamedDAGBuilder*/ {
 
 	private Set<OClass> namedClasses;
 	private Set<Property> property;
@@ -302,7 +302,7 @@ public class NamedDAGBuilderImpl implements NamedDAGBuilder {
 
 	
 
-	@Override
+	//@Override
 	/**
 	 * Allows to take the constructed named DAG
 	 * @return DAGImpl the constructed named DAG

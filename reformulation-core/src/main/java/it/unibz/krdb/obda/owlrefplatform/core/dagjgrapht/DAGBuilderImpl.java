@@ -34,7 +34,7 @@ import org.jgrapht.graph.DefaultEdge;
  * transitive reduction.
  */
 
-public class DAGBuilderImpl implements DAGBuilder {
+public class DAGBuilderImpl /*implements DAGBuilder0*/ {
 
 	// contains the representative node with the set of equivalent mappings.
 	private Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
@@ -99,7 +99,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * 
 	 * @param graph needs a graph with or without cycles
 	 * @param equivalents a map between the node and its equivalent nodes
-	 * @param representatives a map between the node and its representive node
+	 * @param representatives a map between the node and its representative node
 	 */
 	public DAGBuilderImpl(Graph graph,
 			Map<Description, Set<Description>> equivalents,
@@ -908,7 +908,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * if(parent.equals(vertex)) return true; } return false; }
 	 */
 
-	@Override
+	//@Override
 	public DAG getDAG() {
 
 		return dag;
