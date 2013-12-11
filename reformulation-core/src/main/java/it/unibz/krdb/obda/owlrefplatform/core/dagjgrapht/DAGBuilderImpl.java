@@ -60,7 +60,7 @@ public class DAGBuilderImpl /*implements DAGBuilder0*/ {
 	public DAGBuilderImpl(Graph graph) {
 
 		// temporary graph to be transformed in DAG
-		modifiedGraph = new GraphImpl(DefaultEdge.class);
+		modifiedGraph = new GraphImpl();
 
 		// clone all the vertex and edges from dag
 

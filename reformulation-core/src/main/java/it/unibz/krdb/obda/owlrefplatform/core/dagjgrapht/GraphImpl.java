@@ -19,7 +19,6 @@ import org.jgrapht.graph.DefaultEdge;
 
 public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> implements Graph {
 
-	
 	private static final long serialVersionUID = 6784249753145034915L;
 
 	private Set<OClass> classes = new LinkedHashSet<OClass>();
@@ -29,31 +28,25 @@ public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> imp
 
 	/**
 	 * Constructor for a Graph 
-	 * @param arg0 type of the edges
 	 */
 
-	public GraphImpl(Class<? extends DefaultEdge> arg0) {
-		super(arg0);
-
-		
+	public GraphImpl() {
+		super(DefaultEdge.class);		
 	}
 
-	/**
-	 * Allows to have all named roles in the graph
-	 * @return  set of all property (not inverse) in the graph
+	/** 
+	 * @return  set of all property names (not inverse) in the graph
 	 */
-
-	//return all roles in the graph
+	
+	@Override
 	public Set<Property> getRoles(){
-		for (Description r: this.vertexSet()){
-			if (r instanceof Property){
+		for (Description r: this.vertexSet()) {
+			if (r instanceof Property) {
 				if(!((Property) r).isInverse())
 				roles.add((Property)r);
 			}
-
 		}
 		return roles;
-
 	}
 
 	/**
@@ -61,18 +54,13 @@ public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> imp
 	 * @return  set of all named concepts in the graph
 	 */
 
-	public Set<OClass> getClasses(){
-		for (Description c: this.vertexSet()){
-			if (c instanceof OClass){
+	@Override
+	public Set<OClass> getClasses() {
+		for (Description c: this.vertexSet()) {
+			if (c instanceof OClass) {
 				classes.add((OClass)c);
 			}
-
 		}
 		return classes;
-
 	}
-
-
-
-
 }

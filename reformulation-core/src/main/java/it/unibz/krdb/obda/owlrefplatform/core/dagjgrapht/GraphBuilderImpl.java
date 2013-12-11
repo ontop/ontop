@@ -25,7 +25,7 @@ import org.jgrapht.graph.DefaultEdge;
 public class GraphBuilderImpl /*implements GraphBuilder*/ {
 	
 
-	private final GraphImpl graph = new  GraphImpl(DefaultEdge.class);
+	private final GraphImpl graph = new  GraphImpl();
 	private final OntologyFactory descFactory = new OntologyFactoryImpl();
 	
 

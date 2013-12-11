@@ -801,7 +801,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public void getChainDAG() {
 		if (dag != null) {
 			// move everything to a graph that admits cycles
-			GraphImpl modifiedGraph = new GraphImpl(DefaultEdge.class);
+			GraphImpl modifiedGraph = new GraphImpl();
 
 			// clone all the vertex and edges from dag
 
