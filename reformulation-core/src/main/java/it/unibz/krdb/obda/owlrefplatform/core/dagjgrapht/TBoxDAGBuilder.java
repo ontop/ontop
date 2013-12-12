@@ -571,7 +571,7 @@ public class TBoxDAGBuilder  {
 	}
 	
 	/*
-	 * Alterntative version but slower to eliminate redundances public void
+	 * Alternative version but slower to eliminate redundancies public void
 	 * eliminateRedundances(){ LinkedList<DefaultEdge> redundantEdges = new
 	 * LinkedList<DefaultEdge>(); TopologicalOrderIterator<Description,
 	 * DefaultEdge> iterator =new TopologicalOrderIterator<Description,

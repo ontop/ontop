@@ -44,7 +44,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	
 	//map of the equivalent elements of an element
 	private Map<Description, Set<Description>> equivalencesMap;
-
+	
 	public DAGImpl() {
 		super(DefaultEdge.class);
 		replacements = new HashMap<Description, Description>();
