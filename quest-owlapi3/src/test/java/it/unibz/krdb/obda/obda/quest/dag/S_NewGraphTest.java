@@ -2,10 +2,10 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraphBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 
 import java.io.File;
@@ -40,10 +40,7 @@ public class S_NewGraphTest  extends TestCase{
 		Ontology o = translator.translate(ontology);
 
 		log.info("Generating graph");
-		GraphBuilderImpl change= new GraphBuilderImpl(o);
-		
-		log.info("Get the graph");
-		GraphImpl graph = (GraphImpl) change.getGraph();
+		TBoxGraph graph = TBoxGraphBuilder.getGraph(o);
 		System.out.println(graph);
 		
 		log.info("See information");
@@ -54,10 +51,7 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
-		DAGBuilderImpl change2 = new DAGBuilderImpl(graph);
-		
-		log.info("Get dag");
-		DAGImpl dag=(DAGImpl) change2.getDAG();
+		DAGImpl dag=(DAGImpl) TBoxDAGBuilder.getDAG(graph);
 		System.out.println(dag);
 		System.out.println(dag.getReplacements());
 		System.out.println(dag.getMapEquivalences());

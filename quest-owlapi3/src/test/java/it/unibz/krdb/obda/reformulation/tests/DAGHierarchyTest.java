@@ -14,11 +14,9 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxDAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraphBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -58,14 +56,10 @@ public class DAGHierarchyTest extends TestCase {
 				inputFile1));
 		Ontology onto = t.translate(owlonto);
 		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
+		TBoxGraph graph = TBoxGraphBuilder.getGraph(onto);
 
 		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
+		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
 		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
 
@@ -163,14 +157,10 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 
 		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
+		TBoxGraph graph = TBoxGraphBuilder.getGraph(onto);
 
 		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
+		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
 		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
 
@@ -287,14 +277,10 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 		
 		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
+		TBoxGraph graph = TBoxGraphBuilder.getGraph(onto);
 
 		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
+		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
 		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
 
@@ -393,14 +379,10 @@ public class DAGHierarchyTest extends TestCase {
 				inputFile2));
 		Ontology onto = t.translate(owlonto);
 		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
+		TBoxGraph graph = TBoxGraphBuilder.getGraph(onto);
 
 		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
+		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
 		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
 

@@ -17,17 +17,19 @@ import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
  */
 
 
-public class GraphBuilderImpl /*implements GraphBuilder*/ {
+public class TBoxGraphBuilder {
 	
-	private final GraphImpl graph = new  GraphImpl();
-	private final OntologyFactory descFactory = new OntologyFactoryImpl();	
-
 	/**
 	 * Build the graph from the TBox axioms of the ontology
 	 * 
 	 * @param ontology TBox containing the axioms
+	 * @return graph encoding all concept inclusions and 
+	 *                       role inclusions with the induced inclusions for inverses and domains/ranges
 	 */
-	public GraphBuilderImpl (Ontology ontology) {
+	public static TBoxGraph getGraph (Ontology ontology) {
+		
+		final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+		TBoxGraph graph = new TBoxGraph();
 		
 		for (Predicate conceptp : ontology.getConcepts()) {
 			ClassDescription concept = descFactory.createClass(conceptp);
@@ -75,7 +77,7 @@ public class GraphBuilderImpl /*implements GraphBuilder*/ {
 				graph.addEdge(child, parent);
 				graph.addEdge(childInv, parentInv);
 				
-				//add also edges between the existential
+				//add also edges between the domains and ranges
 				ClassDescription existsParent = descFactory.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
 				ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
 				ClassDescription existsParentInv = descFactory.getPropertySomeRestriction(parent.getPredicate(), !parent.isInverse());
@@ -90,12 +92,6 @@ public class GraphBuilderImpl /*implements GraphBuilder*/ {
 				graph.addEdge(existChildInv, existsParentInv);
 			}
 		}
-	}
-
-	/**
-	 * @return graph return the created graph
-	 */
-	public  GraphImpl  getGraph(){
 		return graph;
 	}
 }

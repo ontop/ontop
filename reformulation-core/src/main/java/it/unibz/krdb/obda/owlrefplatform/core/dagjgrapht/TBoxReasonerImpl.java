@@ -41,7 +41,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 public class TBoxReasonerImpl implements TBoxReasoner {
 
 	DAGImpl dag;
-	GraphImpl graph;
+	TBoxGraph graph;
 	AbstractGraphIterator<Description, DefaultEdge> iterator;
 
 	private Set<OClass> namedClasses;
@@ -50,14 +50,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public TBoxReasonerImpl(Ontology ontology, boolean named) {
 
 		// generate Graph
-		GraphBuilderImpl change = new GraphBuilderImpl(ontology);
-
-		graph = (GraphImpl) change.getGraph();
+		graph = TBoxGraphBuilder.getGraph(ontology);
 
 		// generate DAG
-		DAGBuilderImpl change2 = new DAGBuilderImpl(graph);
-
-		dag = (DAGImpl) change2.getDAG();
+		TBoxDAGBuilder change2 = new TBoxDAGBuilder();
+		dag = change2.getDAG(graph);
 
 		if (named) // generate namedDAG
 		{
@@ -85,7 +82,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * Constructor using a graph (cycles admitted)
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImpl(GraphImpl graph) {
+	public TBoxReasonerImpl(TBoxGraph graph) {
 		this.graph = graph;
 		namedClasses = graph.getClasses();
 		property = graph.getRoles();
@@ -784,7 +781,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return dag;
 	}
 
-	public GraphImpl getGraph() {
+	public TBoxGraph getGraph() {
 
 		return graph;
 	}
@@ -801,7 +798,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public void getChainDAG() {
 		if (dag != null) {
 			// move everything to a graph that admits cycles
-			GraphImpl modifiedGraph = new GraphImpl();
+			TBoxGraph modifiedGraph = new TBoxGraph();
 
 			// clone all the vertex and edges from dag
 
@@ -898,10 +895,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			DAGBuilderImpl change2 = new DAGBuilderImpl(modifiedGraph,
+			TBoxDAGBuilder change2 = new TBoxDAGBuilder();
+			dag = change2.getDAG(modifiedGraph,
 					dag.getMapEquivalences(), dag.getReplacements());
-
-			dag = (DAGImpl) change2.getDAG();
 
 		} else // if graph
 		{
@@ -971,10 +967,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			DAGBuilderImpl change2 = new DAGBuilderImpl(graph);
-
-			dag = (DAGImpl) change2.getDAG();
-
+			TBoxDAGBuilder change2 = new TBoxDAGBuilder();
+			dag = change2.getDAG(graph);
 		}
 
 	}

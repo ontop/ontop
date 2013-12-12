@@ -44,7 +44,7 @@ public class NamedDAGBuilderImpl /*implements NamedDAGBuilder*/ {
 	
 	public NamedDAGBuilderImpl(DAG dag) {
 
-		namedDag = new DAGImpl(DefaultEdge.class);
+		namedDag = new DAGImpl();
 
 		// clone all the vertexes and edges from dag
 
