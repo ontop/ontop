@@ -578,29 +578,7 @@ public class JDBCConnectionManager {
 			}
 			resultSet.close();
 			resultSet = null;
-			/**
-			 * Fetches all the oracle synonyms and stores them in a nested hash map.
-			 * The outer hashmap is keyed by owner / schema name
-			 * The inner is keyed by table name
-			 * The inner values are arrays of length 2 that describe the
-			 * table the synonym refers to. The first element is the
-			 * owner of the referred table, and the second is the name of the table itself
-			 */
-			/*HashMap<String, HashMap<String, String[]>> all_synonyms = new HashMap<String, HashMap<String, String[]>>();
-			final String synonymsQuery = "SELECT owner, synonym_name, table_owner, table_name from user_synonyms";
-			synonyms = stmt.executeQuery(synonymsQuery);
-			while(synonyms.next()){
-				String owner = synonyms.getString("owner");
-				String synonym_name = synonyms.getString("synonym_name");
-				String[] table_ref = new String[2];
-				table_ref[0] = synonyms.getString("table_owner");
-				table_ref[1] = synonyms.getString("table_name");
-				if(! all_synonyms.containsKey(owner))
-					all_synonyms.put(owner, new HashMap<String, String[]>());
-				all_synonyms.get(owner).put(synonym_name, table_ref);
-			}
-			synonyms.close();
-			synonyms = null;*/
+
 			
 			/**
 			 * The tables contains all tables which occur in the sql source queries
