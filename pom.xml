@@ -225,6 +225,11 @@
   				<artifactId>jgrapht</artifactId>
   				<version>0.8.3</version>
 			</dependency>
+			<dependency>
+				<groupId>jgraph</groupId>
+				<artifactId>jgraph</artifactId>
+				<version>5.13.0.0</version>
+			</dependency>
 			
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -253,6 +258,7 @@
 				<type>jar</type>
 				<scope>compile</scope>
 			</dependency>
+			
 
 			<!-- OWL API -->
 			<dependency>

@@ -123,7 +123,11 @@
   			<groupId>net.sf.jgrapht</groupId>
   			<artifactId>jgrapht</artifactId>
 		</dependency>
-			
+		
+		<dependency>
+			<groupId>jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+		</dependency>
 
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
