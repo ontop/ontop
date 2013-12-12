@@ -119,6 +119,14 @@
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
+	 <extension id="menu.obda.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Check for inconsistencies..."/> 
+		<toolTip value="Run consistency check regarding disjoint and functional properties"/>
+		<class value="it.unibz.krdb.obda.protege4.gui.action.InconsistencyCheckAction"/>
+		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-B"></path>
+		<editorKitId value="OWLEditorKit"/>
+	</extension>
+	
 	 <extension id="menu.obda.importr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Import R2RML mappings..."/> 
 		<toolTip value="Import mappings from an R2RML mapping file"/>

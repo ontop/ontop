@@ -134,6 +134,8 @@ public class QuestOWL extends OWLReasonerBase {
 	private boolean prepared = false;
 
 	private boolean questready = false;
+	
+	private Axiom inconsistent = null;
 
 	// / holds the error that quest had when initializing
 	private String errorMessage = "";
@@ -489,6 +491,11 @@ public class QuestOWL extends OWLReasonerBase {
 		return true;
 	}
 	
+	//info to return which axiom was inconsistent during the check
+	public Axiom getInconsistentAxiom() {
+		return inconsistent;
+	}
+	
 	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
 		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
@@ -525,6 +532,9 @@ public class QuestOWL extends OWLReasonerBase {
 					String value = trs.getConstant(0).getValue();
 					boolean b = Boolean.parseBoolean(value);
 					isConsistent = !b;
+					if (!isConsistent) {
+						inconsistent = dda;
+					}
 					trs.close();
 				}
 				
@@ -561,6 +571,9 @@ public class QuestOWL extends OWLReasonerBase {
 					String value = trs.getConstant(0).getValue();
 					boolean b = Boolean.parseBoolean(value);
 					isConsistent = !b;
+					if (!isConsistent) {
+						inconsistent = pfa;
+					}
 					trs.close();
 				}
 			} catch (OBDAException e) {
