@@ -3,10 +3,10 @@
 
 [SourceDeclaration]
 sourceUri	person
-connectionUrl	jdbc:mysql://obdalin3/optional_test
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
+connectionUrl	jdbc:h2:mem:ljtest
+username	sa
+password	
+driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-1006f0dbb06844d59f019373151efbb9

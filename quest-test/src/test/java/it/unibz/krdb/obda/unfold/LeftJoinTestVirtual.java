@@ -57,9 +57,28 @@ public class LeftJoinTestVirtual extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
+		String url = "jdbc:h2:mem:ljtest";
+		String username = "sa";
+		String password = "";
 
 		fac = OBDADataFactoryImpl.getInstance();
-		
+
+		conn = DriverManager.getConnection(url, username, password);
+		log.debug("Creating in-memory DB and inserting data!");
+		Statement st = conn.createStatement();
+		FileReader reader = new FileReader("src/test/resources/create_optional.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line + "\n");
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		conn.commit();
+		log.debug("Data loaded!");
+
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
@@ -131,25 +150,10 @@ public class LeftJoinTestVirtual extends TestCase {
 		rs.close();
 		assertEquals(expectedRows, count);
 	}
-	
-//	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-//		List<OWLAxiom> rs = st.executeGraph(query);
-//		int count = 0;
-//		Iterator<OWLAxiom> axit = rs.iterator();
-//		while (axit.hasNext()) {
-//			System.out.println(axit.next());			
-//			count++;
-//		}		
-//		assertEquals(expectedRows, count);
-//	}
 
 	public void testLeftJoin() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
 		runTests(p);
 	}
 
