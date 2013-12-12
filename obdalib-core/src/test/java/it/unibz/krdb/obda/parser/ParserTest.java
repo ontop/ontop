@@ -8,7 +8,7 @@
  */
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.sql.api.ParsedQuery;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.QueryTree;
 import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
@@ -791,7 +791,7 @@ public class ParserTest extends TestCase {
 	
 	private String queryText;
 
-	ParsedQuery queryP;
+	VisitedQuery queryP;
 	
 	private boolean parseJSQL(String input) {
 
@@ -799,7 +799,7 @@ public class ParserTest extends TestCase {
 
 		
 		try {
-			 queryP = new ParsedQuery(input);
+			 queryP = new VisitedQuery(input);
 		} catch (JSQLParserException e) {
 			
 			return false;

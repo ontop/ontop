@@ -23,7 +23,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.ParsedQuery;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 
@@ -95,7 +95,7 @@ public class MappingAnalyzer {
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 				// Construct the SQL query tree from the source query
-				ParsedQuery queryParsed = translator.constructParser(sourceQuery.toString());
+				VisitedQuery queryParsed = translator.constructParser(sourceQuery.toString());
 								
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryParsed);
@@ -399,7 +399,7 @@ public class MappingAnalyzer {
 		return result;
 	}
 
-	private LookupTable createLookupTable(ParsedQuery queryParsed) {
+	private LookupTable createLookupTable(VisitedQuery queryParsed) {
 		LookupTable lookupTable = new LookupTable();
 
 		// Collect all the possible column names from tables.
@@ -429,7 +429,7 @@ public class MappingAnalyzer {
 				// simple attribute name
 				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
 				
-				String quotedName = "\""+columnName+"\"";
+//				String quotedName = "\""+columnName+"\"";
 				
 				String COLUMNNAME = columnName.toUpperCase();
 				String columnname = columnName.toLowerCase();
@@ -450,10 +450,10 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
 				}
 				
-				// If the column name in the select string is in double quotes
-				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(quotedName), columnName);
-				}
+//				// If the column name in the select string is in double quotes
+//				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
+//					lookupTable.add(aliasMap.get(quotedName), columnName);
+//				}
 				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
@@ -470,11 +470,11 @@ public class MappingAnalyzer {
 				}
 				
 				// attribute name with table given name prefix
-				String givenTablequotedName = tableGivenName + "." + quotedName;
-//				lookupTable.add(givenTablequotedName, tableColumnName);
-				if (aliasMap.containsKey(givenTablequotedName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(givenTablequotedName), tableColumnName);
-				}
+//				String givenTablequotedName = tableGivenName + "." + quotedName;
+////				lookupTable.add(givenTablequotedName, tableColumnName);
+//				if (aliasMap.containsKey(givenTablequotedName)) { // register the alias name, if any
+//					lookupTable.add(aliasMap.get(givenTablequotedName), tableColumnName);
+//				}
 
 				// attribute name with table name prefix
 				String tablecolumnname = tableName + "." + columnname;

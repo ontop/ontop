@@ -16,7 +16,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.api.ParsedQuery;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 
@@ -115,7 +115,7 @@ public class MetaMappingExpander {
 				}
 				
 				// Construct the SQL query tree from the source query
-				ParsedQuery sourceQueryParsed = translator.constructParser(sourceQuery.toString());
+				VisitedQuery sourceQueryParsed = translator.constructParser(sourceQuery.toString());
 				
 				ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
 				
@@ -133,9 +133,9 @@ public class MetaMappingExpander {
 				 * we only need to distinct project the columns needed for the template expansion 
 				 */
 				
-				ParsedQuery distinctParsedQuery = null;
+				VisitedQuery distinctParsedQuery = null;
 				try {
-					distinctParsedQuery = new ParsedQuery(sourceQueryParsed.getStatement());
+					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement());
 					
 				} catch (JSQLParserException e1) {
 					
@@ -222,7 +222,7 @@ public class MetaMappingExpander {
 	 * @return
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
-			Function bodyAtom, ParsedQuery sourceParsedQuery,
+			Function bodyAtom, VisitedQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
 			List<String> params, int arity) {
@@ -283,9 +283,9 @@ public class MetaMappingExpander {
 		 * we create a new statement with the changed projection and selection
 		 */
 		
-		ParsedQuery newSourceParsedQuery = null;
+		VisitedQuery newSourceParsedQuery = null;
 		try {
-			newSourceParsedQuery = new ParsedQuery(sourceParsedQuery.getStatement());
+			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement());
 			newSourceParsedQuery.setProjection(newProjection);
 			newSourceParsedQuery.setSelection(newSelection);
 			

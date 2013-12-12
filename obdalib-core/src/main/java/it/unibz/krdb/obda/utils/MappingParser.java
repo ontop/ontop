@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.api.ParsedQuery;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.RelationJSQL;
@@ -71,7 +71,7 @@ public class MappingParser {
 	public ArrayList<RelationJSQL> getTables(){
 		ArrayList<RelationJSQL> tables = new ArrayList<RelationJSQL>();
 		for(ParsedMapping pm : parsedMappings){
-			ParsedQuery query = pm.getSourceQueryParsed();
+			VisitedQuery query = pm.getSourceQueryParsed();
 			ArrayList<RelationJSQL> queryTables = query.getTableSet();
 			for(RelationJSQL table : queryTables){
 				if (!(tables.contains(table))){

@@ -11,7 +11,7 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.ParsedQuery;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.RelationJSQL;
@@ -77,7 +77,7 @@ public class SQLQueryTranslator {
 	 * @param query The sql query to be parsed
 	 * @return A QueryTree (possible with null values and errors)
 	 */
-	public ParsedQuery constructParserNoView(String query){
+	public VisitedQuery constructParserNoView(String query){
 		return constructParser(query, false);
 	}
 //	public QueryTree constructQueryTreeNoView(String query){
@@ -94,7 +94,7 @@ public class SQLQueryTranslator {
 	 * @param query The sql query to be parsed
 	 * @return A ParsedQuery (possible just the name of a generated view)
 	 */
-	public ParsedQuery constructParser(String query) {
+	public VisitedQuery constructParser(String query) {
 		return constructParser(query, true);
 	}
 	
@@ -103,11 +103,11 @@ public class SQLQueryTranslator {
 //	}
 	
 	
-	private ParsedQuery constructParser (String query, boolean generateViews){
+	private VisitedQuery constructParser (String query, boolean generateViews){
 		
-		ParsedQuery queryParser = null;
+		VisitedQuery queryParser = null;
 		try {
-			queryParser = new ParsedQuery(query);
+			queryParser = new VisitedQuery(query);
 			
 		
 			
@@ -145,7 +145,7 @@ public class SQLQueryTranslator {
 //		return queryTree;
 //	}
 	
-	private ParsedQuery createView(String query){
+	private VisitedQuery createView(String query){
 		
 		String viewName = String.format("view_%s", id_counter++);
 		
@@ -156,7 +156,7 @@ public class SQLQueryTranslator {
 		else
 			viewDefinitions.add(vd);
 		
-		ParsedQuery vt = createViewParsed(viewName, query);
+		VisitedQuery vt = createViewParsed(viewName, query);
 		return vt;
 	}
 	
@@ -226,15 +226,15 @@ public class SQLQueryTranslator {
 	}
 	
 	//check if it is correct I create a new statement and add the table information in the FROMitem expression
-	private ParsedQuery createViewParsed(String viewName, String query) {		
+	private VisitedQuery createViewParsed(String viewName, String query) {		
 		Table view = new Table("", viewName);
 		PlainSelect body = new PlainSelect();
 		body.setFromItem(view);
 		Select select= new Select();
 		select.setSelectBody(body);
-		ParsedQuery queryParsed = null;
+		VisitedQuery queryParsed = null;
 		try {
-			queryParsed = new ParsedQuery(select);
+			queryParsed = new VisitedQuery(select);
 		} catch (JSQLParserException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

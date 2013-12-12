@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.api.ParsedQuery;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 /**
  * Contains the target query and parsed source part, sql of a mapping
@@ -18,7 +18,7 @@ import it.unibz.krdb.sql.api.ParsedQuery;
  */
 public class ParsedMapping {
 
-	ParsedQuery sourceQueryParsed;
+	VisitedQuery sourceQueryParsed;
 	OBDAMappingAxiom axiom;
 	
 	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryTranslator translator){
@@ -26,7 +26,7 @@ public class ParsedMapping {
 		OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 		// Construct the SQL query tree from the source query
-		ParsedQuery queryParsed = translator.constructParserNoView(sourceQuery.toString());
+		VisitedQuery queryParsed = translator.constructParserNoView(sourceQuery.toString());
 		this.sourceQueryParsed = queryParsed;
 	}
 	
@@ -34,7 +34,7 @@ public class ParsedMapping {
 	 * This returns the querytree constructed from the source query
 	 * @return
 	 */
-	public ParsedQuery getSourceQueryParsed(){
+	public VisitedQuery getSourceQueryParsed(){
 		return this.sourceQueryParsed;
 	}
 	

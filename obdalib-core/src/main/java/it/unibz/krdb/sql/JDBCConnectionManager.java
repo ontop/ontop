@@ -331,8 +331,8 @@ public class JDBCConnectionManager {
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
-			if(tblName.contains("\""))
-				tblName=tblName.substring(1,tblName.length()-1);
+//			if(tblName.contains("\""))
+//				tblName=tblName.substring(1,tblName.length()-1);
 
 			try {
 				rsColumns = md.getColumns(null, tableSchema, tblName, null);

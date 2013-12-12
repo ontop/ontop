@@ -31,7 +31,7 @@ import net.sf.jsqlparser.statement.select.Select;
  * A  structure to store the parsed SQL query string. 
  * It returns the information about the query using the visitor classes
  */
-public class ParsedQuery {
+public class VisitedQuery {
 
 	private static final long serialVersionUID = -4590590361733833782L;
 
@@ -46,7 +46,7 @@ public class ParsedQuery {
 	/**
 	 * Constructs an empty query.
 	 */
-	public ParsedQuery() {
+	public VisitedQuery() {
 		super();
 	}
 
@@ -57,7 +57,7 @@ public class ParsedQuery {
 	 * @throws JSQLParserException 
 	 */
 	
-	public ParsedQuery(String queryString) throws JSQLParserException {
+	public VisitedQuery(String queryString) throws JSQLParserException {
 		query = queryString;
 	 
 	
@@ -73,7 +73,7 @@ public class ParsedQuery {
 		
 	}
 	
-	public ParsedQuery(Statement statement) throws JSQLParserException{
+	public VisitedQuery(Statement statement) throws JSQLParserException{
 		
 		query = statement.toString();
 		 

@@ -13,20 +13,20 @@ import net.sf.jsqlparser.schema.Table;
 /**
  * The Relation class is a wrapper class that make the
  * {@link Table} class compatible with the 
- * abstraction in the {@link ParsedQuery}.
+ * abstraction in the {@link VisitedQuery}.
  */
 public class RelationJSQL extends RelationalAlgebra {
 
 	private static final long serialVersionUID = 8464933976477745339L;
 	
-	private Table table;
+	private TableJSQL table;
 	
-	public RelationJSQL(Table table) {
+	public RelationJSQL(TableJSQL table) {
 		this.table = table;
 	}
 	
 	public String getSchema() {
-		return table.getSchemaName();
+		return table.getSchema();
 	}
 	
 	public String getName() {
@@ -34,11 +34,11 @@ public class RelationJSQL extends RelationalAlgebra {
 	}
 	
 	public String getTableName() {
-		return table.getName();
+		return table.getTableName();
 	}
 	
 	public String getGivenName() {
-		return table.getWholeTableName();
+		return table.getGivenName();
 	}
 	public String getAlias() {
 		return table.getAlias();
@@ -57,7 +57,7 @@ public class RelationJSQL extends RelationalAlgebra {
 	@Override
 	public boolean equals(Object r){
 		if(r instanceof RelationJSQL)
-			return this.table.getWholeTableName().equals(((RelationJSQL)r).table.getWholeTableName());
+			return this.table.getTableName().equals(((RelationJSQL)r).table.getTableName());
 		return false;
 	}
 }

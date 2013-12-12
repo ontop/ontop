@@ -9,6 +9,7 @@
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,56 +106,6 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 */
 	private List<String> otherItemNames;
 
-	/**
-	 * Main entry for this Tool class. A list of found tables is returned.
-	 *
-	 * @param delete
-	 * @return
-	 */
-	public List<RelationJSQL> getTableList(Delete delete) {
-		init();
-		tables.add(new RelationJSQL(delete.getTable()));
-		delete.getWhere().accept(this);
-
-		return tables;
-	}
-
-	/**
-	 * Main entry for this Tool class. A list of found tables is returned.
-	 *
-	 * @param insert
-	 * @return
-	 */
-	public List<RelationJSQL> getTableList(Insert insert) {
-		init();
-		tables.add( new RelationJSQL (insert.getTable()));
-		if (insert.getItemsList() != null) {
-			insert.getItemsList().accept(this);
-		}
-
-		return tables;
-	}
-
-	/**
-	 * Main entry for this Tool class. A list of found tables is returned.
-	 *
-	 * @param replace
-	 * @return
-	 */
-	public List<RelationJSQL> getTableList(Replace replace) {
-		init();
-		tables.add(new RelationJSQL(replace.getTable()));
-		if (replace.getExpressions() != null) {
-			for (Expression expression : replace.getExpressions()) {
-				expression.accept(this);
-			}
-		}
-		if (replace.getItemsList() != null) {
-			replace.getItemsList().accept(this);
-		}
-
-		return tables;
-	}
 
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
@@ -174,39 +125,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		return tables;
 	}
 	
-	
 
-	/**
-	 * Main entry for this Tool class. A list of found tables is returned.
-	 *
-	 * @param update
-	 * @return
-	 */
-	public List<RelationJSQL> getTableList(Update update) {
-		init();
-		tables.add(new RelationJSQL(update.getTable()));
-		if (update.getExpressions() != null) {
-			for (Expression expression : update.getExpressions()) {
-				expression.accept(this);
-			}
-		}
-
-		if (update.getFromItem() != null) {
-			update.getFromItem().accept(this);
-		}
-
-		if (update.getJoins() != null) {
-			for (Join join : update.getJoins()) {
-				join.getRightItem().accept(this);
-			}
-		}
-
-		if (update.getWhere() != null) {
-			update.getWhere().accept(this);
-		}
-
-		return tables;
-	}
 
 	@Override
 	public void visit(WithItem withItem) {
@@ -233,7 +152,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(Table tableName) {
 		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())
 				&& !tables.contains(tableName)) {
-			tables.add(new RelationJSQL(tableName));
+			tables.add(new RelationJSQL(new TableJSQL(tableName)));
 		}
 	}
 
