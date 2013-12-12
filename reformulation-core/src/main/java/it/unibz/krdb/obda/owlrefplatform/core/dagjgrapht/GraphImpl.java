@@ -1,4 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
+
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
@@ -17,7 +18,7 @@ import org.jgrapht.graph.DefaultEdge;
  * 
  */
 
-public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> implements Graph {
+public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> /*implements Graph*/ {
 
 	private static final long serialVersionUID = 6784249753145034915L;
 
@@ -38,8 +39,9 @@ public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> imp
 	 * @return  set of all property names (not inverse) in the graph
 	 */
 	
-	@Override
-	public Set<Property> getRoles(){
+	//@Override
+	public Set<Property> getRoles() {
+		// INEFFICIENT: RECOMPUTES EVERY TIME
 		for (Description r: this.vertexSet()) {
 			if (r instanceof Property) {
 				if(!((Property) r).isInverse())
@@ -50,12 +52,12 @@ public class GraphImpl extends DefaultDirectedGraph<Description,DefaultEdge> imp
 	}
 
 	/**
-	 * Allows to have all named classes in the graph
 	 * @return  set of all named concepts in the graph
 	 */
 
-	@Override
+	//@Override
 	public Set<OClass> getClasses() {
+		// INEFFICIENT: RECOMPUTES EVERY TIME
 		for (Description c: this.vertexSet()) {
 			if (c instanceof OClass) {
 				classes.add((OClass)c);

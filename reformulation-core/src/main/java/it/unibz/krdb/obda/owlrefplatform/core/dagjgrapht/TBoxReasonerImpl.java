@@ -85,8 +85,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * Constructor using a graph (cycles admitted)
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImpl(Graph graph) {
-		this.graph = (GraphImpl) graph;
+	public TBoxReasonerImpl(GraphImpl graph) {
+		this.graph = graph;
 		namedClasses = graph.getClasses();
 		property = graph.getRoles();
 

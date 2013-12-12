@@ -57,22 +57,22 @@ public class DAGBuilderImpl /*implements DAGBuilder0*/ {
 	 * @param graph needs a graph with or without cycles 
 	 */
 	
-	public DAGBuilderImpl(Graph graph) {
+	public DAGBuilderImpl(GraphImpl graph) {
 
 		// temporary graph to be transformed in DAG
 		modifiedGraph = new GraphImpl();
 
 		// clone all the vertex and edges from dag
 
-		for (Description v : ((GraphImpl) graph).vertexSet()) {
+		for (Description v : graph.vertexSet()) {
 			modifiedGraph.addVertex(v);
 
 		}
 
-		for (DefaultEdge e : ((GraphImpl) graph).edgeSet()) {
+		for (DefaultEdge e : graph.edgeSet()) {
 
-			Description s = ((GraphImpl) graph).getEdgeSource(e);
-			Description t = ((GraphImpl) graph).getEdgeTarget(e);
+			Description s = graph.getEdgeSource(e);
+			Description t = graph.getEdgeTarget(e);
 
 			modifiedGraph.addEdge(s, t, e);
 		}
@@ -101,11 +101,11 @@ public class DAGBuilderImpl /*implements DAGBuilder0*/ {
 	 * @param equivalents a map between the node and its equivalent nodes
 	 * @param representatives a map between the node and its representative node
 	 */
-	public DAGBuilderImpl(Graph graph,
+	public DAGBuilderImpl(GraphImpl graph,
 			Map<Description, Set<Description>> equivalents,
 			Map<Description, Description> representatives) {
 
-		modifiedGraph = (GraphImpl) graph;
+		modifiedGraph = graph;
 
 		equivalencesMap = equivalents;
 		replacements = representatives;
@@ -234,7 +234,7 @@ public class DAGBuilderImpl /*implements DAGBuilder0*/ {
 	 * 
 	 */
 
-	private void eliminateCycles(Graph graph) {
+	private void eliminateCycles(GraphImpl graph) {
 
 		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(
 				modifiedGraph);

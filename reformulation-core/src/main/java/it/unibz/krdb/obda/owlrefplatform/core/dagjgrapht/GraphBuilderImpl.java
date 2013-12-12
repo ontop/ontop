@@ -11,11 +11,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
-import java.util.Collection;
-import java.util.Set;
-
-import org.jgrapht.graph.DefaultEdge;
-
 /**
  * Builds a graph starting from the axioms of a TBox.
 
@@ -24,17 +19,15 @@ import org.jgrapht.graph.DefaultEdge;
 
 public class GraphBuilderImpl /*implements GraphBuilder*/ {
 	
-
 	private final GraphImpl graph = new  GraphImpl();
-	private final OntologyFactory descFactory = new OntologyFactoryImpl();
-	
+	private final OntologyFactory descFactory = new OntologyFactoryImpl();	
 
 	/**
 	 * Build the graph from the TBox axioms of the ontology
 	 * 
 	 * @param ontology TBox containing the axioms
 	 */
-	public GraphBuilderImpl (Ontology ontology){
+	public GraphBuilderImpl (Ontology ontology) {
 		
 		for (Predicate conceptp : ontology.getConcepts()) {
 			ClassDescription concept = descFactory.createClass(conceptp);
@@ -64,16 +57,17 @@ public class GraphBuilderImpl /*implements GraphBuilder*/ {
 				graph.addVertex(child);
 				graph.addVertex(parent);
 				graph.addEdge(child, parent);
-			} else if (assertion instanceof SubPropertyAxiomImpl) {
+			} 
+			else if (assertion instanceof SubPropertyAxiomImpl) {
 				SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
 				Property parent = roleIncl.getSuper();
 				Property child = roleIncl.getSub();
 				Property parentInv = descFactory.createProperty(parent.getPredicate(), !parent.isInverse());
 				Property childInv = descFactory.createProperty(child.getPredicate(), !child.isInverse());
 
-				// This adds the direct edge and the inverse, e.g., R ISA S and
-				// R- ISA S-,
-				// R- ISA S and R ISA S-
+				// This adds the direct edge and the inverse, 
+				// e.g., R ISA S and R- ISA S-,
+				//       R- ISA S and R ISA S-
 				graph.addVertex(child);
 				graph.addVertex(parent);
 				graph.addVertex(childInv);
@@ -86,109 +80,22 @@ public class GraphBuilderImpl /*implements GraphBuilder*/ {
 				ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
 				ClassDescription existsParentInv = descFactory.getPropertySomeRestriction(parent.getPredicate(), !parent.isInverse());
 				ClassDescription existChildInv = descFactory.getPropertySomeRestriction(child.getPredicate(), !child.isInverse());
-				if(!graph.containsVertex(existChild)){
-					
-						graph.addVertex(existChild);
-				}
-				if(!graph.containsVertex(existsParent)){
-					
-					 graph.addVertex(existsParent);
-					
-					
-				}
+				
+				graph.addVertex(existChild);   // no need to check whether it is not there -- it's done by DefaultDirectedGraph
+				graph.addVertex(existsParent);		
 				graph.addEdge(existChild, existsParent);
 				
-				if(!graph.containsVertex(existChildInv)){
-					
-					graph.addVertex(existChildInv);
-			}
-			if(!graph.containsVertex(existsParentInv)){
-				
-				 graph.addVertex(existsParentInv);
-				
-				
-			}
+				graph.addVertex(existChildInv);
+				graph.addVertex(existsParentInv);				
 				graph.addEdge(existChildInv, existsParentInv);
-				
 			}
 		}
-
-
-	
-
-
-	}
-	/**
-	 * Build the graph starting from assertion of a TBox 
-	 * @param assertions assertions of an ontology
-	 * @param concepts concepts of an ontology
-	 * @param roles roles of an ontology
-	 * 
-	 */
-	
-	public GraphBuilderImpl (Collection<Axiom> assertions, Set<Predicate> concepts, Set<Predicate> roles){
-		for (Predicate conceptp : concepts) {
-			ClassDescription concept = descFactory.createClass(conceptp);
-			graph.addVertex(concept);
-		}
-
-		/*
-		 * For each role we add nodes for its inverse, its domain and its range
-		 */
-		for (Predicate rolep : roles) {
-			Property role = descFactory.createProperty(rolep);
-			Property roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
-			PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
-			PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
-			graph.addVertex(role);
-			graph.addVertex(roleInv);
-			graph.addVertex(existsRole);
-			graph.addVertex(existsRoleInv);
-		}
-
-		for (Axiom assertion : assertions) {
-
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
-				ClassDescription parent = clsIncl.getSuper();
-				ClassDescription child = clsIncl.getSub();
-				graph.addVertex(child);
-				graph.addVertex(parent);
-				graph.addEdge(child, parent);
-			} else if (assertion instanceof SubPropertyAxiomImpl) {
-				SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
-				Property parent = roleIncl.getSuper();
-				Property child = roleIncl.getSub();
-				Property parentInv = descFactory.createProperty(parent.getPredicate(), !parent.isInverse());
-				Property childInv = descFactory.createProperty(child.getPredicate(), !child.isInverse());
-
-				// This adds the direct edge and the inverse, e.g., R ISA S and
-				// R- ISA S-,
-				// R- ISA S and R ISA S-
-				graph.addVertex(child);
-				graph.addVertex(parent);
-				graph.addVertex(childInv);
-				graph.addVertex(parentInv);
-				graph.addEdge(child, parent);
-				graph.addEdge(childInv, parentInv);
-				
-			}
-		}
-
 	}
 
-	//@Override
 	/**
-	 * Give the graph
 	 * @return graph return the created graph
 	 */
-	public  Graph  getGraph(){
-
+	public  GraphImpl  getGraph(){
 		return graph;
 	}
-
-
-
-
-
 }
