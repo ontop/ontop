@@ -20,6 +20,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Liter
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import junit.framework.TestCase;
 
@@ -39,7 +40,7 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 public class InconsistencyCheckingTest extends TestCase{
 
-	private OWLReasoner reasoner;
+	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
@@ -78,14 +79,14 @@ public class InconsistencyCheckingTest extends TestCase{
 
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
 		questOWLFactory.setPreferenceHolder(p);
-		reasoner = questOWLFactory.createReasoner(ontology);
+		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
 	}
 	
 	@Test
 	public void testInitialConsistency() {
 		//initially the ontology is consistent
 		startReasoner();
-		assertTrue(reasoner.isConsistent());
+		assertTrue(reasoner.isQuestConsistent());
 	}
 	
 	@Test
@@ -98,7 +99,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -113,7 +114,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -128,7 +129,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -143,7 +144,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -158,7 +159,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 

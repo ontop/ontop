@@ -485,7 +485,11 @@ public class QuestOWL extends OWLReasonerBase {
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+	public boolean isConsistent(){
+		return true;
+	}
+	
+	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
 		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
 	
@@ -521,7 +525,9 @@ public class QuestOWL extends OWLReasonerBase {
 					String value = trs.getConstant(0).getValue();
 					boolean b = Boolean.parseBoolean(value);
 					isConsistent = !b;
+					trs.close();
 				}
+				
 			} catch (OBDAException e) {
 				e.printStackTrace();
 			}
@@ -555,6 +561,7 @@ public class QuestOWL extends OWLReasonerBase {
 					String value = trs.getConstant(0).getValue();
 					boolean b = Boolean.parseBoolean(value);
 					isConsistent = !b;
+					trs.close();
 				}
 			} catch (OBDAException e) {
 				e.printStackTrace();
