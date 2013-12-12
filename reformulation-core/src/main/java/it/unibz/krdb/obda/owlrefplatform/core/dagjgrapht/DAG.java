@@ -22,10 +22,6 @@ import java.util.Set;
  *  */
 public interface DAG {
 
-	//set the map of equivalences 
-	@Deprecated
-	public void setMapEquivalences(Map<Description, Set<Description>> equivalences);
-
 	//set the map of replacements
 	@Deprecated
 	public void setReplacements(Map<Description,Description> replacements);

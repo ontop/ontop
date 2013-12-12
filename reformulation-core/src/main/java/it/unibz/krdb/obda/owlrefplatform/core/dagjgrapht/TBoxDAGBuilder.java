@@ -201,16 +201,15 @@ public class TBoxDAGBuilder  {
 			Map<Description, Set<Description>> equivalencesMap, 
 			Map<Description, Description> replacements) {
 
+		OntologyFactory fac = OntologyFactoryImpl.getInstance();
+
 		GabowSCC<Description, DefaultEdge> inspector = 
 				new GabowSCC<Description, DefaultEdge>(graph);
 
-		// each set contains vertices which together form a strongly connected
-		// component within the given graph
+		// each set contains vertices of a strongly connected component of the graph
 		List<Set<Description>> equivalenceSets = inspector
 				.stronglyConnectedSets();
-
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-
+		
 		/*
 		 * A set with all the nodes that have been processed as participating in
 		 * an equivalence cycle. If a component contains any of these nodes, the
@@ -225,62 +224,59 @@ public class TBoxDAGBuilder  {
 			if (equivalenceSet.size() < 2)
 				continue;
 
+			/* 
+			 * fill in the equivalence map for **both** properties and classes
+			 */
+			for (Description node : equivalenceSet) 
+				equivalencesMap.put(node, equivalenceSet);
+			
+			
 			/*
-			 * Avoiding processing nodes two times, but assign the equivalentMap
+			 * process only Properties and avoid processing nodes twice
 			 */
 			boolean ignore = false;
-
 			for (Description node : equivalenceSet) {
-
-				if (!ignore && processedNodes.contains(node)) {
+				if (!(node instanceof Property) || processedNodes.contains(node)) {
 					ignore = true;
-				}
-				// assign to each node the equivalent map set
-				equivalencesMap.put(node, equivalenceSet);
-
-				if (!ignore && !(node instanceof Property)) {
-					ignore = true;
+					break;
 				}
 			}
+			if (ignore)
+				continue;
 
 			/*
 			 * We consider first the elements that are connected with other
 			 * named roles, checking if between their parents there is an
 			 * already assigned named role or an inverse
 			 */
+			for (Description representative : equivalenceSet) {
 
-			if (!ignore) {
+				Set<DefaultEdge> edges = graph
+						.outgoingEdgesOf(representative);
 
-				Iterator<Description> iterator = equivalenceSet.iterator();
-				while (iterator.hasNext()) {
-					Description representative = iterator.next();
+				for (DefaultEdge outEdge : edges) {
+					Description target = graph
+							.getEdgeTarget(outEdge);
 
-					Set<DefaultEdge> edges = graph
-							.outgoingEdgesOf(representative);
-					for (DefaultEdge outEdge : edges) {
-						Description target = graph
-								.getEdgeTarget(outEdge);
-
-						if (processedNodes.contains(target))
-							if (((Property) target).isInverse()) {
-								ignore = true;
-								chosenNodes.addAll(equivalenceSet);
-								break;
-							}
-
-						if (chosenNodes.contains(target)) {
+					if (processedNodes.contains(target))
+						if (((Property) target).isInverse()) {
 							ignore = true;
 							chosenNodes.addAll(equivalenceSet);
 							break;
 						}
-					}
-					if (ignore)
-						break;
-				}
-			}
 
+					if (chosenNodes.contains(target)) {
+						ignore = true;
+						chosenNodes.addAll(equivalenceSet);
+						break;
+					}
+				}
+				if (ignore)
+					break;
+			}	
 			if (ignore)
 				continue;
+
 
 			/* Assign the representative role with its inverse, domain and range
 			 * 
@@ -294,14 +290,11 @@ public class TBoxDAGBuilder  {
 			if (((Property) representative).isInverse()) {
 				boolean notInverse = false;
 				for (Description equivalent : equivalenceSet) {
-					if (equivalent instanceof Property
-							&& !((Property) equivalent).isInverse()) {
+					if (!((Property) equivalent).isInverse()) {
 						notRepresentative = representative;
 						representative = equivalent;
 						notInverse = true;
 						// replacements.put(notRepresentative, representative);
-						// equivalencesMap.put(notRepresentative,
-						// equivalenceSet);
 						break;
 					}
 				}
@@ -311,14 +304,12 @@ public class TBoxDAGBuilder  {
 											// property
 			}
 
-			// equivalencesMap.put(representative, equivalenceSet);
-
 			if (representative == null)
 				continue;
 
 			Property prop = (Property) representative;
 
-			Description inverse = fac.createProperty(prop.getPredicate(),
+			Property inverse = fac.createProperty(prop.getPredicate(),
 					!prop.isInverse());
 
 			Description domain = fac.createPropertySomeRestriction(
@@ -343,100 +334,72 @@ public class TBoxDAGBuilder  {
 				
 				replacements.put(eliminatedNode, representative);
 
-				// equivalencesMap.put(eliminatedNode, equivalenceSet);
-
 				removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
 
 				processedNodes.add(eliminatedNode);
 
-				if (eliminatedNode instanceof Property) {
+				/*
+				 * we are dealing with properties, so we need to also
+				 * collapse the inverses and existentials
+				 */
 
-					/*
-					 * we are dealing with properties, so we need to also
-					 * collapse the inverses and existentials
-					 */
+				Property equiprop = (Property) eliminatedNode;
 
-					Property equiprop = (Property) eliminatedNode;
+				Property equivinverseNode = fac.createProperty(
+						equiprop.getPredicate(), !equiprop.isInverse());
 
-					Description equivinverseNode = fac.createProperty(
-							equiprop.getPredicate(), !equiprop.isInverse());
-					// Description i= replacements.get(equivinverseNode);
-					// replacements.put(equivinverseNode, inverse);
-					// if(i!=null)
-					// equivinverseNode=i;
+				Description equivDomainNode = fac.createPropertySomeRestriction(
+						equiprop.getPredicate(), equiprop.isInverse());
 
-					Description equivDomainNode = fac
-							.createPropertySomeRestriction(
-									equiprop.getPredicate(),
-									equiprop.isInverse());
-					// Description d= replacements.get(equivDomainNode);
-					// replacements.put(equivDomainNode, domain);
-					// if(d!=null)
-					// equivDomainNode= d;
+				Description equivRangeNode = fac.createPropertySomeRestriction(
+						equiprop.getPredicate(), !equiprop.isInverse());
 
-					Description equivRangeNode = fac
-							.createPropertySomeRestriction(
-									equiprop.getPredicate(),
-									!equiprop.isInverse());
-					// Description r= replacements.get(equivRangeNode);
-					// replacements.put(equivRangeNode, range);
-					// if(r!=null)
-					// equivRangeNode= r;
-
-					/* 
-					 * Particular case in which the representative is in a cycle
-					 * with its inverse. We add everything to the named role. 
-					 */
+				/* 
+				 * Particular case in which the representative is in a cycle
+				 * with its inverse. We add everything to the named role. 
+				 */
+				
+				if (equivinverseNode.equals(representative)) {
 					
-					if (equivinverseNode.equals((Property) representative)) {
-						
-						removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
-						processedNodes.add(equivDomainNode);
+					removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
+					processedNodes.add(equivDomainNode);
 
-						replacements.put(equivDomainNode, domain);
-					}
-					else {
-						// this for inverse
-						removeNodeAndRedirectEdges(graph, equivinverseNode, inverse);
-						processedNodes.add(equivinverseNode);
-
-						// this for domain and range
-						removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
-						processedNodes.add(equivDomainNode);
-						
-						removeNodeAndRedirectEdges(graph, equivRangeNode, range);
-						processedNodes.add(equivRangeNode);
-
-						replacements.put(equivinverseNode, inverse);
-
-						replacements.put(equivDomainNode, domain);
-						replacements.put(equivRangeNode, range);
-					}
+					replacements.put(equivDomainNode, domain);
 				}
+				else {
+					// this for inverse
+					removeNodeAndRedirectEdges(graph, equivinverseNode, inverse);
+					processedNodes.add(equivinverseNode);
 
+					// this for domain and range
+					removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
+					processedNodes.add(equivDomainNode);
+					
+					removeNodeAndRedirectEdges(graph, equivRangeNode, range);
+					processedNodes.add(equivRangeNode);
+
+					replacements.put(equivinverseNode, inverse);
+
+					replacements.put(equivDomainNode, domain);
+					replacements.put(equivRangeNode, range);
+				}				
 			}
-
-			
 		}
 
 		/*
-		 * Second check of the strongly connected components for the classes
+		 * Second pass on list the strongly connected components for classes
 		 * 
 		 */
-		List<Set<Description>> equivalenceClassSets = inspector
-				.stronglyConnectedSets();
 		Set<Description> processedClassNodes = new HashSet<Description>();
 
-		for (Set<Description> equivalenceClassSet : equivalenceClassSets) {
+		for (Set<Description> equivalenceClassSet : equivalenceSets) {
 
 			if (equivalenceClassSet.size() < 2)
 				continue;
 			
 			boolean ignore = false;
 			for (Description node : equivalenceClassSet) {
-
-				if (!ignore && processedClassNodes.contains(node)
-						|| node instanceof Property) {
+				if (node instanceof Property || processedClassNodes.contains(node)) {
 					ignore = true;
 					break;
 				}
@@ -525,8 +488,6 @@ public class TBoxDAGBuilder  {
 							// namedElement=true;
 							// replacements.put(notRepresentative,
 							// representative);
-							// equivalencesMap.put(notRepresentative,
-							// equivalenceSet);
 							break;
 						}
 					}
@@ -534,7 +495,6 @@ public class TBoxDAGBuilder  {
 				}
 
 				processedClassNodes.add(representative);
-				// equivalencesMap.put(representative, equivalenceClassSet);
 
 				while (iterator.hasNext()) {
 					Description eliminatedNode = iterator.next();

@@ -68,9 +68,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -134,9 +132,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -205,9 +201,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 

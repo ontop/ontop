@@ -61,9 +61,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -162,9 +160,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -282,9 +278,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -384,9 +378,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAG dag = TBoxDAGBuilder.getDAG(graph);
 		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
+		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		

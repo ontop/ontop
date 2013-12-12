@@ -53,13 +53,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		graph = TBoxGraphBuilder.getGraph(ontology);
 
 		// generate DAG
-		TBoxDAGBuilder change2 = new TBoxDAGBuilder();
-		dag = change2.getDAG(graph);
+		dag = TBoxDAGBuilder.getDAG(graph);
 
-		if (named) // generate namedDAG
-		{
-			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
-			dag = transform.getDAG();
+		if (named) { // generate namedDAG
+			dag = NamedDAGBuilderImpl.getNamedDAG(dag);
 		}
 
 		namedClasses = dag.getClasses();
@@ -68,7 +65,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	/**
 	 * Constructor using a DAG or a named DAG
-	 * @param dag DAG to be used for resoning
+	 * @param dag DAG to be used for reasoning
 	 */
 	public TBoxReasonerImpl(DAG dag) {
 		this.dag = (DAGImpl) dag;

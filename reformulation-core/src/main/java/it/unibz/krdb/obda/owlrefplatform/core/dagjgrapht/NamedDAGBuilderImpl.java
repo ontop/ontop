@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -24,27 +25,23 @@ import org.jgrapht.traverse.GraphIterator;
  * 
  * */
 
-public class NamedDAGBuilderImpl /*implements NamedDAGBuilder*/ {
-
-	private Set<OClass> namedClasses;
-	private Set<Property> property;
-
-	private Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
-
-	private Map<Description, Description> replacements = new HashMap<Description, Description>();;
-	DAGImpl namedDag;
-
-	private TBoxReasonerImpl reasoner;
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+public class NamedDAGBuilderImpl  {
 
 	/**
-	 * Constructor for the NamedDAGBuilder
-	 * @param dag the DAG from which we want to mantain only the named descriptions
+	 * Constructs NamedDAG
+	 * @param dag the DAG from which we want to maintain only the named descriptions
 	 */
 	
-	public NamedDAGBuilderImpl(DAG dag) {
+	public static DAGImpl getNamedDAG(DAG dag) {
 
-		namedDag = new DAGImpl();
+		final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+
+		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
+		Map<Description, Description> replacements = new HashMap<Description, Description>();;
+		
+		DAGImpl namedDag = new DAGImpl(
+				new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class), 
+				equivalencesMap, replacements);
 
 		// clone all the vertexes and edges from dag
 
@@ -58,11 +55,11 @@ public class NamedDAGBuilderImpl /*implements NamedDAGBuilder*/ {
 			namedDag.addEdge(s, t, e);
 		}
 
-		reasoner = new TBoxReasonerImpl(dag);
+		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(dag);
 		
 		// take classes, roles, equivalences map and replacements from the DAG
-		namedClasses = dag.getClasses();
-		property = dag.getRoles();
+		Set<OClass> namedClasses = dag.getClasses();
+		Set<Property> property = dag.getRoles();
 
 		// clone the equivalences and replacements map
 		Map<Description, Set<Description>> equivalencesDag = dag
@@ -293,22 +290,7 @@ public class NamedDAGBuilderImpl /*implements NamedDAGBuilder*/ {
 		
 		}
 		
-
-		namedDag.setMapEquivalences(equivalencesMap);
-		namedDag.setReplacements(replacements);
 		namedDag.setIsaNamedDAG(true);
-
-	}
-
-	
-
-	//@Override
-	/**
-	 * Allows to take the constructed named DAG
-	 * @return DAGImpl the constructed named DAG
-	 */
-	public DAGImpl getDAG() {
 		return namedDag;
 	}
-
 }

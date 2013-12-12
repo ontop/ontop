@@ -51,7 +51,7 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
-		DAGImpl dag=(DAGImpl) TBoxDAGBuilder.getDAG(graph);
+		DAGImpl dag = TBoxDAGBuilder.getDAG(graph);
 		System.out.println(dag);
 		System.out.println(dag.getReplacements());
 		System.out.println(dag.getMapEquivalences());
@@ -75,8 +75,7 @@ public class S_NewGraphTest  extends TestCase{
 //		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
 //		}
 		log.info("Get named dag");
-		NamedDAGBuilderImpl namedDAGclass=  new NamedDAGBuilderImpl(dag);
-		DAGImpl namedDAG= namedDAGclass.getDAG();
+		DAGImpl namedDAG = NamedDAGBuilderImpl.getNamedDAG(dag);
 		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");

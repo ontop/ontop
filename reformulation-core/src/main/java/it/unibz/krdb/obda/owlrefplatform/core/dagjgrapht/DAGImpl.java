@@ -175,15 +175,6 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 		return replacements;
 	}
 
-	@Override
-	/**
-	 * Allows to set the map with equivalences
-	 * @param  equivalences a map between the node and the set of all its equivalent nodes
-	 */
-	public void setMapEquivalences(Map<Description, Set<Description>> equivalences) {
-		this.equivalencesMap = equivalences;
-	}
-	
 	/**
 	 * Allows to set the map with replacements
 	 * @param  replacements a map between the node and its representative node

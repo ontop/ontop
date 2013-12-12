@@ -481,9 +481,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		
 		//build the namedDag (or pureIsa)
-		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
-		
-		pureIsa = transform.getDAG();
+		pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 		
 		reasonerIsa = new TBoxReasonerImpl(pureIsa);
 

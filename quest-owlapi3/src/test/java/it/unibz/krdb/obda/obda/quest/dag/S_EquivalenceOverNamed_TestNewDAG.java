@@ -84,8 +84,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			DAGImpl dag2= S_InputOWL.createDAG(fileInput);
 			//transform in a named graph
-			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag2);
-			DAGImpl namedDag2= transform.getDAG();
+			DAGImpl namedDag2= NamedDAGBuilderImpl.getNamedDAG(dag2);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", namedDag2);
