@@ -162,9 +162,17 @@ public class SQLQueryTranslator {
 			/*
 			 * Take the alias name if the column name has it.
 			 */
-			if (columnName.contains(" as ")) { // has an alias
-				columnName = columnName.split(" as ")[1].trim();
-			}			
+			String[] aliasSplitters = new String[3];
+			aliasSplitters[0] = " as ";
+			aliasSplitters[1] = " AS ";
+			aliasSplitters[2] = " ";
+			for(String aliasSplitter : aliasSplitters){
+				if (columnName.contains(aliasSplitter)) { // has an alias
+					columnName = columnName.split(aliasSplitter)[1].trim();
+					break;
+				}
+			}
+			
 			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
 		}
 		return viewDefinition;

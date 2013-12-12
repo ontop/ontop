@@ -223,9 +223,12 @@ public class JDBCConnectionManager {
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn, tables);
-		}  else {
+		}  else if (md.getDatabaseProductName().contains("PostgreSQL")) {
+			// Postgres treats unquoted identifiers as lowercase
+			metadata = getOtherMetaData(md, conn, tables, true);
+		} else {
 			// For other database engines
-			metadata = getOtherMetaData(md, conn, tables);
+			metadata = getOtherMetaData(md, conn, tables, false);
 		}
 		return metadata;
 	}
@@ -294,8 +297,9 @@ public class JDBCConnectionManager {
 	 * Future plan to retrive all tables when this list is empty?
 	 * 
 	 * @param tables 
+	 * @param lowerCaseId: True if unquoted object identifiers should be treated as lowercasse. This is the case for postgres, but not for mysql
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables, boolean lowerCaseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		
@@ -314,7 +318,7 @@ public class JDBCConnectionManager {
 			Relation table = table_iter.next();
 			ResultSet rsColumns = null;
 			Set<String> tableColumns = new HashSet<String>();
-			String tblName = table.getTableName();
+			String tblName = (lowerCaseIds) ? table.getTableName().toLowerCase() : table.getTableName();
 			/**
 			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
 			 * provided, otherwise without.
@@ -322,7 +326,7 @@ public class JDBCConnectionManager {
 			String tableGivenName = table.getGivenName();
 			String tableSchema;
 			if( table.getSchema().length() > 0)
-				tableSchema = table.getSchema();
+				tableSchema = (lowerCaseIds) ?  table.getSchema().toLowerCase() : table.getSchema();
 			else
 				tableSchema = null;
 
@@ -565,7 +569,7 @@ public class JDBCConnectionManager {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;
-		ResultSet synonyms = null;
+		
 		try {
 			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();
@@ -593,7 +597,7 @@ public class JDBCConnectionManager {
 				try {
 //					String tblName = resultSet.getString("object_name");
 //					tableOwner = resultSet.getString("owner_name");
-					String tblName = table.getTableName().toUpperCase();
+					String tblName = table.getTableName();
 					/**
 					 * givenTableName is exactly the name the user provided, including schema prefix if that was
 					 * provided, otherwise without.
@@ -606,15 +610,15 @@ public class JDBCConnectionManager {
 					 */
 					String tableOwner;
 					if( table.getSchema().length() > 0)
-						tableOwner = table.getSchema().toUpperCase();
+						tableOwner = table.getSchema();
 					else
 						tableOwner = loggedUser;
 						
-					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
-					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner.toUpperCase(), tblName.toUpperCase());
+					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner.toUpperCase(), tblName.toUpperCase());
 					
 					TableDefinition td = new TableDefinition(tableGivenName);
-					rsColumns = md.getColumns(null, tableOwner, tblName, null);
+					rsColumns = md.getColumns(null, tableOwner.toUpperCase(), tblName.toUpperCase(), null);
 			
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
@@ -637,9 +641,6 @@ public class JDBCConnectionManager {
 		} finally {
 			if (resultSet != null) {
 				resultSet.close();
-			}
-			if (synonyms != null) {
-				synonyms.close();
 			}
 			if (stmt != null) {
 				stmt.close();
