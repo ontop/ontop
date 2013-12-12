@@ -119,7 +119,7 @@
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
-	 <extension id="menu.obda.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
+	 <extension id="menu.obda.inconsistecychecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for inconsistencies..."/> 
 		<toolTip value="Run consistency check regarding disjoint and functional properties"/>
 		<class value="it.unibz.krdb.obda.protege4.gui.action.InconsistencyCheckAction"/>
