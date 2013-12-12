@@ -32,10 +32,12 @@ public class NamedDAGBuilderImpl  {
 	 * @param dag the DAG from which we want to maintain only the named descriptions
 	 */
 	
-	public static DAGImpl getNamedDAG(DAG dag) {
+	public static DAGImpl getNamedDAG(DAG dag0) {
 
 		final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
-
+		DAGImpl dag = (DAGImpl)dag0;
+		
+		
 		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();;
 		
@@ -45,12 +47,12 @@ public class NamedDAGBuilderImpl  {
 
 		// clone all the vertexes and edges from dag
 
-		for (Description v : ((DAGImpl) dag).vertexSet()) {
+		for (Description v : dag.vertexSet()) {
 			namedDag.addVertex(v);
 		}
-		for (DefaultEdge e : ((DAGImpl) dag).edgeSet()) {
-			Description s = ((DAGImpl) dag).getEdgeSource(e);
-			Description t = ((DAGImpl) dag).getEdgeTarget(e);
+		for (DefaultEdge e : dag.edgeSet()) {
+			Description s = dag.getEdgeSource(e);
+			Description t = dag.getEdgeTarget(e);
 
 			namedDag.addEdge(s, t, e);
 		}
@@ -92,7 +94,7 @@ public class NamedDAGBuilderImpl  {
 		 */
 		
 		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>((DAGImpl)dag);
+				new EdgeReversedGraph<Description, DefaultEdge>(dag);
 
 		LinkedList<Description> roots = new LinkedList<Description>();
 		for (Description n : reversed.vertexSet()) {
