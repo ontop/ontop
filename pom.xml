@@ -15,6 +15,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
+	
+	<inceptionYear>2009</inceptionYear>
+	<organization>
+		<name>Free University of Bozen-Bolzano</name>
+	</organization>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -89,7 +95,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<aversion>1.9</aversion>
+		
+		<!-- for org.codehaus.mojo:license-maven-plugin -->
+		<license.licenseName>apache_v2</license.licenseName>
+		<license.roots>src/main/java,src/test/java</license.roots>
 	</properties>
 
 
@@ -464,3 +473,4 @@
 		</plugins>
 	</reporting>
 </project>
+			
