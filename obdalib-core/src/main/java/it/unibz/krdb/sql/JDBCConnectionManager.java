@@ -602,7 +602,7 @@ public class JDBCConnectionManager {
 					 * also have worked in the latter case.
 					 */
 					String tableOwner;
-					if( table.getSchema().length() > 0)
+					if( table.getSchema()!=null)
 						tableOwner = table.getSchema();
 					else
 						tableOwner = loggedUser;

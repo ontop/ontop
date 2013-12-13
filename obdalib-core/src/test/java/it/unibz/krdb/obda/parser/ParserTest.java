@@ -126,13 +126,23 @@ public class ParserTest extends TestCase {
 		
 	}
 	
+	//NO SUPPORT SQL
+	public void test_1_5_extra_3() {
+		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
+		printJSQL("test_1_5_extra_3", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
+		printSQL("test_1_5_extra_3", result2);
+		assertFalse(result2);
+		
+	}
 	
-		public void test_1_5_extra_3() {
+		public void test_1_5_extra_4() {
 			final boolean result = parseJSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
-			printJSQL("test_1_5_extra_3", result);
+			printJSQL("test_1_5_extra_4", result);
 			assertTrue(result);
 			final boolean result2 = parseSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
-			printSQL("test_1_5_extra_3", result2);
+			printSQL("test_1_5_extra_4", result2);
 			assertTrue(result2);
 			
 		}

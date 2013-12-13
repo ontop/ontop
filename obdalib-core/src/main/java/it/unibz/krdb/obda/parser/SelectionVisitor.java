@@ -131,11 +131,11 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 			
          if (plainSelect.getWhere() != null) {
                  Expression where=plainSelect.getWhere();
-                 if(where instanceof BinaryExpression){
+                 
                 	 selection= new SelectionJSQL();
-                	 selection.addCondition((BinaryExpression) where);
+					 selection.addCondition( where);
                 	 binaryExp=true;
-                 }
+                 
                  where.accept(this);
                  
                  
@@ -220,6 +220,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Parenthesis parenthesis) {
+		
 			parenthesis.getExpression().accept(this);
 		
 	}
@@ -335,10 +336,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(InExpression inExpression) {
-		if(binaryExp==false){
-			selection= new SelectionJSQL();
-			selection.addCondition(inExpression);
-		}
+		
 	}
 
 	/*
@@ -347,10 +345,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
-		if(binaryExp==false){
-			selection= new SelectionJSQL();
-			selection.addCondition(isNullExpression);
-		}
+		
 		
 	}
 
@@ -438,11 +433,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		if(binaryExp==false){
-			
-			selection= new SelectionJSQL();
-			selection.addCondition(allComparisonExpression);
-		}
+		
 	}
 
 	/*
@@ -451,11 +442,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		if(binaryExp==false){
-			selection= new SelectionJSQL();
 		
-			selection.addCondition(anyComparisonExpression);
-		}
 	}
 
 	/*

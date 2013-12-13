@@ -32,33 +32,18 @@ public class SelectionJSQL implements Serializable{
 	}
 	
 	/**
-	 * Inserts a binary expression to the list. 
+	 * Inserts an expression to the list. 
+	 * We handle in Selection BinaryExpression, IsNUllExpression and INExpression
 	 * 
-	 * @param predicate
+	 * @param obj
 	 * 			The binary condition in the form of BinaryExpression.
 	 * 
 	 */
-	public void addCondition(BinaryExpression predicate){
+	public void addCondition(Expression obj){
 		
-		conditions= predicate;
+		conditions= obj;
 	}
 	
-	/**
-	 * Inserts a IS NULL or IS NOT NULL condition to the list.
-	 * 
-	 * @param predicate
-	 * 			The null predicate.
-	 * 
-	 */
-	public void addCondition(IsNullExpression predicate) {
-		
-		conditions =predicate;
-	}
-	
-	public void addCondition(InExpression predicate){
-		
-		conditions = predicate;
-	}
 	
 	/**
 	 * Copies the input boolean specification into the list.
@@ -69,12 +54,7 @@ public class SelectionJSQL implements Serializable{
 	 */
 	public void copy(Queue<Object> specification)  {
 		for (Object obj : specification) {
-			if (obj instanceof BinaryExpression) {
-				addCondition((BinaryExpression) obj);
-			}
-			else if (obj instanceof IsNullExpression) {
-				addCondition((IsNullExpression) obj);
-			}
+			addCondition((Expression)obj);
 			
 		}
 	}
@@ -94,17 +74,5 @@ public class SelectionJSQL implements Serializable{
 		return str;
 	}
 
-	public void addCondition(AnyComparisonExpression predicate) {
-		
-		AnyComparison comparison = new AnyComparison(predicate.getSubSelect());
-		conditions = comparison;
-		
-	}
 
-	public void addCondition(AllComparisonExpression predicate) {
-		
-		AllComparison comparison = new AllComparison(predicate.getSubSelect());
-		conditions =comparison;
-		
-	}
 }
