@@ -36,7 +36,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  * <li>extensionalPredicates</li>
  * </ul>
  * 
- * @author xiao
+ * @author xiao, mrezk
  * 
  */
 public class DatalogDependencyGraphGenerator {
@@ -70,7 +70,18 @@ public class DatalogDependencyGraphGenerator {
 	public DirectedGraph<CQIE, DefaultEdge> getRuleDependencyGraph() {
 		return ruleDependencyGraph;
 	}
-
+/**
+ * Gives you the predicate that is defined using <code>pred</code> 
+ * @param pred 
+ * @return
+ */
+	public Predicate getFatherPredicate(Predicate pred){
+		Set<DefaultEdge> setfatherEdge = predicateDependencyGraph.incomingEdgesOf(pred);
+		DefaultEdge fatherEdge = (DefaultEdge) setfatherEdge.iterator().next();
+		Predicate father = predicateDependencyGraph.getEdgeSource(fatherEdge);
+		return father;
+	}
+	
 	public Map<Predicate, List<CQIE>> getRuleIndex() {
 		return ruleIndex;
 	}
@@ -199,8 +210,46 @@ public class DatalogDependencyGraphGenerator {
 	}
 	
 	/**
-	 * 
+	 * It removes all rules of a given predicate from the <code>ruleIndex</code>.
+	 * Be careful. This method may cause a missmatch between the graph and the indexes.
+	 * @return 
 	 */
+	public void removeAllPredicateFromRuleIndex(Predicate pred) {
+		if (ruleIndex.containsKey(pred)){
+			ruleIndex.remove(pred);
+		}
+	}
+	
+	/**
+	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code>
+	 * Be careful. This method may cause a missmatch between the graph and the indexes.
+	 * @param pred
+	 * @param rule
+	 */
+	public void removeOneRulePredicateFromRuleIndex(Predicate pred, CQIE rule) {
+		if (ruleIndex.containsKey(pred)){
+			ruleIndex.get(pred).remove(rule);
+		}
+	}
+	
+
+	
+	/**
+	 * It Adds a rule to the <code>ruleIndex</code>
+	 * Be careful. This method may cause a missmatch between the graph and the indexes.
+	 * @return 
+	 */
+	public void setRuleInGraph(Predicate pred, CQIE rule) {
+		if (ruleIndex.containsKey(pred)){
+			ruleIndex.get(pred).add(rule);
+		}else {
+			List<CQIE> listCQIE = new LinkedList<CQIE>();
+			listCQIE.add(rule);
+			ruleIndex.put(pred, listCQIE);
+		}
+	}
+	
+	
 	
 	
 
@@ -300,7 +349,12 @@ public class DatalogDependencyGraphGenerator {
 		}
 
 	}
-
+	
+	/**
+	 * Returns the Bottom-up Ordered List of predicates
+	 * 
+	 * @return List with Predicate elements
+	 */
 	public List<Predicate> getPredicatesInBottomUp() {
 		return predicatesInBottomUp;
 	}
