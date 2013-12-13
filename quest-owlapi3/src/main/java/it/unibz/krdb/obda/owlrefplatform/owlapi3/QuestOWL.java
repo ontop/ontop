@@ -486,7 +486,9 @@ public class QuestOWL extends OWLReasonerBase {
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
-		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
+		// Inconsistency checking creates a nullpointer exception in protege, so disable for the moment
+		return true;
+		//return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
 	
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
