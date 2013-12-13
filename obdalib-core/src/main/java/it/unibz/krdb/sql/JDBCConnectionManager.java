@@ -38,6 +38,12 @@ public class JDBCConnectionManager {
 	public static final String JDBC_RESULTSETTYPE = "resultsettype";
 	public static final String JDBC_RESULTSETCONCUR = "resultsetconcur";
 
+	// These are used by getOtherMetadata to signal whether the
+	// unquoted table names should be put in lower (Postgres), upper (db2) or no change(mysql)
+	private static final int JDBC_ORIGINALCASE = 0;
+	private static final int JDBC_LOWERCASE = 1;
+	private static final int JDBC_UPPERCASE = 2;
+	
 	private static JDBCConnectionManager instance = null;
 
 	private HashMap<String, Object> properties = null;
@@ -223,12 +229,15 @@ public class JDBCConnectionManager {
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn, tables);
+		} else if (md.getDatabaseProductName().contains("DB2")) {
+			// If the database engine is IBM DB2
+			metadata = getOtherMetaData(md, conn, tables, JDBC_UPPERCASE);
 		}  else if (md.getDatabaseProductName().contains("PostgreSQL")) {
 			// Postgres treats unquoted identifiers as lowercase
-			metadata = getOtherMetaData(md, conn, tables, true);
+			metadata = getOtherMetaData(md, conn, tables, JDBC_LOWERCASE);
 		} else {
-			// For other database engines
-			metadata = getOtherMetaData(md, conn, tables, false);
+			// For other database engines, i.e. mysql
+			metadata = getOtherMetaData(md, conn, tables, JDBC_ORIGINALCASE);
 		}
 		return metadata;
 	}
@@ -297,9 +306,9 @@ public class JDBCConnectionManager {
 	 * Future plan to retrive all tables when this list is empty?
 	 * 
 	 * @param tables 
-	 * @param lowerCaseId: True if unquoted object identifiers should be treated as lowercasse. This is the case for postgres, but not for mysql
+	 * @param lowerCaseId: Decides whether casing of unquoted object identifiers should be changed
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables, boolean lowerCaseIds) throws SQLException {
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables, int caseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		
@@ -318,7 +327,8 @@ public class JDBCConnectionManager {
 			Relation table = table_iter.next();
 			ResultSet rsColumns = null;
 			Set<String> tableColumns = new HashSet<String>();
-			String tblName = (lowerCaseIds) ? table.getTableName().toLowerCase() : table.getTableName();
+			String tblName = table.getTableName(); 
+			
 			/**
 			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
 			 * provided, otherwise without.
@@ -326,10 +336,23 @@ public class JDBCConnectionManager {
 			String tableGivenName = table.getGivenName();
 			String tableSchema;
 			if( table.getSchema().length() > 0)
-				tableSchema = (lowerCaseIds) ?  table.getSchema().toLowerCase() : table.getSchema();
+				tableSchema = table.getSchema();
 			else
 				tableSchema = null;
 
+			switch(caseIds){
+			case JDBC_LOWERCASE:
+				tblName = tblName.toLowerCase();
+				if(tableSchema != null)
+					tableSchema = tableSchema.toLowerCase();
+				break;
+			case JDBC_UPPERCASE: 
+				tblName = tblName.toUpperCase();
+				if(tableSchema != null)
+					tableSchema = tableSchema.toUpperCase();
+				break;
+			}
+			
 			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
