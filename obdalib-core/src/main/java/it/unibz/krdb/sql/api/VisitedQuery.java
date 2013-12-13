@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.SelectionVisitor;
 import it.unibz.krdb.obda.parser.TablesNameVisitor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ import net.sf.jsqlparser.statement.select.Select;
  * A  structure to store the parsed SQL query string. 
  * It returns the information about the query using the visitor classes
  */
-public class VisitedQuery {
+public class VisitedQuery implements Serializable{
 
 	private static final long serialVersionUID = -4590590361733833782L;
 
@@ -40,7 +41,13 @@ public class VisitedQuery {
 	 
 	private Select select; //the parsed query
 	
-	private RelationJSQL view;
+	
+	private ArrayList<RelationJSQL> tableSet;
+	private HashMap<String, String> aliasMap;
+	private ArrayList<String> joins;
+	private SelectionJSQL selection;
+	private ProjectionJSQL projection;
+	private AggregationJSQL groupByClause;
 	
 	
 	/**
@@ -65,6 +72,14 @@ public class VisitedQuery {
 			if (stm instanceof Select) {
 				select = (Select)stm;
 				
+				//getting the values we also eliminate or handle the quotes
+				tableSet = getTableSet();
+				aliasMap = getAliasMap();
+				joins = getJoinCondition();
+				selection = getSelection();
+				projection = getProjection();
+				groupByClause =getGroupByClause();
+				
 			}
 			//catch exception about wrong inserted columns
 			else 
@@ -82,27 +97,22 @@ public class VisitedQuery {
 		if (stm instanceof Select) {
 			select = (Select)stm;
 			
+			//getting the values we also eliminate or handle the quotes
+			tableSet = getTableSet();
+			aliasMap = getAliasMap();
+			joins = getJoinCondition();
+			selection = getSelection();
+			projection = getProjection();
+			groupByClause =getGroupByClause();
+			
 		}
 		//catch exception about wrong inserted columns
 		else 
 			throw new JSQLParserException("The inserted query is not a SELECT statement");
-//		if (statement instanceof Select) {
-//			Select newStatement = new Select();
-//			newStatement.setSelectBody(((Select) statement).getSelectBody());
-//			select = newStatement;
-//			stm= newStatement;
-//			query= newStatement.toString();
-//			
-//		}
-//		else 
-//			throw new JSQLParserException("The inserted query is not a SELECT statement");
+
 	}
 	
-//	public ParsedQuery(RelationJSQL value) {
-//		
-//		view = value;
-//		
-//	}
+
 
 	@Override
 	public String toString() {
@@ -113,16 +123,23 @@ public class VisitedQuery {
 	 * Returns all the tables in this query tree.
 	 */
 	public ArrayList<RelationJSQL> getTableSet() {
-		TablesNameVisitor tnp = new TablesNameVisitor();
-		return tnp.getTableList(select);
+		
+		if(tableSet== null){
+			TablesNameVisitor tnp = new TablesNameVisitor();
+			tableSet =tnp.getTableList(select);
+		}
+		return tableSet;
 	}
 	
 	/**
 	 * Get the string construction of alias name. 
 	 */
 	public HashMap<String, String> getAliasMap() {
-		AliasMapVisitor aliasV = new AliasMapVisitor();
-		return aliasV.getAliasMap(select);
+		if(aliasMap== null){
+			AliasMapVisitor aliasV = new AliasMapVisitor();
+			aliasMap= aliasV.getAliasMap(select);
+		}
+		return aliasMap;
 	}
 
 	/**
@@ -130,24 +147,34 @@ public class VisitedQuery {
 	 * format of "VAR1=VAR2".
 	 */
 	public ArrayList<String> getJoinCondition() {
-		JoinConditionVisitor joinCV = new JoinConditionVisitor();
-		return joinCV.getJoinConditions(select);
+		if(joins==null){
+			JoinConditionVisitor joinCV = new JoinConditionVisitor();
+			joins= joinCV.getJoinConditions(select);
+		}
+		return joins;
 	}
 
 	/**
 	 * Get the object construction for the WHERE clause.
 	 */
 	public SelectionJSQL getSelection() {
-		SelectionVisitor sel= new SelectionVisitor();
-		return sel.getSelection(select);
+		if(selection==null){
+			SelectionVisitor sel= new SelectionVisitor();
+			selection= sel.getSelection(select);
+		}
+		return selection;
 	}
 	
 	/**
 	 * Get the object construction for the SELECT clause.
 	 */
 	public ProjectionJSQL getProjection() {
-		ProjectionVisitor proj = new ProjectionVisitor();
-		return proj.getProjection(select);
+		if(projection==null){
+			ProjectionVisitor proj = new ProjectionVisitor();
+			projection= proj.getProjection(select);
+		}
+		return projection;
+		
 	}
 	/**
 	 * Set the object construction for the SELECT clause, 
@@ -157,7 +184,8 @@ public class VisitedQuery {
 	
 	public void setProjection(ProjectionJSQL projection) {
 		ProjectionVisitor proj = new ProjectionVisitor();
-		proj.setProjection(select, projection);
+		 proj.setProjection(select, projection);
+		 this.projection= projection;
 	}
 	
 	/**
@@ -169,6 +197,7 @@ public class VisitedQuery {
 	public void setSelection(SelectionJSQL selection) {
 		SelectionVisitor sel = new SelectionVisitor();
 		sel.setSelection(select, selection);
+		this.selection= selection;
 	}
 
 	
@@ -177,11 +206,10 @@ public class VisitedQuery {
 	 * object.
 	 */
 	public AggregationJSQL getGroupByClause() {
-		AggregationVisitor agg = new AggregationVisitor();
-		
-			AggregationJSQL groupByClause;
+		if(groupByClause== null){
+			AggregationVisitor agg = new AggregationVisitor();
 			groupByClause = agg.getAggregation(select);
-			
+		}
 		
 		return groupByClause;
 	}
@@ -190,8 +218,6 @@ public class VisitedQuery {
 		return select;
 	}
 	
-	public void setStatement(Select statement){
-		select= statement;
-	}
+	
 	
 }

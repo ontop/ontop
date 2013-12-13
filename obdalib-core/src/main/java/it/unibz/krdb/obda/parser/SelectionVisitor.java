@@ -220,7 +220,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Parenthesis parenthesis) {
-		// we do not execute anything
+			parenthesis.getExpression().accept(this);
 		
 	}
 
@@ -397,7 +397,10 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
 	@Override
 	public void visit(Column tableColumn) {
-//		we do not execute anything
+		if(tableColumn.getColumnName().contains("\""))
+		tableColumn.setColumnName(tableColumn.getColumnName().substring(1, tableColumn.getColumnName().length()-1));
+		
+		
 		
 	}
 
@@ -567,6 +570,8 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		if (!(left instanceof BinaryExpression) && 
 				!(right instanceof BinaryExpression)) {
 //			selection.addCondition(binaryExpression);
+			left.accept(this);
+			right.accept(this);
 		}
 		else
 		{

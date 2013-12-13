@@ -90,7 +90,6 @@ public class MappingAnalyzer {
 				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
 				// Currently disabled, to prevent interference with the MetaMappingExpander
 				//QueryTree queryTree = axiom.getSourceQueryTree();
-
 				
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
@@ -193,8 +192,7 @@ public class MappingAnalyzer {
 					
 				
 				}
-
-				
+		
 				
 				// Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
@@ -296,7 +294,7 @@ public class MappingAnalyzer {
 		else if (right instanceof IsNullExpression)
 			t2=getFunction((IsNullExpression) right, lookupTable);
 		else if (right instanceof Parenthesis){
-			//do something else probably manage
+			t2= manageParenthesis((Parenthesis) left, lookupTable);
 		}
 		else
 		if (right instanceof Column) {
@@ -304,7 +302,7 @@ public class MappingAnalyzer {
 			if(rightValueName.toLowerCase().equals("true") || rightValueName.toLowerCase().equals("false"))
 				t2 = dfac.getConstantLiteral(rightValueName, COL_TYPE.BOOLEAN);
 			else{
-			termRightName = lookupTable.lookup(rightValueName);
+			termRightName = lookupTable.lookup(right.toString());
 			if (termRightName == null) {
 				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
 			}
@@ -338,31 +336,31 @@ public class MappingAnalyzer {
 				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 			}
 
-		String op = pred.getStringExpression().toLowerCase();
+		String op = pred.getStringExpression();
 		
 		
 		Function funct = null;
-		if( pred instanceof EqualsTo)
+		if( op.equals("="))
 			funct = dfac.getFunctionEQ(t1, t2);
-		else if(pred instanceof GreaterThan)
+		else if(op.equals(">"))
 			funct = dfac.getFunctionGT(t1, t2); 
-		else if(pred instanceof MinorThan) 
+		else if(op.equals("<")) 
 			funct = dfac.getFunctionLT(t1, t2);
-		else if(pred instanceof GreaterThanEquals)
+		else if(op.equals(">=")) 
 			funct = dfac.getFunctionGTE(t1, t2);
-		else if(pred instanceof MinorThanEquals)
+		else if(op.equals("<="))
 			funct = dfac.getFunctionLTE(t1, t2);
-		else if(pred instanceof NotEqualsTo)
+		else if(op.equals("<>"))
 			funct = dfac.getFunctionNEQ(t1, t2);
-		else if (pred instanceof AndExpression)
+		else if(op.equals("AND"))
 			funct = dfac.getFunctionAND(t1, t2);
-		else if (pred instanceof OrExpression)
+		else if(op.equals("OR"))
 			funct = dfac.getFunctionOR(t1, t2);
-		else if (pred instanceof Addition)
+		else if(op.equals("+"))
 			funct = dfac.getFunctionAdd(t1, t2);
-		else if (pred instanceof Subtraction)
+		else if(op.equals("-"))
 			funct = dfac.getFunctionSubstract(t1, t2);
-		else if (pred instanceof Multiplication)
+		else if(op.equals("*"))
 			funct = dfac.getFunctionMultiply(t1, t2);
 		else
 			throw new RuntimeException("Unknown opertor: " + op);
@@ -434,6 +432,10 @@ public class MappingAnalyzer {
 				String COLUMNNAME = columnName.toUpperCase();
 				String columnname = columnName.toLowerCase();
 				
+//				lookupTable.add(quotedName, index);
+//				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
+//					lookupTable.add(aliasMap.get(columnName), columnName);
+//				}
 				lookupTable.add(columnName, index);
 				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(columnName), columnName);
@@ -450,7 +452,7 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
 				}
 				
-//				// If the column name in the select string is in double quotes
+				// If the column name in the select string is in double quotes
 //				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
 //					lookupTable.add(aliasMap.get(quotedName), columnName);
 //				}
@@ -462,6 +464,13 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
 				
+//				// attribute name with table name prefix
+//				String tablequotedName = tableName + "\".\"" + quotedName;
+//				lookupTable.add(tablequotedName, index);
+//				if (aliasMap.containsKey(tablequotedName)) { // register the alias name, if any
+//					lookupTable.add(aliasMap.get(tablequotedName), tablequotedName);
+//				}
+				
 				// attribute name with table given name prefix
 				String givenTableColumnName = tableGivenName + "." + columnName;
 				lookupTable.add(givenTableColumnName, tableColumnName);
@@ -469,9 +478,9 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(givenTableColumnName), tableColumnName);
 				}
 				
-				// attribute name with table given name prefix
-//				String givenTablequotedName = tableGivenName + "." + quotedName;
-////				lookupTable.add(givenTablequotedName, tableColumnName);
+				// attribute name with table given name prefix and quoted columns
+//				String givenTablequotedName = tableGivenName + "\".\"" + quotedName;
+//				lookupTable.add(givenTablequotedName, tableColumnName);
 //				if (aliasMap.containsKey(givenTablequotedName)) { // register the alias name, if any
 //					lookupTable.add(aliasMap.get(givenTablequotedName), tableColumnName);
 //				}

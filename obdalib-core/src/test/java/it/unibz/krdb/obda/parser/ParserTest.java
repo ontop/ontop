@@ -787,7 +787,14 @@ public class ParserTest extends TestCase {
 		assertTrue(result2);
 	}
 	
-	
+	public void test_11() {
+		final boolean result = parseJSQL("SELECT \"Name\" from grade, student where passed = FALSE AND ( \"course\" = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
+		printJSQL("test_11", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT \"Name\" from grade, student where passed = FALSE AND ( course = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
+		printSQL("test_11", result2);
+		assertTrue(result2);
+	}
 	
 	private String queryText;
 
@@ -811,7 +818,7 @@ public class ParserTest extends TestCase {
 	
 	private void printJSQL(String title, boolean isSupported) {
 		if (isSupported) {
-			System.out.println(title + ": " + queryText);
+			System.out.println(title + ": " + queryP.toString());
 			System.out.println("  Tables: " + queryP.getTableSet());
 			System.out.println("  Projection: " + queryP.getProjection());
 			System.out.println("  Selection: " + ((queryP.getSelection()==null) ? "--" : queryP.getSelection()));
@@ -853,7 +860,7 @@ public class ParserTest extends TestCase {
 	
 	private void printSQL(String title, boolean isSupported) {
 		if (isSupported) {
-			System.out.println(title + ": " + queryText);
+			System.out.println(title + ": " + queryTree.toString());
 			System.out.println("  Tables: " + queryTree.getTableSet());
 			System.out.println("  Projection: " + queryTree.getProjection());
 			System.out.println("  Selection: " + ((queryTree.getSelection() == null) ? "--" : queryTree.getSelection()));

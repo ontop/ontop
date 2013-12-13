@@ -8,14 +8,14 @@
  */
 package it.unibz.krdb.sql.api;
 
-import net.sf.jsqlparser.schema.Table;
+import java.io.Serializable;
 
 /**
  * The Relation class is a wrapper class that make the
- * {@link Table} class compatible with the 
+ * {@link TableJSQL} class compatible with the 
  * abstraction in the {@link VisitedQuery}.
  */
-public class RelationJSQL extends RelationalAlgebra {
+public class RelationJSQL implements Serializable, Cloneable  {
 
 	private static final long serialVersionUID = 8464933976477745339L;
 	
@@ -57,7 +57,7 @@ public class RelationJSQL extends RelationalAlgebra {
 	@Override
 	public boolean equals(Object r){
 		if(r instanceof RelationJSQL)
-			return this.table.getTableName().equals(((RelationJSQL)r).table.getTableName());
+			return this.table.getGivenName().equals(((RelationJSQL)r).table.getGivenName());
 		return false;
 	}
 }
