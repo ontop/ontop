@@ -63,17 +63,21 @@ public class InconsistencyCheckAction extends ProtegeAction {
 			try {
 				QuestOWL questReasoner = (QuestOWL) reasoner;
 				boolean isConsistent = questReasoner.isQuestConsistent();
+				log.debug("Checking for inconsistency returned: "+isConsistent);
 				if (isConsistent) {
-					JOptionPane.showMessageDialog(workspace, "Your ontology is consistent! Great job!");
+					JOptionPane.showMessageDialog(null, "Your ontology is consistent! Great job!");
 				} else {
-					JOptionPane.showMessageDialog(workspace, "Your ontology is not consistent. The axiom creating inconsistency is: "
+					JOptionPane.showMessageDialog(null, "Your ontology is not consistent. The axiom creating inconsistency is: \n"
 							+questReasoner.getInconsistentAxiom().toString());
 				}
 				
 			}catch(Exception ex){
-				JOptionPane.showMessageDialog(workspace, "An error occured. For more info, see the logs.");
+				JOptionPane.showMessageDialog(null, "An error occured. For more info, see the logs.");
 				log.error("Error during inconsistency checking. \n"+ex.getMessage()+"\n"+ex.getLocalizedMessage());
 			}
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "You have to start ontop reasoner for this feature.");
 		}
 	}
 
