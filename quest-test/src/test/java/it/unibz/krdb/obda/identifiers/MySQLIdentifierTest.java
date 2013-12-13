@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * correctly. Especially, that the unquoted identifers are treated as uppercase, and
  * that the case of quoted identifiers is not changed
  */
-public class OracleIdentifierTest extends TestCase {
+public class MySQLIdentifierTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -60,7 +60,7 @@ public class OracleIdentifierTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-oracle.obda";
+	final String obdafile = "resources/identifiers/identifiers-mysql.obda";
 	private QuestOWL reasoner;
 
 	@Override
@@ -105,12 +105,17 @@ public class OracleIdentifierTest extends TestCase {
 	
 	private String runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
+		//StringBuilder bf = new StringBuilder(query);
 		String retval;
 		try {
+			
+
 			QuestOWLResultSet rs = st.executeTuple(query);
+			
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
 			retval = ind1.toString();
+
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -126,49 +131,15 @@ public class OracleIdentifierTest extends TestCase {
 	}
 
 	/**
-	 * Test use of lowercase, unquoted table, schema and column identifiers (also in target)
+	 * Test use of lowercase column identifiers (also in target)
 	 * @throws Exception
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
 	}
 
-
-	/**
-	 * Test use of lowercase, unquoted table and column identifiers (also in target) with uppercase table identifiers
-	 * @throws Exception
-	 */
-	public void testUpperCaseTableUnquoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val =  runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-text>", val);
-	}
-	
-	/**
-	 * Tests column and tables with lowercase characters can be accessed
-	 * Note that this is not recommended by Oracle, and probably uncommon, but possible
-	 * 
-	 * @throws Exception
-	 */
-	public void testWeirdNames() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val =  runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-Name>", val);
-	}
-	
-	/**
-	 * Tests column names only differing in case can be accessed
-	 * Note that this is not recommended by Oracle, and probably uncommon, but possible
-	 * 
-	 * @throws Exception
-	 */
-	public void testwEIRDnAMES() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val =  runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-nAME>", val);
-	}
 	
 			
 }
