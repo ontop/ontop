@@ -11,7 +11,6 @@ package it.unibz.krdb.obda.quest.datatypes;
 import info.aduna.io.IOUtil;
 import it.unibz.krdb.obda.quest.ResultSetInfo;
 import it.unibz.krdb.obda.quest.ResultSetInfoTupleUtil;
-import it.unibz.krdb.obda.quest.scenarios.QuestScenarioParent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,9 +47,10 @@ import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SesameVirtualRepo;
 
-public class QuestDatatypeParent extends TestCase {
-	
-	static final Logger logger = LoggerFactory.getLogger(QuestScenarioParent.class);
+
+
+public abstract class QuestDatatypeParent extends TestCase {
+	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeParent.class);
 
 	protected final String testURI;
 	protected final String queryFileURL;
@@ -60,16 +60,6 @@ public class QuestDatatypeParent extends TestCase {
 	protected final String parameterFileURL;
 	protected Repository dataRep;
 	
-	public interface Factory {
-		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
-				String resultFileURL, String owlFileURL, String obdaFileURL);
-		
-		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
-				String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
-	
-		String getMainManifestFile();
-	}
-
 	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL, 
 			String owlFileURL, String obdaFileURL) {
 		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
@@ -84,6 +74,16 @@ public class QuestDatatypeParent extends TestCase {
 		this.owlFileURL = owlFileURL;
 		this.obdaFileURL = obdaFileURL;
 		this.parameterFileURL = parameterFileURL;
+	}
+	
+	public interface Factory {
+		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
+				String resultFileURL, String owlFileURL, String obdaFileURL);
+		
+		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL, 
+				String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
+
+		String getMainManifestFile();
 	}
 	
 	@Override
@@ -102,8 +102,8 @@ public class QuestDatatypeParent extends TestCase {
 			}
 		}
 	}
-
-	private Repository createRepository() throws Exception {
+	
+	protected Repository createRepository() throws Exception {
 		try {
 			SesameVirtualRepo repo = new SesameVirtualRepo(getName(), owlFileURL, obdaFileURL, parameterFileURL);
 			repo.initialize();
@@ -121,7 +121,7 @@ public class QuestDatatypeParent extends TestCase {
 			dataRep = null;
 		}
 	}
-
+	
 	@Override
 	protected void runTest() throws Exception {
 		ResultSetInfo expectedResult = readResultSetInfo();
