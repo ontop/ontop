@@ -3,7 +3,7 @@
 
 [SourceDeclaration]
 sourceUri	person
-connectionUrl	jdbc:mysql://obdalin3/optional_test
+connectionUrl	jdbc:mysql://10.7.20.39/optional_test
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
