@@ -1183,10 +1183,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		//for (int queryIdx = workingList.size() - 1; queryIdx > 0; queryIdx--) {	
 
-		for (int predIdx = 0; predIdx < predicatesInBottomUp.size(); predIdx++) {
+		for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
 			Predicate pred = predicatesInBottomUp.get(predIdx);
-			if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans1,2.. etc
+			if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
 				ruleIndex = depGraph.getRuleIndex();
 				List<CQIE> workingRules = ruleIndex.get(pred);
