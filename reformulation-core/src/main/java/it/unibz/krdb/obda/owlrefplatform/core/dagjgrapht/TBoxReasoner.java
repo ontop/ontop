@@ -32,7 +32,7 @@ public interface TBoxReasoner {
 
 	public Set<Description> getEquivalences(Description desc, boolean named);
 	
-	public DAG getDAG ();
+	public DAGImpl getDAG ();
 
 	public Ontology getSigmaOntology();
 

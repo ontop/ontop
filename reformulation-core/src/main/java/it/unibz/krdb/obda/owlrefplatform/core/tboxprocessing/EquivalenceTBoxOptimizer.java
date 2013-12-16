@@ -70,7 +70,7 @@ public class EquivalenceTBoxOptimizer {
 	 *
 	 */
 	public void optimize() {
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(tbox, false);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(tbox);
 		DAGImpl impliedDAG = reasoner.getDAG();
 
 //		try {

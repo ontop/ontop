@@ -18,9 +18,8 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Set;
@@ -53,8 +52,8 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology, false);
-		DAG res = reasoner.getDAG();
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology);
+		DAGImpl res = reasoner.getDAG();
 		reasoner.getChainDAG();
 
 		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(bc, false)));
@@ -104,9 +103,7 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
 		
 		//generate Graph
-		GraphBuilderImpl change= new GraphBuilderImpl(ontology);
-		
-		GraphImpl res = (GraphImpl) change.getGraph();
+		TBoxGraph res = TBoxGraph.getGraph(ontology);
 
 		
 		
@@ -179,7 +176,7 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology, false);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology);
 		reasoner.getChainDAG();
 
 		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(er, false)));

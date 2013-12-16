@@ -12,12 +12,10 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -29,35 +27,28 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  * 
  */
 
-public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> implements DAG {
+public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4466539952784531284L;
 	
-	boolean dag = false;
-	boolean namedDAG = false;
+	boolean dag; // true if DAG, false if NamedDAG
 	
 	private Set<OClass> classes = new LinkedHashSet<OClass> ();
 	private Set<Property> roles = new LinkedHashSet<Property> ();
 	
 	//map between an element  and the representative between the equivalent elements
-	private Map<Description, Description> replacements = new HashMap<Description, Description>();
+	private Map<Description, Description> replacements; 
 	
 	//map of the equivalent elements of an element
-	private Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
+	private Map<Description, Set<Description>> equivalencesMap; 
 
-	public DAGImpl(Class<? extends DefaultEdge> arg0) {
-		super(arg0);
-		dag=true;
+	public DAGImpl(Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
+		super(DefaultEdge.class);
+		this.equivalencesMap = equivalencesMap;
+		this.replacements = replacements;
+		dag = true;
 	}
 
-	public DAGImpl(EdgeFactory<Description,DefaultEdge> ef) {
-		super(ef);
-		dag=true;
-	}
-	
 	
 	/**
 	 * set we are working with a DAG and not a named DAG
@@ -66,10 +57,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 */
 	
 	public void setIsaDAG(boolean d){
-		
-		dag=d;
-		namedDAG=!d;
-
+		dag = d;
 	}
 
 	/**
@@ -79,10 +67,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 */
 
 	public void setIsaNamedDAG(boolean nd){
-		
-		namedDAG=nd;
-		dag=!nd;
-
+		dag = !nd;
 	}
 	/**
 	 * check if we are working with a DAG
@@ -92,7 +77,6 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 
 	public boolean isaDAG(){
 		return dag;
-
 	}
 
 	/**
@@ -101,9 +85,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * @return boolean <code> true</code> if named DAG and not DAG
 	 */
 	public boolean isaNamedDAG(){
-		return namedDAG;
-
-
+		return !dag; 
 	}
 	
 	/**
@@ -169,17 +151,14 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	}
 
 
-	@Override
 	/**
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
 	public Map<Description, Set<Description>> getMapEquivalences() {
-		
 		return equivalencesMap;
 	}
 
-	@Override
 	/**
 	 * Allows to have the map with replacements
 	 * @return  a map between the node and its representative node
@@ -188,27 +167,14 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 		return replacements;
 	}
 
-	@Override
-	/**
-	 * Allows to set the map with equivalences
-	 * @param  equivalences a map between the node and the set of all its equivalent nodes
-	 */
-	public void setMapEquivalences(Map<Description, Set<Description>> equivalences) {
-		this.equivalencesMap= equivalences;
-		
-	}
-	
 	/**
 	 * Allows to set the map with replacements
 	 * @param  replacements a map between the node and its representative node
 	 */
-	@Override
 	public void setReplacements(Map<Description, Description> replacements) {
-		this.replacements=replacements;
-		
+		this.replacements = replacements;	
 	}
 	
-	@Override
 	/**
 	 * Allows to obtain the node present in the DAG. 
 	 * @param  node a node that we want to know if it is part of the DAG
@@ -216,19 +182,11 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 */
 	public Description getNode(Description node){
 		if(replacements.containsKey(node))
-			node= replacements.get(node);
+			node = replacements.get(node);
 		else
-		if(!this.vertexSet().contains(node))
-			node=null;
+			if(!this.vertexSet().contains(node))
+				node = null;
 		return node;
 		
 	}
-
-	
-
-
-
-
-
-
 }

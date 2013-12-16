@@ -9,7 +9,7 @@ import org.jgrapht.*;
  * Allows obtaining the strongly connected components of a directed graph. 
  *
  *The implemented algorithm follows Cheriyan-Mehlhorn/Gabow's algorithm
- *Presented in Path-based depth-first search for strong and biconnected componentsby Gabow (2000).
+ *Presented in Path-based depth-first search for strong and biconnected components by Gabow (2000).
  *The running time is order of O(|V|+|E|)
 
  *
@@ -26,10 +26,8 @@ public class GabowSCC<V, E>
     // stores the vertices
     private Deque<VertexNumber<V>> stack = new ArrayDeque<VertexNumber<V>>();
     
-
     // the result of the computation, cached for future calls
-    private List<Set<V>> stronglyConnectedSets;
-
+    private List<EquivalenceClass<V>> stronglyConnectedSets;
 
     // maps vertices to their VertexNumber object
     private Map<V, VertexNumber<V>> vertexToVertexNumber;
@@ -51,15 +49,12 @@ public class GabowSCC<V, E>
      */
     public GabowSCC(DirectedGraph<V, E> directedGraph)
     {
-        if (directedGraph == null) {
-            throw new IllegalArgumentException("null not allowed for graph!");
-        }
-
+        assert (directedGraph != null);
+        
         graph = directedGraph;
         vertexToVertexNumber = null;
         
-        stronglyConnectedSets = null;
-        
+        stronglyConnectedSets = null;        
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -69,8 +64,7 @@ public class GabowSCC<V, E>
      *
      * @return the graph inspected 
      */
-    public DirectedGraph<V, E> getGraph()
-    {
+    public DirectedGraph<V, E> getGraph() {
         return graph;
     }
 
@@ -79,8 +73,7 @@ public class GabowSCC<V, E>
      *
      * @return true if the graph is strongly connected, false otherwise
      */
-    public boolean isStronglyConnected()
-    {
+    public boolean isStronglyConnected() {
         return stronglyConnectedSets().size() == 1;
     }
 
@@ -89,31 +82,28 @@ public class GabowSCC<V, E>
      * which together form a strongly connected component within the given
      * graph.
      *
-     * @return <code>List</code> of <code>Set</code> s containing the strongly
+     * @return <code>List</code> of <code>EquivalanceClass</code>es containing the strongly
      * connected components
      */
-    public List<Set<V>> stronglyConnectedSets()
+    public List<EquivalenceClass<V>> stronglyConnectedSets()
     {
         if (stronglyConnectedSets == null) {
             
-            stronglyConnectedSets = new Vector<Set<V>>();
+            stronglyConnectedSets = new Vector<EquivalenceClass<V>>();
 
-            
             // create VertexData objects for all vertices, store them
             createVertexNumber();
 
             // perform  DFS
-            for (VertexNumber<V> data : vertexToVertexNumber.values()) {
-            	
-                if (data.getNumber()==0) {
+            for (VertexNumber<V> data : vertexToVertexNumber.values()) {           	
+                if (data.getNumber() == 0) {
                     dfsVisit(graph, data);
                 }
             }
-
                   
             vertexToVertexNumber = null;
-            stack =null;
-            B=null;
+            stack = null;
+            B = null;
         }
 
         return stronglyConnectedSets;
@@ -122,21 +112,16 @@ public class GabowSCC<V, E>
    
     /*
      * Creates a VertexNumber object for every vertex in the graph and stores
-     * them
-     * in a HashMap.
+     * them in a HashMap.
      */
     
     private void createVertexNumber()
     {
-    	c=graph.vertexSet().size();
-        vertexToVertexNumber =
-            new HashMap<V, VertexNumber<V>>(c);
+    	c = graph.vertexSet().size();
+        vertexToVertexNumber = new HashMap<V, VertexNumber<V>>(c);
 
         for (V vertex : graph.vertexSet()) {
-            vertexToVertexNumber.put(
-                vertex,
-                new VertexNumber<V>(vertex, 0));
-            
+            vertexToVertexNumber.put(vertex, new VertexNumber<V>(vertex, 0));            
         }
         
         stack = new ArrayDeque<VertexNumber<V>>(c);
@@ -146,81 +131,66 @@ public class GabowSCC<V, E>
     /*
      * The subroutine of DFS. 
      */
-    private void dfsVisit(
-        DirectedGraph<V, E> visitedGraph,
-        VertexNumber<V> v)
-    {
+    private void dfsVisit(DirectedGraph<V, E> visitedGraph, VertexNumber<V> v) 
+    {	
     	 VertexNumber<V> w;
     	 stack.add(v);
-    	 B.add(v.setNumber(stack.size()-1));
+    	 B.add(v.setNumber(stack.size() - 1));
     	
+         // follow all edges
+         for (E edge : visitedGraph.outgoingEdgesOf(v.getVertex())) {
+        	 
+        	 w =  vertexToVertexNumber.get(visitedGraph.getEdgeTarget(edge));
 
-                // follow all edges
-               	
-                	for (E edge : visitedGraph.outgoingEdgesOf(v.getVertex())) {
-                		w =  vertexToVertexNumber.get(
-                                visitedGraph.getEdgeTarget(edge));
-
-
-                    if (w.getNumber()==0) {
-                        dfsVisit(graph, w);
-                    }
-                    else { /*contract if necessary*/
-                    	while (w.getNumber() < B.getLast()) 
-                    	 B.removeLast(); 
-                    	 } 
-                    	 }
-                Set<V> L = new HashSet<V>(); 
-                if (v.getNumber() == (B.getLast())) { 
-                	/* number vertices of the next
-                		strong component */
-                 B.removeLast(); 
+             if (w.getNumber() == 0) {
+            	 dfsVisit(graph, w);
+             }
+             else { /*contract if necessary*/
+            	 while (w.getNumber() < B.getLast()) 
+            		 B.removeLast(); 
+             } 
+         }
+         
+         Set<V> L = new HashSet<V>(); 
+         if (v.getNumber() == (B.getLast())) { 
+        	 /* number vertices of the next strong component */
+        	 B.removeLast(); 
               
-                c++;
-                while (v.getNumber() <= (stack.size()-1)) {
-                	VertexNumber<V> r= stack.removeLast();
+             c++;
+             while (v.getNumber() <= (stack.size()-1)) {
+            	 VertexNumber<V> r = stack.removeLast();
                  L.add(r.getVertex()); 
                  r.setNumber(c);
-                } 
-                stronglyConnectedSets.add(L); 
-                 } 
+             } 
+             stronglyConnectedSets.add(new EquivalenceClass<V>(L)); 
+         } 
     }
 
   
    
     
     private static final class VertexNumber<V>
-    
-{
-    V vertex;
-    int number=0;
+    {
+    	V vertex;
+    	int number;
     	
-    private VertexNumber(
-        V vertex,
-        int number)
-    {
-        this.vertex=vertex;
-        this.number=number;
-    }
+    	private VertexNumber(V vertex, int number) {
+    		this.vertex = vertex;
+    		this.number = number;
+    	}
 
-    int getNumber()
-    {
-        return number;
-    }
+    	int getNumber() {
+    		return number;
+    	}
 
-    V getVertex()
-    {
-        return vertex ;
-    }
-    Integer setNumber( int n){
-    	return number=n;
+    	V getVertex() {
+    		return vertex;
+    	}
     	
+    	Integer setNumber(int n) {
+    		return number=n;
+    	}
     }
-    
- 
-}
-
-   
 }
 
 // End 

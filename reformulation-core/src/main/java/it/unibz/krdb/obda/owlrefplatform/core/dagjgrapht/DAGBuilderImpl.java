@@ -26,30 +26,24 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
  * Starting from a graph build a DAG. 
  * Considering  equivalences and redundancies, it eliminates cycles executes
  * transitive reduction.
+	// contains the representative node with the set of equivalent mappings.
  */
 
-public class DAGBuilderImpl implements DAGBuilder {
+/***
+ * A map to keep the relationship between 'eliminated' and 'remaining'
+ * nodes, created while computing equivalences by eliminating cycles in the
+ * graph.
+ */
 
-	// contains the representative node with the set of equivalent mappings.
-	private Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
+public class DAGBuilderImpl {
 
-	/***
-	 * A map to keep the relationship between 'eliminated' and 'remaining'
-	 * nodes, created while computing equivalences by eliminating cycles in the
-	 * graph.
-	 */
-	private Map<Description, Description> replacements = new HashMap<Description, Description>();
-
-	private DAGImpl dag = new DAGImpl(DefaultEdge.class);
-
-	// graph transformed in a dag
-	private GraphImpl modifiedGraph;
 
 	/**
 	 * *Construct a DAG starting from a given graph 
@@ -57,39 +51,24 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * @param graph needs a graph with or without cycles 
 	 */
 	
-	public DAGBuilderImpl(Graph graph) {
+	public static DAGImpl getDAG(TBoxGraph graph) {
+
+		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
+		Map<Description, Description> replacements = new HashMap<Description, Description>();
 
 		// temporary graph to be transformed in DAG
-		modifiedGraph = new GraphImpl(DefaultEdge.class);
+		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = graph.getCopy();
 
-		// clone all the vertex and edges from dag
+		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
 
-		for (Description v : ((GraphImpl) graph).vertexSet()) {
-			modifiedGraph.addVertex(v);
-
-		}
-
-		for (DefaultEdge e : ((GraphImpl) graph).edgeSet()) {
-
-			Description s = ((GraphImpl) graph).getEdgeSource(e);
-			Description t = ((GraphImpl) graph).getEdgeTarget(e);
-
-			modifiedGraph.addEdge(s, t, e);
-		}
-
-		eliminateCycles(graph);
-
-		eliminateRedundantEdges();
+		eliminateRedundantEdges(modifiedGraph);
 
 		// change the graph in a dag
 
-		dag = new DAGImpl(DefaultEdge.class);
+		DAGImpl dag = new DAGImpl(equivalencesMap, replacements);
 		Graphs.addGraph(dag, modifiedGraph);
-
-		dag.setMapEquivalences(equivalencesMap);
-		dag.setReplacements(replacements);
 		dag.setIsaDAG(true);
-		modifiedGraph = null;
+		return dag;
 
 	}
 
@@ -99,31 +78,26 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * 
 	 * @param graph needs a graph with or without cycles
 	 * @param equivalents a map between the node and its equivalent nodes
-	 * @param representatives a map between the node and its representive node
+	 * @param representatives a map between the node and its representative node
 	 */
-	public DAGBuilderImpl(Graph graph,
-			Map<Description, Set<Description>> equivalents,
-			Map<Description, Description> representatives) {
+	public static DAGImpl getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph,
+			Map<Description, Set<Description>> equivalencesMap,
+			Map<Description, Description> replacements) {
 
-		modifiedGraph = (GraphImpl) graph;
+		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = graph;
 
-		equivalencesMap = equivalents;
-		replacements = representatives;
-
-		eliminateCycles(graph);
-		eliminateRedundantEdges();
+		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
+		eliminateRedundantEdges(modifiedGraph);
 
 		// System.out.println("modified graph "+modifiedGraph);
 
-		dag = new DAGImpl(DefaultEdge.class);
+		DAGImpl dag = new DAGImpl(equivalencesMap, replacements);
 
 		// change the graph in a dag
 		Graphs.addGraph(dag, modifiedGraph);
-
-		dag.setMapEquivalences(equivalencesMap);
-		dag.setReplacements(replacements);
 		dag.setIsaDAG(true);
 		modifiedGraph = null;
+		return dag;
 
 	}
 
@@ -138,7 +112,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * Compute the set of all nodes with more than 2 outgoing edges (these have
 	 * candidate redundant edges.) <br>
 	 */
-	private void eliminateRedundantEdges() {
+	private static void eliminateRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph) {
 		/* Compute the candidate nodes */
 		List<Description> candidates = new LinkedList<Description>();
 		Set<Description> vertexes = modifiedGraph.vertexSet();
@@ -180,7 +154,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 						.getEdgeTarget(currentPathEdge);
 				if (eliminatedEdges.contains(currentPathEdge))
 					continue;
-				eliminateRedundantEdge(currentPathEdge, targets, targetEdgeMap,
+				eliminateRedundantEdge(modifiedGraph, currentPathEdge, targets, targetEdgeMap,
 						currentTarget, eliminatedEdges);
 			}
 
@@ -188,7 +162,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 	}
 
-	private void eliminateRedundantEdge(DefaultEdge safeEdge,
+	private static void eliminateRedundantEdge(DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph, DefaultEdge safeEdge,
 			Set<Description> targets,
 			Map<Description, DefaultEdge> targetEdgeMap,
 			Description currentTarget, Set<DefaultEdge> eliminatedEdges) {
@@ -209,7 +183,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 		for (DefaultEdge outEdge : edgesInPath) {
 			Description target = modifiedGraph.getEdgeTarget(outEdge);
 			// System.out.println("target "+target+" "+outEdge);
-			eliminateRedundantEdge(safeEdge, targets, targetEdgeMap, target,
+			eliminateRedundantEdge(modifiedGraph, safeEdge, targets, targetEdgeMap, target,
 					eliminatedEdges);
 		}
 
@@ -234,14 +208,14 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * 
 	 */
 
-	private void eliminateCycles(Graph graph) {
+	private static void eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
 
 		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(
 				modifiedGraph);
 
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
-		List<Set<Description>> equivalenceSets = inspector
+		List<EquivalenceClass<Description>> equivalenceSets = inspector
 				.stronglyConnectedSets();
 
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
@@ -257,7 +231,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 		
 
-		for (Set<Description> equivalenceSet : equivalenceSets) {
+		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) {
 
 			if (equivalenceSet.size() < 2)
 				continue;
@@ -276,7 +250,7 @@ public class DAGBuilderImpl implements DAGBuilder {
 
 				}
 				// assign to each node the equivalent map set
-				equivalencesMap.put(node, equivalenceSet);
+				equivalencesMap.put(node, equivalenceSet.getMembers());
 
 				if (!ignore && !(node instanceof Property)) {
 					ignore = true;
@@ -306,14 +280,14 @@ public class DAGBuilderImpl implements DAGBuilder {
 						if (processedNodes.contains(target))
 							if (((Property) target).isInverse()) {
 								ignore = true;
-								chosenNodes.addAll(equivalenceSet);
+								chosenNodes.addAll(equivalenceSet.getMembers());
 								break;
 							}
 
 						if (chosenNodes.contains(target)) {
 
 							ignore = true;
-							chosenNodes.addAll(equivalenceSet);
+							chosenNodes.addAll(equivalenceSet.getMembers());
 							break;
 						}
 
@@ -381,13 +355,6 @@ public class DAGBuilderImpl implements DAGBuilder {
 			processedNodes.add(range);
 
 			processedNodes.add(representative);
-
-			Set<Description> inverseMap = new HashSet<Description>();
-			Set<Description> existMap = new HashSet<Description>();
-			Set<Description> existInverseMap = new HashSet<Description>();
-			existInverseMap.add(range);
-			existMap.add(domain);
-			inverseMap.add(inverse);
 
 			//remove all the equivalent node (eliminatedNode)
 			
@@ -649,13 +616,13 @@ public class DAGBuilderImpl implements DAGBuilder {
 		 * Second check of the strongly connected components for the classes
 		 * 
 		 */
-		List<Set<Description>> equivalenceClassSets = inspector
+		List<EquivalenceClass<Description>> equivalenceClassSets = inspector
 				.stronglyConnectedSets();
 		Set<Description> processedClassNodes = new HashSet<Description>();
 
 		// processedNodes.clear();
 
-		for (Set<Description> equivalenceClassSet : equivalenceClassSets) {
+		for (EquivalenceClass<Description> equivalenceClassSet : equivalenceClassSets) {
 
 			if (equivalenceClassSet.size() < 2)
 				continue;
@@ -907,11 +874,5 @@ public class DAGBuilderImpl implements DAGBuilder {
 	 * while(iterator.hasNext()){ Description parent=iterator.next();
 	 * if(parent.equals(vertex)) return true; } return false; }
 	 */
-
-	@Override
-	public DAG getDAG() {
-
-		return dag;
-	}
 
 }

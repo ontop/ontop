@@ -4,8 +4,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 
 import java.io.File;
 
@@ -35,20 +34,16 @@ public class S_InputOWL {
 		Ontology o = translator.translate(ontology);
 		
 		//generate Graph
-		GraphBuilderImpl change= new GraphBuilderImpl(o);
-		
-		GraphImpl graph = (GraphImpl) change.getGraph();
+		TBoxGraph graph = TBoxGraph.getGraph(o);
 		
 		//generate DAG
-		DAGBuilderImpl change2 = new DAGBuilderImpl(graph);
-		
-		DAGImpl dag=(DAGImpl) change2.getDAG();
+		DAGImpl dag= DAGBuilderImpl.getDAG(graph);
 		
 
 		return dag;
 	}
 	
-public static GraphImpl createGraph(String file) throws Exception{
+public static TBoxGraph createGraph(String file) throws Exception{
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(file)));
@@ -57,12 +52,8 @@ public static GraphImpl createGraph(String file) throws Exception{
 		Ontology o = translator.translate(ontology);
 		
 		//generate Graph
-		GraphBuilderImpl change= new GraphBuilderImpl(o);
-		
-		GraphImpl graph = (GraphImpl) change.getGraph();
-		
-		
-		
+		TBoxGraph graph = TBoxGraph.getGraph(o);
+
 		return graph;
 	}
 

@@ -11,7 +11,6 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
@@ -27,7 +26,7 @@ public class DAGTest extends TestCase {
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	private void test_dag_index_nodes(String testname) throws Exception {
-		DAG res = helper.load_dag(testname);
+		DAGImpl res = helper.load_dag(testname);
 		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
 		List<List<Description>> exp_idx = helper.get_results(testname);
 

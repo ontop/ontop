@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -80,12 +80,11 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			GraphImpl graph1= S_InputOWL.createGraph(fileInput);
+			TBoxGraph graph1= S_InputOWL.createGraph(fileInput);
 
 			DAGImpl dag2= S_InputOWL.createDAG(fileInput);
 			//transform in a named graph
-			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag2);
-			DAGImpl namedDag2= transform.getDAG();
+			DAGImpl namedDag2= NamedDAGBuilderImpl.getNamedDAG(dag2);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", namedDag2);
@@ -166,7 +165,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testDescendants( DAGImpl d1, GraphImpl d2, boolean named){
+			private boolean testDescendants( DAGImpl d1, TBoxGraph d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -215,7 +214,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testChildren(GraphImpl d1, DAGImpl d2, boolean named){
+			private boolean testChildren(TBoxGraph d1, DAGImpl d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -314,7 +313,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testAncestors(GraphImpl d1, DAGImpl d2, boolean named){
+			private boolean testAncestors(TBoxGraph d1, DAGImpl d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -419,7 +418,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testParents(GraphImpl d1, DAGImpl d2, boolean named){
+			private boolean testParents(TBoxGraph d1, DAGImpl d2, boolean named){
 				boolean result = false;
 				TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
 				TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
@@ -519,7 +518,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean checkVertexReduction(GraphImpl d1, DAGImpl d2, boolean named){
+			private boolean checkVertexReduction(TBoxGraph d1, DAGImpl d2, boolean named){
 
 				//number of vertexes in the graph
 				int numberVertexesD1= 0;
@@ -561,7 +560,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean checkEdgeReduction(GraphImpl d1, DAGImpl d2, boolean named){
+			private boolean checkEdgeReduction(TBoxGraph d1, DAGImpl d2, boolean named){
 				
 				//number of edges in the graph
 				int  numberEdgesD1= d1.edgeSet().size();

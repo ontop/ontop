@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.StrongConnectivityInspector;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
@@ -40,30 +41,25 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class TBoxReasonerImpl implements TBoxReasoner {
 
-	DAGImpl dag;
-	GraphImpl graph;
+	private DAGImpl dag;
+	private TBoxGraph graph;
 	AbstractGraphIterator<Description, DefaultEdge> iterator;
 
 	private Set<OClass> namedClasses;
 	private Set<Property> property;
 
-	public TBoxReasonerImpl(Ontology ontology, boolean named) {
+	public TBoxReasonerImpl(Ontology ontology) {
 
 		// generate Graph
-		GraphBuilderImpl change = new GraphBuilderImpl(ontology);
-
-		graph = (GraphImpl) change.getGraph();
+		graph = TBoxGraph.getGraph(ontology);
 
 		// generate DAG
-		DAGBuilderImpl change2 = new DAGBuilderImpl(graph);
+		dag = DAGBuilderImpl.getDAG(graph);
 
-		dag = (DAGImpl) change2.getDAG();
-
-		if (named) // generate namedDAG
-		{
-			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
-			dag = transform.getDAG();
-		}
+//		if (named) // generate namedDAG // NEVER USED
+//		{
+//			dag = NamedDAGBuilderImpl.getNamedDAG(dag);
+//		}
 
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();
@@ -71,13 +67,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	/**
 	 * Constructor using a DAG or a named DAG
-	 * @param dag DAG to be used for resoning
+	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImpl(DAG dag) {
-		this.dag = (DAGImpl) dag;
+	public TBoxReasonerImpl(DAGImpl dag) {
+		this.dag = dag;
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();
-
 	}
 
 	
@@ -85,11 +80,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * Constructor using a graph (cycles admitted)
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImpl(Graph graph) {
-		this.graph = (GraphImpl) graph;
+	public TBoxReasonerImpl(TBoxGraph graph) {
+		this.graph = graph;
 		namedClasses = graph.getClasses();
 		property = graph.getRoles();
-
 	}
 
 	/**
@@ -518,7 +512,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		} else {
 			// reverse the graph
 			DirectedGraph<Description, DefaultEdge> reversed = new EdgeReversedGraph<Description, DefaultEdge>(
-					graph);
+					graph.getGraph());
 
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
 					reversed, desc);
@@ -617,7 +611,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		} else {
 
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
-					graph, desc);
+					graph.getGraph(), desc);
 
 			// I don't want to consider the current node
 			Description current = iterator.next();
@@ -706,8 +700,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		else {
 
 			// search for cycles
-			StrongConnectivityInspector<Description, DefaultEdge> inspector = new StrongConnectivityInspector<Description, DefaultEdge>(
-					graph);
+			StrongConnectivityInspector<Description, DefaultEdge> inspector = 
+					new StrongConnectivityInspector<Description, DefaultEdge>(graph.getGraph());
 
 			// each set contains vertices which together form a strongly
 			// connected component within the given graph
@@ -784,7 +778,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return dag;
 	}
 
-	public GraphImpl getGraph() {
+	public TBoxGraph getGraph() {
 
 		return graph;
 	}
@@ -801,7 +795,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public void getChainDAG() {
 		if (dag != null) {
 			// move everything to a graph that admits cycles
-			GraphImpl modifiedGraph = new GraphImpl(DefaultEdge.class);
+			DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
+					new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 
 			// clone all the vertex and edges from dag
 
@@ -898,10 +893,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			DAGBuilderImpl change2 = new DAGBuilderImpl(modifiedGraph,
+			dag = DAGBuilderImpl.getDAG(modifiedGraph,
 					dag.getMapEquivalences(), dag.getReplacements());
-
-			dag = (DAGImpl) change2.getDAG();
 
 		} else // if graph
 		{
@@ -933,14 +926,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				for (Set<Description> children : childrenExist) {
 					for (Description child : children) {
 						// DAGOperations.addParentEdge(child, existsInvNode);
-						graph.addEdge(child, existsInvNode);
+						graph.getGraph().addEdge(child, existsInvNode);
 
 					}
 				}
 				for (Set<Description> children : childrenExistInv) {
 					for (Description child : children) {
 						// DAGOperations.addParentEdge(child, existsNode);
-						graph.addEdge(child, existsNode);
+						graph.getGraph().addEdge(child, existsNode);
 
 					}
 				}
@@ -953,7 +946,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				for (Set<Description> parents : parentExist) {
 					for (Description parent : parents) {
 						// DAGOperations.addParentEdge(existsInvNode, parent);
-						graph.addEdge(existsInvNode, parent);
+						graph.getGraph().addEdge(existsInvNode, parent);
 
 					}
 				}
@@ -961,7 +954,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				for (Set<Description> parents : parentsExistInv) {
 					for (Description parent : parents) {
 						// DAGOperations.addParentEdge(existsNode,parent);
-						graph.addEdge(existsNode, parent);
+						graph.getGraph().addEdge(existsNode, parent);
 
 					}
 				}
@@ -971,9 +964,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			DAGBuilderImpl change2 = new DAGBuilderImpl(graph);
-
-			dag = (DAGImpl) change2.getDAG();
+			dag = DAGBuilderImpl.getDAG(graph);
 
 		}
 

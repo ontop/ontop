@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
@@ -387,9 +386,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private Properties config;
 
-	private DAG dag;
+	private DAGImpl dag;
 
-	 private DAG pureIsa;
+	 private DAGImpl pureIsa;
 
 	private TBoxReasoner reasonerDag;
 	
@@ -454,7 +453,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.config = config;
 	}
 
-	public DAG getDAG() {
+	public DAGImpl getDAG() {
 		return dag;
 	}
 
@@ -475,15 +474,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * nodes are, the DAGNode for P, and the top most inverse children of P
 		 */
 
-		reasonerDag = new TBoxReasonerImpl(ontology,false);
+		reasonerDag = new TBoxReasonerImpl(ontology);
 		
 		dag=reasonerDag.getDAG();
 		
 		
 		//build the namedDag (or pureIsa)
-		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
-		
-		pureIsa = transform.getDAG();
+		pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 		
 		reasonerIsa = new TBoxReasonerImpl(pureIsa);
 

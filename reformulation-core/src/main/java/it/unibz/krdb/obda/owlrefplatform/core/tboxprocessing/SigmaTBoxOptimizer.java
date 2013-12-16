@@ -58,15 +58,15 @@ public class SigmaTBoxOptimizer {
 		this.originalOntology = isat;
 
 		this.originalSigma = sigmat;
-		reasonerIsa= new TBoxReasonerImpl(isat,false);
+		reasonerIsa= new TBoxReasonerImpl(isat);
 		this.isa = reasonerIsa.getDAG();
-		TBoxReasonerImpl reasonerSigma= new TBoxReasonerImpl(sigmat,false);
+		TBoxReasonerImpl reasonerSigma= new TBoxReasonerImpl(sigmat);
 		this.sigma = reasonerSigma.getDAG();
-		reasonerIsaChain= new TBoxReasonerImpl(isat,false);
+		reasonerIsaChain= new TBoxReasonerImpl(isat);
 		this.isaChain = reasonerIsaChain.getDAG();
 		reasonerIsaChain.getChainDAG();
 		
-		reasonerSigmaChain= new TBoxReasonerImpl(sigmat,false);
+		reasonerSigmaChain= new TBoxReasonerImpl(sigmat);
 		this.sigmaChain =  reasonerSigmaChain.getDAG();
 		reasonerSigmaChain.getChainDAG();
 

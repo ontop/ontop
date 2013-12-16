@@ -125,7 +125,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
-		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o, false);
+		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o);
 		DAGImpl impliedDAG = reasoner.getDAG();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -218,7 +218,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
-		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o, false);
+		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o);
 		DAGImpl impliedDAG = reasoner.getDAG();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -314,7 +314,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
-		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o, false);
+		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o);
 		DAGImpl impliedDAG = reasoner.getDAG();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
