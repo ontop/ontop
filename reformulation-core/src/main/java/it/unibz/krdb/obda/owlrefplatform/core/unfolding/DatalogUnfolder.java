@@ -74,7 +74,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
 	private Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<Predicate, List<CQIE>>();
+	
 
+	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
+	
+	
 	/***
 	 * Leaf predicates are those that do not appear in the head of any rule. If
 	 * a predicate is a leaf predicate, it should not be unfolded, they indicate
@@ -103,10 +107,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		for (CQIE mappingrule : unfoldingProgram.getRules()) {
 			Function head = mappingrule.getHead();
 
-			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
+			List<CQIE> rules = mappings.get(head.getFunctionSymbol());
 			if (rules == null) {
 				rules = new LinkedList<CQIE>();
-				ruleIndex.put(head.getFunctionSymbol(), rules);
+				mappings.put(head.getFunctionSymbol(), rules);
 			}
 			rules.add(mappingrule);
 
@@ -123,7 +127,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * the predicates taht do not appear in the head of rules are leaf
 		 * predicates
 		 */
-		allPredicates.removeAll(ruleIndex.keySet());
+		allPredicates.removeAll(mappings.keySet());
 		extensionalPredicates.addAll(allPredicates);
 	}
 
@@ -1410,7 +1414,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 */
 
 		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
-
+		
 		/*
 		 * If there are none, the atom is logically empty, careful, LEFT JOIN
 		 * alert!
