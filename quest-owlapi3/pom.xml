@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.11-SNAPSHOT</version>
+		<version>1.10</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ontop-quest-owlapi3</artifactId>
