@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
 import it.unibz.krdb.sql.api.SelectionJSQL;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -77,15 +78,16 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
 //	ArrayList<SelectionJSQL> selections; // add if we want to consider the UNION case
 	SelectionJSQL selection;
-	boolean binaryExp =false; // true when the binary expression contains all other expressions
+	boolean notSupported=false;
 	boolean setSel=false;
 	
 	/**
 	 * Give the WHERE clause of the select statement
 	 * @param select the parsed select statement
 	 * @return a SelectionJSQL
+	 * @throws JSQLParserException 
 	 */
-	public SelectionJSQL getSelection(Select select)
+	public SelectionJSQL getSelection(Select select) throws JSQLParserException
 	{
 		
 //		selections= new ArrayList<SelectionJSQL>(); // use when we want to consider the UNION
@@ -95,6 +97,8 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 			}
 		}
 		select.getSelectBody().accept(this);
+		if(notSupported)
+				throw new JSQLParserException("Query not yet supported");
 		return selection;
 		
 	}
@@ -134,7 +138,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
                  
                 	 selection= new SelectionJSQL();
 					 selection.addCondition( where);
-                	 binaryExp=true;
+                	 
                  
                  where.accept(this);
                  
@@ -166,7 +170,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Function function) {
-		// we do not execute anything
+		notSupported=true;
 		
 	}
 

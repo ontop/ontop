@@ -511,7 +511,7 @@ public class MappingAnalyzer {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias!=null) {
-					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
+					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
 					if (aliasMap.containsKey(qualifiedColumnAlias)) {
 						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);

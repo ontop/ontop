@@ -137,15 +137,15 @@ public class ParserTest extends TestCase {
 		
 	}
 	
-		public void test_1_5_extra_4() {
-			final boolean result = parseJSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
-			printJSQL("test_1_5_extra_4", result);
-			assertTrue(result);
-			final boolean result2 = parseSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
-			printSQL("test_1_5_extra_4", result2);
-			assertTrue(result2);
-			
-		}
+	public void test_1_5_extra_4() {
+		final boolean result = parseJSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
+		printJSQL("test_1_5_extra_4", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT \"URI1\" as X, \"URI2\" as Y FROM QUEST_OBJECT_PROPERTY_ASSERTION WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
+		printSQL("test_1_5_extra_4", result2);
+		assertTrue(result2);
+		
+	}
 		
 	
 	
@@ -806,6 +806,15 @@ public class ParserTest extends TestCase {
 		assertTrue(result2);
 	}
 	
+	public void test_11_1() {
+		final boolean result = parseJSQL("select t1.owner NAME from all_tables t1, all_tables t2, ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = t2.owner and t1.owner = ALL_VIEWS.OWNER");
+		printJSQL("test_11_1", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("select t1.owner NAME from all_tables t1, all_tables t2, ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = t2.owner and t1.owner = ALL_VIEWS.OWNER");
+		printSQL("test_11_1", result2);
+		assertTrue(result2);
+	}
+	
 	private String queryText;
 
 	VisitedQuery queryP;
@@ -830,8 +839,14 @@ public class ParserTest extends TestCase {
 		if (isSupported) {
 			System.out.println(title + ": " + queryP.toString());
 			System.out.println("  Tables: " + queryP.getTableSet());
-			System.out.println("  Projection: " + queryP.getProjection());
-			System.out.println("  Selection: " + ((queryP.getSelection()==null) ? "--" : queryP.getSelection()));
+			try {
+				System.out.println("  Projection: " + queryP.getProjection());
+			
+				System.out.println("  Selection: " + ((queryP.getSelection()==null) ? "--" : queryP.getSelection()));
+			} catch (JSQLParserException e) {
+				
+				e.printStackTrace();
+			}
 			System.out.println("  Aliases: " + (queryP.getAliasMap().isEmpty() ? "--" : queryP.getAliasMap()));
 			System.out.println("  GroupBy: " +  queryP.getGroupByClause());
 			System.out.println("  Join conditions: " + (queryP.getJoinCondition().isEmpty() ? "--" : queryP.getJoinCondition()));

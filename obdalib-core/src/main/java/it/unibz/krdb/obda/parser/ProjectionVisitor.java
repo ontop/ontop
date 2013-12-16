@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibz.krdb.sql.api.ProjectionJSQL;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -74,15 +75,17 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	ProjectionJSQL projection;
 	boolean bdistinctOn = false;
 	boolean setProj = false;
+	boolean notSupported = false;
 	
 	
 	/**
 	 * Return the list of Projection with the expressions between SELECT and FROM
 	 * @param select parsed statement
 	 * @return
+	 * @throws JSQLParserException 
 	 */
 	
-	public ProjectionJSQL getProjection(Select select) {
+	public ProjectionJSQL getProjection(Select select) throws JSQLParserException {
 		
 //		projections = new ArrayList<ProjectionJSQL>(); //used if we want to consider UNION
 		
@@ -92,6 +95,9 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			}
 		}
 		select.getSelectBody().accept(this);
+		
+		if(notSupported)
+				throw new JSQLParserException("Query not yet supported");
 		
 		return projection;	
 		
@@ -247,7 +253,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
+		notSupported=true;
 		
 	}
 

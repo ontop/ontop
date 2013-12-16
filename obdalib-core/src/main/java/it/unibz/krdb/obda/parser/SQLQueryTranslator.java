@@ -24,8 +24,10 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectItem;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -104,7 +106,7 @@ public class SQLQueryTranslator {
 	
 	
 	private VisitedQuery constructParser (String query, boolean generateViews){
-		
+		boolean errors=false;
 		VisitedQuery queryParser = null;
 		try {
 			queryParser = new VisitedQuery(query);
@@ -114,10 +116,11 @@ public class SQLQueryTranslator {
 		} catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)
 				log.warn("Parse exception, it is not possible to use any SQL reserved keywords "+ e.getCause().getMessage());
+			errors=true;
 			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
 		}
 		
-		if (queryParser == null && generateViews )
+		if (queryParser == null || (errors && generateViews) )
 			queryParser = createView(query);
 		
 		return queryParser;
@@ -225,11 +228,18 @@ public class SQLQueryTranslator {
 		return viewDefinition;
 	}
 	
-	//check if it is correct I create a new statement and add the table information in the FROMitem expression
+	/*
+	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROMitem expression
+	 * We create a query that looks like SELECT * FROM viewName
+	 */
 	private VisitedQuery createViewParsed(String viewName, String query) {		
-		Table view = new Table("", viewName);
+		Table view = new Table(null, viewName);
 		PlainSelect body = new PlainSelect();
 		body.setFromItem(view);
+		ArrayList<SelectItem> list = new ArrayList<SelectItem>();
+		list.add(new AllColumns());
+		body.setSelectItems(list);
+
 		Select select= new Select();
 		select.setSelectBody(body);
 		VisitedQuery queryParsed = null;

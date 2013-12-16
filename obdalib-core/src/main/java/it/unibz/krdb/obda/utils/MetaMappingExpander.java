@@ -122,7 +122,13 @@ public class MetaMappingExpander {
 				distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
 				
 				
-				ArrayList<SelectExpressionItem> columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
+				ArrayList<SelectExpressionItem> columnList = null;
+				try {
+					columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
+				} catch (JSQLParserException e2) {
+					
+					e2.printStackTrace();
+				}
 				
 				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 				
@@ -241,7 +247,13 @@ public class MetaMappingExpander {
 		/*
 		 * new Selection 
 		 */
-		SelectionJSQL selection = sourceParsedQuery.getSelection();
+		SelectionJSQL selection = null;
+		try {
+			selection = sourceParsedQuery.getSelection();
+		} catch (JSQLParserException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		SelectionJSQL newSelection;
 		if(selection != null){
 			newSelection = selection;

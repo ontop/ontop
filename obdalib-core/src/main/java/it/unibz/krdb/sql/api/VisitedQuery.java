@@ -81,7 +81,7 @@ public class VisitedQuery implements Serializable{
 				groupByClause =getGroupByClause();
 				
 			}
-			//catch exception about wrong inserted columns
+						//catch exception about wrong inserted columns
 			else 
 				throw new JSQLParserException("The inserted query is not a SELECT statement");
 
@@ -156,8 +156,9 @@ public class VisitedQuery implements Serializable{
 
 	/**
 	 * Get the object construction for the WHERE clause.
+	 * @throws JSQLParserException 
 	 */
-	public SelectionJSQL getSelection() {
+	public SelectionJSQL getSelection() throws JSQLParserException {
 		if(selection==null){
 			SelectionVisitor sel= new SelectionVisitor();
 			selection= sel.getSelection(select);
@@ -167,8 +168,9 @@ public class VisitedQuery implements Serializable{
 	
 	/**
 	 * Get the object construction for the SELECT clause.
+	 * @throws JSQLParserException 
 	 */
-	public ProjectionJSQL getProjection() {
+	public ProjectionJSQL getProjection() throws JSQLParserException {
 		if(projection==null){
 			ProjectionVisitor proj = new ProjectionVisitor();
 			projection= proj.getProjection(select);
