@@ -1,0 +1,2456 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1222766179 "http://www.owl-ontologies.com/Ontology1222766179.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.owl-ontologies.com/Ontology1222766179.owl#"
+     xml:base="http://www.owl-ontologies.com/Ontology1222766179.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:Ontology1222766179="http://www.owl-ontologies.com/Ontology1222766179.owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#EncodingCodonEncodesAminoAcid -->
+
+    <owl:ObjectProperty rdf:about="#EncodingCodonEncodesAminoAcid">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#AminoAcid"/>
+        <rdfs:domain rdf:resource="#EncodingCodon"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GHAHasAminoAcid -->
+
+    <owl:ObjectProperty rdf:about="#GHAHasAminoAcid">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#AminoAcid"/>
+        <rdfs:domain rdf:resource="#GeneHasAminoAcid"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GHAHasGene -->
+
+    <owl:ObjectProperty rdf:about="#GHAHasGene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Gene"/>
+        <rdfs:domain rdf:resource="#GeneHasAminoAcid"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GHCHasCodon -->
+
+    <owl:ObjectProperty rdf:about="#GHCHasCodon">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Codon"/>
+        <rdfs:domain rdf:resource="#GeneHasCodon"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GHCHasGene -->
+
+    <owl:ObjectProperty rdf:about="#GHCHasGene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Gene"/>
+        <rdfs:domain rdf:resource="#GeneHasCodon"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneClusterContainsGene -->
+
+    <owl:ObjectProperty rdf:about="#GeneClusterContainsGene"/>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasCoordinates -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasCoordinates">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Coordinates"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasGCstatsGene -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasGCstatsGene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#GCstatsGene"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasGeneFunction -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasGeneFunction">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+        <rdfs:range rdf:resource="#GeneFunction"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasGeneIDInfo -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasGeneIDInfo">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+        <rdfs:range rdf:resource="#GeneIDInfo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasGeneStats -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasGeneStats">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+        <rdfs:range rdf:resource="#GeneStats"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasHGTPredictionGene -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasHGTPredictionGene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+        <rdfs:range rdf:resource="#HGTPredictionGene"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasOrganism -->
+
+    <owl:ObjectProperty rdf:about="#GeneHasOrganism">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+        <rdfs:range rdf:resource="#Organism"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#HGTPredictionsIfOfOrganism -->
+
+    <owl:ObjectProperty rdf:about="#HGTPredictionsIfOfOrganism">
+        <rdfs:domain rdf:resource="#HGTPredictions"/>
+        <rdfs:range rdf:resource="#Organism"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OHAHasAminoAcid -->
+
+    <owl:ObjectProperty rdf:about="#OHAHasAminoAcid">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#AminoAcid"/>
+        <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OHAHasOrganism -->
+
+    <owl:ObjectProperty rdf:about="#OHAHasOrganism">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Organism"/>
+        <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OHCHasCodon -->
+
+    <owl:ObjectProperty rdf:about="#OHCHasCodon">
+        <rdfs:range rdf:resource="#Codon"/>
+        <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OHCHasOrganism -->
+
+    <owl:ObjectProperty rdf:about="#OHCHasOrganism">
+        <rdfs:range rdf:resource="#Organism"/>
+        <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasAltCode -->
+
+    <owl:ObjectProperty rdf:about="#OrganismHasAltCode">
+        <rdfs:range rdf:resource="#AltCode"/>
+        <rdfs:domain rdf:resource="#Organism"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasGCstatsOrg -->
+
+    <owl:ObjectProperty rdf:about="#OrganismHasGCstatsOrg">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#GCstatsOrg"/>
+        <rdfs:domain rdf:resource="#Organism"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasHGTPredictions -->
+
+    <owl:ObjectProperty rdf:about="#OrganismHasHGTPredictions">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#HGTPredictions"/>
+        <rdfs:domain rdf:resource="#Organism"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasOrganismInfo -->
+
+    <owl:ObjectProperty rdf:about="#OrganismHasOrganismInfo">
+        <rdfs:domain rdf:resource="#Organism"/>
+        <rdfs:range rdf:resource="#OrganismInfo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasTaxonomy -->
+
+    <owl:ObjectProperty rdf:about="#OrganismHasTaxonomy">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Organism"/>
+        <rdfs:range rdf:resource="#Taxonomy"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismInfoIsOfOrganism -->
+
+    <owl:ObjectProperty rdf:about="#OrganismInfoIsOfOrganism">
+        <rdfs:range rdf:resource="#Organism"/>
+        <rdfs:domain rdf:resource="#OrganismInfo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TaxonomyIsOfOrganism -->
+
+    <owl:ObjectProperty rdf:about="#TaxonomyIsOfOrganism">
+        <rdfs:range rdf:resource="#Organism"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#containsStrictHGTGeneCluster -->
+
+    <owl:ObjectProperty rdf:about="#containsStrictHGTGeneCluster"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AACode -->
+
+    <owl:DatatypeProperty rdf:about="#AACode">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AminoAcid"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAName -->
+
+    <owl:DatatypeProperty rdf:about="#AAName">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AminoAcid"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AASD -->
+
+    <owl:DatatypeProperty rdf:about="#AASD">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAvalueGene -->
+
+    <owl:DatatypeProperty rdf:about="#AAvalueGene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneHasAminoAcid"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAvalueOrg -->
+
+    <owl:DatatypeProperty rdf:about="#AAvalueOrg">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Abbrev -->
+
+    <owl:DatatypeProperty rdf:about="#Abbrev">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Organism"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Begin -->
+
+    <owl:DatatypeProperty rdf:about="#Begin">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Coordinates"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Chi2 -->
+
+    <owl:DatatypeProperty rdf:about="#Chi2">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Class -->
+
+    <owl:DatatypeProperty rdf:about="#Class">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CodonSD -->
+
+    <owl:DatatypeProperty rdf:about="#CodonSD">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CodonValueGene -->
+
+    <owl:DatatypeProperty rdf:about="#CodonValueGene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneHasCodon"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CodonValueOrg -->
+
+    <owl:DatatypeProperty rdf:about="#CodonValueOrg">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#DevAA -->
+
+    <owl:DatatypeProperty rdf:about="#DevAA">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#End -->
+
+    <owl:DatatypeProperty rdf:about="#End">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Coordinates"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Family -->
+
+    <owl:DatatypeProperty rdf:about="#Family">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Function -->
+
+    <owl:DatatypeProperty rdf:about="#Function">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneFunction"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GC1 -->
+
+    <owl:DatatypeProperty rdf:about="#GC1">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GC2 -->
+
+    <owl:DatatypeProperty rdf:about="#GC2">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GC3 -->
+
+    <owl:DatatypeProperty rdf:about="#GC3">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCDif -->
+
+    <owl:DatatypeProperty rdf:about="#GCDif">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsGene"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCDif1 -->
+
+    <owl:DatatypeProperty rdf:about="#GCDif1">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsGene"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCDif2 -->
+
+    <owl:DatatypeProperty rdf:about="#GCDif2">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsGene"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCDif3 -->
+
+    <owl:DatatypeProperty rdf:about="#GCDif3">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsGene"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCValue -->
+
+    <owl:DatatypeProperty rdf:about="#GCValue">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCregion -->
+
+    <owl:DatatypeProperty rdf:about="#GCregion">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#HGTPredictionGene"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GenCode -->
+
+    <owl:DatatypeProperty rdf:about="#GenCode">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismInfo"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneName -->
+
+    <owl:DatatypeProperty rdf:about="#GeneName">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneIDInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Genus -->
+
+    <owl:DatatypeProperty rdf:about="#Genus">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ICDI -->
+
+    <owl:DatatypeProperty rdf:about="#ICDI">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ID -->
+
+    <owl:DatatypeProperty rdf:about="#ID">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Gene"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#KEGG -->
+
+    <owl:DatatypeProperty rdf:about="#KEGG">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneFunction"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#KEGGCode -->
+
+    <owl:DatatypeProperty rdf:about="#KEGGCode">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AltCode"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Length -->
+
+    <owl:DatatypeProperty rdf:about="#Length">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Coordinates"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Mah -->
+
+    <owl:DatatypeProperty rdf:about="#Mah">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#NCBIID -->
+
+    <owl:DatatypeProperty rdf:about="#NCBIID">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AltCode"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Nc -->
+
+    <owl:DatatypeProperty rdf:about="#Nc">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#NoRank -->
+
+    <owl:DatatypeProperty rdf:about="#NoRank">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#NrGenes -->
+
+    <owl:DatatypeProperty rdf:about="#NrGenes">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismInfo"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#NrPredHGTgenes -->
+
+    <owl:DatatypeProperty rdf:about="#NrPredHGTgenes">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#HGTPredictions"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Order -->
+
+    <owl:DatatypeProperty rdf:about="#Order">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismName -->
+
+    <owl:DatatypeProperty rdf:about="#OrganismName">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#P2 -->
+
+    <owl:DatatypeProperty rdf:about="#P2">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#PATH -->
+
+    <owl:DatatypeProperty rdf:about="#PATH">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneFunction"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#PB -->
+
+    <owl:DatatypeProperty rdf:about="#PB">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismInfo"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#PID -->
+
+    <owl:DatatypeProperty rdf:about="#PID">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneIDInfo"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Percentage -->
+
+    <owl:DatatypeProperty rdf:about="#Percentage">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#HGTPredictions"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Phylum -->
+
+    <owl:DatatypeProperty rdf:about="#Phylum">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Prediction -->
+
+    <owl:DatatypeProperty rdf:about="#Prediction">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#HGTPredictionGene"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#RSCUgene -->
+
+    <owl:DatatypeProperty rdf:about="#RSCUgene">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneHasCodon"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#RSCUorg -->
+
+    <owl:DatatypeProperty rdf:about="#RSCUorg">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#SDRSCU -->
+
+    <owl:DatatypeProperty rdf:about="#SDRSCU">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Sim -->
+
+    <owl:DatatypeProperty rdf:about="#Sim">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsGene"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#SimGC -->
+
+    <owl:DatatypeProperty rdf:about="#SimGC">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#SimMah -->
+
+    <owl:DatatypeProperty rdf:about="#SimMah">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneStats"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Species -->
+
+    <owl:DatatypeProperty rdf:about="#Species">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#StDevGC -->
+
+    <owl:DatatypeProperty rdf:about="#StDevGC">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsOrg"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#StDevGC1 -->
+
+    <owl:DatatypeProperty rdf:about="#StDevGC1">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsOrg"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#StDevGC2 -->
+
+    <owl:DatatypeProperty rdf:about="#StDevGC2">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsOrg"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#StDevGC3 -->
+
+    <owl:DatatypeProperty rdf:about="#StDevGC3">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCstatsOrg"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Strand -->
+
+    <owl:DatatypeProperty rdf:about="#Strand">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Coordinates"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#SuperKingdom -->
+
+    <owl:DatatypeProperty rdf:about="#SuperKingdom">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Taxonomy"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Synonym -->
+
+    <owl:DatatypeProperty rdf:about="#Synonym">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GeneIDInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TaxID -->
+
+    <owl:DatatypeProperty rdf:about="#TaxID">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AltCode"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TripletCode -->
+
+    <owl:DatatypeProperty rdf:about="#TripletCode">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Codon"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AltCode -->
+
+    <owl:Class rdf:about="#AltCode">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#TaxID"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#KEGGCode"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#NCBIID"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AminoAcid -->
+
+    <owl:Class rdf:about="#AminoAcid">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AACode"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AAName"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Codon -->
+
+    <owl:Class rdf:about="#Codon">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#TripletCode"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Coordinates -->
+
+    <owl:Class rdf:about="#Coordinates">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Strand"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#End"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Begin"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Length"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#EncodingCodon -->
+
+    <owl:Class rdf:about="#EncodingCodon">
+        <rdfs:subClassOf rdf:resource="#Codon"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#EncodingCodonEncodesAminoAcid"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#EndingCodon -->
+
+    <owl:Class rdf:about="#EndingCodon">
+        <rdfs:subClassOf rdf:resource="#Codon"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#FlexibleHGTGeneCluster -->
+
+    <owl:Class rdf:about="#FlexibleHGTGeneCluster">
+        <rdfs:subClassOf rdf:resource="#GeneCluster"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCstats -->
+
+    <owl:Class rdf:about="#GCstats">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GC1"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GC2"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GC3"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCValue"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCstatsGene -->
+
+    <owl:Class rdf:about="#GCstatsGene">
+        <rdfs:subClassOf rdf:resource="#GCstats"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Sim"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCDif1"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCDif2"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCDif3"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCDif"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCstatsOrg -->
+
+    <owl:Class rdf:about="#GCstatsOrg">
+        <rdfs:subClassOf rdf:resource="#GCstats"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#StDevGC1"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#StDevGC3"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#StDevGC"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#StDevGC2"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Gene -->
+
+    <owl:Class rdf:about="#Gene">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GeneHasOrganism"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GeneHasGeneStats"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#ID"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GeneHasGeneIDInfo"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GeneHasGeneFunction"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneCluster -->
+
+    <owl:Class rdf:about="#GeneCluster"/>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneFunction -->
+
+    <owl:Class rdf:about="#GeneFunction">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Function"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasAminoAcid -->
+
+    <owl:Class rdf:about="#GeneHasAminoAcid">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GHAHasGene"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GHAHasAminoAcid"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AAvalueGene"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneHasCodon -->
+
+    <owl:Class rdf:about="#GeneHasCodon">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#RSCUgene"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GHCHasCodon"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GHCHasGene"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#CodonValueGene"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneIDInfo -->
+
+    <owl:Class rdf:about="#GeneIDInfo">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#PID"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GeneName"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Synonym"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GeneStats -->
+
+    <owl:Class rdf:about="#GeneStats">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#SimMah"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Mah"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#SimGC"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Nc"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#ICDI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Chi2"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#P2"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#DevAA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#HGTPredictionGene -->
+
+    <owl:Class rdf:about="#HGTPredictionGene">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCregion"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Prediction"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#HGTPredictions -->
+
+    <owl:Class rdf:about="#HGTPredictions">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#NrPredHGTgenes"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Percentage"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Organism -->
+
+    <owl:Class rdf:about="#Organism">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OrganismHasTaxonomy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OrganismHasOrganismInfo"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OrganismHasAltCode"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Abbrev"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasAminoAcid -->
+
+    <owl:Class rdf:about="#OrganismHasAminoAcid">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AAvalueOrg"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AASD"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OHAHasAminoAcid"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OHAHasOrganism"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismHasCodon -->
+
+    <owl:Class rdf:about="#OrganismHasCodon">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#CodonSD"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#SDRSCU"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OHCHasOrganism"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#CodonValueOrg"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#RSCUorg"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OHCHasCodon"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#OrganismInfo -->
+
+    <owl:Class rdf:about="#OrganismInfo">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#NrGenes"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#PB"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#OrganismName"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GenCode"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#StrictHGTGeneCluster -->
+
+    <owl:Class rdf:about="#StrictHGTGeneCluster">
+        <rdfs:subClassOf rdf:resource="#GeneCluster"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Taxonomy -->
+
+    <owl:Class rdf:about="#Taxonomy">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#SuperKingdom"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Family"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#NoRank"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Species"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Order"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Phylum"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Genus"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#Class"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#A -->
+
+    <owl:Thing rdf:about="#A">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">A</AACode>
+        <AAName rdf:datatype="&xsd;string">Alanine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAA -->
+
+    <owl:Thing rdf:about="#AAA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">AAA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#K"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAC -->
+
+    <owl:Thing rdf:about="#AAC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">AAC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#N"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAG -->
+
+    <EncodingCodon rdf:about="#AAG">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">AAG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#K"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AAT -->
+
+    <owl:Thing rdf:about="#AAT">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">AAT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#N"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ACA -->
+
+    <EncodingCodon rdf:about="#ACA">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">ACA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ACC -->
+
+    <EncodingCodon rdf:about="#ACC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">ACC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ACG -->
+
+    <owl:Thing rdf:about="#ACG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">ACG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ACT -->
+
+    <EncodingCodon rdf:about="#ACT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">ACT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AGA -->
+
+    <EncodingCodon rdf:about="#AGA">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">AGA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AGC -->
+
+    <EncodingCodon rdf:about="#AGC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">AGC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AGG -->
+
+    <owl:Thing rdf:about="#AGG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">AGG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#AGT -->
+
+    <EncodingCodon rdf:about="#AGT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">AGT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ATA -->
+
+    <owl:Thing rdf:about="#ATA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">ATA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#I"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ATC -->
+
+    <owl:Thing rdf:about="#ATC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">ATC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#I"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ATG -->
+
+    <owl:Thing rdf:about="#ATG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">ATG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#M"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#ATT -->
+
+    <owl:Thing rdf:about="#ATT">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">ATT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#I"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#C -->
+
+    <owl:Thing rdf:about="#C">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">C</AACode>
+        <AAName rdf:datatype="&xsd;string">Cysteine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CAA -->
+
+    <owl:Thing rdf:about="#CAA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CAA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#Q"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CAC -->
+
+    <owl:Thing rdf:about="#CAC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CAC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#H"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CAG -->
+
+    <owl:Thing rdf:about="#CAG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CAG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#Q"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CAT -->
+
+    <EncodingCodon rdf:about="#CAT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">CAT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#H"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CCA -->
+
+    <owl:Thing rdf:about="#CCA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CCA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CCC -->
+
+    <owl:Thing rdf:about="#CCC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CCC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CCG -->
+
+    <owl:Thing rdf:about="#CCG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CCG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CCT -->
+
+    <owl:Thing rdf:about="#CCT">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CCT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CGA -->
+
+    <owl:Thing rdf:about="#CGA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CGA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CGC -->
+
+    <EncodingCodon rdf:about="#CGC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">CGC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CGG -->
+
+    <owl:Thing rdf:about="#CGG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CGG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CGT -->
+
+    <owl:Thing rdf:about="#CGT">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">CGT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CTA -->
+
+    <EncodingCodon rdf:about="#CTA">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">CTA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CTC -->
+
+    <EncodingCodon rdf:about="#CTC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">CTC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CTG -->
+
+    <EncodingCodon rdf:about="#CTG">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">CTG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#CTT -->
+
+    <EncodingCodon rdf:about="#CTT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">CTT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#D -->
+
+    <owl:Thing rdf:about="#D">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AAName rdf:datatype="&xsd;string">Aspartic acid</AAName>
+        <AACode rdf:datatype="&xsd;string">D</AACode>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#E -->
+
+    <owl:Thing rdf:about="#E">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">E</AACode>
+        <AAName rdf:datatype="&xsd;string">Glutamic acid</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#F -->
+
+    <owl:Thing rdf:about="#F">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">F</AACode>
+        <AAName rdf:datatype="&xsd;string">Phenylalanine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#G -->
+
+    <owl:Thing rdf:about="#G">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">G</AACode>
+        <AAName rdf:datatype="&xsd;string">Glycine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GAA -->
+
+    <EncodingCodon rdf:about="#GAA">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GAA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#E"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GAC -->
+
+    <owl:Thing rdf:about="#GAC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GAC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#D"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GAG -->
+
+    <owl:Thing rdf:about="#GAG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GAG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#E"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GAT -->
+
+    <EncodingCodon rdf:about="#GAT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GAT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#D"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCA -->
+
+    <EncodingCodon rdf:about="#GCA">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GCA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCC -->
+
+    <owl:Thing rdf:about="#GCC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GCC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCG -->
+
+    <EncodingCodon rdf:about="#GCG">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GCG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GCT -->
+
+    <owl:Thing rdf:about="#GCT">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GCT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GGA -->
+
+    <owl:Thing rdf:about="#GGA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GGA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GGC -->
+
+    <owl:Thing rdf:about="#GGC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GGC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GGG -->
+
+    <owl:Thing rdf:about="#GGG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GGG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GGT -->
+
+    <EncodingCodon rdf:about="#GGT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GGT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GTA -->
+
+    <owl:Thing rdf:about="#GTA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">GTA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GTC -->
+
+    <EncodingCodon rdf:about="#GTC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GTC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GTG -->
+
+    <EncodingCodon rdf:about="#GTG">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GTG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#GTT -->
+
+    <EncodingCodon rdf:about="#GTT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">GTT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#H -->
+
+    <owl:Thing rdf:about="#H">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">H</AACode>
+        <AAName rdf:datatype="&xsd;string">Histidine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#I -->
+
+    <owl:Thing rdf:about="#I">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">I</AACode>
+        <AAName rdf:datatype="&xsd;string">Isoleucine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#K -->
+
+    <owl:Thing rdf:about="#K">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">K</AACode>
+        <AAName rdf:datatype="&xsd;string">Lysine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#L -->
+
+    <AminoAcid rdf:about="#L">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <AACode rdf:datatype="&xsd;string">L</AACode>
+        <AAName rdf:datatype="&xsd;string">Leucine</AAName>
+    </AminoAcid>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#M -->
+
+    <AminoAcid rdf:about="#M">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <AACode rdf:datatype="&xsd;string">M</AACode>
+        <AAName rdf:datatype="&xsd;string">Methionine</AAName>
+    </AminoAcid>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#N -->
+
+    <owl:Thing rdf:about="#N">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AAName rdf:datatype="&xsd;string">Asparagine</AAName>
+        <AACode rdf:datatype="&xsd;string">N</AACode>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#P -->
+
+    <owl:Thing rdf:about="#P">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">P</AACode>
+        <AAName rdf:datatype="&xsd;string">Proline</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Q -->
+
+    <AminoAcid rdf:about="#Q">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <AAName rdf:datatype="&xsd;string">Glutamine</AAName>
+        <AACode rdf:datatype="&xsd;string">Q</AACode>
+    </AminoAcid>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#R -->
+
+    <AminoAcid rdf:about="#R">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <AAName rdf:datatype="&xsd;string">Arginine</AAName>
+        <AACode rdf:datatype="&xsd;string">R</AACode>
+    </AminoAcid>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#S -->
+
+    <owl:Thing rdf:about="#S">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">S</AACode>
+        <AAName rdf:datatype="&xsd;string">Serine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#T -->
+
+    <owl:Thing rdf:about="#T">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">T</AACode>
+        <AAName rdf:datatype="&xsd;string">Threonine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TAA -->
+
+    <owl:Thing rdf:about="#TAA">
+        <rdf:type rdf:resource="#EndingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TAA</TripletCode>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TAC -->
+
+    <EncodingCodon rdf:about="#TAC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TAC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#Y"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TAG -->
+
+    <EndingCodon rdf:about="#TAG">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TAG</TripletCode>
+    </EndingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TAT -->
+
+    <EncodingCodon rdf:about="#TAT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TAT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#Y"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TCA -->
+
+    <owl:Thing rdf:about="#TCA">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TCA</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TCC -->
+
+    <EncodingCodon rdf:about="#TCC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TCC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TCG -->
+
+    <owl:Thing rdf:about="#TCG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TCG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TCT -->
+
+    <EncodingCodon rdf:about="#TCT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TCT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TGA -->
+
+    <owl:Thing rdf:about="#TGA">
+        <rdf:type rdf:resource="#EndingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TGA</TripletCode>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TGC -->
+
+    <EncodingCodon rdf:about="#TGC">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TGC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#C"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TGG -->
+
+    <owl:Thing rdf:about="#TGG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TGG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#W"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TGT -->
+
+    <owl:Thing rdf:about="#TGT">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TGT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#C"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TTC -->
+
+    <owl:Thing rdf:about="#TTC">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TTC</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#F"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TTG -->
+
+    <owl:Thing rdf:about="#TTG">
+        <rdf:type rdf:resource="#EncodingCodon"/>
+        <TripletCode rdf:datatype="&xsd;string">TTG</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#TTT -->
+
+    <EncodingCodon rdf:about="#TTT">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <TripletCode rdf:datatype="&xsd;string">TTT</TripletCode>
+        <EncodingCodonEncodesAminoAcid rdf:resource="#F"/>
+    </EncodingCodon>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#V -->
+
+    <owl:Thing rdf:about="#V">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AACode rdf:datatype="&xsd;string">V</AACode>
+        <AAName rdf:datatype="&xsd;string">Valine</AAName>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#W -->
+
+    <owl:Thing rdf:about="#W">
+        <rdf:type rdf:resource="#AminoAcid"/>
+        <AAName rdf:datatype="&xsd;string">Tryptophan</AAName>
+        <AACode rdf:datatype="&xsd;string">W</AACode>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1222766179.owl#Y -->
+
+    <AminoAcid rdf:about="#Y">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <AAName rdf:datatype="&xsd;string">Tyrosine</AAName>
+        <AACode rdf:datatype="&xsd;string">Y</AACode>
+    </AminoAcid>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+

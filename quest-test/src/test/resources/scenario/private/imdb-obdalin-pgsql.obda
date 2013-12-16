@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1242910306.owl#" xmlns="http://www.owl-ontologies.com/Ontology1242910306.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="kbdb_imdb">
+        <mapping id="Actor">
+            <CQ string="Actor(person($id))"/>
+            <SQLQuery string="select name.id as id from name, cast_info where name.id = cast_info.person_id and cast_info.role_id = 1"/>
+        </mapping>
+        <mapping id="Movie">
+            <CQ string="Movie(title($id)), hasTitle(title($id),$title), hasProductionYear(title($id),$prodyear)"/>
+            <SQLQuery string="select title.id as id, title.title as title, title.production_year as prodyear from title where kind_id = 1"/>
+        </mapping>
+        <mapping id="Producer">
+            <CQ string="Producer(person($id))"/>
+            <SQLQuery string="select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 3"/>
+        </mapping>
+        <mapping id="Actress">
+            <CQ string="Actress(person($id))"/>
+            <SQLQuery string="select name.id as id from name, cast_info where name.id = cast_info.person_id and cast_info.role_id = 2"/>
+        </mapping>
+        <mapping id="TVSeries">
+            <CQ string="TVSeries(title($id)), hasTitle(title($id),$title), hasProductionYear(title($id),$prodyear)"/>
+            <SQLQuery string="select title.id as id, title.title as title, title.production_year as prodyear from title where kind_id = 2"/>
+        </mapping>
+        <mapping id="Writer">
+            <CQ string="Writer(person($id))"/>
+            <SQLQuery string="select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 4"/>
+        </mapping>
+        <mapping id="Director">
+            <CQ string="Director(person($id))"/>
+            <SQLQuery string="select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 8"/>
+        </mapping>
+        <mapping id="Editor">
+            <CQ string="Editor(person($id))"/>
+            <SQLQuery string="select name.id as id from name, cast_info where cast_info.person_id = name.id and cast_info.role_id = 9"/>
+        </mapping>
+        <mapping id="hasGenre">
+            <CQ string="hasGenre(title($title_id),$genre)"/>
+            <SQLQuery string="select title.id as title_id, movie_info.info as genre from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 3"/>
+        </mapping>
+        <mapping id="hasPlot">
+            <CQ string="hasPlot(title($title_id),$plot)"/>
+            <SQLQuery string="select title.id as title_id, movie_info.info as plot from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 98"/>
+        </mapping>
+        <mapping id="hasBudget">
+            <CQ string="hasBudget(title($title_id),$budget)"/>
+            <SQLQuery string="select title.id as title_id, movie_info.info as budget from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 105"/>
+        </mapping>
+        <mapping id="hasLocation">
+            <CQ string="hasLocation(title($title_id),$location)"/>
+            <SQLQuery string="select title.id as title_id, movie_info.info as location from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 18"/>
+        </mapping>
+        <mapping id="hasGross">
+            <CQ string="hasGross(title($title_id),$gross)"/>
+            <SQLQuery string="select title.id as title_id, movie_info.info as gross from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 107"/>
+        </mapping>
+        <mapping id="hasRentalRevenue">
+            <CQ string="hasRentalRevenue(title($title_id),$rental)"/>
+            <SQLQuery string="select title.id as title_id, movie_info.info as rental from title, movie_info where title.id = movie_info.movie_id and movie_info.info_type_id = 109"/>
+        </mapping>
+        <mapping id="hasActor">
+            <CQ string="hasActor(title($movie_id),person($person_id))"/>
+            <SQLQuery string="select person_id, movie_id from cast_info where role_id = 1 or role_id = 2"/>
+        </mapping>
+        <mapping id="hasDirector">
+            <CQ string="hasDirector(title($movie_id),person($person_id))"/>
+            <SQLQuery string="select person_id, movie_id from cast_info where role_id = 8"/>
+        </mapping>
+        <mapping id="hasEditor">
+            <CQ string="hasEditor(title($movie_id),person($person_id))"/>
+            <SQLQuery string="select person_id, movie_id from cast_info where role_id = 9"/>
+        </mapping>
+        <mapping id="hasWriter">
+            <CQ string="hasWriter(title($movie_id),person($person_id))"/>
+            <SQLQuery string="select person_id, movie_id from cast_info where role_id = 4"/>
+        </mapping>
+        <mapping id="hasProducer">
+            <CQ string="hasProducer(title($movie_id),person($person_id))"/>
+            <SQLQuery string="select person_id, movie_id from cast_info where role_id = 3"/>
+        </mapping>
+        <mapping id="hasDateOfBirth">
+            <CQ string="hasDateOfBirth(person($person_id),$dob)"/>
+            <SQLQuery string="select person_id, info as dob from person_info where info_type_id = 21"/>
+        </mapping>
+        <mapping id="ProductionCompany">
+            <CQ string="ProductionCompany(company($id)), hasCompanyName(company($id),$name)"/>
+            <SQLQuery string="select company_name.id as id, company_name.name as name, company_name.country_code as country from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 2"/>
+        </mapping>
+        <mapping id="DistributionCompany">
+            <CQ string="DistributionCompany(company($id)), hasCompanyName(company($id),$name)"/>
+            <SQLQuery string="select company_name.id as id, company_name.name as name, company_name.country_code as country from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 1"/>
+        </mapping>
+        <mapping id="hasProductionCompany">
+            <CQ string="hasProductionCompany(title($title_id),company($company_id))"/>
+            <SQLQuery string="select company_name.id as company_id, movie_companies.movie_id as title_id from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 2"/>
+        </mapping>
+        <mapping id="hasDistributionCompany">
+            <CQ string="hasDistributionCompany(title($title_id),company($company_id))"/>
+            <SQLQuery string="select company_name.id as company_id, movie_companies.movie_id as title_id from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 1"/>
+        </mapping>
+        <!-- FLOOR() function is not in SQL99 standard
+        <mapping id="hasProductionDecade">
+            <CQ string="hasProductionDecade(title($id),$decade)"/>
+            <SQLQuery string="select id, floor(production_year/10)*10 as decade from title"/>
+        </mapping>
+        -->
+        <mapping id="hasCountryCode">
+            <CQ string="hasCountryCode(company($id),$country)"/>
+            <SQLQuery string="select company_name.id as id, company_name.country_code as country from company_name"/>
+        </mapping>
+        <mapping id="hasName">
+            <CQ string="hasName(person($id),$name)"/>
+            <SQLQuery string="select name.id as id, name.name as name from name"/>
+        </mapping>
+    </mappings>
+    <dataSource URI="kbdb_imdb" databaseDriver="org.postgresql.Driver"
+        databaseName="imdbobda" databasePassword="imdb-09"
+        databaseURL="jbdc:postgresql://obdalin.inf.unibz.it/imdbobda"
+        databaseUsername="imdbobda" isAboxDump="" name="kbdb_imdb" ontouri="http://www.owl-ontologies.com/Ontology1242910306.owl"/>
+</OBDA>

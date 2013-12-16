@@ -1,32 +1,52 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
+
 package it.unibz.krdb.obda.reformulation.semindex.tests;
+
+/*
+ * #%L
+ * ontop-quest-owlapi3
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 
 public class DAGChainTest extends TestCase {
 
-	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+	SemanticIndexHelper						helper				= new SemanticIndexHelper();
+
+	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
 	public void test_simple_isa() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
@@ -46,18 +66,29 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
-		DAG res = DAGConstructor.getISADAG(ontology);
-		res.clean();
-		DAGChain.getChainDAG(res);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology, false);
+		DAG res = reasoner.getDAG();
+		reasoner.getChainDAG();
 
-		assertTrue(res.get(ac).getDescendants().contains(res.get(bc)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(ac).getDescendants().size(), 2);
-		
-		assertTrue(res.get(bc).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(bc).getDescendants().size(), 1);
-		
-		assertEquals(res.get(cc).getDescendants().size(), 0);
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(bc, false)));
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(cc, false)));
+		int numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(ac, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 2);
+
+		assertTrue(reasoner.getDescendants(bc, false).contains(reasoner.getEquivalences(cc, false)));
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(bc, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 1);
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(cc, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 0);
 	}
 
 	public void test_exists_simple() {
@@ -76,32 +107,62 @@ public class DAGChainTest extends TestCase {
 
 		ontology.addRole(er.getPredicate());
 		ontology.addRole(ier.getPredicate());
+		
+		System.out.println(er);
+		System.out.println(ac);
+		System.out.println(cc);
+		System.out.println(ier);
 
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
 		
-		DAG res = DAGConstructor.getISADAG(ontology);
-		for (DAGNode nodes: res.allnodes.values()) {
-			System.out.println("---- " + nodes);
-		}
+		//generate Graph
+		GraphBuilderImpl change= new GraphBuilderImpl(ontology);
 		
-		DAGChain.getChainDAG(res);
+		GraphImpl res = (GraphImpl) change.getGraph();
 
-		assertTrue(res.get(ac).getDescendants().contains(res.get(er)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(ier)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(ac).getDescendants().size(), 3);
 		
-		assertTrue(res.get(er).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(er).getDescendants().size(), 1);
 		
-		assertTrue(res.get(ier).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(ier).getDescendants().size(), 1);
+//		for (Description nodes: res.vertexSet()) {
+//			System.out.println("---- " + nodes);
+//		}
 		
-		assertEquals(res.get(cc).getDescendants().size(), 0);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
+		reasoner.getChainDAG();
+
+		
+		
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(er, false)));
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(ier, false)));
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(cc, false)));
+		int numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(ac, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 3);
+
+		assertTrue(reasoner.getDescendants(er, false).contains(reasoner.getEquivalences(cc, false)));
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(er, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 1);
+
+		assertTrue(reasoner.getDescendants(ier, false).contains(reasoner.getEquivalences(cc, false)));
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(ier, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 1);
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(cc, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 0);
 	}
 
 	public void test_exists_complex() {
+
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
 		Predicate a = predicateFactory.getPredicate("a", 1);
@@ -131,69 +192,59 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
-		DAG res = DAGConstructor.getISADAG(ontology);
-		res.clean();
-		DAGChain.getChainDAG(res);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology, false);
+		reasoner.getChainDAG();
 
-		assertTrue(res.get(ac).getDescendants().contains(res.get(er)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(ier)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(bc)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(ac).getDescendants().size(), 4);
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(er, false)));
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(ier, false)));
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(cc, false)));
+		assertTrue(reasoner.getDescendants(ac, false).contains(reasoner.getEquivalences(bc, false)));
+		int numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(ac, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 4);
 
-		assertTrue(res.get(dc).getDescendants().contains(res.get(er)));
-		assertTrue(res.get(dc).getDescendants().contains(res.get(ier)));
-		assertTrue(res.get(dc).getDescendants().contains(res.get(bc)));
-		assertTrue(res.get(dc).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(dc).getDescendants().size(), 4);
+		assertTrue(reasoner.getDescendants(dc, false).contains(reasoner.getEquivalences(er, false)));
+		assertTrue(reasoner.getDescendants(dc, false).contains(reasoner.getEquivalences(ier, false)));
+		assertTrue(reasoner.getDescendants(dc, false).contains(reasoner.getEquivalences(cc, false)));
+		assertTrue(reasoner.getDescendants(dc, false).contains(reasoner.getEquivalences(bc, false)));
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(dc, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 4);
 
-		assertTrue(res.get(er).getDescendants().contains(res.get(bc)));
-		assertTrue(res.get(er).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(er).getDescendants().size(), 2);
+		assertTrue(reasoner.getDescendants(er, false).contains(reasoner.getEquivalences(bc, false)));
+		assertTrue(reasoner.getDescendants(er, false).contains(reasoner.getEquivalences(cc, false)));
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(er, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 2);
 
-		assertTrue(res.get(ier).getDescendants().contains(res.get(bc)));
-		assertTrue(res.get(ier).getDescendants().contains(res.get(cc)));
-		assertEquals(res.get(ier).getDescendants().size(), 2);
+		assertTrue(reasoner.getDescendants(ier, false).contains(reasoner.getEquivalences(bc, false)));
+		assertTrue(reasoner.getDescendants(ier, false).contains(reasoner.getEquivalences(cc, false)));
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(ier, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 2);
 
-		assertEquals(res.get(bc).getDescendants().size(), 0);
-		assertEquals(res.get(cc).getDescendants().size(), 0);
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(bc, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 0);
+		numDescendants=0;
+		for(Set<Description> equiDescendants: reasoner.getDescendants(cc, false)){
+			numDescendants+=equiDescendants.size();
+		}
+		assertEquals(numDescendants, 0);
+
 	}
 
-	public void disbledtest_exists_complex_2() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+	
 
-		Predicate a = predicateFactory.getPredicate("a", 1);
-		Predicate r = predicateFactory.getPredicate("r", 2);
-
-		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
-
-		ontology.addConcept(ac.getPredicate());
-
-		ontology.addRole(er.getPredicate());
-		ontology.addRole(ier.getPredicate());
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, er));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ac, er));
-
-		DAG res = DAGConstructor.getISADAG(ontology);
-		DAGChain.getChainDAG(res);
-
-		assertTrue(res.get(ac).getDescendants().contains(res.get(er)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(ier)));
-		assertTrue(res.get(ac).getDescendants().contains(res.get(ac)));
-		assertEquals(res.get(ac).getDescendants().size(), 3);
-
-		assertTrue(res.get(er).getDescendants().contains(res.get(er)));
-		assertTrue(res.get(er).getDescendants().contains(res.get(ier)));
-		assertTrue(res.get(er).getDescendants().contains(res.get(ac)));
-		assertEquals(res.get(er).getDescendants().size(), 3);
-
-		assertTrue(res.get(ier).getDescendants().contains(res.get(er)));
-		assertTrue(res.get(ier).getDescendants().contains(res.get(ier)));
-		assertTrue(res.get(ier).getDescendants().contains(res.get(ac)));
-		assertEquals(res.get(ier).getDescendants().size(), 3);
-	}
 }
+

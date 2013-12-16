@@ -1,0 +1,9 @@
+@prefix  :       <http://example/> .
+@prefix  rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+:a :p1 :b .
+:b :p2 :c .
+:c :p3 :d .
+:d :p1 :e .
+:e :p2 :f .
+:f :p3 :g .

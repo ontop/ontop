@@ -1,0 +1,8 @@
+@prefix : <http://example.org/> .
+@prefix foo: <http://example.org/> .
+
+foo:test1 foo:predicate foo:o1 .
+foo:test1 foo:predicate foo:o2 .
+foo:test2 foo:predicate foo:o3 .
+
+

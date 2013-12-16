@@ -8,8 +8,9 @@
 <>  rdf:type mf:Manifest ;
     rdfs:comment "OPTIONAL test cases" ;
     mf:entries
-    (:dawg-optional-001 
-     :dawg-optional-002 
+    (
+     #:dawg-optional-001 
+     #:dawg-optional-002 
      :dawg-union-001 
      :dawg-optional-complex-1
      #:dawg-optional-complex-2 # WON'T FIX: graph

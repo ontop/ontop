@@ -1,0 +1,8 @@
+PREFIX : <http://example/>
+SELECT (avg(?lprice) AS ?avgPrice)
+WHERE {
+  ?org :affiliates ?auth .
+  ?auth :writesBook ?book .
+  ?book :price ?lprice .
+}
+GROUP BY ?org

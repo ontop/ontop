@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
@@ -20,15 +32,16 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -58,6 +71,8 @@ public class TMappingProcessor implements Serializable {
 	private final Ontology aboxDependencies;
 
 	private final DAG pureIsa;
+	
+	private final TBoxReasonerImpl reasoner;
 
 	private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
@@ -65,10 +80,15 @@ public class TMappingProcessor implements Serializable {
 
 	public TMappingProcessor(Ontology tbox, boolean optmize) {
 		this.optimize = optmize;
-		dag = DAGConstructor.getISADAG(tbox);
-		dag.clean();
-		pureIsa = DAGConstructor.filterPureISA(dag);
-		aboxDependencies = DAGConstructor.getSigmaOntology(dag);
+		reasoner= new TBoxReasonerImpl(tbox, false);
+		dag = reasoner.getDAG();
+		NamedDAGBuilderImpl namedDagConstructor= new NamedDAGBuilderImpl(dag);
+		pureIsa =namedDagConstructor.getDAG();
+
+
+
+		aboxDependencies =  reasoner.getSigmaOntology();
+		
 
 	}
 
@@ -372,12 +392,13 @@ public class TMappingProcessor implements Serializable {
 		 * that these are already processed. We start with the leafs.
 		 */
 
-		for (DAGNode currentNode : dag.getRoles()) {
+		for (Property currentProperty : dag.getRoles()) {
 			/* setting up the queue for the next iteration */
 
-			Property currentProperty = (Property) currentNode.getDescription();
-			if (currentProperty.isInverse()) {
-				/* we only create mappings for named properties */
+			if (dag.getReplacements().containsKey(currentProperty)) {
+
+
+				/* we only create mappings for named properties and not considering equivalences*/
 				continue;
 			}
 
@@ -389,14 +410,17 @@ public class TMappingProcessor implements Serializable {
 				mappingIndex.put(currentPredicate, currentNodeMappings);
 			}
 
-			for (DAGNode descendant : currentNode.getDescendants()) {
+
+			for (Set<Description> descendants : reasoner.getDescendants(currentProperty, false)) {
+				for(Description descendant: descendants){
+
 				/*
 				 * adding the mappings of the children as own mappings, the new
 				 * mappings use the current predicate instead of the childs
 				 * predicate and, if the child is inverse and the current is
 				 * positive, it will also invert the terms in the head
 				 */
-				Property childproperty = (Property) descendant.getDescription();
+				Property childproperty = (Property) descendant;
 				List<CQIE> childMappings = originalMappings.getRules(childproperty.getPredicate());
 
 				boolean requiresInverse = (currentProperty.isInverse() != childproperty.isInverse());
@@ -406,10 +430,11 @@ public class TMappingProcessor implements Serializable {
 					Function newMappingHead = null;
 					Function oldMappingHead = childmapping.getHead();
 					if (!requiresInverse) {
-						
+
 						if (!full)
 							continue;
-						
+
+
 						newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
 					} else {
 						Term term0 = oldMappingHead.getTerms().get(1);
@@ -425,13 +450,17 @@ public class TMappingProcessor implements Serializable {
 				}
 
 			}
+			}
 
 			/* Setting up mappings for the equivalent classes */
-			for (DAGNode equiv : currentNode.getEquivalents()) {
-				Property equivProperty = (Property) equiv.getDescription();
+			for (Description equiv : reasoner.getEquivalences(currentProperty, false)) {
+				if(equiv.equals(currentProperty))
+					continue;
+
+				Property equivProperty = (Property) equiv;
 				// if (equivProperty.isInverse())
 				// continue;
-				Predicate p = ((Property) equiv.getDescription()).getPredicate();
+				Predicate p = ((Property) equiv).getPredicate();
 				Set<CQIE> equivalentPropertyMappings = mappingIndex.get(p);
 				if (equivalentPropertyMappings == null) {
 					equivalentPropertyMappings = new LinkedHashSet<CQIE>();
@@ -466,14 +495,15 @@ public class TMappingProcessor implements Serializable {
 		 * Starting with the leafs.
 		 */
 
-		for (DAGNode currentNode : dag.getClasses()) {
+		for (OClass currentProperty : dag.getClasses()) {
 
-			if (!(currentNode.getDescription() instanceof OClass)) {
-				/* we only create mappings for named concepts */
+			if(dag.getReplacements().containsKey(currentProperty)) {//don't consider the equivalences
+
+
 				continue;
 			}
 
-			OClass currentProperty = (OClass) currentNode.getDescription();
+
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = currentProperty.getPredicate();
@@ -483,13 +513,17 @@ public class TMappingProcessor implements Serializable {
 				mappingIndex.put(currentPredicate, currentNodeMappings);
 			}
 
-			for (DAGNode descendant : currentNode.getDescendants()) {
+			for (Set<Description> descendants : reasoner.getDescendants(currentProperty, false)) {
+				for(Description descendant: descendants){
+				
+					
+
 				/*
 				 * adding the mappings of the children as own mappings, the new
 				 * mappings. There are three cases, when the child is a named
 				 * class, or when it is an \exists P or \exists \inv P.
 				 */
-				ClassDescription childDescription = (ClassDescription) descendant.getDescription();
+				ClassDescription childDescription = (ClassDescription) descendant;
 				Predicate childPredicate = null;
 				boolean isClass = true;
 				boolean isInverse = false;
@@ -502,7 +536,7 @@ public class TMappingProcessor implements Serializable {
 					isInverse = ((PropertySomeRestriction) childDescription).isInverse();
 					isClass = false;
 				} else {
-					throw new RuntimeException("Unknown type of node in DAG: " + descendant.getDescription());
+					throw new RuntimeException("Unknown type of node in DAG: " + descendant);
 				}
 
 				List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);
@@ -529,6 +563,7 @@ public class TMappingProcessor implements Serializable {
 						currentNodeMappings.add(newmapping);
 
 				}
+				}}
 
 				// TODO HACK! Remove when the API of DAG is clean, the following
 				// is a hack due to a bug in the DAG API.
@@ -541,52 +576,66 @@ public class TMappingProcessor implements Serializable {
 				 * code block.
 				 */
 
-				if (descendant.getDescription() instanceof PropertySomeRestriction) {
-					for (DAGNode descendant2 : descendant.getEquivalents()) {
-						childDescription = (ClassDescription) descendant2.getDescription();
-						childPredicate = null;
-						isClass = true;
-						isInverse = false;
-						if (childDescription instanceof OClass) {
-							childPredicate = ((OClass) childDescription).getPredicate();
-						} else if (childDescription instanceof PropertySomeRestriction) {
-							childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();
-							isInverse = ((PropertySomeRestriction) childDescription).isInverse();
-							isClass = false;
-						} else {
-							throw new RuntimeException("Unknown type of node in DAG: " + descendant2.getDescription());
-						}
+//				if (descendant instanceof PropertySomeRestriction) {
+//					for (Description descendant2 : reasoner.getEquivalences(descendant,false)) {
 
-						desendantMappings = originalMappings.getRules(childPredicate);
+//						childDescription = (ClassDescription) descendant2;
+//						childPredicate = null;
+//						isClass = true;
+//						isInverse = false;
+//						if (childDescription instanceof OClass) {
+//							childPredicate = ((OClass) childDescription).getPredicate();
+//						} else if (childDescription instanceof PropertySomeRestriction) {
+//							childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();
+//							isInverse = ((PropertySomeRestriction) childDescription).isInverse();
+//							isClass = false;
+//						} else {
+//							throw new RuntimeException("Unknown type of node in DAG: " + descendant2);
+//						}
+//
 
-						for (CQIE childmapping : desendantMappings) {
-							CQIE newmapping = null;
-							Function newMappingHead = null;
-							Function oldMappingHead = childmapping.getHead();
 
-							if (isClass) {
-								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
-							} else {
-								if (!isInverse) {
-									newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(0));
-								} else {
-									newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
-								}
-							}
-							newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-							if (optimize)
-								mergeMappingsWithCQC(currentNodeMappings, newmapping);
-								else
-									currentNodeMappings.add(newmapping);						}
-					}
-				}
+//						desendantMappings = originalMappings.getRules(childPredicate);
+//
 
-			}
+//						for (CQIE childmapping : desendantMappings) {
+//							CQIE newmapping = null;
+//							Atom newMappingHead = null;
+//							Atom oldMappingHead = childmapping.getHead();
+//
+
+//							if (isClass) {
+//								newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
+//							} else {
+//								if (!isInverse) {
+//									newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms().get(0));
+//								} else {
+
+//									newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms().get(1));
+//								}
+//							}
+
+
+//							newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
+//							if (optimize)
+//								mergeMappingsWithCQC(currentNodeMappings, newmapping);
+//								else
+
+//									currentNodeMappings.add(newmapping);						}
+//					}
+//				}
+//			}
+			
+
+
+
+
 			/* Setting up mappings for the equivalent classes */
-			for (DAGNode equiv : currentNode.getEquivalents()) {
-				if (!(equiv.getDescription() instanceof OClass))
+			for (Description equiv : reasoner.getEquivalences(currentProperty, false)) {
+
+				if (!(equiv instanceof OClass) || equiv.equals(currentProperty))
 					continue;
-				Predicate p = ((OClass) equiv.getDescription()).getPredicate();
+				Predicate p = ((OClass) equiv).getPredicate();
 				Set<CQIE> equivalentClassMappings = mappingIndex.get(p);
 
 				if (equivalentClassMappings == null) {
@@ -618,7 +667,6 @@ public class TMappingProcessor implements Serializable {
 	private void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
 			Set<CQIE> similarMappings = mappingIndex.get(p);
-			
 			Set<CQIE> result = new HashSet<CQIE>();
 			Iterator<CQIE> iterSimilarMappings = similarMappings.iterator();
 			while (iterSimilarMappings.hasNext()) {
@@ -635,10 +683,11 @@ public class TMappingProcessor implements Serializable {
 		}
 	}
 
-	private List<DAGNode> getLeafs(Collection<DAGNode> nodes) {
-		LinkedList<DAGNode> leafs = new LinkedList<DAGNode>();
-		for (DAGNode node : nodes) {
-			if (node.getChildren().isEmpty())
+	private List<Description> getLeafs(Collection<Description> nodes) {
+		LinkedList<Description> leafs = new LinkedList<Description>();
+		for (Description node : nodes) {
+			if (reasoner.getDirectChildren(node, false).isEmpty())
+
 				leafs.add(node);
 		}
 		return leafs;

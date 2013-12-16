@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.protege4.panels;
+
+/*
+ * #%L
+ * ontop-protege4
+ * %%
+ * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
@@ -166,7 +178,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowAll.setText("All");
         chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
+        chkShowAll.setPreferredSize(new java.awt.Dimension(55, 23));
         chkShowAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowAllActionPerformed(evt);
@@ -176,9 +188,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowShortURI.setText("Short IRI");
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
+        chkShowShortURI.setMaximumSize(new java.awt.Dimension(95, 23));
+        chkShowShortURI.setMinimumSize(new java.awt.Dimension(95, 23));
+        chkShowShortURI.setPreferredSize(new java.awt.Dimension(95, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();

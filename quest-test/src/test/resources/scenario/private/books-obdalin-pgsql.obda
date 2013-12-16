@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://meraka/moss/exampleBooks.owl#" xmlns="http://meraka/moss/exampleBooks.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="Books">
+    <mapping id="cl_Authors">
+      <CQ string="Author(author($wr_code)),name(author($wr_code),$wr_name)"/>
+      <SQLQuery string="select wr_code, wr_name from tb_affiliated_writers"/>
+    </mapping>
+    <mapping id="cl_Books">
+      <CQ string="Book(book($bk_code)),title(book($bk_code),$bk_title)"/>
+      <SQLQuery string="select bk_code, bk_title from tb_books"/>
+    </mapping>
+    <mapping id="cl_Editors">
+      <CQ string="Editor(editor($ed_code)),name(editor($ed_code),$ed_name)"/>
+      <SQLQuery string="select ed_code, ed_name from tb_editor"/>
+    </mapping>
+    <mapping id="cl_Editions">
+      <CQ string="Edition(edition($ed_code)),dateOfPublication(edition($ed_code),$pub_date),editionNumber(edition($ed_code),$n_edt)"/>
+      <SQLQuery string="select ed_code,pub_date,n_edt from tb_edition"/>
+    </mapping>
+    <mapping id="cl_AudioBook">
+      <CQ string="AudioBook(book($bk_code))"/>
+      <SQLQuery string="select bk_code from tb_books where bk_type='A'"/>
+    </mapping>
+    <mapping id="cl_EmergingWriter">
+      <CQ string="EmergingWriter(author($wr_code)),name(author($wr_code),$wr_name)"/>
+      <SQLQuery string="select wr_code,wr_name from tb_on_prob_wr"/>
+    </mapping>
+    <mapping id="cl_SpecialEdition">
+      <CQ string="SpecialEdition(edition($ed_code))"/>
+      <SQLQuery string="select ed_code,pub_date,n_edt from tb_edition where ed_type='S'"/>
+    </mapping>
+    <mapping id="dp_genre">
+      <CQ string="genre(book($id_bk),$gen_name)"/>
+      <SQLQuery string="select id_bk,gen_name from tb_bk_gen"/>
+    </mapping>
+    <mapping id="op_writtenBy">
+      <CQ string="writtenBy(book($bk_code),author($wr_id))"/>
+      <SQLQuery string="select bk_code,wr_id from tb_authors"/>
+    </mapping>
+    <mapping id="op_hasEdition">
+      <CQ string="hasEdition(book($bk_id),edition($ed_code))"/>
+      <SQLQuery string="select ed_code,bk_id from tb_edition"/>
+    </mapping>
+  </mappings>
+  <dataSource URI="Books" databaseDriver="org.postgresql.Driver" databasePassword="obdaps83" databaseURL="jdbc:postgresql://obdalin.inf.unibz.it/books" databaseUsername="postgres" isAboxDump="" ontouri="http://meraka/moss/exampleBooks.owl#"/>
+</OBDA>

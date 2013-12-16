@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
@@ -95,7 +107,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -192,7 +204,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -297,7 +309,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -469,7 +481,7 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql = "SELECT fn, ln, age, schooluri FROM data";
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -550,12 +562,12 @@ try{
 		 * Setting up the OBDA model and the mappings
 		 */
 
-		String sql1 = "SELECT fn, ln FROM data";
-		String sql2 = "SELECT fn, ln FROM data";
-		String sql3 = "SELECT fn, ln FROM data";
-		String sql4 = "SELECT fn, ln, age FROM data";
-		String sql5 = "SELECT fn, ln, schooluri FROM data";
-		String sql6 = "SELECT fn, ln, schooluri FROM data";
+		String sql1 = "SELECT \"fn\", \"ln\" FROM \"data\"";
+		String sql2 = "SELECT \"fn\", \"ln\" FROM \"data\"";
+		String sql3 = "SELECT \"fn\", \"ln\" FROM \"data\"";
+		String sql4 = "SELECT \"fn\", \"ln\", \"age\" FROM \"data\"";
+		String sql5 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
+		String sql6 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
 
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
@@ -608,7 +620,6 @@ try{
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 		
-
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();

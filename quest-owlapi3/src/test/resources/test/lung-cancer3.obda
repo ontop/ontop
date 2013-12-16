@@ -15,102 +15,102 @@ driverClass	org.h2.Driver
 [MappingDeclaration] @collection [[
 mappingId	map-patient
 target		:db1/{PATIENTID} a :Person ; :name {NAME} . 
-source		select * from TBL_PATIENT
+source		select * from "TBL_PATIENT"
 
 mappingId	patient-neopalsm
 target		:db1/{PATIENTID} :hasNeoplasm :db1/neoplasm/{PATIENTID} . 
-source		select * from TBL_PATIENT
+source		select * from "TBL_PATIENT"
 
 mappingId	patient-neoplasm
 target		:db1/1001 :hasNeoplasm :db1/neoplasm/{PATIENTID} . 
-source		select * from TBL_PATIENT
+source		select * from "TBL_PATIENT"
 
 mappingId	patient-neoplasm
 target		:db1/1001 :hasNeoplasm :db1/neoplasm/2002 . 
-source		select * from TBL_PATIENT
+source		select * from "TBL_PATIENT"
 
 mappingId	nsclc
 target		:db1/neoplasm/{PATIENTID} a :NSCLC . 
-source		select * from TBL_PATIENT WHERE TYPE = false
+source		select * from "TBL_PATIENT" WHERE TYPE = false
 
 mappingId	sclc
 target		:db1/neoplasm/{PATIENTID} a :SCLC . 
-source		select * from TBL_PATIENT WHERE TYPE = true
+source		select * from "TBL_PATIENT" WHERE TYPE = true
 
 mappingId	stagei
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/I . 
-source		select * from TBL_PATIENT WHERE STAGE = 1
+source		select * from "TBL_PATIENT" WHERE STAGE = 1
 
 mappingId	stageii
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/II . 
-source		select * from TBL_PATIENT WHERE STAGE = 2
+source		select * from "TBL_PATIENT" WHERE STAGE = 2
 
 mappingId	stageiii
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/III . 
-source		select * from TBL_PATIENT WHERE STAGE = 3
+source		select * from "TBL_PATIENT" WHERE STAGE = 3
 
 mappingId	stageiiia
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/IIIa . 
-source		select * from TBL_PATIENT WHERE STAGE = 4
+source		select * from "TBL_PATIENT" WHERE STAGE = 4
 
 mappingId	stageiiib
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/IIIb . 
-source		select * from TBL_PATIENT WHERE STAGE = 5
+source		select * from "TBL_PATIENT" WHERE STAGE = 5
 
 mappingId	stageiv
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/IV . 
-source		select * from TBL_PATIENT WHERE STAGE = 6
+source		select * from "TBL_PATIENT" WHERE STAGE = 6
 
 mappingId	stagelimited
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/limited . 
-source		select * from TBL_PATIENT WHERE STAGE = 7
+source		select * from "TBL_PATIENT" WHERE STAGE = 7
 
 mappingId	stageextensive
 target		:db1/neoplasm/{PATIENTID} :hasStage :stages/extensive . 
-source		select * from TBL_PATIENT WHERE STAGE = 8
+source		select * from "TBL_PATIENT" WHERE STAGE = 8
 
 mappingId	patient-2
 target		:db2/{ID} a :Person ; :name {NAME} ; :hasNeoplasm :db2/neoplasm/{ID} . 
-source		select ID, NAME from T_NAME
+source		select "ID", "NAME" from "T_NAME"
 
 mappingId	nsclc-2
 target		:db2/neoplasm/{ID} a :NSCLC . 
-source		select ID, STAGE from T_NSCLC
+source		select "ID", "STAGE" from "T_NSCLC"
 
 mappingId	sclsc-2
 target		:db2/neoplasm/{ID} a :SCLC . 
-source		select ID, STAGE from T_SCLC
+source		select "ID", "STAGE" from "T_SCLC"
 
 mappingId	stagei-2
 target		:db2/neoplasm/{ID} :hasStage :stages/I . 
-source		select ID, STAGE from T_NSCLC WHERE STAGE='i'
+source		select "ID", "STAGE" from "T_NSCLC" WHERE STAGE='i'
 
 mappingId	stageii-2
 target		:db2/neoplasm/{ID} :hasStage :stages/II . 
-source		select ID, STAGE from T_NSCLC WHERE STAGE='ii'
+source		select "ID", "STAGE" from "T_NSCLC" WHERE STAGE='ii'
 
 mappingId	stageiii-2
 target		:db2/neoplasm/{ID} :hasStage :stages/III . 
-source		select ID, STAGE from T_NSCLC WHERE STAGE='iii'
+source		select "ID", "STAGE" from "T_NSCLC" WHERE STAGE='iii'
 
 mappingId	stageiiia-2
 target		:db2/neoplasm/{ID} :hasStage :stages/IIIa . 
-source		select ID, STAGE from T_NSCLC WHERE STAGE='iiia'
+source		select "ID", "STAGE" from "T_NSCLC" WHERE STAGE='iiia'
 
 mappingId	stageiiib-2
 target		:db2/neoplasm/{ID} :hasStage :stages/IIIb . 
-source		select ID, STAGE from T_NSCLC WHERE STAGE='iiib'
+source		select "ID", "STAGE" from "T_NSCLC" WHERE STAGE='iiib'
 
 mappingId	stageiv-2
 target		:db2/neoplasm/{ID} :hasStage :stages/IV . 
-source		select ID, STAGE from T_NSCLC WHERE STAGE='iv'
+source		select "ID", "STAGE" from "T_NSCLC" WHERE STAGE='iv'
 
 mappingId	stagelim-2
 target		:db2/neoplasm/{ID} :hasStage :stages/limited . 
-source		select ID, STAGE from T_SCLC WHERE STAGE='limited'
+source		select "ID", "STAGE" from "T_SCLC" WHERE STAGE='limited'
 
 mappingId	stageex-2
 target		:db2/neoplasm/{ID} :hasStage :stages/extensive . 
-source		select ID, STAGE from T_SCLC WHERE STAGE='extensive'
+source		select "ID", "STAGE" from T_SCLC WHERE STAGE='extensive'
 ]]
 

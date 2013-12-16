@@ -1,0 +1,9 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+SELECT DISTINCT * WHERE { $x a :Person. 
+		$x :firstName $fn. 
+		$x :lastName $ln. 
+		$x :hasAddress $address. 
+		$address :inStreet $street. 
+		$address :inCity $city. 
+		$address :inCountry $country. }
+

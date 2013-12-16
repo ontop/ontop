@@ -462,10 +462,12 @@ reference_value_expression returns [ReferenceValueExpression value]
 column_reference returns [ColumnReference value]
   : (t=table_identifier PERIOD)? column_name {
       String table = "";
-      if (t != null) {
-        table = $t.value;
-      }
-      $value = new ColumnReference(table, $column_name.value);
+      if (t != null)
+        table = $t.value.get(0);
+      if($column_name.value == null)
+        $value = new ColumnReference(table, null);	
+      else
+        $value = new ColumnReference(table, $column_name.value.get(1));
     }
   ;  
   
@@ -597,6 +599,7 @@ comparison_predicate returns [ComparisonPredicate value]
 comp_op returns [ComparisonPredicate.Operator value]
   : EQUALS { $value = ComparisonPredicate.Operator.EQ; }
   | LESS GREATER { $value = ComparisonPredicate.Operator.NE; }
+  | EXCLAMATION EQUALS { $value = ComparisonPredicate.Operator.NE; }
   | LESS { $value = ComparisonPredicate.Operator.LT; }
   | GREATER { $value = ComparisonPredicate.Operator.GT; }
   | LESS EQUALS { $value = ComparisonPredicate.Operator.LE; }
@@ -742,48 +745,63 @@ table_primary returns [TablePrimary value]
  
 table_name returns [TablePrimary value]
   : (schema_name PERIOD)? table_identifier {
-      String schema = $schema_name.value;      
-      if (schema != null && schema != "") {
-        $value = new TablePrimary(schema, $table_identifier.value);
-      }
-      else {
-        $value = new TablePrimary($table_identifier.value);
-      }      
+      if($table_identifier.value != null){
+	    String tableName = $table_identifier.value.get(1);
+        String tableQName = $table_identifier.value.get(0);
+        if ($schema_name.value != null && $schema_name.value.get(1).length() > 0) {
+      	  String schemaName = $schema_name.value.get(1);
+      	  String schemaQName = $schema_name.value.get(0);         
+          $value = new TablePrimary(schemaName, tableName, schemaQName + "." + tableQName);
+        }
+        else {
+          $value = new TablePrimary("", tableName, tableQName);
+        }
+      } else 
+        $value = new TablePrimary("", null, null);      
     }
   ;  
 
 alias_name returns [String value]
-  : identifier  { $value = $identifier.value; }
+  : identifier  { 
+     if ($identifier.value != null)
+       $value = $identifier.value.get(1);
+     else
+       $value = null;
+    }
   ;
 
 derived_table
   : table_subquery
   ;
     
-table_identifier returns [String value]
+table_identifier returns [ArrayList<String> value]
   : identifier { $value = $identifier.value; }
   ;
   
-schema_name returns [String value]
+schema_name returns [ArrayList<String> value]
   : identifier { $value = $identifier.value; }
   ;
     
-column_name returns [String value]
+column_name returns [ArrayList<String> value]
   : identifier { $value = $identifier.value; }
   ;
   
-identifier returns [String value]
+identifier returns [ArrayList<String> value]
   : (t=regular_identifier | t=delimited_identifier) { $value = $t.value; }
   ;
 
-regular_identifier returns [String value]
-  : VARNAME { $value = $VARNAME.text; }
+regular_identifier returns [ArrayList<String> value]
+  : VARNAME { $value = new ArrayList<String>();
+  	$value.add($VARNAME.text);
+  	$value.add($VARNAME.text);
+  	 }
   ;
 
-delimited_identifier returns [String value]
+delimited_identifier returns [ArrayList<String> value]
   : STRING_WITH_QUOTE_DOUBLE { 
-      $value = $STRING_WITH_QUOTE_DOUBLE.text;
-      $value = $value.substring(1, $value.length()-1);
+	$value = new ArrayList<String>();  
+    $value.add($STRING_WITH_QUOTE_DOUBLE.text);
+ 	$value.add($STRING_WITH_QUOTE_DOUBLE.text.substring(1, $STRING_WITH_QUOTE_DOUBLE.text.length()-1));
     }
   ;
 

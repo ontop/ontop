@@ -1,0 +1,17 @@
+@prefix : <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+:a foaf:interest "a" .
+:c foaf:interest  "c" .
+:e foaf:interest  "e" .
+:g foaf:interest  "g" .
+:i foaf:interest  "i" .
+:k foaf:interest  "k" .
+:l foaf:interest  "l" .
+:n foaf:interest  "n" .
+:p foaf:interest  "p" .
+:r foaf:interest  "r" .
+:t foaf:interest  "t" .
+:v foaf:interest  "v" .
+:x foaf:interest  "x" .
+:z foaf:interest  "z" .

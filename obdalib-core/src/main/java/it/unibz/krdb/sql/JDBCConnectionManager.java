@@ -1,27 +1,42 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.sql;
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.Relation;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -196,6 +211,36 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
+	
+	
+	/**
+	 *  Retrieves the database meta data about the table schema given a
+	 * particular data source id.
+	 * This method is used when the table names are taken from the mappings.
+	 * 
+	 * @param sourceId
+	 *            The database id.
+	 * @return The database meta data object.
+	 */
+	public DBMetadata getMetaData(OBDADataSource sourceId, ArrayList<Relation> tables) throws SQLException {
+		Connection conn = getConnection(sourceId);
+		return getMetaData(conn, tables);
+	}
+	
+	public static DBMetadata getMetaData(Connection conn, ArrayList<Relation> tables) throws SQLException {
+		if (tables == null || tables.isEmpty())
+			return getMetaData(conn);
+		DBMetadata metadata = null;
+		final DatabaseMetaData md = conn.getMetaData();
+		if (md.getDatabaseProductName().contains("Oracle")) {
+			// If the database engine is Oracle
+			metadata = getOracleMetaData(md, conn, tables);
+		}  else {
+			// For other database engines
+			metadata = getOtherMetaData(md, conn, tables);
+		}
+		return metadata;
+	}
 
 	/**
 	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
@@ -254,6 +299,81 @@ public class JDBCConnectionManager {
 	}
 
 	/**
+	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
+	 * 
+	 * Only retrieves metadata for the tables listed
+	 * 
+	 * Future plan to retrive all tables when this list is empty?
+	 * 
+	 * @param tables 
+	 */
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		
+		/* Obtain the statement object for query execution */
+		stmt = conn.createStatement();
+
+
+		/**
+		 *  The sql to extract table names is now removed, since we instead use the
+		 *  table names from the source sql of the mappings, given as the parameter tables
+		 */
+
+		Iterator<Relation> table_iter = tables.iterator();
+		/* Obtain the column information for each relational object */
+		while (table_iter.hasNext()) {
+			Relation table = table_iter.next();
+			ResultSet rsColumns = null;
+			Set<String> tableColumns = new HashSet<String>();
+			String tblName = table.getTableName();
+			/**
+			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
+			 * provided, otherwise without.
+			 */
+			String tableGivenName = table.getGivenName();
+			String tableSchema;
+			if( table.getSchema().length() > 0)
+				tableSchema = table.getSchema();
+			else
+				tableSchema = null;
+
+			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
+			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+
+			TableDefinition td = new TableDefinition(tableGivenName);
+
+			try {
+				rsColumns = md.getColumns(null, tableSchema, tblName, null);
+				if (rsColumns == null) {
+					continue;
+				}
+				for (int pos = 1; rsColumns.next(); pos++) {
+					final String columnName = rsColumns.getString("COLUMN_NAME");
+					final int dataType = rsColumns.getInt("DATA_TYPE");
+					final boolean isPrimaryKey = primaryKeys.contains(columnName);
+					final Reference reference = foreignKeys.get(columnName);
+					final int isNullable = rsColumns.getInt("NULLABLE");
+					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+				
+					// Check if the columns are unique regardless their letter cases
+					if (!tableColumns.add(columnName.toLowerCase())) {
+						// if exist
+						throw new RuntimeException("The system cannot process duplicate table columns!");
+					}
+				}
+				// Add this information to the DBMetadata
+				metadata.add(td);
+			} finally {
+				if (rsColumns != null) {
+					rsColumns.close(); // close existing open cursor
+				}
+			}
+		}
+		return metadata;
+	}
+
+	/**
 	 * Retrieve metadata for SQL Server database engine
 	 */
 	private static DBMetadata getSqlServerMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
@@ -263,13 +383,13 @@ public class JDBCConnectionManager {
 		try {
 			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();
-			
+
 			/* Obtain the relational objects (i.e., tables and views) */
 			final String tableSelectQuery = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
 					"FROM INFORMATION_SCHEMA.TABLES " +
 					"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
 			resultSet = stmt.executeQuery(tableSelectQuery);
-			
+
 			/* Obtain the column information for each relational object */
 			while (resultSet.next()) {
 				ResultSet rsColumns = null;
@@ -279,10 +399,10 @@ public class JDBCConnectionManager {
 					final String tblName = resultSet.getString("TABLE_NAME");
 					final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, tblCatalog, tblSchema, tblName);
-					
+
 					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
-					
+
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
@@ -309,7 +429,7 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
-	
+
 	/**
 	 * Retrieve metadata for DB2 database engine
 	 */
@@ -441,6 +561,100 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
+	
+	
+	
+	/**
+	 * Retrieve metadata for Oracle database engine
+	 * 
+	 * Currently only retrieves metadata for the tables listed
+	 * 
+	 * Future plan to retrive all tables when this list is empty?
+	 * 
+	 * @param tables 
+	 */
+	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, ArrayList<Relation> tables) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		ResultSet resultSet = null;
+				
+		try {
+			/* Obtain the statement object for query execution */
+			stmt = conn.createStatement();
+			
+			/* Obtain the table owner (i.e., schema name) */
+			String loggedUser = "SYSTEM"; // by default
+			resultSet = stmt.executeQuery("SELECT user FROM dual");
+			if (resultSet.next()) {
+				loggedUser = resultSet.getString("user");
+			}
+			/**
+			 *  The sql to extract table names is now removed, since we instead use the
+			 *  table names from the source sql of the mappings, given as the parameter tables
+			 */
+			
+			Iterator<Relation> table_iter = tables.iterator();
+			/* Obtain the column information for each relational object */
+			while (table_iter.hasNext()) {
+				Relation table = table_iter.next();
+				ResultSet rsColumns = null;
+				try {
+//					String tblName = resultSet.getString("object_name");
+//					tableOwner = resultSet.getString("owner_name");
+					String tblName = table.getTableName();
+					/**
+					 * givenTableName is exactly the name the user provided, including schema prefix if that was
+					 * provided, otherwise without.
+					 */
+					String tableGivenName = table.getGivenName();
+					/**
+					 * If there is a schema prefix, this must be the tableOwner argument to the 
+					 * jdbc methods below. Otherwise, we use the logged in user. I guess null would
+					 * also have worked in the latter case.
+					 */
+					String tableOwner;
+					if( table.getSchema().length() > 0)
+						tableOwner = table.getSchema();
+					else
+						tableOwner = loggedUser;
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
+					
+					TableDefinition td = new TableDefinition(tableGivenName);
+					rsColumns = md.getColumns(null, tableOwner, tblName, null);
+			
+					for (int pos = 1; rsColumns.next(); pos++) {
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
+						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final Reference reference = foreignKeys.get(columnName);
+						final int isNullable = rsColumns.getInt("NULLABLE");
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+					}
+					// Add this information to the DBMetadata
+					metadata.add(td);
+					//metadata.add(tblName,tableOwner);
+					
+				} finally {
+					if (rsColumns != null) {
+						rsColumns.close(); // close existing open cursor
+					}
+				}
+			}
+		} finally {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		return metadata;
+	}
+	
+	
+	
+	
 
 	/* Retrives the primary key(s) from a table */
 	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {

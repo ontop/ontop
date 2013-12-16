@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="thing"/>
+    <variable name="counter"/>
+  </head>
+  <results>
+    <result>
+      <binding name="thing"><uri>http://example.org/test1</uri></binding>
+      <binding name="counter"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">2</literal></binding>
+    </result>
+    <result>
+      <binding name="thing"><uri>http://example.org/test2</uri></binding>
+      <binding name="counter"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</literal></binding>
+    </result>
+  </results>
+</sparql>
+

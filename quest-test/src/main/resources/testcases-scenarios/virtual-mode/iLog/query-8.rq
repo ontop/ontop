@@ -1,0 +1,18 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>  
+
+#  customer che ordinano la spedizione di almeno N itu
+
+SELECT ?customer ?itu
+WHERE {
+?customer :requests ?req.
+?req :containsITU  ?itu;
+	:hasRequestDate ?date.
+FILTER(?date >= "2011-11-11"^^xsd:dateTime &&
+?date < "2011-11-12"^^xsd:dateTime).
+}
+ORDER BY ?customer
+

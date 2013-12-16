@@ -1,0 +1,9 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+SELECT DISTINCT $fname $ln $securitynum 
+WHERE { 
+$broker a :StockBroker;  
+               :tradesOnBehalfOf $broker;
+               :firstName $fname; 
+               :lastName $ln;
+              :ssn $securitynum 
+}

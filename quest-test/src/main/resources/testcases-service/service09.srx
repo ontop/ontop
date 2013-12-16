@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+    <variable name="p"/>
+    <variable name="o"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://example.org/a</uri></binding>
+      <binding name="p"><uri>http://xmlns.com/foaf/0.1/interest</uri></binding>
+      <binding name="o"><literal>SPARQL 1.1 Basic Federated Query</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://example.org/b</uri></binding>
+      <binding name="p"><uri>http://xmlns.com/foaf/0.1/interest</uri></binding>
+      <binding name="o"><literal>SPARQL 1.1 Query</literal></binding>
+    </result>
+  </results>
+</sparql>
+

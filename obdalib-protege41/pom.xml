@@ -1,36 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.9</version>
+		<artifactId>ontop</artifactId>
+		<groupId>it.unibz.inf.ontop</groupId>
+		<version>1.10.0</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>obdalib-protege41</artifactId>
-	<name>obdalib-protege41</name>
 
-	<repositories>
-		<!-- This repository holds protege 4 and obdalib related dependencies, 
-			the machine will change soon to obdavm instead of obdalin -->
-		<repository>
-			<id>obda.inf.unibz.it</id>
-			<name>FUB OBDA Maven repository</name>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>thirdparty-releases</id>
-			<name>JBoss Thirdparty Releases</name>
-			<url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
-		</repository>
-	</repositories>
+	<artifactId>ontop-protege4</artifactId>
+	<name>ontop-protege4</name>
 
 	<dependencies>
 		<dependency>
@@ -44,9 +22,9 @@
 		<!-- These are dependencies to the OBDA related classes. -->
 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 
@@ -55,14 +33,14 @@
 		<!-- Reasoner libraries -->
 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-reformulation-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-owlapi3</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-owlapi3</artifactId>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
@@ -75,20 +53,20 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-db</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-db</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
@@ -101,20 +79,20 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-reformulation-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-sesame</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-sesame</artifactId>
+			<version>${project.version}</version>
 
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-sesame</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-sesame</artifactId>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
@@ -127,23 +105,6 @@
 			</exclusions>
 		</dependency>
 
-
-		<!-- <dependency> <groupId>inf.unibz.it.obda</groupId> <artifactId>quest-sesame</artifactId> 
-			<version>1.8</version> </dependency> -->
-
-		<!-- All the following dependencies are required at compilation or runtime 
-			and are not available in the OSGi, or Protege 4 classpath. They must be packed 
-			together with the bundle. They have a default scope of runtime and compilation -->
-
-		<!-- <dependency> <groupId>org.jgraph</groupId> <artifactId>jgrapht</artifactId> 
-			</dependency> <dependency> <groupId>org.jgraph</groupId> <artifactId>jgraph</artifactId> 
-			</dependency> -->
-
-		<!-- -->
-		<!-- <dependency> <groupId>com.ibm.icu</groupId> <artifactId>icu4j</artifactId> 
-			</dependency> -->
-		<!-- <dependency> <groupId>activemq</groupId> <artifactId>relaxngDatatype</artifactId> 
-			</dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -157,53 +118,30 @@
 			<artifactId>logback-core</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>xsdlib</groupId> <artifactId>xsdlib</artifactId> 
-			</dependency> <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
-			</dependency> -->
-
-		<!-- <dependency> <groupId>org.openrdf.sesame</groupId> <artifactId>sesame-runtime</artifactId> 
-			</dependency> -->
-
-		<!-- These will download some of the sources -->
-
-		<!-- JDBC Drivers -->
-
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
+  			<groupId>net.sf.jgrapht</groupId>
+  			<artifactId>jgrapht</artifactId>
 		</dependency>
+		
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<type>jar</type>
+			<groupId>jgraph</groupId>
+			<artifactId>jgraph</artifactId>
 		</dependency>
 
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
-			<groupId>org.protege</groupId>
+			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.core.application</artifactId>
-			<version>4.1.0-b239</version>
+			<version>4.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.protege</groupId>
+			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.owl</artifactId>
-			<version>4.1.0-b239</version>
-			<classifier>jar</classifier>
+			<version>4.3.0</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.semanticweb</groupId>
-			<artifactId>org.semanticweb.owl.owlapi</artifactId>
-			<version>4.1.0-b239</version>
-			<classifier>jar</classifier>
-			<scope>provided</scope>
-		</dependency>
-		<!-- <dependency> <groupId>commons-logging</groupId> <artifactId>commons-logging</artifactId> 
-			</dependency> -->
-		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>log4j-over-slf4j</artifactId> 
-			</dependency> -->
 
 		<!-- transitive dependencies -->
 		<dependency>
@@ -312,14 +250,14 @@
 	</dependencies>
 
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-1.9</finalName>
+		<finalName>it.unibz.inf.obda.p4plugin-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<excludes>
 					
 						<exclude>**/TBoxDAGImpl.java</exclude>
@@ -339,7 +277,13 @@
 					</testExcludes>
 				</configuration>
 			</plugin>
-
+			<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-surefire-plugin</artifactId>
+	       		<configuration>
+          			<skipTests>true</skipTests>
+        		</configuration>
+      		</plugin>
 			<!-- <plugin> <artifactId>maven-jar-plugin</artifactId> <configuration> 
 				<archive> <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile> 
 				</archive> </configuration> </plugin> -->
@@ -373,8 +317,8 @@
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
-						<!-- <Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
-						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
+						<!-- <Embed-Dependency>*;groupId=it.unibz.inf.ontop;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
+						<Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
 
 						<Bundle-Name>-ontopPro-</Bundle-Name>
 						<!-- necessary for protege 4 plugins -->

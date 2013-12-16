@@ -8,14 +8,14 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	Books
-connectionUrl	jdbc:h2:tcp://localhost/books
+connectionUrl	jdbc:h2:tcp://localhost/books;DATABASE_TO_UPPER=FALSE
 username	sa
 password	
 driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	cl_Authors
-target		:author/{wr_code}/ a {wr_name} . 
+target		:author/{wr_code}/ a :{wr_name} . 
 source		select wr_code, wr_name from tb_affiliated_writers
 
 mappingId	cl_Books

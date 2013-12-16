@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
@@ -1591,7 +1603,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			}
 
 		}// end for rule body
-		freshRule.updateBody(newbody);
+
+		//freshRule.updateBody(newbody);
+		replaceInnerLJ(freshRule, newbody, termidx1);
 		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
 
 		OBDAVocabulary myNull = new OBDAVocabulary();
@@ -1602,6 +1616,41 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		// LJ data argument
 		freshRule = Unifier.applyUnifier(freshRule, unifier, false);
 		return freshRule;
+	}
+	
+	private void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
+			Stack<Integer> termidx) {
+		Function parentFunction = null;
+		if (termidx.size() > 1) {
+			/*
+			 * Its a nested term
+			 */
+			Term nestedTerm = null;
+			for (int y = 0; y < termidx.size() - 1; y++) {
+				int i = termidx.get(y);
+				if (nestedTerm == null)
+					nestedTerm = (Function) rule.getBody().get(i);
+				else
+				{
+					parentFunction = (Function) nestedTerm;
+					nestedTerm = ((Function) nestedTerm).getTerm(i);
+				}
+			}
+			//Function focusFunction = (Function) nestedTerm;
+			if (parentFunction == null) {
+				//its just one Left Join, replace rule body directly
+				rule.updateBody(replacementTerms);
+				return;
+			}
+			List <Term> tempTerms = parentFunction.getTerms();
+			tempTerms.remove(0);
+			List <Term> newTerms = new LinkedList<Term>();
+			newTerms.addAll(replacementTerms);
+			newTerms.addAll(tempTerms);
+			parentFunction.updateTerms(newTerms);
+		} else {
+			throw new RuntimeException("Unexpected OPTIONAL condition!");
+		}
 	}
 
 	/***

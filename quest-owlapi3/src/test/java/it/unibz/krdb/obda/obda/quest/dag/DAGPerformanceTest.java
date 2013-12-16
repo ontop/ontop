@@ -1,20 +1,31 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.obda.quest.dag;
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Description;
+/*
+ * #%L
+ * ontop-quest-owlapi3
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.util.Map;
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -33,7 +44,7 @@ public class DAGPerformanceTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
 
-	int size = 10000;
+	int size = 1000;
 	int maxdepth = 10;
 
 	private class LevelRange {
@@ -108,30 +119,47 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
-		System.out.println(ont);
+		
+    	Random r2 = new Random(10);
+    	for (int i =0; i<((ont.getAxiomCount()-size) *0.05);i++){
+    		int rand1 = r2.nextInt(size);
+			int rand2 = r2.nextInt(size);
+			OWLClass c1 = classes[rand1];
+			OWLClass c2 = classes[rand2];
+			OWLAxiom subc = fac.getOWLSubClassOfAxiom(c2, c1);
+			man.addAxiom(ont, subc);
+    		
+    	}
+		
 
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		Ontology o = t.translate(ont);
 
-		log.debug("Creating a DAG out of it");
-
 		long start = System.nanoTime();
-		log.debug("Optimizing Equivalences");
-		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
-		equiOptimizer.optimize();
-		
-		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
-		log.debug("Equivalences: {}", equi.size());
-		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
-		log.debug("Done.");
+		log.debug("Creating a DAG out of it");
+		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o, false);
+		DAGImpl impliedDAG = reasoner.getDAG();
+		log.debug("{}s", ((System.nanoTime() - start)/1000000));
+
+//		long start = System.nanoTime();
+//		log.debug("Optimizing Equivalences");
+//		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
+//		equiOptimizer.optimize();
+//		
+//		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
+//		log.debug("Equivalences: {}", equi.size());
+//		log.debug("{}s", ((System.nanoTime() - start)/1000000));
+//		log.debug("Done.");
+//		System.out.println(ont);
+//		System.out.println(equiOptimizer.getOptimalTBox());
 	}
 	
 	/**
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void disabledtestOnto17() throws Exception {
+	public void testOnto17() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
@@ -184,6 +212,17 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
+		
+    	Random r2 = new Random(10);
+    	for (int i =0; i<((ont.getAxiomCount()-size) *0.05);i++){
+    		int rand1 = r2.nextInt(size);
+			int rand2 = r2.nextInt(size);
+			OWLClass c1 = classes[rand1];
+			OWLClass c2 = classes[rand2];
+			OWLAxiom subc = fac.getOWLSubClassOfAxiom(c2, c1);
+			man.addAxiom(ont, subc);
+    		
+    	}
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		Ontology o = t.translate(ont);
@@ -191,21 +230,29 @@ public class DAGPerformanceTest extends TestCase {
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
-		log.debug("Optimizing Equivalences");
-		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
-		equiOptimizer.optimize();
+		log.debug("Creating a DAG out of it");
+		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o, false);
+		DAGImpl impliedDAG = reasoner.getDAG();
+		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
-		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
-		log.debug("Equivalences: {}", equi.size());
-		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
-		log.debug("Done.");
+//		long start = System.nanoTime();
+//		log.debug("Optimizing Equivalences");
+//		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
+//		equiOptimizer.optimize();
+//
+//		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
+//		log.debug("Equivalences: {}", equi.size());
+//		log.debug("{}s", ((System.nanoTime() - start)/1000000));
+//		log.debug("Done.");
+//		System.out.println(ont);
+//		System.out.println(equiOptimizer.getOptimalTBox());
 	}
 	
 	/**
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void disabledtestOnto19() throws Exception {
+	public void testOnto19() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
@@ -259,6 +306,19 @@ public class DAGPerformanceTest extends TestCase {
 				man.addAxiom(ont, subc);
 			}
 		}
+		
+    	Random r2 = new Random(10);
+    	for (int i =0; i<((ont.getAxiomCount()-size) *0.05);i++){
+    		int rand1 = r2.nextInt(size);
+			int rand2 = r2.nextInt(size);
+			OWLClass c1 = classes[rand1];
+			OWLClass c2 = classes[rand2];
+			OWLAxiom subc = fac.getOWLSubClassOfAxiom(c2, c1);
+			man.addAxiom(ont, subc);
+    		
+    	}
+		
+
 		log.debug("Translating into quest API");
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		Ontology o = t.translate(ont);
@@ -266,13 +326,21 @@ public class DAGPerformanceTest extends TestCase {
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
-		log.debug("Optimizing Equivalences");
-		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
-		equiOptimizer.optimize();
-		
-		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
-		log.debug("Equivalences: {}", equi.size());
-		log.debug("{}s", ((System.nanoTime() - start)/1000000000));
-		log.debug("Done.");
+		log.debug("Creating a DAG out of it");
+		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o, false);
+		DAGImpl impliedDAG = reasoner.getDAG();
+		log.debug("{}s", ((System.nanoTime() - start)/1000000));
+
+//		long start = System.nanoTime();
+//		log.debug("Optimizing Equivalences");
+//		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(o);
+//		equiOptimizer.optimize();
+//		
+//		Map<Predicate, Description> equi = equiOptimizer.getEquivalenceMap();
+//		log.debug("Equivalences: {}", equi.size());
+//		log.debug("{}s", ((System.nanoTime() - start)/1000000));
+//		log.debug("Done.");
+//		System.out.println(ont);
+//		System.out.println(equiOptimizer.getOptimalTBox());
 	}	
 }

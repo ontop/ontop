@@ -1,0 +1,197 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1222766179.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	HGT
+connectionUrl	jdbc:oracle:thin:@obdalin.inf.unibz.it:1522/
+username	hgtdb
+password	hgt
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	Organism
+target		:Organism-{ABBREV} a :Organism . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME 
+
+mappingId	HGTPredictions and OrganismHasHGTPredictions
+target		:Organism-{ABBREV} :OrganismHasHGTPredictions :HGTPredictions-{ABBREV} . :HGTPredictions-{ABBREV} a :HGTPredictions . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME
+
+mappingId	HGTPredictions Attributes
+target		:HGTPredictions-{ABBREV} :Percentage {PERCENTAGE} ; :NrPredHGTgenes {HGT} . 
+source		SELECT ABBREV, HGT, PERCENTAGE FROM  HGTDB.ORGANISME
+
+mappingId	OrganismInfo and OrganismHasOrganismInfo
+target		:OrganismInfo-{ABBREV} a :OrganismInfo . :Organism-{ABBREV} :OrganismHasOrganismInfo :OrganismInfo-{ABBREV} . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME 
+
+mappingId	OrganismInfo Attributes
+target		:OrganismInfo-{ABBREV} :PB {PB} ; :NrGenes {NGENES} ; :OrganismName {NAME} ; :GenCode {GENCODE} . 
+source		SELECT ABBREV, PB, NGENES, GENCODE, NAME FROM HGTDB.ORGANISME
+
+mappingId	AltCode and OrganismHasAltCode
+target		:Organism-{ABBREV} :OrganismHasAltCode :AltCode-{ABBREV} . :AltCode-{ABBREV} a :AltCode . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME 
+
+mappingId	AltCode Attributes [Note Gbref is not in the db]
+target		:AltCode-{ABBREV} :NCBIID {NCBIID} ; :TaxID {TAXID} ; :KEGGCode {KEGGCODE} . 
+source		SELECT ABBREV, NCBIID, TAXID, KEGGCODE FROM HGTDB.ORGANISME
+
+mappingId	Organism Attribute
+target		:Organism-{ABBREV} :Abbrev $Abbrev . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME 
+
+mappingId	Gene
+target		:Gene-{ID} a :Gene . 
+source		SELECT ID FROM HGTDB.GENES
+
+mappingId	GCstatsOrg and OrganismHasGCstatsOrg
+target		:getGCstatsOrg($Abbrev) a :GCstatsOrg . :Organism-{ABBREV} :OrganismHasGCstatsOrg :getGCstatsOrg($Abbrev) . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME
+
+mappingId	GCstatsOrg GC attributes
+target		:getGCstatsOrg($Abbrev) :GCValue $GC; :GC1 $GC1; :GC2 $GC2; :GC3 $GC3 . 
+source		SELECT ABBREV, GC, GC1, GC2, GC3 FROM HGTDB.ORGANISME
+
+mappingId	GCstatsOrg StDev attributes
+target		:getGCstatsOrg($Abbrev) :StDevGC $SDGC; :StDevGC1 $SDGC1; :StDevGC2 $SDGC2; :StDevGC3 $SDGC3 . 
+source		SELECT ABBREV, SDGC, SDGC1,SDGC2, SDGC3 FROM HGTDB.ORGANISME
+
+mappingId	GeneHasOrganism
+target		:Gene-{ID} :GeneHasOrganism :Organism-{ABBREV} . 
+source		SELECT ID, ABBREV FROM HGTDB.ORGANISME  JOIN HGTDB.GENES  ON ABBREV = IDORGANISME
+
+mappingId	Gene attribute
+target		:Gene-{ID} :ID {ID} . 
+source		SELECT ID FROM HGTDB.GENES
+
+mappingId	GeneStats and GeneHasGeneStats
+target		:Gene-{ID} :GeneHasGeneStats :GeneStats-{ID} . :GeneStats-{ID} a :GeneStats . 
+source		SELECT ID FROM HGTDB.GENES
+
+mappingId	HGTPredictionGene and GeneHasHGTPredictionGene
+target		:Gene-{ID} :GeneHasHGTPredictionGene :HGTPredictionGene-{ID} . :HGTPredictionGene-{ID} a :HGTPredictionGene . 
+source		SELECT ID FROM  HGTDB.GENES
+
+mappingId	Coordinates And GeneHasCoordinates
+target		:Gene-{ID} :GeneHasCoordinates :Coordinates-{ID} . :Coordinates-{ID} a :Coordinates . 
+source		SELECT ID FROM  HGTDB.GENES
+
+mappingId	GeneIDInfo and GeneHasGeneIDInfo
+target		:Gene-{ID} :GeneHasGeneIDInfo :GeneIDInfo-{ID} . :GeneIDInfo-{ID} a :GeneIDInfo . 
+source		SELECT ID FROM  HGTDB.GENES
+
+mappingId	GeneFunction GeneHasGeneFunction
+target		:Gene-{ID} :GeneHasGeneFunction :GeneFunction-{ID} . :GeneFunction-{ID} a :GeneFunction . 
+source		SELECT ID FROM  HGTDB.GENES
+
+mappingId	GCstatsGene and GeneHasGCstatsGene
+target		:Gene-{ID} :GeneHasGCstatsGene :GCstatsGene-{ID} . :GCstatsGene-{ID} a :GCstatsGene . 
+source		SELECT ID FROM  HGTDB.GENES
+
+mappingId	GeneFunction attributes
+target		:GeneFunction-{ID} :Function {FUNCTION} ; :KEGG {KEGG} ; :PATH {PATH} . 
+source		SELECT ID, KEGG, PATH, FUNCTION FROM  HGTDB.GENES
+
+mappingId	HGTPredictionGene attributes
+target		:HGTPredictionGene-{ID} :Prediction {PREDICTION} ; :GCregion {GCREGION} . 
+source		SELECT ID, PREDICTION, GCREGION FROM  HGTDB.GENES
+
+mappingId	GCstatsGene GC attributes
+target		:GCstatsGene-{ID} :GCValue {GC} ; :GC1 {GC1} ; :GC2 {GC2} ; :GC3 {GC3} . 
+source		SELECT ID, GC, GC1, GC2, GC3 FROM HGTDB.GENES
+
+mappingId	GCstatsGene Dif attributes
+target		:GCstatsGene-{ID} :GCDif {GCDIF} ; :GCDif1 {GCDIF1} ; :GCDif2 {GCDIF2} ; :GCDif3 {GCDIF3} ; :Sim {SIMGC} . 
+source		SELECT ID, GCDIF1, GCDIF2, GCDIF3, GCDIF, SIMGC FROM HGTDB.GENES
+
+mappingId	GeneStats Attributes
+target		:GeneStats-{ID} :Mah {MAH} ; :SimMah {SIMMAH} ; :SimGC {SIMGC} ; :DevAA {DEVAA} ; :Chi2 {CHI2} ; :ICDI {ICDI} ; :Nc {NC} ; :P2 {P2} . 
+source		SELECT ID, MAH, SIMMAH, SIMGC, DEVAA, CHI2, ICDI, NC, P2 FROM HGTDB.GENES
+
+mappingId	Coordinates Attributes
+target		:Coordinates-{ID} :Begin {BEGIN} ; :End {END} ; :Length {LENGTH} ; :Strand {STRAND} . 
+source		SELECT ID, BEGIN, ENDPOS, LENGTH, STRAND FROM HGTDB.GENES
+
+mappingId	GeneIDInfo Attributes
+target		:GeneIDInfo-{ID} :Synonym {SYNONYM} ; :PID {PID} ; :GeneName {GENENAME} . 
+source		SELECT ID, SYNONYM, GENENAME, PID FROM HGTDB.GENES
+
+mappingId	Taxonomy and OrganismHasTaxonomy
+target		:Taxonomy-{ABBREV} a :Taxonomy . :Organism-{ABBREV} :OrganismHasTaxonomy :Taxonomy-{ABBREV} . 
+source		SELECT ABBREV FROM HGTDB.ORGANISME
+
+mappingId	Encoding codons
+target		:EncondingCodon-{CODON} a :EncodingCodon ; :TripletCode {CODON} . 
+source		SELECT CODON FROM HGTDB.ENCODINGCODONS
+
+mappingId	Ending codons
+target		:EndingCodon-{CODON} a :EndingCodon ; :TripletCode {CODON} . 
+source		SELECT CODON FROM HGTDB.ENDINGCODONS
+
+mappingId	OrganismHasCodon
+target		:OrganismHasCodon-{BUNDLEID} a :OrganismHasCodon ; :OHCHasOrganism :Organism-{ID} ; :OHCHasCodon :Codon-{CODON} ; :CodonValueOrg {CODONVALUE} ; :CodonSD {CODONSD} ; :RSCUorg {RSCU} ; :SDRSCU {SDRSCU} . 
+source		SELECT ID, CODON, CODONVALUE, CODONSD, BUNDLEID, RSCU, SDRSCU FROM HGTDB.ORGANISMHASCODON
+
+mappingId	GeneHasCodon
+target		:GeneHasCodon-{BUNDLEID} a :GeneHasCodon ; :GHCHasGene :Gene-{ID}; :GHCHasCodon :Codon-{CODON} ; :CodonValueGene {CODONVALUE} ; :RSCUgene {RSCU} . 
+source		SELECT ID, CODON, CODONVALUE, BUNDLEID, RSCU FROM HGTDB.GENEHASCODON
+
+mappingId	OrganismHasAminoAcid
+target		:OrganismHasAminoAcid-{BUNDLEID} a :AminoAcid , :OrganismHasAminoAcid ; :OHAHasOrganism :Organism-{ID}; :OHAHasAminoAcid :AminoAcid-{AMINOACID} ; :AAvalueOrg {AAVALUE} ; :AASD {AASD} . :AminoAcid-{AMINOACID} a :AminoAcid , :OrganismHasAminoAcid ; :AACode {AMINOACID} . 
+source		SELECT ID, AMINOACID, AAVALUE, AASD, BUNDLEID FROM HGTDB.ORGANISMHASAMINOACID
+
+mappingId	GeneHasAminoAcid
+target		:GeneHasAminoAcid-{BUNDLEID} a :GeneHasAminoAcid ; :GHAHasAminoAcid :AminoAcid-{AMINOACID}; :GHAHasGene :Gene-{ID}; :AAvalueGene {AAVALUE} . 
+source		SELECT ID, AMINOACID, AAVALUE, BUNDLEID FROM HGTDB.GENEHASAMINOACID
+
+mappingId	flex-containsStrictHGTGeneCluste
+target		:FlexHGTCluster-{idorganisme}_{fstart}_{fend} :containsStrictHGTGeneCluster StrictHGTCluster-{idorganisme}_{sstart}_{send} . 
+source		SELECT 
+			   hgtcluster.idorganisme as idorganisme,
+			   comclustg2.cstart as fstart,
+			   comclustg2.cend as fend,
+			   hgtcluster.start_gene as sstart,
+			   hgtcluster.end_gene as send
+			FROM hgtdb.comclustg2,hgtdb.hgtcluster WHERE
+			   hgtcluster.idorganisme = comclustg2.idorganisme and
+			   hgtcluster.start_gene >= comclustg2.cstart and
+			   hgtcluster.end_gene <= comclustg2.cend
+
+mappingId	flex-GeneClusterContainsGene
+target		:FlexHGTCluster-{idorganisme}_{fstart}_{fend} :GeneClusterContainsGene :Gene-{gene} . 
+source		SELECT 
+			   comclustg2.idorganisme as idorganisme,
+			   comclustg2.cstart as fstart,
+			   comclustg2.cend as fend,
+			   genemeta.id as gene
+			FROM hgtdb.comclustg2, hgtdb.genemeta WHERE
+			   genemeta.idorganisme = genemeta.idorganisme and
+			   genemeta.position >= comclustg2.cstart and
+  			   genemeta.position <= comclustg2.cend
+
+mappingId	strict-GeneClusterConstainsGene
+target		:StrictHGTCluster-{idorganisme}_{fstart}_{fend} :GeneClusterContainsGene :Gene-{gene} . 
+source		SELECT 
+			   hgtcluster.idorganisme as idorganisme,
+			   hgtcluster.start_gene as fstart,
+			   hgtcluster.end_gene as fend,
+			   genemeta.id as gene
+			FROM hgtdb.hgtcluster, hgtdb.genemeta WHERE
+			   hgtcluster.idorganisme = genemeta.idorganisme and
+			   genemeta.position >= hgtcluster.start_gene and
+			   genemeta.position <= hgtcluster.end_gene and
+			   hgtcluster.cluster_length > 1
+]]
+

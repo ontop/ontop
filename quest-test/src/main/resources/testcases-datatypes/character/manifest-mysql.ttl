@@ -1,0 +1,188 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Character Type Tests" ;
+    mf:entries
+    ( 
+      :char
+      :varchar 
+      :text 
+      :longtext 
+      :mediumtext 
+      :tinytext 
+      :set 
+      :enum 
+      :char-graph
+      :varchar-graph
+      :text-graph
+      :longtext-graph
+      :mediumtext-graph
+      :tinytext-graph
+      :set-graph
+      :enum-graph
+    ) .
+
+:char rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <char.rq> ] ;
+    mf:result <char.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:char-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <char-graph.rq> ] ;
+    mf:result <char.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:varchar rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: VARCHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <varchar.rq> ] ;
+    mf:result <varchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:varchar-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: VARCHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <varchar-graph.rq> ] ;
+    mf:result <varchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+        
+:text rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TEXT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <text.rq> ] ;
+    mf:result <text.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+ 
+:text-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TEXT-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <text-graph.rq> ] ;
+    mf:result <text.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:longtext rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: LONGTEXT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <longtext.rq> ] ;
+    mf:result <longtext.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:longtext-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: LONGTEXT-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <longtext-graph.rq> ] ;
+    mf:result <longtext.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:mediumtext rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: MEDIUMTEXT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <mediumtext.rq> ] ;
+    mf:result <mediumtext.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:mediumtext-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: MEDIUMTEXT-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <mediumtext-graph.rq> ] ;
+    mf:result <mediumtext.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+ 
+:tinytext rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TINYTEXT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <tinytext.rq> ] ;
+    mf:result <tinytext.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:tinytext-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TINYTEXT-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <tinytext-graph.rq> ] ;
+    mf:result <tinytext.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:set rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: SET" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <set.rq> ] ;
+    mf:result <set.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
+:set-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: SET-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <set-graph.rq> ] ;
+    mf:result <set.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+    
+:enum rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: ENUM" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <enum.rq> ] ;
+    mf:result <enum.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+ 
+:enum-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: ENUM-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop- Team> ;
+    mf:action
+            [ qt:query <enum-graph.rq> ] ;
+    mf:result <enum.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .   

@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.sesame.r2rml;
+
+/*
+ * #%L
+ * ontop-obdalib-sesame
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
@@ -25,6 +37,8 @@ public class R2RMLVocabulary {
 	public static final URI r2rmlView = fact.createURI("http://www.w3.org/ns/r2rml#R2RMLView");
 
 	public static final URI subjectMap = fact.createURI("http://www.w3.org/ns/r2rml#subjectMap");
+	public static final URI subjectMapClass = fact.createURI("http://www.w3.org/ns/r2rml#SubjectMap");
+
 	public static final URI subject = fact.createURI("http://www.w3.org/ns/r2rml#subject");
 	public static final URI predicateObjectMap = fact.createURI("http://www.w3.org/ns/r2rml#predicateObjectMap");
 	public static final URI predicateMap = fact.createURI("http://www.w3.org/ns/r2rml#predicateMap");
@@ -39,6 +53,7 @@ public class R2RMLVocabulary {
 	public static final URI column = fact.createURI("http://www.w3.org/ns/r2rml#column");
 	public static final URI constant = fact.createURI("http://www.w3.org/ns/r2rml#constant");
 	public static final URI termType = fact.createURI("http://www.w3.org/ns/r2rml#termType");
+	public static final URI termMap = fact.createURI("http://www.w3.org/ns/r2rml#TermMap");
 	public static final URI language = fact.createURI("http://www.w3.org/ns/r2rml#language");
 	public static final URI datatype = fact.createURI("http://www.w3.org/ns/r2rml#datatype");
 	public static final URI inverseExpression = fact.createURI("http://www.w3.org/ns/r2rml#inverseExpression");
