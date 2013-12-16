@@ -1,5 +1,6 @@
-package it.unibz.krdb.obda.parser;
+package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,12 +9,11 @@ import net.sf.jsqlparser.schema.Column;
 
 /**
  * Class for an Aggregation, it contains the GROUP BY statement.
- *
- *
+ * 
  */
 		
 
-public class AggregationJSQL {
+public class AggregationJSQL implements Serializable {
 
 	
 private static final long serialVersionUID = 5806057160397315905L;

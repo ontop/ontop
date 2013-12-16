@@ -66,6 +66,8 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
+ * We remove the quotes for each column it they are present.
+ * Since the current release does not support Function, we throw a ParserException, when a function is present
  *
  */
 
@@ -73,9 +75,9 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	
 //	ArrayList<ProjectionJSQL> projections; //create a list of projections if we want to consider union 
 	ProjectionJSQL projection;
-	boolean bdistinctOn = false;
-	boolean setProj = false;
-	boolean notSupported = false;
+	boolean bdistinctOn = false; // true when a SELECT distinct is present
+	boolean setProj = false; // true when we are using the method setProjection
+	boolean notSupported = false; 
 	
 	
 	/**
@@ -96,7 +98,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		}
 		select.getSelectBody().accept(this);
 		
-		if(notSupported)
+		if(notSupported) // used to throw exception for the currently unsupported methods
 				throw new JSQLParserException("Query not yet supported");
 		
 		return projection;	
@@ -157,10 +159,13 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			
 			}
 		
-		else{ //working with getProjection
-		
+		else{ /*
+		working with getProjection we visit the SelectItems and distinguish between select distinct,
+		select distinct on, select all 
+		*/
 		projection= new ProjectionJSQL();
 		Distinct distinct= plainSelect.getDistinct();
+		
 		if(distinct!=null) // for SELECT DISTINCT [ON (...)]
 			{
 			
@@ -187,7 +192,6 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		}
 		
 		}
-//		projections.add(projection);
 		
 	}
 
@@ -251,6 +255,10 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		
 	}
 
+	/*
+	 * The system cannot support function currently (non-Javadoc)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.Function)
+	 */
 	@Override
 	public void visit(Function function) {
 		notSupported=true;
@@ -307,7 +315,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Parenthesis parenthesis) {
-		// TODO Auto-generated method stub
+		parenthesis.getExpression().accept(this);
 		
 	}
 
@@ -413,10 +421,15 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		
 	}
 
+	/*
+	 * Visit the column and remove the quotes if they are present(non-Javadoc)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	 */
 	@Override
 	public void visit(Column tableColumn) {
-		if(tableColumn.getColumnName().contains("\""))
-			tableColumn.setColumnName(tableColumn.getColumnName().substring(1, tableColumn.getColumnName().length()-1));
+		String tableName= tableColumn.getColumnName();
+		if(tableName.contains("\""))
+			tableColumn.setColumnName(tableName.substring(1, tableName.length()-1));
 				
 		
 	}

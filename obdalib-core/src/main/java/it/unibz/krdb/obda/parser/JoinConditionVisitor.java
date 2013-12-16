@@ -98,7 +98,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	}
 
 	/*
-	 * visit Plainselect, search for the join conditions, we do not consider the simple join that are considered for selection
+	 * visit Plainselect, search for the join conditions, we do not consider the simple join that are considered in selection
 	 * 
 	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
 	 */
@@ -114,15 +114,25 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			Expression expr = join.getOnExpression();
 			
 			
-			if (join.getUsingColumns()!=null)
-				for (Column column : join.getUsingColumns()){
-					joinConditions.add(plainSelect.getFromItem()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
+			if (join.getUsingColumns()!=null) //Consider the case of JOIN USING...
+				for (Column column : join.getUsingColumns())
+				{
+					String columnName= column.getColumnName();
+					
+					if(columnName.contains("\""))
+					{
+						columnName=columnName.substring(1, columnName.length()-1);
+						column.setColumnName(columnName);
+					}
+					
+					joinConditions.add(plainSelect.getFromItem()+"."+columnName+" = "+join.getRightItem()+"."+columnName);
+					
 				}
 					
 			else{
 				if(expr!=null)
-//					joinConditions.add(expr.toString());
 					expr.accept(this);
+				//we do not consider simple joins
 //				else
 //					if(join.isSimple())
 //						joinConditions.add(plainSelect.getWhere().toString());
@@ -229,8 +239,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	}
 
 	@Override
-	public void visit(Parenthesis arg0) {
-		//we do not execute anything 
+	public void visit(Parenthesis parenthesis) {
+		parenthesis.getExpression().accept(this);
 		
 	}
 
@@ -313,11 +323,14 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	
 	public void visitBinaryExpression(BinaryExpression binaryExpression) {
-		Expression left =binaryExpression.getLeftExpression();
-		Expression right =binaryExpression.getRightExpression();
+		Expression left = binaryExpression.getLeftExpression();
+		Expression right = binaryExpression.getRightExpression();
 		
 		if (!(left instanceof BinaryExpression) && 
 				!(right instanceof BinaryExpression)) {
+			
+			left.accept(this);
+			right.accept(this);
 			joinConditions.add(binaryExpression.toString());
 		}
 		else
@@ -335,16 +348,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	@Override
 	public void visit(EqualsTo arg0) {
 		visitBinaryExpression(arg0);
-//		Expression left = arg0.getLeftExpression();
-//		Expression right = arg0.getRightExpression();
-//		if ((left instanceof Column || left instanceof AnalyticExpression) && 
-//				(right instanceof Column || right  instanceof AnalyticExpression)) {
-//			joinConditions.add(left + "=" + right);
-//
-//		} else {
-//			left.accept(this);
-//			right.accept(this);
-//		}
+
 	}
 
 	/*
@@ -426,11 +430,15 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 		
 	}
 
+	/*
+	 * Remove quotes from columns if they are present (non-Javadoc)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	 */
 	@Override
-	public void visit(Column arg0) {
-		//we do not execute anything
-//		joinConditions.add(arg0.getWholeColumnName());
-//		arg0.getRightExpression().accept(this);
+	public void visit(Column col) {
+		String columnName= col.getColumnName();
+		if(columnName.contains("\""))
+		col.setColumnName(columnName.substring(1, columnName.length()-1));
 	}
 	
 	/*
@@ -577,7 +585,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	}
 
 	/*
-	 * search for the subjoin conditions, we do not consider the simple join that are consiedered for selection
+	 * search for the subjoin conditions, we do not consider the simple join that are considered in selection
 	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.statement.select.SubJoin)
 	 */
 	@Override
@@ -587,13 +595,21 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 		
 		
 		if (join.getUsingColumns()!=null)
-			for (Column column : join.getUsingColumns()){
+			for (Column column : join.getUsingColumns())
+			{
+				String columnName= column.getColumnName();
+				
+				if(columnName.contains("\""))
+				{
+					columnName=columnName.substring(1, columnName.length()-1);
+					column.setColumnName(columnName);
+				}
+				
 				joinConditions.add(subjoin.getLeft()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
 			}
 				
 		else{
 			if(expr!=null)
-//				joinConditions.add(expr.toString());
 				expr.accept(this);
 		}
 		

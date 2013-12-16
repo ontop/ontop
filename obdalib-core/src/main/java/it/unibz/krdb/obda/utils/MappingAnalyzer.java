@@ -23,9 +23,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,18 +43,7 @@ import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 
 //import com.hp.hpl.jena.iri.IRI;
@@ -131,10 +120,13 @@ public class MappingAnalyzer {
 
 				// For the join conditions WE STILL NEED TO CONSIDER NOT EQUI JOIN
 				ArrayList<String> joinConditions =  queryParsed.getJoinCondition();
-				for (String predicate : joinConditions) {
+				for (String predicate : joinConditions) 
+				{
+					
 					String[] value = predicate.split("=");
 					String leftValue = value[0].trim();
 					String rightValue = value[1].trim();
+					
 					String lookup1 = lookupTable.lookup(leftValue);
 					String lookup2 = lookupTable.lookup(rightValue);
 					if (lookup1 == null)
@@ -153,34 +145,33 @@ public class MappingAnalyzer {
 				SelectionJSQL selection = queryParsed.getSelection();
 				if (selection!=null) {
 					
-						// Stack for filter function
-						Stack<Function> filterFunctionStack = new Stack<Function>();
-						
+					// Stack for filter function
+					Stack<Function> filterFunctionStack = new Stack<Function>();
+					
 					Expression conditions = selection.getRawConditions();
-					
-						Object element = conditions;
-						if (element instanceof BinaryExpression) {
-							BinaryExpression pred = (BinaryExpression) element;
-						
-							Function filterFunction = getFunction(pred, lookupTable);
-							
-							filterFunctionStack.push(filterFunction);
-
-						} else if (element instanceof IsNullExpression) {
-							IsNullExpression pred = (IsNullExpression) element;
-							Function filterFunction = getFunction(pred, lookupTable);
-							filterFunctionStack.push(filterFunction);
-						
-							
-						} else if (element instanceof Parenthesis) {
-							Parenthesis pred = (Parenthesis) element;
-		
-							Function filterFunction = manageParenthesis(pred,lookupTable);
-							filterFunctionStack.push(filterFunction);
-							}
-						
-					
 				
+					Object element = conditions;
+					if (element instanceof BinaryExpression) {
+						BinaryExpression pred = (BinaryExpression) element;
+					
+						Function filterFunction = getFunction(pred, lookupTable);
+						
+						filterFunctionStack.push(filterFunction);
+
+					} else if (element instanceof IsNullExpression) {
+						IsNullExpression pred = (IsNullExpression) element;
+						Function filterFunction = getFunction(pred, lookupTable);
+						filterFunctionStack.push(filterFunction);
+					
+						
+					} else if (element instanceof Parenthesis) {
+						Parenthesis pred = (Parenthesis) element;
+	
+						Function filterFunction = manageParenthesis(pred,lookupTable);
+						filterFunctionStack.push(filterFunction);
+						}
+						
+
 					// The filter function stack must have 1 element left
 					if (filterFunctionStack.size() == 1) {
 						Function filterFunction = filterFunctionStack.pop();
@@ -198,7 +189,9 @@ public class MappingAnalyzer {
 				List<Function> atomList = targetQuery.getBody();
 				//for (Function atom : atomList) {
 				Iterator<Function> atomListIter = atomList.iterator();
-				while(atomListIter.hasNext()){
+				
+				while(atomListIter.hasNext())
+				{
 					Function atom = atomListIter.next();
 					List<Term> terms = atom.getTerms();
 					List<Term> newterms = new LinkedList<Term>();
@@ -209,12 +202,14 @@ public class MappingAnalyzer {
 					CQIE rule = dfac.getCQIE(newhead, atoms);
 					datalog.appendRule(rule);
 				}
+				
 			} catch (Exception e) {
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
 						+ e.getMessage() + " \nMapping: [" + axiom.toString() + "]");
 				
 			}
 		}
+		
 		if (errorMessage.size() > 0) {
 			StringBuilder errors = new StringBuilder();
 			for (String error: errorMessage) {
@@ -235,22 +230,33 @@ public class MappingAnalyzer {
 		throw new RuntimeException("Illegal filter expression: " + filterExpression.toString());
 	}
 	
-	/*
-	 * Used to retrieve the expression contained in the parentesis. Call getFunction 
+	/**
+	 * Used to retrieve the expression contained in the parenthesis. Call getFunction 
+	 * @param paren 
+	 * @param lookupTable
+	 * @return a function from the OBDADataFactory
 	 */
-
 	private Function manageParenthesis(Parenthesis paren, LookupTable lookupTable){
 		Expression inside = paren.getExpression();
+		
 		if (inside instanceof BinaryExpression){
 			BinaryExpression insideB= (BinaryExpression) inside;
 			return getFunction(insideB, lookupTable);
 		}
+		
 		throw new RuntimeException("Empty or irregular parenthesis: " + paren);
 	}
 	
+	/**
+	 * Methods to create a {@link Function} starting from a {@link IsNullExpression}
+	 * @param pred IsNullExpression
+	 * @param lookupTable
+	 * @return a function from the OBDADataFactory
+	 */
+	
 	private Function getFunction(IsNullExpression pred, LookupTable lookupTable) {
+		
 		Expression column = pred.getLeftExpression();
-
 		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
 		if (variableName == null) {
@@ -265,6 +271,13 @@ public class MappingAnalyzer {
 		}
 	}
 
+	/**
+	 *  Recursive methods to create a {@link Function} starting from a {@link BinaryExpression}
+	 *  We consider all possible values of the left and right expressions
+	 * @param pred
+	 * @param lookupTable
+	 * @return
+	 */
 
 	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
 		Expression left = pred.getLeftExpression();
@@ -273,6 +286,7 @@ public class MappingAnalyzer {
 		String leftValueName = left.toString();
 		String termLeftName = lookupTable.lookup(leftValueName);
 		Term t1=null;
+		
 		if (termLeftName == null) {
 			if(left instanceof BinaryExpression)
 				t1=getFunction((BinaryExpression) left, lookupTable);
@@ -284,58 +298,68 @@ public class MappingAnalyzer {
 			else
 			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
 		}
-		else{
-		t1 = dfac.getVariable(termLeftName);
+		else
+		{
+			t1 = dfac.getVariable(termLeftName);
 		}
+		
 		String termRightName = "";
 		Term t2 = null;
+		
 		if(right instanceof BinaryExpression)
 			t2=getFunction((BinaryExpression) right, lookupTable);
 		else if (right instanceof IsNullExpression)
 			t2=getFunction((IsNullExpression) right, lookupTable);
-		else if (right instanceof Parenthesis){
+		else if (right instanceof Parenthesis)
 			t2= manageParenthesis((Parenthesis) left, lookupTable);
-		}
 		else
-		if (right instanceof Column) {
-			String rightValueName = ((Column) right).getColumnName();
-			if(rightValueName.toLowerCase().equals("true") || rightValueName.toLowerCase().equals("false"))
-				t2 = dfac.getConstantLiteral(rightValueName, COL_TYPE.BOOLEAN);
-			else{
-			termRightName = lookupTable.lookup(right.toString());
-			if (termRightName == null) {
-				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
-			}
-			t2 = dfac.getVariable(termRightName);
-			}
-		} else 
-			
-			
-			if (right instanceof StringValue) {
-				termRightName= ((StringValue) right).getValue();
-
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
+			if (right instanceof Column) {
+				//if the columns contains a boolean value
+				String rightValueName = ((Column) right).getColumnName();
+				if(rightValueName.toLowerCase().equals("true") || rightValueName.toLowerCase().equals("false"))
+					t2 = dfac.getConstantLiteral(rightValueName, COL_TYPE.BOOLEAN);
 				
-			}else if (right instanceof DateValue) {
+				else{
+					
+					termRightName = lookupTable.lookup(right.toString());
+					if (termRightName == null) {
+						throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
+					}
+					t2 = dfac.getVariable(termRightName);
+				}
+			} else 
+			
+				if (right instanceof StringValue) {
+					termRightName= ((StringValue) right).getValue();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
+					
+				}else if (right instanceof DateValue) {
 					termRightName= ((DateValue) right).getValue().toString();
 					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-			}else if ( right instanceof TimeValue) {
-				termRightName= ((TimeValue) right).getValue().toString();
-				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-			}else if (right instanceof TimestampValue) {
-				termRightName= ((TimestampValue) right).getValue().toString();
-				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-			}else if (right instanceof LongValue) {
-				termRightName= ((LongValue) right).getStringValue();
-				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
-			} else if (right instanceof DoubleValue) {
-				termRightName= ((DoubleValue) right).toString();
-				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
-			} else {
-				termRightName= right.toString();
-				t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
-			}
+						
+				}else if ( right instanceof TimeValue) {
+					termRightName= ((TimeValue) right).getValue().toString();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+					
+				}else if (right instanceof TimestampValue) {
+					termRightName= ((TimestampValue) right).getValue().toString();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+					
+				}else if (right instanceof LongValue) {
+					termRightName= ((LongValue) right).getStringValue();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+					
+				} else if (right instanceof DoubleValue) {
+					termRightName= ((DoubleValue) right).toString();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
+					
+				} else {
+					termRightName= right.toString();
+					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
+					
+				}
 
+		
 		String op = pred.getStringExpression();
 		
 		
@@ -374,6 +398,7 @@ public class MappingAnalyzer {
 	 */
 	private Term updateTerm(Term term, LookupTable lookupTable) {
 		Term result = null;
+		
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			String varName = var.getName();
@@ -383,7 +408,9 @@ public class MappingAnalyzer {
 				throw new RuntimeException(msg);
 			}
 			result = dfac.getVariable(termName);
-		} else if (term instanceof Function) {
+			
+		} 
+		else if (term instanceof Function) {
 			Function func = (Function) term;
 			List<Term> terms = func.getTerms();
 			List<Term> newterms = new LinkedList<Term>();
@@ -391,7 +418,8 @@ public class MappingAnalyzer {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 			}
 			result = dfac.getFunction(func.getFunctionSymbol(), newterms);
-		} else if (term instanceof Constant) {
+		} 
+		else if (term instanceof Constant) {
 			result = term.clone();
 		}
 		return result;
@@ -409,6 +437,7 @@ public class MappingAnalyzer {
 		int offset = 0; // the index offset
 
 		for (RelationJSQL table : tableList) {
+			
 			String tableName = table.getTableName();
 			String tableGivenName = table.getGivenName();
 			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
@@ -427,15 +456,9 @@ public class MappingAnalyzer {
 				// simple attribute name
 				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
 				
-//				String quotedName = "\""+columnName+"\"";
-				
 				String COLUMNNAME = columnName.toUpperCase();
 				String columnname = columnName.toLowerCase();
 				
-//				lookupTable.add(quotedName, index);
-//				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
-//					lookupTable.add(aliasMap.get(columnName), columnName);
-//				}
 				lookupTable.add(columnName, index);
 				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(columnName), columnName);
@@ -446,16 +469,10 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(columnname), columnName);
 				}
 				
-
 				// If the column name in the select string is in upper case
 				if (aliasMap.containsKey(COLUMNNAME)) { // register the alias name, if any
 					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
 				}
-				
-				// If the column name in the select string is in double quotes
-//				if (aliasMap.containsKey(quotedName)) { // register the alias name, if any
-//					lookupTable.add(aliasMap.get(quotedName), columnName);
-//				}
 				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
@@ -464,13 +481,6 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
 				
-//				// attribute name with table name prefix
-//				String tablequotedName = tableName + "\".\"" + quotedName;
-//				lookupTable.add(tablequotedName, index);
-//				if (aliasMap.containsKey(tablequotedName)) { // register the alias name, if any
-//					lookupTable.add(aliasMap.get(tablequotedName), tablequotedName);
-//				}
-				
 				// attribute name with table given name prefix
 				String givenTableColumnName = tableGivenName + "." + columnName;
 				lookupTable.add(givenTableColumnName, tableColumnName);
@@ -478,13 +488,6 @@ public class MappingAnalyzer {
 					lookupTable.add(aliasMap.get(givenTableColumnName), tableColumnName);
 				}
 				
-				// attribute name with table given name prefix and quoted columns
-//				String givenTablequotedName = tableGivenName + "\".\"" + quotedName;
-//				lookupTable.add(givenTablequotedName, tableColumnName);
-//				if (aliasMap.containsKey(givenTablequotedName)) { // register the alias name, if any
-//					lookupTable.add(aliasMap.get(givenTablequotedName), tableColumnName);
-//				}
-
 				// attribute name with table name prefix
 				String tablecolumnname = tableName + "." + columnname;
 				//lookupTable.add(tablecolumnname, tableColumnName);

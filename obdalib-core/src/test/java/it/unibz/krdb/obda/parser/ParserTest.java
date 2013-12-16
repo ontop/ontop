@@ -126,11 +126,11 @@ public class ParserTest extends TestCase {
 		
 	}
 	
-	//NO SUPPORT SQL
+	//NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_1_5_extra_3() {
 		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
 		printJSQL("test_1_5_extra_3", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
 		printSQL("test_1_5_extra_3", result2);
 		assertFalse(result2);
@@ -328,71 +328,71 @@ public class ParserTest extends TestCase {
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_3_1() {
 		final boolean result = parseJSQL("SELECT MAX(score) FROM grade");
 		printJSQL("test_3_1", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT MAX(score) FROM grade");
 		printSQL("test_3_1", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_3_2() {
 		final boolean result = parseJSQL("SELECT MIN(score) FROM grade");
 		printJSQL("test_3_2", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT MIN(score) FROM grade");
 		printSQL("test_3_2", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_3_3() {
 		final boolean result = parseJSQL("SELECT AVG(score) FROM grade");
 		printJSQL("test_3_3", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT AVG(score) FROM grade");
 		printSQL("test_3_3", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_3_4() {
 		final boolean result = parseJSQL("SELECT SUM(amount) FROM tax");
 		printJSQL("test_3_4", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT SUM(amount) FROM tax");
 		printSQL("test_3_4", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_3_5() {
 		final boolean result = parseJSQL("SELECT COUNT(*) FROM student");
 		printJSQL("test_3_5", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT COUNT(*) FROM student");
 		printSQL("test_3_5", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL 
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function 
 	public void test_3_6() {
 		final boolean result = parseJSQL("SELECT COUNT(id) FROM student");
 		printJSQL("test_3_6", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT COUNT(id) FROM student");
 		printSQL("test_3_6", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_3_7() {
 		final boolean result = parseJSQL("SELECT EVERY(id) FROM student");
 		printJSQL("test_3_7", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT EVERY(id) FROM student");
 		printSQL("test_3_7", result2);
 		assertFalse(result2);
@@ -443,21 +443,21 @@ public class ParserTest extends TestCase {
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_4_1() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality");
 		printJSQL("test_4_1", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality");
 		printSQL("test_4_1", result2);
 		assertFalse(result2);
 	}
 
-	// NO SUPPORT SQL
+	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
 	public void test_4_2() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
 		printJSQL("test_4_2", result);
-		assertTrue(result);
+		assertFalse(result);
 		final boolean result2 = parseSQL("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
 		printSQL("test_4_2", result2);
 		assertFalse(result2);
@@ -504,10 +504,10 @@ public class ParserTest extends TestCase {
 	}
 
 	public void test_5_1_2() {
-		final boolean result = parseJSQL("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.score>=25");
+		final boolean result = parseJSQL("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.\"score\">=25");
 		printJSQL("test_5_1_2", result);
 		assertTrue(result);
-		final boolean result2 = parseSQL("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.score>=25");
+		final boolean result2 = parseSQL("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.\"score\">=25");
 		printSQL("test_5_1_2", result2);
 		assertTrue(result2);
 	}

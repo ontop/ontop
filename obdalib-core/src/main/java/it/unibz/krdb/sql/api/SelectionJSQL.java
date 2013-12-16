@@ -11,12 +11,7 @@ package it.unibz.krdb.sql.api;
 import java.io.Serializable;
 import java.util.Queue;
 
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 
 public class SelectionJSQL implements Serializable{
 	

@@ -12,7 +12,6 @@ import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -67,26 +66,17 @@ import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.delete.Delete;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.replace.Replace;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.ValuesList;
 import net.sf.jsqlparser.statement.select.WithItem;
-import net.sf.jsqlparser.statement.update.Update;
 
 /**
  * Find all used tables within an select statement.
@@ -94,7 +84,7 @@ import net.sf.jsqlparser.statement.update.Update;
 public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
 
 	/**
-	 * Store the table selected, updated, deleted or replaced by the SQL query in Relations
+	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
 	private ArrayList<RelationJSQL> tables;
@@ -132,7 +122,12 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		otherItemNames.add(withItem.getName().toLowerCase());
 		withItem.getSelectBody().accept(this);
 	}
-
+	
+	/*Visit the FROM clause to find tables
+	 * Visit the JOIN and WHERE clauses to check if nested queries are present
+	 * (non-Javadoc)
+	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+	 */
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		plainSelect.getFromItem().accept(this);
@@ -148,11 +143,18 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	}
 
+	/*
+	 * Visit Table and store its value in the list of RelationJSQL(non-Javadoc)
+	 * we use the class TableJSQL to handle quotes and user case choice if present
+	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.schema.Table)
+	 */
+	
 	@Override
 	public void visit(Table tableName) {
+		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
 		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())
-				&& !tables.contains(tableName)) {
-			tables.add(new RelationJSQL(new TableJSQL(tableName)));
+				&& !tables.contains(relation)) {
+			tables.add(relation);
 		}
 	}
 
@@ -161,6 +163,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		subSelect.getSelectBody().accept(this);
 	}
 
+	/*
+	 * We do the same procedure for all Binary Expressions
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Addition)
+	 */
 	@Override
 	public void visit(Addition addition) {
 		visitBinaryExpression(addition);
@@ -311,20 +317,12 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(TimeValue timeValue) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.CaseExpression)
-	 */
+
 	@Override
 	public void visit(CaseExpression caseExpression) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.WhenClause)
-	 */
+
 	@Override
 	public void visit(WhenClause whenClause) {
 	}
@@ -384,6 +382,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(AnalyticExpression analytic) {
 	}
 
+	/*
+	 * Visit UNION, INTERSECT, MINUM and EXCEPT to search for table names
+	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.SetOperationList)
+	 */
 	@Override
 	public void visit(SetOperationList list) {
 		for (PlainSelect plainSelect : list.getPlainSelects()) {
@@ -427,7 +429,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 }

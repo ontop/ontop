@@ -10,17 +10,14 @@ package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
 
-/**
- * Store the information about the Projection of the parsed query. (between SELECT... FROM)
- */
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
-
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+/**
+ * Store the information about the Projection of the parsed query. (between SELECT... FROM)
+ */
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectionJSQL implements Serializable {
 
@@ -74,6 +71,7 @@ public class ProjectionJSQL implements Serializable {
 	 *            The input column object.
 	 */
 	public void add(SelectExpressionItem column, boolean distinctOn) {
+		
 		if (distinctOn){
 			
 			this.setType(ProjectionJSQL.SELECT_DISTINCT_ON);

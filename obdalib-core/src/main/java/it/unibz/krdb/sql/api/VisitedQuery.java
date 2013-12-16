@@ -8,7 +8,6 @@
  */
 package it.unibz.krdb.sql.api;
 
-import it.unibz.krdb.obda.parser.AggregationJSQL;
 import it.unibz.krdb.obda.parser.AggregationVisitor;
 import it.unibz.krdb.obda.parser.AliasMapVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
@@ -19,7 +18,6 @@ import it.unibz.krdb.obda.parser.TablesNameVisitor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -90,29 +88,11 @@ public class VisitedQuery implements Serializable{
 	
 	public VisitedQuery(Statement statement) throws JSQLParserException{
 		
-		query = statement.toString();
-		 
+		this(statement.toString());
 		
-		stm = CCJSqlParserUtil.parse(query);
-		if (stm instanceof Select) {
-			select = (Select)stm;
-			
-			//getting the values we also eliminate or handle the quotes
-			tableSet = getTableSet();
-			aliasMap = getAliasMap();
-			joins = getJoinCondition();
-			selection = getSelection();
-			projection = getProjection();
-			groupByClause =getGroupByClause();
-			
-		}
-		//catch exception about wrong inserted columns
-		else 
-			throw new JSQLParserException("The inserted query is not a SELECT statement");
 
 	}
 	
-
 
 	@Override
 	public String toString() {

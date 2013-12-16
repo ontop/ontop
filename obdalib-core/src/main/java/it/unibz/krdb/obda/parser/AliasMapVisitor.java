@@ -79,7 +79,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
  * 
  * Find all the references between the column names and their aliases,
  * visiting the {@link SelectItem}.
- *
+ * Remove quotes when present.
  */
 
 public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
@@ -123,13 +123,13 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(AllColumns columns) {
-		//we are not interested in all columns (SELECT *) since it does not have aliases
+		//we are not interested in allcolumns (SELECT *) since it does not have aliases
 		
 	}
 
 	@Override
 	public void visit(AllTableColumns tableColumns) {
-		//we are not interested in all table columns (SELECT table.*) since it does not have aliases
+		//we are not interested in alltablecolumns (SELECT table.*) since it does not have aliases
 	}
 	
 	/*
@@ -326,6 +326,10 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		
 	}
 
+	/*
+	 * Remove the quotes in the alias if present. Each alias has a distinct column (non-Javadoc)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	 */
 	@Override
 	public void visit(Column tableColumn) {
 		if(tableColumn.getColumnName().contains("\""))

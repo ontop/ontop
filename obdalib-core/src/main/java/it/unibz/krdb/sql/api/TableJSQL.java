@@ -105,8 +105,7 @@ public class TableJSQL implements Serializable{
 	public void setTableName(String tableName) {
 		if(tableName.contains("\""))
 			this.tableName = tableName.substring(1, tableName.length()-1);
-		else
-			
+		else			
 			this.tableName = tableName;
 	}
 	

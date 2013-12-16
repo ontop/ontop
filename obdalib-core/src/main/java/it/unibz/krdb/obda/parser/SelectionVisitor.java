@@ -9,8 +9,6 @@
 
 package it.unibz.krdb.obda.parser;
 
-import java.util.ArrayList;
-
 import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
 import it.unibz.krdb.sql.api.SelectionJSQL;
@@ -73,6 +71,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Visitor class to retrieve the selection of the statement (WHERE expressions)
  * 
+ * 
  */
 public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
@@ -134,16 +133,15 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		else{
 			
          if (plainSelect.getWhere() != null) {
-                 Expression where=plainSelect.getWhere();
+        	 
+             Expression where=plainSelect.getWhere();
                  
-                	 selection= new SelectionJSQL();
-					 selection.addCondition( where);
+        	 selection= new SelectionJSQL();
+			 selection.addCondition(where);
                 	 
-                 
-                 where.accept(this);
-                 
-                 
-//                 selections.add(selection); 
+             //we visit the where clause to remove quotes and fix any and all comparison
+             where.accept(this);
+
          }
 		}
         
@@ -224,8 +222,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Parenthesis parenthesis) {
-		
-			parenthesis.getExpression().accept(this);
+		parenthesis.getExpression().accept(this);
 		
 	}
 
@@ -393,13 +390,16 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		
 	}
 
+	/*
+	 * Visit the column and remove the quotes if they are present(non-Javadoc)
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	 */
 	
 	@Override
 	public void visit(Column tableColumn) {
-		if(tableColumn.getColumnName().contains("\""))
-		tableColumn.setColumnName(tableColumn.getColumnName().substring(1, tableColumn.getColumnName().length()-1));
-		
-		
+		String tableName= tableColumn.getColumnName();
+		if(tableName.contains("\""))
+			tableColumn.setColumnName(tableName.substring(1, tableName.length()-1));
 		
 	}
 
@@ -543,24 +543,28 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	/*
 	 * We handle differently AnyComparisonExpression and AllComparisonExpression
 	 *  since they do not have a toString method, we substitute them with ad hoc classes.
-	 *  we continue to visit the subexpression We stop when the binary expression  are not nested. 
+	 *  we continue to visit the subexpression.
 	 * 
 	 */
 	
 	public void visitBinaryExpression(BinaryExpression binaryExpression) {
+		
 		Expression left =binaryExpression.getLeftExpression();
 		Expression right =binaryExpression.getRightExpression();
+		
 		if (right instanceof AnyComparisonExpression){
 			right = new AnyComparison(((AnyComparisonExpression) right).getSubSelect());
 			binaryExpression.setRightExpression(right);
 		}
+		
 		if (right instanceof AllComparisonExpression){
 			right = new AllComparison(((AllComparisonExpression) right).getSubSelect());
 			binaryExpression.setRightExpression(right);
 		}
+		
 		if (!(left instanceof BinaryExpression) && 
 				!(right instanceof BinaryExpression)) {
-//			selection.addCondition(binaryExpression);
+
 			left.accept(this);
 			right.accept(this);
 		}
