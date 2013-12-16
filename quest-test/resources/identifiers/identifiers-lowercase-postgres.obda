@@ -1,0 +1,18 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:postgresql://10.7.20.39/books
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{BK_TITLE} a :Country . 
+source		select BK_TITLE from TB_BOOKS	
+
+
+]]
+
