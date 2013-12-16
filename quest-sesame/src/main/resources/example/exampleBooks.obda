@@ -8,10 +8,10 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	Books
-connectionUrl	jdbc:postgresql://10.7.20.39/books
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
+connectionUrl	jdbc:mysql://10.7.20.39/books
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	cl_Authors
@@ -31,7 +31,7 @@ target		:edition/{ed_code}/ a :Edition ; :dateOfPublication {pub_date} ; :editio
 source		select ed_code, pub_date, n_edt from tb_edition
 
 mappingId	cl_AudioBook
-target		:book/{t.bk_code}/ a :AudioBook . 
+target		:book/{bk_code}/ a :AudioBook . 
 source		select bk_code, bk_title from tb_books where bk_type='A'
 
 mappingId	cl_EmergingWriter
