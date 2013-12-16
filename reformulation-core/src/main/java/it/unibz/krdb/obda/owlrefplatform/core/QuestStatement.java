@@ -492,7 +492,7 @@ public class QuestStatement implements OBDAStatement {
 
 		//removeNonAnswerQueries(unfolding);
 
-		//log.debug("After target rules removed: \n{}", unfolding);
+		log.debug("After target rules removed: \n{}", unfolding);
 
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());

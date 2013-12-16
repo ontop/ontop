@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
@@ -26,7 +38,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
-import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -53,7 +64,7 @@ import org.slf4j.LoggerFactory;
  * The input fact rules must be non-cyclic otherwise the procedures in this
  * class will not terminate.
  * 
- * @author mariano, mrezk
+ * @author mariano
  */
 public class DatalogUnfolder implements UnfoldingMechanism {
 
@@ -74,11 +85,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
 	private Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<Predicate, List<CQIE>>();
-	
 
-	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
-	
-	
 	/***
 	 * Leaf predicates are those that do not appear in the head of any rule. If
 	 * a predicate is a leaf predicate, it should not be unfolded, they indicate
@@ -89,7 +96,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * the atom) is logically empty w.r.t. to the program.
 	 */
 	private Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
-	private HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
 		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
@@ -103,14 +109,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * Creating a local index for the rules according to their predicate
 		 */
 
-	
+		HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 		for (CQIE mappingrule : unfoldingProgram.getRules()) {
 			Function head = mappingrule.getHead();
 
-			List<CQIE> rules = mappings.get(head.getFunctionSymbol());
+			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
 			if (rules == null) {
 				rules = new LinkedList<CQIE>();
-				mappings.put(head.getFunctionSymbol(), rules);
+				ruleIndex.put(head.getFunctionSymbol(), rules);
 			}
 			rules.add(mappingrule);
 
@@ -127,7 +133,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * the predicates taht do not appear in the head of rules are leaf
 		 * predicates
 		 */
-		allPredicates.removeAll(mappings.keySet());
+		allPredicates.removeAll(ruleIndex.keySet());
 		extensionalPredicates.addAll(allPredicates);
 	}
 
@@ -212,8 +218,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			DatalogNormalizer.enforceEqualities(query, false);
 		}
 
-		//computePartialEvaluation(workingSet);
-		computePartialEvaluationNew(workingSet);
+		computePartialEvaluation(workingSet);
 
 		LinkedHashSet<CQIE> result = new LinkedHashSet<CQIE>();
 		for (CQIE query : workingSet) {
@@ -282,7 +287,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	@Override
 	/***
 	 * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
-	 * with respect to the program given when this unfolder was initialized. 
+	 * with respect to the program given when this unfolder was initialized. The goal for
+	 * this partial evaluation is the predicate <b>ans1</b>
 	 * 
 	 */
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
@@ -1123,142 +1129,58 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param term
 	 * @param termidx
 	 * @return
-//	 */
-//	public int computePartialEvaluation(List<CQIE> workingList) {
-//
-//		int[] rcount = { 0, 0 };
-//
-//		for (int queryIdx = 0; queryIdx < workingList.size(); queryIdx++) {
-//
-//			CQIE rule = workingList.get(queryIdx);
-//
-//			Stack<Integer> termidx = new Stack<Integer>();
-//
-//			List<Function> currentTerms = rule.getBody();
-//			List<Term> tempList = new LinkedList<Term>();
-//			for (Function a : currentTerms) {
-//				tempList.add(a);
-//			}
-//
-//			List<CQIE> result = computePartialEvaluation(tempList, rule, rcount, termidx, false);
-//
-//			if (result == null) {
-//
-//				/*
-//				 * If the result is null the rule is logically empty
-//				 */
-//				workingList.remove(queryIdx);
-//				queryIdx -= 1;
-//				continue;
-//			} else if (result.size() == 0) {
-//
-//				/*
-//				 * This rule is already a partial evaluation
-//				 */
-//				continue;
-//			}
-//
-//			/*
-//			 * One more step in the partial evaluation was computed, we need to
-//			 * remove the old query and add the result instead. Each of the new
-//			 * queries could still require more steps of evaluation, so we
-//			 * decrease the index.
-//			 */
-//			workingList.remove(queryIdx);
-//			for (CQIE newquery : result) {
-//				if (!workingList.contains(newquery)) {
-//					workingList.add(queryIdx, newquery);
-//				}
-//			}
-//			queryIdx -= 1;
-//		}
-//		return rcount[1];
-//	}
+	 */
+	public int computePartialEvaluation(List<CQIE> workingList) {
 
-	// New method
-	public int computePartialEvaluationNew(List<CQIE> workingList) {
+		int[] rcount = { 0, 0 };
 
-		int[] rcount = { 0, 0 }; //int queryIdx = 0;
-		
-		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
-		
-		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
-		Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+		for (int queryIdx = 0; queryIdx < workingList.size(); queryIdx++) {
 
-		//for (int queryIdx = workingList.size() - 1; queryIdx > 0; queryIdx--) {	
+			CQIE rule = workingList.get(queryIdx);
 
-		for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
+			Stack<Integer> termidx = new Stack<Integer>();
 
-			Predicate pred = predicatesInBottomUp.get(predIdx);
-			if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
+			List<Function> currentTerms = rule.getBody();
+			List<Term> tempList = new LinkedList<Term>();
+			for (Function a : currentTerms) {
+				tempList.add(a);
+			}
 
-				ruleIndex = depGraph.getRuleIndex();
-				List<CQIE> workingRules = ruleIndex.get(pred);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
-				List<CQIE> fatherWorkingRules = ruleIndex.get(preFather);
-				
-				
-				for (CQIE rule : fatherWorkingRules) {
-					// CQIE rule = workingList.get(queryIdx);
+			List<CQIE> result = computePartialEvaluation(tempList, rule, rcount, termidx, false);
 
-					Stack<Integer> termidx = new Stack<Integer>();
+			if (result == null) {
 
-					List<Function> currentTerms = rule.getBody();
-					List<Term> tempList = new LinkedList<Term>();
-					
-					for (Function a : currentTerms) {
-							tempList.add(a);
-					}
-					List<CQIE> result = computePartialEvaluation( pred, tempList, rule, rcount, termidx, false);
-			
+				/*
+				 * If the result is null the rule is logically empty
+				 */
+				workingList.remove(queryIdx);
+				queryIdx -= 1;
+				continue;
+			} else if (result.size() == 0) {
 
-					
-					int queryIdx=workingList.indexOf(rule);
-					
-					if (result == null) {
-						/*
-						 * If the result is null the rule is logically empty
-						 */
-						
-						workingList.remove(queryIdx);
-						// queryIdx -= 1;
-						continue;
-
-					} else if (result.size() == 0) {
-						/*
-						 * This rule is already a partial evaluation
-						 */
-						continue;
-					}
-					/*
-					 * One more step in the partial evaluation was computed, we
-					 * need to remove the old query and add the result instead.
-					 * Each of the new queries could still require more steps of
-					 * evaluation, so we decrease the index.
-					 */
-					// workingList.remove(queryIdx);
-					for (CQIE newquery : result) {
-						if (!workingList.contains(newquery)) {
-							workingList.remove(queryIdx);
-							workingList.removeAll(workingRules);
-							workingList.add(queryIdx, newquery);
-							depGraph.removeAllPredicateFromRuleIndex(preFather);
-							depGraph.setRuleInGraph(preFather, newquery);
-						}
-					}
-				} // end for workingRules
-
-			} else { // it is an extensional predicate
+				/*
+				 * This rule is already a partial evaluation
+				 */
 				continue;
 			}
 
-		} // end for over the ordered predicates
+			/*
+			 * One more step in the partial evaluation was computed, we need to
+			 * remove the old query and add the result instead. Each of the new
+			 * queries could still require more steps of evaluation, so we
+			 * decrease the index.
+			 */
+			workingList.remove(queryIdx);
+			for (CQIE newquery : result) {
+				if (!workingList.contains(newquery)) {
+					workingList.add(queryIdx, newquery);
+				}
+			}
+			queryIdx -= 1;
+		}
 		return rcount[1];
 	}
 
-
-	
-	
 	/***
 	 * Goes trhough each term, and recursively each inner term trying to resovle
 	 * each atom. Returns an empty list if the partial evaluation is completed
@@ -1267,7 +1189,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * one or more queries if there was one atom that could be resolved againts
 	 * one or more rules. The list containts the result of the resolution steps
 	 * againts those rules.
-	 * @param resolvPred 
 	 * 
 	 * @param currentTerms
 	 * @param rule
@@ -1276,7 +1197,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 
-	private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
+	private List<CQIE> computePartialEvaluation(List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
 			boolean parentIsLeftJoin) {
 
 		int nonBooleanAtomCounter = 0;
@@ -1301,7 +1222,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				Predicate predicate = focusLiteral.getFunctionSymbol();
 				boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
 				List<CQIE> result = new LinkedList<CQIE>();
-				result = computePartialEvaluation(resolvPred,  focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin);
+				result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin);
 
 				if (result == null)
 					return null;
@@ -1319,7 +1240,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				 */
 
 				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
-				List<CQIE> result = resolveDataAtom(resolvPred, focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
+				List<CQIE> result = resolveDataAtom(focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
 						isLeftJoinSecondArgument);
 
 				if (result == null)
@@ -1357,7 +1278,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * <li>We apply mgu to r' (see {@link Unifier#applyUnifier(CQIE, Map)})</li>
 	 * <li>return r'
 	 * </ul>
-	 * @param resolvPred 
 	 * 
 	 * 
 	 * 
@@ -1385,7 +1305,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * 
 	 * @see Unifier
 	 */
-	public List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
+	public List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
 			boolean isSecondAtomInLeftJoin) {
 
 		if (!focusAtom.isDataFunction())
@@ -1402,19 +1322,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			return emptyList;
 		}
-		if (ruleIndex.keySet().contains(pred) && !pred.equals(resolvPred)) {
-			//Since it is not resolvPred, we are are not going to resolve it
-			return emptyList;
-		}
-		
-		
 		/*
 		 * This is a real data atom, it either generates something, or null
 		 * (empty)
 		 */
 
 		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
-		
+
 		/*
 		 * If there are none, the atom is logically empty, careful, LEFT JOIN
 		 * alert!
@@ -1430,9 +1344,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				result.add(newRuleWithNullBindings);
 			}
 		} else {
-			
-			//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
-			result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+			// Note, in this step result may get new CQIEs inside
+			result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin,
+					isSecondAtomInLeftJoin);
 		}
 
 		if (result == null) {
