@@ -1,12 +1,68 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>inf.unibz.it.obda</groupId>
-	<artifactId>obdalib-parent</artifactId>
+	<groupId>it.unibz.inf.ontop</groupId>
+	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.9</version>
-	<name>obdalib-parent</name>
-	<url>http://obda.inf.unibz.it/</url>
+	<version>1.10.1-SNAPSHOT</version>
+	<name>ontop</name>
+	<url>http://ontop.inf.unibz.it/</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	
+	
+	<inceptionYear>2009</inceptionYear>
+	<organization>
+		<name>Free University of Bozen-Bolzano</name>
+	</organization>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<scm>
+		<connection>scm:git:git@github.com:ontop/ontop.git</connection>
+		<developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
+		<url>git@github.com:ontop/ontop.git</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>marianormuro</id>
+			<name>Mariano Rodriguez Muro</name>
+		</developer>
+		<developer>
+			<id>ghxiao</id>
+			<name>Guohui Xiao</name>
+		</developer>
+		<developer>
+			<id>martinrezk</id>
+			<name>Martin Rezk</name>
+		</developer>
+		<developer>
+			<id>johardi</id>
+			<name>Josef Hardi</name>
+		</developer>
+		<developer>
+			<id>tibagosi</id>
+			<name>Timea Bagosi</name>
+		</developer>
+		<developer>
+			<id>mislusnys</id>
+			<name>Mindaugas Slusnys</name>
+		</developer>
+		<developer>
+			<id>skomlaebri</id>
+			<name>Sarah Komla-Ebri</name>
+		</developer>
+	</developers>
 
 	<dependencies>
 	</dependencies>
@@ -38,44 +94,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<aversion>1.9</aversion>
+		
+		<!-- for org.codehaus.mojo:license-maven-plugin -->
+		<license.licenseName>apache_v2</license.licenseName>
+		<license.roots>src/main/java,src/test/java</license.roots>
 	</properties>
 
-	<repositories>  
-	    <repository>
-			<id>sesame-official-repository</id>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>bolzano-nexus-public</id>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>bolzano-obda-snapshots</id>
-			<name>Maven Bolzano OBDA snapshots repository</name>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>bolzano-obda-release</id>
-			<name>Maven Bolzano OBDA release repository</name>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-release/</url>
-		</repository>
-	</distributionManagement>
 
 	<build>
 		<pluginManagement>
@@ -85,11 +109,16 @@
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>2.3.2</version>
 				</plugin>
-                <plugin>
-      				<groupId>org.apache.maven.plugins</groupId>
-      				<artifactId>maven-site-plugin</artifactId>
-      				<version>3.2</version>
-    			</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.1</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -100,6 +129,44 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- explicitly define maven-deploy-plugin after other to force exec 
+					order -->
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -162,15 +229,16 @@
 				<version>2.7.1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.jgraph</groupId>
-				<artifactId>jgrapht</artifactId>
-				<version>0.8.3</version>
+  				<groupId>net.sf.jgrapht</groupId>
+  				<artifactId>jgrapht</artifactId>
+  				<version>0.8.3</version>
 			</dependency>
 			<dependency>
-				<groupId>org.jgraph</groupId>
+				<groupId>jgraph</groupId>
 				<artifactId>jgraph</artifactId>
-				<version>0.8.3</version>
+				<version>5.13.0.0</version>
 			</dependency>
+			
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
@@ -181,42 +249,42 @@
 				<artifactId>commons-logging</artifactId>
 				<version>1.1.1</version>
 			</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jdbc</artifactId>
-			<version>7.0.37</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>juli</artifactId>
-			<version>6.0.29</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.studio</groupId>
-			<artifactId>org.apache.commons.logging</artifactId>
-			<version>1.1.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-jdbc</artifactId>
+				<version>7.0.37</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>juli</artifactId>
+				<version>6.0.29</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.directory.studio</groupId>
+				<artifactId>org.apache.commons.logging</artifactId>
+				<version>1.1.1</version>
+				<type>jar</type>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
     		<groupId>com.github.jsqlparser</groupId>
     		<artifactId>jsqlparser</artifactId>
     		<version>0.8.6</version>
-		</dependency>
-		
-		<!--  OWL API -->
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-api</artifactId>
-			<version>3.4.5</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-apibinding</artifactId>
-			<version>3.4.5</version>
-		</dependency>
-		
-			<!-- Sesame API-->
+			</dependency>
+
+			<!-- OWL API -->
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-api</artifactId>
+				<version>3.4.5</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-apibinding</artifactId>
+				<version>3.4.5</version>
+			</dependency>
+
+			<!-- Sesame API -->
 
 			<dependency>
 				<!-- this includes ALL seasame -->
@@ -230,126 +298,116 @@
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-api</artifactId>
 				<version>2.7.6</version>
-			</dependency> 
-			
+			</dependency>
+
 			<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-sparql</artifactId>
-			<version>2.7.6</version>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryparser-sparql</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-util</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-ntriples</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-api</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-sparql-compliance</artifactId>
+				<version>2.7.6</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-sparql-testsuite</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-model</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-turtle</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-rdfxml</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-n3</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryresultio-api</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryresultio-text</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryresultio-sparqlxml</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryalgebra-model</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-repository-sparql</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-repository-manager</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-query</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryparser-api</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-queryalgebra-evaluation</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-datatypes</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-languages</artifactId>
+				<version>2.7.6</version>
 			</dependency>
 			
-	    	<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-util</artifactId>
-			 <version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-ntriples</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-api</artifactId>
-			 <version>2.7.6</version>
-		</dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-sparql-compliance</artifactId>
-            <version>2.7.6</version>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-sparql-testsuite</artifactId>
-            <version>2.7.6</version>
-        </dependency>      
-        <dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-model</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-turtle</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-rdfxml</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-n3</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
- 	 			<groupId>org.openrdf.sesame</groupId>
-     			<artifactId>sesame-queryresultio-api</artifactId>
-    			<version>2.7.6</version>
-    	</dependency>
-		<dependency>
-    			<groupId>org.openrdf.sesame</groupId>
-    			<artifactId>sesame-queryresultio-text</artifactId>
-    			<version>2.7.6</version>
-	    	</dependency>   
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryresultio-sparqlxml</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryalgebra-model</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryalgebra-evaluation</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-sail-federation</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-sparql</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-manager</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-query</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-api</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryalgebra-evaluation</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-datatypes</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-languages</artifactId>
-			<version>2.7.6</version>
-		</dependency>
-                            
 			<!-- JDBC Drivers -->
 
 			<dependency>
@@ -358,10 +416,10 @@
 				<version>9.0-801.jdbc4</version>
 			</dependency>
 			<dependency>
-                <groupId>com.ibm</groupId>
-                <artifactId>db2jcc4.jar</artifactId>
-                <version>10.1</version>
-            </dependency>
+				<groupId>com.ibm</groupId>
+				<artifactId>db2jcc4.jar</artifactId>
+				<version>10.1</version>
+			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
@@ -386,35 +444,36 @@
 	</dependencyManagement>
 
 	<reporting>
-    	<plugins>
-      		<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-surefire-report-plugin</artifactId>
-        		<version>2.15</version>
-        		<configuration>
-        			<outputDirectory>/build/report</outputDirectory>
-          			<showSuccess>true</showSuccess>
-     			</configuration>
-      		</plugin>
-            <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
-            </plugin>
+		<plugins>
 			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-site-plugin</artifactId>
-       			<version>2.1</version>
-        		<configuration>
-         			<outputDirectory>/var/lib/tomcat7/webapps/ontop-test-result</outputDirectory>
-          			<showSuccess>true</showSuccess>
- 				</configuration>
-      		</plugin>
-            <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
-            	<artifactId>maven-jxr-plugin</artifactId>
-            	<version>2.3</version>
-        	</plugin>
-    	</plugins>
-  	</reporting>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.15</version>
+				<configuration>
+					<outputDirectory>/build/report</outputDirectory>
+					<showSuccess>true</showSuccess>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.7</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>2.1</version>
+				<configuration>
+					<outputDirectory>/var/lib/tomcat7/webapps/ontop-test-result</outputDirectory>
+					<showSuccess>true</showSuccess>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.3</version>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
+			

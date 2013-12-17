@@ -1,15 +1,30 @@
+# OS X generated files
 .DS_Store
+
+# Maven generated file
 target
-.settings
-*~
-catalog-v*.xml
+*.versionsBackup
+
+
+# Eclipse generated files
 .classpath
 .projecttmp.*
-tmp.*
 .project
 .pydevproject
 bin
+.settings
 
+# Intellij generated files
 *.iml
 .idea
+
+# Protege generated files
+catalog-v*.xml
+
+# Temp files
+*~
+\#*
+tmp.*
+
+# Ontop specific
 plugin-runtime
