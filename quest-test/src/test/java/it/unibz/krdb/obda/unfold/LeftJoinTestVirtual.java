@@ -109,7 +109,7 @@ public class LeftJoinTestVirtual extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query_multi = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :salary ?salary} }";
+		String query_multi = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
 		String query_multi1 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
 		String query_multi2 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
 		String query1 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name . ?p :age ?age }";

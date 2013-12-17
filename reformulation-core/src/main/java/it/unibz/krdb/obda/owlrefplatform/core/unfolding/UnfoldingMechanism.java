@@ -39,14 +39,16 @@ public interface UnfoldingMechanism extends Serializable {
 
 	/**
 	 * unfolds the the given datalog program applying partial evaluation. It will do the partial evaluation following 
-	 * a specified strategy, for instance, bottom up or top down.
+	 * a specified strategy, for instance, bottom up or top down. The parameter includeMappings tells you if the unfolder should take the mappings
+	 * into account, or just work with the query
 	 * @param query
 	 * @param targetPredicate
 	 * @param strategy
+	 * @param includeMappings
 	 * @return
 	 * @throws OBDAException
 	 */
-	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy)
+	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy,boolean includeMappings)
 			throws OBDAException;
 
 }

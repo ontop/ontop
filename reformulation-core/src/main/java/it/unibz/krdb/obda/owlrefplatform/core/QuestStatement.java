@@ -431,7 +431,7 @@ public class QuestStatement implements OBDAStatement {
 			
 			//removeNonAnswerQueries(program);
 
-			program = unfolder.unfold(program, "ans1",QuestConstants.BUP);
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false);
 
 			log.debug("Flattened query: \n{}", program);
 			
@@ -460,7 +460,7 @@ public class QuestStatement implements OBDAStatement {
 
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.TDOWN);
+		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true);
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		//removeNonAnswerQueries(unfolding);

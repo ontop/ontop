@@ -135,7 +135,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(query);
-		DatalogProgram output = unfolder.unfold(input, "q",QuestConstants.TDOWN);
+		DatalogProgram output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true);
 		System.out.println("input " + input);
 
 		int atomcount = 0;
@@ -164,7 +164,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		query = fac.getCQIE(head, body);
 
 		input = fac.getDatalogProgram(query);
-		output = unfolder.unfold(input, "q",QuestConstants.TDOWN);
+		output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true);
 		System.out.println("input " + input);
 
 		atomcount = 0;
