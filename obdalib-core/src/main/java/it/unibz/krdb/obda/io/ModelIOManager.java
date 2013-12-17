@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.io;
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.exception.Indicator;
@@ -34,6 +46,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URI;
 import java.util.ArrayList;
@@ -165,11 +179,30 @@ public class ModelIOManager {
                     "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
         }
         
-        // Clean the model first before loading
-        model.reset();
         
         LineNumberReader reader = new LineNumberReader(new FileReader(file));
-        String line = "";
+        load(reader);
+    }
+
+    /**
+     * load from an input stream
+     * 
+     * @param stream
+     * @throws IOException
+     * @throws InvalidMappingException
+     */
+	public void load(InputStream stream) throws IOException, InvalidMappingException {
+		LineNumberReader reader = new LineNumberReader(new InputStreamReader(stream));
+		load(reader);
+	}
+
+	private void load(LineNumberReader reader) throws IOException,
+			InvalidMappingException {
+	    // Clean the model first before loading
+        model.reset();
+    
+		
+		String line = "";
         URI sourceUri = null;
         while ((line = reader.readLine()) != null) {
         	try {
@@ -203,7 +236,7 @@ public class ModelIOManager {
         if (!invalidMappingIndicators.isEmpty()) {
             throw new InvalidMappingException(invalidMappingIndicators);
         }
-    }
+	}
 
     /*
      * Helper methods related to save file.

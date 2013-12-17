@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.10.0-SNAPSHOT</version>
+	<version>1.10.1-SNAPSHOT</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -15,6 +14,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
+	
+	<inceptionYear>2009</inceptionYear>
+	<organization>
+		<name>Free University of Bozen-Bolzano</name>
+	</organization>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -89,7 +94,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<aversion>1.9</aversion>
+		
+		<!-- for org.codehaus.mojo:license-maven-plugin -->
+		<license.licenseName>apache_v2</license.licenseName>
+		<license.roots>src/main/java,src/test/java</license.roots>
 	</properties>
 
 
@@ -225,6 +233,11 @@
   				<artifactId>jgrapht</artifactId>
   				<version>0.8.3</version>
 			</dependency>
+			<dependency>
+				<groupId>jgraph</groupId>
+				<artifactId>jgraph</artifactId>
+				<version>5.13.0.0</version>
+			</dependency>
 			
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -253,6 +266,7 @@
 				<type>jar</type>
 				<scope>compile</scope>
 			</dependency>
+			
 
 			<!-- OWL API -->
 			<dependency>
@@ -458,3 +472,4 @@
 		</plugins>
 	</reporting>
 </project>
+			
