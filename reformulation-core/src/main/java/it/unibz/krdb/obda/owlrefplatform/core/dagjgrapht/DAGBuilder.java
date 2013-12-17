@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -69,7 +68,7 @@ public class DAGBuilder {
 	
 	public static DAGImpl getDAG(TBoxGraph graph) {
 
-		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
+		Map<Description, EquivalenceClass<Description>> equivalencesMap = new HashMap<Description, EquivalenceClass<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();
 
 		// temporary graph to be transformed in DAG
@@ -91,7 +90,7 @@ public class DAGBuilder {
 	 * @param representatives a map between the node and its representative node
 	 */
 	public static DAGImpl getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph,
-			Map<Description, Set<Description>> equivalencesMap,
+			Map<Description, EquivalenceClass<Description>> equivalencesMap,
 			Map<Description, Description> replacements) {
 
 		eliminateCycles(graph, equivalencesMap, replacements);
@@ -207,7 +206,7 @@ public class DAGBuilder {
 	 */
 
 	private static void eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Map<Description, Set<Description>> equivalencesMap, 
+			Map<Description, EquivalenceClass<Description>> equivalencesMap, 
 			Map<Description, Description> replacements) {
 
 		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(graph);
@@ -244,7 +243,7 @@ public class DAGBuilder {
 					ignore = true;
 				}
 				// assign to each node the equivalent map set
-				equivalencesMap.put(node, equivalenceSet.getMembers());
+				equivalencesMap.put(node, equivalenceSet);
 
 				if (!ignore && !(node instanceof Property)) {
 					ignore = true;

@@ -63,8 +63,7 @@ public class NamedDAGBuilder {
 		Set<Property> property = dag.getRoles();
 
 		// clone the equivalences and replacements map
-		Map<Description, Set<Description>> equivalencesDag = dag
-				.getMapEquivalences();
+		Map<Description, EquivalenceClass<Description>> equivalencesDag = dag.getMapEquivalences();
 		
 		for (Description vertex : equivalencesDag.keySet()) {
 			
@@ -72,8 +71,7 @@ public class NamedDAGBuilder {
 				for (Description equivalent : equivalencesDag.get(vertex)) {
 					equivalents.add(equivalent);
 				}
-				equivalencesMap.put(vertex, new HashSet<Description>(
-						equivalents));
+				equivalencesMap.put(vertex, new HashSet<Description>(equivalents));
 		}
 		
 		for (Description eliminateNode : dag.getReplacementKeys()) {
@@ -298,7 +296,7 @@ public class NamedDAGBuilder {
 		Set<OClass> namedClasses = dag.getClasses();
 		Set<Property> property = dag.getRoles();
 	
-		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
+		EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(desc);
 
 		// if there are no equivalent nodes return the node or nothing
 		if (equivalents == null) {

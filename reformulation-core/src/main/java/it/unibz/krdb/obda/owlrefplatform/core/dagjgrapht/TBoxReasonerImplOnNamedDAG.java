@@ -89,10 +89,6 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		// get equivalences of the current node
 		Set<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the children of the equivalent nodes
-		if (!dag.containsVertex(desc)) {
-			System.out.println(desc);
-			System.out.println(equivalenceSet);
-		}
 		Set<DefaultEdge> edges = dag.incomingEdgesOf(desc);
 		for (DefaultEdge edge : edges) {
 			Description source = dag.getEdgeSource(edge);
@@ -295,12 +291,12 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	@Override
 	public Set<Description> getEquivalences(Description desc) {
 
-		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
+		Set<Description> equivalents = dag.getEquivalenceClass(desc);
 
 		// if there are no equivalent nodes return the node or nothing
 		if (equivalents == null) {
 			
-				if (namedClasses.contains(desc) | property.contains(desc)) {
+				if (namedClasses.contains(desc) || property.contains(desc)) {
 					return Collections.unmodifiableSet(Collections.singleton(desc));
 				} 
 				else { // return empty set if the node we are considering

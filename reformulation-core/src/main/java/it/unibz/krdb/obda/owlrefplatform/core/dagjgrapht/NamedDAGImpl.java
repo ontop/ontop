@@ -44,7 +44,8 @@ public class NamedDAGImpl  {
 	//map of the equivalent elements of an element
 	private Map<Description, Set<Description>> equivalencesMap; 
 
-	public NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
+	// constructor is accessible within the package only
+	NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
 		this.dag = dag;
 		this.equivalencesMap = equivalencesMap;
 		this.replacements = replacements;
@@ -115,8 +116,8 @@ public class NamedDAGImpl  {
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
-	public Map<Description, Set<Description>> getMapEquivalences() {
-		return equivalencesMap;
+	public Set<Description> getEquivalenceClass(Description desc) {
+		return equivalencesMap.get(desc);
 	}
 
 	public Description getReplacementFor(Description v) {
@@ -142,8 +143,7 @@ public class NamedDAGImpl  {
 		else
 			if(!dag.vertexSet().contains(node))
 				node = null;
-		return node;
-		
+		return node;	
 	}
 
 	@Override
@@ -167,10 +167,6 @@ public class NamedDAGImpl  {
 	
 	public Set<Description> vertexSet() {
 		return dag.vertexSet();
-	}
-
-	public boolean containsVertex(Description desc) {
-		return dag.containsVertex(desc);
 	}
 
 	public Set<DefaultEdge> edgeSet() {

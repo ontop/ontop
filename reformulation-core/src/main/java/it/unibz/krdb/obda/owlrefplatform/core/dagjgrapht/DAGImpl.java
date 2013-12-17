@@ -42,9 +42,14 @@ public class DAGImpl  {
 	private Map<Description, Description> replacements; 
 	
 	//map of the equivalent elements of an element
-	private Map<Description, Set<Description>> equivalencesMap; 
+	private Map<Description, EquivalenceClass<Description>> equivalencesMap; 
 
-	public DAGImpl(DefaultDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
+	
+	// constructor is accessible within the package only
+	DAGImpl(DefaultDirectedGraph<Description,DefaultEdge> dag, Map<Description, 
+			EquivalenceClass<Description>> equivalencesMap, 
+			Map<Description, Description> replacements) {
+		
 		this.dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
 		Graphs.addGraph(this.dag, dag);
 		this.equivalencesMap = equivalencesMap;
@@ -115,8 +120,12 @@ public class DAGImpl  {
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
-	public Map<Description, Set<Description>> getMapEquivalences() {
+	public Map<Description, EquivalenceClass<Description>> getMapEquivalences() {
 		return equivalencesMap;
+	}
+
+	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
+		return equivalencesMap.get(desc);
 	}
 
 	public Description getReplacementFor(Description v) {

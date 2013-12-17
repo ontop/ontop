@@ -230,13 +230,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	@Override
 	public Set<Description> getEquivalences(Description desc) {
 
-		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
+		EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(desc);
 
 		// if there are no equivalent nodes return the node or nothing
 		if (equivalents == null) 
 			return Collections.unmodifiableSet(Collections.singleton(desc));
 				
-		return Collections.unmodifiableSet(equivalents);
+		return Collections.unmodifiableSet(equivalents.getMembers());
 	}
 	
 	/**

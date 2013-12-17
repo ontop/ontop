@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Collection;
@@ -109,9 +110,9 @@ public class EquivalenceTBoxOptimizer {
 
 		Description propNodeRange = ofac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
 		
-		if (impliedDAG.containsVertex(propNodeDomain) & impliedDAG.getMapEquivalences().get(propNodeDomain)!=null )
+		if (impliedDAG.containsVertex(propNodeDomain) & impliedDAG.getEquivalenceClass(propNodeDomain)!=null )
 			impliedDAG.getMapEquivalences().remove(propNodeDomain);
-		if (impliedDAG.containsVertex(propNodeRange) & impliedDAG.getMapEquivalences().get(propNodeRange)!=null )
+		if (impliedDAG.containsVertex(propNodeRange) & impliedDAG.getEquivalenceClass(propNodeRange)!=null )
 			impliedDAG.getMapEquivalences().remove(propNodeRange);
 		
 
@@ -191,7 +192,7 @@ public class EquivalenceTBoxOptimizer {
 					removedNodes.add((Property) redundandEquivPropNodeInv);
 					
 					//assign the new representative to the equivalent nodes
-					for(Description equivInverse: impliedDAG.getMapEquivalences().get(nonredundandPropNodeInv)){
+					for(Description equivInverse: impliedDAG.getEquivalenceClass(nonredundandPropNodeInv)){
 						if(equivInverse.equals(nonredundandPropNodeInv)){
 							impliedDAG.removeReplacementFor(nonredundandPropNodeInv);
 							continue;
@@ -238,10 +239,10 @@ public class EquivalenceTBoxOptimizer {
 				Description equivalentNode = ofac.getPropertySomeRestriction(equivalent.getPredicate(),
 						equivalent.isInverse());
 				impliedDAG.addVertex(equivalentNode); 
-				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null)
+				if(impliedDAG.getEquivalenceClass(equivalentNode)!= null)
 				{
-					Set<Description> equivalences = impliedDAG.getMapEquivalences().get(equivalentNode);
-					equivalences.remove(directRedundantNode);
+					EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass(equivalentNode);
+					equivalences.getMembers().remove(directRedundantNode);
 					
 					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
 				}
@@ -272,7 +273,7 @@ public class EquivalenceTBoxOptimizer {
 				
 				
 				
-				for(Description equivInverse: impliedDAG.getMapEquivalences().get(directRedundantNode)){
+				for(Description equivInverse: impliedDAG.getEquivalenceClass(directRedundantNode)){
 					if(equivInverse.equals(equivalentNode)){
 							impliedDAG.removeReplacementFor(equivalentNode);
 						continue;
@@ -296,9 +297,9 @@ public class EquivalenceTBoxOptimizer {
 						!equivalent.isInverse());
 				impliedDAG.addVertex(equivalentNode);
 				
-				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null){
-					Set<Description> equivalences = impliedDAG.getMapEquivalences().get(equivalentNode);
-					equivalences.remove(directRedundantNode);
+				if(impliedDAG.getEquivalenceClass(equivalentNode)!= null){
+					EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass(equivalentNode);
+					equivalences.getMembers().remove(directRedundantNode);
 					
 					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
 				}
@@ -330,7 +331,7 @@ public class EquivalenceTBoxOptimizer {
 		
 
 				
-				for(Description equivInverse: impliedDAG.getMapEquivalences().get(directRedundantNode)){
+				for(Description equivInverse: impliedDAG.getEquivalenceClass(directRedundantNode)){
 					if(equivInverse.equals(equivalentNode)) {
 						impliedDAG.removeReplacementFor(equivalentNode);
 						continue;
@@ -392,10 +393,10 @@ public class EquivalenceTBoxOptimizer {
 				}
 			}
 
-			if(impliedDAG.getMapEquivalences().get(classNode)!=null)
+			if(impliedDAG.getEquivalenceClass(classNode)!=null)
 			{
-				Set<Description> equivalences = impliedDAG.getMapEquivalences().get(classNode);
-				equivalences.removeAll(redundantClasses);
+				EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass(classNode);
+				equivalences.getMembers().removeAll(redundantClasses);
 				impliedDAG.getMapEquivalences().put(classNode, equivalences);
 			}
 			
@@ -403,8 +404,8 @@ public class EquivalenceTBoxOptimizer {
 			
 			for (Description replacement : replacements){
 				
-				Set<Description> equivalences = impliedDAG.getMapEquivalences().get(classNode);
-				equivalences.add(replacement);
+				EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass(classNode);
+				equivalences.getMembers().add(replacement);
 				impliedDAG.getMapEquivalences().put(classNode, equivalences);
 				impliedDAG.setReplacementFor(replacement, classNode);
 			}
