@@ -289,7 +289,7 @@ public class NamedDAGBuilder {
 		
 		}
 		
-		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, equivalencesMap, replacements, false);
+		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, equivalencesMap, replacements);
 		return dagImpl;
 	}
 	

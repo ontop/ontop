@@ -24,16 +24,14 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /** 
- * Used to represent a DAG and a named DAG.
- * Extend SimpleDirectedGraph from the JGrapht library
+ * Used to represent a DAG.
+ * Uses SimpleDirectedGraph from the JGrapht library
  * It can be constructed using the class DAGBuilder.
  * 
  * 
  */
 
 public class DAGImpl  {
-	
-	private boolean isDag; // true if DAG, false if NamedDAG
 	
 	private SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
@@ -46,41 +44,14 @@ public class DAGImpl  {
 	//map of the equivalent elements of an element
 	private Map<Description, Set<Description>> equivalencesMap; 
 
-	public DAGImpl(DefaultDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements, boolean isDag) {
+	public DAGImpl(DefaultDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
 		this.dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
 		Graphs.addGraph(this.dag, dag);
 		this.equivalencesMap = equivalencesMap;
 		this.replacements = replacements;
-		this.isDag = isDag;
 	}
 
-	public DAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements, boolean isDag) {
-		this.dag = dag;
-		this.equivalencesMap = equivalencesMap;
-		this.replacements = replacements;
-		this.isDag = isDag;
-	}
-	
-	
-	/**
-	 * check if we are working with a DAG
-	 * 
-	 * @return boolean <code> true</code> if DAG and not named DAG
-	 */
-
-	public boolean isaDAG(){
-		return isDag;
-	}
-
-	/**
-	 * check if we are working with a DAG and not a named DAG
-	 * 
-	 * @return boolean <code> true</code> if named DAG and not DAG
-	 */
-	public boolean isaNamedDAG(){
-		return !isDag; 
-	}
-	
+		
 	/**
 	 * Allows to have all named roles in the DAG even the equivalent named roles
 	 * @return  set of all property (not inverse) in the DAG
@@ -201,6 +172,11 @@ public class DAGImpl  {
 		
 	}
 
+	@Override
+	public String toString() {
+		return dag.toString();
+	}
+	
 	
 	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
 		return dag;

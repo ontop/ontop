@@ -734,6 +734,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 				//number of vertexes in the graph
 				int numberVertexesD1= 0;
+				/*
 				if(d2.isaNamedDAG()){
 					for (Description v: d1.vertexSet()){
 						if(d1.getRoles().contains(v)| d1.getClasses().contains(v)){	
@@ -742,7 +743,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						}
 					}
 				}
-				else 
+				else
+				*/ 
 					numberVertexesD1= d1.vertexSet().size();
 				
 				//number of vertexes in the dag

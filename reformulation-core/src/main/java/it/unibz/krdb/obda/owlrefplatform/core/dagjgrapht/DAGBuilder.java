@@ -78,7 +78,7 @@ public class DAGBuilder {
 		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
 		eliminateRedundantEdges(modifiedGraph);
 
-		DAGImpl dag = new DAGImpl(modifiedGraph, equivalencesMap, replacements, true);
+		DAGImpl dag = new DAGImpl(modifiedGraph, equivalencesMap, replacements);
 		return dag;
 	}
 
@@ -97,7 +97,7 @@ public class DAGBuilder {
 		eliminateCycles(graph, equivalencesMap, replacements);
 		eliminateRedundantEdges(graph);
 
-		DAGImpl dag = new DAGImpl(graph, equivalencesMap, replacements, true);
+		DAGImpl dag = new DAGImpl(graph, equivalencesMap, replacements);
 		return dag;
 	}
 

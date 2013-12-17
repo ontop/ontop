@@ -111,14 +111,6 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	public SemanticIndexEngineImpl(NamedDAGImpl namedDag) {
 
 		this.namedDag = namedDag;
-		if (namedDag.isaNamedDAG())
-		{
-			construct();
-		}
-
-	}
-	
-	private void construct(){
 		
 		GraphIterator<Description, DefaultEdge> orderIterator;
 
