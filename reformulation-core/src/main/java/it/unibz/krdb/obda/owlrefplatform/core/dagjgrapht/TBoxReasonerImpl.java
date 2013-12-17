@@ -80,11 +80,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * Constructor using a graph (cycles admitted)
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImpl(TBoxGraph graph) {
-		this.graph = graph;
-		namedClasses = graph.getClasses();
-		property = graph.getRoles();
-	}
+//	public TBoxReasonerImpl(TBoxGraph graph) {
+//		this.graph = graph;
+//		namedClasses = graph.getClasses();
+//		property = graph.getRoles();
+//	}
 
 	/**
 	 * return the direct children starting from the given node of the dag
@@ -781,13 +781,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public DAGImpl getDAG() {
-
 		return dag;
-	}
-
-	public TBoxGraph getGraph() {
-
-		return graph;
 	}
 
 	

@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -104,7 +105,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testDescendants(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
+		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
 		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
@@ -159,7 +160,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	private boolean testDescendants( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
 		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
+		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 
@@ -207,7 +208,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testChildren(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
+		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
 		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
@@ -260,7 +261,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	private boolean testChildren( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
 		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
+		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 
@@ -306,7 +307,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testAncestors(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
+		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
 		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
@@ -363,7 +364,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	private boolean testAncestors( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
 		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
+		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 
@@ -411,7 +412,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testParents(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
+		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
 		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
@@ -465,7 +466,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	private boolean testParents( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
 		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
+		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 

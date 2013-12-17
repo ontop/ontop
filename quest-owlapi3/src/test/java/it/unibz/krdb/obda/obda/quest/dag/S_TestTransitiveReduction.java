@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -126,7 +127,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			}
 		}
 
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(g1);
+		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(g1);
 
 		Set<Set<Description>> nodesg1= reasonerd1.getNodes(false);
 		Iterator<Set<Description>> it2 =nodesg1.iterator();

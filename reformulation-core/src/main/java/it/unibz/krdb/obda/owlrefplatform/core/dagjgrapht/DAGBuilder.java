@@ -52,8 +52,11 @@ public class DAGBuilder {
 	 */
 	
 	public static DAGImpl getDAG(Ontology onto) {
+		
 		TBoxGraph graph = TBoxGraph.getGraph(onto);
+		
 		DAGImpl dag = DAGBuilder.getDAG(graph);
+		
 		return dag;
 	}
 

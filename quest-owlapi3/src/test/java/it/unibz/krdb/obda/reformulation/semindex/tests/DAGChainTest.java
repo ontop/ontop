@@ -21,6 +21,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnGraph;
 
 import java.util.Set;
 
@@ -111,7 +112,7 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
+		TBoxReasonerImplOnGraph reasoner= new TBoxReasonerImplOnGraph(res);
 		reasoner.getChainDAG();
 
 		
