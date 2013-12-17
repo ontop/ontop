@@ -391,7 +391,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	 private DAGImpl pureIsa;
 
-	private TBoxReasoner reasonerDag;
+	private TBoxReasonerImpl reasonerDag;
 	
 	private SemanticIndexEngine engine;
 	

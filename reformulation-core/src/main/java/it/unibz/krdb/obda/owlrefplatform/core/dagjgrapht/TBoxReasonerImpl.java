@@ -40,26 +40,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private DAGImpl dag;
 
-	private Set<OClass> namedClasses;
-	private Set<Property> property;
-
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
 	public TBoxReasonerImpl(DAGImpl dag) {
 		this.dag = dag;
-		namedClasses = dag.getClasses();
-		property = dag.getRoles();
 	}
 	
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 
 	 * @param desc node that we want to know the direct children
-	 * @param named
-	 *            when it's true only the children that correspond to named
-	 *            classes and property are returned
 	 * @return we return a set of set of description to distinguish between
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
@@ -74,15 +66,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		if (node == null)
 			node = desc;
 
-		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {
-			
+		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {	
 			Description source = dag.getEdgeSource(edge);
 
 			// get the child node and its equivalent nodes
 			Set<Description> equivalences = getEquivalences(source);
-
-				if (!equivalences.isEmpty())
-					result.add(equivalences);
+			if (!equivalences.isEmpty())
+				result.add(equivalences);
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -93,9 +83,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * return the direct parents starting from the given node of the dag
 	 * 
 	 * @param desc node from which we want to know the direct parents
-	 * @param named
-	 *            when it's true only the parents that correspond to named
-	 *            classes or property are returned
 	 *            
 	 * @return we return a set of set of description to distinguish between
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
@@ -117,8 +104,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			// get the child node and its equivalent nodes
 			Set<Description> equivalences = getEquivalences(target);
 
-				if (!equivalences.isEmpty())
-					result.add(equivalences);
+			if (!equivalences.isEmpty())
+				result.add(equivalences);
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -130,10 +117,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * the dag
 	 * 
 	 * @param desc node we want to know the descendants
-	 * @param named
-	 *            when it's true only the descendants that are named classes or
-	 *            property are returned
-	 *@return we return a set of set of description to distinguish between
+	 *
+	 * @return we return a set of set of description to distinguish between
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
@@ -162,7 +147,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			if (equivalent.equals(startNode))
 				continue;
 			sourcesStartnoNode.add(equivalent);
-
 		}
 
 		if (!sourcesStartnoNode.isEmpty())
@@ -188,9 +172,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * the dag
 	 * 
 	 * @param desc node we want to know the ancestors
-	 * @param named
-	 *            when it's true only the ancestors that are named classes or
-	 *            property are returned
+	 *
 	 * @return we return a set of set of description to distinguish between
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
@@ -218,7 +200,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			if (equivalent.equals(startNode))
 				continue;
 			sourcesStartnoNode.add(equivalent);
-
 		}
 
 		if (!sourcesStartnoNode.isEmpty())
@@ -230,7 +211,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 			// add the node and its equivalent nodes
 			Set<Description> sources = getEquivalences(parent);
-
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -243,10 +223,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * Return the equivalences starting from the given node of the dag
 	 * 
 	 * @param desc node we want to know the ancestors
-
-	 * @param named
-	 *            when it's <code> true </code> only the equivalences that are named classes or
-	 *            property are returned
 	 *            
 	 * @return we return a set of description with equivalent nodes 
 	 */
@@ -266,8 +242,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	/**
 	 * Return all the nodes in the DAG or graph
 	 * 
-	 * @param named when it's <code> true </code> only the named classes or
-	 *            property are returned 
 	 * @return we return a set of set of description to distinguish between
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
