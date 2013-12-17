@@ -66,11 +66,9 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
-
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		SemanticIndexEngine engine = new SemanticIndexEngineImpl(namedReasoner);
+		SemanticIndexEngine engine = new SemanticIndexEngineImpl(pureIsa);
 		List<Interval> nodeInterval = engine.getIntervals(ofac
 				.createClass(testURI + "B1"));
 
@@ -128,10 +126,9 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		SemanticIndexEngine engine = new SemanticIndexEngineImpl(namedReasoner);
+		SemanticIndexEngine engine = new SemanticIndexEngineImpl(pureIsa);
 		List<Interval> nodeInterval = engine.getIntervals(ofac
 				.createObjectProperty(testURI + "R1"));
 
@@ -194,11 +191,9 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
-
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		SemanticIndexEngine engine = new SemanticIndexEngineImpl(namedReasoner);
+		SemanticIndexEngine engine = new SemanticIndexEngineImpl(pureIsa);
 		List<Interval> nodeInterval = engine.getIntervals(ofac
 				.createObjectProperty(testURI + "A1"));
 

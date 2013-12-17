@@ -53,11 +53,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		property = dag.getRoles();
 	}
 	
-	@Override
-	public DAGImpl getDAG() {
-		return dag;
-	}
-	
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 

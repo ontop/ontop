@@ -95,12 +95,10 @@ public void testIndexes() throws Exception{
 }
 
 private boolean testIndexes( DAGImpl dag){
-	TBoxReasonerImpl reasoner= new TBoxReasonerImpl(dag);
 	boolean result=true;
-	
-	
+		
 	//create semantic index
-	SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(reasoner);
+	SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(dag);
 	Map<Description, Integer> indexes=engine.getIndexes();
 	Map<Description, SemanticIndexRange> ranges=engine.getIntervals();
 	

@@ -393,8 +393,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private TBoxReasoner reasonerDag;
 	
-	private TBoxReasoner reasonerIsa;
-	
 	private SemanticIndexEngine engine;
 	
 	private Ontology aboxDependencies;
@@ -484,13 +482,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		//build the namedDag (or pureIsa)
 		pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 		
-		reasonerIsa = new TBoxReasonerImpl(pureIsa);
-
 		aboxDependencies =  reasonerDag.getSigmaOntology();
 		
 
 		//create the indexes
-		engine = new SemanticIndexEngineImpl(reasonerIsa);
+		engine = new SemanticIndexEngineImpl(pureIsa);
 		
 
 

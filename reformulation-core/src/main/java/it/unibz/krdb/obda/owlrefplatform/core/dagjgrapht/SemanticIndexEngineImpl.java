@@ -108,9 +108,9 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	 */
 
 
-	public SemanticIndexEngineImpl(TBoxReasoner reasoner) {
+	public SemanticIndexEngineImpl(DAGImpl namedDag) {
 
-		namedDag = reasoner.getDAG();
+		this.namedDag = namedDag;
 		if (namedDag.isaNamedDAG())
 		{
 			construct();
