@@ -406,35 +406,6 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 
-//	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
-//
-//		// Contruct the datalog program object from the query string
-//		DatalogProgram program = null;
-//		try {
-//			if (questInstance.isSemIdx()) {
-//				translator.setSI();
-//				translator.setUriRef(questInstance.getUriRefIds());
-//			}
-//			program = translator.translate(query, signature);
-//
-//			log.debug("Translated query: \n{}", program);
-//
-//			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
-//			removeNonAnswerQueries(program);
-//
-//			program = unfolder.unfold(program, "ans1");
-//
-//			log.debug("Flattened query: \n{}", program);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			OBDAException ex = new OBDAException(e.getMessage());
-//			ex.setStackTrace(e.getStackTrace());
-//			throw ex;
-//		}
-//		log.debug("Replacing equivalences...");
-//		program = validator.replaceEquivalences(program);
-//		return program;
-//	}
 	/**
 	 * Translates a SPARQL query into Datalog dealing with equivalences and
 	 * verifying that the vocabulary of the query matches the one in the
@@ -460,7 +431,7 @@ public class QuestStatement implements OBDAStatement {
 			
 			//removeNonAnswerQueries(program);
 
-			program = unfolder.unfold(program, "ans1");
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP);
 
 			log.debug("Flattened query: \n{}", program);
 			
@@ -487,12 +458,14 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1");
+		
+		//This instnce of the unfolder is carried from Quest, and contains the mappings.
+		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.TDOWN);
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		//removeNonAnswerQueries(unfolding);
 
-		log.debug("After target rules removed: \n{}", unfolding);
+		//log.debug("After target rules removed: \n{}", unfolding);
 
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());

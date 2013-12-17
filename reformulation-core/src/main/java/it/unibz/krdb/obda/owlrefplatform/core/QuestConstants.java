@@ -31,4 +31,9 @@ public class QuestConstants {
 	// Boolean value
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";
+	
+	//Unfolding Strategies
+	public static final String TDOWN = "topdown";
+	public static final String BUP = "bottomup";
+	
 }

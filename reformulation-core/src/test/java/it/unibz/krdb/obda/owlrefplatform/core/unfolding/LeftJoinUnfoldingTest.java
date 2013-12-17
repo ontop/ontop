@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q");
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN);
 
 		System.out.println(result);
 
@@ -104,7 +105,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q");
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN);
 
 		System.out.println(result);
 
@@ -153,7 +154,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q");
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN);
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);
@@ -199,7 +200,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 			p.appendRule(rule3);
 
 			DatalogUnfolder unfolder = new DatalogUnfolder(p);
-			DatalogProgram result = unfolder.unfold(queryProgram, "q");
+			DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN);
 
 			// Only one rule should be returned where y is null
 			System.out.println(result);
@@ -238,7 +239,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		query.appendRule(rule1);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(query, "q");
+		DatalogProgram result = unfolder.unfold(query, "q",QuestConstants.TDOWN);
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);
