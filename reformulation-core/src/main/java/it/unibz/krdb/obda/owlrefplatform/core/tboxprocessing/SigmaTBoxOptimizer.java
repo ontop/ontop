@@ -85,7 +85,7 @@ public class SigmaTBoxOptimizer {
 		List<Axiom> rv = new LinkedList<Axiom>();
 
 		for(Description node:isa.vertexSet()){
-			for (Set<Description> descendants: reasonerIsa.getDescendants(node, false)){
+			for (Set<Description> descendants: reasonerIsa.getDescendants(node)){
 					Description firstDescendant=descendants.iterator().next();
 					Description descendant= isa.getReplacementFor(firstDescendant);
 					if(descendant==null)
@@ -107,7 +107,7 @@ public class SigmaTBoxOptimizer {
 			}
 					}
 			}
-			Set<Description> equivalents = reasonerIsa.getEquivalences(node, false);
+			Set<Description> equivalents = reasonerIsa.getEquivalences(node);
 
 			for(Description equivalent:equivalents){
 				if(!equivalent.equals(node)){
@@ -144,7 +144,7 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent, false)) {
+			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent)) {
 				Description child_prime=children_prime.iterator().next();
 
 				if (!child_prime.equals(child) && check_directly_redundant_role(child_prime, child)
@@ -176,7 +176,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent, false)) {
+			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent)) {
 			Description child_prime=children_prime.iterator().next();
 
 				if (!child_prime.equals(child) && check_directly_redundant(child_prime, child) && !check_redundant(child_prime, parent)) {
@@ -196,24 +196,24 @@ public class SigmaTBoxOptimizer {
 			return false;
 		}
 		
-		Set<Set<Description>> spChildren= reasonerSigmaChain.getDirectChildren(sp, false);
-		Set<Description> scEquivalent=reasonerSigmaChain.getEquivalences(sc, false);
-		Set<Set<Description>> scChildren= reasonerSigmaChain.getDescendants(sc, false);
-		Set<Set<Description>> tcChildren= reasonerIsaChain.getDescendants(tc,false);
+		Set<Set<Description>> spChildren= reasonerSigmaChain.getDirectChildren(sp);
+		Set<Description> scEquivalent=reasonerSigmaChain.getEquivalences(sc);
+		Set<Set<Description>> scChildren= reasonerSigmaChain.getDescendants(sc);
+		Set<Set<Description>> tcChildren= reasonerIsaChain.getDescendants(tc);
 		
 		if (sigmaChain.getReplacementFor(parent) != null){
 			sp = sigmaChain.getNode(sigmaChain.getReplacementFor(parent));
-			spChildren= reasonerSigmaChain.getDirectChildren(sp, false);
+			spChildren= reasonerSigmaChain.getDirectChildren(sp);
 		}
 		if (sigmaChain.getReplacementFor(child) != null){
 			sc = sigmaChain.getNode(sigmaChain.getReplacementFor(child));
-			scEquivalent=reasonerSigmaChain.getEquivalences(sc, false);
-			scChildren=reasonerSigmaChain.getDescendants(sc, false); 
+			scEquivalent=reasonerSigmaChain.getEquivalences(sc);
+			scChildren=reasonerSigmaChain.getDescendants(sc); 
 			
 		}
 		if (isaChain.getReplacementFor(child) != null){
 			tc = sigmaChain.getNode(isaChain.getReplacementFor(child));
-			reasonerSigmaChain.getDescendants(tc,false);
+			reasonerSigmaChain.getDescendants(tc);
 		}
 
 		boolean redundant =spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);

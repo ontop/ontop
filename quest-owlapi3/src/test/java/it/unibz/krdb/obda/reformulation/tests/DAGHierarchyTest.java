@@ -62,7 +62,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+		TBoxReasonerImpl namedReasoner = new TBoxReasonerImpl(pureIsa);
 
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -161,7 +161,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+		TBoxReasonerImpl namedReasoner = new TBoxReasonerImpl(pureIsa);
 
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -279,7 +279,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+		TBoxReasonerImpl namedReasoner = new TBoxReasonerImpl(pureIsa);
 
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -379,7 +379,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
+		TBoxReasonerImpl namedReasoner = new TBoxReasonerImpl(pureIsa);
 		
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 

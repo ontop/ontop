@@ -169,8 +169,7 @@ public class NamedDAGBuilder {
 				 replacements.remove(newReference);
 				 namedDag.addVertex(newReference);
 				
-				 Set<Description> allEquivalences = reasoner.getEquivalences(node,
-							false);
+				 Set<Description> allEquivalences = reasoner.getEquivalences(node);
 				 Iterator<Description> e= allEquivalences.iterator();
 				 while(e.hasNext()){
 					 Description vertex =e.next();

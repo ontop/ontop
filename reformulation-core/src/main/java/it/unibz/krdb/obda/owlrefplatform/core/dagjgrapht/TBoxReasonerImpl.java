@@ -98,6 +98,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
+	public Set<Set<Description>> getDirectChildren(Description desc) {
+		return getDirectChildren(desc,false);
+	}
+	
 	public Set<Set<Description>> getDirectChildren(Description desc,
 			boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
@@ -113,12 +117,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				Description source = dag.getEdgeSource(edge);
 
 				// get the child node and its equivalent nodes
-				Set<Description> equivalences = getEquivalences(source, false);
+				Set<Description> equivalences = getEquivalences(source);
 
 				if (named) { // if true I search only for the named nodes
 
-					Set<Description> namedEquivalences = getEquivalences(
-							source, true);
+					Set<Description> namedEquivalences = getEquivalences(source, true);
 
 					if (!namedEquivalences.isEmpty())
 						result.add(namedEquivalences);
@@ -146,7 +149,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		{
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc, false);
+			Set<Description> equivalenceSet = getEquivalences(desc);
 			// I want to consider also the children of the equivalent nodes
 			for (Description n : equivalenceSet) {
 				Set<DefaultEdge> edges = graph.incomingEdgesOf(n);
@@ -158,13 +161,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					if (equivalenceSet.contains(source)) {
 						continue;
 					}
-					Set<Description> equivalences = getEquivalences(source,
-							false);
+					Set<Description> equivalences = getEquivalences(source);
 
 					if (named) { // if true I search only for the named nodes
 
-						Set<Description> namedEquivalences = getEquivalences(
-								source, true);
+						Set<Description> namedEquivalences = getEquivalences(source, true);
 
 						if (!namedEquivalences.isEmpty())
 							result.add(namedEquivalences);
@@ -200,7 +201,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc, false);
+			Set<Description> equivalenceSet = getEquivalences(desc);
 			// I want to consider also the children of the equivalent nodes
 			if (!dag.containsVertex(desc)) {
 				System.out.println(desc);
@@ -217,8 +218,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				}
 //				Set<Description> equivalences = getEquivalences(source, false);
 
-				Set<Description> namedEquivalences = getEquivalences(source,
-						true);
+				Set<Description> namedEquivalences = getEquivalences(source, true);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -238,7 +238,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc, false);
+			Set<Description> equivalenceSet = getEquivalences(desc);
 			// I want to consider also the children of the equivalent nodes
 
 			Set<DefaultEdge> edges = graph.incomingEdgesOf(desc);
@@ -250,10 +250,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				if (equivalenceSet.contains(source)) {
 					continue;
 				}
-				Set<Description> equivalences = getEquivalences(source, false);
+				Set<Description> equivalences = getEquivalences(source);
 
-				Set<Description> namedEquivalences = getEquivalences(source,
-						true);
+				Set<Description> namedEquivalences = getEquivalences(source, true);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -284,8 +283,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 * */
-
 	@Override
+	public Set<Set<Description>> getDirectParents(Description desc) {
+		return getDirectParents(desc,false);
+	}
+
 	public Set<Set<Description>> getDirectParents(Description desc,
 			boolean named) {
 
@@ -302,12 +304,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				Description target = dag.getEdgeTarget(edge);
 
 				// get the child node and its equivalent nodes
-				Set<Description> equivalences = getEquivalences(target, false);
+				Set<Description> equivalences = getEquivalences(target);
 
 				if (named) { // if true I search only for the named nodes
 
-					Set<Description> namedEquivalences = getEquivalences(
-							target, true);
+					Set<Description> namedEquivalences = getEquivalences(target, true);
 					if (!namedEquivalences.isEmpty())
 						result.add(namedEquivalences);
 					else {
@@ -332,7 +333,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		{
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc, false);
+			Set<Description> equivalenceSet = getEquivalences(desc);
 
 			// I want to consider also the parents of the equivalent nodes
 			for (Description n : equivalenceSet) {
@@ -345,13 +346,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					if (equivalenceSet.contains(target)) {
 						continue;
 					}
-					Set<Description> equivalences = getEquivalences(target,
-							false);
+					Set<Description> equivalences = getEquivalences(target);
 
 					if (named) { // if true I search only for the named nodes
 
-						Set<Description> namedEquivalences = getEquivalences(
-								target, true);
+						Set<Description> namedEquivalences = getEquivalences(target, true);
 						if (!namedEquivalences.isEmpty())
 							result.add(namedEquivalences);
 						else {
@@ -385,7 +384,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc, false);
+			Set<Description> equivalenceSet = getEquivalences(desc);
 			// I want to consider also the parents of the equivalent nodes
 
 			Set<DefaultEdge> edges = dag.outgoingEdgesOf(desc);
@@ -398,8 +397,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					continue;
 				}
 
-				Set<Description> namedEquivalences = getEquivalences(target,
-						true);
+				Set<Description> namedEquivalences = getEquivalences(target, true);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -431,10 +429,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				if (equivalenceSet.contains(target)) {
 					continue;
 				}
-				Set<Description> equivalences = getEquivalences(target, false);
+				Set<Description> equivalences = getEquivalences(target);
 
-				Set<Description> namedEquivalences = getEquivalences(target,
-						true);
+				Set<Description> namedEquivalences = getEquivalences(target, true);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -466,6 +463,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
+	public Set<Set<Description>> getDescendants(Description desc) {
+		return getDescendants(desc, false);
+	}
+	
 	public Set<Set<Description>> getDescendants(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 		if (dag != null) {
@@ -566,8 +567,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	
+
 	@Override
+	public Set<Set<Description>> getAncestors(Description desc) {
+		return getAncestors(desc, false);
+	}
+	
 	public Set<Set<Description>> getAncestors(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
@@ -659,8 +664,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *            
 	 * @return we return a set of description with equivalent nodes 
 	 */
-	
+
 	@Override
+	public Set<Description> getEquivalences(Description desc) {
+		return getEquivalences(desc, false);
+	}
+	
 	public Set<Description> getEquivalences(Description desc, boolean named) {
 		// equivalences over a dag
 		if (dag != null) {
@@ -830,9 +839,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				Description existsNode = node;
 				Description existsInvNode = dag.getNode(existsRin);
 				Set<Set<Description>> childrenExist = new HashSet<Set<Description>>(
-						getDirectChildren(existsNode, false));
+						getDirectChildren(existsNode));
 				Set<Set<Description>> childrenExistInv = new HashSet<Set<Description>>(
-						getDirectChildren(existsInvNode, false));
+						getDirectChildren(existsInvNode));
 
 				for (Set<Description> children : childrenExist) {
 					// for(Description child:children){
@@ -860,9 +869,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				}
 
 				Set<Set<Description>> parentExist = new HashSet<Set<Description>>(
-						getDirectParents(existsNode, false));
+						getDirectParents(existsNode));
 				Set<Set<Description>> parentsExistInv = new HashSet<Set<Description>>(
-						getDirectParents(existsInvNode, false));
+						getDirectParents(existsInvNode));
 
 				for (Set<Description> parents : parentExist) {
 					Description firstParent = parents.iterator().next();
@@ -917,9 +926,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				Description existsNode = node;
 				Description existsInvNode = existsRin;
 				Set<Set<Description>> childrenExist = new HashSet<Set<Description>>(
-						getDirectChildren(existsNode, false));
+						getDirectChildren(existsNode));
 				Set<Set<Description>> childrenExistInv = new HashSet<Set<Description>>(
-						getDirectChildren(existsInvNode, false));
+						getDirectChildren(existsInvNode));
 
 				for (Set<Description> children : childrenExist) {
 					for (Description child : children) {
@@ -937,9 +946,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				}
 
 				Set<Set<Description>> parentExist = new HashSet<Set<Description>>(
-						getDirectParents(existsNode, false));
+						getDirectParents(existsNode));
 				Set<Set<Description>> parentsExistInv = new HashSet<Set<Description>>(
-						getDirectParents(existsInvNode, false));
+						getDirectParents(existsInvNode));
 
 				for (Set<Description> parents : parentExist) {
 					for (Description parent : parents) {
@@ -979,7 +988,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// while (edgeiterator.hasNext()) {
 		// Edge edge = edgeiterator.next();
 		for (Description node : dag.vertexSet()) {
-			for (Set<Description> descendants : getDescendants(node, false)) {
+			for (Set<Description> descendants : getDescendants(node)) {
 				Description firstDescendant = descendants.iterator().next();
 				Description descendant = dag.getReplacementFor(firstDescendant);
 				if (descendant == null)
@@ -1010,7 +1019,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 				}
 			}
-			for (Description equivalent : getEquivalences(node, false)) {
+			for (Description equivalent : getEquivalences(node)) {
 				if (!equivalent.equals(node)) {
 					Axiom ax = null;
 					if (node instanceof ClassDescription) {

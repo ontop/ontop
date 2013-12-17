@@ -392,7 +392,7 @@ public class TMappingProcessor implements Serializable {
 			}
 
 
-			for (Set<Description> descendants : reasoner.getDescendants(currentProperty, false)) {
+			for (Set<Description> descendants : reasoner.getDescendants(currentProperty)) {
 				for(Description descendant: descendants){
 
 				/*
@@ -434,7 +434,7 @@ public class TMappingProcessor implements Serializable {
 			}
 
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getEquivalences(currentProperty, false)) {
+			for (Description equiv : reasoner.getEquivalences(currentProperty)) {
 				if(equiv.equals(currentProperty))
 					continue;
 
@@ -492,7 +492,7 @@ public class TMappingProcessor implements Serializable {
 				mappingIndex.put(currentPredicate, currentNodeMappings);
 			}
 
-			for (Set<Description> descendants : reasoner.getDescendants(currentProperty, false)) {
+			for (Set<Description> descendants : reasoner.getDescendants(currentProperty)) {
 				for(Description descendant: descendants){
 				
 					
@@ -610,7 +610,7 @@ public class TMappingProcessor implements Serializable {
 
 
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getEquivalences(currentProperty, false)) {
+			for (Description equiv : reasoner.getEquivalences(currentProperty)) {
 
 				if (!(equiv instanceof OClass) || equiv.equals(currentProperty))
 					continue;
@@ -665,7 +665,7 @@ public class TMappingProcessor implements Serializable {
 	private List<Description> getLeafs(Collection<Description> nodes) {
 		LinkedList<Description> leafs = new LinkedList<Description>();
 		for (Description node : nodes) {
-			if (reasoner.getDirectChildren(node, false).isEmpty())
+			if (reasoner.getDirectChildren(node).isEmpty())
 
 				leafs.add(node);
 		}

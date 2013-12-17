@@ -147,8 +147,8 @@ public class S_TestTransitiveReduction extends TestCase {
 			
 				
 				//descendants of the vertex
-				Set<Set<Description>> descendants=reasonerd2.getDescendants(vertex, false);
-				Set<Set<Description>> children=reasonerd2.getDirectChildren(vertex, false);
+				Set<Set<Description>> descendants=reasonerd2.getDescendants(vertex);
+				Set<Set<Description>> children=reasonerd2.getDirectChildren(vertex);
 
 				log.info("descendants{} ", descendants);
 				log.info("children {} ", children);

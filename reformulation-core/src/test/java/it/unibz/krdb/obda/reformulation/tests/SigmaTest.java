@@ -51,13 +51,13 @@ public class SigmaTest extends TestCase {
         TBoxReasonerImpl sigma= new TBoxReasonerImpl(ontologySigma);
         DAGImpl res= sigma.getDAG();
 
-        assertTrue(sigma.getDescendants(ac, false).contains(sigma.getEquivalences(er, false)));
+        assertTrue(sigma.getDescendants(ac).contains(sigma.getEquivalences(er)));
 
-        assertEquals(1, sigma.getDescendants(ac, false).size());
+        assertEquals(1, sigma.getDescendants(ac).size());
 
-        assertEquals(0, sigma.getDescendants(er, false).size());
+        assertEquals(0, sigma.getDescendants(er).size());
 
-        assertEquals(0, sigma.getDescendants(cc, false).size());
+        assertEquals(0, sigma.getDescendants(cc).size());
 
     }
 }

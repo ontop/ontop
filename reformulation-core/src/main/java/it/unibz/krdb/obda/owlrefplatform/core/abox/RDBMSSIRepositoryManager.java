@@ -1758,7 +1758,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
 		Description roleNode = dag.getNode(role);
-		Set<Set<Description>> ancestors = reasonerDag.getAncestors(roleNode, false);
+		Set<Set<Description>> ancestors = reasonerDag.getAncestors(roleNode);
 
 		for (Set<Description> node : ancestors) {
 			for(Description desc: node)
@@ -1938,8 +1938,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * Collecting the top most allows us to avoid redundancy elimination
 			 */
 			Queue<Set<Description>> childrenQueue = new LinkedList<Set<Description>>();
-			childrenQueue.addAll(reasonerDag.getDirectChildren(node, false));
-			childrenQueue.add(reasonerDag.getEquivalences(node, false));
+			childrenQueue.addAll(reasonerDag.getDirectChildren(node));
+			childrenQueue.add(reasonerDag.getEquivalences(node));
 
 
 			while (!childrenQueue.isEmpty()) {
@@ -1954,7 +1954,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 						&& ((Property) child).isInverse()) {
 					roleInverseChildren.add(child);
 				} else {
-					childrenQueue.addAll((reasonerDag.getDirectChildren(child, false)));
+					childrenQueue.addAll((reasonerDag.getDirectChildren(child)));
 				}
 			}
 
@@ -1965,7 +1965,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				Property role = ((Property) inverseNode);
 				for (Description possibleRedundantNode : roleInverseChildren) {
 					Property possibleRedundantRole = ((Property) possibleRedundantNode);
-					if (reasonerDag.getDescendants(role, false)
+					if (reasonerDag.getDescendants(role)
 							.contains(possibleRedundantRole))
 						inverseRedundants.add(possibleRedundantNode);
 				}
@@ -2004,14 +2004,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			/* Collecting Exists R children */
 			//consider also the equivalent of the node
-			for (Description child : reasonerDag.getEquivalences(node, false)) {
+			for (Description child : reasonerDag.getEquivalences(node)) {
 				
 				if (child instanceof PropertySomeRestrictionImpl& !(child.equals(node))) {
 					existChildren.add(child);
 				}
 				
 			}
-			for (Set<Description> children : reasonerDag.getDescendants(node, false)) {
+			for (Set<Description> children : reasonerDag.getDescendants(node)) {
 				for (Description child:children){
 
 				if (child instanceof PropertySomeRestrictionImpl) {
@@ -2041,7 +2041,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 									existsDesc2.isInverse());
 					Description roleNode2 = dag.getNode(role2);
 
-					for(Set<Description> descendants: reasonerDag.getDescendants(roleNode, false)){
+					for(Set<Description> descendants: reasonerDag.getDescendants(roleNode)){
 						if(descendants.contains(roleNode2))
 						/*
 						 * The DAG implies that R ISA S, so we remove ER

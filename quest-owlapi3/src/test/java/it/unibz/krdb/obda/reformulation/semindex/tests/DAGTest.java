@@ -33,7 +33,7 @@ public class DAGTest extends TestCase {
 		Set<Description> classes= new HashSet<Description>();
 		for(Description node:((DAGImpl)res).vertexSet()){
 			if(node instanceof ClassDescription){
-				for(Description c: reasoner.getEquivalences(node, false) )
+				for(Description c: reasoner.getEquivalences(node) )
 				classes.add(c);
 			}
 		}
@@ -41,7 +41,7 @@ public class DAGTest extends TestCase {
 		Set<Description> roles= new HashSet<Description>();
 		for(Description node:((DAGImpl)res).vertexSet()){
 			if(node instanceof Property){
-				for(Description r: reasoner.getEquivalences(node, false) )
+				for(Description r: reasoner.getEquivalences(node) )
 					roles.add(r);
 				}
 			
