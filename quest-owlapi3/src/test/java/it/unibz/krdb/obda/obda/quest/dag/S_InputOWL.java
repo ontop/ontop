@@ -33,13 +33,9 @@ public class S_InputOWL {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology o = translator.translate(ontology);
 		
-		//generate Graph
-		TBoxGraph graph = TBoxGraph.getGraph(o);
-		
 		//generate DAG
-		DAGImpl dag= DAGBuilder.getDAG(graph);
+		DAGImpl dag= DAGBuilder.getDAG(o);
 		
-
 		return dag;
 	}
 	

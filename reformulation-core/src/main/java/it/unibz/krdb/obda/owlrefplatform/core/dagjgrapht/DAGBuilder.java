@@ -11,6 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -43,6 +44,18 @@ import org.jgrapht.graph.DefaultEdge;
  */
 
 public class DAGBuilder {
+
+	/**
+	 * *Construct a DAG starting from a given ontology 
+	 * 
+	 * @param onto an ontology 
+	 */
+	
+	public static DAGImpl getDAG(Ontology onto) {
+		TBoxGraph graph = TBoxGraph.getGraph(onto);
+		DAGImpl dag = DAGBuilder.getDAG(graph);
+		return dag;
+	}
 
 
 	/**

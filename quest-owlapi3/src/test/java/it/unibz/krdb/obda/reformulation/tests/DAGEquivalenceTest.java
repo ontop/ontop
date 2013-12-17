@@ -61,11 +61,8 @@ public class DAGEquivalenceTest extends TestCase {
 				testEquivalenceClasses));
 		Ontology onto = t.translate(owlonto);
 
-		// generate Graph
-		TBoxGraph graph = TBoxGraph.getGraph(onto);
-
 		// generate DAG
-		DAGImpl dag = DAGBuilder.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(onto);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
@@ -125,11 +122,9 @@ public class DAGEquivalenceTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
 				testEquivalenceRoles));
 		Ontology onto = t.translate(owlonto);
-		// generate Graph
-		TBoxGraph graph = TBoxGraph.getGraph(onto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilder.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(onto);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
@@ -194,11 +189,8 @@ public class DAGEquivalenceTest extends TestCase {
 				testEquivalenceRolesInverse));
 		Ontology onto = t.translate(owlonto);
 
-		// generate Graph
-		TBoxGraph graph = TBoxGraph.getGraph(onto);
-
 		// generate DAG
-		DAGImpl dag = DAGBuilder.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(onto);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
