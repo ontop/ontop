@@ -56,6 +56,11 @@ public class TBoxReasonerImplOnGraph implements TBoxReasoner {
 		property = graph.getRoles();
 	}
 
+	@Override
+	public DAGImpl getDAG() {
+		return dag;
+	}
+
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 
@@ -465,11 +470,6 @@ public class TBoxReasonerImplOnGraph implements TBoxReasoner {
 			}
 
 		return result;
-	}
-
-	@Override
-	public DAGImpl getDAG() {
-		return dag;
 	}
 
 	/***

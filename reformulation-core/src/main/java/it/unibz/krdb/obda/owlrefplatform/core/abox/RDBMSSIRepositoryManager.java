@@ -490,7 +490,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 
 		//create the indexes
-		engine= new SemanticIndexEngineImpl(reasonerIsa);
+		engine = new SemanticIndexEngineImpl(reasonerIsa);
 		
 
 

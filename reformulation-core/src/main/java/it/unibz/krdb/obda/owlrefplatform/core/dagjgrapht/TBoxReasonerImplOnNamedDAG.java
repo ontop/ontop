@@ -53,6 +53,11 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		property = dag.getRoles();
 	}
 	
+	@Override
+	public DAGImpl getDAG() {
+		return dag;
+	}
+	
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 
@@ -66,10 +71,6 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 */
 	@Override
 	public Set<Set<Description>> getDirectChildren(Description desc) {
-		return getDirectChildren(desc,true);
-	}
-	
-	private Set<Set<Description>> getDirectChildren(Description desc, boolean named) {
 		
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
@@ -85,20 +86,13 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			// get the child node and its equivalent nodes
 			Set<Description> equivalences = getEquivalences(source);
 
-			if (named) { // if true I search only for the named nodes
-
-				Set<Description> namedEquivalences = getEquivalences(source, true);
+				Set<Description> namedEquivalences = getEquivalences(source);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
 				else {
 					result.addAll(getNamedChildren(source));
 				}
-			}
-			else {
-				if (!equivalences.isEmpty())
-					result.add(equivalences);
-			}
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -130,7 +124,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 				}
 //				Set<Description> equivalences = getEquivalences(source, false);
 
-				Set<Description> namedEquivalences = getEquivalences(source, true);
+				Set<Description> namedEquivalences = getEquivalences(source);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -163,10 +157,6 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * */
 	@Override
 	public Set<Set<Description>> getDirectParents(Description desc) {
-		return getDirectParents(desc,true);
-	}
-
-	private Set<Set<Description>> getDirectParents(Description desc, boolean named) {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 		
@@ -181,19 +171,12 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			// get the child node and its equivalent nodes
 			Set<Description> equivalences = getEquivalences(target);
 
-			if (named) { // if true I search only for the named nodes
-
-				Set<Description> namedEquivalences = getEquivalences(target, true);
+				Set<Description> namedEquivalences = getEquivalences(target);
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
 				else {
 					result.addAll(getNamedParents(target));
 				}
-			}
-			else {
-				if (!equivalences.isEmpty())
-					result.add(equivalences);
-			}
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -221,7 +204,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 					continue;
 				}
 
-				Set<Description> namedEquivalences = getEquivalences(target, true);
+				Set<Description> namedEquivalences = getEquivalences(target);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -253,10 +236,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 */
 	@Override
 	public Set<Set<Description>> getDescendants(Description desc) {
-		return getDescendants(desc, true);
-	}
-	
-	private Set<Set<Description>> getDescendants(Description desc, boolean named) {
+
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		Description node = dag.getReplacementFor(desc);
@@ -273,7 +253,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		iterator.next();
 
 		Description startNode = desc;
-		Set<Description> sourcesStart = getEquivalences(startNode, named);
+		Set<Description> sourcesStart = getEquivalences(startNode);
 		Set<Description> sourcesStartnoNode = new HashSet<Description>();
 		for (Description equivalent : sourcesStart) {
 			if (equivalent.equals(startNode))
@@ -290,7 +270,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			Description child = iterator.next();
 
 			// add the node and its equivalent nodes
-			Set<Description> sources = getEquivalences(child, named);
+			Set<Description> sources = getEquivalences(child);
 
 			if (!sources.isEmpty())
 				result.add(sources);
@@ -315,10 +295,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	@Override
 	public Set<Set<Description>> getAncestors(Description desc) {
-		return getAncestors(desc, true);
-	}
-	
-	private Set<Set<Description>> getAncestors(Description desc, boolean named) {
+
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		Description node = dag.getReplacementFor(desc);
@@ -332,7 +309,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		iterator.next();
 
 		Description startNode = desc;
-		Set<Description> sourcesStart = getEquivalences(startNode, named);
+		Set<Description> sourcesStart = getEquivalences(startNode);
 		Set<Description> sourcesStartnoNode = new HashSet<Description>();
 		for (Description equivalent : sourcesStart) {
 			if (equivalent.equals(startNode))
@@ -349,7 +326,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			Description parent = iterator.next();
 
 			// add the node and its equivalent nodes
-			Set<Description> sources = getEquivalences(parent, named);
+			Set<Description> sources = getEquivalences(parent);
 
 			if (!sources.isEmpty())
 				result.add(sources);
@@ -373,18 +350,12 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	@Override
 	public Set<Description> getEquivalences(Description desc) {
-		return getEquivalences(desc, true);
-	}
-	
-	private Set<Description> getEquivalences(Description desc, boolean named) {
-		// equivalences over a dag
 
 		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
 
 		// if there are no equivalent nodes return the node or nothing
 		if (equivalents == null) {
 			
-			if (named) {
 				if (namedClasses.contains(desc) | property.contains(desc)) {
 					return Collections.unmodifiableSet(Collections.singleton(desc));
 				} 
@@ -392,21 +363,14 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 						// (desc) is not a named class or property
 					return Collections.emptySet();
 				}
-			}
-			return Collections.unmodifiableSet(Collections.singleton(desc));
 		}
 		
 		Set<Description> equivalences = new LinkedHashSet<Description>();
-		if (named) {
 			for (Description vertex : equivalents) {
 				if (namedClasses.contains(vertex) | property.contains(vertex)) {
 						equivalences.add(vertex);
 				}
 			}
-		} 
-		else {
-			equivalences = equivalents;
-		}
 		return Collections.unmodifiableSet(equivalences);
 	}
 	
@@ -422,137 +386,15 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	@Override
 	public Set<Set<Description>> getNodes() {
-		return getNodes(true);
-	}
 
-	private Set<Set<Description>> getNodes(boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		for (Description vertex : dag.vertexSet()) 
-				result.add(getEquivalences(vertex, named));
+				result.add(getEquivalences(vertex));
 
 		return result;
 	}
 
-	@Override
-	public DAGImpl getDAG() {
-		return dag;
-	}
-
-	
-	/***
-	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
-	 * relation of the original DAG gets extended to the reachability relation
-	 * of T and Sigma chains.
-	 * 
-	 * 
-	 */
-	
-	public void convertIntoChainDAG() {
-
-		// move everything to a graph that admits cycles
-			DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
-					new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
-
-			// clone all the vertex and edges from dag
-
-			for (Description v : dag.vertexSet()) {
-				modifiedGraph.addVertex(v);
-
-			}
-			for (DefaultEdge e : dag.edgeSet()) {
-				Description s = dag.getEdgeSource(e);
-				Description t = dag.getEdgeTarget(e);
-
-				modifiedGraph.addEdge(s, t, e);
-			}
-
-			Collection<Description> nodes = new HashSet<Description>(
-					dag.vertexSet());
-			OntologyFactory fac = OntologyFactoryImpl.getInstance();
-			HashSet<Description> processedNodes = new HashSet<Description>();
-			for (Description node : nodes) {
-				if (!(node instanceof PropertySomeRestriction)
-						|| processedNodes.contains(node)) {
-					continue;
-				}
-
-				/*
-				 * Adding a cycle between exists R and exists R- for each R.
-				 */
-
-				PropertySomeRestriction existsR = (PropertySomeRestriction) node;
-				PropertySomeRestriction existsRin = fac
-						.createPropertySomeRestriction(existsR.getPredicate(),
-								!existsR.isInverse());
-				Description existsNode = node;
-				Description existsInvNode = dag.getNode(existsRin);
-				Set<Set<Description>> childrenExist = new HashSet<Set<Description>>(
-						getDirectChildren(existsNode));
-				Set<Set<Description>> childrenExistInv = new HashSet<Set<Description>>(
-						getDirectChildren(existsInvNode));
-
-				for (Set<Description> children : childrenExist) {
-					// for(Description child:children){
-					// DAGOperations.addParentEdge(child, existsInvNode);
-					Description firstChild = children.iterator().next();
-					Description child = dag.getReplacementFor(firstChild);
-					if (child == null)
-						child = firstChild;
-					if (!child.equals(existsInvNode))
-						modifiedGraph.addEdge(child, existsInvNode);
-
-					// }
-				}
-				for (Set<Description> children : childrenExistInv) {
-					// for(Description child:children){
-					// DAGOperations.addParentEdge(child, existsNode);
-					Description firstChild = children.iterator().next();
-					Description child = dag.getReplacementFor(firstChild);
-					if (child == null)
-						child = firstChild;
-					if (!child.equals(existsNode))
-						modifiedGraph.addEdge(child, existsNode);
-
-					// }
-				}
-
-				Set<Set<Description>> parentExist = new HashSet<Set<Description>>(
-						getDirectParents(existsNode));
-				Set<Set<Description>> parentsExistInv = new HashSet<Set<Description>>(
-						getDirectParents(existsInvNode));
-
-				for (Set<Description> parents : parentExist) {
-					Description firstParent = parents.iterator().next();
-					Description parent = dag.getReplacementFor(firstParent);
-					if (parent == null)
-						parent = firstParent;
-					if (!parent.equals(existsInvNode))
-						modifiedGraph.addEdge(existsInvNode, parent);
-
-					// }
-				}
-
-				for (Set<Description> parents : parentsExistInv) {
-					Description firstParent = parents.iterator().next();
-					Description parent = dag.getReplacementFor(firstParent);
-					if (parent == null)
-						parent = firstParent;
-					if (!parent.equals(existsInvNode))
-						modifiedGraph.addEdge(existsNode, parent);
-
-					// }
-				}
-
-				processedNodes.add(existsInvNode);
-				processedNodes.add(existsNode);
-			}
-
-			/* Collapsing the cycles */
-			dag = DAGBuilder.getDAG(modifiedGraph,
-					dag.getMapEquivalences(), dag.getReplacements());
-
-	}
 
 	public Ontology getSigmaOntology() {
 		OntologyFactory descFactory = new OntologyFactoryImpl();
