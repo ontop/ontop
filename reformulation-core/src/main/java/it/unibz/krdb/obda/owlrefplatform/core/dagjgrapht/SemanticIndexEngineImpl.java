@@ -13,7 +13,6 @@ import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
@@ -88,8 +87,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	 * */
 	private void mergeRangeNode(Description d) {
 
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>(namedDag);
+		DirectedGraph<Description, DefaultEdge> reversed = namedDag.getReversedDag();
 		//successorList gives the direct children of the node without the equivalences
 		for (Description ch : Graphs.successorListOf(reversed, d)) {
 			if (ch != d) {
@@ -112,8 +110,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 
 	public SemanticIndexEngineImpl(TBoxReasoner reasoner) {
 
-
-		namedDag=(DAGImpl) reasoner.getDAG();
+		namedDag = reasoner.getDAG();
 		if (namedDag.isaNamedDAG())
 		{
 			construct();
@@ -126,8 +123,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		GraphIterator<Description, DefaultEdge> orderIterator;
 
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>(namedDag);
+		DirectedGraph<Description, DefaultEdge> reversed = namedDag.getReversedDag();
 
 		LinkedList<Description> roots = new LinkedList<Description>();
 		for (Description n : reversed.vertexSet()) {
@@ -154,8 +150,6 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		}
 		}
 		index_counter=1;
-		
-
 	}
 
 	@Override
@@ -163,13 +157,11 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		if(indexes.get(d)!=null)
 			return indexes.get(d);
 		return -1;
-
-
 	}
 	
+	@Override
 	public void setIndex(Description d, int index) {
 		indexes.put(d, index);
-
 	}
 
 	@Override
@@ -180,29 +172,21 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 			return ranges.get(node).getIntervals();
 		SemanticIndexRange range= new SemanticIndexRange(-1, -1);
 		return range.getIntervals();
-
 	}
 	
+	@Override
 	public void setRange(Description d, SemanticIndexRange range) {
 		ranges.put(d, range);
-
 	}
 
 	@Override
 	public Map<Description, Integer> getIndexes() {
 		return indexes;
-
-
 	}
 
 	@Override
 	public Map<Description, SemanticIndexRange> getIntervals() {
-
 		return ranges;
-
 	}
 	
-	
-
-
 }

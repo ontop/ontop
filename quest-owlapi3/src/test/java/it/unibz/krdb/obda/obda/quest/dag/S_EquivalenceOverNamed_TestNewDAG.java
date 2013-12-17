@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			DAGImpl dag2= S_InputOWL.createDAG(fileInput);
 			//transform in a named graph
-			DAGImpl namedDag2= NamedDAGBuilderImpl.getNamedDAG(dag2);
+			DAGImpl namedDag2= NamedDAGBuilder.getNamedDAG(dag2);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", namedDag2);

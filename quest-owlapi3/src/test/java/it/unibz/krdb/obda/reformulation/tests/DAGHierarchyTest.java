@@ -16,7 +16,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -60,7 +60,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -159,7 +159,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -277,7 +277,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -377,7 +377,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		

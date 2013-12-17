@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -67,7 +67,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -131,7 +131,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -200,7 +200,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 

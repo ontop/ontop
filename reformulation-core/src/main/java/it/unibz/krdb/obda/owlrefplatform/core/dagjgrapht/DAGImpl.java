@@ -16,7 +16,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /** 
@@ -27,11 +31,11 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  * 
  */
 
-public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
-
-	private static final long serialVersionUID = 4466539952784531284L;
+public class DAGImpl  {
 	
-	boolean dag; // true if DAG, false if NamedDAG
+	private boolean isDag; // true if DAG, false if NamedDAG
+	
+	private SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	private Set<OClass> classes = new LinkedHashSet<OClass> ();
 	private Set<Property> roles = new LinkedHashSet<Property> ();
@@ -42,13 +46,21 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	//map of the equivalent elements of an element
 	private Map<Description, Set<Description>> equivalencesMap; 
 
-	public DAGImpl(Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements, boolean dag) {
-		super(DefaultEdge.class);
+	public DAGImpl(DefaultDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements, boolean isDag) {
+		this.dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
+		Graphs.addGraph(this.dag, dag);
 		this.equivalencesMap = equivalencesMap;
 		this.replacements = replacements;
-		this.dag = dag;
+		this.isDag = isDag;
 	}
 
+	public DAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements, boolean isDag) {
+		this.dag = dag;
+		this.equivalencesMap = equivalencesMap;
+		this.replacements = replacements;
+		this.isDag = isDag;
+	}
+	
 	
 	/**
 	 * check if we are working with a DAG
@@ -57,7 +69,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	 */
 
 	public boolean isaDAG(){
-		return dag;
+		return isDag;
 	}
 
 	/**
@@ -66,7 +78,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	 * @return boolean <code> true</code> if named DAG and not DAG
 	 */
 	public boolean isaNamedDAG(){
-		return !dag; 
+		return !isDag; 
 	}
 	
 	/**
@@ -74,7 +86,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	 * @return  set of all property (not inverse) in the DAG
 	 */
 	public Set<Property> getRoles(){
-		for (Description r: this.vertexSet()){
+		for (Description r: dag.vertexSet()){
 			
 			//check in the equivalent nodes if there are properties
 			if(replacements.containsValue(r)){
@@ -104,7 +116,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	 */
 	
 	public Set<OClass> getClasses(){
-		for (Description c: this.vertexSet()) {			
+		for (Description c: dag.vertexSet()) {			
 			//check in the equivalent nodes if there are named classes
 			if (replacements.containsValue(c)) {
 				if (equivalencesMap.get(c)!=null) {
@@ -161,9 +173,71 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 		if(replacements.containsKey(node))
 			node = replacements.get(node);
 		else
-			if(!this.vertexSet().contains(node))
+			if(!dag.vertexSet().contains(node))
 				node = null;
 		return node;
 		
 	}
+
+	
+	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
+		return dag;
+	}
+
+	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
+		DirectedGraph<Description, DefaultEdge> reversed =
+				new EdgeReversedGraph<Description, DefaultEdge>(dag);
+		return reversed;
+	}
+
+
+	
+	public Set<Description> vertexSet() {
+		return dag.vertexSet();
+	}
+
+	public boolean containsVertex(Description desc) {
+		return dag.containsVertex(desc);
+	}
+
+	public Set<DefaultEdge> edgeSet() {
+		return dag.edgeSet();
+	}	
+
+	public Description getEdgeSource(DefaultEdge edge) {
+		return dag.getEdgeSource(edge);
+	}
+
+	public Description getEdgeTarget(DefaultEdge edge) {
+		return dag.getEdgeTarget(edge);
+	}
+
+	public Set<DefaultEdge> incomingEdgesOf(Description node) {
+		return dag.incomingEdgesOf(node);
+	}
+
+	public Set<DefaultEdge> outgoingEdgesOf(Description node) {
+		return dag.outgoingEdgesOf(node);
+	}
+
+
+
+	
+	// HACKY METHODS TO BE RID OF
+	public void addEdge(Description s, Description t) {
+		dag.addEdge(s, t);
+	}
+
+	public void addVertex(Description v) {
+		dag.addVertex(v);
+	}
+
+	public void removeAllEdges(Description s, Description t) {
+		dag.removeAllEdges(s, t);
+	}
+
+	public void removeVertex(Description v) {
+		dag.removeVertex(v);
+	}
+	
 }

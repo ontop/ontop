@@ -15,7 +15,7 @@ import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
@@ -24,7 +24,7 @@ import org.jgrapht.traverse.GraphIterator;
  * 
  * */
 
-public class NamedDAGBuilderImpl {
+public class NamedDAGBuilder {
 
 
 
@@ -38,7 +38,8 @@ public class NamedDAGBuilderImpl {
 		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();;
 
-		DAGImpl  namedDag = new DAGImpl(equivalencesMap, replacements, false);
+		SimpleDirectedGraph <Description,DefaultEdge>  namedDag = 
+				new SimpleDirectedGraph <Description,DefaultEdge>(DefaultEdge.class);
 
 		// clone all the vertexes and edges from dag
 
@@ -89,8 +90,7 @@ public class NamedDAGBuilderImpl {
 		 * represent the parents of the node
 		 */
 		
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>((DAGImpl)dag);
+		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
 
 		LinkedList<Description> roots = new LinkedList<Description>();
 		for (Description n : reversed.vertexSet()) {
@@ -137,7 +137,7 @@ public class NamedDAGBuilderImpl {
 
 					// I do a copy of the dag not to remove edges that I still need to
 					// consider in the loops
-					DAGImpl copyDAG = (DAGImpl) namedDag.clone();
+					SimpleDirectedGraph <Description,DefaultEdge> copyDAG = (SimpleDirectedGraph <Description,DefaultEdge>)namedDag.clone();
 					Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
 							copyDAG.outgoingEdgesOf(node));
 					for (DefaultEdge incEdge : incomingEdges) {
@@ -227,7 +227,7 @@ public class NamedDAGBuilderImpl {
 
 								// I do a copy of the dag not to remove edges that I still need to
 								// consider in the loops
-								DAGImpl copyDAG = (DAGImpl) namedDag.clone();
+								SimpleDirectedGraph <Description,DefaultEdge> copyDAG = (SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
 								Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
 										copyDAG.outgoingEdgesOf(posNode));
 								for (DefaultEdge incEdge : incomingEdges) {
@@ -261,7 +261,7 @@ public class NamedDAGBuilderImpl {
 
 				// I do a copy of the dag not to remove edges that I still need to
 				// consider in the loops
-				DAGImpl copyDAG = (DAGImpl) namedDag.clone();
+				SimpleDirectedGraph <Description,DefaultEdge> copyDAG = (SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
 				Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
 						copyDAG.outgoingEdgesOf(node));
 				for (DefaultEdge incEdge : incomingEdges) {
@@ -288,6 +288,7 @@ public class NamedDAGBuilderImpl {
 		
 		}
 		
-		return namedDag;
+		DAGImpl dagImpl = new DAGImpl(namedDag, equivalencesMap, replacements, false);
+		return dagImpl;
 	}
 }

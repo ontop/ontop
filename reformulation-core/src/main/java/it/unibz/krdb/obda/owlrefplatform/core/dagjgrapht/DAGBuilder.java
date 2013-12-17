@@ -62,9 +62,7 @@ public class DAGBuilder {
 		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
 		eliminateRedundantEdges(modifiedGraph);
 
-		// change the graph in a dag
-		DAGImpl dag = new DAGImpl(equivalencesMap, replacements, true);
-		Graphs.addGraph(dag, modifiedGraph);
+		DAGImpl dag = new DAGImpl(modifiedGraph, equivalencesMap, replacements, true);
 		return dag;
 	}
 
@@ -80,15 +78,10 @@ public class DAGBuilder {
 			Map<Description, Set<Description>> equivalencesMap,
 			Map<Description, Description> replacements) {
 
-		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = graph;
+		eliminateCycles(graph, equivalencesMap, replacements);
+		eliminateRedundantEdges(graph);
 
-		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
-		eliminateRedundantEdges(modifiedGraph);
-
-		DAGImpl dag = new DAGImpl(equivalencesMap, replacements, true);
-
-		// change the graph in a dag
-		Graphs.addGraph(dag, modifiedGraph);
+		DAGImpl dag = new DAGImpl(graph, equivalencesMap, replacements, true);
 		return dag;
 	}
 

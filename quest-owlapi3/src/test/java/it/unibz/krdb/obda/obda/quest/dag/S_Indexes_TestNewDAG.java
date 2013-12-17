@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -81,7 +81,7 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		DAGImpl namedDag= NamedDAGBuilderImpl.getNamedDAG(dag);
+		DAGImpl namedDag= NamedDAGBuilder.getNamedDAG(dag);
 
 		
 		log.debug("Input number {}", i+1 );
@@ -107,7 +107,7 @@ private boolean testIndexes( DAGImpl dag){
 	//check that the index of the node is contained in the intervals of the parent node
 	for(Description vertex: dag.vertexSet()){
 		int index= indexes.get(vertex);
-		for(Description parent: Graphs.successorListOf(dag, vertex)){
+		for(Description parent: Graphs.successorListOf(dag.getDag(), vertex)){
 			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
 			
 			if(!result)

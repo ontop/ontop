@@ -474,8 +474,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			if (node == null)
 				node = desc;
 			// reverse the dag
-			DirectedGraph<Description, DefaultEdge> reversed = new EdgeReversedGraph<Description, DefaultEdge>(
-					dag);
+			DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
 
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
 					reversed, node);
@@ -577,8 +576,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			if (node == null)
 				node = desc;
 
-			iterator = new BreadthFirstIterator<Description, DefaultEdge>(dag,
-					node);
+			iterator = new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
 
 			// I don't want to consider the current node
 			iterator.next();

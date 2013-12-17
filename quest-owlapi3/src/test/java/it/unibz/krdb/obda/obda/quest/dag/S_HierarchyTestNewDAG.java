@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-			DAGImpl dag2= (DAGImpl) NamedDAGBuilderImpl.getNamedDAG(dag1);
+			DAGImpl dag2= (DAGImpl) NamedDAGBuilder.getNamedDAG(dag1);
 			log.debug("Input number {}", i+1 );
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);

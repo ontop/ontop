@@ -43,7 +43,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -480,7 +480,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		
 		//build the namedDag (or pureIsa)
-		pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 		
 		reasonerIsa = new TBoxReasonerImpl(pureIsa);
 
