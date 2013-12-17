@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -68,8 +69,10 @@ public class TMappingProcessor implements Serializable {
 
 	public TMappingProcessor(Ontology tbox, boolean optmize) {
 		this.optimize = optmize;
-		reasoner= new TBoxReasonerImpl(tbox);
-		dag = reasoner.getDAG();
+		
+		dag = DAGBuilder.getDAG(tbox);
+		reasoner = new TBoxReasonerImpl(dag);
+
 		pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		aboxDependencies =  reasoner.getSigmaOntology();

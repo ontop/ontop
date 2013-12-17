@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -70,8 +71,8 @@ public class EquivalenceTBoxOptimizer {
 	 *
 	 */
 	public void optimize() {
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(tbox);
-		DAGImpl impliedDAG = reasoner.getDAG();
+		DAGImpl impliedDAG = DAGBuilder.getDAG(tbox);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(impliedDAG);
 
 //		try {
 //			GraphGenerator.dumpISA(impliedDAG, "input");

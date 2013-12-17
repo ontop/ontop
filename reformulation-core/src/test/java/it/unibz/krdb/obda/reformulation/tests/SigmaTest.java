@@ -19,9 +19,9 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -47,9 +47,9 @@ public class SigmaTest extends TestCase {
 
         
        
-        Ontology ontologySigma =  TBoxReasonerImpl.getSigma(ontology);
-        TBoxReasonerImpl sigma= new TBoxReasonerImpl(ontologySigma);
-        DAGImpl res= sigma.getDAG();
+        Ontology ontologySigma = TBoxReasonerImpl.getSigma(ontology);
+        DAGImpl res = DAGBuilder.getDAG(ontologySigma);
+        TBoxReasonerImpl sigma = new TBoxReasonerImpl(res);
 
         assertTrue(sigma.getDescendants(ac).contains(sigma.getEquivalences(er)));
 

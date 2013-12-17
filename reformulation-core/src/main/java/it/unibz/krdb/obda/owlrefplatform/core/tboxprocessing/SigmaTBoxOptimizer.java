@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -56,20 +57,21 @@ public class SigmaTBoxOptimizer {
 
 	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
 		this.originalOntology = isat;
-
 		this.originalSigma = sigmat;
-		reasonerIsa= new TBoxReasonerImpl(isat);
-		this.isa = reasonerIsa.getDAG();
-		TBoxReasonerImpl reasonerSigma= new TBoxReasonerImpl(sigmat);
-		this.sigma = reasonerSigma.getDAG();
-		reasonerIsaChain= new TBoxReasonerImpl(isat);
-		this.isaChain = reasonerIsaChain.getDAG();
-		reasonerIsaChain.getChainDAG();
 		
-		reasonerSigmaChain= new TBoxReasonerImpl(sigmat);
-		this.sigmaChain =  reasonerSigmaChain.getDAG();
-		reasonerSigmaChain.getChainDAG();
-
+		this.isa = DAGBuilder.getDAG(isat);
+		reasonerIsa = new TBoxReasonerImpl(this.isa);
+		
+		this.sigma = DAGBuilder.getDAG(sigmat);
+		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(this.sigma);
+		
+		this.isaChain = DAGBuilder.getDAG(isat);
+		reasonerIsaChain = new TBoxReasonerImpl(this.isaChain);
+		reasonerIsaChain.convertIntoChainDAG();
+		
+		this.sigmaChain =  DAGBuilder.getDAG(sigmat);
+		reasonerSigmaChain = new TBoxReasonerImpl(this.sigmaChain);
+		reasonerSigmaChain.convertIntoChainDAG();
 	}
 
 	public Ontology getReducedOntology() {

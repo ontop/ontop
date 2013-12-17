@@ -23,14 +23,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -42,28 +39,9 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private DAGImpl dag;
-	private TBoxGraph graph;
-	AbstractGraphIterator<Description, DefaultEdge> iterator;
 
 	private Set<OClass> namedClasses;
 	private Set<Property> property;
-
-	public TBoxReasonerImpl(Ontology ontology) {
-
-		// generate Graph
-		graph = TBoxGraph.getGraph(ontology);
-
-		// generate DAG
-		dag = DAGBuilder.getDAG(graph);
-
-//		if (named) // generate namedDAG // NEVER USED
-//		{
-//			dag = NamedDAGBuilderImpl.getNamedDAG(dag);
-//		}
-
-		namedClasses = dag.getClasses();
-		property = dag.getRoles();
-	}
 
 	/**
 	 * Constructor using a DAG or a named DAG
@@ -74,18 +52,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();
 	}
-
 	
-	/**
-	 * Constructor using a graph (cycles admitted)
-	 * @param dag DAG to be used for reasoning
-	 */
-//	public TBoxReasonerImpl(TBoxGraph graph) {
-//		this.graph = graph;
-//		namedClasses = graph.getClasses();
-//		property = graph.getRoles();
-//	}
-
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 
@@ -102,90 +69,35 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getDirectChildren(desc,false);
 	}
 	
-	public Set<Set<Description>> getDirectChildren(Description desc,
-			boolean named) {
+	public Set<Set<Description>> getDirectChildren(Description desc, boolean named) {
+		
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
-		if (dag != null) { // direct children over a dag
 
-			// take the representative node
-			Description node = dag.getReplacementFor(desc);
-			if (node == null)
-				node = desc;
+		// take the representative node
+		Description node = dag.getReplacementFor(desc);
+		if (node == null)
+			node = desc;
 
-			Set<DefaultEdge> edges = dag.incomingEdgesOf(node);
-			for (DefaultEdge edge : edges) {
-				Description source = dag.getEdgeSource(edge);
+		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {
+			
+			Description source = dag.getEdgeSource(edge);
 
-				// get the child node and its equivalent nodes
-				Set<Description> equivalences = getEquivalences(source);
+			// get the child node and its equivalent nodes
+			Set<Description> equivalences = getEquivalences(source);
 
-				if (named) { // if true I search only for the named nodes
+			if (named) { // if true I search only for the named nodes
 
-					Set<Description> namedEquivalences = getEquivalences(source, true);
+				Set<Description> namedEquivalences = getEquivalences(source, true);
 
-					if (!namedEquivalences.isEmpty())
-						result.add(namedEquivalences);
-					else {
-
-						result.addAll(getNamedChildren(source));
-						// for (Description equivalent: equivalences){
-						// //I search for the first named description
-						// if(!namedEquivalences.contains(equivalent) ){
-						//
-						// result.addAll( getNamedChildren(equivalent));
-						// }
-						// }
-					}
-				}
-
+				if (!namedEquivalences.isEmpty())
+					result.add(namedEquivalences);
 				else {
-
-					if (!equivalences.isEmpty())
-						result.add(equivalences);
+					result.addAll(getNamedChildren(source));
 				}
 			}
-
-		} else // direct children over a graph
-		{
-
-			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc);
-			// I want to consider also the children of the equivalent nodes
-			for (Description n : equivalenceSet) {
-				Set<DefaultEdge> edges = graph.incomingEdgesOf(n);
-				for (DefaultEdge edge : edges) {
-					Description source = graph.getEdgeSource(edge);
-
-					// I don't want to consider as children the equivalent node
-					// of the current node desc
-					if (equivalenceSet.contains(source)) {
-						continue;
-					}
-					Set<Description> equivalences = getEquivalences(source);
-
-					if (named) { // if true I search only for the named nodes
-
-						Set<Description> namedEquivalences = getEquivalences(source, true);
-
-						if (!namedEquivalences.isEmpty())
-							result.add(namedEquivalences);
-						else {
-							for (Description node : equivalences) {
-								// I search for the first named description
-								if (!namedEquivalences.contains(node)) {
-
-									result.addAll(getNamedChildren(node));
-								}
-							}
-						}
-					}
-
-					else {
-
-						if (!equivalences.isEmpty())
-							result.add(equivalences);
-					}
-				}
+			else {
+				if (!equivalences.isEmpty())
+					result.add(equivalences);
 			}
 		}
 
@@ -197,8 +109,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	private Set<Set<Description>> getNamedChildren(Description desc) {
-		if (dag != null) {
-			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+
+		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 			// get equivalences of the current node
 			Set<Description> equivalenceSet = getEquivalences(desc);
@@ -233,42 +145,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					// }
 				}
 			}
+			
 			return result;
-		} else {
-			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
-
-			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc);
-			// I want to consider also the children of the equivalent nodes
-
-			Set<DefaultEdge> edges = graph.incomingEdgesOf(desc);
-			for (DefaultEdge edge : edges) {
-				Description source = graph.getEdgeSource(edge);
-
-				// I don't want to consider as children the equivalent node of
-				// the current node desc
-				if (equivalenceSet.contains(source)) {
-					continue;
-				}
-				Set<Description> equivalences = getEquivalences(source);
-
-				Set<Description> namedEquivalences = getEquivalences(source, true);
-
-				if (!namedEquivalences.isEmpty())
-					result.add(namedEquivalences);
-				else {
-					for (Description node : equivalences) {
-						// I search for the first named description
-						if (!namedEquivalences.contains(node)) {
-
-							result.addAll(getNamedChildren(node));
-						}
-					}
-				}
-			}
-			return result;
-		}
-
 	}
 
 	/**
@@ -288,87 +166,33 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getDirectParents(desc,false);
 	}
 
-	public Set<Set<Description>> getDirectParents(Description desc,
-			boolean named) {
+	public Set<Set<Description>> getDirectParents(Description desc, boolean named) {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
-		if (dag != null) { // direct parents over a dag
+		
+		// take the representative node
+		Description node = dag.getReplacementFor(desc);
+		if (node == null)
+			node = desc;
 
-			// take the representative node
-			Description node = dag.getReplacementFor(desc);
-			if (node == null)
-				node = desc;
+		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
+			Description target = dag.getEdgeTarget(edge);
 
-			Set<DefaultEdge> edges = dag.outgoingEdgesOf(node);
-			for (DefaultEdge edge : edges) {
-				Description target = dag.getEdgeTarget(edge);
+			// get the child node and its equivalent nodes
+			Set<Description> equivalences = getEquivalences(target);
 
-				// get the child node and its equivalent nodes
-				Set<Description> equivalences = getEquivalences(target);
+			if (named) { // if true I search only for the named nodes
 
-				if (named) { // if true I search only for the named nodes
-
-					Set<Description> namedEquivalences = getEquivalences(target, true);
-					if (!namedEquivalences.isEmpty())
-						result.add(namedEquivalences);
-					else {
-						result.addAll(getNamedParents(target));
-						// for (Description equivalent: equivalences){
-						// //I search for the first named description
-						// if(!namedEquivalences.contains(equivalent) ){
-						//
-						// result.addAll(getNamedParents(equivalent));
-						// }
-						// }
-					}
-
-				} else {
-
-					if (!equivalences.isEmpty())
-						result.add(equivalences);
+				Set<Description> namedEquivalences = getEquivalences(target, true);
+				if (!namedEquivalences.isEmpty())
+					result.add(namedEquivalences);
+				else {
+					result.addAll(getNamedParents(target));
 				}
 			}
-
-		} else // direct parents over a graph
-		{
-
-			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc);
-
-			// I want to consider also the parents of the equivalent nodes
-			for (Description n : equivalenceSet) {
-				Set<DefaultEdge> edges = graph.outgoingEdgesOf(n);
-				for (DefaultEdge edge : edges) {
-					Description target = graph.getEdgeTarget(edge);
-
-					// I don't want to consider as parents the equivalent node
-					// of the current node desc
-					if (equivalenceSet.contains(target)) {
-						continue;
-					}
-					Set<Description> equivalences = getEquivalences(target);
-
-					if (named) { // if true I search only for the named nodes
-
-						Set<Description> namedEquivalences = getEquivalences(target, true);
-						if (!namedEquivalences.isEmpty())
-							result.add(namedEquivalences);
-						else {
-							for (Description node : equivalences) {
-								// I search for the first named description
-								if (!namedEquivalences.contains(node)) {
-
-									result.addAll(getNamedParents(node));
-								}
-							}
-						}
-
-					} else {
-
-						if (!equivalences.isEmpty())
-							result.add(equivalences);
-					}
-				}
+			else {
+				if (!equivalences.isEmpty())
+					result.add(equivalences);
 			}
 		}
 
@@ -380,8 +204,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 	
 	private Set<Set<Description>> getNamedParents(Description desc) {
-		if (dag != null) {
-			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+
+		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 			// get equivalences of the current node
 			Set<Description> equivalenceSet = getEquivalences(desc);
@@ -413,41 +237,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				}
 			}
 			return result;
-		} else {
-			LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
-
-			// get equivalences of the current node
-			Set<Description> equivalenceSet = getEquivalences(desc, false);
-			// I want to consider also the parents of the equivalent nodes
-
-			Set<DefaultEdge> edges = graph.outgoingEdgesOf(desc);
-			for (DefaultEdge edge : edges) {
-				Description target = graph.getEdgeTarget(edge);
-
-				// I don't want to consider as parents the equivalent node of
-				// the current node desc
-				if (equivalenceSet.contains(target)) {
-					continue;
-				}
-				Set<Description> equivalences = getEquivalences(target);
-
-				Set<Description> namedEquivalences = getEquivalences(target, true);
-
-				if (!namedEquivalences.isEmpty())
-					result.add(namedEquivalences);
-				else {
-					for (Description node : equivalences) {
-						// I search for the first named description
-						if (!namedEquivalences.contains(node)) {
-
-							result.addAll(getNamedParents(node));
-						}
-					}
-				}
-			}
-			return result;
-
-		}
 	}
 
 	/**
@@ -469,90 +258,46 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public Set<Set<Description>> getDescendants(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
-		if (dag != null) {
 
-			Description node = dag.getReplacementFor(desc);
-			if (node == null)
-				node = desc;
-			// reverse the dag
-			DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
+		Description node = dag.getReplacementFor(desc);
+		if (node == null)
+			node = desc;
+		
+		// reverse the dag
+		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
 
-			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
-					reversed, node);
+		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
+					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
 
-			// I don't want to consider the current node
-			iterator.next();
+		// I don't want to consider the current node
+		iterator.next();
 
-			Description startNode = desc;
-			Set<Description> sourcesStart = getEquivalences(startNode, named);
-			Set<Description> sourcesStartnoNode = new HashSet<Description>();
-			for (Description equivalent : sourcesStart) {
-				if (equivalent.equals(startNode))
-					continue;
-				sourcesStartnoNode.add(equivalent);
+		Description startNode = desc;
+		Set<Description> sourcesStart = getEquivalences(startNode, named);
+		Set<Description> sourcesStartnoNode = new HashSet<Description>();
+		for (Description equivalent : sourcesStart) {
+			if (equivalent.equals(startNode))
+				continue;
+			sourcesStartnoNode.add(equivalent);
 
-			}
+		}
 
-			if (!sourcesStartnoNode.isEmpty())
-				result.add(sourcesStartnoNode);
+		if (!sourcesStartnoNode.isEmpty())
+			result.add(sourcesStartnoNode);
 
-			// iterate over the subsequent nodes, they are all descendant of
-			// desc
-			while (iterator.hasNext()) {
-				Description child = iterator.next();
+		// iterate over the subsequent nodes, they are all descendant of desc
+		while (iterator.hasNext()) {
+			Description child = iterator.next();
 
-				// add the node and its equivalent nodes
+			// add the node and its equivalent nodes
+			Set<Description> sources = getEquivalences(child, named);
 
-				Set<Description> sources = getEquivalences(child, named);
-
-				if (!sources.isEmpty())
-					result.add(sources);
-
-			}
-		} else {
-			// reverse the graph
-			DirectedGraph<Description, DefaultEdge> reversed = new EdgeReversedGraph<Description, DefaultEdge>(
-					graph.getGraph());
-
-			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
-					reversed, desc);
-
-			// I don't want to consider the current node
-			Description current = iterator.next();
-
-			// get equivalences of the current node
-//			Set<Description> equivalenceSet = getEquivalences(current, named);
-			// iterate over the subsequent nodes, they are all descendant of
-			// desc
-			while (iterator.hasNext()) {
-				Description node = iterator.next();
-
-				// I don't want to add between the descendants a node equivalent
-				// to the starting node
-				if (node.equals(current))
-					continue;
-
-				if (named) { // add only the named classes and property
-					if (namedClasses.contains(node) | property.contains(node)) {
-						Set<Description> sources = new HashSet<Description>();
-						sources.add(node);
-
-						result.add(sources);
-					}
-				} else {
-					Set<Description> sources = new HashSet<Description>();
-					sources.add(node);
-
-					result.add(sources);
-				}
-
-			}
-
+			if (!sources.isEmpty())
+				result.add(sources);
 		}
 
 		// add each of them to the result
 		return Collections.unmodifiableSet(result);
-
 	}
 
 	/**
@@ -576,81 +321,42 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<Set<Description>> getAncestors(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
-		if (dag != null) {
-			Description node = dag.getReplacementFor(desc);
-			if (node == null)
-				node = desc;
+		Description node = dag.getReplacementFor(desc);
+		if (node == null)
+			node = desc;
 
-			iterator = new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
+		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
+				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
 
-			// I don't want to consider the current node
-			iterator.next();
+		// I don't want to consider the current node
+		iterator.next();
 
-			Description startNode = desc;
-			Set<Description> sourcesStart = getEquivalences(startNode, named);
-			Set<Description> sourcesStartnoNode = new HashSet<Description>();
-			for (Description equivalent : sourcesStart) {
-				if (equivalent.equals(startNode))
-					continue;
-				sourcesStartnoNode.add(equivalent);
+		Description startNode = desc;
+		Set<Description> sourcesStart = getEquivalences(startNode, named);
+		Set<Description> sourcesStartnoNode = new HashSet<Description>();
+		for (Description equivalent : sourcesStart) {
+			if (equivalent.equals(startNode))
+				continue;
+			sourcesStartnoNode.add(equivalent);
 
-			}
+		}
 
-			if (!sourcesStartnoNode.isEmpty())
-				result.add(sourcesStartnoNode);
+		if (!sourcesStartnoNode.isEmpty())
+			result.add(sourcesStartnoNode);
 
-			// iterate over the subsequent nodes, they are all ancestor of desc
-			while (iterator.hasNext()) {
-				Description parent = iterator.next();
+		// iterate over the subsequent nodes, they are all ancestor of desc
+		while (iterator.hasNext()) {
+			Description parent = iterator.next();
 
-				// add the node and its equivalent nodes
+			// add the node and its equivalent nodes
+			Set<Description> sources = getEquivalences(parent, named);
 
-				Set<Description> sources = getEquivalences(parent, named);
-
-				if (!sources.isEmpty())
-					result.add(sources);
-
-			}
-		} else {
-
-			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
-					graph.getGraph(), desc);
-
-			// I don't want to consider the current node
-			Description current = iterator.next();
-
-			// get equivalences of the current node
-//			Set<Description> equivalenceSet = getEquivalences(current, named);
-			// iterate over the subsequent nodes, they are all ancestor of desc
-			while (iterator.hasNext()) {
-				Description node = iterator.next();
-
-				// I don't want to add between the ancestors a node equivalent
-				// to the starting node
-				if (current.equals(node))
-					continue;
-
-				if (named) { // add only the named classes and property
-					if (namedClasses.contains(node) | property.contains(node)) {
-						Set<Description> sources = new HashSet<Description>();
-						sources.add(node);
-
-						result.add(sources);
-					}
-				} else {
-					Set<Description> sources = new HashSet<Description>();
-					sources.add(node);
-
-					result.add(sources);
-				}
-
-			}
-
+			if (!sources.isEmpty())
+				result.add(sources);
 		}
 
 		// add each of them to the result
 		return Collections.unmodifiableSet(result);
-
 	}
 
 	/**
@@ -672,85 +378,36 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public Set<Description> getEquivalences(Description desc, boolean named) {
 		// equivalences over a dag
-		if (dag != null) {
-			Set<Description> equivalents = dag.getMapEquivalences().get(desc);
 
-			// if there are no equivalent nodes return the node or nothing
-			if (equivalents == null) {
+		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
 
-				if (named) {
-					if (namedClasses.contains(desc) | property.contains(desc)) {
-						return Collections.unmodifiableSet(Collections
-								.singleton(desc));
-					} else { // return empty set if the node we are considering
-								// (desc) is not a named class or propertu
-						Set<Description> equivalences = Collections.emptySet();
-						return equivalences;
-					}
-				}
-				return Collections.unmodifiableSet(Collections.singleton(desc));
-			}
-			Set<Description> equivalences = new LinkedHashSet<Description>();
-			if (named) {
-				for (Description vertex : equivalents) {
-					if (namedClasses.contains(vertex)
-							| property.contains(vertex)) {
-						equivalences.add(vertex);
-					}
-				}
-			} else {
-				equivalences = equivalents;
-			}
-			return Collections.unmodifiableSet(equivalences);
-		}
-		// if equivalences over a graph
-		else {
-
-			// search for cycles
-			StrongConnectivityInspector<Description, DefaultEdge> inspector = 
-					new StrongConnectivityInspector<Description, DefaultEdge>(graph.getGraph());
-
-			// each set contains vertices which together form a strongly
-			// connected component within the given graph
-			List<Set<Description>> equivalenceSets = inspector
-					.stronglyConnectedSets();
-
-			Set<Description> equivalences = new LinkedHashSet<Description>();
-			// I want to find the equivalent node of desc
-			for (Set<Description> equivalenceSet : equivalenceSets) {
-				if (equivalenceSet.size() >= 2) {
-					if (equivalenceSet.contains(desc)) {
-						if (named) {
-							for (Description vertex : equivalenceSet) {
-								if (namedClasses.contains(vertex)
-										| property.contains(vertex)) {
-									equivalences.add(vertex);
-								}
-							}
-							return Collections.unmodifiableSet(equivalences);
-						}
-
-						return Collections.unmodifiableSet(equivalenceSet);
-					}
-
-				}
-
-			}
-
-			// if there are not equivalent node return the node or nothing
+		// if there are no equivalent nodes return the node or nothing
+		if (equivalents == null) {
+			
 			if (named) {
 				if (namedClasses.contains(desc) | property.contains(desc)) {
-					return Collections.unmodifiableSet(Collections
-							.singleton(desc));
-				} else { // return empty set if the node we are considering
-							// (desc) is not a named class or propertu
-					equivalences = Collections.emptySet();
-					return equivalences;
+					return Collections.unmodifiableSet(Collections.singleton(desc));
+				} 
+				else { // return empty set if the node we are considering
+						// (desc) is not a named class or propertu
+					return Collections.emptySet();
 				}
 			}
 			return Collections.unmodifiableSet(Collections.singleton(desc));
-
 		}
+		
+		Set<Description> equivalences = new LinkedHashSet<Description>();
+		if (named) {
+			for (Description vertex : equivalents) {
+				if (namedClasses.contains(vertex) | property.contains(vertex)) {
+						equivalences.add(vertex);
+				}
+			}
+		} 
+		else {
+			equivalences = equivalents;
+		}
+		return Collections.unmodifiableSet(equivalences);
 	}
 	
 	/**
@@ -765,18 +422,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public Set<Set<Description>> getNodes(boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
-		if (dag != null) {
-			for (Description vertex : dag.vertexSet()) {
+
+		for (Description vertex : dag.vertexSet()) 
 				result.add(getEquivalences(vertex, named));
-			}
-		} else {
-			for (Description vertex : graph.vertexSet()) {
-				result.add(getEquivalences(vertex, named));
-			}
-		}
 
 		return result;
-
 	}
 
 	@Override
@@ -793,9 +443,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * 
 	 */
 	
-	public void getChainDAG() {
-		if (dag != null) {
-			// move everything to a graph that admits cycles
+	public void convertIntoChainDAG() {
+
+		// move everything to a graph that admits cycles
 			DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
 					new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 
@@ -896,78 +546,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			/* Collapsing the cycles */
 			dag = DAGBuilder.getDAG(modifiedGraph,
 					dag.getMapEquivalences(), dag.getReplacements());
-
-		} else // if graph
-		{
-			Collection<Description> nodes = new HashSet<Description>(
-					graph.vertexSet());
-			OntologyFactory fac = OntologyFactoryImpl.getInstance();
-			HashSet<Description> processedNodes = new HashSet<Description>();
-			for (Description node : nodes) {
-				if (!(node instanceof PropertySomeRestriction)
-						|| processedNodes.contains(node)) {
-					continue;
-				}
-
-				/*
-				 * Adding a cycle between exists R and exists R- for each R.
-				 */
-
-				PropertySomeRestriction existsR = (PropertySomeRestriction) node;
-				PropertySomeRestriction existsRin = fac
-						.createPropertySomeRestriction(existsR.getPredicate(),
-								!existsR.isInverse());
-				Description existsNode = node;
-				Description existsInvNode = existsRin;
-				Set<Set<Description>> childrenExist = new HashSet<Set<Description>>(
-						getDirectChildren(existsNode));
-				Set<Set<Description>> childrenExistInv = new HashSet<Set<Description>>(
-						getDirectChildren(existsInvNode));
-
-				for (Set<Description> children : childrenExist) {
-					for (Description child : children) {
-						// DAGOperations.addParentEdge(child, existsInvNode);
-						graph.getGraph().addEdge(child, existsInvNode);
-
-					}
-				}
-				for (Set<Description> children : childrenExistInv) {
-					for (Description child : children) {
-						// DAGOperations.addParentEdge(child, existsNode);
-						graph.getGraph().addEdge(child, existsNode);
-
-					}
-				}
-
-				Set<Set<Description>> parentExist = new HashSet<Set<Description>>(
-						getDirectParents(existsNode));
-				Set<Set<Description>> parentsExistInv = new HashSet<Set<Description>>(
-						getDirectParents(existsInvNode));
-
-				for (Set<Description> parents : parentExist) {
-					for (Description parent : parents) {
-						// DAGOperations.addParentEdge(existsInvNode, parent);
-						graph.getGraph().addEdge(existsInvNode, parent);
-
-					}
-				}
-
-				for (Set<Description> parents : parentsExistInv) {
-					for (Description parent : parents) {
-						// DAGOperations.addParentEdge(existsNode,parent);
-						graph.getGraph().addEdge(existsNode, parent);
-
-					}
-				}
-
-				processedNodes.add(existsInvNode);
-				processedNodes.add(existsNode);
-			}
-
-			/* Collapsing the cycles */
-			dag = DAGBuilder.getDAG(graph);
-
-		}
 
 	}
 

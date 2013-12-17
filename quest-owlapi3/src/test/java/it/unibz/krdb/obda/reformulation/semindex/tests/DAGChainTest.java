@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -53,9 +54,9 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology);
-		DAGImpl res = reasoner.getDAG();
-		reasoner.getChainDAG();
+		DAGImpl res = DAGBuilder.getDAG(ontology);
+		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(res);
+		reasoner.convertIntoChainDAG();
 
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
@@ -113,7 +114,7 @@ public class DAGChainTest extends TestCase {
 //		}
 		
 		TBoxReasonerImplOnGraph reasoner= new TBoxReasonerImplOnGraph(res);
-		reasoner.getChainDAG();
+		reasoner.convertIntoChainDAG();
 
 		
 		
@@ -177,8 +178,9 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(ontology);
-		reasoner.getChainDAG();
+		DAGImpl dag221 = DAGBuilder.getDAG(ontology);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(dag221);
+		reasoner.convertIntoChainDAG();
 
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(er)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(ier)));

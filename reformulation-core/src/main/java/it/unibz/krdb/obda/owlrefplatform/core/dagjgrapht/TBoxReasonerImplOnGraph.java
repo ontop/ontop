@@ -480,7 +480,7 @@ public class TBoxReasonerImplOnGraph implements TBoxReasoner {
 	 * 
 	 */
 	
-	public void getChainDAG() {
+	public void convertIntoChainDAG() {
 
 		Collection<Description> nodes = new HashSet<Description>(
 					graph.vertexSet());

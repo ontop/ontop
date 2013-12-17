@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
@@ -473,10 +474,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Collecting relevant nodes for each role. For a Role P, the relevant
 		 * nodes are, the DAGNode for P, and the top most inverse children of P
 		 */
-
-		reasonerDag = new TBoxReasonerImpl(ontology);
 		
-		dag=reasonerDag.getDAG();
+		dag = DAGBuilder.getDAG(ontology);
+
+		reasonerDag = new TBoxReasonerImpl(dag);
+		
 		
 		
 		//build the namedDag (or pureIsa)
