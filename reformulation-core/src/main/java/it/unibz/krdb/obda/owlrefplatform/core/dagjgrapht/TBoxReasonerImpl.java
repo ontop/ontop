@@ -258,41 +258,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public Set<Description> getEquivalences(Description desc) {
-		return getEquivalences(desc, false);
-	}
-	
-	Set<Description> getEquivalences(Description desc, boolean named) {
-		// equivalences over a dag
 
 		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
 
 		// if there are no equivalent nodes return the node or nothing
-		if (equivalents == null) {
-			
-			if (named) {
-				if (namedClasses.contains(desc) | property.contains(desc)) {
-					return Collections.unmodifiableSet(Collections.singleton(desc));
-				} 
-				else { // return empty set if the node we are considering
-						// (desc) is not a named class or property
-					return Collections.emptySet();
-				}
-			}
+		if (equivalents == null) 
 			return Collections.unmodifiableSet(Collections.singleton(desc));
-		}
-		
-		Set<Description> equivalences = new LinkedHashSet<Description>();
-		if (named) {
-			for (Description vertex : equivalents) {
-				if (namedClasses.contains(vertex) | property.contains(vertex)) {
-						equivalences.add(vertex);
-				}
-			}
-		} 
-		else {
-			equivalences = equivalents;
-		}
-		return Collections.unmodifiableSet(equivalences);
+				
+		return Collections.unmodifiableSet(equivalents);
 	}
 	
 	/**

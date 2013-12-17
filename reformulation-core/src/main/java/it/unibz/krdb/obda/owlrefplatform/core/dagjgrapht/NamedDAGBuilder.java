@@ -6,9 +6,11 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -134,7 +136,8 @@ public class NamedDAGBuilder {
 
 					// I do a copy of the dag not to remove edges that I still need to
 					// consider in the loops
-					SimpleDirectedGraph <Description,DefaultEdge> copyDAG = (SimpleDirectedGraph <Description,DefaultEdge>)namedDag.clone();
+					SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
+								(SimpleDirectedGraph <Description,DefaultEdge>)namedDag.clone();
 					Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
 							copyDAG.outgoingEdgesOf(node));
 					for (DefaultEdge incEdge : incomingEdges) {
@@ -162,7 +165,7 @@ public class NamedDAGBuilder {
 				}
 			}
 			
-			Set<Description> namedEquivalences = reasoner.getEquivalences(node,true);
+			Set<Description> namedEquivalences = getNamedEquivalences(dag, node);
 			if(!namedEquivalences.isEmpty())
 			{
 				Description newReference= namedEquivalences.iterator().next();
@@ -223,7 +226,8 @@ public class NamedDAGBuilder {
 
 								// I do a copy of the dag not to remove edges that I still need to
 								// consider in the loops
-								SimpleDirectedGraph <Description,DefaultEdge> copyDAG = (SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
+								SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
+											(SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
 								Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
 										copyDAG.outgoingEdgesOf(posNode));
 								for (DefaultEdge incEdge : incomingEdges) {
@@ -257,7 +261,8 @@ public class NamedDAGBuilder {
 
 				// I do a copy of the dag not to remove edges that I still need to
 				// consider in the loops
-				SimpleDirectedGraph <Description,DefaultEdge> copyDAG = (SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
+				SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
+							(SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
 				Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
 						copyDAG.outgoingEdgesOf(node));
 				for (DefaultEdge incEdge : incomingEdges) {
@@ -287,4 +292,33 @@ public class NamedDAGBuilder {
 		DAGImpl dagImpl = new DAGImpl(namedDag, equivalencesMap, replacements, false);
 		return dagImpl;
 	}
+	
+	private static Set<Description> getNamedEquivalences(DAGImpl dag, Description desc) {
+
+		Set<OClass> namedClasses = dag.getClasses();
+		Set<Property> property = dag.getRoles();
+	
+		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
+
+		// if there are no equivalent nodes return the node or nothing
+		if (equivalents == null) {
+			
+				if (namedClasses.contains(desc) | property.contains(desc)) {
+					return Collections.unmodifiableSet(Collections.singleton(desc));
+				} 
+				else { // return empty set if the node we are considering
+						// (desc) is not a named class or property
+					return Collections.emptySet();
+				}
+		}
+		
+		Set<Description> equivalences = new LinkedHashSet<Description>();
+			for (Description vertex : equivalents) {
+				if (namedClasses.contains(vertex) | property.contains(vertex)) {
+						equivalences.add(vertex);
+				}
+			}
+		return Collections.unmodifiableSet(equivalences);
+	}
+	
 }
