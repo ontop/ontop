@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
@@ -50,7 +50,7 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
-		DAGImpl dag=(DAGImpl) DAGBuilderImpl.getDAG(graph);
+		DAGImpl dag=(DAGImpl) DAGBuilder.getDAG(graph);
 		System.out.println(dag);
 		System.out.println(dag.getReplacements());
 		System.out.println(dag.getMapEquivalences());

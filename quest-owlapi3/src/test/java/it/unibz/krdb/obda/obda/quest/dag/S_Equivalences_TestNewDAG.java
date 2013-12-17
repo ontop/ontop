@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -81,7 +81,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			TBoxGraph graph1= S_InputOWL.createGraph(fileInput);
 
 			//transform in a dag
-			DAGImpl dag2= DAGBuilderImpl.getDAG(graph1);
+			DAGImpl dag2= DAGBuilder.getDAG(graph1);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", dag2);

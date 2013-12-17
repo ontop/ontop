@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 
@@ -37,7 +37,7 @@ public class S_InputOWL {
 		TBoxGraph graph = TBoxGraph.getGraph(o);
 		
 		//generate DAG
-		DAGImpl dag= DAGBuilderImpl.getDAG(graph);
+		DAGImpl dag= DAGBuilder.getDAG(graph);
 		
 
 		return dag;

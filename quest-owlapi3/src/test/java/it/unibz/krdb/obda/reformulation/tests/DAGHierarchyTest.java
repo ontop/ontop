@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
@@ -58,7 +58,7 @@ public class DAGHierarchyTest extends TestCase {
 		TBoxGraph graph = TBoxGraph.getGraph(onto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilderImpl.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
@@ -157,7 +157,7 @@ public class DAGHierarchyTest extends TestCase {
 		TBoxGraph graph = TBoxGraph.getGraph(onto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilderImpl.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
@@ -275,7 +275,7 @@ public class DAGHierarchyTest extends TestCase {
 		TBoxGraph graph = TBoxGraph.getGraph(onto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilderImpl.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 
@@ -375,7 +375,7 @@ public class DAGHierarchyTest extends TestCase {
 		TBoxGraph graph = TBoxGraph.getGraph(onto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilderImpl.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(graph);
 		// generate named DAG
 		DAGImpl pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
 

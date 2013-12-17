@@ -42,7 +42,7 @@ import org.jgrapht.graph.DefaultEdge;
  * graph.
  */
 
-public class DAGBuilderImpl {
+public class DAGBuilder {
 
 
 	/**
@@ -103,12 +103,12 @@ public class DAGBuilderImpl {
 	 * Compute the set of all nodes with more than 2 outgoing edges (these have
 	 * candidate redundant edges.) <br>
 	 */
-	private static void eliminateRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph) {
+	private static void eliminateRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> graph) {
 		/* Compute the candidate nodes */
 		List<Description> candidates = new LinkedList<Description>();
-		Set<Description> vertexes = modifiedGraph.vertexSet();
+		Set<Description> vertexes = graph.vertexSet();
 		for (Description vertex : vertexes) {
-			int outdegree = modifiedGraph.outDegreeOf(vertex);
+			int outdegree = graph.outDegreeOf(vertex);
 			if (outdegree > 1) {
 				candidates.add(vertex);
 			}
@@ -123,8 +123,7 @@ public class DAGBuilderImpl {
 
 			Set<DefaultEdge> possiblyRedundantEdges = new LinkedHashSet<DefaultEdge>();
 
-			possiblyRedundantEdges.addAll(modifiedGraph
-					.outgoingEdgesOf(candidate));
+			possiblyRedundantEdges.addAll(graph.outgoingEdgesOf(candidate));
 
 			Set<DefaultEdge> eliminatedEdges = new HashSet<DefaultEdge>();
 
@@ -135,17 +134,16 @@ public class DAGBuilderImpl {
 			Map<Description, DefaultEdge> targetEdgeMap = new HashMap<Description, DefaultEdge>();
 
 			for (DefaultEdge edge : possiblyRedundantEdges) {
-				Description target = modifiedGraph.getEdgeTarget(edge);
+				Description target = graph.getEdgeTarget(edge);
 				targets.add(target);
 				targetEdgeMap.put(target, edge);
 			}
 
 			for (DefaultEdge currentPathEdge : possiblyRedundantEdges) {
-				Description currentTarget = modifiedGraph
-						.getEdgeTarget(currentPathEdge);
+				Description currentTarget = graph.getEdgeTarget(currentPathEdge);
 				if (eliminatedEdges.contains(currentPathEdge))
 					continue;
-				eliminateRedundantEdge(modifiedGraph, currentPathEdge, targets, targetEdgeMap,
+				eliminateRedundantEdge(graph, currentPathEdge, targets, targetEdgeMap,
 						currentTarget, eliminatedEdges);
 			}
 
@@ -153,29 +151,29 @@ public class DAGBuilderImpl {
 
 	}
 
-	private static void eliminateRedundantEdge(DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph, DefaultEdge safeEdge,
+	private static void eliminateRedundantEdge(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+			DefaultEdge safeEdge,
 			Set<Description> targets,
 			Map<Description, DefaultEdge> targetEdgeMap,
 			Description currentTarget, Set<DefaultEdge> eliminatedEdges) {
+		
 		if (targets.contains(currentTarget)) {
 			DefaultEdge edge = targetEdgeMap.get(currentTarget);
 			if (!edge.equals(safeEdge)) {
 				/*
 				 * This is a redundant edge, removing it.
 				 */
-				modifiedGraph.removeEdge(edge);
+				graph.removeEdge(edge);
 				eliminatedEdges.add(edge);
 			}
 		}
 
 		// continue traversing the dag up
-		Set<DefaultEdge> edgesInPath = modifiedGraph
-				.outgoingEdgesOf(currentTarget);
+		Set<DefaultEdge> edgesInPath = graph.outgoingEdgesOf(currentTarget);
 		for (DefaultEdge outEdge : edgesInPath) {
-			Description target = modifiedGraph.getEdgeTarget(outEdge);
+			Description target = graph.getEdgeTarget(outEdge);
 			// System.out.println("target "+target+" "+outEdge);
-			eliminateRedundantEdge(modifiedGraph, safeEdge, targets, targetEdgeMap, target,
-					eliminatedEdges);
+			eliminateRedundantEdge(graph, safeEdge, targets, targetEdgeMap, target, eliminatedEdges);
 		}
 
 	}
@@ -199,10 +197,11 @@ public class DAGBuilderImpl {
 	 * 
 	 */
 
-	private static void eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
+	private static void eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+			Map<Description, Set<Description>> equivalencesMap, 
+			Map<Description, Description> replacements) {
 
-		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(
-				modifiedGraph);
+		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(graph);
 
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
@@ -256,11 +255,9 @@ public class DAGBuilderImpl {
 				while (iterator.hasNext()) {
 					Description representative = iterator.next();
 
-					Set<DefaultEdge> edges = modifiedGraph
-							.outgoingEdgesOf(representative);
+					Set<DefaultEdge> edges = graph.outgoingEdgesOf(representative);
 					for (DefaultEdge outEdge : edges) {
-						Description target = modifiedGraph
-								.getEdgeTarget(outEdge);
+						Description target = graph.getEdgeTarget(outEdge);
 
 						if (processedNodes.contains(target))
 							if (((Property) target).isInverse()) {
@@ -274,9 +271,6 @@ public class DAGBuilderImpl {
 							chosenNodes.addAll(equivalenceSet.getMembers());
 							break;
 						}
-
-						//
-
 					}
 					if (ignore)
 						break;
@@ -335,7 +329,7 @@ public class DAGBuilderImpl {
 					eliminatedNode = notRepresentative;
 				replacements.put(eliminatedNode, representative);
 
-				removeNodeAndRedirectEdges(modifiedGraph, eliminatedNode, representative);
+				removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
 				processedNodes.add(eliminatedNode);
 
 				if (eliminatedNode instanceof Property) {
@@ -361,27 +355,23 @@ public class DAGBuilderImpl {
 					 */
 					
 					if (equivinverseNode.equals((Property) representative)) {
-						removeNodeAndRedirectEdges(modifiedGraph, equivDomainNode, domain);
+						removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
 						processedNodes.add(equivDomainNode);
 
 						replacements.put(equivDomainNode, domain);
 					}
 
 					else {
-						// this for inverse
-						removeNodeAndRedirectEdges(modifiedGraph, equivinverseNode, inverse);
+						removeNodeAndRedirectEdges(graph, equivinverseNode, inverse);
 						processedNodes.add(equivinverseNode);
-						// this for domain
-						removeNodeAndRedirectEdges(modifiedGraph, equivDomainNode, domain);
+						removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
 						processedNodes.add(equivDomainNode);
-						// this for range
-						removeNodeAndRedirectEdges(modifiedGraph, equivRangeNode, range);
+						removeNodeAndRedirectEdges(graph, equivRangeNode, range);
 						processedNodes.add(equivRangeNode);
 
 						replacements.put(equivinverseNode, inverse);
 						replacements.put(equivDomainNode, domain);
 						replacements.put(equivRangeNode, range);
-
 					}
 				}
 
@@ -478,7 +468,7 @@ public class DAGBuilderImpl {
 					if (eliminatedNode.equals(representative))
 						eliminatedNode = notRepresentative;
 
-					removeNodeAndRedirectEdges(modifiedGraph, eliminatedNode, representative);
+					removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
 
 					processedClassNodes.add(eliminatedNode);
 				}
@@ -540,7 +530,7 @@ public class DAGBuilderImpl {
 							continue;
 						}
 					
-					removeNodeAndRedirectEdges(modifiedGraph, eliminatedNode, representative);
+					removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
 
 					processedClassNodes.add(eliminatedNode);
 				}
@@ -549,7 +539,8 @@ public class DAGBuilderImpl {
 
 	}
 	
-	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, Description eliminatedNode, Description representative) {
+	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+			Description eliminatedNode, Description representative) {
 		/*
 		 * Re-pointing all links to and from the eliminated node to
 		 * the representative node
@@ -559,9 +550,7 @@ public class DAGBuilderImpl {
 				graph.incomingEdgesOf(eliminatedNode));
 
 		for (DefaultEdge incEdge : edges) {
-			Description source = graph
-					.getEdgeSource(incEdge);
-
+			Description source = graph.getEdgeSource(incEdge);
 			graph.removeAllEdges(source, eliminatedNode);
 
 			if (source.equals(representative))
@@ -574,9 +563,7 @@ public class DAGBuilderImpl {
 				graph.outgoingEdgesOf(eliminatedNode));
 
 		for (DefaultEdge outEdge : edges) {
-			Description target = graph
-					.getEdgeTarget(outEdge);
-
+			Description target = graph.getEdgeTarget(outEdge);
 			graph.removeAllEdges(eliminatedNode, target);
 
 			if (target.equals(representative))

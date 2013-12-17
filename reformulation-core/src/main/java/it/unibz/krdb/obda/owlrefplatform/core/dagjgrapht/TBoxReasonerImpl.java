@@ -54,7 +54,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		graph = TBoxGraph.getGraph(ontology);
 
 		// generate DAG
-		dag = DAGBuilderImpl.getDAG(graph);
+		dag = DAGBuilder.getDAG(graph);
 
 //		if (named) // generate namedDAG // NEVER USED
 //		{
@@ -893,7 +893,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			dag = DAGBuilderImpl.getDAG(modifiedGraph,
+			dag = DAGBuilder.getDAG(modifiedGraph,
 					dag.getMapEquivalences(), dag.getReplacements());
 
 		} else // if graph
@@ -964,7 +964,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			dag = DAGBuilderImpl.getDAG(graph);
+			dag = DAGBuilder.getDAG(graph);
 
 		}
 
