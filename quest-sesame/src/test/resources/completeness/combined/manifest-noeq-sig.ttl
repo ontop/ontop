@@ -49,8 +49,8 @@
       :test_505a
       :test_510
       :test_511
-      :test_512           
-      :test_513           
+      :test_512
+#      :test_513
       :test_87a
       :test_87b
       :test_87c
