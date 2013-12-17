@@ -50,9 +50,10 @@ public class SesameVirtualTest extends TestCase {
 		
 		try {
 			
-			String owlfile = "/Users/timi/Documents/hdd/Project/Test Cases/Book.owl";
-			String obdafile = "/Users/timi/Documents/hdd/Project/Test Cases/Books-mappings.ttl";
-				//"/home/timi/ontologies/helloworld/helloworld.owl";
+			
+			String owlfile = "src/test/resources/example/exampleBooks.owl";
+			String obdafile = "src/test/resources/example/exampleBooks.obda";
+
 			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
 	
 			repo.initialize();

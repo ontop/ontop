@@ -67,7 +67,7 @@ public class SesameClassicTest extends TestCase {
 	public void addFromFile() throws RDFParseException, RepositoryException, IOException
 	{
 		// /add data to repo
-		File file = new File("src/test/resources/onto2plus.owl");
+		File file = new File("src/test/resources/example/onto2plus.owl");
 
 		System.out.println("Add from file.");
 		con.add(file, baseURI, RDFFormat.RDFXML);

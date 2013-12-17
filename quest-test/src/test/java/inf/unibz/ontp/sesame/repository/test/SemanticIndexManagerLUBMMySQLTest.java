@@ -44,6 +44,7 @@ import java.sql.Connection;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -62,8 +63,8 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	String url = "jdbc:mysql://10.7.20.39/si_test?sessionVariables=sql_mode='ANSI'";
 	String username = "fish";
 	String password = "fish";
-
-	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/merge.owl";
+	
+	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl";
 
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
@@ -123,6 +124,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	}
 
 	public void test2RestoringAndLoading() throws Exception {
+		
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
@@ -186,4 +188,5 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 			log.debug("Elapsed time: {} ms", time);
 		}
 	}
+
 }
