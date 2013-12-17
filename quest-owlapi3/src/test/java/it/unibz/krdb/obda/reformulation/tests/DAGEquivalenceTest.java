@@ -14,9 +14,11 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxDAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraphBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
@@ -63,12 +65,18 @@ public class DAGEquivalenceTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 
 		// generate Graph
-		TBoxGraph graph = TBoxGraphBuilder.getGraph(onto);
+		GraphBuilder change = new GraphBuilderImpl(onto);
+
+		GraphImpl graph = (GraphImpl) change.getGraph();
 
 		// generate DAG
-		DAG dag = TBoxDAGBuilder.getDAG(graph);
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
 		// generate named DAG
-		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 
@@ -127,12 +135,18 @@ public class DAGEquivalenceTest extends TestCase {
 				testEquivalenceRoles));
 		Ontology onto = t.translate(owlonto);
 		// generate Graph
-		TBoxGraph graph = TBoxGraphBuilder.getGraph(onto);
+		GraphBuilder change = new GraphBuilderImpl(onto);
+
+		GraphImpl graph = (GraphImpl) change.getGraph();
 
 		// generate DAG
-		DAG dag = TBoxDAGBuilder.getDAG(graph);
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
 		// generate named DAG
-		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -196,12 +210,18 @@ public class DAGEquivalenceTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 
 		// generate Graph
-		TBoxGraph graph = (TBoxGraph) TBoxGraphBuilder.getGraph(onto);
+		GraphBuilder change = new GraphBuilderImpl(onto);
+
+		GraphImpl graph = (GraphImpl) change.getGraph();
 
 		// generate DAG
-		DAG dag = TBoxDAGBuilder.getDAG(graph);
+		DAGBuilder change2 = new DAGBuilderImpl(graph);
+
+		DAG dag = change2.getDAG();
 		// generate named DAG
-		DAG pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
+
+		DAG pureIsa = namedchange.getDAG();
 
 		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 

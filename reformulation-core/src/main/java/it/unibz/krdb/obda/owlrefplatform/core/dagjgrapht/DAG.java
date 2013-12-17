@@ -22,9 +22,13 @@ import java.util.Set;
  *  */
 public interface DAG {
 
+
+
+	//set the map of equivalences
+	public void setMapEquivalences(Map<Description, Set<Description>> equivalences);
+
 	//set the map of replacements
-	@Deprecated
-	public void setReplacements(Map<Description,Description> replacements);
+	public void setReplacements( Map<Description,Description> replacements);
 
 	//return the map set of equivalences
 	public Map<Description, Set<Description>> getMapEquivalences();
@@ -46,4 +50,11 @@ public interface DAG {
 
 	//return the node considering replacements
 	public Description getNode(Description node);
+
+
+
+
+
+
+
 }

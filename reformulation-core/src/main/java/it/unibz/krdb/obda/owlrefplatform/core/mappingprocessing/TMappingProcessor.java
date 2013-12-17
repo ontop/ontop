@@ -70,7 +70,8 @@ public class TMappingProcessor implements Serializable {
 		this.optimize = optmize;
 		reasoner= new TBoxReasonerImpl(tbox, false);
 		dag = reasoner.getDAG();
-		pureIsa = NamedDAGBuilderImpl.getNamedDAG(dag);
+		NamedDAGBuilderImpl namedDagConstructor= new NamedDAGBuilderImpl(dag);
+		pureIsa =namedDagConstructor.getDAG();
 
 
 

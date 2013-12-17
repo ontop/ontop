@@ -55,7 +55,9 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		DAGImpl namedDag = NamedDAGBuilderImpl.getNamedDAG(dag);
+		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
+		DAGImpl namedDag= transform.getDAG();
+
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", namedDag);

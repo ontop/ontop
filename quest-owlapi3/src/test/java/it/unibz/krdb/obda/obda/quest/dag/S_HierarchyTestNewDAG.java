@@ -61,7 +61,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-			DAGImpl dag2 = NamedDAGBuilderImpl.getNamedDAG(dag1);
+			NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag1);
+			DAGImpl dag2= (DAGImpl) transform.getDAG();
 			log.debug("Input number {}", i+1 );
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);

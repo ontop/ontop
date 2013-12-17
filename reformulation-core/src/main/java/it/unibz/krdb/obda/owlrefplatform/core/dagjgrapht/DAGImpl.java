@@ -17,8 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -32,38 +31,33 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> implements DAG {
 
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 4466539952784531284L;
 	
-	private boolean dag; /* true for DAG and false for NamedDAG */ 
+	boolean dag = false;
+	boolean namedDAG = false;
 	
 	private Set<OClass> classes = new LinkedHashSet<OClass> ();
 	private Set<Property> roles = new LinkedHashSet<Property> ();
 	
 	//map between an element  and the representative between the equivalent elements
-	private Map<Description, Description> replacements;
+	private Map<Description, Description> replacements = new HashMap<Description, Description>();
 	
 	//map of the equivalent elements of an element
-	private Map<Description, Set<Description>> equivalencesMap;
+	private Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
+
+	public DAGImpl(Class<? extends DefaultEdge> arg0) {
+		super(arg0);
+		dag=true;
+	}
+
+	public DAGImpl(EdgeFactory<Description,DefaultEdge> ef) {
+		super(ef);
+		dag=true;
+	}
 	
-	public DAGImpl() {
-		super(DefaultEdge.class);
-		replacements = new HashMap<Description, Description>();
-		equivalencesMap = new HashMap<Description, Set<Description>>();
-		dag = true;
-	}
-
-	public DAGImpl(DefaultDirectedGraph<Description,DefaultEdge> graph,
-			Map<Description, Set<Description>> equivalencesMap,
-			Map<Description, Description> replacements) {
-		
-		super(DefaultEdge.class);
-		
-		Graphs.addGraph(this, graph);
-		this.equivalencesMap = equivalencesMap;
-		this.replacements = replacements;
-		this.dag = true;
-	}
-
 	
 	/**
 	 * set we are working with a DAG and not a named DAG
@@ -71,8 +65,11 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * @param d boolean <code> true</code> if DAG
 	 */
 	
-	public void setIsaDAG(boolean d) {
-		dag = d;
+	public void setIsaDAG(boolean d){
+		
+		dag=d;
+		namedDAG=!d;
+
 	}
 
 	/**
@@ -81,8 +78,11 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * @param nd boolean <code> true</code> if named DAG
 	 */
 
-	public void setIsaNamedDAG(boolean nd) {
-		dag = !nd;
+	public void setIsaNamedDAG(boolean nd){
+		
+		namedDAG=nd;
+		dag=!nd;
+
 	}
 	/**
 	 * check if we are working with a DAG
@@ -90,8 +90,9 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * @return boolean <code> true</code> if DAG and not named DAG
 	 */
 
-	public boolean isaDAG() {
+	public boolean isaDAG(){
 		return dag;
+
 	}
 
 	/**
@@ -99,34 +100,41 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * 
 	 * @return boolean <code> true</code> if named DAG and not DAG
 	 */
-	public boolean isaNamedDAG() {
-		return !dag; //namedDAG;
+	public boolean isaNamedDAG(){
+		return namedDAG;
+
+
 	}
 	
 	/**
 	 * Allows to have all named roles in the DAG even the equivalent named roles
 	 * @return  set of all property (not inverse) in the DAG
 	 */
-	public Set<Property> getRoles() {
-		for (Description r: this.vertexSet()) {
+	public Set<Property> getRoles(){
+		for (Description r: this.vertexSet()){
+			
 			//check in the equivalent nodes if there are properties
-			if(replacements.containsValue(r)) {
-				if(equivalencesMap.get(r) != null) {
-					for (Description e: equivalencesMap.get(r))	{
-						if (e instanceof Property) {
-							if(!((Property) e).isInverse())
-								roles.add((Property)e);
+			if(replacements.containsValue(r)){
+			if(equivalencesMap.get(r)!=null){
+				for (Description e: equivalencesMap.get(r))	{
+					if (e instanceof Property){
+//						System.out.println("roles: "+ e +" "+ e.getClass());
+						if(!((Property) e).isInverse())
+						roles.add((Property)e);
 						
-						}
-					}
+				}
 				}
 			}
-			if (r instanceof Property) {
-				if(!((Property) r).isInverse())
-					roles.add((Property)r);
 			}
+			if (r instanceof Property){
+//				System.out.println("roles: "+ r +" "+ r.getClass());
+				if(!((Property) r).isInverse())
+				roles.add((Property)r);
+			}
+
 		}
 		return roles;
+
 	}
 
 	/**
@@ -134,26 +142,30 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * @return  set of all named concepts in the DAG
 	 */
 	
-	public Set<OClass> getClasses() {
-		
-		for (Description c: this.vertexSet()) {
+	public Set<OClass> getClasses(){
+		for (Description c: this.vertexSet()){
+			
 			//check in the equivalent nodes if there are named classes
-			if(replacements.containsValue(c)) {
-				if(equivalencesMap.get(c) != null) {
+			if(replacements.containsValue(c)){
+			if(equivalencesMap.get(c)!=null){
 				
-					for (Description e: equivalencesMap.get(c))	{
-						if (e instanceof OClass) {
-							classes.add((OClass)e);
-						}
-					}
+				for (Description e: equivalencesMap.get(c))	{
+					if (e instanceof OClass){
+//						System.out.println("classes: "+ e +" "+ e.getClass());
+						classes.add((OClass)e);
+				}
 				}
 			}
+			}
 			
-			if (c instanceof OClass) {
+			if (c instanceof OClass){
+//				System.out.println("classes: "+ c+ " "+ c.getClass());
 				classes.add((OClass)c);
 			}
+
 		}
 		return classes;
+
 	}
 
 
@@ -162,7 +174,8 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
-	public Map<Description, Set<Description>> getMapEquivalences() {	
+	public Map<Description, Set<Description>> getMapEquivalences() {
+		
 		return equivalencesMap;
 	}
 
@@ -175,13 +188,24 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 		return replacements;
 	}
 
+	@Override
+	/**
+	 * Allows to set the map with equivalences
+	 * @param  equivalences a map between the node and the set of all its equivalent nodes
+	 */
+	public void setMapEquivalences(Map<Description, Set<Description>> equivalences) {
+		this.equivalencesMap= equivalences;
+		
+	}
+	
 	/**
 	 * Allows to set the map with replacements
 	 * @param  replacements a map between the node and its representative node
 	 */
 	@Override
 	public void setReplacements(Map<Description, Description> replacements) {
-		this.replacements = replacements;
+		this.replacements=replacements;
+		
 	}
 	
 	@Override
@@ -190,12 +214,21 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> imple
 	 * @param  node a node that we want to know if it is part of the DAG
 	 * @return the node, or its representative, or null if it is not present in the DAG
 	 */
-	public Description getNode(Description node) {
+	public Description getNode(Description node){
 		if(replacements.containsKey(node))
-			node = replacements.get(node);
+			node= replacements.get(node);
 		else
-			if(!this.vertexSet().contains(node))
-				node = null;
+		if(!this.vertexSet().contains(node))
+			node=null;
 		return node;
+		
 	}
+
+	
+
+
+
+
+
+
 }

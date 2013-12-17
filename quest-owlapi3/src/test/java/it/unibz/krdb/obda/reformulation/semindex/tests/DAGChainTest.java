@@ -19,8 +19,8 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraphBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Set;
@@ -104,7 +104,9 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
 		
 		//generate Graph
-		TBoxGraph res = TBoxGraphBuilder.getGraph(ontology);
+		GraphBuilderImpl change= new GraphBuilderImpl(ontology);
+		
+		GraphImpl res = (GraphImpl) change.getGraph();
 
 		
 		
