@@ -51,8 +51,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class InconsistencyCheckingVirtualTest {
 
-	private String owlfile = "src/test/resources/BooksNoAxioms.owl";
-	private String obdafile = "src/main/resources/example/exampleBooks.obda";
+	private String owlfile = "src/test/resources/example/BooksNoAxioms.owl";
+	private String obdafile = "src/test/resources/example/exampleBooks.obda";
 	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;

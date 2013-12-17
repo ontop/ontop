@@ -1,4 +1,4 @@
-package sesameWrapper.example;
+package inf.unibz.ontop.sesame.tests.general;
 
 /*
  * #%L
