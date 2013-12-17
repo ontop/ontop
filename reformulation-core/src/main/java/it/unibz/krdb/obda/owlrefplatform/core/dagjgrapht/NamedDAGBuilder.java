@@ -63,24 +63,21 @@ public class NamedDAGBuilder {
 		// clone the equivalences and replacements map
 		Map<Description, Set<Description>> equivalencesDag = dag
 				.getMapEquivalences();
-		Map<Description, Description> replacementsDag = dag.getReplacements();
+		
 		for (Description vertex : equivalencesDag.keySet()) {
 			
-
 				HashSet<Description> equivalents = new HashSet<Description>();
 				for (Description equivalent : equivalencesDag.get(vertex)) {
 					equivalents.add(equivalent);
 				}
 				equivalencesMap.put(vertex, new HashSet<Description>(
 						equivalents));
-			
-
 		}
-		for (Description eliminateNode : replacementsDag.keySet()) {
+		
+		for (Description eliminateNode : dag.getReplacementKeys()) {
 
-			Description referent = replacementsDag.get(eliminateNode);
+			Description referent = dag.getReplacementFor(eliminateNode);
 			replacements.put(eliminateNode, referent);
-
 		}
 
 		GraphIterator<Description, DefaultEdge> orderIterator;

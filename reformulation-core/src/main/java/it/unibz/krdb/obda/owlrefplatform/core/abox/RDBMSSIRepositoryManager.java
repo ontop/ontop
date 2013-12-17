@@ -496,12 +496,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		/***
 		 * Copying the equivalences that might bet lost from the translation
 		 */
-		Map<Description,Description> isaEquivalences =pureIsa.getReplacements();
-		for (Description d : dag.getReplacements().keySet()) {
-			isaEquivalences.put(d, dag.getReplacements().get(d));
-			equivalentIndex.put(d, dag.getReplacements().get(d));
+		{
+			// Map<Description,Description> isaEquivalences = pureIsa.getReplacements();
+			for (Description d : dag.getReplacementKeys()) {
+				pureIsa.setReplacementFor(d, dag.getReplacementFor(d));
+				equivalentIndex.put(d, dag.getReplacementFor(d));
+			}
+			//pureIsa.setReplacements(isaEquivalences);  // commented out by Roman -- no need in resetting the variable
 		}
-		pureIsa.setReplacements(isaEquivalences);
 		
 		/*
 		 * Creating cache of semantic indexes and ranges
@@ -766,9 +768,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					if (dag.getReplacements().containsKey(propDesc)) {
-						Property desc = (Property) dag.getReplacements()
-								.get(propDesc);
+					if (dag.hasReplacementFor(propDesc)) {
+						Property desc = (Property) dag.getReplacementFor(propDesc);
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -1317,8 +1318,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		if (dag.getReplacements().containsKey(property)) {
-			Property desc = (Property) dag.getReplacements().get(property);
+		if (dag.hasReplacementFor(property)) {
+			Property desc = (Property) dag.getReplacementFor(property);
 			if (desc.isInverse()) {
 				return true;
 			}
@@ -1944,7 +1945,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			while (!childrenQueue.isEmpty()) {
 				Set<Description> children = childrenQueue.poll();
 				Description firstChild=children.iterator().next();
-				Description child=dag.getReplacements().get(firstChild);
+				Description child=dag.getReplacementFor(firstChild);
 				if(child==null)
 					child=firstChild;
 				if(child.equals(node))
@@ -1989,9 +1990,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
 		for (Description node : dag.getClasses()) {
-			if(dag.getReplacements().containsKey(node))
-
-
+			if(dag.hasReplacementFor(node))
 				continue;
 
 			classNodesMaps.add(node);

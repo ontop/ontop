@@ -104,7 +104,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		if (dag != null) { // direct children over a dag
 
 			// take the representative node
-			Description node = dag.getReplacements().get(desc);
+			Description node = dag.getReplacementFor(desc);
 			if (node == null)
 				node = desc;
 
@@ -293,7 +293,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		if (dag != null) { // direct parents over a dag
 
 			// take the representative node
-			Description node = dag.getReplacements().get(desc);
+			Description node = dag.getReplacementFor(desc);
 			if (node == null)
 				node = desc;
 
@@ -470,7 +470,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 		if (dag != null) {
 
-			Description node = dag.getReplacements().get(desc);
+			Description node = dag.getReplacementFor(desc);
 			if (node == null)
 				node = desc;
 			// reverse the dag
@@ -572,7 +572,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		if (dag != null) {
-			Description node = dag.getReplacements().get(desc);
+			Description node = dag.getReplacementFor(desc);
 			if (node == null)
 				node = desc;
 
@@ -838,7 +838,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					// for(Description child:children){
 					// DAGOperations.addParentEdge(child, existsInvNode);
 					Description firstChild = children.iterator().next();
-					Description child = dag.getReplacements().get(firstChild);
+					Description child = dag.getReplacementFor(firstChild);
 					if (child == null)
 						child = firstChild;
 					if (!child.equals(existsInvNode))
@@ -850,7 +850,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					// for(Description child:children){
 					// DAGOperations.addParentEdge(child, existsNode);
 					Description firstChild = children.iterator().next();
-					Description child = dag.getReplacements().get(firstChild);
+					Description child = dag.getReplacementFor(firstChild);
 					if (child == null)
 						child = firstChild;
 					if (!child.equals(existsNode))
@@ -866,7 +866,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 				for (Set<Description> parents : parentExist) {
 					Description firstParent = parents.iterator().next();
-					Description parent = dag.getReplacements().get(firstParent);
+					Description parent = dag.getReplacementFor(firstParent);
 					if (parent == null)
 						parent = firstParent;
 					if (!parent.equals(existsInvNode))
@@ -877,7 +877,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 				for (Set<Description> parents : parentsExistInv) {
 					Description firstParent = parents.iterator().next();
-					Description parent = dag.getReplacements().get(firstParent);
+					Description parent = dag.getReplacementFor(firstParent);
 					if (parent == null)
 						parent = firstParent;
 					if (!parent.equals(existsInvNode))
@@ -981,8 +981,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		for (Description node : dag.vertexSet()) {
 			for (Set<Description> descendants : getDescendants(node, false)) {
 				Description firstDescendant = descendants.iterator().next();
-				Description descendant = dag.getReplacements().get(
-						firstDescendant);
+				Description descendant = dag.getReplacementFor(firstDescendant);
 				if (descendant == null)
 					descendant = firstDescendant;
 //				Axiom axiom = null;

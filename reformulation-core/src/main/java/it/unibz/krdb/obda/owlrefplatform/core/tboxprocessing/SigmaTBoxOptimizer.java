@@ -87,7 +87,7 @@ public class SigmaTBoxOptimizer {
 		for(Description node:isa.vertexSet()){
 			for (Set<Description> descendants: reasonerIsa.getDescendants(node, false)){
 					Description firstDescendant=descendants.iterator().next();
-					Description descendant= isa.getReplacements().get(firstDescendant);
+					Description descendant= isa.getReplacementFor(firstDescendant);
 					if(descendant==null)
 						descendant=firstDescendant;
 					Axiom axiom = null;
@@ -201,18 +201,18 @@ public class SigmaTBoxOptimizer {
 		Set<Set<Description>> scChildren= reasonerSigmaChain.getDescendants(sc, false);
 		Set<Set<Description>> tcChildren= reasonerIsaChain.getDescendants(tc,false);
 		
-		if (sigmaChain.getReplacements().get(parent) != null){
-			sp = sigmaChain.getNode(sigmaChain.getReplacements().get(parent));
+		if (sigmaChain.getReplacementFor(parent) != null){
+			sp = sigmaChain.getNode(sigmaChain.getReplacementFor(parent));
 			spChildren= reasonerSigmaChain.getDirectChildren(sp, false);
 		}
-		if (sigmaChain.getReplacements().get(child) != null){
-			sc = sigmaChain.getNode(sigmaChain.getReplacements().get(child));
+		if (sigmaChain.getReplacementFor(child) != null){
+			sc = sigmaChain.getNode(sigmaChain.getReplacementFor(child));
 			scEquivalent=reasonerSigmaChain.getEquivalences(sc, false);
 			scChildren=reasonerSigmaChain.getDescendants(sc, false); 
 			
 		}
-		if (isaChain.getReplacements().get(child) != null){
-			tc = sigmaChain.getNode(isaChain.getReplacements().get(child));
+		if (isaChain.getReplacementFor(child) != null){
+			tc = sigmaChain.getNode(isaChain.getReplacementFor(child));
 			reasonerSigmaChain.getDescendants(tc,false);
 		}
 

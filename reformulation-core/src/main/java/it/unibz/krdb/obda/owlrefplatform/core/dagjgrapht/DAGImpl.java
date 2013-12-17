@@ -148,22 +148,44 @@ public class DAGImpl  {
 		return equivalencesMap;
 	}
 
+	public Description getReplacementFor(Description v) {
+		return replacements.get(v);
+	}
+
+	public boolean hasReplacementFor(Description v) {
+		return replacements.containsKey(v);
+	}
+
+	public Set<Description> getReplacementKeys() {
+		return replacements.keySet();
+	}
+	
+	
 	/**
 	 * Allows to have the map with replacements
 	 * @return  a map between the node and its representative node
 	 */
+	@Deprecated
 	public Map<Description, Description> getReplacements() {
 		return replacements;
 	}
 
 	/**
 	 * Allows to set the map with replacements
-	 * @param  replacements a map between the node and its representative node
 	 */
-	public void setReplacements(Map<Description, Description> replacements) {
-		this.replacements = replacements;	
+	@Deprecated
+	public void setReplacementFor(Description key, Description value) {
+		replacements.put(key, value);	
 	}
-	
+
+	/**
+	 * Allows to set the map with replacements
+	 */
+	@Deprecated
+	public void removeReplacementFor(Description key) {
+		replacements.remove(key);	
+	}
+
 	/**
 	 * Allows to obtain the node present in the DAG. 
 	 * @param  node a node that we want to know if it is part of the DAG

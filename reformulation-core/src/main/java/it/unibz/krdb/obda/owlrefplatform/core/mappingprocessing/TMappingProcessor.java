@@ -378,9 +378,7 @@ public class TMappingProcessor implements Serializable {
 		for (Property currentProperty : dag.getRoles()) {
 			/* setting up the queue for the next iteration */
 
-			if (dag.getReplacements().containsKey(currentProperty)) {
-
-
+			if (dag.hasReplacementFor(currentProperty)) {
 				/* we only create mappings for named properties and not considering equivalences*/
 				continue;
 			}
@@ -480,9 +478,7 @@ public class TMappingProcessor implements Serializable {
 
 		for (OClass currentProperty : dag.getClasses()) {
 
-			if(dag.getReplacements().containsKey(currentProperty)) {//don't consider the equivalences
-
-
+			if(dag.hasReplacementFor(currentProperty)) {//don't consider the equivalences
 				continue;
 			}
 
