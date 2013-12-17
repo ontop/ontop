@@ -69,7 +69,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getDirectChildren(desc,false);
 	}
 	
-	public Set<Set<Description>> getDirectChildren(Description desc, boolean named) {
+	private Set<Set<Description>> getDirectChildren(Description desc, boolean named) {
 		
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
@@ -166,7 +166,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getDirectParents(desc,false);
 	}
 
-	public Set<Set<Description>> getDirectParents(Description desc, boolean named) {
+	private Set<Set<Description>> getDirectParents(Description desc, boolean named) {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 		
@@ -256,7 +256,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getDescendants(desc, false);
 	}
 	
-	public Set<Set<Description>> getDescendants(Description desc, boolean named) {
+	private Set<Set<Description>> getDescendants(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		Description node = dag.getReplacementFor(desc);
@@ -318,7 +318,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getAncestors(desc, false);
 	}
 	
-	public Set<Set<Description>> getAncestors(Description desc, boolean named) {
+	private Set<Set<Description>> getAncestors(Description desc, boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		Description node = dag.getReplacementFor(desc);
@@ -376,7 +376,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getEquivalences(desc, false);
 	}
 	
-	public Set<Description> getEquivalences(Description desc, boolean named) {
+	Set<Description> getEquivalences(Description desc, boolean named) {
 		// equivalences over a dag
 
 		Set<Description> equivalents = dag.getMapEquivalences().get(desc);
@@ -389,7 +389,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					return Collections.unmodifiableSet(Collections.singleton(desc));
 				} 
 				else { // return empty set if the node we are considering
-						// (desc) is not a named class or propertu
+						// (desc) is not a named class or property
 					return Collections.emptySet();
 				}
 			}
@@ -420,7 +420,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	public Set<Set<Description>> getNodes(boolean named) {
+	@Override
+	public Set<Set<Description>> getNodes() {
+		return getNodes(false);
+	}
+	
+	private Set<Set<Description>> getNodes(boolean named) {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		for (Description vertex : dag.vertexSet()) 
@@ -664,4 +669,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return sigma;
 	}
 
+	public static TBoxReasoner getReasoner(DAGImpl dag, boolean named) {
+		return (named) ? new TBoxReasonerImplOnNamedDAG(dag) : new TBoxReasonerImpl(dag);
+	}
 }

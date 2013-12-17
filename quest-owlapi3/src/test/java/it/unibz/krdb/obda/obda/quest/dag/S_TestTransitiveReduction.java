@@ -116,7 +116,7 @@ public class S_TestTransitiveReduction extends TestCase {
 
 		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
 
-		Set<Set<Description>> nodesd2= reasonerd2.getNodes(false);
+		Set<Set<Description>> nodesd2= reasonerd2.getNodes();
 		Iterator<Set<Description>> it1 =nodesd2.iterator();
 		while (it1.hasNext()) {
 			Set<Description> equivalents=it1.next();

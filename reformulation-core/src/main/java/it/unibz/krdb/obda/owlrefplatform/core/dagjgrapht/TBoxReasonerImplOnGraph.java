@@ -556,4 +556,10 @@ public class TBoxReasonerImplOnGraph implements TBoxReasoner {
 	public Ontology getSigmaOntology() {
 		throw new IllegalArgumentException("getSigmaOntology is not supported");
 	}
+
+	@Override
+	public Set<Set<Description>> getNodes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

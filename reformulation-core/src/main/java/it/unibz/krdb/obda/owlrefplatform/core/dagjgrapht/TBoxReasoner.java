@@ -35,5 +35,7 @@ public interface TBoxReasoner {
 	public DAGImpl getDAG ();
 
 	public Ontology getSigmaOntology();
+	
+	public Set<Set<Description>> getNodes();
 
 }

@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
@@ -82,21 +83,21 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	private boolean testDescendants(DAGImpl d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
+		TBoxReasoner reasonerd1= TBoxReasonerImpl.getReasoner(d1, named);
+		TBoxReasoner reasonerd2= TBoxReasonerImpl.getReasoner(d2, named);
 
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
 				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					Set<Set<Description>> setd1	=reasonerd1.getDescendants(vertex, named);
-					Set<Set<Description>> setd2	=reasonerd2.getDescendants(vertex, named);
+					Set<Set<Description>> setd1	=reasonerd1.getDescendants(vertex);
+					Set<Set<Description>> setd2	=reasonerd2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
 			}
 			else
-				result=reasonerd1.getDescendants(vertex, named).equals(reasonerd2.getDescendants(vertex, named));
+				result=reasonerd1.getDescendants(vertex).equals(reasonerd2.getDescendants(vertex));
 			if(!result)
 				break;
 		}
@@ -107,21 +108,21 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	private boolean testAncestors(DAGImpl d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
+		TBoxReasoner reasonerd1 = TBoxReasonerImpl.getReasoner(d1, named);
+		TBoxReasoner reasonerd2 = TBoxReasonerImpl.getReasoner(d2, named);
 
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
 				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					Set<Set<Description>> setd1	=reasonerd1.getAncestors(vertex, named);
-					Set<Set<Description>> setd2	=reasonerd2.getAncestors(vertex, named);
+					Set<Set<Description>> setd1	=reasonerd1.getAncestors(vertex);
+					Set<Set<Description>> setd2	=reasonerd2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}
 			}
 			else
-				result=reasonerd1.getAncestors(vertex, named).equals(reasonerd2.getAncestors(vertex, named));
+				result=reasonerd1.getAncestors(vertex).equals(reasonerd2.getAncestors(vertex));
 			if(!result)
 				break;
 		}
