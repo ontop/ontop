@@ -60,16 +60,12 @@ public class DAGBuilderImpl {
 		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = graph.getCopy();
 
 		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
-
 		eliminateRedundantEdges(modifiedGraph);
 
 		// change the graph in a dag
-
-		DAGImpl dag = new DAGImpl(equivalencesMap, replacements);
+		DAGImpl dag = new DAGImpl(equivalencesMap, replacements, true);
 		Graphs.addGraph(dag, modifiedGraph);
-		dag.setIsaDAG(true);
 		return dag;
-
 	}
 
 	/**
@@ -89,16 +85,11 @@ public class DAGBuilderImpl {
 		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
 		eliminateRedundantEdges(modifiedGraph);
 
-		// System.out.println("modified graph "+modifiedGraph);
-
-		DAGImpl dag = new DAGImpl(equivalencesMap, replacements);
+		DAGImpl dag = new DAGImpl(equivalencesMap, replacements, true);
 
 		// change the graph in a dag
 		Graphs.addGraph(dag, modifiedGraph);
-		dag.setIsaDAG(true);
-		modifiedGraph = null;
 		return dag;
-
 	}
 
 	/***
@@ -229,8 +220,6 @@ public class DAGBuilderImpl {
 		Set<Description> processedNodes = new HashSet<Description>();
 		Set<Description> chosenNodes = new HashSet<Description>();
 
-		
-
 		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) {
 
 			if (equivalenceSet.size() < 2)
@@ -245,16 +234,12 @@ public class DAGBuilderImpl {
 
 				if (!ignore && processedNodes.contains(node)) {
 					ignore = true;
-
-					// break;
-
 				}
 				// assign to each node the equivalent map set
 				equivalencesMap.put(node, equivalenceSet.getMembers());
 
 				if (!ignore && !(node instanceof Property)) {
 					ignore = true;
-					// break;
 				}
 
 			}
@@ -285,7 +270,6 @@ public class DAGBuilderImpl {
 							}
 
 						if (chosenNodes.contains(target)) {
-
 							ignore = true;
 							chosenNodes.addAll(equivalenceSet.getMembers());
 							break;
@@ -297,12 +281,9 @@ public class DAGBuilderImpl {
 					if (ignore)
 						break;
 				}
-				
-
 			}
 
 			if (ignore)
-
 				continue;
 
 			/* Assign the representative role with its inverse, domain and range
@@ -322,9 +303,6 @@ public class DAGBuilderImpl {
 						notRepresentative = representative;
 						representative = equivalent;
 						notInverse = true;
-						// replacements.put(notRepresentative, representative);
-						// equivalencesMap.put(notRepresentative,
-						// equivalenceSet);
 						break;
 					}
 				}
@@ -334,21 +312,13 @@ public class DAGBuilderImpl {
 											// property
 			}
 
-			// equivalencesMap.put(representative, equivalenceSet);
-
 			if (representative == null)
 				continue;
 
 			Property prop = (Property) representative;
-
-			Description inverse = fac.createProperty(prop.getPredicate(),
-					!prop.isInverse());
-
-			Description domain = fac.createPropertySomeRestriction(
-					prop.getPredicate(), prop.isInverse());
-
-			Description range = fac.createPropertySomeRestriction(
-					prop.getPredicate(), !prop.isInverse());
+			Description inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
+			Description domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
+			Description range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
 
 			processedNodes.add(inverse);
 			processedNodes.add(domain);
@@ -365,43 +335,7 @@ public class DAGBuilderImpl {
 					eliminatedNode = notRepresentative;
 				replacements.put(eliminatedNode, representative);
 
-				// equivalencesMap.put(eliminatedNode, equivalenceSet);
-
-				/*
-				 * Re-pointing all links to and from the eliminated node to the
-				 * representative node
-				 */
-
-				Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
-						modifiedGraph.incomingEdgesOf(eliminatedNode));
-
-				for (DefaultEdge incEdge : edges) {
-					Description source = modifiedGraph.getEdgeSource(incEdge);
-
-					modifiedGraph.removeAllEdges(source, eliminatedNode);
-
-					if (source.equals(representative))
-						continue;
-
-					modifiedGraph.addEdge(source, representative);
-				}
-
-				edges = new HashSet<DefaultEdge>(
-						modifiedGraph.outgoingEdgesOf(eliminatedNode));
-
-				for (DefaultEdge outEdge : edges) {
-					Description target = modifiedGraph.getEdgeTarget(outEdge);
-
-					modifiedGraph.removeAllEdges(eliminatedNode, target);
-
-					if (target.equals(representative))
-						continue;
-					modifiedGraph.addEdge(representative, target);
-
-				}
-
-				modifiedGraph.removeVertex(eliminatedNode);
-
+				removeNodeAndRedirectEdges(modifiedGraph, eliminatedNode, representative);
 				processedNodes.add(eliminatedNode);
 
 				if (eliminatedNode instanceof Property) {
@@ -412,31 +346,14 @@ public class DAGBuilderImpl {
 					 */
 
 					Property equiprop = (Property) eliminatedNode;
-
 					Description equivinverseNode = fac.createProperty(
 							equiprop.getPredicate(), !equiprop.isInverse());
-					// Description i= replacements.get(equivinverseNode);
-					// replacements.put(equivinverseNode, inverse);
-					// if(i!=null)
-					// equivinverseNode=i;
 
-					Description equivDomainNode = fac
-							.createPropertySomeRestriction(
-									equiprop.getPredicate(),
-									equiprop.isInverse());
-					// Description d= replacements.get(equivDomainNode);
-					// replacements.put(equivDomainNode, domain);
-					// if(d!=null)
-					// equivDomainNode= d;
+					Description equivDomainNode = fac.createPropertySomeRestriction(
+									equiprop.getPredicate(), equiprop.isInverse());
 
-					Description equivRangeNode = fac
-							.createPropertySomeRestriction(
-									equiprop.getPredicate(),
-									!equiprop.isInverse());
-					// Description r= replacements.get(equivRangeNode);
-					// replacements.put(equivRangeNode, range);
-					// if(r!=null)
-					// equivRangeNode= r;
+					Description equivRangeNode = fac.createPropertySomeRestriction(
+									equiprop.getPredicate(), !equiprop.isInverse());
 
 					/* 
 					 * Particular case in which the representative is in a cycle
@@ -444,163 +361,24 @@ public class DAGBuilderImpl {
 					 */
 					
 					if (equivinverseNode.equals((Property) representative)) {
-
+						removeNodeAndRedirectEdges(modifiedGraph, equivDomainNode, domain);
 						processedNodes.add(equivDomainNode);
-
-						
-						Set<DefaultEdge> edgesDomain = new HashSet<DefaultEdge>(
-								modifiedGraph.incomingEdgesOf(equivDomainNode));
-
-						for (DefaultEdge incEdge : edgesDomain) {
-							Description source = modifiedGraph
-									.getEdgeSource(incEdge);
-
-							modifiedGraph.removeAllEdges(source,
-									equivDomainNode);
-
-							if (source.equals(domain))
-								continue;
-
-							modifiedGraph.addEdge(source, domain);
-						}
-
-						edgesDomain = new HashSet<DefaultEdge>(
-								modifiedGraph.outgoingEdgesOf(equivDomainNode));
-
-						for (DefaultEdge outEdge : edgesDomain) {
-							Description target = modifiedGraph
-									.getEdgeTarget(outEdge);
-
-							modifiedGraph.removeAllEdges(equivDomainNode,
-									target);
-
-							if (target.equals(domain))
-								continue;
-							modifiedGraph.addEdge(domain, target);
-
-						}
-
-						modifiedGraph.removeVertex(equivDomainNode);
 
 						replacements.put(equivDomainNode, domain);
 					}
 
 					else {
-						//
+						// this for inverse
+						removeNodeAndRedirectEdges(modifiedGraph, equivinverseNode, inverse);
+						processedNodes.add(equivinverseNode);
+						// this for domain
+						removeNodeAndRedirectEdges(modifiedGraph, equivDomainNode, domain);
+						processedNodes.add(equivDomainNode);
+						// this for range
+						removeNodeAndRedirectEdges(modifiedGraph, equivRangeNode, range);
 						processedNodes.add(equivRangeNode);
 
-						processedNodes.add(equivDomainNode);
-
-						processedNodes.add(equivinverseNode);
-
-						// this for inverse
-
-						Set<DefaultEdge> edgesInverse = new HashSet<DefaultEdge>(
-								modifiedGraph.incomingEdgesOf(equivinverseNode));
-
-						for (DefaultEdge incEdge : edgesInverse) {
-							Description source = modifiedGraph
-									.getEdgeSource(incEdge);
-
-							modifiedGraph.removeAllEdges(source,
-									equivinverseNode);
-
-							if (source.equals(inverse))
-								continue;
-
-							modifiedGraph.addEdge(source, inverse);
-						}
-
-						edgesInverse = new HashSet<DefaultEdge>(
-								modifiedGraph.outgoingEdgesOf(equivinverseNode));
-
-						for (DefaultEdge outEdge : edgesInverse) {
-							Description target = modifiedGraph
-									.getEdgeTarget(outEdge);
-
-							modifiedGraph.removeAllEdges(equivinverseNode,
-									target);
-
-							if (target.equals(inverse))
-								continue;
-							modifiedGraph.addEdge(inverse, target);
-
-						}
-
-						modifiedGraph.removeVertex(equivinverseNode);
-
-						// this for domain
-						Set<DefaultEdge> edgesDomain = new HashSet<DefaultEdge>(
-								modifiedGraph.incomingEdgesOf(equivDomainNode));
-
-						for (DefaultEdge incEdge : edgesDomain) {
-							Description source = modifiedGraph
-									.getEdgeSource(incEdge);
-
-							modifiedGraph.removeAllEdges(source,
-									equivDomainNode);
-
-							if (source.equals(domain))
-								continue;
-
-							modifiedGraph.addEdge(source, domain);
-						}
-
-						edgesDomain = new HashSet<DefaultEdge>(
-								modifiedGraph.outgoingEdgesOf(equivDomainNode));
-
-						for (DefaultEdge outEdge : edgesDomain) {
-							Description target = modifiedGraph
-									.getEdgeTarget(outEdge);
-
-							modifiedGraph.removeAllEdges(equivDomainNode,
-									target);
-
-							if (target.equals(domain))
-								continue;
-							modifiedGraph.addEdge(domain, target);
-
-						}
-
-						modifiedGraph.removeVertex(equivDomainNode);
-
-						// this for range
-						Set<DefaultEdge> edgesRange = new HashSet<DefaultEdge>(
-								modifiedGraph.incomingEdgesOf(equivRangeNode));
-
-						for (DefaultEdge incEdge : edgesRange) {
-							Description source = modifiedGraph
-									.getEdgeSource(incEdge);
-
-							modifiedGraph
-									.removeAllEdges(source, equivRangeNode);
-
-							if (source.equals(range))
-								continue;
-
-							modifiedGraph.addEdge(source, range);
-						}
-
-						edgesRange = new HashSet<DefaultEdge>(
-								modifiedGraph.outgoingEdgesOf(equivRangeNode));
-
-						for (DefaultEdge outEdge : edgesRange) {
-							Description target = modifiedGraph
-									.getEdgeTarget(outEdge);
-
-							modifiedGraph
-									.removeAllEdges(equivRangeNode, target);
-
-							if (target.equals(range))
-								continue;
-							modifiedGraph.addEdge(range, target);
-
-						}
-
-						modifiedGraph.removeVertex(equivRangeNode);
-
 						replacements.put(equivinverseNode, inverse);
-
 						replacements.put(equivDomainNode, domain);
 						replacements.put(equivRangeNode, range);
 
@@ -700,44 +478,7 @@ public class DAGBuilderImpl {
 					if (eliminatedNode.equals(representative))
 						eliminatedNode = notRepresentative;
 
-					/*
-					 * Re-pointing all links to and from the eliminated node to
-					 * the representative node
-					 */
-
-					Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
-							modifiedGraph.incomingEdgesOf(eliminatedNode));
-
-					for (DefaultEdge incEdge : edges) {
-						Description source = modifiedGraph
-								.getEdgeSource(incEdge);
-
-						modifiedGraph.removeAllEdges(source, eliminatedNode);
-
-						if (source.equals(representative))
-							continue;
-
-						modifiedGraph.addEdge(source, representative);
-					}
-
-					edges = new HashSet<DefaultEdge>(
-							modifiedGraph.outgoingEdgesOf(eliminatedNode));
-
-					for (DefaultEdge outEdge : edges) {
-						Description target = modifiedGraph
-								.getEdgeTarget(outEdge);
-
-						modifiedGraph.removeAllEdges(eliminatedNode, target);
-
-						if (target.equals(representative))
-							continue;
-
-						
-						modifiedGraph.addEdge(representative, target);
-
-					}
-
-					modifiedGraph.removeVertex(eliminatedNode);
+					removeNodeAndRedirectEdges(modifiedGraph, eliminatedNode, representative);
 
 					processedClassNodes.add(eliminatedNode);
 				}
@@ -799,44 +540,7 @@ public class DAGBuilderImpl {
 							continue;
 						}
 					
-					/*
-					 * Re-pointing all links to and from the eliminated node to
-					 * the representative node
-					 */
-
-					Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
-							modifiedGraph.incomingEdgesOf(eliminatedNode));
-
-					for (DefaultEdge incEdge : edges) {
-						Description source = modifiedGraph
-								.getEdgeSource(incEdge);
-
-						modifiedGraph.removeAllEdges(source, eliminatedNode);
-
-						if (source.equals(representative))
-							continue;
-
-						modifiedGraph.addEdge(source, representative);
-					}
-
-					edges = new HashSet<DefaultEdge>(
-							modifiedGraph.outgoingEdgesOf(eliminatedNode));
-
-					for (DefaultEdge outEdge : edges) {
-						Description target = modifiedGraph
-								.getEdgeTarget(outEdge);
-
-						modifiedGraph.removeAllEdges(eliminatedNode, target);
-
-						if (target.equals(representative))
-							continue;
-
-						
-						modifiedGraph.addEdge(representative, target);
-
-					}
-
-					modifiedGraph.removeVertex(eliminatedNode);
+					removeNodeAndRedirectEdges(modifiedGraph, eliminatedNode, representative);
 
 					processedClassNodes.add(eliminatedNode);
 				}
@@ -844,6 +548,46 @@ public class DAGBuilderImpl {
 		}
 
 	}
+	
+	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, Description eliminatedNode, Description representative) {
+		/*
+		 * Re-pointing all links to and from the eliminated node to
+		 * the representative node
+		 */
+
+		Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
+				graph.incomingEdgesOf(eliminatedNode));
+
+		for (DefaultEdge incEdge : edges) {
+			Description source = graph
+					.getEdgeSource(incEdge);
+
+			graph.removeAllEdges(source, eliminatedNode);
+
+			if (source.equals(representative))
+				continue;
+
+			graph.addEdge(source, representative);
+		}
+
+		edges = new HashSet<DefaultEdge>(
+				graph.outgoingEdgesOf(eliminatedNode));
+
+		for (DefaultEdge outEdge : edges) {
+			Description target = graph
+					.getEdgeTarget(outEdge);
+
+			graph.removeAllEdges(eliminatedNode, target);
+
+			if (target.equals(representative))
+				continue;
+			
+			graph.addEdge(representative, target);
+		}
+
+		graph.removeVertex(eliminatedNode);		
+	}
+	
 
 	/*
 	 * Alterntative version but slower to eliminate redundances public void

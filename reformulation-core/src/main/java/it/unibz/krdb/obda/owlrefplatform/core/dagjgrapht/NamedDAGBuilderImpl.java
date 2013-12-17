@@ -38,7 +38,7 @@ public class NamedDAGBuilderImpl {
 		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();;
 
-		DAGImpl  namedDag = new DAGImpl(equivalencesMap, replacements);
+		DAGImpl  namedDag = new DAGImpl(equivalencesMap, replacements, false);
 
 		// clone all the vertexes and edges from dag
 
@@ -288,11 +288,6 @@ public class NamedDAGBuilderImpl {
 		
 		}
 		
-
-		namedDag.setIsaNamedDAG(true);
 		return namedDag;
-
 	}
-
-
 }

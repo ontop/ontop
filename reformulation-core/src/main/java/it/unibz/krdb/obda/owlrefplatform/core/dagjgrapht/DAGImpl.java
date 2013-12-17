@@ -42,33 +42,14 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	//map of the equivalent elements of an element
 	private Map<Description, Set<Description>> equivalencesMap; 
 
-	public DAGImpl(Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
+	public DAGImpl(Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements, boolean dag) {
 		super(DefaultEdge.class);
 		this.equivalencesMap = equivalencesMap;
 		this.replacements = replacements;
-		dag = true;
+		this.dag = dag;
 	}
 
 	
-	/**
-	 * set we are working with a DAG and not a named DAG
-	 * 
-	 * @param d boolean <code> true</code> if DAG
-	 */
-	
-	public void setIsaDAG(boolean d){
-		dag = d;
-	}
-
-	/**
-	 * set we are working with a named DAG and not with a DAG
-	 * 
-	 * @param nd boolean <code> true</code> if named DAG
-	 */
-
-	public void setIsaNamedDAG(boolean nd){
-		dag = !nd;
-	}
 	/**
 	 * check if we are working with a DAG
 	 * 
@@ -102,7 +83,7 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 					if (e instanceof Property){
 //						System.out.println("roles: "+ e +" "+ e.getClass());
 						if(!((Property) e).isInverse())
-						roles.add((Property)e);
+							roles.add((Property)e);
 						
 				}
 				}
@@ -111,12 +92,10 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 			if (r instanceof Property){
 //				System.out.println("roles: "+ r +" "+ r.getClass());
 				if(!((Property) r).isInverse())
-				roles.add((Property)r);
+					roles.add((Property)r);
 			}
-
 		}
 		return roles;
-
 	}
 
 	/**
@@ -125,29 +104,27 @@ public class DAGImpl extends SimpleDirectedGraph <Description,DefaultEdge> {
 	 */
 	
 	public Set<OClass> getClasses(){
-		for (Description c: this.vertexSet()){
-			
+		for (Description c: this.vertexSet()) {			
 			//check in the equivalent nodes if there are named classes
-			if(replacements.containsValue(c)){
-			if(equivalencesMap.get(c)!=null){
+			if (replacements.containsValue(c)) {
+				if (equivalencesMap.get(c)!=null) {
 				
-				for (Description e: equivalencesMap.get(c))	{
-					if (e instanceof OClass){
-//						System.out.println("classes: "+ e +" "+ e.getClass());
-						classes.add((OClass)e);
+					for (Description e: equivalencesMap.get(c))	{
+						if (e instanceof OClass) {
+//							System.out.println("classes: "+ e +" "+ e.getClass());
+							classes.add((OClass)e);
+						}
+					}
 				}
-				}
-			}
 			}
 			
-			if (c instanceof OClass){
+			if (c instanceof OClass) {
 //				System.out.println("classes: "+ c+ " "+ c.getClass());
 				classes.add((OClass)c);
 			}
 
 		}
 		return classes;
-
 	}
 
 
