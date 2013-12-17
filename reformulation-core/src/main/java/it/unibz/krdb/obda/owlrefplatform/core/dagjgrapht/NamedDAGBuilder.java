@@ -35,7 +35,7 @@ public class NamedDAGBuilder {
 	 * @param dag the DAG from which we want to maintain only the named descriptions
 	 */
 	
-	public static DAGImpl getNamedDAG(DAGImpl dag) {
+	public static NamedDAGImpl getNamedDAG(DAGImpl dag) {
 
 		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();;
@@ -289,7 +289,7 @@ public class NamedDAGBuilder {
 		
 		}
 		
-		DAGImpl dagImpl = new DAGImpl(namedDag, equivalencesMap, replacements, false);
+		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, equivalencesMap, replacements, false);
 		return dagImpl;
 	}
 	

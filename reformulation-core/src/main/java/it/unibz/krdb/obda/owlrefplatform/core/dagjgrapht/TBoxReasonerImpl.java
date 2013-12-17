@@ -487,8 +487,4 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		sigma.saturate();
 		return sigma;
 	}
-
-	public static TBoxReasoner getReasoner(DAGImpl dag, boolean named) {
-		return (named) ? new TBoxReasonerImplOnNamedDAG(dag) : new TBoxReasonerImpl(dag);
-	}
 }

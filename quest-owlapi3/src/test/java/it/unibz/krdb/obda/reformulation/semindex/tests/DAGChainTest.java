@@ -22,7 +22,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnGraph;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
 import java.util.Set;
 
@@ -113,7 +113,7 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		TBoxReasonerImplOnGraph reasoner= new TBoxReasonerImplOnGraph(res);
+		TestTBoxReasonerImplOnGraph reasoner= new TestTBoxReasonerImplOnGraph(res);
 		reasoner.convertIntoChainDAG();
 
 		

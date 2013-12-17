@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -81,7 +82,7 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		DAGImpl namedDag= NamedDAGBuilder.getNamedDAG(dag);
+		NamedDAGImpl namedDag = NamedDAGBuilder.getNamedDAG(dag);
 
 		
 		log.debug("Input number {}", i+1 );
@@ -94,7 +95,7 @@ public void testIndexes() throws Exception{
 	}
 }
 
-private boolean testIndexes( DAGImpl dag){
+private boolean testIndexes(NamedDAGImpl dag){
 	boolean result=true;
 		
 	//create semantic index

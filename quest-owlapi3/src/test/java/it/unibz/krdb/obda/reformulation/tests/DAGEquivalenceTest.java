@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
@@ -64,7 +65,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(onto);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
+		NamedDAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -124,7 +125,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(onto);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
+		NamedDAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -189,7 +190,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate DAG
 		DAGImpl dag = DAGBuilder.getDAG(onto);
 		// generate named DAG
-		DAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
+		NamedDAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 

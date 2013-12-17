@@ -37,7 +37,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * 
  */
 
-public class TBoxReasonerImplOnGraph implements TBoxReasoner {
+public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 
 	private TBoxGraph graph;
 	private DAGImpl dag;
@@ -50,7 +50,7 @@ public class TBoxReasonerImplOnGraph implements TBoxReasoner {
 	 * Constructor using a graph (cycles admitted)
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImplOnGraph(TBoxGraph graph) {
+	public TestTBoxReasonerImplOnGraph(TBoxGraph graph) {
 		this.graph = graph;
 		namedClasses = graph.getClasses();
 		property = graph.getRoles();

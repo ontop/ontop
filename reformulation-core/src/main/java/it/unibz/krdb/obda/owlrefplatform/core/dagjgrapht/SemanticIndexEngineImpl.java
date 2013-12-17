@@ -26,7 +26,7 @@ import org.jgrapht.traverse.GraphIterator;
  */
 public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 
-	private DAGImpl namedDag;
+	private NamedDAGImpl namedDag;
 	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
 	private int index_counter = 1;
@@ -108,7 +108,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	 */
 
 
-	public SemanticIndexEngineImpl(DAGImpl namedDag) {
+	public SemanticIndexEngineImpl(NamedDAGImpl namedDag) {
 
 		this.namedDag = namedDag;
 		if (namedDag.isaNamedDAG())

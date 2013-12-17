@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.Serializable;
@@ -59,7 +60,7 @@ public class TMappingProcessor implements Serializable {
 
 	private final Ontology aboxDependencies;
 
-	private final DAGImpl pureIsa;
+	private final NamedDAGImpl pureIsa;
 	
 	private final TBoxReasonerImpl reasoner;
 

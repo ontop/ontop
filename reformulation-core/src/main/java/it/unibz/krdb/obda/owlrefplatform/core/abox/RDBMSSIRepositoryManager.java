@@ -45,6 +45,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -389,7 +390,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private DAGImpl dag;
 
-	 private DAGImpl pureIsa;
+	 private NamedDAGImpl pureIsa;
 
 	private TBoxReasonerImpl reasonerDag;
 	
@@ -506,7 +507,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		/*
 		 * Creating cache of semantic indexes and ranges
 		 */
-		Set<Description> descriptions = ((DAGImpl)pureIsa).vertexSet();
+		Set<Description> descriptions = pureIsa.vertexSet();
 		for (Description description : descriptions) {
 			if (description instanceof OClass) {
 

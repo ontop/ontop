@@ -3,10 +3,13 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnGraph;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnNamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -80,10 +83,10 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxGraph graph1= S_InputOWL.createGraph(fileInput);
+			TBoxGraph graph1 = S_InputOWL.createGraph(fileInput);
 
 			//transform in a dag
-			DAGImpl dag2= DAGBuilder.getDAG(graph1);
+			DAGImpl dag2 = DAGBuilder.getDAG(graph1);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", dag2);
@@ -99,15 +102,18 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			assertTrue(checkVertexReduction(graph1, dag2));
 			assertTrue(checkEdgeReduction(graph1, dag2));
 
-
 		}
 
+	}
+	
+	private static TBoxReasoner getReasoner(DAGImpl dag) {
+		return new TBoxReasonerImpl(dag);
 	}
 
 	private boolean testDescendants(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
-		TBoxReasoner reasonerd2 = TBoxReasonerImpl.getReasoner(d2, named);
+		TestTBoxReasonerImplOnGraph reasonerd1= new TestTBoxReasonerImplOnGraph(d1);
+		TBoxReasoner reasonerd2 = getReasoner(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
 
@@ -160,8 +166,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testDescendants( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd1 = TBoxReasonerImpl.getReasoner(d1, named);
-		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
+		TBoxReasoner reasonerd1 = getReasoner(d1);
+		TestTBoxReasonerImplOnGraph reasonerd2 = new TestTBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 
@@ -209,8 +215,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testChildren(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImplOnGraph reasonerd1 = new TBoxReasonerImplOnGraph(d1);
-		TBoxReasoner reasonerd2 = TBoxReasonerImpl.getReasoner(d2, named);
+		TestTBoxReasonerImplOnGraph reasonerd1 = new TestTBoxReasonerImplOnGraph(d1);
+		TBoxReasoner reasonerd2 = getReasoner(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
 
@@ -261,8 +267,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testChildren( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd1 = TBoxReasonerImpl.getReasoner(d1, named);
-		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
+		TBoxReasoner reasonerd1 = getReasoner(d1);
+		TestTBoxReasonerImplOnGraph reasonerd2= new TestTBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 
@@ -308,8 +314,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testAncestors(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
-		TBoxReasoner reasonerd2 = TBoxReasonerImpl.getReasoner(d2, named);
+		TestTBoxReasonerImplOnGraph reasonerd1 = new TestTBoxReasonerImplOnGraph(d1);
+		TBoxReasoner reasonerd2 = getReasoner(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
 
@@ -364,8 +370,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testAncestors( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd1 = TBoxReasonerImpl.getReasoner(d1, named);
-		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
+		TBoxReasoner reasonerd1 = getReasoner(d1);
+		TestTBoxReasonerImplOnGraph reasonerd2= new TestTBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 
@@ -413,8 +419,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testParents(TBoxGraph d1, DAGImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasonerImplOnGraph reasonerd1= new TBoxReasonerImplOnGraph(d1);
-		TBoxReasoner reasonerd2 = TBoxReasonerImpl.getReasoner(d2, named);
+		TestTBoxReasonerImplOnGraph reasonerd1 = new TestTBoxReasonerImplOnGraph(d1);
+		TBoxReasoner reasonerd2 = getReasoner(d2);
 		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
 		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
 
@@ -466,8 +472,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	private boolean testParents( DAGImpl d1, TBoxGraph d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd1 = TBoxReasonerImpl.getReasoner(d1, named);
-		TBoxReasonerImplOnGraph reasonerd2= new TBoxReasonerImplOnGraph(d2);
+		TBoxReasoner reasonerd1 = getReasoner(d1);
+		TestTBoxReasonerImplOnGraph reasonerd2= new TestTBoxReasonerImplOnGraph(d2);
 		Set<Set<Description>> setd1 = null;
 		Set<Set<Description>> setd2 = null;
 

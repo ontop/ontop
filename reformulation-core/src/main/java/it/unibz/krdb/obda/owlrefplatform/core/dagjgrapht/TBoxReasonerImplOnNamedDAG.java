@@ -8,15 +8,9 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,13 +23,13 @@ import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
- * Allows to reason over the TBox using  DAG or graph
+ * Allows to reason over the TBox using Named DAG
  * 
  */
 
 public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
-	private DAGImpl dag;
+	private NamedDAGImpl dag;
 
 	private Set<OClass> namedClasses;
 	private Set<Property> property;
@@ -44,7 +38,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImplOnNamedDAG(DAGImpl dag) {
+	public TBoxReasonerImplOnNamedDAG(NamedDAGImpl dag) {
 		this.dag = dag;
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();
