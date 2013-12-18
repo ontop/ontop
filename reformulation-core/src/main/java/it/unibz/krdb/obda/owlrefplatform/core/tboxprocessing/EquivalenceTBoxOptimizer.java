@@ -30,9 +30,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
-
 /***
  * An optimizer that will eliminate equivalences implied by the ontology,
  * simplifying the vocabulary of the ontology. This allows to reduce the number
@@ -81,7 +78,6 @@ public class EquivalenceTBoxOptimizer {
 		/*
 		 * Processing all properties
 		 */
-		// Collection<Predicate> removedProperties = new HashSet<Predicate>();
 
 		Collection<Description> props = new HashSet<Description>(dag.vertexSet());
 		HashSet<Property> removedNodes = new HashSet<Property>();
@@ -307,7 +303,7 @@ public class EquivalenceTBoxOptimizer {
 				Description descEquivalent = equivalentNode;
 				if (descEquivalent instanceof OClass) {
 					/*
-					 * Its a named class, we need to remove it
+					 * It's a named class, we need to remove it
 					 */
 					OClass equiClass = (OClass) descEquivalent;
 					equivalenceMap.put(equiClass.getPredicate(), classDescription);
@@ -315,7 +311,7 @@ public class EquivalenceTBoxOptimizer {
 				} else {
 
 					/*
-					 * Its an \exists R, we need to make sure that it references
+					 * It's an \exists R, we need to make sure that it references
 					 * to the proper vocabulary
 					 */
 					PropertySomeRestriction existsR = (PropertySomeRestriction) descEquivalent;
@@ -325,7 +321,7 @@ public class EquivalenceTBoxOptimizer {
 						continue;
 
 					/*
-					 * This \exists R indeed referes to a property that was
+					 * This \exists R indeed refers to a property that was
 					 * removed in the previous step and replace for some other
 					 * property S. we need to eliminate the \exists R, and add
 					 * an \exists S
@@ -363,58 +359,20 @@ public class EquivalenceTBoxOptimizer {
 
 		optimalTBox = ofac.createOntology();
 		
-
 		for(Description node:dag.vertexSet()){
-			for (Set<Description> descendants: reasoner.getDescendants(node)){
-					Description firstDescendant=descendants.iterator().next();
-					Description descendant= dag.getRepresentativeFor(firstDescendant);
-					Axiom axiom = null;
-					if(!descendant.equals(node)){
-					/*
-					 * Creating subClassOf or subPropertyOf axioms
-					 */
-					if (descendant instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) descendant, (ClassDescription) node
-								);
-					} else {
-;
-						axiom = ofac
-								.createSubPropertyAxiom((Property) descendant, (Property) node);
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					}
-				
-				
-			}
-			for(Description equivalent:reasoner.getEquivalences(node)){
-				if(!equivalent.equals(node)){
-					Axiom axiom = null;
-					if (node instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent);
-						
-					} else {
-						
-						axiom = ofac.createSubPropertyAxiom((Property) node, (Property) equivalent);
-						
+			for (Set<Description> descendants : reasoner.getDescendants(node)) {
+				Description firstDescendant = descendants.iterator().next();
+				Description descendant = dag.getRepresentativeFor(firstDescendant);
 
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					
-					if (equivalent instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node);
-						
-					} else{
-						axiom = ofac.createSubPropertyAxiom((Property) equivalent, (Property) node);
-						
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					}
+				if (!descendant.equals(node)) 
+					addToTBox(optimalTBox, descendant, node);					
+			}
+			for (Description equivalent : reasoner.getEquivalences(node)) {
+				if (!equivalent.equals(node)) {
+					addToTBox(optimalTBox, node, equivalent);					
+					addToTBox(optimalTBox, equivalent, node);
 				}
-			
-			
+			}
 		}
 
 		//
@@ -425,9 +383,20 @@ public class EquivalenceTBoxOptimizer {
 		extraVocabulary.addAll(tbox.getVocabulary());
 		extraVocabulary.removeAll(equivalenceMap.keySet());
 		optimalTBox.addEntities(extraVocabulary);
-
 	}
 
+	private static void addToTBox(Ontology o, Description s, Description t) {
+		Axiom axiom;
+		if (s instanceof ClassDescription) {
+			axiom = ofac.createSubClassAxiom((ClassDescription) s, (ClassDescription) t);
+		} 
+		else{
+			axiom = ofac.createSubPropertyAxiom((Property) s, (Property) t);
+		}
+		o.addEntities(axiom.getReferencedEntities());
+		o.addAssertion(axiom);		
+	}
+	
 	public Ontology getOptimalTBox() {
 		return this.optimalTBox;
 	}
