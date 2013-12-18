@@ -11,7 +11,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -267,7 +266,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * 
 	 */
 	
-	public void convertIntoChainDAG() {
+	public DAGImpl getChainDAG() {
 
 		// move everything to a graph that admits cycles
 			DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
@@ -368,9 +367,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 
 			/* Collapsing the cycles */
-			dag = DAGBuilder.getDAG(modifiedGraph,
-					dag.getMapEquivalences(), dag.getReplacements());
-
+			return DAGBuilder.getDAG(modifiedGraph, dag.getMapEquivalences(), dag.getReplacements());
 	}
 
 	public Ontology getSigmaOntology() {

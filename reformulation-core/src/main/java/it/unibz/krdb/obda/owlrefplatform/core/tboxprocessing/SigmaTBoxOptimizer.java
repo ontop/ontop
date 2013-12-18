@@ -63,15 +63,15 @@ public class SigmaTBoxOptimizer {
 		reasonerIsa = new TBoxReasonerImpl(this.isa);
 		
 		this.sigma = DAGBuilder.getDAG(sigmat);
-		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(this.sigma);
+		TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(this.sigma);
 		
-		this.isaChain = DAGBuilder.getDAG(isat);
+		this.isaChain = reasonerIsa.getChainDAG();
 		reasonerIsaChain = new TBoxReasonerImpl(this.isaChain);
-		reasonerIsaChain.convertIntoChainDAG();
+		//reasonerIsaChain.convertIntoChainDAG();
 		
-		this.sigmaChain =  DAGBuilder.getDAG(sigmat);
+		this.sigmaChain =  reasonerSigma.getChainDAG();
 		reasonerSigmaChain = new TBoxReasonerImpl(this.sigmaChain);
-		reasonerSigmaChain.convertIntoChainDAG();
+		//reasonerSigmaChain.convertIntoChainDAG();
 	}
 
 	public Ontology getReducedOntology() {

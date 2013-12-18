@@ -9,7 +9,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -37,8 +36,6 @@ public class NamedDAGBuilder {
 	
 	public static NamedDAGImpl getNamedDAG(DAGImpl dag) {
 
-		Map<Description, Description> replacements = new HashMap<Description, Description>();;
-
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag = 
 				new SimpleDirectedGraph <Description,DefaultEdge>(DefaultEdge.class);
 
@@ -54,7 +51,6 @@ public class NamedDAGBuilder {
 			namedDag.addEdge(s, t, e);
 		}
 
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(dag);
 		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 		
 		// take classes, roles, equivalences map and replacements from the DAG
@@ -62,8 +58,8 @@ public class NamedDAGBuilder {
 		Set<Property> property = dag.getRoles();
 
 		// clone the equivalences and replacements map
+		Map<Description, Description> replacements = new HashMap<Description, Description>();
 		for (Description eliminateNode : dag.getReplacementKeys()) {
-
 			Description referent = dag.getReplacementFor(eliminateNode);
 			replacements.put(eliminateNode, referent);
 		}
@@ -84,9 +80,9 @@ public class NamedDAGBuilder {
 			}
 		}
 		
-		Set<Description> processedNodes= new HashSet<Description>();
+		Set<Description> processedNodes = new HashSet<Description>();
 		
-		for (Description root: roots){
+		for (Description root: roots) {
 		
 		/* 
 		 * A depth first sort from each root of the DAG.
@@ -101,7 +97,7 @@ public class NamedDAGBuilder {
 		
 		while (orderIterator.hasNext()) 
 		{
-			Description node= orderIterator.next();
+			Description node = orderIterator.next();
 			
 			if(processedNodes.contains(node))
 				continue;
@@ -143,18 +139,16 @@ public class NamedDAGBuilder {
 					namedDag.removeVertex(node);
 					processedNodes.add(node);
 					
-					
-				
 					continue;
 				}
 			}
 			
+			EquivalenceClass<Description> equivalenceClassInDag = dag.getEquivalenceClass(node);
+
 			Set<Description> namedEquivalences;
 			{
-				EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(node);
-
 				// if there are no equivalent nodes return the node or nothing
-				if (equivalents == null) {				
+				if (equivalenceClassInDag == null) {				
 						if (namedClasses.contains(node) || property.contains(node)) 
 							namedEquivalences = Collections.singleton(node);
 						
@@ -163,7 +157,7 @@ public class NamedDAGBuilder {
 				}
 				else {
 					namedEquivalences = new LinkedHashSet<Description>();
-					for (Description vertex : equivalents) {
+					for (Description vertex : equivalenceClassInDag) {
 						if (namedClasses.contains(vertex) || property.contains(vertex)) 
 							namedEquivalences.add(vertex);
 					}
@@ -177,38 +171,31 @@ public class NamedDAGBuilder {
 				 replacements.remove(newReference);
 				 namedDag.addVertex(newReference);
 				
-				 for (Description vertex : reasoner.getEquivalences(node)) {
-					 if(!vertex.equals(newReference))
-						 replacements.put(vertex, newReference);					 
-				 }
+				 if (equivalenceClassInDag != null)
+					 for (Description vertex : equivalenceClassInDag) {
+						 if (!vertex.equals(newReference))
+							 replacements.put(vertex, newReference);					 
+					 }
 				 
 				 /*
-					 * Re-pointing all links to and from the eliminated node to the
-					 new
+					 * Re-pointing all links to and from the eliminated node to the new
 					 * representative node
 					 */
 					
-					 Set<DefaultEdge> edges = new
-					 HashSet<DefaultEdge>(namedDag.incomingEdgesOf(node));
-					 for (DefaultEdge incEdge : edges) {
-					 Description source = namedDag.getEdgeSource(incEdge);
-					 namedDag.removeAllEdges(source, node);
+					 for (DefaultEdge incEdge : namedDag.incomingEdgesOf(node)) {
+						 Description source = namedDag.getEdgeSource(incEdge);
+						 namedDag.removeAllEdges(source, node);
 					
-					 if (source.equals(newReference))
-					 continue;
-					
-					 namedDag.addEdge(source, newReference);
+						 if (!source.equals(newReference))
+							 namedDag.addEdge(source, newReference);
 					 }
 					
-					 edges = new
-					 HashSet<DefaultEdge>(namedDag.outgoingEdgesOf(node));
-					 for (DefaultEdge outEdge : edges) {
-					 Description target = namedDag.getEdgeTarget(outEdge);
-					 namedDag.removeAllEdges(node, target);
+					 for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(node)) {
+						 Description target = namedDag.getEdgeTarget(outEdge);
+						 namedDag.removeAllEdges(node, target);
 					
-					 if (target.equals(newReference))
-					 continue;
-					 namedDag.addEdge(newReference, target);
+						 if (!target.equals(newReference))
+							 namedDag.addEdge(newReference, target);
 					 }
 					
 					 namedDag.removeVertex(node);
@@ -244,16 +231,12 @@ public class NamedDAGBuilder {
 
 								}
 
-								namedDag.removeVertex(posNode);
-								
-								
+								namedDag.removeVertex(posNode);				
 							
 								continue;
 							}
-					 
-					 	
 			}
-			else{
+			else {
 				Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
 						namedDag.incomingEdgesOf(node));
 

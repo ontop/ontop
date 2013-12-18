@@ -33,7 +33,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class DAGImpl  {
 	
-	private SimpleDirectedGraph <Description,DefaultEdge> dag;
+	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	private Set<OClass> classes = new LinkedHashSet<OClass> ();
 	private Set<Property> roles = new LinkedHashSet<Property> ();
