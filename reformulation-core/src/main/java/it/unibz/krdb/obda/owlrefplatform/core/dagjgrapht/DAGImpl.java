@@ -147,22 +147,6 @@ public class DAGImpl  {
 	}
 
 	/**
-	 * Allows to set the map with replacements
-	 */
-	@Deprecated
-	public void setReplacementFor(Description key, Description value) {
-		replacements.put(key, value);	
-	}
-
-	/**
-	 * Allows to set the map with replacements
-	 */
-	@Deprecated
-	public void removeReplacementFor(Description key) {
-		replacements.remove(key);	
-	}
-
-	/**
 	 * Allows to obtain the node present in the DAG. 
 	 * @param  node a node that we want to know if it is part of the DAG
 	 * @return the node, or its representative, or null if it is not present in the DAG
@@ -225,21 +209,34 @@ public class DAGImpl  {
 
 
 	
-	// HACKY METHODS TO BE RID OF
+	// HACKY METHODS TO BE RID OF (USED ONLY IN IN EquivalenceTBoxOptimizer)
+	@Deprecated 
+	public void setReplacementFor(Description key, Description value) {
+		replacements.put(key, value);	
+	}
+
+	@Deprecated 
+	public void removeReplacementFor(Description key) {
+		replacements.remove(key);	
+	}
+
+	@Deprecated 
 	public void addEdge(Description s, Description t) {
 		dag.addEdge(s, t);
 	}
 
+	@Deprecated 
 	public void addVertex(Description v) {
 		dag.addVertex(v);
 	}
 
+	@Deprecated 
 	public void removeAllEdges(Description s, Description t) {
 		dag.removeAllEdges(s, t);
 	}
 
+	@Deprecated 
 	public void removeVertex(Description v) {
 		dag.removeVertex(v);
-	}
-	
+	}	
 }

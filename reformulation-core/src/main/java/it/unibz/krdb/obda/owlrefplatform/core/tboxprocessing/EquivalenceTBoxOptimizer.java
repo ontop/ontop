@@ -75,12 +75,6 @@ public class EquivalenceTBoxOptimizer {
 		DAGImpl impliedDAG = DAGBuilder.getDAG(tbox);
 		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(impliedDAG);
 
-//		try {
-//			GraphGenerator.dumpISA(impliedDAG, "input");
-//		} catch (IOException e) {
-////			e.printStackTrace();
-//		}
-
 		/*
 		 * Processing all properties
 		 */
