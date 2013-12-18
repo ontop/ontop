@@ -8,8 +8,6 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
@@ -27,11 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.BreadthFirstIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +42,6 @@ public class SigmaTBoxOptimizer {
 	private final TBoxReasonerImpl reasonerSigmaChain;
 	private final TBoxReasonerImpl reasonerIsaChain;
 
-	private static final OBDADataFactory	predicateFactory = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory	descFactory = OntologyFactoryImpl.getInstance();
 
 	private Ontology				originalOntology	= null;
@@ -93,7 +85,6 @@ public class SigmaTBoxOptimizer {
 					Description descendant= isa.getReplacementFor(firstDescendant);
 					if(descendant==null)
 						descendant=firstDescendant;
-					Axiom axiom = null;
 					if(!descendant.equals(node)){
 					/*
 					 * Creating subClassOf or subPropertyOf axioms

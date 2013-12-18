@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -35,14 +36,14 @@ public class DAGImpl  {
 	
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
-	private Set<OClass> classes = new LinkedHashSet<OClass> ();
-	private Set<Property> roles = new LinkedHashSet<Property> ();
+	private Set<OClass> classes;
+	private Set<Property> roles;
 	
 	//map between an element  and the representative between the equivalent elements
 	private Map<Description, Description> replacements; 
 	
 	//map of the equivalent elements of an element
-	private Map<Description, EquivalenceClass<Description>> equivalencesMap; 
+	private Map<Description, EquivalenceClass<Description>> equivalencesClasses; 
 
 	
 	// constructor is accessible within the package only
@@ -52,7 +53,7 @@ public class DAGImpl  {
 		
 		this.dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
 		Graphs.addGraph(this.dag, dag);
-		this.equivalencesMap = equivalencesMap;
+		this.equivalencesClasses = equivalencesMap;
 		this.replacements = replacements;
 	}
 
@@ -61,27 +62,16 @@ public class DAGImpl  {
 	 * Allows to have all named roles in the DAG even the equivalent named roles
 	 * @return  set of all property (not inverse) in the DAG
 	 */
-	public Set<Property> getRoles(){
-		for (Description r: dag.vertexSet()){
-			
-			//check in the equivalent nodes if there are properties
-			if(replacements.containsValue(r)){
-			if(equivalencesMap.get(r)!=null){
-				for (Description e: equivalencesMap.get(r))	{
-					if (e instanceof Property){
-//						System.out.println("roles: "+ e +" "+ e.getClass());
-						if(!((Property) e).isInverse())
-							roles.add((Property)e);
-						
-				}
-				}
-			}
-			}
-			if (r instanceof Property){
-//				System.out.println("roles: "+ r +" "+ r.getClass());
-				if(!((Property) r).isInverse())
-					roles.add((Property)r);
-			}
+	public Set<Property> getPropertyNames() {
+		if (roles == null) {
+			roles = new LinkedHashSet<Property> ();
+			for (Description v: dag.vertexSet()) 
+				if (v instanceof Property)
+					for (Description r : getEquivalenceClass(v)) {
+						Property p = (Property) r;
+						if (!p.isInverse())
+							roles.add(p);
+					}
 		}
 		return roles;
 	}
@@ -91,26 +81,14 @@ public class DAGImpl  {
 	 * @return  set of all named concepts in the DAG
 	 */
 	
-	public Set<OClass> getClasses(){
-		for (Description c: dag.vertexSet()) {			
-			//check in the equivalent nodes if there are named classes
-			if (replacements.containsValue(c)) {
-				if (equivalencesMap.get(c)!=null) {
-				
-					for (Description e: equivalencesMap.get(c))	{
-						if (e instanceof OClass) {
-//							System.out.println("classes: "+ e +" "+ e.getClass());
+	public Set<OClass> getClassNames() {
+		if (classes == null) {
+			 classes = new LinkedHashSet<OClass> ();
+			 for (Description v: dag.vertexSet())
+				if (v instanceof OClass) 
+					for (Description e : getEquivalenceClass(v))
+						if (e instanceof OClass)
 							classes.add((OClass)e);
-						}
-					}
-				}
-			}
-			
-			if (c instanceof OClass) {
-//				System.out.println("classes: "+ c+ " "+ c.getClass());
-				classes.add((OClass)c);
-			}
-
 		}
 		return classes;
 	}
@@ -121,11 +99,24 @@ public class DAGImpl  {
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
 	public Map<Description, EquivalenceClass<Description>> getMapEquivalences() {
-		return equivalencesMap;
+		return equivalencesClasses;
 	}
 
 	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
-		return equivalencesMap.get(desc);
+		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
+		if (c == null)
+			c = new EquivalenceClass<Description>(Collections.singleton(desc));
+		return c;
+	}
+	
+	public EquivalenceClass<Description> getEquivalenceClass0(Description desc) {
+		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
+		//if ((c != null) && (c.size() == 1)) {
+		//	Description d = c.getMembers().iterator().next();
+		//	if (replacements.get(d) == null)
+		//		return null;
+		//}
+		return c;
 	}
 
 	public Description getReplacementFor(Description v) {

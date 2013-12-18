@@ -51,8 +51,8 @@ public class NamedDAGBuilder {
 		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 		
 		// take classes, roles, equivalences map and replacements from the DAG
-		Set<OClass> namedClasses = dag.getClasses();
-		Set<Property> property = dag.getRoles();
+		Set<OClass> namedClasses = dag.getClassNames();
+		Set<Property> property = dag.getPropertyNames();
 
 		
 		/*
@@ -102,28 +102,12 @@ public class NamedDAGBuilder {
 					}
 				}
 			
-				EquivalenceClass<Description> equivalenceClassInDag = dag.getEquivalenceClass(node);
-
-				Set<Description> namedEquivalences;
-				{
-					// if there are no equivalent nodes return the node or nothing
-					if (equivalenceClassInDag == null) {				
-						if (namedClasses.contains(node) || property.contains(node)) 
-							namedEquivalences = Collections.singleton(node);
-						
-						else  //  empty set if node is not a named class or property
-							namedEquivalences = Collections.emptySet();
-					}
-					else {
-						namedEquivalences = new LinkedHashSet<Description>();
-						for (Description vertex : equivalenceClassInDag) {
-							if (namedClasses.contains(vertex) || property.contains(vertex)) 
-								namedEquivalences.add(vertex);
-						}
-					}
+				Set<Description> namedEquivalences = new LinkedHashSet<Description>();
+				for (Description vertex : dag.getEquivalenceClass(node)) {
+					if (namedClasses.contains(vertex) || property.contains(vertex)) 
+						namedEquivalences.add(vertex);
 				}
-			
-			
+							
 				if(!namedEquivalences.isEmpty())
 				{
 					Description newReference = namedEquivalences.iterator().next();

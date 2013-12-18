@@ -290,23 +290,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	@Override
 	public Set<Description> getEquivalences(Description desc) {
-
-		EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(desc);
-
-		// if there are no equivalent nodes return the node or nothing
-		if (equivalents == null) {
-			
-				if (namedClasses.contains(desc) || property.contains(desc)) {
-					return Collections.unmodifiableSet(Collections.singleton(desc));
-				} 
-				else { // return empty set if the node we are considering
-						// (desc) is not a named class or property
-					return Collections.emptySet();
-				}
-		}
 		
 		Set<Description> equivalences = new LinkedHashSet<Description>();
-			for (Description vertex : equivalents) {
+			for (Description vertex : dag.getEquivalenceClass0(desc)) {
 				if (namedClasses.contains(vertex) || property.contains(vertex)) {
 						equivalences.add(vertex);
 				}

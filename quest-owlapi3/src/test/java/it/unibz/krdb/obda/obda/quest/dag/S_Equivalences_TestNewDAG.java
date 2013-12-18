@@ -174,7 +174,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
 					setd1	=reasonerd1.getDescendants(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("descendants {} ", setd1);
@@ -275,7 +275,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
 					setd1	=reasonerd1.getDirectChildren(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("children {} ", setd1);
@@ -378,7 +378,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
 					setd1	=reasonerd1.getAncestors(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("ancestors {} ", setd1);
@@ -480,7 +480,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
 					setd1	=reasonerd1.getDirectParents(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("parents {} ", setd1);

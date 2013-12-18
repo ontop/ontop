@@ -216,6 +216,13 @@ public class DAGBuilder {
 		List<EquivalenceClass<Description>> equivalenceSets = inspector
 				.stronglyConnectedSets();
 
+		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) {
+			if (equivalenceSet.size() > 1)
+				for (Description node : equivalenceSet) 
+					equivalencesMap.put(node, equivalenceSet);
+		}
+		
+		
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 		/*
@@ -243,7 +250,7 @@ public class DAGBuilder {
 					ignore = true;
 				}
 				// assign to each node the equivalent map set
-				equivalencesMap.put(node, equivalenceSet);
+				//equivalencesMap.put(node, equivalenceSet);
 
 				if (!ignore && !(node instanceof Property)) {
 					ignore = true;

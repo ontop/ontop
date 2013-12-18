@@ -377,7 +377,7 @@ public class TMappingProcessor implements Serializable {
 		 * that these are already processed. We start with the leafs.
 		 */
 
-		for (Property currentProperty : dag.getRoles()) {
+		for (Property currentProperty : dag.getPropertyNames()) {
 			/* setting up the queue for the next iteration */
 
 			/* we only create mappings for named properties and not considering equivalences*/
@@ -478,7 +478,7 @@ public class TMappingProcessor implements Serializable {
 		 * Starting with the leafs.
 		 */
 
-		for (OClass currentProperty : dag.getClasses()) {
+		for (OClass currentProperty : dag.getClassNames()) {
 
 			if (dag.getReplacementFor(currentProperty) != null) //don't consider the equivalences
 				continue;

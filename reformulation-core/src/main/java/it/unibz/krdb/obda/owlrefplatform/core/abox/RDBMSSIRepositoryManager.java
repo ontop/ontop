@@ -1989,7 +1989,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<Description> classNodesMaps = new HashSet<Description>();
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
-		for (Description node : dag.getClasses()) {
+		for (Description node : dag.getClassNames()) {
 			if (dag.getReplacementFor(node) != null)
 				continue;
 

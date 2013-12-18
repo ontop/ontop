@@ -50,28 +50,7 @@ public class NamedDAGImpl  {
 	 * @return  set of all property (not inverse) in the DAG
 	 */
 	public Set<Property> getRoles(){
-		for (Description r: dag.vertexSet()) {
-			
-			//check in the equivalent nodes if there are properties
-			if (originalDag.isReplacement(r)) {
-				EquivalenceClass<Description> classR = originalDag.getEquivalenceClass(r);
-				if(classR != null) {
-					for (Description e: classR)	{
-						if (e instanceof Property) {
-//							System.out.println("roles: "+ e +" "+ e.getClass());
-							if(!((Property) e).isInverse())
-								roles.add((Property)e);
-						}
-					}
-				}
-			}
-			if (r instanceof Property){
-//				System.out.println("roles: "+ r +" "+ r.getClass());
-				if(!((Property) r).isInverse())
-					roles.add((Property)r);
-			}
-		}
-		return roles;
+		return originalDag.getPropertyNames();
 	}
 
 	/**
@@ -80,27 +59,7 @@ public class NamedDAGImpl  {
 	 */
 	
 	public Set<OClass> getClasses(){
-		for (Description c: dag.vertexSet()) {			
-			//check in the equivalent nodes if there are named classes
-			if (originalDag.isReplacement(c)) {
-				EquivalenceClass<Description> classC = originalDag.getEquivalenceClass(c);
-				if (classC != null) {
-					for (Description e: classC)	{
-						if (e instanceof OClass) {
-//							System.out.println("classes: "+ e +" "+ e.getClass());
-							classes.add((OClass)e);
-						}
-					}
-				}
-			}
-			
-			if (c instanceof OClass) {
-//				System.out.println("classes: "+ c+ " "+ c.getClass());
-				classes.add((OClass)c);
-			}
-
-		}
-		return classes;
+		return originalDag.getClassNames();
 	}
 
 
@@ -108,7 +67,7 @@ public class NamedDAGImpl  {
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
-	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
+	public EquivalenceClass<Description> getEquivalenceClass0(Description desc) {
 		return originalDag.getEquivalenceClass(desc);
 	}
 

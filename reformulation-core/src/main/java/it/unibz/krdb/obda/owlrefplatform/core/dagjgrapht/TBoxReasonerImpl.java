@@ -227,13 +227,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public Set<Description> getEquivalences(Description desc) {
-
 		EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(desc);
-
-		// if there are no equivalent nodes return the node or nothing
-		if (equivalents == null) 
-			return Collections.unmodifiableSet(Collections.singleton(desc));
-				
 		return Collections.unmodifiableSet(equivalents.getMembers());
 	}
 	
@@ -280,7 +274,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			for (DefaultEdge e : dag.edgeSet()) {
 				Description s = dag.getEdgeSource(e);
 				Description t = dag.getEdgeTarget(e);
-
 				modifiedGraph.addEdge(s, t, e);
 			}
 
