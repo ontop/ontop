@@ -34,27 +34,10 @@ public class NamedDAGBuilder {
 	
 	public static NamedDAGImpl getNamedDAG(DAGImpl dag) {
 
-		SimpleDirectedGraph <Description,DefaultEdge>  namedDag = 
-				new SimpleDirectedGraph <Description,DefaultEdge>(DefaultEdge.class);
-
-		// clone all the vertexes and edges from dag
-
-		for (Description v : dag.vertexSet()) {
-			namedDag.addVertex(v);
-		}
-		for (DefaultEdge e : dag.edgeSet()) {
-			Description s = dag.getEdgeSource(e);
-			Description t = dag.getEdgeTarget(e);
-			namedDag.addEdge(s, t, e);
-		}
+		SimpleDirectedGraph <Description,DefaultEdge>  namedDag = dag.getCopy(); 
 
 		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
-		
-		// take classes, roles, equivalences map and replacements from the DAG
-		Set<OClass> namedClasses = dag.getClassNames();
-		Set<Property> property = dag.getPropertyNames();
-
-		
+				
 		/*
 		 * Test with a reversed graph so that the incoming edges 
 		 * represent the parents of the node
@@ -88,7 +71,7 @@ public class NamedDAGBuilder {
 				if (processedNodes.contains(node))
 					continue;
 			
-				if (namedClasses.contains(node) || property.contains(node)) {
+				if (dag.getClassNames().contains(node) || dag.getPropertyNames().contains(node)) {
 					processedNodes.add(node);
 					continue;
 				}
@@ -104,7 +87,7 @@ public class NamedDAGBuilder {
 			
 				Set<Description> namedEquivalences = new LinkedHashSet<Description>();
 				for (Description vertex : dag.getEquivalenceClass(node)) {
-					if (namedClasses.contains(vertex) || property.contains(vertex)) 
+					if (dag.getClassNames().contains(vertex) || dag.getPropertyNames().contains(vertex)) 
 						namedEquivalences.add(vertex);
 				}
 							
