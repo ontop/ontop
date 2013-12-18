@@ -111,7 +111,7 @@ public class NamedDAGBuilder {
 				if(!namedEquivalences.isEmpty())
 				{
 					Description newReference = namedEquivalences.iterator().next();
-					newReference = dag.getReplacementFor(newReference);
+					newReference = dag.getRepresentativeFor(newReference);
 					
 					//replacements.remove(newReference);
 					namedDag.addVertex(newReference);

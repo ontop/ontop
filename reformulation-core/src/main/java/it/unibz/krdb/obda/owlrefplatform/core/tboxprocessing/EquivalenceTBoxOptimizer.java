@@ -160,20 +160,16 @@ public class EquivalenceTBoxOptimizer {
 					for (Set<Description> children : reasoner.getDirectChildren(redundandEquivPropNodeInv)) {
 //						for(Description child:children){
 						Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getReplacementFor(firstChild);
-							if(child==null)
-								child=firstChild;
-							impliedDAG.removeAllEdges(child, redundandEquivPropNodeInv);
-							impliedDAG.addEdge(child, nonredundandPropNodeInv);
+						Description child= impliedDAG.getRepresentativeFor(firstChild);
+						impliedDAG.removeAllEdges(child, redundandEquivPropNodeInv);
+						impliedDAG.addEdge(child, nonredundandPropNodeInv);
 						
 					}
 
 					for (Set<Description> parents : reasoner.getDirectParents(redundandEquivPropNodeInv)) {
 //						for(Description parent:parents){
 							Description firstParent=parents.iterator().next();
-							Description parent= impliedDAG.getReplacementFor(firstParent);
-							if(parent==null)
-								parent=firstParent;
+							Description parent= impliedDAG.getRepresentativeFor(firstParent);
 							impliedDAG.removeAllEdges(parent, redundandEquivPropNodeInv);
 							impliedDAG.addEdge(nonredundandPropNodeInv, parent);
 						
@@ -244,9 +240,7 @@ public class EquivalenceTBoxOptimizer {
 				
 					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode)) {
 						Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getReplacementFor(firstChild);
-							if(child==null)
-								child=firstChild;
+						Description child= impliedDAG.getRepresentativeFor(firstChild);
 						if (!reasoner.getDirectChildren(equivalentNode).contains(child)) {
 							impliedDAG.addEdge(child, equivalentNode);
 						}
@@ -255,9 +249,7 @@ public class EquivalenceTBoxOptimizer {
 
 					for (Set<Description> parents : reasoner.getDirectParents(directRedundantNode)) {
 						Description firstParent=parents.iterator().next();
-						Description parent= impliedDAG.getReplacementFor(firstParent);
-						if(parent==null)
-							parent=firstParent;
+						Description parent= impliedDAG.getRepresentativeFor(firstParent);
 						if (!reasoner.getDirectParents(equivalentNode).contains(parent)) {
 							impliedDAG.addEdge(equivalentNode, parent);
 						}
@@ -302,9 +294,7 @@ public class EquivalenceTBoxOptimizer {
 				
 					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode)) {
 					Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getReplacementFor(firstChild);
-						if(child==null)
-							child=firstChild;
+						Description child= impliedDAG.getRepresentativeFor(firstChild);
 						if (!reasoner.getDirectChildren(equivalentNode).contains(child)) {
 							impliedDAG.addEdge(child, equivalentNode);
 						}
@@ -313,9 +303,7 @@ public class EquivalenceTBoxOptimizer {
 
 					for (Set<Description> parents : reasoner.getDirectParents(directRedundantNode)) {
 						Description firstParent=parents.iterator().next();
-						Description parent= impliedDAG.getReplacementFor(firstParent);
-						if(parent==null)
-							parent=firstParent;
+						Description parent= impliedDAG.getRepresentativeFor(firstParent);
 						if (!reasoner.getDirectParents(equivalentNode).contains(parent)) {
 							impliedDAG.addEdge(equivalentNode, parent);
 						}
@@ -344,8 +332,9 @@ public class EquivalenceTBoxOptimizer {
 		 */
 		Collection<OClass> classNodes = impliedDAG.getClassNames();
 		for (OClass classNode : classNodes) {
-			if(impliedDAG.getReplacementFor(classNode) != null)
+			if(impliedDAG.hasReplacementFor(classNode))
 				continue;
+			
 			OClass classDescription = (OClass) classNode;
 
 			Collection<Description> redundantClasses = new LinkedList<Description>();
@@ -422,9 +411,7 @@ public class EquivalenceTBoxOptimizer {
 		for(Description node:impliedDAG.vertexSet()){
 			for (Set<Description> descendants: reasoner.getDescendants(node)){
 					Description firstDescendant=descendants.iterator().next();
-					Description descendant= impliedDAG.getReplacementFor(firstDescendant);
-					if(descendant==null)
-						descendant=firstDescendant;
+					Description descendant= impliedDAG.getRepresentativeFor(firstDescendant);
 					Axiom axiom = null;
 					if(!descendant.equals(node)){
 					/*

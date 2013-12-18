@@ -82,9 +82,7 @@ public class SigmaTBoxOptimizer {
 		for(Description node:isa.vertexSet()){
 			for (Set<Description> descendants: reasonerIsa.getDescendants(node)){
 					Description firstDescendant=descendants.iterator().next();
-					Description descendant= isa.getReplacementFor(firstDescendant);
-					if(descendant==null)
-						descendant=firstDescendant;
+					Description descendant = isa.getRepresentativeFor(firstDescendant);
 					if(!descendant.equals(node)){
 					/*
 					 * Creating subClassOf or subPropertyOf axioms

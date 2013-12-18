@@ -1945,9 +1945,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			while (!childrenQueue.isEmpty()) {
 				Set<Description> children = childrenQueue.poll();
 				Description firstChild=children.iterator().next();
-				Description child=dag.getReplacementFor(firstChild);
-				if(child==null)
-					child=firstChild;
+				Description child = dag.getRepresentativeFor(firstChild);
 				if(child.equals(node))
 					continue;
 				if ((child instanceof Property)
@@ -1990,7 +1988,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
 		for (Description node : dag.getClassNames()) {
-			if (dag.getReplacementFor(node) != null)
+			if (dag.hasReplacementFor(node))
 				continue;
 
 			classNodesMaps.add(node);

@@ -109,6 +109,7 @@ public class DAGImpl  {
 		return c;
 	}
 	
+	@Deprecated // HACKY VERSION
 	public EquivalenceClass<Description> getEquivalenceClass0(Description desc) {
 		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
 		//if ((c != null) && (c.size() == 1)) {
@@ -119,6 +120,18 @@ public class DAGImpl  {
 		return c;
 	}
 
+	public Description getRepresentativeFor(Description v) {
+		Description rep = replacements.get(v);
+		if (rep != null)   // there is a proper replacement
+			return rep;
+		return v;		   // no replacement -- return the node
+	}
+
+	public boolean hasReplacementFor(Description v) {
+		return (replacements.get(v) != null);
+	}
+
+	@Deprecated 
 	public Description getReplacementFor(Description v) {
 		return replacements.get(v);
 	}
@@ -200,7 +213,7 @@ public class DAGImpl  {
 
 
 	
-	// HACKY METHODS TO BE RID OF (USED ONLY IN IN EquivalenceTBoxOptimizer)
+	// HACKY METHODS TO BE RID OF (USED ONLY IN EquivalenceTBoxOptimizer)
 	@Deprecated 
 	public void setReplacementFor(Description key, Description value) {
 		replacements.put(key, value);	

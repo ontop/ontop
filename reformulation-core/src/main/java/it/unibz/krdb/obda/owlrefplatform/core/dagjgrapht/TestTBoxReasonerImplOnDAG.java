@@ -60,9 +60,7 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		// take the representative node
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 
 		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {
 			
@@ -130,9 +128,7 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 		
 		// take the representative node
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 
 		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
 			Description target = dag.getEdgeTarget(edge);
@@ -195,9 +191,7 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 		
 		// reverse the dag
 		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
@@ -249,9 +243,7 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);

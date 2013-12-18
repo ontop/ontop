@@ -60,9 +60,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
 		// take the representative node
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 
 		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {	
 			Description source = dag.getEdgeSource(edge);
@@ -92,9 +90,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 		
 		// take the representative node
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 
 		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
 			Description target = dag.getEdgeTarget(edge);
@@ -125,9 +121,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 		
 		// reverse the dag
 		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
@@ -181,9 +175,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
-		Description node = dag.getReplacementFor(desc);
-		if (node == null)
-			node = desc;
+		Description node = dag.getRepresentativeFor(desc);
 
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
@@ -306,9 +298,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					// for(Description child:children){
 					// DAGOperations.addParentEdge(child, existsInvNode);
 					Description firstChild = children.iterator().next();
-					Description child = dag.getReplacementFor(firstChild);
-					if (child == null)
-						child = firstChild;
+					Description child = dag.getRepresentativeFor(firstChild);
 					if (!child.equals(existsInvNode))
 						modifiedGraph.addEdge(child, existsInvNode);
 
@@ -318,9 +308,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					// for(Description child:children){
 					// DAGOperations.addParentEdge(child, existsNode);
 					Description firstChild = children.iterator().next();
-					Description child = dag.getReplacementFor(firstChild);
-					if (child == null)
-						child = firstChild;
+					Description child = dag.getRepresentativeFor(firstChild);
 					if (!child.equals(existsNode))
 						modifiedGraph.addEdge(child, existsNode);
 
@@ -334,9 +322,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 				for (Set<Description> parents : parentExist) {
 					Description firstParent = parents.iterator().next();
-					Description parent = dag.getReplacementFor(firstParent);
-					if (parent == null)
-						parent = firstParent;
+					Description parent = dag.getRepresentativeFor(firstParent);
 					if (!parent.equals(existsInvNode))
 						modifiedGraph.addEdge(existsInvNode, parent);
 
@@ -345,9 +331,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 				for (Set<Description> parents : parentsExistInv) {
 					Description firstParent = parents.iterator().next();
-					Description parent = dag.getReplacementFor(firstParent);
-					if (parent == null)
-						parent = firstParent;
+					Description parent = dag.getRepresentativeFor(firstParent);
 					if (!parent.equals(existsInvNode))
 						modifiedGraph.addEdge(existsNode, parent);
 
@@ -369,9 +353,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		for (Description node : dag.vertexSet()) {
 			for (Set<Description> descendants : getDescendants(node)) {
 				Description firstDescendant = descendants.iterator().next();
-				Description descendant = dag.getReplacementFor(firstDescendant);
-				if (descendant == null)
-					descendant = firstDescendant;
+				Description descendant = dag.getRepresentativeFor(firstDescendant);
 
 				if (!descendant.equals(node)) 
 					addToSigma(sigma, descendant, node);
