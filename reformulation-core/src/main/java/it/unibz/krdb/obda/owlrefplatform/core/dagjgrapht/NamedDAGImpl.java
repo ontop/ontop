@@ -122,8 +122,9 @@ public class NamedDAGImpl  {
 	 * @return the node, or its representative, or null if it is not present in the DAG
 	 */
 	public Description getNode(Description node){
-		if (originalDag.hasReplacementFor(node))
-			node = originalDag.getReplacementFor(node);
+		Description replacement = originalDag.getReplacementFor(node);
+		if (replacement != null)
+			node = replacement;
 		else
 			if (!dag.vertexSet().contains(node))
 				node = null;

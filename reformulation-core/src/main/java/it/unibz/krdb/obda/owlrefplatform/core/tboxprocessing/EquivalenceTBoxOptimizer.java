@@ -350,7 +350,7 @@ public class EquivalenceTBoxOptimizer {
 		 */
 		Collection<OClass> classNodes = impliedDAG.getClasses();
 		for (OClass classNode : classNodes) {
-			if(impliedDAG.hasReplacementFor(classNode))
+			if(impliedDAG.getReplacementFor(classNode) != null)
 				continue;
 			OClass classDescription = (OClass) classNode;
 

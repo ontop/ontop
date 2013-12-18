@@ -380,10 +380,10 @@ public class TMappingProcessor implements Serializable {
 		for (Property currentProperty : dag.getRoles()) {
 			/* setting up the queue for the next iteration */
 
-			if (dag.hasReplacementFor(currentProperty)) {
-				/* we only create mappings for named properties and not considering equivalences*/
+			/* we only create mappings for named properties and not considering equivalences*/
+			if (dag.getReplacementFor(currentProperty) != null) 
 				continue;
-			}
+			
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = currentProperty.getPredicate();
@@ -480,9 +480,8 @@ public class TMappingProcessor implements Serializable {
 
 		for (OClass currentProperty : dag.getClasses()) {
 
-			if(dag.hasReplacementFor(currentProperty)) {//don't consider the equivalences
+			if (dag.getReplacementFor(currentProperty) != null) //don't consider the equivalences
 				continue;
-			}
 
 
 

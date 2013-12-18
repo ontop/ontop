@@ -24,10 +24,10 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
  * Allows to reason over the TBox using Named DAG
- * 
+ * TEST ONLY CLASS
  */
 
-public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
+public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	private NamedDAGImpl dag;
 
@@ -38,7 +38,7 @@ public class TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImplOnNamedDAG(NamedDAGImpl dag) {
+	public TestTBoxReasonerImplOnNamedDAG(NamedDAGImpl dag) {
 		this.dag = dag;
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();

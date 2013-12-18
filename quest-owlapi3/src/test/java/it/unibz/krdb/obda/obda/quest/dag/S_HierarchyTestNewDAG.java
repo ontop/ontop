@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImplOnNamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnDAG;
 
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	}
 
 	private static TBoxReasoner getReasoner(NamedDAGImpl dag) {
-		return new TBoxReasonerImplOnNamedDAG(dag);
+		return new TestTBoxReasonerImplOnNamedDAG(dag);
 	}
 
 	private boolean testDescendants(DAGImpl d1, NamedDAGImpl d2, boolean named){

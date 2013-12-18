@@ -131,18 +131,9 @@ public class DAGImpl  {
 	public Description getReplacementFor(Description v) {
 		return replacements.get(v);
 	}
-
-	public boolean hasReplacementFor(Description v) {
-		return replacements.containsKey(v);
-	}
 	
 	public boolean isReplacement(Description v) {
 		return replacements.containsValue(v);
-	}
-
-	
-	public Set<Description> getReplacementKeys() {
-		return replacements.keySet();
 	}
 	
 	
@@ -176,14 +167,13 @@ public class DAGImpl  {
 	 * @param  node a node that we want to know if it is part of the DAG
 	 * @return the node, or its representative, or null if it is not present in the DAG
 	 */
-	public Description getNode(Description node){
+	public Description getNode(Description node) {
 		if(replacements.containsKey(node))
 			node = replacements.get(node);
 		else
 			if(!dag.vertexSet().contains(node))
 				node = null;
 		return node;
-		
 	}
 
 	@Override

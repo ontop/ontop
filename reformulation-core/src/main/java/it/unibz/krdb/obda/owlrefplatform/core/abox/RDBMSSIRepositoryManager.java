@@ -373,7 +373,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private Map<String, Integer> roleIndexes = new HashMap<String, Integer>();
 
-	private Map<Description, Description> equivalentIndex = new HashMap<Description, Description>();
+	//private Map<Description, Description> equivalentIndex = new HashMap<Description, Description>();
 
 	private Map<String, List<Interval>> classIntervals = new HashMap<String, List<Interval>>();
 
@@ -388,7 +388,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private Properties config;
 
 	private DAGImpl dag;
-
+	
 	private TBoxReasonerImpl reasonerDag;
 	
 	private SemanticIndexEngine engine;
@@ -491,14 +491,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		/***
 		 * Copying the equivalences that might get lost from the translation
+		 * Roman: this section is replaced by accessing DAG
 		 */
 		{
 			// Map<Description,Description> isaEquivalences = pureIsa.getReplacements();
-			for (Description d : dag.getReplacementKeys()) {
+			//for (Description d : dag.getReplacementKeys()) {
 				// commented out by Roman -- NamedDag Replacements are inherited from DAG
 				// pureIsa.setReplacementFor(d, dag.getReplacementFor(d)); 
-				equivalentIndex.put(d, dag.getReplacementFor(d));
-			}
+			//	equivalentIndex.put(d, dag.getReplacementFor(d));
+			//}
 			//pureIsa.setReplacements(isaEquivalences);  // commented out by Roman -- no need in resetting the variable
 		}
 		
@@ -765,8 +766,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					if (dag.hasReplacementFor(propDesc)) {
-						Property desc = (Property) dag.getReplacementFor(propDesc);
+					Description propReplacement = dag.getReplacementFor(propDesc);
+					if (propReplacement != null) {
+						Property desc = (Property) propReplacement;
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -829,7 +831,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent */
 				OClass c = (OClass)ofac.createClass(name);
-				OClass equivalent = (OClass)equivalentIndex.get(c);
+				OClass equivalent = (OClass)dag.getReplacementFor(c);
 				return classIndexes.get(equivalent.getPredicate().getName());
 			}
 					
@@ -841,7 +843,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
 				Property c = ofac.createObjectProperty(name);
-				Property equivalent = (Property)equivalentIndex.get(c);
+				Property equivalent = (Property)dag.getReplacementFor(c);
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				
@@ -851,7 +853,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				/* object property equivalent failed, we now look for data property equivalent */
 				
 				c = ofac.createDataProperty(name);
-				equivalent = (Property)equivalentIndex.get(c);
+				equivalent = (Property)dag.getReplacementFor(c);
 				
 				index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				return index1;
@@ -1315,8 +1317,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		if (dag.hasReplacementFor(property)) {
-			Property desc = (Property) dag.getReplacementFor(property);
+		Description propReplacement = dag.getReplacementFor(property);
+		if (propReplacement != null) {
+			Property desc = (Property) propReplacement;
 			if (desc.isInverse()) {
 				return true;
 			}
@@ -1987,7 +1990,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
 		for (Description node : dag.getClasses()) {
-			if(dag.hasReplacementFor(node))
+			if (dag.getReplacementFor(node) != null)
 				continue;
 
 			classNodesMaps.add(node);
