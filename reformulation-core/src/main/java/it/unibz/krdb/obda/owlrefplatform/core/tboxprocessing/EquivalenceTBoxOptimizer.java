@@ -72,15 +72,15 @@ public class EquivalenceTBoxOptimizer {
 	 *
 	 */
 	public void optimize() {
-		DAGImpl impliedDAG = DAGBuilder.getDAG(tbox);
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(impliedDAG);
+		DAGImpl dag = DAGBuilder.getDAG(tbox);
+		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(dag);
 
 		/*
 		 * Processing all properties
 		 */
 		// Collection<Predicate> removedProperties = new HashSet<Predicate>();
 
-		Collection<Description> props = new HashSet<Description>(impliedDAG.vertexSet());
+		Collection<Description> props = new HashSet<Description>(dag.vertexSet());
 		HashSet<Property> removedNodes = new HashSet<Property>();
 
 		for (Description desc : props) {
@@ -104,10 +104,10 @@ public class EquivalenceTBoxOptimizer {
 
 		Description propNodeRange = ofac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
 		
-		if (impliedDAG.containsVertex(propNodeDomain) & impliedDAG.getEquivalenceClass0(propNodeDomain)!=null )
-			impliedDAG.getMapEquivalences().remove(propNodeDomain);
-		if (impliedDAG.containsVertex(propNodeRange) & impliedDAG.getEquivalenceClass0(propNodeRange)!=null )
-			impliedDAG.getMapEquivalences().remove(propNodeRange);
+		if (dag.containsVertex(propNodeDomain) & dag.getEquivalenceClass0(propNodeDomain)!=null )
+			dag.getMapEquivalences().remove(propNodeDomain);
+		if (dag.containsVertex(propNodeRange) & dag.getEquivalenceClass0(propNodeRange)!=null )
+			dag.getMapEquivalences().remove(propNodeRange);
 		
 
 			Collection<Description> equivalents = reasoner.getEquivalences(prop);
@@ -153,44 +153,44 @@ public class EquivalenceTBoxOptimizer {
 						ofac.createProperty(equiProp.getPredicate(), !equiProp.isInverse());
 				
 
-				if (impliedDAG.containsVertex(redundandEquivPropNodeInv)) {
-					impliedDAG.addVertex(nonredundandPropNodeInv); //choose the representative inverse
+				if (dag.containsVertex(redundandEquivPropNodeInv)) {
+					dag.addVertex(nonredundandPropNodeInv); //choose the representative inverse
 					
 //					for (Description child : redundandEquivPropNodeInv.getChildren()) {
 					for (Set<Description> children : reasoner.getDirectChildren(redundandEquivPropNodeInv)) {
 //						for(Description child:children){
 						Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getRepresentativeFor(firstChild);
-						impliedDAG.removeAllEdges(child, redundandEquivPropNodeInv);
-						impliedDAG.addEdge(child, nonredundandPropNodeInv);
+						Description child= dag.getRepresentativeFor(firstChild);
+						dag.removeAllEdges(child, redundandEquivPropNodeInv);
+						dag.addEdge(child, nonredundandPropNodeInv);
 						
 					}
 
 					for (Set<Description> parents : reasoner.getDirectParents(redundandEquivPropNodeInv)) {
 //						for(Description parent:parents){
 							Description firstParent=parents.iterator().next();
-							Description parent= impliedDAG.getRepresentativeFor(firstParent);
-							impliedDAG.removeAllEdges(parent, redundandEquivPropNodeInv);
-							impliedDAG.addEdge(nonredundandPropNodeInv, parent);
+							Description parent= dag.getRepresentativeFor(firstParent);
+							dag.removeAllEdges(parent, redundandEquivPropNodeInv);
+							dag.addEdge(nonredundandPropNodeInv, parent);
 						
 					}
 					
 					
 					
-					impliedDAG.removeVertex(redundandEquivPropNodeInv);
+					dag.removeVertex(redundandEquivPropNodeInv);
 					
 					removedNodes.add((Property) redundandEquivPropNodeInv);
 					
 					//assign the new representative to the equivalent nodes
-					for(Description equivInverse: impliedDAG.getEquivalenceClass0(nonredundandPropNodeInv)){
+					for(Description equivInverse: dag.getEquivalenceClass0(nonredundandPropNodeInv)){
 						if(equivInverse.equals(nonredundandPropNodeInv)){
-							impliedDAG.removeReplacementFor(nonredundandPropNodeInv);
+							dag.removeReplacementFor(nonredundandPropNodeInv);
 							continue;
 						}
-						impliedDAG.setReplacementFor(equivInverse, nonredundandPropNodeInv);
+						dag.setReplacementFor(equivInverse, nonredundandPropNodeInv);
 					}
 					
-					impliedDAG.getMapEquivalences().remove(redundandEquivPropNodeInv);
+					dag.getMapEquivalences().remove(redundandEquivPropNodeInv);
 
 					
 //					removedNodes.add((Property) redundandEquivPropNodeInv);
@@ -201,13 +201,13 @@ public class EquivalenceTBoxOptimizer {
 
 				
 				
-				impliedDAG.removeVertex(equivalent);
+				dag.removeVertex(equivalent);
 
 			}
 			// We clear all equivalents!
 			
 
-			impliedDAG.getMapEquivalences().remove(prop);
+			dag.getMapEquivalences().remove(prop);
 
 		}
 
@@ -224,34 +224,34 @@ public class EquivalenceTBoxOptimizer {
 
 			/* first for the domain */
 			Description directRedundantNode = ofac.getPropertySomeRestriction(redundantProp, false);
-			boolean containsNodeDomain=  impliedDAG.containsVertex(directRedundantNode);
+			boolean containsNodeDomain=  dag.containsVertex(directRedundantNode);
 			if (containsNodeDomain) {
 				Description equivalentNode = ofac.getPropertySomeRestriction(equivalent.getPredicate(),
 						equivalent.isInverse());
-				impliedDAG.addVertex(equivalentNode); 
-				if(impliedDAG.getEquivalenceClass0(equivalentNode)!= null)
+				dag.addVertex(equivalentNode); 
+				if(dag.getEquivalenceClass0(equivalentNode)!= null)
 				{
-					EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass0(equivalentNode);
+					EquivalenceClass<Description> equivalences = dag.getEquivalenceClass0(equivalentNode);
 					equivalences.getMembers().remove(directRedundantNode);
 					
-					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
+					dag.getMapEquivalences().put(equivalentNode, equivalences);
 				}
 
 				
 					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode)) {
 						Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getRepresentativeFor(firstChild);
+						Description child= dag.getRepresentativeFor(firstChild);
 						if (!reasoner.getDirectChildren(equivalentNode).contains(child)) {
-							impliedDAG.addEdge(child, equivalentNode);
+							dag.addEdge(child, equivalentNode);
 						}
 						
 					}
 
 					for (Set<Description> parents : reasoner.getDirectParents(directRedundantNode)) {
 						Description firstParent=parents.iterator().next();
-						Description parent= impliedDAG.getRepresentativeFor(firstParent);
+						Description parent= dag.getRepresentativeFor(firstParent);
 						if (!reasoner.getDirectParents(equivalentNode).contains(parent)) {
-							impliedDAG.addEdge(equivalentNode, parent);
+							dag.addEdge(equivalentNode, parent);
 						}
 						
 					}
@@ -259,16 +259,16 @@ public class EquivalenceTBoxOptimizer {
 				
 				
 				
-				for(Description equivInverse: impliedDAG.getEquivalenceClass0(directRedundantNode)){
+				for(Description equivInverse: dag.getEquivalenceClass0(directRedundantNode)){
 					if(equivInverse.equals(equivalentNode)){
-							impliedDAG.removeReplacementFor(equivalentNode);
+							dag.removeReplacementFor(equivalentNode);
 						continue;
 					}
-					impliedDAG.setReplacementFor(equivInverse,equivalentNode);
+					dag.setReplacementFor(equivInverse,equivalentNode);
 					
 				}
-				impliedDAG.removeReplacementFor(directRedundantNode);
-				impliedDAG.removeVertex(directRedundantNode);
+				dag.removeReplacementFor(directRedundantNode);
+				dag.removeVertex(directRedundantNode);
 								
 
 //				equivalentNode.getDescendants().remove(directRedundantNode);
@@ -277,35 +277,35 @@ public class EquivalenceTBoxOptimizer {
 			/* Now for the range */
 
 			directRedundantNode = ofac.getPropertySomeRestriction(redundantProp, true);
-			boolean  containsNodeRange = impliedDAG.containsVertex(directRedundantNode);
+			boolean  containsNodeRange = dag.containsVertex(directRedundantNode);
 			if (containsNodeRange) {
 				Description equivalentNode = ofac.getPropertySomeRestriction(equivalent.getPredicate(),
 						!equivalent.isInverse());
-				impliedDAG.addVertex(equivalentNode);
+				dag.addVertex(equivalentNode);
 				
-				if(impliedDAG.getEquivalenceClass0(equivalentNode)!= null){
-					EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass0(equivalentNode);
+				if(dag.getEquivalenceClass0(equivalentNode)!= null){
+					EquivalenceClass<Description> equivalences = dag.getEquivalenceClass0(equivalentNode);
 					equivalences.getMembers().remove(directRedundantNode);
 					
-					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
+					dag.getMapEquivalences().put(equivalentNode, equivalences);
 				}
 				
 
 				
 					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode)) {
 					Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getRepresentativeFor(firstChild);
+						Description child= dag.getRepresentativeFor(firstChild);
 						if (!reasoner.getDirectChildren(equivalentNode).contains(child)) {
-							impliedDAG.addEdge(child, equivalentNode);
+							dag.addEdge(child, equivalentNode);
 						}
 						
 					}
 
 					for (Set<Description> parents : reasoner.getDirectParents(directRedundantNode)) {
 						Description firstParent=parents.iterator().next();
-						Description parent= impliedDAG.getRepresentativeFor(firstParent);
+						Description parent= dag.getRepresentativeFor(firstParent);
 						if (!reasoner.getDirectParents(equivalentNode).contains(parent)) {
-							impliedDAG.addEdge(equivalentNode, parent);
+							dag.addEdge(equivalentNode, parent);
 						}
 						
 					}
@@ -313,15 +313,15 @@ public class EquivalenceTBoxOptimizer {
 		
 
 				
-				for(Description equivInverse: impliedDAG.getEquivalenceClass0(directRedundantNode)){
+				for(Description equivInverse: dag.getEquivalenceClass0(directRedundantNode)){
 					if(equivInverse.equals(equivalentNode)) {
-						impliedDAG.removeReplacementFor(equivalentNode);
+						dag.removeReplacementFor(equivalentNode);
 						continue;
 					}
-					impliedDAG.setReplacementFor(equivInverse, equivalentNode);
+					dag.setReplacementFor(equivInverse, equivalentNode);
 				}
-				impliedDAG.removeReplacementFor(directRedundantNode);
-				impliedDAG.removeVertex(directRedundantNode);
+				dag.removeReplacementFor(directRedundantNode);
+				dag.removeVertex(directRedundantNode);
 //				equivalentNode.getDescendants().remove(directRedundantNode);
 			}
 		}
@@ -330,9 +330,9 @@ public class EquivalenceTBoxOptimizer {
 		/*
 		 * Processing all classes
 		 */
-		Collection<OClass> classNodes = impliedDAG.getClassNames();
+		Collection<OClass> classNodes = dag.getClassNames();
 		for (OClass classNode : classNodes) {
-			if(impliedDAG.hasReplacementFor(classNode))
+			if(dag.hasReplacementFor(classNode))
 				continue;
 			
 			OClass classDescription = (OClass) classNode;
@@ -376,21 +376,21 @@ public class EquivalenceTBoxOptimizer {
 				}
 			}
 
-			if(impliedDAG.getEquivalenceClass0(classNode)!=null)
+			if(dag.getEquivalenceClass0(classNode)!=null)
 			{
-				EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass0(classNode);
+				EquivalenceClass<Description> equivalences = dag.getEquivalenceClass0(classNode);
 				equivalences.getMembers().removeAll(redundantClasses);
-				impliedDAG.getMapEquivalences().put(classNode, equivalences);
+				dag.getMapEquivalences().put(classNode, equivalences);
 			}
 			
 
 			
 			for (Description replacement : replacements){
 				
-				EquivalenceClass<Description> equivalences = impliedDAG.getEquivalenceClass0(classNode);
+				EquivalenceClass<Description> equivalences = dag.getEquivalenceClass0(classNode);
 				equivalences.getMembers().add(replacement);
-				impliedDAG.getMapEquivalences().put(classNode, equivalences);
-				impliedDAG.setReplacementFor(replacement, classNode);
+				dag.getMapEquivalences().put(classNode, equivalences);
+				dag.setReplacementFor(replacement, classNode);
 			}
 
 		}
@@ -408,10 +408,10 @@ public class EquivalenceTBoxOptimizer {
 		optimalTBox = ofac.createOntology();
 		
 
-		for(Description node:impliedDAG.vertexSet()){
+		for(Description node:dag.vertexSet()){
 			for (Set<Description> descendants: reasoner.getDescendants(node)){
 					Description firstDescendant=descendants.iterator().next();
-					Description descendant= impliedDAG.getRepresentativeFor(firstDescendant);
+					Description descendant= dag.getRepresentativeFor(firstDescendant);
 					Axiom axiom = null;
 					if(!descendant.equals(node)){
 					/*

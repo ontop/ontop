@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
@@ -34,15 +33,11 @@ public class NamedDAGImpl  {
 	private final DAGImpl originalDag;
 	private SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
-	private Set<OClass> classes = new LinkedHashSet<OClass> ();
-	private Set<Property> roles = new LinkedHashSet<Property> ();
-	
 	// constructor is accessible within the package only
 	NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, DAGImpl originalDag) {
 		this.dag = dag;
 		this.originalDag = originalDag;
 	}
-	
 	
 	
 	/**
@@ -67,12 +62,12 @@ public class NamedDAGImpl  {
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
-	public EquivalenceClass<Description> getEquivalenceClass0(Description desc) {
+	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
 		return originalDag.getEquivalenceClass(desc);
 	}
 
-	public Description getReplacementFor(Description v) {
-		return originalDag.getReplacementFor(v);
+	public Description getRepresentativeFor(Description v) {
+		return originalDag.getRepresentativeFor(v);
 	}
 
 	/**
