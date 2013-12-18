@@ -25,7 +25,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_2_0_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_0");
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, TBoxReasonerImpl.getSigma(ontology));
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, SigmaTBoxOptimizer.getSigma(ontology));
 		List<Axiom> rv = reduction.reduce();
 		assertEquals(0, rv.size());
 	}
@@ -33,7 +33,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_2_0_1() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_1");
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, TBoxReasonerImpl.getSigma(ontology));
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, SigmaTBoxOptimizer.getSigma(ontology));
 		List<Axiom> rv = reduction.reduce();
 		assertEquals(0, rv.size());
 	}
@@ -41,7 +41,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_2_1_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_1_0");
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, TBoxReasonerImpl.getSigma(ontology));
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, SigmaTBoxOptimizer.getSigma(ontology));
 		List<Axiom> rv = reduction.reduce();
 		assertEquals(1, rv.size());
 	}
@@ -49,7 +49,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_1_2_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_1_2_0");
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology,TBoxReasonerImpl.getSigma(ontology));
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, SigmaTBoxOptimizer.getSigma(ontology));
 		List<Axiom> rv = reduction.reduce();
 		assertEquals(0, rv.size());
 	}

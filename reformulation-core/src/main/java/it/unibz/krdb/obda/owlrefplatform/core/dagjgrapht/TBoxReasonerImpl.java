@@ -16,7 +16,6 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -372,116 +371,51 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public Ontology getSigmaOntology() {
 		OntologyFactory descFactory = new OntologyFactoryImpl();
-
 		Ontology sigma = descFactory.createOntology("sigma");
 
-		// DAGEdgeIterator edgeiterator = new DAGEdgeIterator(dag);
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-		// for(DefaultEdge edge: dag.edgeSet()){
-		// while (edgeiterator.hasNext()) {
-		// Edge edge = edgeiterator.next();
 		for (Description node : dag.vertexSet()) {
 			for (Set<Description> descendants : getDescendants(node)) {
 				Description firstDescendant = descendants.iterator().next();
 				Description descendant = dag.getReplacementFor(firstDescendant);
 				if (descendant == null)
 					descendant = firstDescendant;
-//				Axiom axiom = null;
-				/*
-				 * Creating subClassOf or subPropertyOf axioms
-				 */
-				if (!descendant.equals(node)) {
-					if (descendant instanceof ClassDescription) {
-						ClassDescription sub = (ClassDescription) descendant;
-						ClassDescription superp = (ClassDescription) node;
-						if (superp instanceof PropertySomeRestriction)
-							continue;
 
-						Axiom ax = fac.createSubClassAxiom(sub, superp);
-						sigma.addEntities(ax.getReferencedEntities());
-						sigma.addAssertion(ax);
-					} else {
-						Property sub = (Property) descendant;
-						Property superp = (Property) node;
-
-						Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-						sigma.addEntities(ax.getReferencedEntities());
-
-						sigma.addAssertion(ax);
-					}
-
-				}
+				if (!descendant.equals(node)) 
+					addToSigma(sigma, descendant, node);
 			}
 			for (Description equivalent : getEquivalences(node)) {
-				if (!equivalent.equals(node)) {
-					Axiom ax = null;
-					if (node instanceof ClassDescription) {
-						ClassDescription sub = (ClassDescription) node;
-						ClassDescription superp = (ClassDescription) equivalent;
-						if (!(superp instanceof PropertySomeRestriction)) {
-							ax = fac.createSubClassAxiom(sub, superp);
-							sigma.addEntities(ax.getReferencedEntities());
-							sigma.addAssertion(ax);
-						}
-
-					} else {
-						Property sub = (Property) node;
-						Property superp = (Property) equivalent;
-
-						ax = fac.createSubPropertyAxiom(sub, superp);
-						sigma.addEntities(ax.getReferencedEntities());
-						sigma.addAssertion(ax);
-
-					}
-
-					if (equivalent instanceof ClassDescription) {
-						ClassDescription sub = (ClassDescription) equivalent;
-						ClassDescription superp = (ClassDescription) node;
-						if (!(superp instanceof PropertySomeRestriction)) {
-							ax = fac.createSubClassAxiom(sub, superp);
-							sigma.addEntities(ax.getReferencedEntities());
-							sigma.addAssertion(ax);
-						}
-
-					} else {
-						Property sub = (Property) equivalent;
-						Property superp = (Property) node;
-
-						ax = fac.createSubPropertyAxiom(sub, superp);
-						sigma.addEntities(ax.getReferencedEntities());
-						sigma.addAssertion(ax);
-
-					}
-
+				if (!equivalent.equals(node))  {
+					addToSigma(sigma, node, equivalent);
+					addToSigma(sigma, equivalent, node);					
 				}
-
 			}
 		}
-		// }
 
 		return sigma;
 	}
-
-	public static Ontology getSigma(Ontology ontology) {
-		OntologyFactory descFactory = new OntologyFactoryImpl();
-		Ontology sigma = descFactory.createOntology("sigma");
-		sigma.addConcepts(ontology.getConcepts());
-		sigma.addRoles(ontology.getRoles());
-		for (Axiom assertion : ontology.getAssertions()) {
-
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
-				Description parent = inclusion.getSuper();
-
-				if (parent instanceof PropertySomeRestriction) {
-					continue;
-				}
-			}
-
-			sigma.addAssertion(assertion);
-		}
-
-		sigma.saturate();
-		return sigma;
+	
+	/**
+	 * Creating subClassOf or subPropertyOf axioms
+	 */
+	
+	private static void addToSigma(Ontology sigma, Description subn, Description supern) {
+		OntologyFactory fac = OntologyFactoryImpl.getInstance();
+		
+		if (subn instanceof ClassDescription) {
+			ClassDescription sub = (ClassDescription) subn;
+			ClassDescription superp = (ClassDescription) supern;
+			if (!(superp instanceof PropertySomeRestriction))
+				addToSigma(sigma, fac.createSubClassAxiom(sub, superp));
+		} 
+		else {
+			Property sub = (Property) subn;
+			Property superp = (Property) supern;
+			addToSigma(sigma, fac.createSubPropertyAxiom(sub, superp));
+		}		
+	}
+	
+	private static void addToSigma(Ontology sigma, Axiom ax) {
+		sigma.addEntities(ax.getReferencedEntities());
+		sigma.addAssertion(ax);		
 	}
 }

@@ -29,8 +29,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.Serializable;
@@ -60,11 +58,11 @@ public class TMappingProcessor implements Serializable {
 
 	private final Ontology aboxDependencies;
 
-	private final NamedDAGImpl pureIsa;
+	// private final NamedDAGImpl pureIsa;
 	
 	private final TBoxReasonerImpl reasoner;
 
-	private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
+	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
 	boolean optimize = true;
 
@@ -74,7 +72,7 @@ public class TMappingProcessor implements Serializable {
 		dag = DAGBuilder.getDAG(tbox);
 		reasoner = new TBoxReasonerImpl(dag);
 
-		pureIsa = NamedDAGBuilder.getNamedDAG(dag);
+		// pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 
 		aboxDependencies =  reasoner.getSigmaOntology();
 	}

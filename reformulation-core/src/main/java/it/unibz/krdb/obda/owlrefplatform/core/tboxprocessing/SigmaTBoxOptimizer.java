@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -59,18 +60,18 @@ public class SigmaTBoxOptimizer {
 		this.originalOntology = isat;
 		this.originalSigma = sigmat;
 		
-		this.isa = DAGBuilder.getDAG(isat);
-		reasonerIsa = new TBoxReasonerImpl(this.isa);
+		isa = DAGBuilder.getDAG(isat);
+		reasonerIsa = new TBoxReasonerImpl(isa);
 		
-		this.sigma = DAGBuilder.getDAG(sigmat);
-		TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(this.sigma);
+		sigma = DAGBuilder.getDAG(sigmat);
+		TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigma);
 		
-		this.isaChain = reasonerIsa.getChainDAG();
-		reasonerIsaChain = new TBoxReasonerImpl(this.isaChain);
+		isaChain = reasonerIsa.getChainDAG();
+		reasonerIsaChain = new TBoxReasonerImpl(isaChain);
 		//reasonerIsaChain.convertIntoChainDAG();
 		
-		this.sigmaChain =  reasonerSigma.getChainDAG();
-		reasonerSigmaChain = new TBoxReasonerImpl(this.sigmaChain);
+		sigmaChain =  reasonerSigma.getChainDAG();
+		reasonerSigmaChain = new TBoxReasonerImpl(sigmaChain);
 		//reasonerSigmaChain.convertIntoChainDAG();
 	}
 
@@ -221,6 +222,29 @@ public class SigmaTBoxOptimizer {
 		boolean redundant =spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
 		return (redundant);
 
+	}
+
+	public static Ontology getSigma(Ontology ontology) {
+		OntologyFactory descFactory = new OntologyFactoryImpl();
+		Ontology sigma = descFactory.createOntology("sigma");
+		sigma.addConcepts(ontology.getConcepts());
+		sigma.addRoles(ontology.getRoles());
+		for (Axiom assertion : ontology.getAssertions()) {
+
+			if (assertion instanceof SubClassAxiomImpl) {
+				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
+				Description parent = inclusion.getSuper();
+
+				if (parent instanceof PropertySomeRestriction) {
+					continue;
+				}
+			}
+
+			sigma.addAssertion(assertion);
+		}
+
+		sigma.saturate();
+		return sigma;
 	}
 
 }

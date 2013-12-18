@@ -22,6 +22,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -47,7 +48,7 @@ public class SigmaTest extends TestCase {
 
         
        
-        Ontology ontologySigma = TBoxReasonerImpl.getSigma(ontology);
+        Ontology ontologySigma = SigmaTBoxOptimizer.getSigma(ontology);
         DAGImpl res = DAGBuilder.getDAG(ontologySigma);
         TBoxReasonerImpl sigma = new TBoxReasonerImpl(res);
 
