@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -33,6 +31,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class NamedDAGImpl  {
 	
+	private DAGImpl originalDag;
 	private SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	private Set<OClass> classes = new LinkedHashSet<OClass> ();
@@ -41,13 +40,10 @@ public class NamedDAGImpl  {
 	//map between an element  and the representative between the equivalent elements
 	private Map<Description, Description> replacements; 
 	
-	//map of the equivalent elements of an element
-	private Map<Description, Set<Description>> equivalencesMap; 
-
 	// constructor is accessible within the package only
-	NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, Map<Description, Set<Description>> equivalencesMap, Map<Description, Description> replacements) {
+	NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, DAGImpl originalDag, Map<Description, Description> replacements) {
 		this.dag = dag;
-		this.equivalencesMap = equivalencesMap;
+		this.originalDag = originalDag;
 		this.replacements = replacements;
 	}
 	
@@ -58,20 +54,20 @@ public class NamedDAGImpl  {
 	 * @return  set of all property (not inverse) in the DAG
 	 */
 	public Set<Property> getRoles(){
-		for (Description r: dag.vertexSet()){
+		for (Description r: dag.vertexSet()) {
 			
 			//check in the equivalent nodes if there are properties
-			if(replacements.containsValue(r)){
-			if(equivalencesMap.get(r)!=null){
-				for (Description e: equivalencesMap.get(r))	{
-					if (e instanceof Property){
-//						System.out.println("roles: "+ e +" "+ e.getClass());
-						if(!((Property) e).isInverse())
-							roles.add((Property)e);
-						
+			if(replacements.containsValue(r)) {
+				EquivalenceClass<Description> classR = originalDag.getEquivalenceClass(r);
+				if(classR != null) {
+					for (Description e: classR)	{
+						if (e instanceof Property) {
+//							System.out.println("roles: "+ e +" "+ e.getClass());
+							if(!((Property) e).isInverse())
+								roles.add((Property)e);
+						}
+					}
 				}
-				}
-			}
 			}
 			if (r instanceof Property){
 //				System.out.println("roles: "+ r +" "+ r.getClass());
@@ -91,9 +87,9 @@ public class NamedDAGImpl  {
 		for (Description c: dag.vertexSet()) {			
 			//check in the equivalent nodes if there are named classes
 			if (replacements.containsValue(c)) {
-				if (equivalencesMap.get(c)!=null) {
-				
-					for (Description e: equivalencesMap.get(c))	{
+				EquivalenceClass<Description> classC = originalDag.getEquivalenceClass(c);
+				if (classC != null) {
+					for (Description e: classC)	{
 						if (e instanceof OClass) {
 //							System.out.println("classes: "+ e +" "+ e.getClass());
 							classes.add((OClass)e);
@@ -116,8 +112,8 @@ public class NamedDAGImpl  {
 	 * Allows to have the  map with equivalences
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
-	public Set<Description> getEquivalenceClass(Description desc) {
-		return equivalencesMap.get(desc);
+	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
+		return originalDag.getEquivalenceClass(desc);
 	}
 
 	public Description getReplacementFor(Description v) {
@@ -130,6 +126,7 @@ public class NamedDAGImpl  {
 	@Deprecated
 	public void setReplacementFor(Description key, Description value) {
 		replacements.put(key, value);	
+		// ONE USE ONLY
 	}
 
 	/**

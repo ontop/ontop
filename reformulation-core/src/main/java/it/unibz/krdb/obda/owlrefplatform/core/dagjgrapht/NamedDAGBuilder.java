@@ -37,7 +37,6 @@ public class NamedDAGBuilder {
 	
 	public static NamedDAGImpl getNamedDAG(DAGImpl dag) {
 
-		Map<Description, Set<Description>> equivalencesMap = new HashMap<Description, Set<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();;
 
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag = 
@@ -63,24 +62,13 @@ public class NamedDAGBuilder {
 		Set<Property> property = dag.getRoles();
 
 		// clone the equivalences and replacements map
-		Map<Description, EquivalenceClass<Description>> equivalencesDag = dag.getMapEquivalences();
-		
-		for (Description vertex : equivalencesDag.keySet()) {
-			
-				HashSet<Description> equivalents = new HashSet<Description>();
-				for (Description equivalent : equivalencesDag.get(vertex)) {
-					equivalents.add(equivalent);
-				}
-				equivalencesMap.put(vertex, new HashSet<Description>(equivalents));
-		}
-		
 		for (Description eliminateNode : dag.getReplacementKeys()) {
 
 			Description referent = dag.getReplacementFor(eliminateNode);
 			replacements.put(eliminateNode, referent);
 		}
 
-		GraphIterator<Description, DefaultEdge> orderIterator;
+		
 
 		/*
 		 * Test with a reversed graph so that the incoming edges 
@@ -107,7 +95,7 @@ public class NamedDAGBuilder {
 		 * 
 		 * 
 		 */
-		orderIterator =
+			GraphIterator<Description, DefaultEdge> orderIterator =
 				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
 		
 		
@@ -118,8 +106,7 @@ public class NamedDAGBuilder {
 			if(processedNodes.contains(node))
 				continue;
 			
-			if (namedClasses.contains(node) | property.contains(node)) {
-				
+			if (namedClasses.contains(node) || property.contains(node)) {
 				processedNodes.add(node);
 				continue;
 			}
@@ -147,9 +134,8 @@ public class NamedDAGBuilder {
 							Description target = copyDAG.getEdgeTarget(outEdge);
 							namedDag.removeAllEdges(node, target);
 
-							if (source.equals(target))
-								continue;
-							namedDag.addEdge(source, target);
+							if (!source.equals(target))
+								namedDag.addEdge(source, target);
 						}
 
 					}
@@ -163,22 +149,37 @@ public class NamedDAGBuilder {
 				}
 			}
 			
-			Set<Description> namedEquivalences = getNamedEquivalences(dag, node);
+			Set<Description> namedEquivalences;
+			{
+				EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(node);
+
+				// if there are no equivalent nodes return the node or nothing
+				if (equivalents == null) {				
+						if (namedClasses.contains(node) || property.contains(node)) 
+							namedEquivalences = Collections.singleton(node);
+						
+						else  //  empty set if (desc) is not a named class or property
+							namedEquivalences = Collections.emptySet();
+				}
+				else {
+					namedEquivalences = new LinkedHashSet<Description>();
+					for (Description vertex : equivalents) {
+						if (namedClasses.contains(vertex) || property.contains(vertex)) 
+							namedEquivalences.add(vertex);
+					}
+				}
+			}
+			
+			
 			if(!namedEquivalences.isEmpty())
 			{
-				Description newReference= namedEquivalences.iterator().next();
+				 Description newReference = namedEquivalences.iterator().next();
 				 replacements.remove(newReference);
 				 namedDag.addVertex(newReference);
 				
-				 Set<Description> allEquivalences = reasoner.getEquivalences(node);
-				 Iterator<Description> e= allEquivalences.iterator();
-				 while(e.hasNext()){
-					 Description vertex =e.next();
-				 
-					 if(vertex.equals(newReference))
-						 continue;
-				 
-				 replacements.put(vertex, newReference);
+				 for (Description vertex : reasoner.getEquivalences(node)) {
+					 if(!vertex.equals(newReference))
+						 replacements.put(vertex, newReference);					 
 				 }
 				 
 				 /*
@@ -237,9 +238,8 @@ public class NamedDAGBuilder {
 										Description target = copyDAG.getEdgeTarget(outEdge);
 										namedDag.removeAllEdges(posNode, target);
 
-										if (source.equals(target))
-											continue;
-										namedDag.addEdge(source, target);
+										if (!source.equals(target))
+											namedDag.addEdge(source, target);
 									}
 
 								}
@@ -272,9 +272,8 @@ public class NamedDAGBuilder {
 						Description target = copyDAG.getEdgeTarget(outEdge);
 						namedDag.removeAllEdges(node, target);
 
-						if (source.equals(target))
-							continue;
-						namedDag.addEdge(source, target);
+						if (!source.equals(target))
+							namedDag.addEdge(source, target);
 					}
 
 				}
@@ -287,36 +286,7 @@ public class NamedDAGBuilder {
 		
 		}
 		
-		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, equivalencesMap, replacements);
+		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, dag, replacements);
 		return dagImpl;
 	}
-	
-	private static Set<Description> getNamedEquivalences(DAGImpl dag, Description desc) {
-
-		Set<OClass> namedClasses = dag.getClasses();
-		Set<Property> property = dag.getRoles();
-	
-		EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(desc);
-
-		// if there are no equivalent nodes return the node or nothing
-		if (equivalents == null) {
-			
-				if (namedClasses.contains(desc) | property.contains(desc)) {
-					return Collections.unmodifiableSet(Collections.singleton(desc));
-				} 
-				else { // return empty set if the node we are considering
-						// (desc) is not a named class or property
-					return Collections.emptySet();
-				}
-		}
-		
-		Set<Description> equivalences = new LinkedHashSet<Description>();
-			for (Description vertex : equivalents) {
-				if (namedClasses.contains(vertex) | property.contains(vertex)) {
-						equivalences.add(vertex);
-				}
-			}
-		return Collections.unmodifiableSet(equivalences);
-	}
-	
 }

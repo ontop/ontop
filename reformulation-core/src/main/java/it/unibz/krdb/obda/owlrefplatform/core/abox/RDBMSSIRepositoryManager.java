@@ -48,7 +48,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.BufferedWriter;
@@ -498,7 +497,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		{
 			// Map<Description,Description> isaEquivalences = pureIsa.getReplacements();
 			for (Description d : dag.getReplacementKeys()) {
-				pureIsa.setReplacementFor(d, dag.getReplacementFor(d));
+				// commented out by Roman -- NamedDag Replacements are inherited from DAG
+				// NOT QUITE!
+				pureIsa.setReplacementFor(d, dag.getReplacementFor(d)); 
 				equivalentIndex.put(d, dag.getReplacementFor(d));
 			}
 			//pureIsa.setReplacements(isaEquivalences);  // commented out by Roman -- no need in resetting the variable
