@@ -32,19 +32,15 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 public class NamedDAGImpl  {
 	
 	private final DAGImpl originalDag;
-	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
+	private SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	private Set<OClass> classes = new LinkedHashSet<OClass> ();
 	private Set<Property> roles = new LinkedHashSet<Property> ();
 	
-	//map between an element  and the representative between the equivalent elements
-	private Map<Description, Description> replacements; 
-	
 	// constructor is accessible within the package only
-	NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, DAGImpl originalDag, Map<Description, Description> replacements) {
+	NamedDAGImpl(SimpleDirectedGraph<Description,DefaultEdge> dag, DAGImpl originalDag) {
 		this.dag = dag;
 		this.originalDag = originalDag;
-		this.replacements = replacements;
 	}
 	
 	
@@ -57,7 +53,7 @@ public class NamedDAGImpl  {
 		for (Description r: dag.vertexSet()) {
 			
 			//check in the equivalent nodes if there are properties
-			if(replacements.containsValue(r)) {
+			if (originalDag.isReplacement(r)) {
 				EquivalenceClass<Description> classR = originalDag.getEquivalenceClass(r);
 				if(classR != null) {
 					for (Description e: classR)	{
@@ -86,7 +82,7 @@ public class NamedDAGImpl  {
 	public Set<OClass> getClasses(){
 		for (Description c: dag.vertexSet()) {			
 			//check in the equivalent nodes if there are named classes
-			if (replacements.containsValue(c)) {
+			if (originalDag.isReplacement(c)) {
 				EquivalenceClass<Description> classC = originalDag.getEquivalenceClass(c);
 				if (classC != null) {
 					for (Description e: classC)	{
@@ -117,16 +113,7 @@ public class NamedDAGImpl  {
 	}
 
 	public Description getReplacementFor(Description v) {
-		return replacements.get(v);
-	}
-
-	/**
-	 * Allows to set the map with replacements
-	 */
-	@Deprecated
-	public void setReplacementFor(Description key, Description value) {
-		replacements.put(key, value);	
-		// ONE USE ONLY
+		return originalDag.getReplacementFor(v);
 	}
 
 	/**
@@ -135,10 +122,10 @@ public class NamedDAGImpl  {
 	 * @return the node, or its representative, or null if it is not present in the DAG
 	 */
 	public Description getNode(Description node){
-		if(replacements.containsKey(node))
-			node = replacements.get(node);
+		if (originalDag.hasReplacementFor(node))
+			node = originalDag.getReplacementFor(node);
 		else
-			if(!dag.vertexSet().contains(node))
+			if (!dag.vertexSet().contains(node))
 				node = null;
 		return node;	
 	}

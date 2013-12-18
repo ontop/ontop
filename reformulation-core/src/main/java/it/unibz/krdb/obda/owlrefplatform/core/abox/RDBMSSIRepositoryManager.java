@@ -490,14 +490,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 
 		/***
-		 * Copying the equivalences that might bet lost from the translation
+		 * Copying the equivalences that might get lost from the translation
 		 */
 		{
 			// Map<Description,Description> isaEquivalences = pureIsa.getReplacements();
 			for (Description d : dag.getReplacementKeys()) {
 				// commented out by Roman -- NamedDag Replacements are inherited from DAG
-				// NOT QUITE!
-				pureIsa.setReplacementFor(d, dag.getReplacementFor(d)); 
+				// pureIsa.setReplacementFor(d, dag.getReplacementFor(d)); 
 				equivalentIndex.put(d, dag.getReplacementFor(d));
 			}
 			//pureIsa.setReplacements(isaEquivalences);  // commented out by Roman -- no need in resetting the variable

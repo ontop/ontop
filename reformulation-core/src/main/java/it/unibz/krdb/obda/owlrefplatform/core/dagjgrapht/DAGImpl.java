@@ -135,7 +135,12 @@ public class DAGImpl  {
 	public boolean hasReplacementFor(Description v) {
 		return replacements.containsKey(v);
 	}
+	
+	public boolean isReplacement(Description v) {
+		return replacements.containsValue(v);
+	}
 
+	
 	public Set<Description> getReplacementKeys() {
 		return replacements.keySet();
 	}

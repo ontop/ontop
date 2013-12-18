@@ -27,8 +27,6 @@ import org.jgrapht.traverse.GraphIterator;
 
 public class NamedDAGBuilder {
 
-
-
 	/**
 	 * Constructor for the NamedDAGBuilder
 	 * @param dag the DAG from which we want to maintain only the named descriptions
@@ -47,7 +45,6 @@ public class NamedDAGBuilder {
 		for (DefaultEdge e : dag.edgeSet()) {
 			Description s = dag.getEdgeSource(e);
 			Description t = dag.getEdgeTarget(e);
-
 			namedDag.addEdge(s, t, e);
 		}
 
@@ -57,15 +54,7 @@ public class NamedDAGBuilder {
 		Set<OClass> namedClasses = dag.getClasses();
 		Set<Property> property = dag.getRoles();
 
-		// clone the equivalences and replacements map
-		Map<Description, Description> replacements = new HashMap<Description, Description>();
-		for (Description eliminateNode : dag.getReplacementKeys()) {
-			Description referent = dag.getReplacementFor(eliminateNode);
-			replacements.put(eliminateNode, referent);
-		}
-
 		
-
 		/*
 		 * Test with a reversed graph so that the incoming edges 
 		 * represent the parents of the node
@@ -84,119 +73,103 @@ public class NamedDAGBuilder {
 		
 		for (Description root: roots) {
 		
-		/* 
-		 * A depth first sort from each root of the DAG.
-		 * If the node is named we keep it, otherwise we remove it and 
-		 * we connect all its descendants to all its ancestors.
-		 * 
-		 * 
-		 */
+			/* 
+			 * A depth first sort from each root of the DAG.
+			 * If the node is named we keep it, otherwise we remove it and 
+			 * we connect all its descendants to all its ancestors.
+			 */
 			GraphIterator<Description, DefaultEdge> orderIterator =
-				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
+				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);	
 		
-		
-		while (orderIterator.hasNext()) 
-		{
-			Description node = orderIterator.next();
-			
-			if (processedNodes.contains(node))
-				continue;
-			
-			if (namedClasses.contains(node) || property.contains(node)) {
-				processedNodes.add(node);
-				continue;
-			}
-			
-			if (node instanceof Property)
+			while (orderIterator.hasNext()) 
 			{
-				Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
-				if(processedNodes.contains(posNode))
-				{
-					eliminateNode(namedDag, node);
-					processedNodes.add(node);					
+				Description node = orderIterator.next();
+			
+				if (processedNodes.contains(node))
+					continue;
+			
+				if (namedClasses.contains(node) || property.contains(node)) {
+					processedNodes.add(node);
 					continue;
 				}
-			}
 			
-			EquivalenceClass<Description> equivalenceClassInDag = dag.getEquivalenceClass(node);
+				if (node instanceof Property) {
+					Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
+					if (processedNodes.contains(posNode)) {
+						eliminateNode(namedDag, node);
+						processedNodes.add(node);					
+						continue;
+					}
+				}
+			
+				EquivalenceClass<Description> equivalenceClassInDag = dag.getEquivalenceClass(node);
 
-			Set<Description> namedEquivalences;
-			{
-				// if there are no equivalent nodes return the node or nothing
-				if (equivalenceClassInDag == null) {				
+				Set<Description> namedEquivalences;
+				{
+					// if there are no equivalent nodes return the node or nothing
+					if (equivalenceClassInDag == null) {				
 						if (namedClasses.contains(node) || property.contains(node)) 
 							namedEquivalences = Collections.singleton(node);
 						
-						else  //  empty set if (desc) is not a named class or property
+						else  //  empty set if node is not a named class or property
 							namedEquivalences = Collections.emptySet();
-				}
-				else {
-					namedEquivalences = new LinkedHashSet<Description>();
-					for (Description vertex : equivalenceClassInDag) {
-						if (namedClasses.contains(vertex) || property.contains(vertex)) 
-							namedEquivalences.add(vertex);
+					}
+					else {
+						namedEquivalences = new LinkedHashSet<Description>();
+						for (Description vertex : equivalenceClassInDag) {
+							if (namedClasses.contains(vertex) || property.contains(vertex)) 
+								namedEquivalences.add(vertex);
+						}
 					}
 				}
-			}
 			
 			
-			if(!namedEquivalences.isEmpty())
-			{
-				 Description newReference = namedEquivalences.iterator().next();
-				 replacements.remove(newReference);
-				 namedDag.addVertex(newReference);
+				if(!namedEquivalences.isEmpty())
+				{
+					Description newReference = namedEquivalences.iterator().next();
+					newReference = dag.getReplacementFor(newReference);
+					
+					//replacements.remove(newReference);
+					namedDag.addVertex(newReference);
 				
-				 if (equivalenceClassInDag != null)
-					 for (Description vertex : equivalenceClassInDag) {
-						 if (!vertex.equals(newReference))
-							 replacements.put(vertex, newReference);					 
-					 }
-				 
-				 /*
+					/*
 					 * Re-pointing all links to and from the eliminated node to the new
 					 * representative node
 					 */
 					
-					 for (DefaultEdge incEdge : namedDag.incomingEdgesOf(node)) {
-						 Description source = namedDag.getEdgeSource(incEdge);
-						 namedDag.removeAllEdges(source, node);
+					for (DefaultEdge incEdge : namedDag.incomingEdgesOf(node)) {
+						Description source = namedDag.getEdgeSource(incEdge);
+						namedDag.removeAllEdges(source, node);
 					
-						 if (!source.equals(newReference))
-							 namedDag.addEdge(source, newReference);
-					 }
+						if (!source.equals(newReference))
+							namedDag.addEdge(source, newReference);
+					}
 					
-					 for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(node)) {
-						 Description target = namedDag.getEdgeTarget(outEdge);
-						 namedDag.removeAllEdges(node, target);
+					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(node)) {
+						Description target = namedDag.getEdgeTarget(outEdge);
+						namedDag.removeAllEdges(node, target);
 					
-						 if (!target.equals(newReference))
-							 namedDag.addEdge(newReference, target);
-					 }
+						if (!target.equals(newReference))
+							namedDag.addEdge(newReference, target);
+					}
 					
-					 namedDag.removeVertex(node);
-					 processedNodes.add(node);
+					namedDag.removeVertex(node);
+					processedNodes.add(node);
 					 
-					 /*remove the invertex*/
-					 
-					 	if(node instanceof Property)
-					 	{
-					 		Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
-							
-							eliminateNode(namedDag, posNode);
-							
-							continue;
-						}
-			}
-			else {
-				eliminateNode(namedDag, node);
-				processedNodes.add(node);
-			}
-			
-		}
+					if (node instanceof Property) {
+						/*remove the inverse */
+						Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
+						eliminateNode(namedDag, posNode);
+					}
+				}
+				else {
+					eliminateNode(namedDag, node);
+					processedNodes.add(node);
+				}
+			} // end while
+		} // end for each root
 		
-		}
-		
-		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, dag, replacements);
+		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, dag);
 		return dagImpl;
 	}
 	
@@ -224,8 +197,6 @@ public class NamedDAGBuilder {
 			}
 
 		}
-
 		namedDag.removeVertex(node);		
-	}
-	
+	}	
 }
