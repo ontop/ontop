@@ -381,7 +381,7 @@ public class TMappingProcessor implements Serializable {
 			/* setting up the queue for the next iteration */
 
 			/* we only create mappings for named properties and not considering equivalences*/
-			if (dag.getReplacementFor(currentProperty) != null) 
+			if (dag.hasReplacementFor(currentProperty)) 
 				continue;
 			
 
@@ -480,7 +480,7 @@ public class TMappingProcessor implements Serializable {
 
 		for (OClass currentProperty : dag.getClassNames()) {
 
-			if (dag.getReplacementFor(currentProperty) != null) //don't consider the equivalences
+			if (dag.hasReplacementFor(currentProperty)) //don't consider the equivalences
 				continue;
 
 

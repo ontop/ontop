@@ -174,7 +174,7 @@ public class DAGImpl  {
 		if(replacements.containsKey(node))
 			node = replacements.get(node);
 		else
-			if(!dag.vertexSet().contains(node))
+			if(!containsVertex(node))
 				node = null;
 		return node;
 	}

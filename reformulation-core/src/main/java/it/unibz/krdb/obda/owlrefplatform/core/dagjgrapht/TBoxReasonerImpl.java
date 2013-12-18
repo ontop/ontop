@@ -379,18 +379,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		if (subn instanceof ClassDescription) {
 			ClassDescription sub = (ClassDescription) subn;
 			ClassDescription superp = (ClassDescription) supern;
-			if (!(superp instanceof PropertySomeRestriction))
-				addToSigma(sigma, fac.createSubClassAxiom(sub, superp));
+			if (!(superp instanceof PropertySomeRestriction)) {
+				Axiom ax = fac.createSubClassAxiom(sub, superp);
+				sigma.addEntities(ax.getReferencedEntities());
+				sigma.addAssertion(ax);						
+			}
 		} 
 		else {
 			Property sub = (Property) subn;
 			Property superp = (Property) supern;
-			addToSigma(sigma, fac.createSubPropertyAxiom(sub, superp));
+			Axiom ax = fac.createSubPropertyAxiom(sub, superp);
+			sigma.addEntities(ax.getReferencedEntities());
+			sigma.addAssertion(ax);						
 		}		
-	}
-	
-	private static void addToSigma(Ontology sigma, Axiom ax) {
-		sigma.addEntities(ax.getReferencedEntities());
-		sigma.addAssertion(ax);		
 	}
 }
