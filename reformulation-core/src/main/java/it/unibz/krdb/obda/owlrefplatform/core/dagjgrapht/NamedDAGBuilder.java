@@ -99,7 +99,7 @@ public class NamedDAGBuilder {
 		{
 			Description node = orderIterator.next();
 			
-			if(processedNodes.contains(node))
+			if (processedNodes.contains(node))
 				continue;
 			
 			if (namedClasses.contains(node) || property.contains(node)) {
@@ -107,38 +107,13 @@ public class NamedDAGBuilder {
 				continue;
 			}
 			
-			if(node instanceof Property)
+			if (node instanceof Property)
 			{
 				Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
 				if(processedNodes.contains(posNode))
 				{
-					Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
-							namedDag.incomingEdgesOf(node));
-
-					// I do a copy of the dag not to remove edges that I still need to
-					// consider in the loops
-					SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
-								(SimpleDirectedGraph <Description,DefaultEdge>)namedDag.clone();
-					Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
-							copyDAG.outgoingEdgesOf(node));
-					for (DefaultEdge incEdge : incomingEdges) {
-
-						Description source = namedDag.getEdgeSource(incEdge);
-						namedDag.removeAllEdges(source, node);
-
-						for (DefaultEdge outEdge : outgoingEdges) {
-							Description target = copyDAG.getEdgeTarget(outEdge);
-							namedDag.removeAllEdges(node, target);
-
-							if (!source.equals(target))
-								namedDag.addEdge(source, target);
-						}
-
-					}
-
-					namedDag.removeVertex(node);
-					processedNodes.add(node);
-					
+					eliminateNode(namedDag, node);
+					processedNodes.add(node);					
 					continue;
 				}
 			}
@@ -203,65 +178,17 @@ public class NamedDAGBuilder {
 					 
 					 /*remove the invertex*/
 					 
-					 if(node instanceof Property)
-						{
-							Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
+					 	if(node instanceof Property)
+					 	{
+					 		Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
 							
-								Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
-										namedDag.incomingEdgesOf(posNode));
-
-								// I do a copy of the dag not to remove edges that I still need to
-								// consider in the loops
-								SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
-											(SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
-								Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
-										copyDAG.outgoingEdgesOf(posNode));
-								for (DefaultEdge incEdge : incomingEdges) {
-
-									Description source = namedDag.getEdgeSource(incEdge);
-									namedDag.removeAllEdges(source, posNode);
-
-									for (DefaultEdge outEdge : outgoingEdges) {
-										Description target = copyDAG.getEdgeTarget(outEdge);
-										namedDag.removeAllEdges(posNode, target);
-
-										if (!source.equals(target))
-											namedDag.addEdge(source, target);
-									}
-
-								}
-
-								namedDag.removeVertex(posNode);				
+							eliminateNode(namedDag, posNode);
 							
-								continue;
-							}
+							continue;
+						}
 			}
 			else {
-				Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
-						namedDag.incomingEdgesOf(node));
-
-				// I do a copy of the dag not to remove edges that I still need to
-				// consider in the loops
-				SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
-							(SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
-				Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
-						copyDAG.outgoingEdgesOf(node));
-				for (DefaultEdge incEdge : incomingEdges) {
-
-					Description source = namedDag.getEdgeSource(incEdge);
-					namedDag.removeAllEdges(source, node);
-
-					for (DefaultEdge outEdge : outgoingEdges) {
-						Description target = copyDAG.getEdgeTarget(outEdge);
-						namedDag.removeAllEdges(node, target);
-
-						if (!source.equals(target))
-							namedDag.addEdge(source, target);
-					}
-
-				}
-
-				namedDag.removeVertex(node);
+				eliminateNode(namedDag, node);
 				processedNodes.add(node);
 			}
 			
@@ -272,4 +199,33 @@ public class NamedDAGBuilder {
 		NamedDAGImpl dagImpl = new NamedDAGImpl(namedDag, dag, replacements);
 		return dagImpl;
 	}
+	
+	private static void eliminateNode(SimpleDirectedGraph <Description,DefaultEdge>  namedDag, Description node) {
+		Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
+				namedDag.incomingEdgesOf(node));
+
+		// I do a copy of the dag not to remove edges that I still need to
+		// consider in the loops
+		SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
+					(SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
+		Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
+				copyDAG.outgoingEdgesOf(node));
+		for (DefaultEdge incEdge : incomingEdges) {
+
+			Description source = namedDag.getEdgeSource(incEdge);
+			namedDag.removeAllEdges(source, node);
+
+			for (DefaultEdge outEdge : outgoingEdges) {
+				Description target = copyDAG.getEdgeTarget(outEdge);
+				namedDag.removeAllEdges(node, target);
+
+				if (!source.equals(target))
+					namedDag.addEdge(source, target);
+			}
+
+		}
+
+		namedDag.removeVertex(node);		
+	}
+	
 }
