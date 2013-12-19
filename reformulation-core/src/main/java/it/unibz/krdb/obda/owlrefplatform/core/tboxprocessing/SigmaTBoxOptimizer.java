@@ -20,8 +20,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -79,10 +77,6 @@ public class SigmaTBoxOptimizer {
 			}
 		}
 		return optimizedTBox;
-	}
-
-	private List<Axiom> reduce() {
-		return new LinkedList<Axiom>(getReducedOntology().getAssertions());
 	}
 
 	private void addToTBox(Ontology rv, Description sub, Description sup) {
@@ -162,4 +156,49 @@ public class SigmaTBoxOptimizer {
 		boolean redundant = spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
 		return redundant;
 	}
+	
+	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
+		OntologyFactory descFactory = new OntologyFactoryImpl();
+		Ontology sigma = descFactory.createOntology("sigma");
+
+		for (Set<Description> nodes : reasoner.getNodes()) {
+			Description node = reasoner.getRepresentativeFor(nodes);
+			for (Set<Description> descendants : reasoner.getDescendants(node)) {
+				Description descendant = reasoner.getRepresentativeFor(descendants);
+
+				if (!descendant.equals(node)) 
+					addToSigma(sigma, descendant, node);
+			}
+			for (Description equivalent : reasoner.getEquivalences(node)) {
+				if (!equivalent.equals(node))  {
+					addToSigma(sigma, node, equivalent);
+					addToSigma(sigma, equivalent, node);					
+				}
+			}
+		}
+
+		return sigma;
+	}
+	
+	/**
+	 * Creating subClassOf or subPropertyOf axioms
+	 */
+	
+	private static void addToSigma(Ontology sigma, Description subn, Description supern) {
+		OntologyFactory fac = OntologyFactoryImpl.getInstance();
+		
+		if (subn instanceof ClassDescription) {
+			if (!(supern instanceof PropertySomeRestriction)) {
+				Axiom ax = fac.createSubClassAxiom((ClassDescription) subn, (ClassDescription) supern);
+				sigma.addEntities(ax.getReferencedEntities());
+				sigma.addAssertion(ax);						
+			}
+		} 
+		else {
+			Axiom ax = fac.createSubPropertyAxiom((Property) subn, (Property) supern);
+			sigma.addEntities(ax.getReferencedEntities());
+			sigma.addAssertion(ax);						
+		}		
+	}
+	
 }

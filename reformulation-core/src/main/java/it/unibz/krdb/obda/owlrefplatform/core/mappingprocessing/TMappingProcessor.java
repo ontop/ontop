@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -72,9 +73,7 @@ public class TMappingProcessor implements Serializable {
 		dag = DAGBuilder.getDAG(tbox);
 		reasoner = new TBoxReasonerImpl(dag);
 
-		// pureIsa = NamedDAGBuilder.getNamedDAG(dag);
-
-		aboxDependencies =  reasoner.getSigmaOntology();
+		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 	}
 
 	/***

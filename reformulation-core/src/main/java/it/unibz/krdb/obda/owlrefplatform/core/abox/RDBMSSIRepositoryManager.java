@@ -49,6 +49,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -475,14 +476,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		reasonerDag = new TBoxReasonerImpl(dag);
 		
-		
+		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
+				
 		
 		//build the namedDag (or pureIsa)
 		NamedDAGImpl pureIsa = NamedDAGBuilder.getNamedDAG(dag);
 		
-		aboxDependencies =  reasonerDag.getSigmaOntology();
-		
-
 		//create the indexes
 		engine = new SemanticIndexEngineImpl(pureIsa);
 		

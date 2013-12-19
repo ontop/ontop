@@ -49,7 +49,7 @@ public class SigmaTest extends TestCase {
         
        
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology ontologySigma = reasoner.getSigmaOntology();
+		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
         TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
 
         assertTrue(sigma.getDescendants(ac).contains(sigma.getEquivalences(er)));

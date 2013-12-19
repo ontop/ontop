@@ -25,7 +25,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_2_0_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_0");
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = reasoner.getSigmaOntology();
+		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
 		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
@@ -35,7 +35,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_2_0_1() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_1");
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = reasoner.getSigmaOntology();
+		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
 		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
@@ -45,7 +45,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_2_1_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_1_0");
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = reasoner.getSigmaOntology();
+		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
 		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
@@ -55,7 +55,7 @@ public class SemanticReductionTest extends TestCase {
 	public void test_1_2_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_1_2_0");
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = reasoner.getSigmaOntology();
+		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
 		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
