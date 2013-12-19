@@ -76,6 +76,8 @@ public class SemanticReductionTest extends TestCase {
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, OntologyFactoryImpl.getInstance().createOntology());
 		List<Axiom> rv = reduction.reduce();
 		//System.out.println(rv);
+		for (Axiom a : rv)
+			System.out.println(a);
 		assertEquals(45, rv.size());
 	}
 }
