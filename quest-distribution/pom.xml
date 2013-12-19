@@ -1,46 +1,45 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.9</version>
+		<artifactId>ontop</artifactId>
+		<groupId>it.unibz.inf.ontop</groupId>
+		<version>1.10.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>quest-distribution</artifactId>
-	<name>quest-distribution</name>
+	<artifactId>ontop-distribution</artifactId>
+	<name>ontop-distribution</name>
 	<description>Builds the distribution files for quest and the core apis.</description>
 	
 	<dependencies>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-owlapi3</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-owlapi3</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-reformulation-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-db</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-db</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>quest-sesame</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-sesame</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -57,7 +56,6 @@
 			 <plugin>
         		<groupId>org.apache.maven.plugins</groupId>
         		<artifactId>maven-jar-plugin</artifactId>
-        		<version>2.3</version> <!-- replace with correct version nbr! -->
         		<configuration>
           			<excludes>
             			<exclude>jetty/*</exclude>
@@ -75,6 +73,13 @@
 						<descriptor>quest-sesame-bin.xml</descriptor>
 						<descriptor>dependencies.xml</descriptor>
 					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 		</plugins>

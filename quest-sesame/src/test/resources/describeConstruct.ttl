@@ -1,5 +1,0 @@
-@prefix : <http://www.semanticweb.org/ontologies/test#> .
-<http://example.org/C> :p1 "Cname".
-<http://example.org/B>   :p2   <http://example.org/A>.
-<http://example.org/A>   :p2   <http://example.org/D>.
-<http://example.org/C> :p1 "no name" .

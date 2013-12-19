@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.9</version>
+		<artifactId>ontop</artifactId>
+		<groupId>it.unibz.inf.ontop</groupId>
+		<version>1.10.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>reformulation-core</artifactId>
-	<name>quest-core</name>
+	<artifactId>ontop-reformulation-core</artifactId>
+	<name>ontop-reformulation-core</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -41,6 +39,10 @@
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency> 
 
+ 		<dependency>
+  			<groupId>net.sf.jgrapht</groupId>
+  			<artifactId>jgrapht</artifactId>
+		</dependency>
 			
 		<dependency>
 			<groupId>postgresql</groupId>
@@ -53,30 +55,13 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.jgraph</groupId>
-			<artifactId>jgrapht</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jgraph</groupId>
-			<artifactId>jgraph</artifactId>
-		</dependency> -->
+
+			
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
 		</dependency>     
 	</dependencies>
-	
-	<repositories>
-		<repository>
-		  <releases>
-                <enabled>true</enabled>
-            </releases>
-			<id>bonecp-repo</id>
-			<name>BoneCP Repository</name>
-			<url>http://jolbox.com/bonecp/downloads/maven</url>
-		</repository>
-	</repositories>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -89,11 +74,9 @@
 				<version>2.3.2</version>
 				<configuration>
 					
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<excludes>
-						<exclude>**/TBoxDAGImpl.java</exclude>
-						<exclude>**/dagjgrapht/*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
 					<testExcludes>

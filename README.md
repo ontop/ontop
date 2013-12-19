@@ -1,4 +1,4 @@
-[![Build Status](https://www.travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
+[![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 Ontop
 ==================
@@ -8,13 +8,17 @@ virtual RDF graphs defined through mappings to RDBMS.
 
 Licensing terms 
 --------------------
-License information can be found in the file LICENSE.txt
+The -ontop- framework is available under the Apache License, Version 2.0
+
+All documentation is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike-3.0]
+(http://creativecommons.org/licenses/by-nc-sa/3.0/) license.
+
 
 Compiling, packing, testing, etc.
 --------------------
 The project is a [Maven](http://maven.apache.org/) project. Compiling, running the unit tests, building the release binaries all can be done using maven. To make it more practical we created several .sh scripts that you can run on any unix environment that has maven installed. The scripts are located in the folder 'scripts', look at that folder for more information.
 
-Currently we use Maven 3 and Java 6 to build the project.
+Currently we use Maven 3 and Java 7 to build the project.
 
 Code organization
 --------------------

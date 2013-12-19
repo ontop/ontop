@@ -1,18 +1,38 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
+
+/*
+ * #%L
+ * ontop-quest-owlapi3
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ResultSet;
+import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.impl.DisjointClassAxiomImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -126,6 +146,8 @@ public class QuestOWL extends OWLReasonerBase {
 	private boolean prepared = false;
 
 	private boolean questready = false;
+	
+	private Axiom inconsistent = null;
 
 	// / holds the error that quest had when initializing
 	private String errorMessage = "";
@@ -218,14 +240,8 @@ public class QuestOWL extends OWLReasonerBase {
 
 	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
-			OWLReasonerRuntimeException owlReasonerRuntimeException = new OWLReasonerRuntimeException(
-					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) {
-
-						/**
-						 * 
-						 */
-				private static final long serialVersionUID = 1L;
-				};
+			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
+					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) ;
 				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
 			throw owlReasonerRuntimeException;
 		}
@@ -483,9 +499,103 @@ public class QuestOWL extends OWLReasonerBase {
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+	public boolean isConsistent(){
 		return true;
 	}
+	
+	//info to return which axiom was inconsistent during the check
+	public Axiom getInconsistentAxiom() {
+		return inconsistent;
+	}
+	
+	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
+		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
+	}
+	
+	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+		boolean isConsistent = true;
+		
+		//deal with disjoint classes
+		Set<DisjointDescriptionAxiom> disjointAxioms = translatedOntologyMerge.getDisjointDescriptionAxioms();
+		Iterator<DisjointDescriptionAxiom> it = disjointAxioms.iterator();
+		
+		//create ask query
+		String strQueryClass = "ASK {?x a <%s>; a <%s> }";
+		String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+		String strQuery = "";
+		
+		while (isConsistent && it.hasNext()) {		
+			
+			DisjointDescriptionAxiom dda = it.next();
+			if (dda instanceof DisjointClassAxiom) {
+				DisjointClassAxiom dc = (DisjointClassAxiom)dda;
+				strQuery = String.format(strQueryClass, dc.getFirst(), dc.getSecond());
+			} else if (dda instanceof DisjointPropertyAxiom) {
+				DisjointPropertyAxiom dp = (DisjointPropertyAxiom) dda;
+				strQuery = String.format(strQueryProp, dp.getFirst(), dp.getSecond());
+			}
+			
+			QuestStatement query;
+			try {
+				query = conn.createStatement();
+				ResultSet rs = query.execute(strQuery);
+				TupleResultSet trs = ((TupleResultSet)rs);
+				if (trs!= null && trs.nextRow()){
+					String value = trs.getConstant(0).getValue();
+					boolean b = Boolean.parseBoolean(value);
+					isConsistent = !b;
+					if (!isConsistent) {
+						inconsistent = dda;
+					}
+					trs.close();
+				}
+				
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return isConsistent;
+	}
+	
+	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+		boolean isConsistent = true;
+		
+		//deal with functional properties
+		Set<PropertyFunctionalAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
+		Iterator<PropertyFunctionalAxiom> itf = funcPropAxioms.iterator();
+		
+		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
+		String strQuery = "";
+		
+		while (isConsistent && itf.hasNext()) {
+			
+			PropertyFunctionalAxiom pfa = itf.next();
+			String propFunc = pfa.getReferencedEntities().iterator().next().getName();
+			strQuery = String.format(strQueryFunc, propFunc, propFunc);
+			
+			QuestStatement query;
+			try {
+				query = conn.createStatement();
+				ResultSet rs = query.execute(strQuery);
+				TupleResultSet trs = ((TupleResultSet)rs);
+				if (trs!= null && trs.nextRow()){
+					String value = trs.getConstant(0).getValue();
+					boolean b = Boolean.parseBoolean(value);
+					isConsistent = !b;
+					if (!isConsistent) {
+						inconsistent = pfa;
+					}
+					trs.close();
+				}
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return isConsistent;
+	}
+	
 
 	public boolean isSatisfiable(OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {

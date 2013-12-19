@@ -1,14 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>obdalib-parent</artifactId>
-		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.9</version>
+		<artifactId>ontop</artifactId>
+		<groupId>it.unibz.inf.ontop</groupId>
+		<version>1.10.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>quest-owlapi3</artifactId>
-	<name>quest-owlapi3</name>
+	<artifactId>ontop-quest-owlapi3</artifactId>
+	<name>ontop-quest-owlapi3</name>
 
 	<dependencies>
 		<dependency>
@@ -27,25 +26,26 @@
 				<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>reformulation-core</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-reformulation-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-sesame</artifactId>
-			<version>1.9</version>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-sesame</artifactId>
+			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-api</artifactId>
@@ -54,10 +54,7 @@
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-runtime</artifactId>
-		</dependency> -->
+		
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -69,22 +66,10 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-model</artifactId>
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-api</artifactId>
-		</dependency> -->
-		<!-- <dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-turtle</artifactId>
-		</dependency> -->
+		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	
@@ -95,8 +80,8 @@
 				<version>2.3.2</version>
 				<configuration>
 					
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<testExcludes>
 						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
@@ -113,9 +98,7 @@
         <version>2.16</version>
         <configuration>
           <excludes>
-          	<!-- Known issue, this test is currently failing, it was ignored in 1.9 release -->
-			<exclude>**/PropertyCharacteristicTest.java</exclude>
-			<!-- H2 case sensitivity is failing (sometimes) -->
+          	<!-- H2 case sensitivity is failing (sometimes) -->
 			<exclude>**/MetaMappingVirtualABoxTest.java</exclude>
           </excludes>
         </configuration>

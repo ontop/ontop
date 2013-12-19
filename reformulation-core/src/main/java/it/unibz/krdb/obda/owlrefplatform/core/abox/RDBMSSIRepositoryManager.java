@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
@@ -41,11 +53,14 @@ import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.Interval;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -386,8 +401,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private DAG dag;
 
-	// private DAG pureIsa;
+	 private DAG pureIsa;
 
+	private TBoxReasoner reasonerDag;
+	
+	private TBoxReasoner reasonerIsa;
+	
+	private SemanticIndexEngine engine;
+	
 	private Ontology aboxDependencies;
 
 	private Ontology ontology;
@@ -466,46 +487,47 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * nodes are, the DAGNode for P, and the top most inverse children of P
 		 */
 
-		dag = DAGConstructor.getISADAG(ontology);
+		reasonerDag = new TBoxReasonerImpl(ontology,false);
+		
+		dag=reasonerDag.getDAG();
+		
+		
+		//build the namedDag (or pureIsa)
+		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
+		
+		pureIsa = transform.getDAG();
+		
+		reasonerIsa = new TBoxReasonerImpl(pureIsa);
 
-		// USE THE DAG GRAPHS FOR DEBUGGING
-		//
-		// try {
-		// GraphGenerator.dumpISA(dag, "given");
-		// } catch (IOException e1) {
-		// e1.printStackTrace();
-		// }
+		aboxDependencies =  reasonerDag.getSigmaOntology();
+		
 
-		dag.clean();
+		//create the indexes
+		engine= new SemanticIndexEngineImpl(reasonerIsa);
+		
 
-		DAG pureIsa = DAGConstructor.filterPureISA(dag);
-		aboxDependencies = DAGConstructor.getSigmaOntology(dag);
 
-		pureIsa.clean();
-		pureIsa.index();
-
-		DAGOperations.buildAncestors(dag);
-		DAGOperations.buildDescendants(dag);
 
 		/***
 		 * Copying the equivalences that might bet lost from the translation
 		 */
-		for (Description d : dag.equi_mappings.keySet()) {
-			pureIsa.equi_mappings.put(d, dag.equi_mappings.get(d));
-			equivalentIndex.put(d, dag.equi_mappings.get(d));
+		Map<Description,Description> isaEquivalences =pureIsa.getReplacements();
+		for (Description d : dag.getReplacements().keySet()) {
+			isaEquivalences.put(d, dag.getReplacements().get(d));
+			equivalentIndex.put(d, dag.getReplacements().get(d));
 		}
-
+		pureIsa.setReplacements(isaEquivalences);
+		
 		/*
 		 * Creating cache of semantic indexes and ranges
 		 */
-		Set<Description> descriptions = pureIsa.allnodes.keySet();
+		Set<Description> descriptions = ((DAGImpl)pureIsa).vertexSet();
 		for (Description description : descriptions) {
 			if (description instanceof OClass) {
 
 				OClass cdesc = (OClass) description;
-				DAGNode node = pureIsa.get(description);
-				int idx = node.getIndex();
-				List<Interval> intervals = node.getRange().getIntervals();
+				int idx = engine.getIndex(description);
+				List<Interval> intervals = engine.getIntervals(description);
 
 				String iri = cdesc.getPredicate().getName();
 				classIndexes.put(iri, idx);
@@ -519,9 +541,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					continue;
 				}
 
-				DAGNode node = pureIsa.get(description);
-				int idx = node.getIndex();
-				List<Interval> intervals = node.getRange().getIntervals();
+
+				int idx = engine.getIndex(description);
+
+				List<Interval> intervals = engine.getIntervals(description);
 
 				String iri = cdesc.getPredicate().getName();
 				roleIndexes.put(iri, idx);
@@ -698,9 +721,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					// Property propDesc = ofac.createProperty(propPred);
 
 					int idx = getIndex(attributeABoxAssertion.getPredicate().getName(), 2);
+					// Description node = pureIsa.getNode(propDesc);
+					//int idx = engine.getIndex(node);
 
-					// DAGNode node = pureIsa.getRoleNode(propDesc);
-					// int idx = node.getIndex();
+
+
 
 					switch (attributeType) {
 					case LITERAL:
@@ -756,8 +781,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					if (dag.equi_mappings.containsKey(propDesc)) {
-						Property desc = (Property) dag.equi_mappings.get(propDesc);
+					if (dag.getReplacements().containsKey(propDesc)) {
+						Property desc = (Property) dag.getReplacements()
+								.get(propDesc);
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -768,8 +794,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 							c2isBNode = tmpIsBnode;
 						}
 					}
-					// DAGNode node = pureIsa.getRoleNode(propDesc);
-					// int idx = node.getIndex();
+					//Description node = pureIsa.getNode(propDesc);
+					//int idx = engine.getIndex(node);
 
 					int idx = getIndex(roleABoxAssertion.getPredicate().getName(), 2);
 
@@ -794,9 +820,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// ClassDescription clsDesc = ofac.createClass(clsPred);
 				//
 				int idx = getIndex(classAssertion.getPredicate().getName(), 1);
-				//
-				// DAGNode node = pureIsa.getClassNode(clsDesc);
-				// int idx = node.getIndex();
+
+				//Description node = pureIsa.getNode(clsDesc);
+				//int idx = engine.getIndex(node);
 
 				out.append(String.format(cls_insert_str, getQuotedString(uri), idx, c1isBNode));
 			}
@@ -994,7 +1020,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.close();
 	}
 
-	@Override
+@Override
+
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
@@ -1305,8 +1332,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		if (dag.equi_mappings.containsKey(property)) {
-			Property desc = (Property) dag.equi_mappings.get(property);
+		if (dag.getReplacements().containsKey(property)) {
+			Property desc = (Property) dag.getReplacements().get(property);
 			if (desc.isInverse()) {
 				return true;
 			}
@@ -1316,310 +1343,319 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private int getConceptIndex(Predicate concept) {
 		return getIndex(concept.getName(), 1);
-		// Integer idxc = indexes.get(concept);
-		// if (idxc == null) {
-		// ClassDescription description = ofac.createClass(concept);
-		// DAGNode node = pureIsa.getClassNode(description);
-		// if (node == null) {
-		// log.error("Found class without node: " + concept);
-		// }
-		// idxc = new Integer(node.getIndex());
-		// indexes.put(concept, idxc);
-		// }
-		// return idxc.intValue();
+		/* Integer idxc = indexes.get(concept);
+		if (idxc == null) {
+			ClassDescription description = ofac.createClass(concept);
+			Description node = pureIsa.getNode(description);
+			if (node == null) {
+				log.error("Found class without node: " + concept);
+			}
+			idxc = new Integer(engine.getIndex(node));
+			indexes.put(concept, idxc);
+		}
+		return idxc.intValue(); */
 	}
 
-	// /***
-	// * We register that the mappings that store data related to this assertion
-	// * is not empty. Given any assertion there are two mappings that become
-	// * non-empty. the "DL" style mapping and the "Triple" style mapping. For
-	// * example, given the assertion Class('mariano'), where mariano is a URI,
-	// * the mappings with the following head become non-empty:
-	// * <p>
-	// * Class(uri(x))
-	// * <p>
-	// * triple(uri(x),uri(rdf:type),uri(Class))
-	// *
-	// * <p>
-	// * Note, this method also takes into account the ontology in that an ABox
-	// * assertion about a role R affects non-emptyness about any S such that R
-	// * subPropertyOf S, similar for concept hierarchies, domain, range and
-	// * inverse inferences.
-	// */
-	// private void assertNonEmptyness(Assertion assertion) {
-	//
-	// if (assertion instanceof BinaryAssertion) {
-	// BinaryAssertion ba = (BinaryAssertion) assertion;
-	//
-	// /*
-	// * getting the data for each term
-	// */
-	// Predicate p = ba.getPredicate();
-	//
-	// Predicate typeSubject = dfac.getTypePredicate(ba.getValue1().getType());
-	// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
-	// Predicate typeObject = dfac.getTypePredicate(ba.getValue2().getType());
-	//
-	// Function fsubject;
-	// if (ba.getValue1().getType() != COL_TYPE.LITERAL_LANG) {
-	// fsubject = dfac.getFunctionalTerm(typeSubject, dfac.getVariable("x"));
-	// } else {
-	// fsubject = dfac.getFunctionalTerm(typeSubject, dfac.getVariable("x"),
-	// dfac.getVariable("x2"));
+	/***
+	 * We register that the mappings that store data related to this assertion
+	 * is not empty. Given any assertion there are two mappings that become
+	 * non-empty. the "DL" style mapping and the "Triple" style mapping. For
+	 * example, given the assertion Class('mariano'), where mariano is a URI,
+	 * the mappings with the following head become non-empty:
+	 * <p>
+	 * Class(uri(x))
+	 * <p>
+	 * triple(uri(x),uri(rdf:type),uri(Class))
+	 * 
+	 * <p>
+	 * Note, this method also takes into account the ontology in that an ABox
+	 * assertion about a role R affects non-emptyness about any S such that R
+	 * subPropertyOf S, similar for concept hierarchies, domain, range and
+	 * inverse inferences.
+	 */
+	 // private void assertNonEmptyness(Assertion assertion) {
+
+		// if (assertion instanceof BinaryAssertion) {
+			// BinaryAssertion ba = (BinaryAssertion) assertion;
+
+			// /*
+			 // * getting the data for each term
+			 // */
+			// Predicate p = ba.getPredicate();
+
+			// Predicate typeSubject = dfac.getTypePredicate(ba.getValue1()
+					// .getType());
+			// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
+			// Predicate typeObject = dfac.getTypePredicate(ba.getValue2()
+					// .getType());
+
+			// Function fsubject;
+			// if (ba.getValue1().getType() != COL_TYPE.LITERAL_LANG) {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"));
+			// } else {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"), dfac.getVariable("x2"));
+			// }
+
+			// Function fpredicate = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getURIConstant(p.getName()));
+			// Function fobject;
+
+			// if (ba.getValue2().getType() != COL_TYPE.LITERAL_LANG) {
+				// fobject = dfac.getFunctionalTerm(typeObject,
+						// dfac.getVariable("y"));
+			// } else {
+				// fobject = dfac.getFunctionalTerm(typeObject,
+						// dfac.getVariable("y"), dfac.getVariable("y2"));
+			// }
+
+			// // DL style head
+			// Function headDL = dfac.getFunctionalTerm(p, fsubject, fobject);
+
+			// // Triple style head
+			// Function headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
+
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+
+			// /*
+			 // * Dealing with emptyness of upper level roles in the hierarchy
+			 // */
+
+			// Description node = dag.getNode(ofac.createProperty(p));
+			
+			// //get ancestors has also the equivalent nodes
+			// Set<Set<Description>> parents = reasonerDag.getAncestors(node, false);
+			
+			
+			// for (Set<Description> parent : parents) 
+			// {
+				// for(Description desc: parent)
+				// {
+					
+				// Property parentProp = (Property) desc;
+				// Predicate parentP = parentProp.getPredicate();
+				// boolean inverse = parentProp.isInverse();
+
+				// fpredicate = dfac.getFunctionalTerm(typePredicate,
+						// dfac.getURIConstant(parentP.getName()));
+
+				// // DL style head
+				// if (!inverse)
+					// headDL = dfac.getFunctionalTerm(parentP, fsubject, fobject);
+				// else
+					// headDL = dfac.getFunctionalTerm(parentP, fobject, fsubject);
+
+				// // Triple style head
+				// if (!inverse)
+					// headTriple = dfac.getFunctionalTerm(
+							// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject,
+							// fpredicate, fobject);
+				// else
+					// headTriple = dfac.getFunctionalTerm(
+							// OBDAVocabulary.QUEST_TRIPLE_PRED, fobject,
+							// fpredicate, fsubject);
+
+				// assertNonEmptyness(headDL);
+				// assertNonEmptyness(headTriple);
+				
+				// }
+			// }
+
+			// /*
+			 // * Dealing with domain and range inferences
+			 // */
+
+			// /*
+			 // * First domain (inverse false for \exists R)
+			 // */
+			// Description d = ofac.createPropertySomeRestriction(p, false);
+			// Description dagNode = dag.getNode(d);
+			// parents = reasonerDag.getAncestors(dagNode, false); //get ancestors has already the equivalences of dagNode
+// //			parents.add(reasonerDag.getEquivalences(dagNode, false));
+			
+			
+			// for (Set<Description> parent : parents) {
+				// // DL style head
+				// for(Description desc:parent)
+				// {
+				// ClassDescription classDescription = (ClassDescription) desc;
+
+				// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
+						// fsubject, classDescription);
+				// }
+			// }
+
+			// /*
+			 // * First range (inverse true for \exists R^-)
+			 // */
+			// d = ofac.createPropertySomeRestriction(p, true);
+			// dagNode = dag.getNode(d);
+			// parents = reasonerDag.getAncestors(dagNode, false);
+// //			parents.add(reasonerDag.getEquivalences(dagNode, false));
+			
+			
+			// for (Set<Description> parent : parents) {
+				// // DL style head
+				// for(Description desc:parent)
+				// {
+					
+				
+				// ClassDescription classDescription = (ClassDescription) desc;
+
+				// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
+						// fsubject, classDescription);
+				// }
+			// }
+
+		// } else if (assertion instanceof UnaryAssertion) {
+			// UnaryAssertion ua = (UnaryAssertion) assertion;
+
+			// /*
+			 // * getting the data for each term
+			 // */
+			// Predicate p = ua.getPredicate();
+
+			// Predicate typeSubject = dfac.getTypePredicate(ua.getValue()
+					// .getType());
+			// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
+			// Predicate typeObject = dfac.getUriTemplatePredicate(1);
+
+			// Function fsubject;
+			// if (ua.getValue().getType() != COL_TYPE.LITERAL_LANG) {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"));
+			// } else {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"), dfac.getVariable("x2"));
+			// }
+
+			// Function fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
+			// Function fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getURIConstant(p.getName()));
+
+			// // DL style head
+			// Function headDL = dfac.getFunctionalTerm(p, fsubject);
+
+			// // Triple style head
+			// Function headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
+
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+
+			// /*
+			 // * Asserting non-emptyness for all the super classes of the current
+			 // * class
+			 // */
+
+			// Description node = dag.getNode(ofac.createClass(p));
+			// Set<Set<Description>> parents = reasonerDag.getAncestors(node, false);
+			
+			// for (Set<Description> parent : parents) {
+				// // DL style head
+				// for(Description desc:parent)
+				// {
+				// ClassDescription classDescription = (ClassDescription) desc;
+
+				// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
+						// fsubject, classDescription);
+				// }
+			// }
+
+		// }
 	// }
-	//
-	// Function fpredicate = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(p.getName()));
-	// Function fobject;
-	//
-	// if (ba.getValue2().getType() != COL_TYPE.LITERAL_LANG) {
-	// fobject = dfac.getFunctionalTerm(typeObject, dfac.getVariable("y"));
-	// } else {
-	// fobject = dfac.getFunctionalTerm(typeObject, dfac.getVariable("y"),
-	// dfac.getVariable("y2"));
-	// }
-	//
-	// // DL style head
-	// Function headDL = dfac.getFunctionalTerm(p, fsubject, fobject);
-	//
-	// // Triple style head
-	// Function headTriple =
-	// dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject,
-	// fpredicate, fobject);
-	//
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	//
-	// /*
-	// * Dealing with emptyness of upper level roles in the hierarchy
-	// */
-	//
-	// DAGNode node = dag.get(ofac.createProperty(p));
-	// Set<DAGNode> parents = new HashSet<DAGNode>(node.getAncestors());
-	//
-	// Set<DAGNode> equivalents = new HashSet<DAGNode>();
-	// for (DAGNode parent : parents)
-	// equivalents.addAll(parent.getEquivalents());
-	//
-	// parents.addAll(equivalents);
-	//
-	// for (DAGNode parent : parents) {
-	// Description desc = parent.getDescription();
-	// Property parentProp = (Property) desc;
-	// Predicate parentP = parentProp.getPredicate();
-	// boolean inverse = parentProp.isInverse();
-	//
-	// fpredicate = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(parentP.getName()));
-	//
-	// // DL style head
-	// if (!inverse)
-	// headDL = dfac.getFunctionalTerm(parentP, fsubject, fobject);
-	// else
-	// headDL = dfac.getFunctionalTerm(parentP, fobject, fsubject);
-	//
-	// // Triple style head
-	// if (!inverse)
-	// headTriple = dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED,
-	// fsubject, fpredicate, fobject);
-	// else
-	// headTriple = dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED,
-	// fobject, fpredicate, fsubject);
-	//
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// }
-	//
-	// /*
-	// * Dealing with domain and range inferences
-	// */
-	//
-	// /*
-	// * First domain (inverse false for \exists R)
-	// */
-	// Description d = ofac.createPropertySomeRestriction(p, false);
-	// DAGNode dagNode = dag.get(d);
-	// parents = new HashSet<DAGNode>(dagNode.getAncestors());
-	// parents.addAll(dagNode.getEquivalents());
-	//
-	// equivalents = new HashSet<DAGNode>();
-	// for (DAGNode parent : parents)
-	// equivalents.addAll(parent.getEquivalents());
-	//
-	// parents.addAll(equivalents);
-	//
-	// for (DAGNode parent : parents) {
-	// // DL style head
-	// ClassDescription classDescription = (ClassDescription)
-	// parent.getDescription();
-	//
-	// assertNonEmptynessOfClassExpression(typePredicate, typeObject, fsubject,
-	// classDescription);
-	// }
-	//
-	// /*
-	// * First range (inverse true for \exists R^-)
-	// */
-	// d = ofac.createPropertySomeRestriction(p, true);
-	// dagNode = dag.get(d);
-	// parents = new HashSet<DAGNode>(dagNode.getAncestors());
-	// parents.addAll(dagNode.getEquivalents());
-	//
-	// equivalents = new HashSet<DAGNode>();
-	// for (DAGNode parent : parents)
-	// equivalents.addAll(parent.getEquivalents());
-	//
-	// parents.addAll(equivalents);
-	//
-	// for (DAGNode parent : parents) {
-	// // DL style head
-	// ClassDescription classDescription = (ClassDescription)
-	// parent.getDescription();
-	//
-	// assertNonEmptynessOfClassExpression(typePredicate, typeObject, fsubject,
-	// classDescription);
-	// }
-	//
-	// } else if (assertion instanceof UnaryAssertion) {
-	// UnaryAssertion ua = (UnaryAssertion) assertion;
-	//
-	// /*
-	// * getting the data for each term
-	// */
-	// Predicate p = ua.getPredicate();
-	//
-	// Predicate typeSubject = dfac.getTypePredicate(ua.getValue().getType());
-	// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
-	// Predicate typeObject = dfac.getUriTemplatePredicate(1);
-	//
-	// Function fsubject;
-	// if (ua.getValue().getType() != COL_TYPE.LITERAL_LANG) {
-	// fsubject = dfac.getFunctionalTerm(typeSubject, dfac.getVariable("x"));
-	// } else {
-	// fsubject = dfac.getFunctionalTerm(typeSubject, dfac.getVariable("x"),
-	// dfac.getVariable("x2"));
-	// }
-	//
-	// Function fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
-	// Function fobject = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(p.getName()));
-	//
-	// // DL style head
-	// Function headDL = dfac.getFunctionalTerm(p, fsubject);
-	//
-	// // Triple style head
-	// Function headTriple =
-	// dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject,
-	// fpredicate, fobject);
-	//
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	//
-	// /*
-	// * Asserting non-emptyness for all the super classes of the current
-	// * class
-	// */
-	//
-	// DAGNode node = dag.get(ofac.createClass(p));
-	// Set<DAGNode> parents = new HashSet<DAGNode>(node.getAncestors());
-	// Set<DAGNode> equivalents = new HashSet<DAGNode>();
-	// for (DAGNode parent : parents)
-	// equivalents.addAll(parent.getEquivalents());
-	//
-	// parents.addAll(equivalents);
-	//
-	// for (DAGNode parent : parents) {
-	// // DL style head
-	// ClassDescription classDescription = (ClassDescription)
-	// parent.getDescription();
-	//
-	// assertNonEmptynessOfClassExpression(typePredicate, typeObject, fsubject,
-	// classDescription);
-	// }
-	//
-	// }
-	// }
-	//
+
 	// private void assertNonEmptynessOfClassExpression(Predicate typePredicate,
-	// Predicate typeObject, Function fsubject,
-	// ClassDescription classDescription) {
-	// Function fpredicate;
-	// Function fobject;
-	// Function headDL;
-	// Function headTriple;
-	// if (classDescription instanceof OClass) {
-	//
-	// OClass className = (OClass) classDescription;
-	//
-	// Predicate predicate = className.getPredicate();
-	// headDL = dfac.getFunctionalTerm(predicate, fsubject);
-	//
-	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
-	// fobject = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(predicate.getName()));
-	//
-	// // Triple style head
-	// headTriple = dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED,
-	// fsubject, fpredicate, fobject);
-	//
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// } else if (classDescription instanceof PropertySomeRestriction) {
-	// PropertySomeRestriction className = (PropertySomeRestriction)
-	// classDescription;
-	//
-	// Predicate predicate = className.getPredicate();
-	//
-	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(predicate.toString()));
-	// fobject = dfac.getFunctionalTerm(typePredicate, dfac.getVariable("X2"));
-	//
-	// if (!className.isInverse())
-	// headDL = dfac.getFunctionalTerm(predicate, fsubject, fobject);
-	// else
-	// headDL = dfac.getFunctionalTerm(predicate, fobject, fsubject);
-	//
-	// // Triple style head
-	// if (!className.isInverse())
-	// headTriple = dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED,
-	// fsubject, fpredicate, fobject);
-	// else
-	// headTriple = dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED,
-	// fobject, fpredicate, fsubject);
-	//
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// } else if (classDescription instanceof DataType) {
-	// DataType className = (DataType) classDescription;
-	//
-	// Predicate predicate = className.getPredicate();
-	//
-	// headDL = dfac.getFunctionalTerm(predicate, fsubject,
-	// dfac.getVariable("X2"));
-	//
-	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(predicate.toString()));
-	// fobject = dfac.getFunctionalTerm(typePredicate, dfac.getVariable("X2"));
-	//
-	// // Triple style head
-	//
-	// headTriple = dfac.getFunctionalTerm(OBDAVocabulary.QUEST_TRIPLE_PRED,
-	// fsubject, fpredicate, fobject);
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// }
+			// Predicate typeObject, Function fsubject,
+			// ClassDescription classDescription) {
+		// Function fpredicate;
+		// Function fobject;
+		// Function headDL;
+		// Function headTriple;
+		// if (classDescription instanceof OClass) {
+
+			// OClass className = (OClass) classDescription;
+
+			// Predicate predicate = className.getPredicate();
+			// headDL = dfac.getFunctionalTerm(predicate, fsubject);
+
+			// fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
+			// fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getURIConstant(predicate.getName()));
+
+			// // Triple style head
+			// headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
+
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+		// } else if (classDescription instanceof PropertySomeRestriction) {
+			// PropertySomeRestriction className = (PropertySomeRestriction) classDescription;
+
+			// Predicate predicate = className.getPredicate();
+
+			// fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(ifac.construct(predicate.toString())));
+			// fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getVariable("X2"));
+
+			// if (!className.isInverse())
+				// headDL = dfac.getFunctionalTerm(predicate, fsubject, fobject);
+			// else
+				// headDL = dfac.getFunctionalTerm(predicate, fobject, fsubject);
+
+			// // Triple style head
+			// if (!className.isInverse())
+				// headTriple = dfac.getFunctionalTerm(
+						// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+						// fobject);
+			// else
+				// headTriple = dfac.getFunctionalTerm(
+						// OBDAVocabulary.QUEST_TRIPLE_PRED, fobject, fpredicate,
+						// fsubject);
+
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+		// } else if (classDescription instanceof DataType) {
+			// DataType className = (DataType) classDescription;
+
+			// Predicate predicate = className.getPredicate();
+
+			// headDL = dfac.getFunctionalTerm(predicate, fsubject,
+					// dfac.getVariable("X2"));
+
+			// fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(ifac.construct(predicate.toString())));
+			// fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getVariable("X2"));
+
+			// // Triple style head
+
+			// headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+		// }
+
 	// }
 
 	// private void assertNonEmptyness(Function headDL) {
-	// int hash1 = getIndexHash(headDL);
-	// emptynessIndexes.put(hash1, false);
-	// }
+		// int hash1 = getIndexHash(headDL);
+		// emptynessIndexes.put(hash1, false);
+	// } 
 
 	private int getAttributeIndex(Predicate attribute) {
 		return getIndex(attribute.getName(), 2);
-
+		
 	}
 
 	private String getBooleanString(String value) {
@@ -1735,16 +1771,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
-		DAGNode roleNode = dag.get(role);
-		Set<DAGNode> ancestors = roleNode.getAncestors();
+		Description roleNode = dag.getNode(role);
+		Set<Set<Description>> ancestors = reasonerDag.getAncestors(roleNode, false);
 
-		for (DAGNode node : ancestors) {
-			Description desc = node.getDescription();
-			if (desc instanceof DataType) {
-				DataType datatype = (DataType) desc;
-				return datatype.getPredicate().getType(0); // TODO Put some
-															// check for
-															// multiple types
+		for (Set<Description> node : ancestors) {
+			for(Description desc: node)
+			{
+				if (desc instanceof DataType) {
+					DataType datatype = (DataType) desc;
+					return datatype.getPredicate().getType(0); // TODO Put some
+																// check for
+																// multiple types
+				}
 			}
 		}
 		return COL_TYPE.LITERAL;
@@ -1887,22 +1925,23 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		// // e.printStackTrace();
 		// }
 
-		Set<DAGNode> roleNodes = new HashSet<DAGNode>();
-		Map<DAGNode, List<DAGNode>> roleInverseMaps = new HashMap<DAGNode, List<DAGNode>>();
+		Set<Description> roleNodes = new HashSet<Description>();
+		Map<Description, List<Description>> roleInverseMaps = new HashMap<Description, List<Description>>();
 
 		Set<Predicate> roles = ontology.getRoles();
 		for (Predicate rolepred : roles) {
 
-			DAGNode node = dag.getRoleNode(ofac.createProperty(rolepred));
+			Description node = dag.getNode(ofac.createProperty(rolepred));
 			// We only map named roles
-			if (!(node.getDescription() instanceof Property) || ((Property) node.getDescription()).isInverse()) {
+			if (!(node instanceof Property)
+					|| ((Property) node).isInverse()) {
 				continue;
 			}
 			roleNodes.add(node);
 
-			List<DAGNode> roleInverseChildren = roleInverseMaps.get(node);
+			List<Description> roleInverseChildren = roleInverseMaps.get(node);
 			if (roleInverseChildren == null) {
-				roleInverseChildren = new LinkedList<DAGNode>();
+				roleInverseChildren = new LinkedList<Description>();
 				roleInverseMaps.put(node, roleInverseChildren);
 			}
 
@@ -1912,27 +1951,36 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * 
 			 * Collecting the top most allows us to avoid redundancy elimination
 			 */
-			Queue<DAGNode> childrenQueue = new LinkedList<DAGNode>();
-			childrenQueue.addAll(node.getChildren());
-			childrenQueue.addAll(node.getEquivalents());
+			Queue<Set<Description>> childrenQueue = new LinkedList<Set<Description>>();
+			childrenQueue.addAll(reasonerDag.getDirectChildren(node, false));
+			childrenQueue.add(reasonerDag.getEquivalences(node, false));
+
 
 			while (!childrenQueue.isEmpty()) {
-				DAGNode child = childrenQueue.poll();
-				if ((child.getDescription() instanceof Property) && ((Property) child.getDescription()).isInverse()) {
+				Set<Description> children = childrenQueue.poll();
+				Description firstChild=children.iterator().next();
+				Description child=dag.getReplacements().get(firstChild);
+				if(child==null)
+					child=firstChild;
+				if(child.equals(node))
+					continue;
+				if ((child instanceof Property)
+						&& ((Property) child).isInverse()) {
 					roleInverseChildren.add(child);
 				} else {
-					childrenQueue.addAll(child.getChildren());
+					childrenQueue.addAll((reasonerDag.getDirectChildren(child, false)));
 				}
 			}
 
 			/* Removing redundant nodes */
 
-			HashSet<DAGNode> inverseRedundants = new HashSet<DAGNode>();
-			for (DAGNode inverseNode : roleInverseChildren) {
-				Property role = ((Property) inverseNode.getDescription());
-				for (DAGNode possibleRedundantNode : roleInverseChildren) {
-					Property possibleRedundantRole = ((Property) possibleRedundantNode.getDescription());
-					if (dag.getRoleNode(role).getDescendants().contains(possibleRedundantRole))
+			HashSet<Description> inverseRedundants = new HashSet<Description>();
+			for (Description inverseNode : roleInverseChildren) {
+				Property role = ((Property) inverseNode);
+				for (Description possibleRedundantNode : roleInverseChildren) {
+					Property possibleRedundantRole = ((Property) possibleRedundantNode);
+					if (reasonerDag.getDescendants(role, false)
+							.contains(possibleRedundantRole))
 						inverseRedundants.add(possibleRedundantNode);
 				}
 			}
@@ -1946,31 +1994,45 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * isa P
 		 * 
 		 * Here we cannot collect only the top most, so we do it in two passes.
-		 * First we callect all exsts R children, then we remove redundant ones.
+		 * First we collect all exists R children, then we remove redundant ones.
 		 */
 
 		// TODO this part can be optimized if we know some existing dependencies
 		// (e.g., coming from given mappings)
 
-		Set<DAGNode> classNodesMaps = new HashSet<DAGNode>();
-		Map<DAGNode, Set<DAGNode>> classExistsMaps = new HashMap<DAGNode, Set<DAGNode>>();
-		for (DAGNode node : dag.getClasses()) {
-			// we only map named classes
-			if (!(node.getDescription() instanceof OClass)) {
+		Set<Description> classNodesMaps = new HashSet<Description>();
+		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
+		
+		for (Description node : dag.getClasses()) {
+			if(dag.getReplacements().containsKey(node))
+
+
 				continue;
-			}
+
 			classNodesMaps.add(node);
 
-			Set<DAGNode> existChildren = classExistsMaps.get(node);
+			Set<Description> existChildren = classExistsMaps.get(node);
 			if (existChildren == null) {
-				existChildren = new HashSet<DAGNode>();
+				
+				existChildren = new HashSet<Description>();
 				classExistsMaps.put(node, existChildren);
 			}
 
 			/* Collecting Exists R children */
-			for (DAGNode child : node.getDescendants()) {
-				if (child.getDescription() instanceof PropertySomeRestrictionImpl) {
+			//consider also the equivalent of the node
+			for (Description child : reasonerDag.getEquivalences(node, false)) {
+				
+				if (child instanceof PropertySomeRestrictionImpl& !(child.equals(node))) {
 					existChildren.add(child);
+				}
+				
+			}
+			for (Set<Description> children : reasonerDag.getDescendants(node, false)) {
+				for (Description child:children){
+
+				if (child instanceof PropertySomeRestrictionImpl) {
+					existChildren.add(child);
+				}
 				}
 			}
 
@@ -1979,24 +2041,29 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * role hierarchy )
 			 */
 			// Set<DAGNode> existChildren = classExistsMaps.get(node);
-			Set<DAGNode> redundantNodes = new HashSet<DAGNode>();
-			for (DAGNode existsnode : existChildren) {
+			Set<Description> redundantNodes = new HashSet<Description>();
+			for (Description existsnode : existChildren) {
 				/* Here we have ES */
-				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode.getDescription();
-				Property role = ofac.createProperty(existsDesc.getPredicate(), existsDesc.isInverse());
-				DAGNode roleNode = dag.getRoleNode(role);
+				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode;
+				Property role = ofac.createProperty(existsDesc.getPredicate(),
+						existsDesc.isInverse());
+				Description roleNode = dag.getNode(role);
 
-				for (DAGNode possiblyRedundantNode : existChildren) {
+				for (Description possiblyRedundantNode : existChildren) {
 					/* Here we have ER */
-					PropertySomeRestriction existsDesc2 = (PropertySomeRestriction) possiblyRedundantNode.getDescription();
-					Property role2 = ofac.createProperty(existsDesc2.getPredicate(), existsDesc2.isInverse());
-					DAGNode roleNode2 = dag.getRoleNode(role2);
+					PropertySomeRestriction existsDesc2 = (PropertySomeRestriction) possiblyRedundantNode;
+					Property role2 = ofac
+							.createProperty(existsDesc2.getPredicate(),
+									existsDesc2.isInverse());
+					Description roleNode2 = dag.getNode(role2);
 
-					if (roleNode.getDescendants().contains(roleNode2))
+					for(Set<Description> descendants: reasonerDag.getDescendants(roleNode, false)){
+						if(descendants.contains(roleNode2))
 						/*
 						 * The DAG implies that R ISA S, so we remove ER
 						 */
 						redundantNodes.add(possiblyRedundantNode);
+					}
 				}
 			}
 			existChildren.removeAll(redundantNodes);
@@ -2018,16 +2085,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
 
-		for (DAGNode roleNode : roleNodes) {
+		for (Description roleNode : roleNodes) {
 
 			// Get the description of the role node, i.e., a Property object.
-			Property property = (Property) roleNode.getDescription();
+			Property property = (Property) roleNode;
 
 			// Get the property predicate
 			Predicate role = property.getPredicate();
 
 			// Get the indexed node (from the pureIsa dag)
-			// DAGNode indexedNode = pureIsa.getRoleNode(property);
+			//Description indexedNode = pureIsa.getNode(property);
 
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
@@ -2204,9 +2271,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Creating mappings for each concept
 		 */
 
-		for (DAGNode classNode : classNodesMaps) {
+		
 
-			Predicate classuri = ((OClass) classNode.getDescription()).getPredicate();
+		for (Description classNode : classNodesMaps) {
+
+			Predicate classuri = ((OClass) classNode)
+					.getPredicate();
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 
@@ -2218,7 +2288,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
 			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
-
+			
 			/*
 			 * This target query is shared by all mappings for this class
 			 */
@@ -2249,8 +2319,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			/*
 			 * Getting the indexed node (from the pureIsa dag)
 			 */
-			// DAGNode indexedNode = pureIsa.getClassNode((OClass)
-			// classNode.getDescription());
+			//Description indexedNode = pureIsa.getNode((OClass) classNode);
+			
+
 
 			List<Interval> intervals = getIntervals(classuri.getName(), 1);
 			if (intervals == null) {
@@ -2559,7 +2630,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		return sql.toString();
 	}
-
+	
 	// /***
 	// * Constructs the mappings for all roles (or object properties) in the DAG
 	// * node list. The string buffer stores the mapping string, if any. The
@@ -2727,7 +2798,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// return hasLiteralNode;
 	// }
 
-	// /**
+// /**
 	// * Constructs the mappings for all data properties with range xsd:string
 	// in
 	// * the DAG node list. The string buffer stores the mapping string, if any.
@@ -3093,55 +3164,62 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void getMetadataSQLInserts(OutputStream outstream) throws IOException {
 
-		// BufferedWriter out = new BufferedWriter(new
-		// OutputStreamWriter(outstream));
-		//
-		// String insert_query = this.insert_idx_query.replace("?", "%s");
-		//
-		// index
-		//
-		// for (DAGNode node : dag.getClasses()) {
-		//
-		// ClassDescription description = (ClassDescription)
-		// node.getDescription();
-		//
-		//
-		// DAGNode node2 = pureIsa.getClassNode(description);
-		// if (node2 != null) {
-		// node = node2;
+		// BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+				// outstream));
+
+		// String insert_query = this.insert_query.replace("?", "%s");
+
+		// for (Description node : ((DAGImpl) dag).vertexSet()) {
+			// if(!(node instanceof ClassDescription)){
+				// continue;
+			// }
+
+			// ClassDescription description = (ClassDescription) node;
+					
+
+			// /*
+			 // * we always prefer the pureISA node since it can have extra data
+			 // * (indexes)
+			 // */
+// //			Description node2 = pureIsa.getNode(description);
+// //			if (node2 != null) {
+// //				node = node2;
+// //			}
+
+			// String uri = description.toString();
+			
+
+			// for (Interval it : engine.getIntervals(node)) {
+
+				// out.append(String.format(insert_query, getQuotedString(uri),
+						// engine.getIndex(node), it.getStart(), it.getEnd(), CLASS_TYPE));
+				// out.append(";\n");
+			// }
 		// }
-		//
-		// String uri = description.toString();
-		//
-		// for (Interval it : node.getRange().getIntervals()) {
-		//
-		// out.append(String.format(insert_query, getQuotedString(uri),
-		// node.getIndex(), it.getStart(), it.getEnd(), CLASS_TYPE));
-		// out.append(";\n");
+
+		// for (Description node : ((DAGImpl) dag).vertexSet()) {
+			// if(!(node instanceof Property)){
+				// continue;
+			// }
+			// Property description = (Property) node;
+
+			// /*
+			 // * we always prefer the pureISA node since it can have extra data
+			 // * (indexes)
+			 // */
+			// Description node2 = pureIsa.getNode(description);
+			// if (node2 != null) {
+				// node = node2;
+			// }
+
+			// String uri = description.toString();
+
+			// for (Interval it : engine.getIntervals(node)) {
+				// out.append(String.format(insert_query, getQuotedString(uri),
+						// engine.getIndex(node), it.getStart(), it.getEnd(), ROLE_TYPE));
+				// out.append(";\n");
+			// }
 		// }
-		// }
-		//
-		// for (DAGNode node : dag.getRoles()) {
-		// Property description = (Property) node.getDescription();
-		//
-		// /*
-		// * we always prefer the pureISA node since it can have extra data
-		// * (indexes)
-		// */
-		// DAGNode node2 = pureIsa.getRoleNode(description);
-		// if (node2 != null) {
-		// node = node2;
-		// }
-		//
-		// String uri = description.toString();
-		//
-		// for (Interval it : node.getRange().getIntervals()) {
-		// out.append(String.format(insert_query, getQuotedString(uri),
-		// node.getIndex(), it.getStart(), it.getEnd(), ROLE_TYPE));
-		// out.append(";\n");
-		// }
-		// }
-		//
 		// out.flush();
 	}
 
@@ -3170,7 +3248,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			st.executeUpdate("DELETE FROM " + interval_table);
 			st.executeUpdate("DELETE FROM " + emptyness_index_table);
 
-			/* inserting index data for classes and roeles */
+			/* inserting index data for classes and roles */
 
 			for (String concept : classIndexes.keySet()) {
 				stm.setString(1, concept.toString());

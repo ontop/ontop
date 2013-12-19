@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.ontology.impl;
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -14,6 +26,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -64,6 +77,8 @@ public class OntologyImpl implements Ontology {
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
+	
+	private Set<DisjointDescriptionAxiom> disjointAxioms = new HashSet<DisjointDescriptionAxiom>();
 
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
 	
@@ -156,9 +171,10 @@ public class OntologyImpl implements Ontology {
 		if (originalassertions.contains(assertion)) {
 			return;
 		}
-		if (!referencesPredicates(assertion.getReferencedEntities())) {
+		Set<Predicate> referencedEntities = assertion.getReferencedEntities();
+		if (!referencesPredicates(referencedEntities)) {
 			IllegalArgumentException ex = new IllegalArgumentException("At least one of these predicates is unknown: "
-					+ assertion.getReferencedEntities().toString());
+					+ referencedEntities.toString());
 			throw ex;
 		}
 		isSaturated = false;
@@ -174,6 +190,8 @@ public class OntologyImpl implements Ontology {
 			originalassertions.add(assertion);
 		} else if (assertion instanceof PropertyFunctionalAxiom) {
 			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
+		} else if (assertion instanceof DisjointDescriptionAxiom) {
+			disjointAxioms.add((DisjointDescriptionAxiom) assertion);
 		} else if (assertion instanceof Assertion) {
 			/*ABox assertions */
 			aboxAssertions.add((Assertion)assertion);
@@ -188,6 +206,16 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public Set<Axiom> getAssertions() {
 		return originalassertions;
+	}
+	
+	@Override 
+	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms() {
+		return functionalAxioms;
+	}
+	
+	@Override 
+	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms() {
+		return disjointAxioms;
 	}
 
 	public String toString() {

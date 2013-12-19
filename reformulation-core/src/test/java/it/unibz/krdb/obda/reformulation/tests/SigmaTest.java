@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.reformulation.tests;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -19,6 +31,9 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -42,16 +57,19 @@ public class SigmaTest extends TestCase {
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, er));
 
-        DAG res = DAGConstructor.getSigma(ontology);
-        res.clean();
+        
+       
+        Ontology ontologySigma =  TBoxReasonerImpl.getSigma(ontology);
+        TBoxReasonerImpl sigma= new TBoxReasonerImpl(ontologySigma, false);
+        DAGImpl res= sigma.getDAG();
 
-        assertTrue(res.getClassNode(ac).getDescendants().contains(res.getClassNode(er)));
+        assertTrue(sigma.getDescendants(ac, false).contains(sigma.getEquivalences(er, false)));
 
-        assertEquals(1, res.getClassNode(ac).getDescendants().size());
+        assertEquals(1, sigma.getDescendants(ac, false).size());
 
-        assertEquals(0, res.getClassNode(er).getDescendants().size());
+        assertEquals(0, sigma.getDescendants(er, false).size());
 
-        assertEquals(0, res.getClassNode(cc).getDescendants().size());
+        assertEquals(0, sigma.getDescendants(cc, false).size());
 
     }
 }
