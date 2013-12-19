@@ -47,7 +47,7 @@ public class VocabularyExtractor {
 		return result;
 	}
 
-	public Predicate getPredicate(Description e) {
+	public static Predicate getPredicate(Description e) {
 		if (e instanceof OClass) {
 			return ((OClass) e).getPredicate();
 		}

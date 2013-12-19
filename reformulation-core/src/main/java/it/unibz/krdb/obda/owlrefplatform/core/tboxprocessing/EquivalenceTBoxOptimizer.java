@@ -16,7 +16,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
@@ -30,7 +29,7 @@ import java.util.Set;
 /***
  * An optimizer that will eliminate equivalences implied by the ontology,
  * simplifying the vocabulary of the ontology. This allows to reduce the number
- * of inferences implied by the onotlogy and eliminating redundancy. The output
+ * of inferences implied by the ontology and eliminating redundancy. The output
  * is two components: a "equivalence map" that functional mapping from class
  * (property) expression to class (property) that can be used to retrieve the
  * class (property) of the optimized ontology that should be used instead of one
@@ -57,79 +56,15 @@ public class EquivalenceTBoxOptimizer {
 		reasoner = new TBoxReasonerImpl(dag);
 	}
 
-	/***
-	 * Optimize will compute the implied hierarchy of the given ontology and 
-	 * remove any cycles (compute equivalence
-	 * classes). Then for each equivalent set (of classes/roles) it will keep
-	 * only one representative and replace reference to any other node in the
-	 * equivalence set with reference to the representative. The equivalences
-	 * will be kept in an equivalence map, that relates classes/properties with
-	 * its equivalent. Note that the equivalent of a class can only be another
-	 * class, an the equivalent of a property can be another property, or the
-	 * inverse of a property.
+	/**
+	 * the EquivalenceMap maps predicates to the representatives of their equivalence class (in TBox)
 	 * 
-	 *
+	 * it contains 
+	 * 		- an entry for each property name other than the representative of an equivalence class 
+	 * 				(or its inverse)
+	 * 		- an entry for each class name other than the representative of its equivalence class
 	 */
-	public void optimize() {
-
-		getEquivalenceMap();
-		
-		optimalTBox = ofac.createOntology();
-		
-		for(Set<Description> nodeClass : reasoner.getNodes()) {
-			Description firstNode = nodeClass.iterator().next();
-			Description node = reasoner.getRepresentativeFor(firstNode);
-			
-			for (Set<Description> descendants : reasoner.getDescendants(node)) {
-				Description firstDescendant = descendants.iterator().next();
-				Description descendant = reasoner.getRepresentativeFor(firstDescendant);
-
-				if (!descendant.equals(node))  // exclude trivial inclusions
-					addToTBox(optimalTBox, descendant, node);
-			}
-			for (Description equivalent : reasoner.getEquivalences(node)) {
-				if (!equivalent.equals(node)) {
-					Predicate equivalentp = null;
-					if (equivalent instanceof Property)
-						equivalentp = ((Property)equivalent).getPredicate();
-					else if (equivalent instanceof OClass)
-						equivalentp = ((OClass)equivalent).getPredicate();
-					else if (equivalent instanceof PropertySomeRestriction)
-						equivalentp = ((PropertySomeRestriction)equivalent).getPredicate();
-					
-					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
-					if ((equivalentp == null) || !equivalenceMap.containsKey(equivalentp)) {
-						addToTBox(optimalTBox, node, equivalent);					
-						addToTBox(optimalTBox, equivalent, node);
-					}
-				}
-			}
-		}
-
-		// Last, add references to all the vocabulary of the original TBox
-		
-		Set<Predicate> extraVocabulary = new HashSet<Predicate>();
-		extraVocabulary.addAll(originalVocabulary);
-		extraVocabulary.removeAll(equivalenceMap.keySet());
-		optimalTBox.addEntities(extraVocabulary);
-	}
-
-	private static void addToTBox(Ontology o, Description s, Description t) {
-		Axiom axiom;
-		if (s instanceof ClassDescription) {
-			axiom = ofac.createSubClassAxiom((ClassDescription) s, (ClassDescription) t);
-		} 
-		else {
-			axiom = ofac.createSubPropertyAxiom((Property) s, (Property) t);
-		}
-		o.addEntities(axiom.getReferencedEntities());
-		o.addAssertion(axiom);	
-	}
 	
-	public Ontology getOptimalTBox() {
-		return this.optimalTBox;
-	}
-
 	public Map<Predicate, Description> getEquivalenceMap() {
 		
 		if (equivalenceMap == null) {
@@ -176,5 +111,71 @@ public class EquivalenceTBoxOptimizer {
 			}			
 		}
 		return equivalenceMap;
+	}
+
+	/***
+	 * Optimize will compute the implied hierarchy of the given ontology and 
+	 * remove any cycles (compute equivalence
+	 * classes). Then for each equivalent set (of classes/roles) it will keep
+	 * only one representative and replace reference to any other node in the
+	 * equivalence set with reference to the representative. The equivalences
+	 * will be kept in an equivalence map, that relates classes/properties with
+	 * its equivalent. Note that the equivalent of a class can only be another
+	 * class, an the equivalent of a property can be another property, or the
+	 * inverse of a property.
+	 */
+
+	public void optimize() {
+
+		getEquivalenceMap();
+		
+		optimalTBox = ofac.createOntology();
+		
+		for(Set<Description> nodeClass : reasoner.getNodes()) {
+			Description firstNode = nodeClass.iterator().next();
+			Description node = reasoner.getRepresentativeFor(firstNode);
+			
+			for (Set<Description> descendants : reasoner.getDescendants(node)) {
+				Description firstDescendant = descendants.iterator().next();
+				Description descendant = reasoner.getRepresentativeFor(firstDescendant);
+
+				if (!descendant.equals(node))  // exclude trivial inclusions
+					addToTBox(optimalTBox, descendant, node);
+			}
+			for (Description equivalent : reasoner.getEquivalences(node)) {
+				if (!equivalent.equals(node)) {
+					Predicate equivalentp = VocabularyExtractor.getPredicate(equivalent);
+					
+					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
+					if ((equivalentp == null) || !equivalenceMap.containsKey(equivalentp)) {
+						addToTBox(optimalTBox, node, equivalent);					
+						addToTBox(optimalTBox, equivalent, node);
+					}
+				}
+			}
+		}
+
+		// Last, add references to all the vocabulary of the original TBox
+		
+		Set<Predicate> extraVocabulary = new HashSet<Predicate>();
+		extraVocabulary.addAll(originalVocabulary);
+		extraVocabulary.removeAll(equivalenceMap.keySet());
+		optimalTBox.addEntities(extraVocabulary);
+	}
+
+	private static void addToTBox(Ontology o, Description s, Description t) {
+		Axiom axiom;
+		if (s instanceof ClassDescription) {
+			axiom = ofac.createSubClassAxiom((ClassDescription) s, (ClassDescription) t);
+		} 
+		else {
+			axiom = ofac.createSubPropertyAxiom((Property) s, (Property) t);
+		}
+		o.addEntities(axiom.getReferencedEntities());
+		o.addAssertion(axiom);	
+	}
+	
+	public Ontology getOptimalTBox() {
+		return this.optimalTBox;
 	}
 }
