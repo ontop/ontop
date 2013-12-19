@@ -22,7 +22,7 @@ Know how to fix something or provide new features?
 
 For trivial contribution (e.g. fixing typos in the docs), please use the Pull Requst of GitHub.
 
-For non-trivial contribution, please contact use first. 
+For non-trivial contribution, please contact us first. 
 We are now preparing the contribution agreement to enable you to do 
 this and still be able to maintain our license scheme.
 
