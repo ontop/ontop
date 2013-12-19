@@ -46,6 +46,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		this.dag = dag;
 	}
 	
+	public TBoxReasonerImpl(Ontology onto) {
+		this.dag = DAGBuilder.getDAG(onto);
+	}
+	
 	public Description getRepresentativeFor(Description node) {
 		return dag.getRepresentativeFor(node);
 	}

@@ -16,7 +16,6 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -34,8 +33,8 @@ import org.slf4j.LoggerFactory;
 public class SigmaTBoxOptimizer {
 
 	private static final Logger		log					= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
-	private final DAGImpl				isa;
 	private final DAGImpl				sigma;
+	private final DAGImpl				isa;
 	private final DAGImpl				isaChain;
 	private final DAGImpl				sigmaChain;
 	private final TBoxReasonerImpl reasonerIsa;
@@ -46,11 +45,8 @@ public class SigmaTBoxOptimizer {
 
 	private Ontology				originalOntology	= null;
 
-	private Ontology				originalSigma		= null;
-
 	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
 		this.originalOntology = isat;
-		this.originalSigma = sigmat;
 		
 		isa = DAGBuilder.getDAG(isat);
 		reasonerIsa = new TBoxReasonerImpl(isa);
@@ -79,52 +75,53 @@ public class SigmaTBoxOptimizer {
 		log.debug("Starting semantic-reduction");
 		List<Axiom> rv = new LinkedList<Axiom>();
 
-		for(Description node:isa.vertexSet()){
-			for (Set<Description> descendants: reasonerIsa.getDescendants(node)){
-					Description firstDescendant=descendants.iterator().next();
-					Description descendant = isa.getRepresentativeFor(firstDescendant);
-					if(!descendant.equals(node)){
+		for(Description node: isa.vertexSet()) {
+			for (Set<Description> descendants: reasonerIsa.getDescendants(node)) {
+					Description firstDescendant = descendants.iterator().next();
+					Description descendant = reasonerIsa.getRepresentativeFor(firstDescendant);
+					if (!descendant.equals(node)) {
 					/*
 					 * Creating subClassOf or subPropertyOf axioms
 					 */
-					if (descendant instanceof ClassDescription) {
-				if (!check_redundant(node, descendant)) {
-					rv.add(descFactory.createSubClassAxiom((ClassDescription) descendant, (ClassDescription) node));
-				}
-			} else {
-				if (!check_redundant_role(node,descendant)) {
-					rv.add(descFactory.createSubPropertyAxiom((Property) descendant, (Property) node));
-				}
-
-			}
+						if (descendant instanceof ClassDescription) {
+							if (!check_redundant(node, descendant)) {
+								rv.add(descFactory.createSubClassAxiom((ClassDescription) descendant, (ClassDescription) node));
+							}
+						} 
+						else {
+							if (!check_redundant_role(node,descendant)) {
+								rv.add(descFactory.createSubPropertyAxiom((Property) descendant, (Property) node));
+							}
+						}
 					}
 			}
 			Set<Description> equivalents = reasonerIsa.getEquivalences(node);
 
-			for(Description equivalent:equivalents){
-				if(!equivalent.equals(node)){
+			for (Description equivalent:equivalents) {
+				if (!equivalent.equals(node)) {
 					if (node instanceof ClassDescription) {
 						if (!check_redundant(equivalent, node)) {
 							rv.add(descFactory.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent));
 						}
-					} else {
+					} 
+					else {
 						if (!check_redundant_role(equivalent,node)) {
 							rv.add(descFactory.createSubPropertyAxiom((Property) node, (Property) equivalent));
 						}
-
 					}
 					
 					if (equivalent instanceof ClassDescription) {
 						if (!check_redundant(node, equivalent)) {
 							rv.add(descFactory.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node));
 						}
-					} else {
+					} 
+					else {
 						if (!check_redundant_role(node,equivalent)) {
 							rv.add(descFactory.createSubPropertyAxiom((Property) equivalent, (Property) node));
 						}
 					}
-					}
 				}
+			}
 		}
 //		log.debug("Finished semantic-reduction.");
 		return rv;
@@ -143,7 +140,6 @@ public class SigmaTBoxOptimizer {
 						&& !check_redundant(child_prime, parent)) {
 					return true;
 				}
-//				}
 			}
 		}
 //		log.debug("Not redundant role {} {}", parent, child);
@@ -169,12 +165,13 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent)) {
-			Description child_prime=children_prime.iterator().next();
+			Description child_prime = children_prime.iterator().next();
 
-				if (!child_prime.equals(child) && check_directly_redundant(child_prime, child) && !check_redundant(child_prime, parent)) {
+				if (!child_prime.equals(child) && check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
 					return true;
 				}
-				}
+			}
 		}
 		return false;
 	}
@@ -188,52 +185,21 @@ public class SigmaTBoxOptimizer {
 			return false;
 		}
 		
-		Set<Set<Description>> spChildren= reasonerSigmaChain.getDirectChildren(sp);
-		Set<Description> scEquivalent=reasonerSigmaChain.getEquivalences(sc);
-		Set<Set<Description>> scChildren= reasonerSigmaChain.getDescendants(sc);
-		Set<Set<Description>> tcChildren= reasonerIsaChain.getDescendants(tc);
 		
-		if (sigmaChain.getReplacementFor(parent) != null){
-			sp = sigmaChain.getNode(sigmaChain.getReplacementFor(parent));
-			spChildren= reasonerSigmaChain.getDirectChildren(sp);
-		}
-		if (sigmaChain.getReplacementFor(child) != null){
-			sc = sigmaChain.getNode(sigmaChain.getReplacementFor(child));
-			scEquivalent=reasonerSigmaChain.getEquivalences(sc);
-			scChildren=reasonerSigmaChain.getDescendants(sc); 
-			
-		}
-		if (isaChain.getReplacementFor(child) != null){
-			tc = sigmaChain.getNode(isaChain.getReplacementFor(child));
-			reasonerSigmaChain.getDescendants(tc);
-		}
+		sp = sigmaChain.getRepresentativeFor(parent); 
+		Set<Set<Description>> spChildren =  reasonerSigmaChain.getDirectChildren(sp);
+		
+		sc = sigmaChain.getRepresentativeFor(child); 
+		Set<Description> scEquivalent = reasonerSigmaChain.getEquivalences(sc);
+		Set<Set<Description>> scChildren = reasonerSigmaChain.getDescendants(sc);
+		
+//		if (isaChain.getReplacementFor(child) != null)
+//			tc = sigmaChain.getNode(isaChain.getReplacementFor(child));
+		
+		Set<Set<Description>> tcChildren = reasonerIsaChain.getDescendants(tc);
 
-		boolean redundant =spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
-		return (redundant);
-
-	}
-
-	public static Ontology getSigma(Ontology ontology) {
-		OntologyFactory descFactory = new OntologyFactoryImpl();
-		Ontology sigma = descFactory.createOntology("sigma");
-		sigma.addConcepts(ontology.getConcepts());
-		sigma.addRoles(ontology.getRoles());
-		for (Axiom assertion : ontology.getAssertions()) {
-
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
-				Description parent = inclusion.getSuper();
-
-				if (parent instanceof PropertySomeRestriction) {
-					continue;
-				}
-			}
-
-			sigma.addAssertion(assertion);
-		}
-
-		sigma.saturate();
-		return sigma;
+		boolean redundant = spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
+		return redundant;
 	}
 
 }

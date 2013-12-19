@@ -48,13 +48,14 @@ public class SigmaTest extends TestCase {
 
         
        
-        Ontology ontologySigma = SigmaTBoxOptimizer.getSigma(ontology);
-        DAGImpl res = DAGBuilder.getDAG(ontologySigma);
-        TBoxReasonerImpl sigma = new TBoxReasonerImpl(res);
+		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
+		Ontology ontologySigma = reasoner.getSigmaOntology();
+        TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
 
         assertTrue(sigma.getDescendants(ac).contains(sigma.getEquivalences(er)));
 
-        assertEquals(1, sigma.getDescendants(ac).size());
+     // Roman: was 1, which, I think, is wrong: A has two subclasses, ER and C
+        assertEquals(2, sigma.getDescendants(ac).size());  
 
         assertEquals(0, sigma.getDescendants(er).size());
 
