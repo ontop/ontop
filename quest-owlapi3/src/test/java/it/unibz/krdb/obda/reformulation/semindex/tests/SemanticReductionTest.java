@@ -14,7 +14,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
-import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -28,7 +28,7 @@ public class SemanticReductionTest extends TestCase {
 		Ontology sigma = reasoner.getSigmaOntology();
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		List<Axiom> rv = reduction.reduce();
+		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
 		assertEquals(0, rv.size());
 	}
 
@@ -38,7 +38,7 @@ public class SemanticReductionTest extends TestCase {
 		Ontology sigma = reasoner.getSigmaOntology();
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		List<Axiom> rv = reduction.reduce();
+		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
 		assertEquals(0, rv.size());
 	}
 
@@ -48,7 +48,7 @@ public class SemanticReductionTest extends TestCase {
 		Ontology sigma = reasoner.getSigmaOntology();
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		List<Axiom> rv = reduction.reduce();
+		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
 		assertEquals(1, rv.size());
 	}
 
@@ -58,7 +58,7 @@ public class SemanticReductionTest extends TestCase {
 		Ontology sigma = reasoner.getSigmaOntology();
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		List<Axiom> rv = reduction.reduce();
+		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
 		assertEquals(0, rv.size());
 	}
 
@@ -74,10 +74,8 @@ public class SemanticReductionTest extends TestCase {
 		Ontology ontology = helper.load_onto("equivalence-test");
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, OntologyFactoryImpl.getInstance().createOntology());
-		List<Axiom> rv = reduction.reduce();
+		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
 		//System.out.println(rv);
-		for (Axiom a : rv)
-			System.out.println(a);
 		assertEquals(45, rv.size());
 	}
 }

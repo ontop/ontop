@@ -43,7 +43,7 @@ import java.util.Set;
  */
 public class EquivalenceTBoxOptimizer {
 
-	private Ontology optimalTBox = null;
+	private Ontology optimizedTBox = null;
 	private Map<Predicate, Description> equivalenceMap  = null;
 	private TBoxReasonerImpl reasoner;
 	private Set<Predicate> originalVocabulary;
@@ -52,8 +52,7 @@ public class EquivalenceTBoxOptimizer {
 
 	public EquivalenceTBoxOptimizer(Ontology tbox) {
 		originalVocabulary = tbox.getVocabulary();
-		DAGImpl dag = DAGBuilder.getDAG(tbox);
-		reasoner = new TBoxReasonerImpl(dag);
+		reasoner = new TBoxReasonerImpl(tbox);
 	}
 
 	/**
@@ -70,14 +69,11 @@ public class EquivalenceTBoxOptimizer {
 		if (equivalenceMap == null) {
 			equivalenceMap = new HashMap<Predicate, Description>();
 
-			for(Set<Description> nodeClass : reasoner.getNodes()) {
-				Description firstNode = nodeClass.iterator().next();
-				Description node = reasoner.getRepresentativeFor(firstNode);
-				
-				Set<Description> equivalents = reasoner.getEquivalences(node);
-				
+			for(Set<Description> nodes : reasoner.getNodes()) {
+				Description node = reasoner.getRepresentativeFor(nodes);
+							
 				if (node instanceof Property) {
-					for (Description equivalent : equivalents) {
+					for (Description equivalent : reasoner.getEquivalences(node)) {
 						if (equivalent.equals(node)) 
 							continue;
 
@@ -97,7 +93,7 @@ public class EquivalenceTBoxOptimizer {
 					}
 				}
 				else { // is a class 
-					for (Description equivalent : equivalents) {
+					for (Description equivalent : reasoner.getEquivalences(node)) {
 						if (equivalent.equals(node)) 
 							continue;
 
@@ -125,42 +121,46 @@ public class EquivalenceTBoxOptimizer {
 	 * inverse of a property.
 	 */
 
-	public void optimize() {
-
-		getEquivalenceMap();
+	public Ontology getOptimalTBox() {
 		
-		optimalTBox = ofac.createOntology();
-		
-		for(Set<Description> nodeClass : reasoner.getNodes()) {
-			Description firstNode = nodeClass.iterator().next();
-			Description node = reasoner.getRepresentativeFor(firstNode);
+		if (optimizedTBox == null) {
 			
-			for (Set<Description> descendants : reasoner.getDescendants(node)) {
-				Description firstDescendant = descendants.iterator().next();
-				Description descendant = reasoner.getRepresentativeFor(firstDescendant);
+			optimizedTBox = ofac.createOntology();
+			getEquivalenceMap();
+			
+			for(Set<Description> nodes : reasoner.getNodes()) {
+				Description node = reasoner.getRepresentativeFor(nodes);
+				
+				for (Set<Description> descendants : reasoner.getDescendants(node)) {
+					Description descendant = reasoner.getRepresentativeFor(descendants);
 
-				if (!descendant.equals(node))  // exclude trivial inclusions
-					addToTBox(optimalTBox, descendant, node);
-			}
-			for (Description equivalent : reasoner.getEquivalences(node)) {
-				if (!equivalent.equals(node)) {
-					Predicate equivalentp = VocabularyExtractor.getPredicate(equivalent);
-					
-					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
-					if ((equivalentp == null) || !equivalenceMap.containsKey(equivalentp)) {
-						addToTBox(optimalTBox, node, equivalent);					
-						addToTBox(optimalTBox, equivalent, node);
+					if (!descendant.equals(node))  // exclude trivial inclusions
+						addToTBox(optimizedTBox, descendant, node);
+				}
+				for (Description equivalent : reasoner.getEquivalences(node)) {
+					if (!equivalent.equals(node)) {
+						Predicate equivalentp = VocabularyExtractor.getPredicate(equivalent);
+						
+						// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
+						if ((equivalentp == null) || !equivalenceMap.containsKey(equivalentp)) {
+							addToTBox(optimizedTBox, node, equivalent);					
+							addToTBox(optimizedTBox, equivalent, node);
+						}
 					}
 				}
 			}
-		}
 
-		// Last, add references to all the vocabulary of the original TBox
-		
-		Set<Predicate> extraVocabulary = new HashSet<Predicate>();
-		extraVocabulary.addAll(originalVocabulary);
-		extraVocabulary.removeAll(equivalenceMap.keySet());
-		optimalTBox.addEntities(extraVocabulary);
+			// Last, add references to all the vocabulary of the original TBox
+			
+			Set<Predicate> extraVocabulary = new HashSet<Predicate>();
+			extraVocabulary.addAll(originalVocabulary);
+			extraVocabulary.removeAll(equivalenceMap.keySet());
+			optimizedTBox.addEntities(extraVocabulary);
+		}
+		return optimizedTBox;
+	}
+	
+	public void optimize() {
 	}
 
 	private static void addToTBox(Ontology o, Description s, Description t) {
@@ -173,9 +173,5 @@ public class EquivalenceTBoxOptimizer {
 		}
 		o.addEntities(axiom.getReferencedEntities());
 		o.addAssertion(axiom);	
-	}
-	
-	public Ontology getOptimalTBox() {
-		return this.optimalTBox;
-	}
+	}	
 }
