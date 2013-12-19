@@ -109,13 +109,6 @@ public class DAGImpl  {
 	}
 
 
-	/**
-	 * Allows to have the  map with equivalences
-	 * @return  a map between the node and the set of all its equivalent nodes
-	 */
-	public Map<Description, EquivalenceClass<Description>> getMapEquivalences() {
-		return equivalencesClasses;
-	}
 
 	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
 		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
@@ -156,15 +149,7 @@ public class DAGImpl  {
 	}
 	
 	
-	/**
-	 * Allows to have the map with replacements
-	 * @return  a map between the node and its representative node
-	 */
-	@Deprecated
-	public Map<Description, Description> getReplacements() {
-		return replacements;
-	}
-
+	
 	/**
 	 * Allows to obtain the node present in the DAG. 
 	 * @param  node a node that we want to know if it is part of the DAG
@@ -181,15 +166,17 @@ public class DAGImpl  {
 
 	@Override
 	public String toString() {
-		return dag.toString();
+		return dag.toString() + 
+				"\n\nReplacements\n" + replacements.toString() + 
+				"\n\nEquivalenceMap\n" + equivalencesClasses;
 	}
 	
 	
-	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
-		return dag;
-	}
-
-	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
+	
+	// INTERNAL DETAILS
+	
+	
+	DirectedGraph<Description, DefaultEdge> getReversedDag() {
 		DirectedGraph<Description, DefaultEdge> reversed =
 				new EdgeReversedGraph<Description, DefaultEdge>(dag);
 		return reversed;
@@ -201,61 +188,47 @@ public class DAGImpl  {
 		return dag.vertexSet();
 	}
 
-	public boolean containsVertex(Description desc) {
-		return dag.containsVertex(desc);
-	}
-
 	public Set<DefaultEdge> edgeSet() {
 		return dag.edgeSet();
 	}	
 
-	public Description getEdgeSource(DefaultEdge edge) {
+	
+	
+	
+	
+	@Deprecated // SINGLE USE
+	public Map<Description, Description> getReplacements() {
+		return replacements;
+	}
+
+	@Deprecated  // SINGLE USE
+	public Map<Description, EquivalenceClass<Description>> getMapEquivalences() {
+		return equivalencesClasses;
+	}
+	
+	
+	
+	SimpleDirectedGraph <Description,DefaultEdge> getDag() {
+		return dag;
+	}
+	
+	boolean containsVertex(Description desc) {
+		return dag.containsVertex(desc);
+	}
+
+	Description getEdgeSource(DefaultEdge edge) {
 		return dag.getEdgeSource(edge);
 	}
 
-	public Description getEdgeTarget(DefaultEdge edge) {
+	Description getEdgeTarget(DefaultEdge edge) {
 		return dag.getEdgeTarget(edge);
 	}
 
-	public Set<DefaultEdge> incomingEdgesOf(Description node) {
+	Set<DefaultEdge> incomingEdgesOf(Description node) {
 		return dag.incomingEdgesOf(node);
 	}
 
-	public Set<DefaultEdge> outgoingEdgesOf(Description node) {
+	Set<DefaultEdge> outgoingEdgesOf(Description node) {
 		return dag.outgoingEdgesOf(node);
-	}
-
-
-
-	
-	// HACKY METHODS TO BE RID OF (USED ONLY IN EquivalenceTBoxOptimizer)
-	@Deprecated 
-	public void setReplacementFor(Description key, Description value) {
-		replacements.put(key, value);	
-	}
-
-	@Deprecated 
-	public void removeReplacementFor(Description key) {
-		replacements.remove(key);	
-	}
-
-	@Deprecated 
-	public void addEdge(Description s, Description t) {
-		dag.addEdge(s, t);
-	}
-
-	@Deprecated 
-	public void addVertex(Description v) {
-		dag.addVertex(v);
-	}
-
-	@Deprecated 
-	public void removeAllEdges(Description s, Description t) {
-		dag.removeAllEdges(s, t);
-	}
-
-	@Deprecated 
-	public void removeVertex(Description v) {
-		dag.removeVertex(v);
 	}	
 }

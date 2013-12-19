@@ -51,10 +51,8 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
-		DAGImpl dag=(DAGImpl) DAGBuilder.getDAG(graph);
+		DAGImpl dag = DAGBuilder.getDAG(graph);
 		System.out.println(dag);
-		System.out.println(dag.getReplacements());
-		System.out.println(dag.getMapEquivalences());
 		
 		log.info("See information");
 		System.out.println(dag.vertexSet());

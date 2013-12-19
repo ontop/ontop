@@ -46,6 +46,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		this.dag = dag;
 	}
 	
+	public Description getRepresentativeFor(Description node) {
+		return dag.getRepresentativeFor(node);
+	}
+	
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 

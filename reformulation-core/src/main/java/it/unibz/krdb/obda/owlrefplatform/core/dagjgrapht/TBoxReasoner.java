@@ -33,5 +33,6 @@ public interface TBoxReasoner {
 	public Set<Description> getEquivalences(Description desc);
 	
 	public Set<Set<Description>> getNodes();
+	
 
 }
