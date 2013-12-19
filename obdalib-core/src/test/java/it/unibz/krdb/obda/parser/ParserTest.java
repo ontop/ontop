@@ -177,6 +177,15 @@ public class ParserTest extends TestCase {
 		printSQL("test_1_7", result2);
 		assertTrue(result2);
 	}
+	
+	public void test_1_7_1() {
+		final boolean result = parseJSQL("SELECT alias.id, alias.name FROM student");
+		printJSQL("test_1_7_1", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("SELECT alias.id, alias.name FROM student");
+		printSQL("test_1_7_1", result2);
+		assertTrue(result2);
+	}
 
 	public void test_1_8() {
 		final boolean result = parseJSQL("SELECT id FROM \"student\"");
