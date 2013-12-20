@@ -9,8 +9,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
@@ -47,18 +49,31 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public TBoxReasonerImpl(Ontology onto) {
 		this.dag = DAGBuilder.getDAG(onto);
 	}
-	
-	public Description getRepresentativeFor(Description node) {
-		return dag.getRepresentativeFor(node);
-	}
 
 	public Description getRepresentativeFor(Set<Description> nodes) {
 		Description first = nodes.iterator().next();
 		return dag.getRepresentativeFor(first);
 	}
+
+	public boolean hasReplacementFor(Description v) {
+		return dag.hasReplacementFor(v);
+	}
+
+	public Set<Property> getPropertyNames() {
+		return dag.getPropertyNames();
+	}
+
+	public Set<OClass> getClassNames() {
+		return dag.getClassNames();
+	}
 	
 	public Description getNode(Description node) {
 		return dag.getNode(node);
+	}
+	
+	@Deprecated
+	public Set<Description> vertexSet() {
+		return dag.getDag().vertexSet();
 	}
 	
 	/**

@@ -26,12 +26,11 @@ public class DAGTest extends TestCase {
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	private void test_dag_index_nodes(String testname) throws Exception {
-		DAGImpl res = helper.load_dag(testname);
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
+		TBoxReasonerImpl reasoner = helper.load_dag(testname);
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
 		Set<Description> classes= new HashSet<Description>();
-		for(Description node : res.getDag().vertexSet()){
+		for(Description node : reasoner.vertexSet()){
 			if(node instanceof ClassDescription){
 				for(Description c: reasoner.getEquivalences(node) )
 				classes.add(c);
@@ -39,7 +38,7 @@ public class DAGTest extends TestCase {
 		}
 		
 		Set<Description> roles= new HashSet<Description>();
-		for(Description node : res.getDag().vertexSet()){
+		for(Description node : reasoner.vertexSet()){
 			if(node instanceof Property){
 				for(Description r: reasoner.getEquivalences(node) )
 					roles.add(r);

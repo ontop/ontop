@@ -99,11 +99,10 @@ public class SemanticIndexHelper {
 
     }
 
-    public DAGImpl load_dag(String ontoname) throws Exception {
+    public TBoxReasonerImpl load_dag(String ontoname) throws Exception {
 
-    	//TBoxReasonerImpl reasoner = new TBoxReasonerImpl();
-        return DAGBuilder.getDAG(load_onto(ontoname));
-
+    	return new TBoxReasonerImpl(load_onto(ontoname));
+        //return DAGBuilder.getDAG(load_onto(ontoname));
     }
 
     public List<List<Description>> get_results(String resname) {

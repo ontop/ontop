@@ -450,9 +450,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.config = config;
 	}
 
-	public DAGImpl getDAG() {
-		return dag;
-	}
+//	public DAGImpl getDAG() {
+//		return dag;
+//	}
 
 	@Override
 	public void setTBox(Ontology ontology) {
@@ -1755,7 +1755,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
-		Description roleNode = dag.getNode(role);
+		Description roleNode = reasonerDag.getNode(role);
 		Set<Set<Description>> ancestors = reasonerDag.getAncestors(roleNode);
 
 		for (Set<Description> node : ancestors) {
@@ -1915,7 +1915,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<Predicate> roles = ontology.getRoles();
 		for (Predicate rolepred : roles) {
 
-			Description node = dag.getNode(ofac.createProperty(rolepred));
+			Description node = reasonerDag.getNode(ofac.createProperty(rolepred));
 			// We only map named roles
 			if (!(node instanceof Property)
 					|| ((Property) node).isInverse()) {
@@ -1942,8 +1942,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			while (!childrenQueue.isEmpty()) {
 				Set<Description> children = childrenQueue.poll();
-				Description firstChild=children.iterator().next();
-				Description child = dag.getRepresentativeFor(firstChild);
+				Description child = reasonerDag.getRepresentativeFor(children);
 				if(child.equals(node))
 					continue;
 				if ((child instanceof Property)
@@ -1985,8 +1984,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<Description> classNodesMaps = new HashSet<Description>();
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
-		for (Description node : dag.getClassNames()) {
-			if (dag.hasReplacementFor(node))
+		for (Description node : reasonerDag.getClassNames()) {
+			if (reasonerDag.hasReplacementFor(node))
 				continue;
 
 			classNodesMaps.add(node);
@@ -2027,7 +2026,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode;
 				Property role = ofac.createProperty(existsDesc.getPredicate(),
 						existsDesc.isInverse());
-				Description roleNode = dag.getNode(role);
+				Description roleNode = reasonerDag.getNode(role);
 
 				for (Description possiblyRedundantNode : existChildren) {
 					/* Here we have ER */
@@ -2035,7 +2034,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Property role2 = ofac
 							.createProperty(existsDesc2.getPredicate(),
 									existsDesc2.isInverse());
-					Description roleNode2 = dag.getNode(role2);
+					Description roleNode2 = reasonerDag.getNode(role2);
 
 					for(Set<Description> descendants: reasonerDag.getDescendants(roleNode)){
 						if(descendants.contains(roleNode2))

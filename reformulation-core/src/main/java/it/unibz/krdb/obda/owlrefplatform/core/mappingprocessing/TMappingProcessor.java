@@ -55,11 +55,7 @@ public class TMappingProcessor implements Serializable {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final DAGImpl dag;
-
 	private final Ontology aboxDependencies;
-
-	// private final NamedDAGImpl pureIsa;
 	
 	private final TBoxReasonerImpl reasoner;
 
@@ -70,8 +66,7 @@ public class TMappingProcessor implements Serializable {
 	public TMappingProcessor(Ontology tbox, boolean optmize) {
 		this.optimize = optmize;
 		
-		dag = DAGBuilder.getDAG(tbox);
-		reasoner = new TBoxReasonerImpl(dag);
+		reasoner = new TBoxReasonerImpl(tbox);
 
 		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 	}
@@ -376,11 +371,11 @@ public class TMappingProcessor implements Serializable {
 		 * that these are already processed. We start with the leafs.
 		 */
 
-		for (Property currentProperty : dag.getPropertyNames()) {
+		for (Property currentProperty : reasoner.getPropertyNames()) {
 			/* setting up the queue for the next iteration */
 
 			/* we only create mappings for named properties and not considering equivalences*/
-			if (dag.hasReplacementFor(currentProperty)) 
+			if (reasoner.hasReplacementFor(currentProperty)) 
 				continue;
 			
 
@@ -477,9 +472,9 @@ public class TMappingProcessor implements Serializable {
 		 * Starting with the leafs.
 		 */
 
-		for (OClass currentProperty : dag.getClassNames()) {
+		for (OClass currentProperty : reasoner.getClassNames()) {
 
-			if (dag.hasReplacementFor(currentProperty)) //don't consider the equivalences
+			if (reasoner.hasReplacementFor(currentProperty)) //don't consider the equivalences
 				continue;
 
 
