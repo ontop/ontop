@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
@@ -94,8 +95,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			if(named){
 
 				if(d1.getPropertyNames().contains(vertex) || d1.getClassNames().contains(vertex)){
-					Set<Set<Description>> setd1	=reasonerd1.getDescendants(vertex);
-					Set<Set<Description>> setd2	=reasonerd2.getDescendants(vertex);
+					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getDescendants(vertex);
+					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
@@ -119,8 +120,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			if(named){
 
 				if(d1.getRoles().contains(vertex) || d1.getClasses().contains(vertex)){
-					Set<Set<Description>> setd1	=reasonerd1.getDescendants(vertex);
-					Set<Set<Description>> setd2	=reasonerd2.getDescendants(vertex);
+					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getDescendants(vertex);
+					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
@@ -144,8 +145,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			if(named){
 
 				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
-					Set<Set<Description>> setd1	=reasonerd1.getAncestors(vertex);
-					Set<Set<Description>> setd2	=reasonerd2.getAncestors(vertex);
+					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getAncestors(vertex);
+					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}
@@ -167,8 +168,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			if(named){
 
 				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					Set<Set<Description>> setd1	=reasonerd1.getAncestors(vertex);
-					Set<Set<Description>> setd2	=reasonerd2.getAncestors(vertex);
+					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getAncestors(vertex);
+					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}

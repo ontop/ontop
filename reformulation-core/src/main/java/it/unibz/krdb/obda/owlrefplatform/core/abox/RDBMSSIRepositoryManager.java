@@ -43,6 +43,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
@@ -1756,9 +1757,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
 		Description roleNode = reasonerDag.getNode(role);
-		Set<Set<Description>> ancestors = reasonerDag.getAncestors(roleNode);
+		Set<EquivalenceClass<Description>> ancestors = reasonerDag.getAncestors(roleNode);
 
-		for (Set<Description> node : ancestors) {
+		for (EquivalenceClass<Description> node : ancestors) {
 			for(Description desc: node)
 			{
 				if (desc instanceof DataType) {
@@ -1935,13 +1936,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * 
 			 * Collecting the top most allows us to avoid redundancy elimination
 			 */
-			Queue<Set<Description>> childrenQueue = new LinkedList<Set<Description>>();
+			Queue<EquivalenceClass<Description>> childrenQueue = new LinkedList<EquivalenceClass<Description>>();
 			childrenQueue.addAll(reasonerDag.getDirectChildren(node));
 			childrenQueue.add(reasonerDag.getEquivalences(node));
 
 
 			while (!childrenQueue.isEmpty()) {
-				Set<Description> children = childrenQueue.poll();
+				EquivalenceClass<Description> children = childrenQueue.poll();
 				Description child = reasonerDag.getRepresentativeFor(children);
 				if(child.equals(node))
 					continue;
@@ -2006,7 +2007,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				}
 				
 			}
-			for (Set<Description> children : reasonerDag.getDescendants(node)) {
+			for (EquivalenceClass<Description> children : reasonerDag.getDescendants(node)) {
 				for (Description child:children){
 
 				if (child instanceof PropertySomeRestrictionImpl) {
@@ -2036,7 +2037,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 									existsDesc2.isInverse());
 					Description roleNode2 = reasonerDag.getNode(role2);
 
-					for(Set<Description> descendants: reasonerDag.getDescendants(roleNode)){
+					for(EquivalenceClass<Description> descendants: reasonerDag.getDescendants(roleNode)){
 						if(descendants.contains(roleNode2))
 						/*
 						 * The DAG implies that R ISA S, so we remove ER

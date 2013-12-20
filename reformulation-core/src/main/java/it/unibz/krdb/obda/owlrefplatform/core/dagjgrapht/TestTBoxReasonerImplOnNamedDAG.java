@@ -53,9 +53,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
-	public Set<Set<Description>> getDirectChildren(Description desc) {
+	public Set<EquivalenceClass<Description>> getDirectChildren(Description desc) {
 		
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		// take the representative node
 		Description node = dag.getRepresentativeFor(desc);
@@ -65,8 +65,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			Description source = dag.getDag().getEdgeSource(edge);
 
 			// get the child node and its equivalent nodes
-			Set<Description> namedEquivalences = getEquivalences(source);
-
+			EquivalenceClass<Description> namedEquivalences = getEquivalences(source);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
@@ -80,12 +79,12 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *  Private method that searches for the first named children
 	 */
 
-	private Set<Set<Description>> getNamedChildren(Description desc) {
+	private Set<EquivalenceClass<Description>> getNamedChildren(Description desc) {
 
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		// get equivalences of the current node
-		Set<Description> equivalenceSet = getEquivalences(desc);
+		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the children of the equivalent nodes
 		Set<DefaultEdge> edges = dag.getDag().incomingEdgesOf(desc);
 		for (DefaultEdge edge : edges) {
@@ -96,8 +95,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			if (equivalenceSet.contains(source)) 
 				continue;
 
-			Set<Description> namedEquivalences = getEquivalences(source);
-
+			EquivalenceClass<Description> namedEquivalences = getEquivalences(source);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
@@ -117,9 +115,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         the same set of description
 	 * */
 	@Override
-	public Set<Set<Description>> getDirectParents(Description desc) {
+	public Set<EquivalenceClass<Description>> getDirectParents(Description desc) {
 
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 		
 		// take the representative node
 		Description node = dag.getRepresentativeFor(desc);
@@ -128,7 +126,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			Description target = dag.getDag().getEdgeTarget(edge);
 
 			// get the child node and its equivalent nodes
-			Set<Description> namedEquivalences = getEquivalences(target);
+			EquivalenceClass<Description> namedEquivalences = getEquivalences(target);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else {
@@ -143,12 +141,12 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *  private method that search for the first named parents
 	 */
 	
-	private Set<Set<Description>> getNamedParents(Description desc) {
+	private Set<EquivalenceClass<Description>> getNamedParents(Description desc) {
 
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		// get equivalences of the current node
-		Set<Description> equivalenceSet = getEquivalences(desc);
+		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the parents of the equivalent nodes
 
 		Set<DefaultEdge> edges = dag.getDag().outgoingEdgesOf(desc);
@@ -160,8 +158,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			if (equivalenceSet.contains(target)) 
 				continue;
 
-			Set<Description> namedEquivalences = getEquivalences(target);
-
+			EquivalenceClass<Description> namedEquivalences = getEquivalences(target);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
@@ -181,9 +178,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
-	public Set<Set<Description>> getDescendants(Description desc) {
+	public Set<EquivalenceClass<Description>> getDescendants(Description desc) {
 
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		Description node = dag.getRepresentativeFor(desc);
 		
@@ -197,7 +194,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		iterator.next();
 
 		Description startNode = desc;
-		Set<Description> sourcesStart = getEquivalences(startNode);
+		EquivalenceClass<Description> sourcesStart = getEquivalences(startNode);
 		Set<Description> sourcesStartnoNode = new HashSet<Description>();
 		for (Description equivalent : sourcesStart) {
 			if (equivalent.equals(startNode))
@@ -206,14 +203,14 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		}
 
 		if (!sourcesStartnoNode.isEmpty())
-			result.add(sourcesStartnoNode);
+			result.add(new EquivalenceClass<Description>(sourcesStartnoNode));
 
 		// iterate over the subsequent nodes, they are all descendant of desc
 		while (iterator.hasNext()) {
 			Description child = iterator.next();
 
 			// add the node and its equivalent nodes
-			Set<Description> sources = getEquivalences(child);
+			EquivalenceClass<Description> sources = getEquivalences(child);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -233,9 +230,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 */
 
 	@Override
-	public Set<Set<Description>> getAncestors(Description desc) {
+	public Set<EquivalenceClass<Description>> getAncestors(Description desc) {
 
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		Description node = dag.getRepresentativeFor(desc);
 
@@ -246,7 +243,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		iterator.next();
 
 		Description startNode = desc;
-		Set<Description> sourcesStart = getEquivalences(startNode);
+		EquivalenceClass<Description> sourcesStart = getEquivalences(startNode);
 		Set<Description> sourcesStartnoNode = new HashSet<Description>();
 		for (Description equivalent : sourcesStart) {
 			if (equivalent.equals(startNode))
@@ -255,15 +252,14 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		}
 
 		if (!sourcesStartnoNode.isEmpty())
-			result.add(sourcesStartnoNode);
+			result.add(new EquivalenceClass<Description>(sourcesStartnoNode));
 
 		// iterate over the subsequent nodes, they are all ancestor of desc
 		while (iterator.hasNext()) {
 			Description parent = iterator.next();
 
 			// add the node and its equivalent nodes
-			Set<Description> sources = getEquivalences(parent);
-
+			EquivalenceClass<Description> sources = getEquivalences(parent);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -281,7 +277,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 */
 
 	@Override
-	public Set<Description> getEquivalences(Description desc) {
+	public EquivalenceClass<Description> getEquivalences(Description desc) {
 		
 		Set<Description> equivalences = new LinkedHashSet<Description>();
 			for (Description vertex : dag.getEquivalenceClass(desc)) {
@@ -289,7 +285,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 						equivalences.add(vertex);
 				}
 			}
-		return Collections.unmodifiableSet(equivalences);
+		return new EquivalenceClass<Description>(equivalences);
 	}
 	
 	/**
@@ -301,9 +297,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 */
 
 	@Override
-	public Set<Set<Description>> getNodes() {
+	public Set<EquivalenceClass<Description>> getNodes() {
 
-		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
+		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		for (Description vertex : dag.vertexSet()) 
 				result.add(getEquivalences(vertex));

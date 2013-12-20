@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
@@ -67,7 +68,7 @@ public class DAGHierarchyTest extends TestCase {
 		 * The initial node is Node A.
 		 */
 		Description initialNode = ofac.createClass(ontoURI + "A");
-		Set<Set<Description>> descendants = namedReasoner.getDescendants(initialNode);
+		Set<EquivalenceClass<Description>> descendants = namedReasoner.getDescendants(initialNode);
 
 		assertEquals(descendants.size(), 0);
 
@@ -101,7 +102,7 @@ public class DAGHierarchyTest extends TestCase {
 		Description C = ofac.createClass(ontoURI + "C");
 		Set<Description> equivalents = new HashSet<Description>();
 		equivalents.add(C);
-		assertTrue(descendants.contains(equivalents));
+		assertTrue(descendants.contains(new EquivalenceClass<Description>(equivalents)));
 
 		/**
 		 * The initial node is Node E.
@@ -117,7 +118,7 @@ public class DAGHierarchyTest extends TestCase {
 		initialNode = ofac.createClass(ontoURI + "F");
 		descendants = namedReasoner.getDescendants(initialNode);
 		int size = 0;
-		for (Set<Description> d : descendants)
+		for (EquivalenceClass<Description> d : descendants)
 
 			size += d.size();
 
@@ -134,7 +135,7 @@ public class DAGHierarchyTest extends TestCase {
 		Description E = ofac.createClass(ontoURI + "E"); // equivalent class
 		equivalents = new HashSet<Description>();
 		equivalents.add(E);
-		assertTrue(descendants.contains(equivalents));
+		assertTrue(descendants.contains(new EquivalenceClass<Description>(equivalents)));
 	}
 
 	/**
@@ -163,10 +164,10 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 
 		Description initialNode = ofac.createClass(ontoURI + "A");
-		Set<Set<Description>> ancestors = namedReasoner.getAncestors(initialNode);
+		Set<EquivalenceClass<Description>> ancestors = namedReasoner.getAncestors(initialNode);
 
 		int size = 0;
-		for (Set<Description> a : ancestors)
+		for (EquivalenceClass<Description> a : ancestors)
 
 			size += a.size();
 
@@ -187,7 +188,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = namedReasoner.getAncestors(initialNode);
 
 		size = 0;
-		for (Set<Description> a : ancestors)
+		for (EquivalenceClass<Description> a : ancestors)
 
 			size += a.size();
 
@@ -213,7 +214,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = namedReasoner.getAncestors(initialNode);
 
 		size = 0;
-		for (Set<Description> a : ancestors)
+		for (EquivalenceClass<Description> a : ancestors)
 
 			size += a.size();
 
@@ -223,7 +224,7 @@ public class DAGHierarchyTest extends TestCase {
 															// class
 		Set<Description> equivalents = new HashSet<Description>();
 		equivalents.add(C);
-		assertTrue(ancestors.contains(equivalents));
+		assertTrue(ancestors.contains(new EquivalenceClass<Description>(equivalents)));
 		E = ofac.createClass(ontoURI + "E"); // equivalent class
 		assertTrue(ancestors.contains(namedReasoner.getEquivalences(E)));
 		F = ofac.createClass(ontoURI + "F");
@@ -248,7 +249,7 @@ public class DAGHierarchyTest extends TestCase {
 		E = ofac.createClass(ontoURI + "E"); // equivalent class
 		equivalents = new HashSet<Description>();
 		equivalents.add(E);
-		assertTrue(ancestors.contains(equivalents));
+		assertTrue(ancestors.contains(new EquivalenceClass<Description>(equivalents)));
 	}
 
 	/**
@@ -276,7 +277,7 @@ public class DAGHierarchyTest extends TestCase {
 		 * The initial node is Node P.
 		 */
 		Description initialNode = ofac.createObjectProperty(ontoURI + "P");
-		Set<Set<Description>> descendants = namedReasoner.getDescendants(initialNode);
+		Set<EquivalenceClass<Description>> descendants = namedReasoner.getDescendants(initialNode);
 
 		assertEquals(descendants.size(), 0);
 
@@ -310,7 +311,7 @@ public class DAGHierarchyTest extends TestCase {
 		Description R = ofac.createObjectProperty(ontoURI + "R");
 		Set<Description> equivalents = new HashSet<Description>();
 		equivalents.add(R);
-		assertTrue(descendants.contains(equivalents));
+		assertTrue(descendants.contains(new EquivalenceClass<Description>(equivalents)));
 
 		/**
 		 * The initial node is Node T.
@@ -327,7 +328,7 @@ public class DAGHierarchyTest extends TestCase {
 		descendants = namedReasoner.getDescendants(initialNode);
 
 		int size = 0;
-		for (Set<Description> d : descendants)
+		for (EquivalenceClass<Description> d : descendants)
 
 			size += d.size();
 
@@ -345,7 +346,7 @@ public class DAGHierarchyTest extends TestCase {
 		Description T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
 		 equivalents = new HashSet<Description>();
 		equivalents.add(T);													// role
-		assertTrue(descendants.contains(equivalents));
+		assertTrue(descendants.contains(new EquivalenceClass<Description>(equivalents)));
 	}
 
 	/**
@@ -374,10 +375,10 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		Description initialNode = ofac
 				.createObjectProperty(ontoURI + "P");
-		Set<Set<Description>> ancestors = namedReasoner.getAncestors(initialNode);
+		Set<EquivalenceClass<Description>> ancestors = namedReasoner.getAncestors(initialNode);
 
 		int size = 0;
-		for (Set<Description> a : ancestors)
+		for (EquivalenceClass<Description> a : ancestors)
 
 			size += a.size();
 
@@ -398,7 +399,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = namedReasoner.getAncestors(initialNode);
 
 		size = 0;
-		for (Set<Description> a : ancestors)
+		for (EquivalenceClass<Description> a : ancestors)
 
 			size += a.size();
 
@@ -426,7 +427,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = namedReasoner.getAncestors(initialNode);
 
 		size = 0;
-		for (Set<Description> a : ancestors)
+		for (EquivalenceClass<Description> a : ancestors)
 
 			size += a.size();
 
@@ -436,7 +437,7 @@ public class DAGHierarchyTest extends TestCase {
 																			// role
 		Set<Description> equivalents = new HashSet<Description>();
 		equivalents.add(R);
-		assertTrue(ancestors.contains(equivalents));
+		assertTrue(ancestors.contains(new EquivalenceClass<Description>(equivalents)));
 		T = ofac.createObjectProperty(ontoURI + "T"); // equivalent
 																	// role
 		
@@ -465,7 +466,7 @@ public class DAGHierarchyTest extends TestCase {
 																	// role
 		equivalents = new HashSet<Description>();
 		equivalents.add(T);
-		assertTrue(ancestors.contains(equivalents));
+		assertTrue(ancestors.contains(new EquivalenceClass<Description>(equivalents)));
 		
 	}
 }

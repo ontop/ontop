@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
@@ -116,10 +117,10 @@ public class S_TestTransitiveReduction extends TestCase {
 
 		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
 
-		Set<Set<Description>> nodesd2= reasonerd2.getNodes();
-		Iterator<Set<Description>> it1 =nodesd2.iterator();
+		Set<EquivalenceClass<Description>> nodesd2= reasonerd2.getNodes();
+		Iterator<EquivalenceClass<Description>> it1 =nodesd2.iterator();
 		while (it1.hasNext()) {
-			Set<Description> equivalents=it1.next();
+			EquivalenceClass<Description> equivalents=it1.next();
 
 			//two nodes have two edges, three nodes have three edges...
 			if(equivalents.size()>=2){
@@ -129,14 +130,14 @@ public class S_TestTransitiveReduction extends TestCase {
 
 		TestTBoxReasonerImplOnGraph reasonerd1= new TestTBoxReasonerImplOnGraph(g1);
 
-		Set<Set<Description>> nodesg1= reasonerd1.getNodes(false);
-		Iterator<Set<Description>> it2 =nodesg1.iterator();
+		Set<EquivalenceClass<Description>> nodesg1= reasonerd1.getNodes(false);
+		Iterator<EquivalenceClass<Description>> it2 =nodesg1.iterator();
 		
 
 		while (it2.hasNext()) {
 
 			
-			Set<Description> equivalents=it2.next();
+			EquivalenceClass<Description> equivalents=it2.next();
 			log.info("equivalents {} ", equivalents);
 			
 			
@@ -148,15 +149,15 @@ public class S_TestTransitiveReduction extends TestCase {
 			
 				
 				//descendants of the vertex
-				Set<Set<Description>> descendants=reasonerd2.getDescendants(vertex);
-				Set<Set<Description>> children=reasonerd2.getDirectChildren(vertex);
+				Set<EquivalenceClass<Description>> descendants=reasonerd2.getDescendants(vertex);
+				Set<EquivalenceClass<Description>> children=reasonerd2.getDirectChildren(vertex);
 
 				log.info("descendants{} ", descendants);
 				log.info("children {} ", children);
 
 				for(DefaultEdge edge: g1.incomingEdgesOf(vertex)){
 					Description source=g1.getEdgeSource(edge);
-					for(Set<Description> descendant:descendants){
+					for(EquivalenceClass<Description> descendant:descendants){
 
 					if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
 						numberRedundants +=1;	

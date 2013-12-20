@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
@@ -62,19 +63,19 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
 		int numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(ac)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 2);
 
 		assertTrue(reasoner.getDescendants(bc).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(bc)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(bc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(cc)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 0);
@@ -123,26 +124,26 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(ier)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
 		int numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(ac)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 3);
 
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(er)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(er)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);
 
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(ier)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ier)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(cc)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 0);
@@ -189,7 +190,7 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(bc)));
 		int numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(ac)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 4);
@@ -199,7 +200,7 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(dc).contains(reasoner.getEquivalences(cc)));
 		assertTrue(reasoner.getDescendants(dc).contains(reasoner.getEquivalences(bc)));
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(dc)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(dc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 4);
@@ -207,7 +208,7 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(er)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(er)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 2);
@@ -215,18 +216,18 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(ier)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ier)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 2);
 
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(bc)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(bc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 0);
 		numDescendants=0;
-		for(Set<Description> equiDescendants: reasoner.getDescendants(cc)){
+		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 0);

@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Set;
@@ -60,9 +61,9 @@ public class SigmaTBoxOptimizer {
 
 			log.debug("Starting semantic-reduction");
 
-			for(Set<Description> nodes: isa.getNodes()) {
+			for(EquivalenceClass<Description> nodes: isa.getNodes()) {
 				Description node = isa.getRepresentativeFor(nodes);
-				for (Set<Description> descendants : isa.getDescendants(node)) {
+				for (EquivalenceClass<Description> descendants : isa.getDescendants(node)) {
 						Description descendant = isa.getRepresentativeFor(descendants);
 						if (!descendant.equals(node)) 
 							addToTBox(optimizedTBox, descendant, node);
@@ -97,7 +98,7 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Set<Description> children_prime : isa.getDirectChildren(parent)) {
+			for (EquivalenceClass<Description> children_prime : isa.getDirectChildren(parent)) {
 				Property child_prime = (Property) children_prime.iterator().next();
 
 				if (!child_prime.equals(child) && 
@@ -127,7 +128,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Set<Description> children_prime : isa.getDirectChildren(parent)) {
+			for (EquivalenceClass<Description> children_prime : isa.getDirectChildren(parent)) {
 			Description child_prime = children_prime.iterator().next();
 
 				if (!child_prime.equals(child) && 
@@ -148,10 +149,10 @@ public class SigmaTBoxOptimizer {
 		if (sp == null || sc == null || tc == null) 
 			return false;
 		
-		Set<Set<Description>> spChildren =  sigmaChain.getDirectChildren(sp);
-		Set<Description> scEquivalent = sigmaChain.getEquivalences(sc);
-		Set<Set<Description>> scChildren = sigmaChain.getDescendants(sc);
-		Set<Set<Description>> tcChildren = isaChain.getDescendants(tc);
+		Set<EquivalenceClass<Description>> spChildren =  sigmaChain.getDirectChildren(sp);
+		EquivalenceClass<Description> scEquivalent = sigmaChain.getEquivalences(sc);
+		Set<EquivalenceClass<Description>> scChildren = sigmaChain.getDescendants(sc);
+		Set<EquivalenceClass<Description>> tcChildren = isaChain.getDescendants(tc);
 
 		boolean redundant = spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
 		return redundant;
@@ -161,9 +162,9 @@ public class SigmaTBoxOptimizer {
 		OntologyFactory descFactory = new OntologyFactoryImpl();
 		Ontology sigma = descFactory.createOntology("sigma");
 
-		for (Set<Description> nodes : reasoner.getNodes()) {
+		for (EquivalenceClass<Description> nodes : reasoner.getNodes()) {
 			Description node = reasoner.getRepresentativeFor(nodes);
-			for (Set<Description> descendants : reasoner.getDescendants(node)) {
+			for (EquivalenceClass<Description> descendants : reasoner.getDescendants(node)) {
 				Description descendant = reasoner.getRepresentativeFor(descendants);
 
 				if (!descendant.equals(node)) 

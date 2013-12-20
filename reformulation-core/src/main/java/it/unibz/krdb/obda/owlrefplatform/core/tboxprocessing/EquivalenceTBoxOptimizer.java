@@ -19,8 +19,9 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
- 
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,7 +70,7 @@ public class EquivalenceTBoxOptimizer {
 		if (equivalenceMap == null) {
 			equivalenceMap = new HashMap<Predicate, Description>();
 
-			for(Set<Description> nodes : reasoner.getNodes()) {
+			for(EquivalenceClass<Description> nodes : reasoner.getNodes()) {
 				Description node = reasoner.getRepresentativeFor(nodes);
 							
 				if (node instanceof Property) {
@@ -128,10 +129,10 @@ public class EquivalenceTBoxOptimizer {
 			optimizedTBox = ofac.createOntology();
 			getEquivalenceMap();
 			
-			for(Set<Description> nodes : reasoner.getNodes()) {
+			for(EquivalenceClass<Description> nodes : reasoner.getNodes()) {
 				Description node = reasoner.getRepresentativeFor(nodes);
 				
-				for (Set<Description> descendants : reasoner.getDescendants(node)) {
+				for (EquivalenceClass<Description> descendants : reasoner.getDescendants(node)) {
 					Description descendant = reasoner.getRepresentativeFor(descendants);
 
 					if (!descendant.equals(node))  // exclude trivial inclusions

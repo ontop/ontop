@@ -10,7 +10,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Ontology;
 
 import java.util.Set;
 
@@ -22,17 +21,17 @@ import java.util.Set;
  */
 public interface TBoxReasoner {
 
-	public Set<Set<Description>> getDirectChildren(Description desc);
+	public Set<EquivalenceClass<Description>> getDirectChildren(Description desc);
 
-	public Set<Set<Description>> getDirectParents(Description desc);
+	public Set<EquivalenceClass<Description>> getDirectParents(Description desc);
 
-	public Set<Set<Description>> getDescendants(Description desc);
+	public Set<EquivalenceClass<Description>> getDescendants(Description desc);
 
-	public Set<Set<Description>> getAncestors(Description desc);
+	public Set<EquivalenceClass<Description>> getAncestors(Description desc);
 
-	public Set<Description> getEquivalences(Description desc);
+	public EquivalenceClass<Description> getEquivalences(Description desc);
 	
-	public Set<Set<Description>> getNodes();
+	public Set<EquivalenceClass<Description>> getNodes();
 	
 
 }
