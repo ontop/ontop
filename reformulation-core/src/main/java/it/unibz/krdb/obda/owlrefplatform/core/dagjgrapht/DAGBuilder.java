@@ -52,7 +52,7 @@ public class DAGBuilder {
 	
 	public static DAGImpl getDAG(Ontology onto) {
 		
-		TBoxGraph graph = TBoxGraph.getGraph(onto);
+		TBoxGraph graph = TBoxGraph.getGraph(onto, false);
 		
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		
@@ -67,18 +67,10 @@ public class DAGBuilder {
 	 */
 	
 	public static DAGImpl getDAG(TBoxGraph graph) {
-
-		Map<Description, EquivalenceClass<Description>> equivalencesMap = new HashMap<Description, EquivalenceClass<Description>>();
-		Map<Description, Description> replacements = new HashMap<Description, Description>();
-
 		// temporary graph to be transformed in DAG
 		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = graph.getCopy();
 
-		eliminateCycles(modifiedGraph, equivalencesMap, replacements);
-		eliminateRedundantEdges(modifiedGraph);
-
-		DAGImpl dag = new DAGImpl(modifiedGraph, equivalencesMap, replacements);
-		return dag;
+		return getDAG(modifiedGraph);
 	}
 
 	/**
@@ -89,10 +81,11 @@ public class DAGBuilder {
 	 * @param equivalents a map between the node and its equivalent nodes
 	 * @param representatives a map between the node and its representative node
 	 */
-	public static DAGImpl getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph,
-			Map<Description, EquivalenceClass<Description>> equivalencesMap,
-			Map<Description, Description> replacements) {
+	public static DAGImpl getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph) {
 
+		Map<Description, EquivalenceClass<Description>> equivalencesMap = new HashMap<Description, EquivalenceClass<Description>>();
+		Map<Description, Description> replacements = new HashMap<Description, Description>();
+		
 		eliminateCycles(graph, equivalencesMap, replacements);
 		eliminateRedundantEdges(graph);
 

@@ -54,10 +54,8 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
-		DAGImpl res = DAGBuilder.getDAG(ontology);
-		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(res);
-		DAGImpl chainDAG = reasoner0.getChainDAG();
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(chainDAG);
+		//TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasonerImpl reasoner = TBoxReasonerImpl.getChainReasoner(ontology);
 
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
@@ -179,10 +177,10 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
-		DAGImpl dag221 = DAGBuilder.getDAG(ontology);
-		TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
-		DAGImpl dagChain221 = reasoner221.getChainDAG();
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(dagChain221);
+		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
+		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
+		//DAGImpl dagChain221 = reasoner221.getChainDAG();
+		TBoxReasonerImpl reasoner = TBoxReasonerImpl.getChainReasoner(ontology);
 
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(er)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(ier)));

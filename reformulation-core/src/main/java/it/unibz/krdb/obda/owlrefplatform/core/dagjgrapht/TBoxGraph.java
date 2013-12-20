@@ -132,8 +132,12 @@ public class TBoxGraph  {
 	 * Build the graph from the TBox axioms of the ontology
 	 * 
 	 * @param ontology TBox containing the axioms
+	 * @param chain 
+	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
+	 * relation of the original DAG gets extended to the reachability relation
+	 * of T and Sigma chains.
 	 */
-	public static TBoxGraph getGraph (Ontology ontology) {
+	public static TBoxGraph getGraph (Ontology ontology, boolean chain) {
 		
 		DefaultDirectedGraph<Description,DefaultEdge> graph = new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
@@ -156,6 +160,10 @@ public class TBoxGraph  {
 			graph.addVertex(roleInv);
 			graph.addVertex(existsRole);
 			graph.addVertex(existsRoleInv);
+			if (chain) {
+				graph.addEdge(existsRoleInv, existsRole);				
+				graph.addEdge(existsRole, existsRoleInv);				
+			}
 		}
 
 		for (Axiom assertion : ontology.getAssertions()) {
@@ -203,5 +211,8 @@ public class TBoxGraph  {
 		return new TBoxGraph(graph);
 	}
 	
+	public static TBoxGraph getGraph (Ontology ontology) {
+		return getGraph(ontology, false);
+	}
 
 }

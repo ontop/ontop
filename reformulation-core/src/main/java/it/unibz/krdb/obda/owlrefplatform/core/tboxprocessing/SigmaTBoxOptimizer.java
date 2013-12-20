@@ -45,12 +45,12 @@ public class SigmaTBoxOptimizer {
 		vocabulary = isat.getVocabulary();
 		
 		isa = new TBoxReasonerImpl(isat);
-		DAGImpl isaChainDAG = isa.getChainDAG();
-		isaChain = new TBoxReasonerImpl(isaChainDAG);
+		//DAGImpl isaChainDAG = isa.getChainDAG();
+		isaChain = TBoxReasonerImpl.getChainReasoner(isat);
 		
-		TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
-		DAGImpl sigmaChainDAG =  reasonerSigma.getChainDAG();
-		sigmaChain = new TBoxReasonerImpl(sigmaChainDAG);
+		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
+		//DAGImpl sigmaChainDAG =  reasonerSigma.getChainDAG();
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigmat);
 	}
 
 	public Ontology getReducedOntology() {

@@ -196,16 +196,6 @@ public class DAGImpl  {
 	
 	
 	
-	@Deprecated // SINGLE USE
-	public Map<Description, Description> getReplacements() {
-		return replacements;
-	}
-
-	@Deprecated  // SINGLE USE
-	public Map<Description, EquivalenceClass<Description>> getMapEquivalences() {
-		return equivalencesClasses;
-	}
-	
 	
 	
 	SimpleDirectedGraph <Description,DefaultEdge> getDag() {
