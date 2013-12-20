@@ -23,6 +23,7 @@ import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -76,8 +77,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// take the representative node
 		Description node = dag.getRepresentativeFor(desc);
 
-		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {	
-			Description source = dag.getEdgeSource(edge);
+		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {	
+			Description source = dag.getDag().getEdgeSource(edge);
 
 			// get the child node and its equivalent nodes
 			Set<Description> equivalences = getEquivalences(source);
@@ -106,8 +107,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// take the representative node
 		Description node = dag.getRepresentativeFor(desc);
 
-		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
-			Description target = dag.getEdgeTarget(edge);
+		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
+			Description target = dag.getDag().getEdgeTarget(edge);
 
 			// get the child node and its equivalent nodes
 			Set<Description> equivalences = getEquivalences(target);
@@ -250,7 +251,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		LinkedHashSet<Set<Description>> result = new LinkedHashSet<Set<Description>>();
 
-		for (Description vertex : dag.vertexSet()) 
+		for (Description vertex : dag.getDag().vertexSet()) 
 				result.add(getEquivalences(vertex));
 
 		return result;
@@ -276,24 +277,26 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public static TBoxReasonerImpl getChainReasoner(Ontology onto) {
 		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
 		
+		
 		// move everything to a graph that admits cycles
 			DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
 					new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 
-			// clone all the vertex and edges from dag
+			{
+			SimpleDirectedGraph <Description,DefaultEdge> dag = tbox.dag.getDag();
 
-			for (Description v : tbox.dag.vertexSet()) {
+			// clone all the vertex and edges from dag
+			for (Description v : dag.vertexSet()) {
 				modifiedGraph.addVertex(v);
 
 			}
-			for (DefaultEdge e : tbox.dag.edgeSet()) {
-				Description s = tbox.dag.getEdgeSource(e);
-				Description t = tbox.dag.getEdgeTarget(e);
+			for (DefaultEdge e : dag.edgeSet()) {
+				Description s = dag.getEdgeSource(e);
+				Description t = dag.getEdgeTarget(e);
 				modifiedGraph.addEdge(s, t, e);
 			}
-
-			Collection<Description> nodes = new HashSet<Description>(
-					tbox.dag.vertexSet());
+			}
+			Collection<Description> nodes = new HashSet<Description>(tbox.dag.getDag().vertexSet());
 			OntologyFactory fac = OntologyFactoryImpl.getInstance();
 			HashSet<Description> processedNodes = new HashSet<Description>();
 			for (Description node : nodes) {

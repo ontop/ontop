@@ -26,7 +26,7 @@ import org.jgrapht.traverse.GraphIterator;
  */
 public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 
-	private NamedDAGImpl namedDag;
+	private NamedDAG namedDag;
 	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
 	private int index_counter = 1;
@@ -108,11 +108,10 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	 */
 
 
-	public SemanticIndexEngineImpl(NamedDAGImpl namedDag) {
+	public SemanticIndexEngineImpl(NamedDAG namedDag) {
 
 		this.namedDag = namedDag;
 		
-		GraphIterator<Description, DefaultEdge> orderIterator;
 
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
 		DirectedGraph<Description, DefaultEdge> reversed = namedDag.getReversedDag();
@@ -126,8 +125,8 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 		
 		for (Description root: roots){
 		//A depth first sort 
-		orderIterator =
-				new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
+			GraphIterator<Description, DefaultEdge> orderIterator 
+				= new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
 		
 		
 

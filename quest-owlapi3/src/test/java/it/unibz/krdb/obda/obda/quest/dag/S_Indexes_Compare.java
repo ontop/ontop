@@ -11,8 +11,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
@@ -55,7 +54,7 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		NamedDAGImpl namedDag= NamedDAGBuilder.getNamedDAG(dag);
+		NamedDAG namedDag= NamedDAG.getNamedDAG(dag);
 
 		
 		log.debug("Input number {}", i+1 );
@@ -82,7 +81,7 @@ public void testIndexes() throws Exception{
 	}
 }
 
-private void testOldIndexes(DAG d1, NamedDAGImpl d2){
+private void testOldIndexes(DAG d1, NamedDAG d2){
 	
 	
 	
@@ -110,7 +109,7 @@ private void testOldIndexes(DAG d1, NamedDAGImpl d2){
 	
 	
 }
-private boolean testIndexes(NamedDAGImpl dag) {
+private boolean testIndexes(NamedDAG dag) {
 	boolean result=false;
 	
 	

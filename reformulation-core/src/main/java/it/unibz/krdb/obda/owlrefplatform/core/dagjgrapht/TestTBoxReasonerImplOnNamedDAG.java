@@ -29,7 +29,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
-	private NamedDAGImpl dag;
+	private NamedDAG dag;
 
 	private Set<OClass> namedClasses;
 	private Set<Property> property;
@@ -38,7 +38,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TestTBoxReasonerImplOnNamedDAG(NamedDAGImpl dag) {
+	public TestTBoxReasonerImplOnNamedDAG(NamedDAG dag) {
 		this.dag = dag;
 		namedClasses = dag.getClasses();
 		property = dag.getRoles();
@@ -60,9 +60,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		// take the representative node
 		Description node = dag.getRepresentativeFor(desc);
 
-		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {
+		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {
 			
-			Description source = dag.getEdgeSource(edge);
+			Description source = dag.getDag().getEdgeSource(edge);
 
 			// get the child node and its equivalent nodes
 			Set<Description> namedEquivalences = getEquivalences(source);
@@ -87,9 +87,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		// get equivalences of the current node
 		Set<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the children of the equivalent nodes
-		Set<DefaultEdge> edges = dag.incomingEdgesOf(desc);
+		Set<DefaultEdge> edges = dag.getDag().incomingEdgesOf(desc);
 		for (DefaultEdge edge : edges) {
-			Description source = dag.getEdgeSource(edge);
+			Description source = dag.getDag().getEdgeSource(edge);
 
 			// I don't want to consider as children the equivalent node of
 			// the current node desc
@@ -124,8 +124,8 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		// take the representative node
 		Description node = dag.getRepresentativeFor(desc);
 
-		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
-			Description target = dag.getEdgeTarget(edge);
+		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
+			Description target = dag.getDag().getEdgeTarget(edge);
 
 			// get the child node and its equivalent nodes
 			Set<Description> namedEquivalences = getEquivalences(target);
@@ -151,9 +151,9 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		Set<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the parents of the equivalent nodes
 
-		Set<DefaultEdge> edges = dag.outgoingEdgesOf(desc);
+		Set<DefaultEdge> edges = dag.getDag().outgoingEdgesOf(desc);
 		for (DefaultEdge edge : edges) {
-			Description target = dag.getEdgeTarget(edge);
+			Description target = dag.getDag().getEdgeTarget(edge);
 
 			// I don't want to consider as parents the equivalent node of
 			// the current node desc

@@ -10,7 +10,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -25,6 +24,7 @@ import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.StrongConnectivityInspector;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
@@ -39,8 +39,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 
-	private TBoxGraph graph;
-	private DAGImpl dag;
+	private DefaultDirectedGraph<Description,DefaultEdge> graph;
 	AbstractGraphIterator<Description, DefaultEdge> iterator;
 
 	private Set<OClass> namedClasses;
@@ -50,12 +49,37 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 * Constructor using a graph (cycles admitted)
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TestTBoxReasonerImplOnGraph(TBoxGraph graph) {
+	public TestTBoxReasonerImplOnGraph(DefaultDirectedGraph<Description,DefaultEdge> graph) {
 		this.graph = graph;
-		namedClasses = graph.getClasses();
-		property = graph.getRoles();
+		namedClasses = new HashSet<OClass>();
+		for (Description c: graph.vertexSet()) {
+			if (c instanceof OClass) 
+				namedClasses.add((OClass)c);
+		}
+		property = new HashSet<Property>();
+		for (Description r: graph.vertexSet()) {
+			if (r instanceof Property) {
+				if (!((Property) r).isInverse())
+					property.add((Property)r);
+			}
+		}
 	}
 
+	//return all roles in the graph
+	public Set<Property> getRoles() {
+		return property;
+	}
+
+	/**
+	 * Allows to have all named classes in the graph
+	 * @return  set of all named concepts in the graph
+	 */
+
+	public Set<OClass> getClasses(){
+		return namedClasses;
+	}
+	
+	
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 
@@ -285,7 +309,7 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 
 		// reverse the graph
 			DirectedGraph<Description, DefaultEdge> reversed = new EdgeReversedGraph<Description, DefaultEdge>(
-					graph.getGraph());
+					graph);
 
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
 					reversed, desc);
@@ -347,7 +371,7 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 
 		
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
-					graph.getGraph(), desc);
+					graph, desc);
 
 			// I don't want to consider the current node
 			Description current = iterator.next();
@@ -404,7 +428,7 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 
 			// search for cycles
 			StrongConnectivityInspector<Description, DefaultEdge> inspector = 
-					new StrongConnectivityInspector<Description, DefaultEdge>(graph.getGraph());
+					new StrongConnectivityInspector<Description, DefaultEdge>(graph);
 
 			// each set contains vertices which together form a strongly
 			// connected component within the given graph
@@ -505,14 +529,14 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				for (Set<Description> children : childrenExist) {
 					for (Description child : children) {
 						// DAGOperations.addParentEdge(child, existsInvNode);
-						graph.getGraph().addEdge(child, existsInvNode);
+						graph.addEdge(child, existsInvNode);
 
 					}
 				}
 				for (Set<Description> children : childrenExistInv) {
 					for (Description child : children) {
 						// DAGOperations.addParentEdge(child, existsNode);
-						graph.getGraph().addEdge(child, existsNode);
+						graph.addEdge(child, existsNode);
 
 					}
 				}
@@ -525,7 +549,7 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				for (Set<Description> parents : parentExist) {
 					for (Description parent : parents) {
 						// DAGOperations.addParentEdge(existsInvNode, parent);
-						graph.getGraph().addEdge(existsInvNode, parent);
+						graph.addEdge(existsInvNode, parent);
 
 					}
 				}
@@ -533,7 +557,7 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				for (Set<Description> parents : parentsExistInv) {
 					for (Description parent : parents) {
 						// DAGOperations.addParentEdge(existsNode,parent);
-						graph.getGraph().addEdge(existsNode, parent);
+						graph.addEdge(existsNode, parent);
 
 					}
 				}
@@ -541,17 +565,11 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				processedNodes.add(existsInvNode);
 				processedNodes.add(existsNode);
 
-			/* Collapsing the cycles */
-			dag = DAGBuilder.getDAG(graph);
+			DAGBuilder.getDAG(graph);
 
 		}
 	}
 	
-	
-	public Ontology getSigmaOntology() {
-		throw new IllegalArgumentException("getSigmaOntology is not supported");
-	}
-
 	@Override
 	public Set<Set<Description>> getNodes() {
 		// TODO Auto-generated method stub

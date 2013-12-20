@@ -1,17 +1,19 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
 import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -40,14 +42,15 @@ public class S_NewGraphTest  extends TestCase{
 		Ontology o = translator.translate(ontology);
 
 		log.info("Generating graph");
-		TBoxGraph graph = TBoxGraph.getGraph(o);
+		DefaultDirectedGraph<Description,DefaultEdge> graph = DAGBuilder.getGraph(o);
 		System.out.println(graph);
+		TestTBoxReasonerImplOnGraph reasoner = new TestTBoxReasonerImplOnGraph(graph);
 		
 		log.info("See information");
 		System.out.println("vertexes"+ graph.vertexSet());
 		log.debug("vertexes {}", graph.vertexSet());
-		System.out.println(graph.getClasses());
-		System.out.println(graph.getRoles());
+		System.out.println(reasoner.getClasses());
+		System.out.println(reasoner.getRoles());
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
@@ -55,10 +58,10 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(dag);
 		
 		log.info("See information");
-		System.out.println(dag.vertexSet());
+		System.out.println(dag.getDag().vertexSet());
 		System.out.println(dag.getClassNames());
 		System.out.println(dag.getPropertyNames());
-		System.out.println(dag.edgeSet());
+		System.out.println(dag.getDag().edgeSet());
 		
 //		log.info("See relations");
 //		TBoxReasonerImpl tbox= new TBoxReasonerImpl(dag);
@@ -73,13 +76,13 @@ public class S_NewGraphTest  extends TestCase{
 //		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
 //		}
 		log.info("Get named dag");
-		NamedDAGImpl namedDAG = NamedDAGBuilder.getNamedDAG(dag);
+		NamedDAG namedDAG = NamedDAG.getNamedDAG(dag);
 		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");
 		System.out.println(namedDAG.getClasses());
 		System.out.println(namedDAG.getRoles());
-		System.out.println(namedDAG.edgeSet());
+		System.out.println(namedDAG.getDag().edgeSet());
 		
 //		log.info("See relations named DAG");
 //		TBoxReasonerImpl tbox2= new TBoxReasonerImpl(dag);

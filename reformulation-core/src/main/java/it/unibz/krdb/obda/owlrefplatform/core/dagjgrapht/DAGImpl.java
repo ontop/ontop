@@ -36,8 +36,8 @@ public class DAGImpl  {
 	
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
-	private Set<OClass> classes;
-	private Set<Property> roles;
+	private Set<OClass> classNames;
+	private Set<Property> propertyNames;
 	
 	//map between an element  and the representative between the equivalent elements
 	private Map<Description, Description> replacements; 
@@ -78,17 +78,17 @@ public class DAGImpl  {
 	 * @return  set of all property (not inverse) in the DAG
 	 */
 	public Set<Property> getPropertyNames() {
-		if (roles == null) {
-			roles = new LinkedHashSet<Property> ();
+		if (propertyNames == null) {
+			propertyNames = new LinkedHashSet<Property> ();
 			for (Description v: dag.vertexSet()) 
 				if (v instanceof Property)
 					for (Description r : getEquivalenceClass(v)) {
 						Property p = (Property) r;
 						if (!p.isInverse())
-							roles.add(p);
+							propertyNames.add(p);
 					}
 		}
-		return roles;
+		return propertyNames;
 	}
 
 	/**
@@ -97,15 +97,15 @@ public class DAGImpl  {
 	 */
 	
 	public Set<OClass> getClassNames() {
-		if (classes == null) {
-			 classes = new LinkedHashSet<OClass> ();
+		if (classNames == null) {
+			 classNames = new LinkedHashSet<OClass> ();
 			 for (Description v: dag.vertexSet())
 				if (v instanceof OClass) 
 					for (Description e : getEquivalenceClass(v))
 						if (e instanceof OClass)
-							classes.add((OClass)e);
+							classNames.add((OClass)e);
 		}
-		return classes;
+		return classNames;
 	}
 
 
@@ -117,17 +117,6 @@ public class DAGImpl  {
 		return c;
 	}
 	
-	@Deprecated // HACKY VERSION
-	public EquivalenceClass<Description> getEquivalenceClass0(Description desc) {
-		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
-		//if ((c != null) && (c.size() == 1)) {
-		//	Description d = c.getMembers().iterator().next();
-		//	if (replacements.get(d) == null)
-		//		return null;
-		//}
-		return c;
-	}
-
 	public Description getRepresentativeFor(Description v) {
 		Description rep = replacements.get(v);
 		if (rep != null)   // there is a proper replacement
@@ -144,10 +133,10 @@ public class DAGImpl  {
 		return replacements.get(v);
 	}
 	
-	public boolean isReplacement(Description v) {
-		return replacements.containsValue(v);
-	}
 	
+	public boolean isNamed(Description node) {
+		return getClassNames().contains(node) || getPropertyNames().contains(node);
+	}
 	
 	
 	/**
@@ -159,7 +148,7 @@ public class DAGImpl  {
 		if(replacements.containsKey(node))
 			node = replacements.get(node);
 		else
-			if(!containsVertex(node))
+			if(!dag.containsVertex(node))
 				node = null;
 		return node;
 	}
@@ -182,43 +171,9 @@ public class DAGImpl  {
 		return reversed;
 	}
 
-
-	
-	public Set<Description> vertexSet() {
-		return dag.vertexSet();
-	}
-
-	public Set<DefaultEdge> edgeSet() {
-		return dag.edgeSet();
-	}	
-
-	
-	
-	
-	
-	
-	
-	SimpleDirectedGraph <Description,DefaultEdge> getDag() {
+		
+	@Deprecated 
+	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
 		return dag;
 	}
-	
-	boolean containsVertex(Description desc) {
-		return dag.containsVertex(desc);
-	}
-
-	Description getEdgeSource(DefaultEdge edge) {
-		return dag.getEdgeSource(edge);
-	}
-
-	Description getEdgeTarget(DefaultEdge edge) {
-		return dag.getEdgeTarget(edge);
-	}
-
-	Set<DefaultEdge> incomingEdgesOf(Description node) {
-		return dag.incomingEdgesOf(node);
-	}
-
-	Set<DefaultEdge> outgoingEdgesOf(Description node) {
-		return dag.outgoingEdgesOf(node);
-	}	
 }

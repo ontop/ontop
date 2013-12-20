@@ -3,7 +3,6 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxGraph;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
@@ -13,6 +12,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +83,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxGraph graph1= S_InputOWL.createGraph(fileInput);
+			DefaultDirectedGraph<Description,DefaultEdge> graph1= S_InputOWL.createGraph(fileInput);
 
 			DAGImpl dag2 = DAGBuilder.getDAG(graph1);
 //			DAGImpl dag2= S_InputOWL.createDAG(fileInput);
@@ -102,11 +102,11 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 
-	private boolean testRedundantEdges(TBoxGraph g1, DAGImpl d2){
+	private boolean testRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> g1, DAGImpl d2){
 		//number of edges in the graph
 		int  numberEdgesD1= g1.edgeSet().size();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.edgeSet().size();
+		int numberEdgesD2 = d2.getDag().edgeSet().size();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;

@@ -31,7 +31,7 @@ public class DAGTest extends TestCase {
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
 		Set<Description> classes= new HashSet<Description>();
-		for(Description node:((DAGImpl)res).vertexSet()){
+		for(Description node : res.getDag().vertexSet()){
 			if(node instanceof ClassDescription){
 				for(Description c: reasoner.getEquivalences(node) )
 				classes.add(c);
@@ -39,7 +39,7 @@ public class DAGTest extends TestCase {
 		}
 		
 		Set<Description> roles= new HashSet<Description>();
-		for(Description node:((DAGImpl)res).vertexSet()){
+		for(Description node : res.getDag().vertexSet()){
 			if(node instanceof Property){
 				for(Description r: reasoner.getEquivalences(node) )
 					roles.add(r);

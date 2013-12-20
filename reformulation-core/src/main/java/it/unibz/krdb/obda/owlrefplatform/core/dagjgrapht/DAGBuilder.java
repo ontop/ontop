@@ -9,6 +9,9 @@
 
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -16,6 +19,8 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,26 +57,13 @@ public class DAGBuilder {
 	
 	public static DAGImpl getDAG(Ontology onto) {
 		
-		TBoxGraph graph = TBoxGraph.getGraph(onto, false);
+		DefaultDirectedGraph<Description,DefaultEdge> graph = DAGBuilder.getGraph(onto, false);
 		
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		
 		return dag;
 	}
 
-
-	/**
-	 * *Construct a DAG starting from a given graph 
-	 * 
-	 * @param graph needs a graph with or without cycles 
-	 */
-	
-	public static DAGImpl getDAG(TBoxGraph graph) {
-		// temporary graph to be transformed in DAG
-		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = graph.getCopy();
-
-		return getDAG(modifiedGraph);
-	}
 
 	/**
 	 * *Construct a DAG starting from a given graph with already known
@@ -83,13 +75,26 @@ public class DAGBuilder {
 	 */
 	public static DAGImpl getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph) {
 
+		DefaultDirectedGraph<Description,DefaultEdge> copy = 
+				new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+
+		for (Description v : graph.vertexSet()) 
+			copy.addVertex(v);
+
+		for (DefaultEdge e : graph.edgeSet()) {
+			Description s = graph.getEdgeSource(e);
+			Description t = graph.getEdgeTarget(e);
+
+			copy.addEdge(s, t, e);
+		}
+	
 		Map<Description, EquivalenceClass<Description>> equivalencesMap = new HashMap<Description, EquivalenceClass<Description>>();
 		Map<Description, Description> replacements = new HashMap<Description, Description>();
 		
-		eliminateCycles(graph, equivalencesMap, replacements);
-		eliminateRedundantEdges(graph);
+		eliminateCycles(copy, equivalencesMap, replacements);
+		eliminateRedundantEdges(copy);
 
-		DAGImpl dag = new DAGImpl(graph, equivalencesMap, replacements);
+		DAGImpl dag = new DAGImpl(copy, equivalencesMap, replacements);
 		return dag;
 	}
 
@@ -614,4 +619,94 @@ public class DAGBuilder {
 	 * if(parent.equals(vertex)) return true; } return false; }
 	 */
 
+	
+	
+	/**
+	 * Build the graph from the TBox axioms of the ontology
+	 * 
+	 * @param ontology TBox containing the axioms
+	 * @param chain 
+	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
+	 * relation of the original DAG gets extended to the reachability relation
+	 * of T and Sigma chains.
+	 */
+	public static DefaultDirectedGraph<Description,DefaultEdge> getGraph (Ontology ontology, boolean chain) {
+		
+		DefaultDirectedGraph<Description,DefaultEdge> graph = new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+		
+		
+		for (Predicate conceptp : ontology.getConcepts()) {
+			ClassDescription concept = descFactory.createClass(conceptp);
+			graph.addVertex(concept);
+		}
+
+		/*
+		 * For each role we add nodes for its inverse, its domain and its range
+		 */
+		for (Predicate rolep : ontology.getRoles()) {
+			Property role = descFactory.createProperty(rolep);
+			Property roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
+			PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
+			PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
+			graph.addVertex(role);
+			graph.addVertex(roleInv);
+			graph.addVertex(existsRole);
+			graph.addVertex(existsRoleInv);
+			if (chain) {
+				graph.addEdge(existsRoleInv, existsRole);				
+				graph.addEdge(existsRole, existsRoleInv);				
+			}
+		}
+
+		for (Axiom assertion : ontology.getAssertions()) {
+
+			if (assertion instanceof SubClassAxiomImpl) {
+				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
+				ClassDescription parent = clsIncl.getSuper();
+				ClassDescription child = clsIncl.getSub();
+				graph.addVertex(child);
+				graph.addVertex(parent);
+				graph.addEdge(child, parent);
+			} 
+			else if (assertion instanceof SubPropertyAxiomImpl) {
+				SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
+				Property parent = roleIncl.getSuper();
+				Property child = roleIncl.getSub();
+				Property parentInv = descFactory.createProperty(parent.getPredicate(), !parent.isInverse());
+				Property childInv = descFactory.createProperty(child.getPredicate(), !child.isInverse());
+
+				// This adds the direct edge and the inverse, e.g., R ISA S and
+				// R- ISA S-,
+				// R- ISA S and R ISA S-
+				graph.addVertex(child);
+				graph.addVertex(parent);
+				graph.addVertex(childInv);
+				graph.addVertex(parentInv);
+				graph.addEdge(child, parent);
+				graph.addEdge(childInv, parentInv);
+				
+				//add also edges between the existential
+				ClassDescription existsParent = descFactory.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
+				ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
+				ClassDescription existsParentInv = descFactory.getPropertySomeRestriction(parent.getPredicate(), !parent.isInverse());
+				ClassDescription existChildInv = descFactory.getPropertySomeRestriction(child.getPredicate(), !child.isInverse());
+				graph.addVertex(existChild);
+				graph.addVertex(existsParent);
+				graph.addEdge(existChild, existsParent);
+				
+				graph.addVertex(existChildInv);
+				graph.addVertex(existsParentInv);
+				graph.addEdge(existChildInv, existsParentInv);
+				
+			}
+		}
+		return graph;
+	}
+	
+	public static DefaultDirectedGraph<Description,DefaultEdge> getGraph(Ontology ontology) {
+		return getGraph(ontology, false);
+	}
+	
+	
 }
