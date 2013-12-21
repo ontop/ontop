@@ -50,11 +50,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		this.dag = DAGBuilder.getDAG(onto);
 	}
 
-	public Description getRepresentativeFor(Set<Description> nodes) {
-		Description first = nodes.iterator().next();
-		return dag.getRepresentativeFor(first);
-	}
-	
 	public Description getRepresentativeFor(EquivalenceClass<Description> nodes) {
 		Description first = nodes.iterator().next();
 		return dag.getRepresentativeFor(first);
@@ -252,8 +247,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public EquivalenceClass<Description> getEquivalences(Description desc) {
-		EquivalenceClass<Description> equivalents = dag.getEquivalenceClass(desc);
-		return equivalents;
+		return dag.getEquivalenceClass(desc);
 	}
 	
 	/**
@@ -275,15 +269,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return result;
 	}
 
-/*
-	public static TBoxReasonerImpl getChainReasoner(Ontology onto) {
-		TBoxGraph graph = TBoxGraph.getGraph(onto, true);
+
+	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
+		DefaultDirectedGraph<Description,DefaultEdge> graph = DAGBuilder.getGraph(onto, true);
 		
 		DAGImpl dag = DAGBuilder.getDAG(graph);
 		
 		return new TBoxReasonerImpl(dag);		
 	}
-*/	
+	
 	/***
 	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
 	 * relation of the original DAG gets extended to the reachability relation
