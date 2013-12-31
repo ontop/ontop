@@ -1,8 +1,6 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
@@ -84,18 +82,13 @@ public class S_TestTransitiveReduction extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			DefaultDirectedGraph<Description,DefaultEdge> graph1= S_InputOWL.createGraph(fileInput);
-
-			DAGImpl dag2 = DAGBuilder.getDAG(graph1);
-//			DAGImpl dag2= S_InputOWL.createDAG(fileInput);
-
+			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			DefaultDirectedGraph<Description,DefaultEdge> graph1 = dag2.getGraph();
 
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", dag2);
-			
-			
-
+						
 			assertTrue(testRedundantEdges(graph1,dag2));
 
 
@@ -103,11 +96,11 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 
-	private boolean testRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> g1, DAGImpl d2){
+	private boolean testRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> g1, TBoxReasonerImpl d2){
 		//number of edges in the graph
 		int  numberEdgesD1= g1.edgeSet().size();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.getDag().edgeSet().size();
+		int numberEdgesD2 = d2.edges();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
@@ -115,9 +108,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-
-		Set<EquivalenceClass<Description>> nodesd2= reasonerd2.getNodes();
+		Set<EquivalenceClass<Description>> nodesd2= d2.getNodes();
 		Iterator<EquivalenceClass<Description>> it1 =nodesd2.iterator();
 		while (it1.hasNext()) {
 			EquivalenceClass<Description> equivalents=it1.next();
@@ -149,8 +140,8 @@ public class S_TestTransitiveReduction extends TestCase {
 			
 				
 				//descendants of the vertex
-				Set<EquivalenceClass<Description>> descendants=reasonerd2.getDescendants(vertex);
-				Set<EquivalenceClass<Description>> children=reasonerd2.getDirectChildren(vertex);
+				Set<EquivalenceClass<Description>> descendants=d2.getDescendants(vertex);
+				Set<EquivalenceClass<Description>> children=d2.getDirectChildren(vertex);
 
 				log.info("descendants{} ", descendants);
 				log.info("children {} ", children);

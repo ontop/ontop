@@ -37,17 +37,20 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private DAGImpl dag;
+	private DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TBoxReasonerImpl(DAGImpl dag) {
+	private TBoxReasonerImpl(DAGImpl dag) {
 		this.dag = dag;
 	}
 	
 	public TBoxReasonerImpl(Ontology onto) {
-		this.dag = DAGBuilder.getDAG(onto);
+		graph = DAGBuilder.getGraph(onto, false);
+		
+		this.dag = DAGBuilder.getDAG(graph);
 	}
 
 	public Description getRepresentativeFor(EquivalenceClass<Description> nodes) {
@@ -57,6 +60,25 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public boolean hasReplacementFor(Description v) {
 		return dag.hasReplacementFor(v);
+	}
+	
+	@Deprecated
+	public Description getReplacementFor(Description v) {
+		return dag.getReplacementFor(v);
+	}
+	
+	public DAGImpl getDag() {
+		return dag;
+	}
+
+	@Deprecated
+	public DefaultDirectedGraph<Description,DefaultEdge> getGraph() {
+		return graph;
+	}
+	
+	@Deprecated // test only
+	public int edges() {
+		return dag.getDag().edgeSet().size();
 	}
 
 	public Set<Property> getPropertyNames() {
@@ -387,4 +409,5 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			/* Collapsing the cycles */
 			return new TBoxReasonerImpl(DAGBuilder.getDAG(modifiedGraph));
 	}
+
 }

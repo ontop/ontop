@@ -388,8 +388,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private Properties config;
 
-	private DAGImpl dag;
-	
 	private TBoxReasonerImpl reasonerDag;
 	
 	private SemanticIndexEngine engine;
@@ -472,15 +470,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * nodes are, the DAGNode for P, and the top most inverse children of P
 		 */
 		
-		dag = DAGBuilder.getDAG(ontology);
-
-		reasonerDag = new TBoxReasonerImpl(dag);
+		reasonerDag = new TBoxReasonerImpl(ontology);
 		
 		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
 				
 		
 		//build the namedDag (or pureIsa)
-		NamedDAG pureIsa = NamedDAG.getNamedDAG(dag);
+		NamedDAG pureIsa = NamedDAG.getNamedDAG(reasonerDag.getDag());
 		
 		//create the indexes
 		engine = new SemanticIndexEngineImpl(pureIsa);
@@ -765,7 +761,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					Description propReplacement = dag.getReplacementFor(propDesc);
+					Description propReplacement = reasonerDag.getReplacementFor(propDesc);
 					if (propReplacement != null) {
 						Property desc = (Property) propReplacement;
 						if (desc.isInverse()) {
@@ -830,7 +826,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent */
 				OClass c = (OClass)ofac.createClass(name);
-				OClass equivalent = (OClass)dag.getReplacementFor(c);
+				OClass equivalent = (OClass)reasonerDag.getReplacementFor(c);
 				return classIndexes.get(equivalent.getPredicate().getName());
 			}
 					
@@ -842,7 +838,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
 				Property c = ofac.createObjectProperty(name);
-				Property equivalent = (Property)dag.getReplacementFor(c);
+				Property equivalent = (Property)reasonerDag.getReplacementFor(c);
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				
@@ -852,7 +848,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				/* object property equivalent failed, we now look for data property equivalent */
 				
 				c = ofac.createDataProperty(name);
-				equivalent = (Property)dag.getReplacementFor(c);
+				equivalent = (Property)reasonerDag.getReplacementFor(c);
 				
 				index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				return index1;
@@ -1316,7 +1312,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		Description propReplacement = dag.getReplacementFor(property);
+		Description propReplacement = reasonerDag.getReplacementFor(property);
 		if (propReplacement != null) {
 			Property desc = (Property) propReplacement;
 			if (desc.isInverse()) {
