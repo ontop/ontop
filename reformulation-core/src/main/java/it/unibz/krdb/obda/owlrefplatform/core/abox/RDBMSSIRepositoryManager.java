@@ -476,7 +476,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				
 		
 		//build the namedDag (or pureIsa)
-		NamedDAG pureIsa = NamedDAG.getNamedDAG(reasonerDag.getDag());
+		NamedDAG pureIsa = NamedDAG.getNamedDAG(reasonerDag);
 		
 		//create the indexes
 		engine = new SemanticIndexEngineImpl(pureIsa);

@@ -49,21 +49,6 @@ import org.jgrapht.graph.DefaultEdge;
 
 public class DAGBuilder {
 
-	/**
-	 * *Construct a DAG starting from a given ontology 
-	 * 
-	 * @param onto an ontology 
-	 */
-	
-	public static DAGImpl getDAG(Ontology onto) {
-		
-		DefaultDirectedGraph<Description,DefaultEdge> graph = DAGBuilder.getGraph(onto, false);
-		
-		DAGImpl dag = DAGBuilder.getDAG(graph);
-		
-		return dag;
-	}
-
 
 	/**
 	 * *Construct a DAG starting from a given graph with already known
@@ -703,10 +688,5 @@ public class DAGBuilder {
 		}
 		return graph;
 	}
-	
-	public static DefaultDirectedGraph<Description,DefaultEdge> getGraph(Ontology ontology) {
-		return getGraph(ontology, false);
-	}
-	
 	
 }

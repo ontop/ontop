@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
 import java.io.File;
@@ -42,7 +43,8 @@ public class S_NewGraphTest  extends TestCase{
 		Ontology o = translator.translate(ontology);
 
 		log.info("Generating graph");
-		DefaultDirectedGraph<Description,DefaultEdge> graph = DAGBuilder.getGraph(o);
+		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
+		DefaultDirectedGraph<Description,DefaultEdge> graph = r.getGraph();
 		System.out.println(graph);
 		TestTBoxReasonerImplOnGraph reasoner = new TestTBoxReasonerImplOnGraph(graph);
 		
@@ -54,7 +56,7 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
-		DAGImpl dag = DAGBuilder.getDAG(graph);
+		DAGImpl dag = r.getDag();
 		System.out.println(dag);
 		
 		log.info("See information");
@@ -76,7 +78,7 @@ public class S_NewGraphTest  extends TestCase{
 //		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
 //		}
 		log.info("Get named dag");
-		NamedDAG namedDAG = NamedDAG.getNamedDAG(dag);
+		NamedDAG namedDAG = NamedDAG.getNamedDAG(r);
 		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");

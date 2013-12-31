@@ -107,7 +107,8 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
 		
 		//generate Graph
-		DefaultDirectedGraph<Description,DefaultEdge> res = DAGBuilder.getGraph(ontology);
+		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
+		DefaultDirectedGraph<Description,DefaultEdge> res = res0.getGraph();
 
 		
 		

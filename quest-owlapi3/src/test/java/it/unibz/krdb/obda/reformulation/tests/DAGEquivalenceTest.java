@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
 import java.util.List;
@@ -59,7 +60,7 @@ public class DAGEquivalenceTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilder.getDAG(onto);
+		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
 		NamedDAG pureIsa = NamedDAG.getNamedDAG(dag);
 
@@ -119,7 +120,7 @@ public class DAGEquivalenceTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilder.getDAG(onto);
+		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
 		NamedDAG pureIsa = NamedDAG.getNamedDAG(dag);
 
@@ -184,7 +185,7 @@ public class DAGEquivalenceTest extends TestCase {
 		Ontology onto = t.translate(owlonto);
 
 		// generate DAG
-		DAGImpl dag = DAGBuilder.getDAG(onto);
+		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
 		NamedDAG pureIsa = NamedDAG.getNamedDAG(dag);
 

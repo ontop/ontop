@@ -57,21 +57,6 @@ public class DAGImpl  {
 		this.replacements = replacements;
 	}
 
-	public SimpleDirectedGraph <Description,DefaultEdge> getCopy() {
-		SimpleDirectedGraph <Description,DefaultEdge> nDag 
-			= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
-
-		for (Description v : dag.vertexSet()) {
-			nDag.addVertex(v);
-		}
-		for (DefaultEdge e : dag.edgeSet()) {
-			Description s = dag.getEdgeSource(e);
-			Description t = dag.getEdgeTarget(e);
-			nDag.addEdge(s, t, e);
-		}
-		
-		return nDag;
-	}
 		
 	/**
 	 * Allows to have all named roles in the DAG even the equivalent named roles
@@ -133,10 +118,6 @@ public class DAGImpl  {
 		return replacements.get(v);
 	}
 	
-	
-	public boolean isNamed(Description node) {
-		return getClassNames().contains(node) || getPropertyNames().contains(node);
-	}
 	
 	
 	/**

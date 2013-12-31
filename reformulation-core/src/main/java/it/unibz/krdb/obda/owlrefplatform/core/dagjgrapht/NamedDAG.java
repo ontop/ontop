@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -36,11 +37,11 @@ import org.jgrapht.traverse.GraphIterator;
 
 public class NamedDAG  {
 	
-	private final DAGImpl originalDag;
+	private final TBoxReasonerImpl originalDag;
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	// constructor is accessible within the class only
-	private NamedDAG(SimpleDirectedGraph<Description,DefaultEdge> dag, DAGImpl originalDag) {
+	private NamedDAG(SimpleDirectedGraph<Description,DefaultEdge> dag, TBoxReasonerImpl originalDag) {
 		this.dag = dag;
 		this.originalDag = originalDag;
 	}
@@ -69,11 +70,11 @@ public class NamedDAG  {
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
 	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
-		return originalDag.getEquivalenceClass(desc);
+		return originalDag.getDag().getEquivalenceClass(desc);
 	}
 
 	public Description getRepresentativeFor(Description v) {
-		return originalDag.getRepresentativeFor(v);
+		return originalDag.getDag().getRepresentativeFor(v);
 	}
 
 	/**
@@ -120,9 +121,24 @@ public class NamedDAG  {
 	 * @param dag the DAG from which we want to maintain only the named descriptions
 	 */
 	
-	public static NamedDAG getNamedDAG(DAGImpl dag) {
+	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
 
-		SimpleDirectedGraph <Description,DefaultEdge>  namedDag = dag.getCopy(); 
+		DAGImpl dag = reasoner.getDag();
+		
+		SimpleDirectedGraph <Description,DefaultEdge>  namedDag; 
+		{
+			namedDag	= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
+			SimpleDirectedGraph<Description, DefaultEdge> dg = dag.getDag();
+			
+			for (Description v : dg.vertexSet()) {
+				namedDag.addVertex(v);
+			}
+			for (DefaultEdge e : dg.edgeSet()) {
+				Description s = dg.getEdgeSource(e);
+				Description t = dg.getEdgeTarget(e);
+				namedDag.addEdge(s, t, e);
+			}
+		}
 
 		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 				
@@ -158,7 +174,7 @@ public class NamedDAG  {
 				if (processedNodes.contains(node))
 					continue;
 			
-				if (dag.isNamed(node)) {
+				if (reasoner.isNamed(node)) {
 					processedNodes.add(node);
 					continue;
 				}
@@ -174,7 +190,7 @@ public class NamedDAG  {
 			
 				Set<Description> namedEquivalences = new LinkedHashSet<Description>();
 				for (Description vertex : dag.getEquivalenceClass(node)) {
-					if (dag.isNamed(vertex)) 
+					if (reasoner.isNamed(vertex)) 
 						namedEquivalences.add(vertex);
 				}
 							
@@ -222,7 +238,7 @@ public class NamedDAG  {
 			} // end while
 		} // end for each root
 		
-		NamedDAG dagImpl = new NamedDAG(namedDag, dag);
+		NamedDAG dagImpl = new NamedDAG(namedDag, reasoner);
 		return dagImpl;
 	}
 	

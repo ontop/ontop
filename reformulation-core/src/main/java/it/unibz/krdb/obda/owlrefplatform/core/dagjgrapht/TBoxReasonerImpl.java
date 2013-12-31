@@ -92,7 +92,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Description getNode(Description node) {
 		return dag.getNode(node);
 	}
-	
+
+	public boolean isNamed(Description node) {
+		return getClassNames().contains(node) || getPropertyNames().contains(node);
+	}
+		
 	@Deprecated
 	public Set<Description> vertexSet() {
 		return dag.getDag().vertexSet();

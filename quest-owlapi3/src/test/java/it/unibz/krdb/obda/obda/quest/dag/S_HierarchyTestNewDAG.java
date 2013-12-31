@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnDAG;
 
@@ -60,7 +61,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			DAGImpl dag1= S_InputOWL.createDAG(fileInput);
+			TBoxReasonerImpl dag1= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
@@ -78,20 +79,20 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	}
 
 
-	private static TBoxReasoner getReasoner(DAGImpl dag) {
-		return new TestTBoxReasonerImplOnDAG(dag);
+	private static TBoxReasoner getReasoner(TBoxReasonerImpl dag) {
+		return new TestTBoxReasonerImplOnDAG(dag.getDag());
 	}
 
 	private static TBoxReasoner getReasoner(NamedDAG dag) {
 		return new TestTBoxReasonerImplOnNamedDAG(dag);
 	}
 
-	private boolean testDescendants(DAGImpl d1, NamedDAG d2, boolean named){
+	private boolean testDescendants(TBoxReasonerImpl d1, NamedDAG d2, boolean named){
 		boolean result = false;
 		TBoxReasoner reasonerd1= getReasoner(d1);
 		TBoxReasoner reasonerd2= getReasoner(d2);
 
-		for(Description vertex: d1.getDag().vertexSet()){
+		for(Description vertex: d1.vertexSet()){
 			if(named){
 
 				if(d1.getPropertyNames().contains(vertex) || d1.getClassNames().contains(vertex)){
@@ -111,7 +112,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	}
 
-	private boolean testDescendants(NamedDAG d1, DAGImpl d2, boolean named){
+	private boolean testDescendants(NamedDAG d1, TBoxReasonerImpl d2, boolean named){
 		boolean result = false;
 		TBoxReasoner reasonerd1= getReasoner(d1);
 		TBoxReasoner reasonerd2= getReasoner(d2);
@@ -136,12 +137,12 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	}
 
-	private boolean testAncestors(DAGImpl d1, NamedDAG d2, boolean named){
+	private boolean testAncestors(TBoxReasonerImpl d1, NamedDAG d2, boolean named){
 		boolean result = false;
 		TBoxReasoner reasonerd1 = getReasoner(d1);
 		TBoxReasoner reasonerd2 = getReasoner(d2);
 
-		for(Description vertex: d1.getDag().vertexSet()){
+		for(Description vertex: d1.vertexSet()){
 			if(named){
 
 				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
@@ -159,7 +160,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		return result;
 	}
 	
-	private boolean testAncestors(NamedDAG d1, DAGImpl d2, boolean named){
+	private boolean testAncestors(NamedDAG d1, TBoxReasonerImpl d2, boolean named){
 		boolean result = false;
 		TBoxReasoner reasonerd1 = getReasoner(d1);
 		TBoxReasoner reasonerd2 = getReasoner(d2);
