@@ -31,6 +31,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 
+	private TBoxReasonerImpl reasoner;
 	private DAGImpl dag;
 
 	private Set<OClass> namedClasses;
@@ -40,10 +41,11 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TestTBoxReasonerImplOnDAG(DAGImpl dag) {
-		this.dag = dag;
-		namedClasses = dag.getClassNames();
-		property = dag.getPropertyNames();
+	public TestTBoxReasonerImplOnDAG(TBoxReasonerImpl reasoner) {
+		this.reasoner = reasoner;
+		this.dag = reasoner.getDag();
+		namedClasses = reasoner.getClassNames();
+		property = reasoner.getPropertyNames();
 	}
 	
 	/**
@@ -191,7 +193,7 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 		Description node = dag.getRepresentativeFor(desc);
 		
 		// reverse the dag
-		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
+		DirectedGraph<Description, DefaultEdge> reversed = reasoner.getReversedDag();
 
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);

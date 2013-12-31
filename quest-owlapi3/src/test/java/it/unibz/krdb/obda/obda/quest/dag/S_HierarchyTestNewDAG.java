@@ -80,7 +80,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 
 	private static TBoxReasoner getReasoner(TBoxReasonerImpl dag) {
-		return new TestTBoxReasonerImplOnDAG(dag.getDag());
+		return new TestTBoxReasonerImplOnDAG(dag);
 	}
 
 	private static TBoxReasoner getReasoner(NamedDAG dag) {

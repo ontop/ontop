@@ -25,6 +25,7 @@ import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -39,6 +40,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private DAGImpl dag;
 	private DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
+	private Set<OClass> classNames;
+	private Set<Property> propertyNames;
+	
+	
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
@@ -81,13 +86,42 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return dag.getDag().edgeSet().size();
 	}
 
+	/**
+	 * Allows to have all named roles in the DAG even the equivalent named roles
+	 * @return  set of all property (not inverse) in the DAG
+	 */
 	public Set<Property> getPropertyNames() {
-		return dag.getPropertyNames();
+		if (propertyNames == null) {
+			propertyNames = new LinkedHashSet<Property> ();
+			for (Description v: dag.getDag().vertexSet()) 
+				if (v instanceof Property)
+					for (Description r : dag.getEquivalenceClass(v)) {
+						Property p = (Property) r;
+						if (!p.isInverse())
+							propertyNames.add(p);
+					}
+		}
+		return propertyNames;
 	}
 
+	/**
+	 * Allows to have all named classes in the DAG even the equivalent named classes
+	 * @return  set of all named concepts in the DAG
+	 */
+	
 	public Set<OClass> getClassNames() {
-		return dag.getClassNames();
+		if (classNames == null) {
+			 classNames = new LinkedHashSet<OClass> ();
+			 for (Description v: dag.getDag().vertexSet())
+				if (v instanceof OClass) 
+					for (Description e : dag.getEquivalenceClass(v))
+						if (e instanceof OClass)
+							classNames.add((OClass)e);
+		}
+		return classNames;
 	}
+
+
 	
 	public Description getNode(Description node) {
 		return dag.getNode(node);
@@ -179,7 +213,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		Description node = dag.getRepresentativeFor(desc);
 		
 		// reverse the dag
-		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
+		DirectedGraph<Description, DefaultEdge> reversed = getReversedDag();
 
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
@@ -295,6 +329,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return result;
 	}
 
+	// INTERNAL DETAILS
+	
+	
+	DirectedGraph<Description, DefaultEdge> getReversedDag() {
+		DirectedGraph<Description, DefaultEdge> reversed =
+				new EdgeReversedGraph<Description, DefaultEdge>(dag.getDag());
+		return reversed;
+	}
+	
 
 	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
 		DefaultDirectedGraph<Description,DefaultEdge> graph = DAGBuilder.getGraph(onto, true);

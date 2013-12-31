@@ -147,7 +147,7 @@ public class NamedDAG  {
 		 * represent the parents of the node
 		 */
 		
-		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
+		DirectedGraph<Description, DefaultEdge> reversed = reasoner.getReversedDag();
 
 		LinkedList<Description> roots = new LinkedList<Description>();
 		for (Description n : reversed.vertexSet()) {

@@ -36,9 +36,6 @@ public class DAGImpl  {
 	
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
-	private Set<OClass> classNames;
-	private Set<Property> propertyNames;
-	
 	//map between an element  and the representative between the equivalent elements
 	private Map<Description, Description> replacements; 
 	
@@ -58,42 +55,6 @@ public class DAGImpl  {
 	}
 
 		
-	/**
-	 * Allows to have all named roles in the DAG even the equivalent named roles
-	 * @return  set of all property (not inverse) in the DAG
-	 */
-	public Set<Property> getPropertyNames() {
-		if (propertyNames == null) {
-			propertyNames = new LinkedHashSet<Property> ();
-			for (Description v: dag.vertexSet()) 
-				if (v instanceof Property)
-					for (Description r : getEquivalenceClass(v)) {
-						Property p = (Property) r;
-						if (!p.isInverse())
-							propertyNames.add(p);
-					}
-		}
-		return propertyNames;
-	}
-
-	/**
-	 * Allows to have all named classes in the DAG even the equivalent named classes
-	 * @return  set of all named concepts in the DAG
-	 */
-	
-	public Set<OClass> getClassNames() {
-		if (classNames == null) {
-			 classNames = new LinkedHashSet<OClass> ();
-			 for (Description v: dag.vertexSet())
-				if (v instanceof OClass) 
-					for (Description e : getEquivalenceClass(v))
-						if (e instanceof OClass)
-							classNames.add((OClass)e);
-		}
-		return classNames;
-	}
-
-
 
 	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
 		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
@@ -143,14 +104,6 @@ public class DAGImpl  {
 	
 	
 	
-	// INTERNAL DETAILS
-	
-	
-	DirectedGraph<Description, DefaultEdge> getReversedDag() {
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>(dag);
-		return reversed;
-	}
 
 		
 	@Deprecated 

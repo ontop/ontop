@@ -61,8 +61,8 @@ public class S_NewGraphTest  extends TestCase{
 		
 		log.info("See information");
 		System.out.println(dag.getDag().vertexSet());
-		System.out.println(dag.getClassNames());
-		System.out.println(dag.getPropertyNames());
+		System.out.println(r.getClassNames());
+		System.out.println(r.getPropertyNames());
 		System.out.println(dag.getDag().edgeSet());
 		
 //		log.info("See relations");
