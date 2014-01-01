@@ -119,7 +119,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(d1.getRoles().contains(vertex) || d1.getClasses().contains(vertex)){
+				if(d1.reasoner().isNamed(vertex)){
 					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getDescendants(vertex);
 					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getDescendants(vertex);
 
@@ -167,7 +167,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+				if(d1.reasoner().isNamed(vertex)){
 					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getAncestors(vertex);
 					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getAncestors(vertex);
 
@@ -186,7 +186,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		boolean result = false;
 		for(Description vertex: dag.vertexSet()){
 
-			if(dag.getRoles().contains(vertex)| dag.getClasses().contains(vertex)){
+			if(dag.reasoner().isNamed(vertex)){
 				result=true;
 
 				if(!result)

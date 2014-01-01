@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -46,49 +45,8 @@ public class NamedDAG  {
 		this.originalDag = originalDag;
 	}
 	
-	
-	/**
-	 * Allows to have all named roles in the DAG even the equivalent named roles
-	 * @return  set of all property (not inverse) in the DAG
-	 */
-	public Set<Property> getRoles(){
-		return originalDag.getPropertyNames();
-	}
-
-	/**
-	 * Allows to have all named classes in the DAG even the equivalent named classes
-	 * @return  set of all named concepts in the DAG
-	 */
-	
-	public Set<OClass> getClasses(){
-		return originalDag.getClassNames();
-	}
-
-
-	/**
-	 * Allows to have the  map with equivalences
-	 * @return  a map between the node and the set of all its equivalent nodes
-	 */
-	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
-		return originalDag.getEquivalences(desc);
-	}
-
-	public Description getRepresentativeFor(Description v) {
-		return originalDag.getRepresentativeFor(v);
-	}
-
-	/**
-	 * Allows to obtain the node present in the DAG. 
-	 * @param  node a node that we want to know if it is part of the DAG
-	 * @return the node, or its representative, or null if it is not present in the DAG
-	 */
-	
-	public Description getNode(Description node){
-		Description rep = getRepresentativeFor(node);
-		if (!dag.containsVertex(rep))
-			return null;
-		
-		return rep;	
+	public TBoxReasonerImpl reasoner() {
+		return originalDag;
 	}
 
 	@Override
@@ -123,11 +81,10 @@ public class NamedDAG  {
 	
 	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
 
-		SimpleDirectedGraph<Description, DefaultEdge> dag = reasoner.getDag();
-		
-		SimpleDirectedGraph <Description,DefaultEdge>  namedDag; 
+		SimpleDirectedGraph <Description,DefaultEdge>  namedDag 
+					= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
 		{
-			namedDag	= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
+			SimpleDirectedGraph<Description, DefaultEdge> dag = reasoner.getDag();
 			
 			for (Description v : dag.vertexSet()) {
 				namedDag.addVertex(v);

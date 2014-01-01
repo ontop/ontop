@@ -158,10 +158,10 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine{
 	@Override
 	public List<Interval> getIntervals(Description d) {
 
-		Description node=namedDag.getNode(d);
-		if(ranges.get(node)!=null)
+		Description node = namedDag.reasoner().getRepresentativeFor(d);
+		if(ranges.get(node) != null)
 			return ranges.get(node).getIntervals();
-		SemanticIndexRange range= new SemanticIndexRange(-1, -1);
+		SemanticIndexRange range = new SemanticIndexRange(-1, -1);
 		return range.getIntervals();
 	}
 	

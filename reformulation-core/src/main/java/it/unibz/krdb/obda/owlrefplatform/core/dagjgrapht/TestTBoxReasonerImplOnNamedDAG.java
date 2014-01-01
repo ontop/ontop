@@ -9,8 +9,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -31,17 +30,12 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	private NamedDAG dag;
 
-	private Set<OClass> namedClasses;
-	private Set<Property> property;
-
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
 	public TestTBoxReasonerImplOnNamedDAG(NamedDAG dag) {
 		this.dag = dag;
-		namedClasses = dag.getClasses();
-		property = dag.getRoles();
 	}
 	
 	/**
@@ -58,11 +52,11 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		// take the representative node
-		Description node = dag.getRepresentativeFor(desc);
+		Description node = dag.reasoner().getRepresentativeFor(desc);
 
-		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {
-			
-			Description source = dag.getDag().getEdgeSource(edge);
+//		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {			
+//			Description source = dag.getDag().getEdgeSource(edge);
+		for (Description source: Graphs.predecessorListOf(dag.getDag(), node)) {
 
 			// get the child node and its equivalent nodes
 			EquivalenceClass<Description> namedEquivalences = getEquivalences(source);
@@ -86,9 +80,10 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		// get equivalences of the current node
 		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the children of the equivalent nodes
-		Set<DefaultEdge> edges = dag.getDag().incomingEdgesOf(desc);
-		for (DefaultEdge edge : edges) {
-			Description source = dag.getDag().getEdgeSource(edge);
+		//Set<DefaultEdge> edges = dag.getDag().incomingEdgesOf(desc);
+		//for (DefaultEdge edge : edges) {
+		//	Description source = dag.getDag().getEdgeSource(edge);
+		for (Description source: Graphs.predecessorListOf(dag.getDag(), desc)) {
 
 			// I don't want to consider as children the equivalent node of
 			// the current node desc
@@ -120,10 +115,11 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 		
 		// take the representative node
-		Description node = dag.getRepresentativeFor(desc);
+		Description node = dag.reasoner().getRepresentativeFor(desc);
 
-		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
-			Description target = dag.getDag().getEdgeTarget(edge);
+//		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
+//			Description target = dag.getDag().getEdgeTarget(edge);
+		for (Description target: Graphs.successorListOf(dag.getDag(), node)) {
 
 			// get the child node and its equivalent nodes
 			EquivalenceClass<Description> namedEquivalences = getEquivalences(target);
@@ -149,9 +145,10 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
 		// I want to consider also the parents of the equivalent nodes
 
-		Set<DefaultEdge> edges = dag.getDag().outgoingEdgesOf(desc);
-		for (DefaultEdge edge : edges) {
-			Description target = dag.getDag().getEdgeTarget(edge);
+//		Set<DefaultEdge> edges = dag.getDag().outgoingEdgesOf(desc);
+//		for (DefaultEdge edge : edges) {
+//		Description target = dag.getDag().getEdgeTarget(edge);
+		for (Description target: Graphs.successorListOf(dag.getDag(), desc)) {
 
 			// I don't want to consider as parents the equivalent node of
 			// the current node desc
@@ -182,7 +179,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
-		Description node = dag.getRepresentativeFor(desc);
+		Description node = dag.reasoner().getRepresentativeFor(desc);
 		
 		// reverse the dag
 		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
@@ -234,7 +231,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
-		Description node = dag.getRepresentativeFor(desc);
+		Description node = dag.reasoner().getRepresentativeFor(desc);
 
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
@@ -280,8 +277,8 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	public EquivalenceClass<Description> getEquivalences(Description desc) {
 		
 		Set<Description> equivalences = new LinkedHashSet<Description>();
-			for (Description vertex : dag.getEquivalenceClass(desc)) {
-				if (namedClasses.contains(vertex) || property.contains(vertex)) {
+			for (Description vertex : dag.reasoner().getEquivalences(desc)) {
+				if (dag.reasoner().isNamed(vertex)) {
 						equivalences.add(vertex);
 				}
 			}

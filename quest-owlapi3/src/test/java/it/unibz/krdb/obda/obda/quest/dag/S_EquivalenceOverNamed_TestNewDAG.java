@@ -147,9 +147,6 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						setd1	=reasonerd1.getDescendants(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("descendants {} ", setd1);
-						for(Description v: d2.vertexSet()){
-					
-						}
 						setd2	=reasonerd2.getDescendants(vertex);
 						log.debug("descendants {} ", setd2);
 						
@@ -188,7 +185,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				for(Description vertex: d1.vertexSet()){
 					if(named){
 
-						if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+						if (d1.reasoner().isNamed(vertex)){
 
 							setd1	=reasonerd1.getDescendants(vertex);
 							log.info("vertex {}", vertex);
@@ -393,7 +390,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				for(Description vertex: d1.vertexSet()){
 					if(named){
 
-						if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+						if(d1.reasoner().isNamed(vertex)){
 							setd1	=reasonerd1.getDirectChildren(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("children {} ", setd1);
@@ -544,7 +541,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				for(Description vertex: d1.vertexSet()){
 					if(named){
 
-						if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+						if(d1.reasoner().isNamed(vertex)){
 							setd1	=reasonerd1.getAncestors(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("ancestors {} ", setd1);
@@ -692,7 +689,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				for(Description vertex: d1.vertexSet()){
 					if(named){
 
-						if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
+						if(d1.reasoner().isNamed(vertex)){
 							setd1	=reasonerd1.getDirectParents(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("parents {} ", setd1);
@@ -823,7 +820,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				boolean result = false;
 				for(Description vertex: dag.vertexSet()){
 
-					if(dag.getRoles().contains(vertex)| dag.getClasses().contains(vertex)){
+					if(dag.reasoner().isNamed(vertex)){
 						result=true;
 
 						if(!result)
