@@ -70,11 +70,11 @@ public class NamedDAG  {
 	 * @return  a map between the node and the set of all its equivalent nodes
 	 */
 	public EquivalenceClass<Description> getEquivalenceClass(Description desc) {
-		return originalDag.getDag().getEquivalenceClass(desc);
+		return originalDag.getEquivalences(desc);
 	}
 
 	public Description getRepresentativeFor(Description v) {
-		return originalDag.getDag().getRepresentativeFor(v);
+		return originalDag.getRepresentativeFor(v);
 	}
 
 	/**
@@ -123,19 +123,18 @@ public class NamedDAG  {
 	
 	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
 
-		DAGImpl dag = reasoner.getDag();
+		SimpleDirectedGraph<Description, DefaultEdge> dag = reasoner.getDag();
 		
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag; 
 		{
 			namedDag	= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
-			SimpleDirectedGraph<Description, DefaultEdge> dg = dag.getDag();
 			
-			for (Description v : dg.vertexSet()) {
+			for (Description v : dag.vertexSet()) {
 				namedDag.addVertex(v);
 			}
-			for (DefaultEdge e : dg.edgeSet()) {
-				Description s = dg.getEdgeSource(e);
-				Description t = dg.getEdgeTarget(e);
+			for (DefaultEdge e : dag.edgeSet()) {
+				Description s = dag.getEdgeSource(e);
+				Description t = dag.getEdgeTarget(e);
 				namedDag.addEdge(s, t, e);
 			}
 		}
@@ -189,14 +188,14 @@ public class NamedDAG  {
 				}
 			
 				Set<Description> namedEquivalences = new LinkedHashSet<Description>();
-				for (Description vertex : dag.getEquivalenceClass(node)) {
+				for (Description vertex : reasoner.getEquivalences(node)) {
 					if (reasoner.isNamed(vertex)) 
 						namedEquivalences.add(vertex);
 				}
 							
 				if(!namedEquivalences.isEmpty()) {
 					Description newReference = namedEquivalences.iterator().next();
-					newReference = dag.getRepresentativeFor(newReference);
+					newReference = reasoner.getRepresentativeFor(newReference);
 					
 					//replacements.remove(newReference);
 					namedDag.addVertex(newReference);

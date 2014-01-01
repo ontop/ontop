@@ -17,9 +17,11 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
@@ -563,10 +565,10 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 
 				processedNodes.add(existsInvNode);
 				processedNodes.add(existsNode);
-
-			DAGBuilder.getDAG(graph);
-
-		}
+			}
+			Map<Description, Description> replacements = new HashMap<Description, Description>();
+			Map<Description, EquivalenceClass<Description>> equivalencesClasses = new HashMap<Description, EquivalenceClass<Description>>();
+			DAGBuilder.getDAG(graph, equivalencesClasses, replacements);
 	}
 	
 	@Override

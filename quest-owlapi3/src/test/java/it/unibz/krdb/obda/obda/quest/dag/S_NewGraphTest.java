@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
@@ -56,14 +55,13 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");
-		DAGImpl dag = r.getDag();
-		System.out.println(dag);
+		System.out.println(r);
 		
 		log.info("See information");
-		System.out.println(dag.getDag().vertexSet());
+		System.out.println(r.getDag().vertexSet());
 		System.out.println(r.getClassNames());
 		System.out.println(r.getPropertyNames());
-		System.out.println(dag.getDag().edgeSet());
+		System.out.println(r.getDag().edgeSet());
 		
 //		log.info("See relations");
 //		TBoxReasonerImpl tbox= new TBoxReasonerImpl(dag);

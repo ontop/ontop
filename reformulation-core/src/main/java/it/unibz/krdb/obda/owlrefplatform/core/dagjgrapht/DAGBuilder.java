@@ -31,8 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
  * Starting from a graph build a DAG. 
@@ -58,7 +60,9 @@ public class DAGBuilder {
 	 * @param equivalents a map between the node and its equivalent nodes
 	 * @param representatives a map between the node and its representative node
 	 */
-	public static DAGImpl getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph) {
+	public static SimpleDirectedGraph <Description,DefaultEdge> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+			Map<Description, EquivalenceClass<Description>> equivalencesMap, 
+			Map<Description, Description> replacements) {
 
 		DefaultDirectedGraph<Description,DefaultEdge> copy = 
 				new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
@@ -73,13 +77,12 @@ public class DAGBuilder {
 			copy.addEdge(s, t, e);
 		}
 	
-		Map<Description, EquivalenceClass<Description>> equivalencesMap = new HashMap<Description, EquivalenceClass<Description>>();
-		Map<Description, Description> replacements = new HashMap<Description, Description>();
-		
 		eliminateCycles(copy, equivalencesMap, replacements);
 		eliminateRedundantEdges(copy);
 
-		DAGImpl dag = new DAGImpl(copy, equivalencesMap, replacements);
+		SimpleDirectedGraph <Description,DefaultEdge> dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
+		Graphs.addGraph(dag, copy);
+		
 		return dag;
 	}
 
