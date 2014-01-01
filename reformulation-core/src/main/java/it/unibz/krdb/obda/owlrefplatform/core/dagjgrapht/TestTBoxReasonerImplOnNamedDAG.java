@@ -56,7 +56,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 //		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {			
 //			Description source = dag.getDag().getEdgeSource(edge);
-		for (Description source: Graphs.predecessorListOf(dag.getDag(), node)) {
+		for (Description source: dag.getPredecessors(node)) {
 
 			// get the child node and its equivalent nodes
 			EquivalenceClass<Description> namedEquivalences = getEquivalences(source);
@@ -83,7 +83,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		//Set<DefaultEdge> edges = dag.getDag().incomingEdgesOf(desc);
 		//for (DefaultEdge edge : edges) {
 		//	Description source = dag.getDag().getEdgeSource(edge);
-		for (Description source: Graphs.predecessorListOf(dag.getDag(), desc)) {
+		for (Description source: dag.getPredecessors(desc)) {
 
 			// I don't want to consider as children the equivalent node of
 			// the current node desc
@@ -119,7 +119,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 //		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
 //			Description target = dag.getDag().getEdgeTarget(edge);
-		for (Description target: Graphs.successorListOf(dag.getDag(), node)) {
+		for (Description target: dag.getSuccessors(node)) {
 
 			// get the child node and its equivalent nodes
 			EquivalenceClass<Description> namedEquivalences = getEquivalences(target);
@@ -148,7 +148,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 //		Set<DefaultEdge> edges = dag.getDag().outgoingEdgesOf(desc);
 //		for (DefaultEdge edge : edges) {
 //		Description target = dag.getDag().getEdgeTarget(edge);
-		for (Description target: Graphs.successorListOf(dag.getDag(), desc)) {
+		for (Description target: dag.getSuccessors(desc)) {
 
 			// I don't want to consider as parents the equivalent node of
 			// the current node desc

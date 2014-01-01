@@ -82,7 +82,7 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("See information named DAG");
 		System.out.println(r.getClassNames());
 		System.out.println(r.getPropertyNames());
-		System.out.println(namedDAG.getDag().edgeSet());
+		System.out.println(namedDAG);
 		
 //		log.info("See relations named DAG");
 //		TBoxReasonerImpl tbox2= new TBoxReasonerImpl(dag);

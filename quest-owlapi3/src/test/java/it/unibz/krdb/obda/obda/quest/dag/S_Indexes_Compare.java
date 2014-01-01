@@ -121,7 +121,7 @@ private boolean testIndexes(NamedDAG dag) {
 	//check that the index of the node is contained in the intervals of the parent node
 	for(Description vertex: dag.vertexSet()){
 		int index= indexes.get(vertex);
-		for(Description parent: Graphs.successorListOf(dag.getDag(), vertex)){
+		for(Description parent: dag.getSuccessors(vertex)){
 			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
 			
 			if(result)

@@ -17,9 +17,11 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -66,12 +68,18 @@ public class NamedDAG  {
 
 	
 	
-	@Deprecated // USED ONLY IN TESTS
+	@Deprecated // USED ONLY IN TESTS (2 calls)
 	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
 		return dag;
 	}
 	
+	public List<Description> getSuccessors(Description desc) {
+		return Graphs.successorListOf(dag, desc);		
+	}
 	
+	public List<Description> getPredecessors(Description desc) {
+		return Graphs.predecessorListOf(dag, desc);		
+	}
 	
 	
 	/**

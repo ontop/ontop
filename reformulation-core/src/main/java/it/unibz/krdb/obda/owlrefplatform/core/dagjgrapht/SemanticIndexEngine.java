@@ -17,7 +17,7 @@ public interface SemanticIndexEngine {
 	//given the description returns the index
 	public int getIndex(Description d);
 	
-	public void setIndex(Description d, int index);
+	//public void setIndex(Description d, int index);
 	
 	//obtain the list of intervals (with indexes of the descendants) for the given description
 	public List<Interval> getIntervals(Description d);
