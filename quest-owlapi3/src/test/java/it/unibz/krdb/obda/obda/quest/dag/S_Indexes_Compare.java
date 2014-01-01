@@ -54,14 +54,14 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		NamedDAG namedDag= NamedDAG.getNamedDAG(dag);
+		SemanticIndexEngineImpl engine = new SemanticIndexEngineImpl(dag);
 
 		
 		log.debug("Input number {}", i+1 );
-		log.info("named graph {}", namedDag);
+		log.info("named graph {}", engine.getNamedDAG());
 		
 		
-		testIndexes(namedDag);
+		testIndexes(engine);
 
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
@@ -76,12 +76,12 @@ public void testIndexes() throws Exception{
 			pureIsa.index();
 			 DAGOperations.buildDescendants(pureIsa);
 		        DAGOperations.buildAncestors(pureIsa);
-		 testOldIndexes(pureIsa, namedDag);
+		 testOldIndexes(pureIsa, engine);
 		
 	}
 }
 
-private void testOldIndexes(DAG d1, NamedDAG d2){
+private void testOldIndexes(DAG d1, SemanticIndexEngineImpl d2){
 	
 	
 	
@@ -109,19 +109,18 @@ private void testOldIndexes(DAG d1, NamedDAG d2){
 	
 	
 }
-private boolean testIndexes(NamedDAG dag) {
+private boolean testIndexes(SemanticIndexEngineImpl engine) {
 	boolean result=false;
 	
 	
 	//create semantic index
-	SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(dag);
 	Map<Description, Integer> indexes=engine.getIndexes();
 	Map<Description, SemanticIndexRange> ranges=engine.getIntervals();
 	
 	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: dag.vertexSet()){
+	for(Description vertex: engine.getNamedDAG().vertexSet()){
 		int index= indexes.get(vertex);
-		for(Description parent: dag.getSuccessors(vertex)){
+		for(Description parent: engine.getNamedDAG().getSuccessors(vertex)){
 			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
 			
 			if(result)

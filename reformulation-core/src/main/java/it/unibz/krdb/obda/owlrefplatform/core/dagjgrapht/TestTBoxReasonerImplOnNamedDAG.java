@@ -18,6 +18,7 @@ import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -34,8 +35,24 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
+	public TestTBoxReasonerImplOnNamedDAG(TBoxReasonerImpl reasoner) {
+		this.dag = NamedDAG.getNamedDAG(reasoner);
+	}
+
 	public TestTBoxReasonerImplOnNamedDAG(NamedDAG dag) {
 		this.dag = dag;
+	}
+	
+	public Set<Description> vertexSet() {
+		return dag.vertexSet();
+	}
+	
+	public TBoxReasonerImpl reasoner() {
+		return dag.reasoner();
+	}
+	
+	public SimpleDirectedGraph<Description, DefaultEdge> getDag() {
+		return dag.getDag();
 	}
 	
 	/**

@@ -473,11 +473,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
 				
 		
-		//build the namedDag (or pureIsa)
-		NamedDAG pureIsa = NamedDAG.getNamedDAG(reasonerDag);
-		
 		//create the indexes
-		engine = new SemanticIndexEngineImpl(pureIsa);
+		engine = new SemanticIndexEngineImpl(reasonerDag);
 		
 
 
@@ -499,7 +496,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		/*
 		 * Creating cache of semantic indexes and ranges
 		 */
-		Set<Description> descriptions = pureIsa.vertexSet();
+		// HACKY WAY -- TO BE CHANGED
+		Set<Description> descriptions = ((SemanticIndexEngineImpl)engine).getNamedDAG().vertexSet();
 		for (Description description : descriptions) {
 			if (description instanceof OClass) {
 

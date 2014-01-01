@@ -22,7 +22,7 @@ public interface SemanticIndexEngine {
 	//obtain the list of intervals (with indexes of the descendants) for the given description
 	public List<Interval> getIntervals(Description d);
 	
-	public void setRange(Description d, SemanticIndexRange range);
+	//public void setRange(Description d, SemanticIndexRange range);
 	
 	//obtain the map with all the indexes
 	public Map<Description, Integer> getIndexes();

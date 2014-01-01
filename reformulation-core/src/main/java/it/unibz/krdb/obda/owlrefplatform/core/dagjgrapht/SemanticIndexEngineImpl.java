@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -84,14 +85,18 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 		}
 	}
 
+	@Deprecated // for tests only
+	public NamedDAG getNamedDAG() {
+		return namedDag;
+	}
+	
 	/**
 	 * Assign indexes for the named DAG, use a depth first listener over the DAG 
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
-
-	public SemanticIndexEngineImpl(NamedDAG namedDag) {
-
-		this.namedDag = namedDag;
+	public SemanticIndexEngineImpl(TBoxReasonerImpl reasoner)  {
+	
+		this.namedDag = NamedDAG.getNamedDAG(reasoner);
 		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
 		DirectedGraph<Description, DefaultEdge> reversed = namedDag.getReversedDag();
@@ -137,11 +142,6 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 		return range.getIntervals();
 	}
 	
-	@Override
-	public void setRange(Description d, SemanticIndexRange range) {
-		ranges.put(d, range);
-	}
-
 	@Override
 	public Map<Description, Integer> getIndexes() {
 		return indexes;

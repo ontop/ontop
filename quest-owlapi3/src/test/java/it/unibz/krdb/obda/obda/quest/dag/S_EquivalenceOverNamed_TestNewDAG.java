@@ -88,7 +88,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			TBoxReasonerImpl dag2= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 			DefaultDirectedGraph<Description,DefaultEdge> graph1= dag2.getGraph(); // S_InputOWL.createGraph(fileInput);
 			//transform in a named graph
-			NamedDAG namedDag2 = NamedDAG.getNamedDAG(dag2);
+			TestTBoxReasonerImplOnNamedDAG namedDag2 = new TestTBoxReasonerImplOnNamedDAG(dag2);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", graph1);
 			log.info("Second dag {}", namedDag2);
@@ -114,15 +114,11 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		return new TestTBoxReasonerImplOnDAG(dag);
 	}
 
-	private static TBoxReasoner getReasoner(NamedDAG dag) {
-		return new TestTBoxReasonerImplOnNamedDAG(dag);
-	}
 	
-			private boolean testDescendants(TBoxReasonerImpl d1, NamedDAG d2, boolean named){
+			private boolean testDescendants(TBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 				
 				boolean result = false;
 				TBoxReasoner reasonerd1 = getReasoner(d1);
-				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = new HashSet<EquivalenceClass<Description>>();
 				Set<EquivalenceClass<Description>> setd2 = new HashSet<EquivalenceClass<Description>>();
 
@@ -135,7 +131,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 							log.info("vertex {}", vertex);
 							log.debug("descendants {} ", setd1);
 
-							setd2	=reasonerd2.getDescendants(vertex);
+							setd2	= d2.getDescendants(vertex);
 
 							log.debug("descendants {} ", setd2);
 
@@ -147,7 +143,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						setd1	=reasonerd1.getDescendants(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("descendants {} ", setd1);
-						setd2	=reasonerd2.getDescendants(vertex);
+						setd2	= d2.getDescendants(vertex);
 						log.debug("descendants {} ", setd2);
 						
 
@@ -174,10 +170,9 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testDescendants(NamedDAG d1, TBoxReasonerImpl d2, boolean named){
+			private boolean testDescendants(TestTBoxReasonerImplOnNamedDAG d1, TBoxReasonerImpl d2, boolean named){
 				
 				boolean result = false;
-				TBoxReasoner reasonerd1 = getReasoner(d1);
 				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = new HashSet<EquivalenceClass<Description>>();
 				Set<EquivalenceClass<Description>> setd2 = new HashSet<EquivalenceClass<Description>>();
@@ -187,7 +182,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 						if (d1.reasoner().isNamed(vertex)){
 
-							setd1	=reasonerd1.getDescendants(vertex);
+							setd1	= d1.getDescendants(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("descendants {} ", setd1);
 
@@ -200,7 +195,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						}
 					}
 					else{
-						setd1	=reasonerd1.getDescendants(vertex);
+						setd1	= d1.getDescendants(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("descendants {} ", setd1);
 						for(Description v: d2.vertexSet()){
@@ -334,10 +329,9 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testChildren( TBoxReasonerImpl d1, NamedDAG d2, boolean named){
+			private boolean testChildren( TBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 				boolean result = false;
 				TBoxReasoner reasonerd1 = getReasoner(d1);
-				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
@@ -348,7 +342,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 							setd1	=reasonerd1.getDirectChildren(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("children {} ", setd1);
-							setd2	=reasonerd2.getDirectChildren(vertex);
+							setd2	= d2.getDirectChildren(vertex);
 							log.debug("children {} ", setd2);
 						}
 					}
@@ -356,7 +350,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						setd1	=reasonerd1.getDirectChildren(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("children {} ", setd1);
-						setd2	=reasonerd2.getDirectChildren(vertex);
+						setd2	= d2.getDirectChildren(vertex);
 						log.debug("children {} ", setd2);
 					}
 					Set<Description> set2 = new HashSet<Description>();
@@ -380,9 +374,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				return result;
 
 			}
-			private boolean testChildren(NamedDAG d1, TBoxReasonerImpl d2, boolean named){
+			private boolean testChildren(TestTBoxReasonerImplOnNamedDAG d1, TBoxReasonerImpl d2, boolean named){
 				boolean result = false;
-				TBoxReasoner reasonerd1 = getReasoner(d1);
 				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
@@ -391,7 +384,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 					if(named){
 
 						if(d1.reasoner().isNamed(vertex)){
-							setd1	=reasonerd1.getDirectChildren(vertex);
+							setd1	= d1.getDirectChildren(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("children {} ", setd1);
 							setd2	=reasonerd2.getDirectChildren(vertex);
@@ -399,7 +392,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						}
 					}
 					else{
-						setd1	=reasonerd1.getDirectChildren(vertex);
+						setd1	= d1.getDirectChildren(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("children {} ", setd1);
 						setd2	=reasonerd2.getDirectChildren(vertex);
@@ -483,10 +476,9 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testAncestors( TBoxReasonerImpl d1, NamedDAG d2, boolean named){
+			private boolean testAncestors( TBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 				boolean result = false;
 				TBoxReasoner reasonerd1 = getReasoner(d1);
-				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
@@ -497,7 +489,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 							setd1	=reasonerd1.getAncestors(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("ancestors {} ", setd1);
-							setd2	=reasonerd2.getAncestors(vertex);
+							setd2	= d2.getAncestors(vertex);
 							log.debug("ancestors {} ", setd2);
 						}
 					}
@@ -507,7 +499,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						log.debug("ancestors {} ", setd1);
 
 
-						setd2	=reasonerd2.getAncestors(vertex);
+						setd2	= d2.getAncestors(vertex);
 						log.debug("ancestors {} ", setd2);
 					}
 					Set<Description> set2 = new HashSet<Description>();
@@ -531,9 +523,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				return result;
 
 			}
-			private boolean testAncestors(NamedDAG d1, TBoxReasonerImpl d2, boolean named){
+			private boolean testAncestors(TestTBoxReasonerImplOnNamedDAG d1, TBoxReasonerImpl d2, boolean named){
 				boolean result = false;
-				TBoxReasoner reasonerd1 = getReasoner(d1);
 				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
@@ -542,7 +533,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 					if(named){
 
 						if(d1.reasoner().isNamed(vertex)){
-							setd1	=reasonerd1.getAncestors(vertex);
+							setd1	= d1.getAncestors(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("ancestors {} ", setd1);
 							setd2	=reasonerd2.getAncestors(vertex);
@@ -550,7 +541,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						}
 					}
 					else{
-						setd1	=reasonerd1.getAncestors(vertex);
+						setd1	= d1.getAncestors(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("ancestors {} ", setd1);
 
@@ -633,10 +624,9 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean testParents( TBoxReasonerImpl d1, NamedDAG d2, boolean named){
+			private boolean testParents( TBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 				boolean result = false;
 				TBoxReasoner reasonerd1 = getReasoner(d1);
-				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
@@ -647,7 +637,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 							setd1	=reasonerd1.getDirectParents(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("parents {} ", setd1);
-							setd2	=reasonerd2.getDirectParents(vertex);
+							setd2	= d2.getDirectParents(vertex);
 							log.debug("parents {} ", setd2);
 						}
 					}
@@ -655,7 +645,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						setd1	=reasonerd1.getDirectParents(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("parents {} ", setd1);
-						setd2	=reasonerd2.getDirectParents(vertex);
+						setd2	= d2.getDirectParents(vertex);
 						log.debug("parents {} ", setd2);
 					}
 					Set<Description> set2 = new HashSet<Description>();
@@ -679,9 +669,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				return result;
 
 			}
-			private boolean testParents(NamedDAG d1, TBoxReasonerImpl d2, boolean named){
+			private boolean testParents(TestTBoxReasonerImplOnNamedDAG d1, TBoxReasonerImpl d2, boolean named){
 				boolean result = false;
-				TBoxReasoner reasonerd1 = getReasoner(d1);
 				TBoxReasoner reasonerd2 = getReasoner(d2);
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
@@ -690,7 +679,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 					if(named){
 
 						if(d1.reasoner().isNamed(vertex)){
-							setd1	=reasonerd1.getDirectParents(vertex);
+							setd1	= d1.getDirectParents(vertex);
 							log.info("vertex {}", vertex);
 							log.debug("parents {} ", setd1);
 							setd2	=reasonerd2.getDirectParents(vertex);
@@ -698,7 +687,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						}
 					}
 					else{
-						setd1	=reasonerd1.getDirectParents(vertex);
+						setd1	= d1.getDirectParents(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("parents {} ", setd1);
 						setd2	=reasonerd2.getDirectParents(vertex);
@@ -770,7 +759,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 
-			private boolean checkEdgeReduction(DefaultDirectedGraph<Description,DefaultEdge> d1, NamedDAG d2, boolean named){
+			private boolean checkEdgeReduction(DefaultDirectedGraph<Description,DefaultEdge> d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 				
 				//number of edges in the graph
 				int  numberEdgesD1= d1.edgeSet().size();
@@ -795,9 +784,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				}
 				}
 				
-				TBoxReasoner reasonerd2a = getReasoner(d2);
 
-				Set<EquivalenceClass<Description>> nodesd2= reasonerd2a.getNodes();
+				Set<EquivalenceClass<Description>> nodesd2= d2.getNodes();
 				Iterator<EquivalenceClass<Description>> it1 =nodesd2.iterator();
 				while (it1.hasNext()) {
 					EquivalenceClass<Description> equivalents=it1.next();
@@ -816,11 +804,11 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 			
-			private boolean checkforNamedVertexesOnly(NamedDAG dag){
+			private boolean checkforNamedVertexesOnly(TestTBoxReasonerImplOnNamedDAG namedDag2){
 				boolean result = false;
-				for(Description vertex: dag.vertexSet()){
+				for(Description vertex: namedDag2.vertexSet()){
 
-					if(dag.reasoner().isNamed(vertex)){
+					if(namedDag2.reasoner().isNamed(vertex)){
 						result=true;
 
 						if(!result)

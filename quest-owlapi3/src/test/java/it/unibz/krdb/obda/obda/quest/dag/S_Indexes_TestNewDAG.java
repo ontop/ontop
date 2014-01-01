@@ -80,31 +80,30 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		NamedDAG namedDag = NamedDAG.getNamedDAG(dag);
+		SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(dag);
 
 		
 		log.debug("Input number {}", i+1 );
-		log.info("named graph {}", namedDag);
+		log.info("named graph {}", engine);
 		
 		
-		assertTrue(testIndexes(namedDag));
+		assertTrue(testIndexes(engine));
 
 
 	}
 }
 
-private boolean testIndexes(NamedDAG dag){
+private boolean testIndexes(SemanticIndexEngineImpl engine){
 	boolean result=true;
 		
 	//create semantic index
-	SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(dag);
 	Map<Description, Integer> indexes=engine.getIndexes();
 	Map<Description, SemanticIndexRange> ranges=engine.getIntervals();
 	
 	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: dag.vertexSet()){
+	for(Description vertex: engine.getNamedDAG().vertexSet()){
 		int index= indexes.get(vertex);
-		for(Description parent: dag.getSuccessors(vertex)){
+		for(Description parent: engine.getNamedDAG().getSuccessors(vertex)){
 			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
 			
 			if(!result)
