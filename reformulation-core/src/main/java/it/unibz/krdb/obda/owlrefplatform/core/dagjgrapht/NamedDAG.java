@@ -37,19 +37,13 @@ import org.jgrapht.traverse.GraphIterator;
 
 public class NamedDAG  {
 	
-	private final TBoxReasonerImpl originalDag;
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	// constructor is accessible within the class only
-	private NamedDAG(SimpleDirectedGraph<Description,DefaultEdge> dag, TBoxReasonerImpl originalDag) {
+	private NamedDAG(SimpleDirectedGraph<Description,DefaultEdge> dag) {
 		this.dag = dag;
-		this.originalDag = originalDag;
 	}
 	
-	public TBoxReasonerImpl reasoner() {
-		return originalDag;
-	}
-
 	@Override
 	public String toString() {
 		return dag.toString();
@@ -201,7 +195,7 @@ public class NamedDAG  {
 			} // end while
 		} // end for each root
 		
-		NamedDAG dagImpl = new NamedDAG(namedDag, reasoner);
+		NamedDAG dagImpl = new NamedDAG(namedDag);
 		return dagImpl;
 	}
 	

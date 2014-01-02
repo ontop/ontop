@@ -30,29 +30,27 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	private NamedDAG dag;
+	private TBoxReasonerImpl reasoner;
 
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
 	public TestTBoxReasonerImplOnNamedDAG(TBoxReasonerImpl reasoner) {
+		this.reasoner = reasoner;
 		this.dag = NamedDAG.getNamedDAG(reasoner);
 	}
 
-	public TestTBoxReasonerImplOnNamedDAG(NamedDAG dag) {
-		this.dag = dag;
-	}
-	
 	public Set<Description> vertexSet() {
 		return dag.vertexSet();
 	}
 	
 	public TBoxReasonerImpl reasoner() {
-		return dag.reasoner();
+		return reasoner;
 	}
 	
-	public SimpleDirectedGraph<Description, DefaultEdge> getDag() {
-		return dag.getDag();
+	public int getEdgesSize() {
+		return dag.getDag().edgeSet().size();
 	}
 	
 	/**
@@ -69,7 +67,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		// take the representative node
-		Description node = dag.reasoner().getRepresentativeFor(desc);
+		Description node = reasoner.getRepresentativeFor(desc);
 
 //		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {			
 //			Description source = dag.getDag().getEdgeSource(edge);
@@ -132,7 +130,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 		
 		// take the representative node
-		Description node = dag.reasoner().getRepresentativeFor(desc);
+		Description node = reasoner.getRepresentativeFor(desc);
 
 //		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
 //			Description target = dag.getDag().getEdgeTarget(edge);
@@ -196,7 +194,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
-		Description node = dag.reasoner().getRepresentativeFor(desc);
+		Description node = reasoner.getRepresentativeFor(desc);
 		
 		// reverse the dag
 		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
@@ -248,7 +246,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
-		Description node = dag.reasoner().getRepresentativeFor(desc);
+		Description node = reasoner.getRepresentativeFor(desc);
 
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
@@ -294,8 +292,8 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	public EquivalenceClass<Description> getEquivalences(Description desc) {
 		
 		Set<Description> equivalences = new LinkedHashSet<Description>();
-			for (Description vertex : dag.reasoner().getEquivalences(desc)) {
-				if (dag.reasoner().isNamed(vertex)) {
+			for (Description vertex : reasoner.getEquivalences(desc)) {
+				if (reasoner.isNamed(vertex)) {
 						equivalences.add(vertex);
 				}
 			}

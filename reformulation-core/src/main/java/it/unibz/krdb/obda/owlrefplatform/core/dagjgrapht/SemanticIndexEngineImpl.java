@@ -26,6 +26,7 @@ import org.jgrapht.traverse.GraphIterator;
  */
 public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 
+	private TBoxReasonerImpl reasoner;
 	private NamedDAG namedDag;
 	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
@@ -95,7 +96,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
 	public SemanticIndexEngineImpl(TBoxReasonerImpl reasoner)  {
-	
+		this.reasoner = reasoner;
 		this.namedDag = NamedDAG.getNamedDAG(reasoner);
 		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
@@ -135,7 +136,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 	@Override
 	public List<Interval> getIntervals(Description d) {
 
-		Description node = namedDag.reasoner().getRepresentativeFor(d);
+		Description node = reasoner.getRepresentativeFor(d);
 		if(ranges.get(node) != null)
 			return ranges.get(node).getIntervals();
 		SemanticIndexRange range = new SemanticIndexRange(-1, -1);

@@ -766,7 +766,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				System.out.println(numberEdgesD1);
 				System.out.println(d1.edgeSet());
 				//number of edges in the dag
-				int numberEdgesD2 = d2.getDag().edgeSet().size();
+				int numberEdgesD2 = d2.getEdgesSize();
 
 				//number of edges between the equivalent nodes
 				int numberEquivalents=0;
