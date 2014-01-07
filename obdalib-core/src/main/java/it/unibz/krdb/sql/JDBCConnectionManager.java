@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.sql.Connection;
