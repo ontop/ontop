@@ -63,6 +63,9 @@ public class TreeWitnessGenerator {
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
 
+		if (concepts.isEmpty())
+			return concepts;
+		
 		if (concepts.size() == 1 && concepts.iterator().next() instanceof OClass)
 			return concepts;
 		

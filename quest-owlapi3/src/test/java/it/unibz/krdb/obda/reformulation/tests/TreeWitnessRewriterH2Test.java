@@ -84,9 +84,9 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 
-	final String testCase = "twr";
+	final String testCase = "twr-predicate";
 	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
-	final String obdafile = "src/test/resources/test/treewitness" + testCase + ".obda";
+	final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
 
 	/* These are the distinct tuples that we know each query returns */
