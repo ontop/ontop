@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package inf.unibz.ontp.sesame.repository.test;
+
+/*
+ * #%L
+ * ontop-test
+ * %%
+ * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -32,6 +44,7 @@ import java.sql.Connection;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -50,8 +63,8 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	String url = "jdbc:mysql://10.7.20.39/si_test?sessionVariables=sql_mode='ANSI'";
 	String username = "fish";
 	String password = "fish";
-
-	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/merge.owl";
+	
+	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl";
 
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
@@ -111,6 +124,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	}
 
 	public void test2RestoringAndLoading() throws Exception {
+		
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
@@ -174,4 +188,5 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 			log.debug("Elapsed time: {} ms", time);
 		}
 	}
+
 }
