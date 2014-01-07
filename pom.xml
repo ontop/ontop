@@ -266,7 +266,11 @@
 				<type>jar</type>
 				<scope>compile</scope>
 			</dependency>
-			
+			<dependency>
+    		<groupId>com.github.jsqlparser</groupId>
+    		<artifactId>jsqlparser</artifactId>
+    		<version>0.8.6</version>
+			</dependency>
 
 			<!-- OWL API -->
 			<dependency>

@@ -24,8 +24,8 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.api.QueryTree;
-import it.unibz.krdb.sql.api.Relation;
+import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -43,7 +43,7 @@ public class MappingParser {
 	private ArrayList<OBDAMappingAxiom> mappingList;
 	private SQLQueryTranslator translator;
 	private ArrayList<ParsedMapping> parsedMappings;
-	private ArrayList<Relation> realTables; // Tables that are not view definitions
+	private ArrayList<RelationJSQL> realTables; // Tables that are not view definitions
 	
 	public MappingParser(ArrayList<OBDAMappingAxiom> mappingList){
 		this.mappingList = mappingList;
@@ -57,17 +57,17 @@ public class MappingParser {
 	 * 
 	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
 	 */
-	public ArrayList<Relation> getRealTables(){
+	public ArrayList<RelationJSQL> getRealTables(){
 		if(this.realTables == null){
-			ArrayList<Relation> _realTables = this.getTables();
-			ArrayList<Relation> removeThese = new ArrayList<Relation>();
+			ArrayList<RelationJSQL> _realTables = this.getTables();
+			ArrayList<RelationJSQL> removeThese = new ArrayList<RelationJSQL>();
 			for(ViewDefinition vd : translator.getViewDefinitions()){
-				for(Relation rel : _realTables){
+				for(RelationJSQL rel : _realTables){
 					if(rel.getName().equals(vd.getName()))
 						removeThese.add(rel);
 				}
 			}
-			for(Relation remRel : removeThese){
+			for(RelationJSQL remRel : removeThese){
 				_realTables.remove(remRel);
 			}
 			this.realTables = _realTables;
@@ -86,12 +86,12 @@ public class MappingParser {
 		return parsedMappings;
 	}
 	
-	public ArrayList<Relation> getTables(){
-		ArrayList<Relation> tables = new ArrayList<Relation>();
+	public ArrayList<RelationJSQL> getTables(){
+		ArrayList<RelationJSQL> tables = new ArrayList<RelationJSQL>();
 		for(ParsedMapping pm : parsedMappings){
-			QueryTree query = pm.getSourceQueryTree();
-			ArrayList<Relation> queryTables = query.getTableSet();
-			for(Relation table : queryTables){
+			VisitedQuery query = pm.getSourceQueryParsed();
+			ArrayList<RelationJSQL> queryTables = query.getTableSet();
+			for(RelationJSQL table : queryTables){
 				if (!(tables.contains(table))){
 					tables.add(table);
 				}
