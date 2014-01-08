@@ -19,7 +19,10 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * limitations under the License.
  * #L%
  */
-
+/**
+ * @author timea bagosi
+ * Class responsible to write an r2rml turtle file given an obda model
+ */
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;

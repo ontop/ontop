@@ -19,7 +19,10 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * limitations under the License.
  * #L%
  */
-
+/**
+ * @author timea bagosi
+ * Class to represent R2RML standard vocabulary
+ */
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
