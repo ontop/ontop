@@ -172,7 +172,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 		
-		Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 		
 		
 		
@@ -244,7 +244,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @throws OBDAException
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
-			String indent,  Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesBottomUp, Set<Predicate> extensionalPredicates) throws OBDAException {
+			String indent,  Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesBottomUp, List<Predicate> extensionalPredicates) throws OBDAException {
 
 		int listSize = predicatesBottomUp.size();
 		int i = 0;

@@ -365,8 +365,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
-			Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
-
+			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+			Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
+			
 			for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
 				Predicate pred = predicatesInBottomUp.get(predIdx);
@@ -375,12 +376,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					ruleIndex = depGraph.getRuleIndex();
 					Collection<CQIE> workingRules = ruleIndex.get(pred);
 					Predicate preFather =  depGraph.getFatherPredicate(pred);
-					Collection<CQIE> OriginalfatherWorkingRules= ruleIndex.get(preFather);
-					List<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
+					Collection<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
 
-					for (CQIE rule: OriginalfatherWorkingRules){
-						 fatherWorkingRules.add(rule) ;
-					}
+					
+					fatherWorkingRules= ruleIndexByBody.get(pred);
+					
 					
 					for (CQIE rule : fatherWorkingRules) {
 						// CQIE rule = workingList.get(queryIdx);
@@ -450,27 +450,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
-			Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 			ruleIndex = depGraph.getRuleIndex();
-			
+			Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 			
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
-					Predicate pred = predicatesInBottomUp.get(predIdx);
+					Predicate pred = extensionalPredicates.get(predIdx);
 					Predicate preFather =  depGraph.getFatherPredicate(pred);
 					//query rules using pred
 					
 					
 					
-					Collection<CQIE> OriginalfatherWorkingRules= ruleIndex.get(preFather);
-					List<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
+					Collection<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
 
-					
-					
-					for (CQIE rule: OriginalfatherWorkingRules){
-						 fatherWorkingRules.add(rule) ;
-					}
-					
+					fatherWorkingRules= ruleIndexByBody.get(pred);
 					
 					
 					for (CQIE rule : fatherWorkingRules) {
@@ -512,9 +506,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						 * Each of the new queries could still require more steps of
 						 * evaluation, so we decrease the index.
 						 */
+						workingList.remove(queryIdx);
 						for (CQIE newquery : result) {
 							if (!workingList.contains(newquery)) {
-								workingList.remove(queryIdx);
 								workingList.add(queryIdx, newquery);
 								depGraph.removeOneRulePredicateFromRuleIndex(preFather,rule);
 								depGraph.setRuleInGraph(preFather, newquery);

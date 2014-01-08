@@ -64,7 +64,7 @@ public class DatalogDependencyGraphGenerator {
 	/**
 	 * the predicates in the datalog program without definition
 	 */
-	private Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
+	private List<Predicate> extensionalPredicates = new ArrayList<Predicate>();
 	
 	/**
 	 * Bottom-up Ordered List of predicates
@@ -114,7 +114,7 @@ public class DatalogDependencyGraphGenerator {
 		return ruleIndex;
 	}
 
-	public Set<Predicate> getExtensionalPredicates() {
+	public List<Predicate> getExtensionalPredicates() {
 		return extensionalPredicates;
 	}
 	
@@ -401,7 +401,30 @@ public class DatalogDependencyGraphGenerator {
 	public Multimap<Predicate, CQIE> getRuleIndexByBodyPredicate() {
 		return ruleIndexByBodyPredicate;
 	}
+	
 
+	/**
+	 * Adds a rule to the <code>ruleIndexByBodyPredicate</code>
+	 * Be careful. This method may cause a missmatch between the graph and the indexes.
+	 * @return 
+	 */
+	
+	
+	public void setBodyIndex(Predicate pred, CQIE rule) {
+		
+		ruleIndexByBodyPredicate.put(pred, rule);		
+	}
+	/**
+	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code> from <code>ruleIndexByBodyPredicate</code>
+	 * Be careful. This method may cause a mismatch between the graph and the indexes.
+	 * @param pred
+	 * @param rule
+	 */
+	public void removeOneRuleFromBodyIndex(Predicate pred, CQIE rule) {
+
+		ruleIndexByBodyPredicate.remove(pred, rule);
+	}
+	
 
 
 
