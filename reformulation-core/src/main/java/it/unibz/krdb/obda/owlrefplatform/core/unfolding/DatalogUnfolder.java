@@ -44,6 +44,7 @@ import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +60,8 @@ import java.util.Stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Generates partial evaluations of rules (the queries), with respect to a set
@@ -91,7 +94,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
-	private Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<Predicate, List<CQIE>>();
+	private Multimap<Predicate, CQIE> ruleIndex;
 	
 
 	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
@@ -370,9 +373,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
 					ruleIndex = depGraph.getRuleIndex();
-					List<CQIE> workingRules = ruleIndex.get(pred);
+					Collection<CQIE> workingRules = ruleIndex.get(pred);
 					Predicate preFather =  depGraph.getFatherPredicate(pred);
-					List<CQIE> OriginalfatherWorkingRules= ruleIndex.get(preFather);
+					Collection<CQIE> OriginalfatherWorkingRules= ruleIndex.get(preFather);
 					List<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
 
 					for (CQIE rule: OriginalfatherWorkingRules){
@@ -459,7 +462,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					
 					
 					
-					List<CQIE> OriginalfatherWorkingRules= ruleIndex.get(preFather);
+					Collection<CQIE> OriginalfatherWorkingRules= ruleIndex.get(preFather);
 					List<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
 
 					
@@ -672,7 +675,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				return emptyList;
 			}
 			
-			List<CQIE> rulesDefiningTheAtom = new LinkedList<CQIE>();
+			Collection<CQIE> rulesDefiningTheAtom = new LinkedList<CQIE>();
 
 			if (!includeMappings){
 			//therefore we are doing bottom-up of the query	
@@ -1071,7 +1074,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount,
-			List<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
+			Collection<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
 
 		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
 //		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);

@@ -52,6 +52,8 @@ import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,6 +66,8 @@ import java.util.Set;
 
 import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Multimap;
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
@@ -152,14 +156,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 	@Override
 	public String generateSourceQuery(DatalogProgram queryProgram, List<String> signature) throws OBDAException {
 		
+		/*
+		 * normalize the program before generating the SQL
+		 */
+		normalizeProgram(queryProgram);
 		
-		DatalogDependencyGraphGenerator depGrqaph = new DatalogDependencyGraphGenerator(queryProgram);
+		
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
 
 		sqlAnsViewMap = new HashMap<Predicate, String>();
 		
-		Map<Predicate, List<CQIE>> ruleIndex = depGrqaph.getRuleIndex();
-		List<Predicate> predicatesInBottomUp = depGrqaph.getPredicatesInBottomUp();		
-		Set<Predicate> extensionalPredicates = depGrqaph.getExtensionalPredicates();
+		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
+		
+		Multimap<Predicate, CQIE> ruleIndexByBodyPredicate = depGraph.getRuleIndexByBodyPredicate();
+		
+		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
+		
+		Set<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 		
 		
 		
@@ -215,6 +228,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * that will create a view for every ans prodicate in the Datalog input program. 
 	 * @param query
 	 * 		This is a arbitrary Datalog Program. In this program ans predicates will be translated to Views.
+	 * 
+	 * 		NOTE: actually current implementation only handles Datalog programs that have a tree-like dependency graph 
+	 * 
 	 * @param signature
 	 * 		The Select variables in the SPARQL query
 	 * @param indent
@@ -228,11 +244,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @throws OBDAException
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
-			String indent,  Map<Predicate, List<CQIE>> ruleIndex, List<Predicate> predicatesBottomUp, Set<Predicate> extensionalPredicates) throws OBDAException {
+			String indent,  Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesBottomUp, Set<Predicate> extensionalPredicates) throws OBDAException {
 
-		List<CQIE> Originalrules = query.getRules();
-		int numberOfQueries = Originalrules.size();
-		
 		int listSize = predicatesBottomUp.size();
 		int i = 0;
 
@@ -245,6 +258,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while( i<listSize -1 ){
 			Predicate pred = predicatesBottomUp.get(i);
 			if (extensionalPredicates.contains(pred)){
+				/*
+				 * extensional predicates are defined by DBs
+				 */
 				i++ ;
 				continue;
 			} else {
@@ -260,7 +276,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		
 		//This should be ans1, and the rules defining it.
 		Predicate predAns1 = predicatesBottomUp.get(i);
-		List<CQIE> ansrules = ruleIndex.get(predAns1);
+		Collection<CQIE> ansrules = ruleIndex.get(predAns1);
 
 		
 		List<String> queriesStrings = new LinkedList<String>();
@@ -379,6 +395,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 //			log.debug("Normalized CQ: \n{}", cq);
 	}
 	
+	/**
+	 * Normalizes a program, i.e., list of rules, in place
+	 * 
+	 * @param program
+	 */
+	private void normalizeProgram(DatalogProgram program){
+		for(CQIE rule : program.getRules()){
+			normalizeRule(rule);
+		}
+	}
+	
 
 	/**
 	* This Method was created to handle the semantics of OPTIONAL when there
@@ -403,21 +430,34 @@ public class SQLGenerator implements SQLQueryGenerator {
 	*/
 
 	private void createViewFrom(Predicate pred, DBMetadata metadata,
-			Map<Predicate, List<CQIE>> ruleIndex, DatalogProgram query,
+			Multimap<Predicate, CQIE> ruleIndex, DatalogProgram query,
 			List<String> signature) throws OBDAException
 	{
 
 		/* Creates BODY of the view query */
 
-		List<CQIE> ruleList = ruleIndex.get(pred);
+		Collection<CQIE> ruleList = ruleIndex.get(pred);
+		
+		/*
+		 * We assume here each "ans_i" predicate only occurs once in the body of a rule
+		 */
+		
+		
+		
+		
+		
 		String UnionView = "";
+		
+		
+		
+		
+		
 
 		for (CQIE cqOriginal : ruleList) {
 			
 			CQIE cqCopy= cqOriginal.clone();
 			Function cqHead = cqOriginal.getHead();
-			List<String> varContainer = new LinkedList<String>();
-			getVariablesFromAtom(cqHead, varContainer);
+			List<String> varContainer = getVariablesFromAtom(cqHead);
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(cqCopy, varContainer);
 			
@@ -453,10 +493,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * 
 	 * @param varContainer
 	 * 			It is populated with the variables in atom.
+	 * @return 
 	 */
-	private void getVariablesFromAtom(
-			Function atom, List<String> varContainer) {
+	private List<String> getVariablesFromAtom(
+			Function atom) {
 
+		List<String> results = new ArrayList<>();
+		
 		Queue<Term> queueInAtom = new LinkedList<Term>();
 
 		queueInAtom.add(atom);
@@ -473,11 +516,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			} else 	if (queueHead instanceof Variable) {
 				Term var =  queueHead.clone();
-				varContainer.add(var.toString());
+				results.add(var.toString());
 			}
 			
 		} // end while innerAtom
-
+		return results;
+		
 	}
 
 	
@@ -1093,8 +1137,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
-			String functionString = function.toString();
-
+			String functionString = function.getName();
+			
 			/*
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
