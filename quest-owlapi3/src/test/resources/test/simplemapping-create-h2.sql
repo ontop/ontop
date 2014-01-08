@@ -1,7 +1,7 @@
 
 CREATE TABLE table1 (
     uri character varying(100) NOT NULL,
-    value character varying(100),
+    val character varying(100),
 );
 
 
