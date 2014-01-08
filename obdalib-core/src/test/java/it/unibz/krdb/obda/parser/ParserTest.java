@@ -654,7 +654,7 @@ public class ParserTest extends TestCase {
 		
 		try {
 			 queryP = new VisitedQuery(input);
-		} catch (JSQLParserException e) {
+		} catch (Exception e) {
 			
 			return false;
 		}
@@ -671,7 +671,7 @@ public class ParserTest extends TestCase {
 				System.out.println("  Projection: " + queryP.getProjection());
 			
 				System.out.println("  Selection: " + ((queryP.getSelection()==null) ? "--" : queryP.getSelection()));
-			} catch (JSQLParserException e) {
+			} catch (Exception e) {
 				
 				e.printStackTrace();
 			}

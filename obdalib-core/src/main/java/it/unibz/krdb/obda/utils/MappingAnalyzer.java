@@ -88,9 +88,9 @@ public class MappingAnalyzer {
 				// the model.
 				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
 				
-				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
-				// Currently disabled, to prevent interference with the MetaMappingExpander
-				//QueryTree queryTree = axiom.getSourceQueryTree();
+				// Get the parsed sql, since it is already parsed by the mapping parser
+				// consider also MetaMappingExpander
+				//VisitedQuery queryParsed = ...;
 				
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
@@ -100,7 +100,7 @@ public class MappingAnalyzer {
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryParsed);
 
-				// We can get easily the table from the SQL query tree
+				// We can get easily the table from the SQL 
 				ArrayList<RelationJSQL> tableList = queryParsed.getTableSet();
 
 				// Construct the body from the source query
