@@ -78,8 +78,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
 		// TODO: This should depend on whether the column name was quoted in the original sql query
-		//return String.format("%s.\"%s\"", tablename, columnname);
-		return String.format("%s.%s", tablename, columnname);
+		return String.format("%s.\"%s\"", tablename, columnname);
+//		return String.format("%s.%s", tablename, columnname);
 	}
 
 	@Override
@@ -96,8 +96,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String sqlQuote(String name) {
 		//TODO: This should depend on quotes in the sql in the mappings
-		//return String.format("\"%s\"", name);
-		return name;
+		return String.format("\"%s\"", name);
+//		return name;
 	}
 
 	@Override

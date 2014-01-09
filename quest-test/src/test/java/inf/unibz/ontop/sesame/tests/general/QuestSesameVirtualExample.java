@@ -58,9 +58,9 @@ public class QuestSesameVirtualExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	final String owlFile = "src/main/resources/example/exampleBooks.owl";
-	final String obdaFile = "src/main/resources/example/exampleBooks.obda";
-	final String ttlFile = "src/main/resources/example/Books-mappings.ttl";
+	final String owlFile = "src/test/resources/example/exampleBooks.owl";
+	final String obdaFile = "src/test/resources/example/exampleBooks.obda";
+	final String ttlFile = "src/test/resources/example/Books-mappings.ttl";
 	
 	public void runQuery() throws Exception {
 
