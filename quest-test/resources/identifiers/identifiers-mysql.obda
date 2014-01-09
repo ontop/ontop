@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:mysql://10.7.20.39/datatypes
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{letter} a :Country . 
+source		select Type_Char as letter from Characters
+
+]]
+
