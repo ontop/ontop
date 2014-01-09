@@ -354,13 +354,15 @@ public class JDBCConnectionManager {
 
 			switch(caseIds){
 			case JDBC_LOWERCASE:
+				if(!table.isTableQuoted())
 				tblName = tblName.toLowerCase();
-				if(tableSchema != null)
+				if(tableSchema != null && !table.isSchemaQuoted())
 					tableSchema = tableSchema.toLowerCase();
 				break;
 			case JDBC_UPPERCASE: 
+				if(!table.isTableQuoted())
 				tblName = tblName.toUpperCase();
-				if(tableSchema != null)
+				if(tableSchema != null && !table.isSchemaQuoted())
 					tableSchema = tableSchema.toUpperCase();
 				break;
 			}
@@ -709,7 +711,7 @@ public class JDBCConnectionManager {
 		return pk;
 	}
 	
-	/* Retrives the foreign key(s) from a table */
+	/* Retrieves the foreign key(s) from a table */
 	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		Map<String, Reference> fk = new HashMap<String, Reference>();
 		ResultSet rsForeignKeys = null;
