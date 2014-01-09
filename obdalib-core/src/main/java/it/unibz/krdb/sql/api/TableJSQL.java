@@ -22,19 +22,22 @@ public class TableJSQL implements Serializable{
 	 */
 	
 	private String schema;
-	private String givenSchema;
+	private String tableName;
 	private String name;
 	private String alias;
 	
 	
-	/*
-	 * These two fields are new to handle quoted names in multi schema.
-	 * tablename is the cleaned name of the table. GivenName is the name with quotes, upper case,
-	 * that is, exactly as given by the user. 
-	 */
-	private String tableName;
-	private String givenName;
 	
+	/*
+	 * These  fields are to handle quoted names in multischema.
+	 * givenSchema and givenName are the names with quotes, upper case,
+	 * that is, exactly as given by the user. 
+	 * quotedTable and quotedSchema are boolean value to identify when quotes have been removed.
+	 */
+	
+	private String givenSchema;
+	private String givenName;
+	private boolean quotedTable, quotedSchema;
 	
 
 	public TableJSQL(String name) {
@@ -75,7 +78,7 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && schema.contains("\""))
+		if(schema!=null && (schema.startsWith("\"") || schema.startsWith("'")))
 			this.schema = schema.substring(1, schema.length()-1);
 		else
 			this.schema = schema;
@@ -103,8 +106,11 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if(tableName.contains("\""))
+		if((tableName.startsWith("\"") || tableName.startsWith("'")))
+		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
+			quotedTable = true;
+		}
 		else			
 			this.tableName = tableName;
 	}
@@ -142,6 +148,21 @@ public class TableJSQL implements Serializable{
 	public String getAlias() {
 		return alias;
 	}
+	
+	/**
+	 * 
+	 * @return true if the original name of the table is quoted
+	 */
+	public boolean isTableQuoted() {
+		return quotedTable;
+	}
+	/**
+	 * 
+	 * @return true if the original name of the schema is quoted
+	 */
+	public boolean isSchemaQuoted() {
+		return quotedSchema;
+	}
 
 	@Override
 	public String toString() {
@@ -164,4 +185,6 @@ public class TableJSQL implements Serializable{
 		}
 		return false;
 	}
+
+	
 }

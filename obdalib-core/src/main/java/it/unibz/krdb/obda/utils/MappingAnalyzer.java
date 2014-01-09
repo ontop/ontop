@@ -415,14 +415,8 @@ public class MappingAnalyzer {
 			String varName = var.getName();
 			String termName = lookupTable.lookup(varName);
 			if (termName == null) {
-				termName = lookupTable.lookup(varName.toLowerCase());
-				if (termName == null) {
-					termName = lookupTable.lookup(varName.toUpperCase());
-					if (termName == null) {	
-						final String msg = String.format("Error in identifying column name \"%s\", please check the query source in the mappings.\nPossible reasons:\n1. The name is ambiguous, or\n2. The name is not defined in the database schema.", var);
-						throw new RuntimeException(msg);
-					}
-				}
+				final String msg = String.format("Error in identifying column name \"%s\", please check the query source in the mappings.\nPossible reasons:\n1. The name is ambiguous, or\n2. The name is not defined in the database schema.", var);
+				throw new RuntimeException(msg);
 			}
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
