@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#
+:		http://www.example.org/test#
 
 [SourceDeclaration]
 sourceUri	person
