@@ -119,7 +119,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 				{
 					String columnName= column.getColumnName();
 					
-					if(columnName.contains("\""))
+					if(columnName.startsWith("\"") || columnName.startsWith("'"))
 					{
 						columnName=columnName.substring(1, columnName.length()-1);
 						column.setColumnName(columnName);
@@ -599,7 +599,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			{
 				String columnName= column.getColumnName();
 				
-				if(columnName.contains("\""))
+				if(columnName.startsWith("\"") || columnName.startsWith("'"))
 				{
 					columnName=columnName.substring(1, columnName.length()-1);
 					column.setColumnName(columnName);
