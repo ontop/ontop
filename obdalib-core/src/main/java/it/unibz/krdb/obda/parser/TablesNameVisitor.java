@@ -152,8 +152,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Table tableName) {
 		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
-		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())
-				&& !tables.contains(relation)) {
+		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())) {
 			tables.add(relation);
 		}
 	}
