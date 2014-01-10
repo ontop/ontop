@@ -246,7 +246,11 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-util</artifactId>
 		</dependency>
-
+		
+		<dependency>
+    		<groupId>com.google.guava</groupId>
+   			<artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
