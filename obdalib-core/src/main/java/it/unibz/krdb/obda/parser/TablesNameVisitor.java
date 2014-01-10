@@ -145,6 +145,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	/*
 	 * Visit Table and store its value in the list of RelationJSQL(non-Javadoc)
+	 * We want to mantain duplicate tables to retrive the different aliases assigned
 	 * we use the class TableJSQL to handle quotes and user case choice if present
 	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.schema.Table)
 	 */
@@ -152,8 +153,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Table tableName) {
 		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
-		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())
-				&& !tables.contains(relation)) {
+		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())) {
 			tables.add(relation);
 		}
 	}

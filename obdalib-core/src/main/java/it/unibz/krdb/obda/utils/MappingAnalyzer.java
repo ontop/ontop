@@ -323,7 +323,7 @@ public class MappingAnalyzer {
 		else if (right instanceof IsNullExpression)
 			t2=getFunction((IsNullExpression) right, lookupTable);
 		else if (right instanceof Parenthesis)
-			t2= manageParenthesis((Parenthesis) left, lookupTable);
+			t2= manageParenthesis((Parenthesis) right, lookupTable);
 		else
 			if (right instanceof Column) {
 				//if the columns contains a boolean value
