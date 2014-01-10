@@ -162,6 +162,15 @@ public class MultiSchemaTest extends TestCase {
 		runTests(query);
 	}
 	
+	/**
+	 * Test use of three aliases to same table, and a reference to the second
+	 * @throws Exception
+	 */
+	public void testMultiSchemaAlias2() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :View2}";
+		runTests(query);
+	}
+	
 	
 	/**
 	 * Test use of views
