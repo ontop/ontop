@@ -57,5 +57,10 @@ mappingId	TwoViews
 target		:View2-{NAME}-{name3} a :View2 . 
 source		select t2.table_name NAME, t3.table_name name3 from SYS.ALL_TABLES t1, sys.all_tables t2, sys.all_tables t3, SYS.ALL_VIEWS where t2.owner = all_views.owner and t3.owner = all_views.owner
 
+mappingId	Something
+target		:Something-{NAME} a :Something . 
+source		select AT.table_name as NAME from sys.all_tables AT
+
+
 ]]
 

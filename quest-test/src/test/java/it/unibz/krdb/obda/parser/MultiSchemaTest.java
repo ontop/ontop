@@ -171,6 +171,14 @@ public class MultiSchemaTest extends TestCase {
 		runTests(query);
 	}
 	
+	/**
+	 * Test alias together with wrong case for table
+	 * @throws Exception
+	 */
+	public void testMultiSchemaCapitalAlias() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Something}";
+		runTests(query);
+	}
 	
 	/**
 	 * Test use of views
