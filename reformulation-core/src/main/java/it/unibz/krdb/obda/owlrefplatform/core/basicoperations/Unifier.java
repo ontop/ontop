@@ -185,7 +185,7 @@ public class Unifier {
 	public static void applyUnifier(Function term,
 			Map<Variable, Term> unifier) {
 		List<Term> terms = term.getTerms();
-		applyUnifier(terms, unifier);
+		applyUnifier(terms, term, unifier);
 	}
 	
 	public static void applyUnifierToGetFact(Function term,
@@ -202,18 +202,20 @@ public class Unifier {
 	// }
 
 	
-	public static void applyUnifier(List<Term> terms, 
+	public static void applyUnifier(List<Term> terms, Function atom,
 			Map<Variable, Term> unifier) {
-		applyUnifier(terms, unifier,0);
+		applyUnifier(terms, atom, unifier,0);
 	}
 	/***
 	 * Applies the subsittution to all the terms in the list. Note that this
 	 * will not clone the list or the terms insdie the list.
 	 * 
 	 * @param terms
+	 * @param atom
+	 * 			the parent of the terms if known, othersize, it is null
 	 * @param unifier
 	 */
-	public static void applyUnifier(List<Term> terms, 
+	public static void applyUnifier(List<Term> terms, Function atom,
 			Map<Variable, Term> unifier, int fromIndex) {
 		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
@@ -221,10 +223,18 @@ public class Unifier {
 			 * unifiers only apply to variables, simple or inside functional
 			 * terms
 			 */
-			if (t instanceof VariableImpl) {
+			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
-				if (replacement != null)
-					terms.set(i, replacement);
+				if (replacement != null){
+					if(atom != null){
+						/*
+						 * <code>atom.setTerm()</code> will trigger the updating the string cache of the atom
+						 */
+						atom.setTerm(i, replacement);
+					} else {
+						terms.set(i, replacement);
+					}
+				}
 			} else if (t instanceof Function) {
 				Function t2 = (Function) t;
 				applyUnifier(t2, unifier);
@@ -232,6 +242,8 @@ public class Unifier {
 			}
 		}
 	}
+	
+	
 	
 	/**
 	 * 
@@ -381,8 +393,8 @@ public class Unifier {
 			 * Applying the newly computed substitution to the 'replacement' of
 			 * the existing substitutions
 			 */
-			applyUnifier(terms1, mgu, termidx + 1);
-			applyUnifier(terms2, mgu, termidx + 1);
+			applyUnifier(terms1, null, mgu, termidx + 1);
+			applyUnifier(terms2, null, mgu, termidx + 1);
 
 		}
 		return mgu;
