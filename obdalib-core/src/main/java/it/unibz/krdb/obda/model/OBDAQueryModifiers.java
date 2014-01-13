@@ -24,23 +24,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OBDAQueryModifiers {
-
+	private boolean isCount;
 	private boolean isDistinct;
 
 	private long limit;
 	private long offset;
 
 	private List<OrderCondition> orderConditions;
-
+	private List<Variable> groupConditions;
+	
 	public OBDAQueryModifiers() {
+		isCount = false;
 		isDistinct = false;
 		limit = -1;
 		offset = -1;
 		orderConditions = new ArrayList<OrderCondition>();
+		groupConditions = new ArrayList<Variable>();
 	}
 
 	public OBDAQueryModifiers clone() {
 		OBDAQueryModifiers clone = new OBDAQueryModifiers();
+		clone.isCount = isCount;
 		clone.isDistinct = isDistinct;
 		clone.limit = limit;
 		clone.offset = offset;
@@ -51,14 +55,17 @@ public class OBDAQueryModifiers {
 				throw new RuntimeException(e);
 			}
 		}
+		clone.groupConditions.addAll(groupConditions);
 		return clone;
 	}
 
 	public void copy(OBDAQueryModifiers other) {
 		isDistinct = other.isDistinct;
+		isCount = other.isCount;
 		limit = other.limit;
 		offset = other.offset;
 		orderConditions.addAll(other.orderConditions);
+		groupConditions.addAll(other.groupConditions);
 	}
 
 	public void setDistinct() {
@@ -67,6 +74,14 @@ public class OBDAQueryModifiers {
 
 	public boolean isDistinct() {
 		return isDistinct;
+	}
+	
+	public void setCount() {
+		isCount = true;
+	}
+
+	public boolean isCount() {
+		return isCount;
 	}
 
 	public void setLimit(long limit) {
@@ -97,7 +112,15 @@ public class OBDAQueryModifiers {
 		OrderCondition condition = new OrderCondition(var, direction);
 		orderConditions.add(condition);
 	}
+	
+	public void addGroupCondition(Variable var) {
+		groupConditions.add(var);
+	}
 
+	public List<Variable> getGroupConditions() {
+		return groupConditions;
+	}
+	
 	public List<OrderCondition> getSortConditions() {
 		return orderConditions;
 	}
@@ -105,9 +128,13 @@ public class OBDAQueryModifiers {
 	public boolean hasOrder() {
 		return !orderConditions.isEmpty() ? true : false;
 	}
+	
+	public boolean hasGroup() {
+		return !groupConditions.isEmpty() ? true : false;
+	}
 
 	public boolean hasModifiers() {
-		return isDistinct || hasLimit() || hasOffset() || hasOrder();
+		return isCount || isDistinct || hasLimit() || hasOffset() || hasOrder() || hasGroup();
 	}
 
 	/**

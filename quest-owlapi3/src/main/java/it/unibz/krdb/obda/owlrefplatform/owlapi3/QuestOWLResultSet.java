@@ -68,6 +68,14 @@ public class QuestOWLResultSet {
 			throw new OntopOWLException(e);
 		}
 	}
+	
+	public int getCount() throws OWLException {
+		try {
+			return res.getCountValue();
+		} catch (OBDAException e) {
+			throw new OntopOWLException(e);
+		}
+	}
 
 	public List<String> getSignature() throws OWLException {
 		try {

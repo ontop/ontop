@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  */
 
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.util.List;
 
@@ -64,4 +65,6 @@ public interface SQLDialectAdapter {
 	public String sqlCast(String value, int type);
 	
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive);
+
+	public String sqlGroupBy(List<Variable> groupby, String viewname);
 }

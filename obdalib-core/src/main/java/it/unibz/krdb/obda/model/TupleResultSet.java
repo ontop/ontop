@@ -55,4 +55,6 @@ public interface TupleResultSet extends ResultSet{
 
 	public Constant getConstant(String name) throws OBDAException;
 
+	public int getCountValue() throws OBDAException;
+
 }

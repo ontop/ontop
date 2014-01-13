@@ -136,6 +136,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String subquery = generateQuery(query, signature, indent);
 
 			String modifier = "";
+			List<Variable> groupby = query.getQueryModifiers().getGroupConditions();
+			if (!groupby.isEmpty()) {
+				modifier += sqladapter.sqlGroupBy(groupby, outerViewName) + "\n";
+			}
 			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
 			if (!conditions.isEmpty()) {
 				modifier += sqladapter.sqlOrderBy(conditions, outerViewName) + "\n";
@@ -145,6 +149,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (limit != -1 || offset != -1) {
 				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
 			}
+			// if it is a COUNT query
+//			if (query.getQueryModifiers().isCount()) {
+//				String sql = "SELECT COUNT(*)\n";
+//				sql += "FROM (\n";
+//				sql += subquery + "\n";
+//				sql += ") " + outerViewName + "\n";
+//				sql += modifier;
+//				return sql;
+//			}
 			String sql = "SELECT *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
@@ -803,7 +816,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
+			
+			// Aggregates
+			} else if (functionString.equals("Count")) {
+				mainColumn = "COUNT(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+			
+			} else if (functionString.equals("Sum")) {
+					mainColumn = "SUM(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+			
+			} else if (functionString.equals("Avg")) {
+				mainColumn = "AVG(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+						
 			} else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
@@ -873,6 +896,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
 			 */
+			if (functionString.equals("Count")) {
+				return (String.format(typeStr, 4, signature.get(hpos)));
+			}
+			if (functionString.equals("Sum")) {
+				return (String.format(typeStr, 5, signature.get(hpos)));
+			}
+			if (functionString.equals("Avg")) {
+				return (String.format(typeStr, 5, signature.get(hpos)));
+			}
+			
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
 				return (String.format(typeStr, 9, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {

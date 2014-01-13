@@ -228,6 +228,11 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 		return valueConstant;
 	}
 
+	@Override
+	public int getCountValue() throws OBDAException {
+		return 1;
+	}
+
 //	@Override
 //	public URI getURI(String name) throws OBDAException {
 //		return null;

@@ -126,7 +126,17 @@ public class QuestResultset implements TupleResultSet {
 	public OBDAStatement getStatement() {
 		return st;
 	}
-
+	
+	@Override
+	public int getCountValue() {
+		int count = 0;
+		try {
+			count = set.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return count;
+	}
 	/***
 	 * Returns the constant at column "column" recall that columns start at index 1.
 	 */
