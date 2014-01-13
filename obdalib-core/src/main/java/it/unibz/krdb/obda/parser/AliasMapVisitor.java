@@ -142,7 +142,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		if (selectExpr.getAlias() != null) {
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
-			aliasMap.put(e.toString(), selectExpr.getAlias());
+			aliasMap.put(e.toString().toLowerCase(), selectExpr.getAlias());
 	
 		}
 	}

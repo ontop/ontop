@@ -30,7 +30,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -635,6 +634,8 @@ public class JDBCConnectionManager {
 //					String tblName = resultSet.getString("object_name");
 //					tableOwner = resultSet.getString("owner_name");
 					String tblName = table.getTableName();
+					if(!table.isTableQuoted())
+						tblName = tblName.toUpperCase();
 					/**
 					 * givenTableName is exactly the name the user provided, including schema prefix if that was
 					 * provided, otherwise without.
@@ -646,16 +647,19 @@ public class JDBCConnectionManager {
 					 * also have worked in the latter case.
 					 */
 					String tableOwner;
-					if( table.getSchema()!=null)
+					if( table.getSchema()!=null){
 						tableOwner = table.getSchema();
+						if(!table.isSchemaQuoted())
+							tableOwner = tableOwner.toUpperCase();
+					}
 					else
-						tableOwner = loggedUser;
+						tableOwner = loggedUser.toUpperCase();
 						
-					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner.toUpperCase(), tblName.toUpperCase());
-					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner.toUpperCase(), tblName.toUpperCase());
+					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tableGivenName);
-					rsColumns = md.getColumns(null, tableOwner.toUpperCase(), tblName.toUpperCase(), null);
+					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 			
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");

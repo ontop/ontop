@@ -824,6 +824,14 @@ public class ParserTest extends TestCase {
 		assertTrue(result2);
 	}
 	
+	public void git () {
+		final boolean result = parseJSQL("select AT.table_name as NAME from sys.all_tables AT");
+		printJSQL("test_11_1", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("select AT.table_name as NAME from sys.all_tables AT");
+		printSQL("test_11_1", result2);
+		assertTrue(result2);
+	}
 	private String queryText;
 
 	VisitedQuery queryP;
