@@ -38,6 +38,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -345,8 +346,7 @@ public class DatalogNormalizer {
 		Set<Function> booleanAtoms = new HashSet<Function>();
 		List<Function> equalities = new LinkedList<Function>();
 		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
-		@SuppressWarnings("rawtypes")
-		List body = query.getBody();
+		List<Function> body = query.getBody();
 		body.addAll(equalities);
 
 		/*
@@ -356,6 +356,11 @@ public class DatalogNormalizer {
 		 */
 
 		Unifier.applyUnifier(query, substitutions, false);
+		
+		/**
+		 * For debugging only
+		 */
+		QueryUtils.clearCache(query);
 
 	}
 

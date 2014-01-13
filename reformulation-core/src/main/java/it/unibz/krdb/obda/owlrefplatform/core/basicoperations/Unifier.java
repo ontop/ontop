@@ -184,8 +184,8 @@ public class Unifier {
 
 	public static void applyUnifier(Function term,
 			Map<Variable, Term> unifier) {
-		List<Term> terms = term.getTerms();
-		applyUnifier(terms, term, unifier);
+		List<Term> subTerms = term.getTerms();
+		applyUnifier(subTerms, term, unifier);
 	}
 	
 	public static void applyUnifierToGetFact(Function term,

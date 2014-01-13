@@ -40,11 +40,14 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
+import it.unibz.krdb.obda.utils.QueryUtils;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
@@ -52,7 +55,6 @@ import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,13 +63,19 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
+
+import static com.google.common.base.Preconditions.checkState;
+
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
@@ -159,6 +167,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		/*
 		 * normalize the program before generating the SQL
 		 */
+		//queryProgram = DatalogNormalizer.normalizeDatalogProgram(queryProgram);
+
 		normalizeProgram(queryProgram);
 		
 		
@@ -181,7 +191,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (queryProgram.getQueryModifiers().hasModifiers()) {
 			final String indent = "   ";
 			final String outerViewName = "SUB_QVIEW";
-			String subquery = generateQuery(queryProgram, signature, indent,ruleIndex,  predicatesInBottomUp, extensionalPredicates);
+			String subquery = generateQuery(queryProgram, signature, indent, ruleIndex, 
+					ruleIndexByBodyPredicate, predicatesInBottomUp, extensionalPredicates);
 
 			String modifier = "";
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
@@ -200,7 +211,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += modifier;
 			return sql;
 		} else {
-			return generateQuery(queryProgram, signature, "", ruleIndex,  predicatesInBottomUp, extensionalPredicates);
+			return generateQuery(queryProgram, signature, "", ruleIndex,  ruleIndexByBodyPredicate, predicatesInBottomUp, extensionalPredicates);
 		}
 	}
 	
@@ -229,13 +240,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param query
 	 * 		This is a arbitrary Datalog Program. In this program ans predicates will be translated to Views.
 	 * 
-	 * 		NOTE: actually current implementation only handles Datalog programs that have a tree-like dependency graph 
+	 * 		NOTE (xiao): actually current implementation only handles Datalog programs that have a tree-like dependency graph 
 	 * 
 	 * @param signature
 	 * 		The Select variables in the SPARQL query
 	 * @param indent
 	 * @param ruleIndex
 	 * 		The index that maps intentional predicates to its rules
+	 * @param ruleIndexByBodyPredicate 
 	 * @param predicatesBottomUp
 	 * 		The topologically ordered predicates in <code> query </query>. {@link #DatalogDependencyGraphGenerator}
 	 * @param extensionalPredicates
@@ -244,7 +256,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @throws OBDAException
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
-			String indent,  Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesBottomUp, List<Predicate> extensionalPredicates) throws OBDAException {
+			String indent,  Multimap<Predicate, CQIE> ruleIndex, Multimap<Predicate, CQIE> ruleIndexByBodyPredicate, 
+			List<Predicate> predicatesBottomUp, List<Predicate> extensionalPredicates) throws OBDAException {
+
 
 		int listSize = predicatesBottomUp.size();
 		int i = 0;
@@ -261,10 +275,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * extensional predicates are defined by DBs
 				 */
-				i++ ;
-				continue;
 			} else {
-				createViewFrom(pred,metadata,ruleIndex, query, signature);
+				createViewFrom(pred,metadata, ruleIndex, ruleIndexByBodyPredicate, query, signature);
 			}
 			i++ ;
 		}	
@@ -279,22 +291,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Collection<CQIE> ansrules = ruleIndex.get(predAns1);
 
 		
-		List<String> queriesStrings = new LinkedList<String>();
+		List<String> queryStrings = new LinkedList<String>();
 		/* Main loop, constructing the SPJ query for each CQ */
 		
 		for (CQIE cq : ansrules) {
 
-		/*
-		 * Here we normalize so that the form of the CQ is as close to the
-		 * form of a normal SQL algebra as possible, 
-		 */
-		String querystr = generateQueryFromSingleRule(cq,signature);
-		
-		queriesStrings.add(querystr);
+			/*
+			 * Here we normalize so that the form of the CQ is as close to the
+			 * form of a normal SQL algebra as possible, 
+			 */
+			String querystr = generateQueryFromSingleRule(cq,signature, null);
+			
+			queryStrings.add(querystr);
 		}
 
 		
-		StringBuilder result = createUnionFromSQLList(queriesStrings);
+		StringBuilder result = createUnionFromSQLList(queryStrings);
 
 		return result.toString();
 	}
@@ -336,27 +348,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 * @throws OBDAException
 	 */
-	private String generateQueryFromSingleRule(CQIE cq,	List<String> signature) throws OBDAException 
+	public String generateQueryFromSingleRule(CQIE cq,	List<String> signature, Map<Variable, Term> mgu) throws OBDAException 
 	{
 		//for (CQIE cq : query.getRules()) {
-			normalizeRule(cq);
 
-			QueryAliasIndex index = new QueryAliasIndex(cq);
+		//normalizeRule(cq);
 
-			boolean innerdistincts = false;
-			
-			//&& numberOfQueries == 1
-			if (isDistinct ) {
-				innerdistincts = true;
-			}
+		QueryAliasIndex index = new QueryAliasIndex(cq);
 
-			String FROM = getFROM(cq, index);
-			String WHERE = getWHERE(cq, index);
-			String SELECT = getSelectClause(signature, cq, index, innerdistincts);
-
-			String querystr = SELECT + FROM + WHERE;
-			return querystr ;
+		boolean innerdistincts = false;
+		
+		//&& numberOfQueries == 1
+		if (isDistinct) {
+			innerdistincts = true;
 		}
+
+		String FROM = getFROM(cq.getBody(), index);
+		String WHERE = getWHERE(cq.getBody(), index);
+		String SELECT = getSelectClause(signature, cq, index, mgu, innerdistincts);
+
+		String querystr = SELECT + FROM + WHERE;
+		return querystr ;
+	}
 
 	/**
 	 * Here we normalize so that the form of the CQ is as close to the
@@ -422,6 +435,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	*
 	* The idea is to use the view definition in the case of Union in the Optionals/LeftJoins
 	 * @param ruleIndex 
+	 * @param ruleIndexByBodyPredicate 
 	 * @param query 
 	 * @param signature 
 	 * @throws OBDAException 
@@ -430,7 +444,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	*/
 
 	private void createViewFrom(Predicate pred, DBMetadata metadata,
-			Multimap<Predicate, CQIE> ruleIndex, DatalogProgram query,
+			Multimap<Predicate, CQIE> ruleIndex, Multimap<Predicate, CQIE> ruleIndexByBodyPredicate, DatalogProgram query,
 			List<String> signature) throws OBDAException
 	{
 
@@ -438,96 +452,64 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Collection<CQIE> ruleList = ruleIndex.get(pred);
 		
-		/*
-		 * We assume here each "ans_i" predicate only occurs once in the body of a rule
+		
+		Collection<CQIE> fatherRules = ruleIndexByBodyPredicate.get(pred);
+		
+		
+		Preconditions.checkElementIndex(0, fatherRules.size(),	"no father rules found");
+		
+		/**
+		 * Use the first one for the signature
 		 */
+		CQIE fatherRule = fatherRules.iterator().next();
+		
+		Collection<Function> fatherAtoms = QueryUtils.findAtomsInRuleBody(fatherRule, pred);
+		
+		/*
+		 *  We assume that the atom only occur once
+		 */
+		Preconditions.checkState(fatherAtoms.size() == 1);
+		
+		Function fatherAtom = fatherAtoms.iterator().next();
 		
 		
 		
-		
-		
-		String UnionView = "";
-		
-		
-		
-		
+		String unionView = "";
 		
 
-		for (CQIE cqOriginal : ruleList) {
+		for (CQIE rule : ruleList) {
+		
 			
-			CQIE cqCopy= cqOriginal.clone();
-			Function cqHead = cqOriginal.getHead();
-			List<String> varContainer = getVariablesFromAtom(cqHead);
+			Function cqHead = rule.getHead();
+			
+			Map<Variable, Term> mgu = Unifier.getMGU(cqHead, fatherAtom);
+			
+			
+			List<String> varContainer = QueryUtils.getVariableNamesInAtom(cqHead);
 			/* Creates the SQL for the View */
-			String sqlQuery = generateQueryFromSingleRule(cqCopy, varContainer);
+			String sqlQuery = generateQueryFromSingleRule(rule, varContainer, mgu);
 			
-			if (UnionView.equals("")){
-				UnionView = "(" + sqlQuery + ")";
+			if (unionView.equals("")){
+				unionView = "(" + sqlQuery + ")";
 			} else {
-				UnionView = UnionView + "\n" + "\n UNION \n (" + sqlQuery + ")";
+				unionView = unionView + "\n" + "\n UNION \n (" + sqlQuery + ")";
 			}
 
 		}
+		
+		
+		
 		String viewname = String.format(VIEW_ANS_NAME, pred);
 		//String viewname = "Q" + pred + "View";
 		/* Creates the View itself */
-		ViewDefinition viewU = metadata.createViewDefinition(viewname,	UnionView, true);
+		ViewDefinition viewU = metadata.createViewDefinition(viewname,	unionView, true);
 		metadata.add(viewU);
-		sqlAnsViewMap.put(pred,UnionView);
+		sqlAnsViewMap.put(pred,unionView);
 	}
 
 
 	
 	
-	/**
-	 * 
-	 * This is a helper method for {@link #generateQueryFromSingleRule(CQIE, List)}.
-	 * This method will be used to extract the signature of the ans atoms
-	 * 
-	 * This method traverses in an atom, and put in <code>varContainer</code>
-	 * all the variables from the atom CASTED into String
-	 * 
-	 * 
-	 * @param atom
-	 *            
-	 * 
-	 * @param varContainer
-	 * 			It is populated with the variables in atom.
-	 * @return 
-	 */
-	private List<String> getVariablesFromAtom(
-			Function atom) {
-
-		List<String> results = new ArrayList<>();
-		
-		Queue<Term> queueInAtom = new LinkedList<Term>();
-
-		queueInAtom.add(atom);
-		while (!queueInAtom.isEmpty()) {
-			Term queueHead = queueInAtom.poll();
-			
-			if (queueHead instanceof Function) {
-				Function funcRoot = (Function) queueHead;
-				
-				if ( funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction() || funcRoot.isDataFunction()) {
-					for (Term term : funcRoot.getTerms()) {
-						queueInAtom.add(term);
-					}
-				}
-			} else 	if (queueHead instanceof Variable) {
-				Term var =  queueHead.clone();
-				results.add(var.toString());
-			}
-			
-		} // end while innerAtom
-		return results;
-		
-	}
-
-	
-
-	
-
 	/***
 	 * Returns a string with boolean conditions formed with the boolean atoms
 	 * found in the atoms list.
@@ -782,11 +764,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return def;
 	}
 
-	private String getFROM(CQIE query, QueryAliasIndex index) {
-		List<Function> atoms = new LinkedList<Function>();
-		for (Function atom : query.getBody()) {
-			atoms.add((Function) atom);
-		}
+	private String getFROM(List<Function> atoms, QueryAliasIndex index) {
+//		List<Function> atoms = new LinkedList<Function>();
+//		for (Function atom : query.getBody()) {
+//			atoms.add((Function) atom);
+//		}
+//		String tableDefinitions = getTableDefinitions(atoms, index, true, false, "");
+		//List<Function> atoms = query.getBody();
 		String tableDefinitions = getTableDefinitions(atoms, index, true, false, "");
 		return "\n FROM \n" + tableDefinitions;
 	}
@@ -909,7 +893,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * the form "COL1 = COL2"
 		 */
 		for (Variable var : currentLevelVariables) {
-			Set<String> references = index.getColumnReferences(var);
+			Collection<String> references = index.getColumnReferences(var);
 			if (references.size() < 2) {
 				// No need for equality
 				continue;
@@ -957,11 +941,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return 12;
 	}
 
-	private String getWHERE(CQIE query, QueryAliasIndex index) {
-		List<Function> atoms = new LinkedList<Function>();
-		for (Function atom : query.getBody()) {
-			atoms.add((Function) atom);
-		}
+	private String getWHERE(List<Function> atoms, QueryAliasIndex index) {
+//		List<Function> atoms = new LinkedList<Function>();
+//		for (Function atom : query.getBody()) {
+//			atoms.add((Function) atom);
+//		}
+//		List<Function> atoms = query.getBody();
 		String conditions = getConditionsString(atoms, index, false, "");
 		if (conditions.length() == 0) {
 			return "";
@@ -971,13 +956,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	/**
 	 * produces the select clause of the sql query for the given CQIE
+	 * @param mgu 
 	 * 
 	 * @param q
 	 *            the query
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-			QueryAliasIndex index, boolean distinct) throws OBDAException {
+			QueryAliasIndex index, Map<Variable, Term> mgu, boolean distinct) throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
@@ -995,11 +981,27 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
+		
+		//BiMap<Variable, Term> bm = HashBiMap.create(mgu);;
+		
+		//BiMap<Term,Variable> inverse = bm.inverse();
+		
+		
+		
+		
 		while (hit.hasNext()) {
 			Term ht = hit.next();
-			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos);
-			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index);
-			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index);
+			
+			//String varName = getVarName(inverse, ht);
+			
+			String varName = "v" + hpos;
+			
+			//String varName = signature.get(hpos);
+			//String varName = ht.toString();
+			
+			String typeColumn = getTypeColumnForSELECT(ht, varName);
+			String langColumn = getLangColumnForSELECT(ht, varName,	index);
+			String mainColumn = getMainColumnForSELECT(ht, varName, index);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -1015,8 +1017,33 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return sb.toString();
 	}
 
+	private String getVarName(BiMap<Term, Variable> inverse, Term ht) {
+		
+		String varName = null;
+		
+		if(inverse.containsKey(ht)){
+			Variable variable = inverse.get(ht);
+			varName = variable.getName();
+		}
+		else {
+			for(Term key : inverse.keySet()){
+				if(key instanceof Function){
+					/*
+					 * if ht is a subterm of term
+					 */
+					if (((Function)ht).getFirstOcurrance(key, 0) != -1){
+						varName =  inverse.get(key).getName();
+						break;
+					}
+				}
+			}
+		}
+		
+		return varName;
+	}
+
 	private String getMainColumnForSELECT(Term ht,
-			List<String> signature, int hpos, QueryAliasIndex index) {
+			String varName, QueryAliasIndex index) {
 
 		String mainColumn = null;
 
@@ -1091,13 +1118,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
-		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
+		//String varName = signature.get(hpos);
+		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varName));
 	}
 
-	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
+	private String getLangColumnForSELECT(Term ht, String varName, QueryAliasIndex index) {
 
 		String langStr = "%s AS \"%sLang\"";
 
+		//String varName = signature.get(hpos);
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
@@ -1123,17 +1152,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					lang = getSQLString(langTerm, index, false);
 				}
-				return (String.format(langStr, lang, signature.get(hpos)));
+				return (String.format(langStr, lang, varName));
 			}
 		}
-		return (String.format(langStr, "NULL", signature.get(hpos)));
+		return (String.format(langStr, "NULL", varName));
 
 	}
 
-	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+	//private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+	private String getTypeColumnForSELECT(Term ht, String varName) {
 
 		String typeStr = "%s AS \"%sQuestType\"";
 
+		//String varName = signature.get(hpos);
+		
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
@@ -1144,28 +1176,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * set to know the type of constant)
 			 */
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
-				return (String.format(typeStr, 9, signature.get(hpos)));
+				return (String.format(typeStr, 9, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, 8, signature.get(hpos)));
+				return (String.format(typeStr, 8, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, 5, signature.get(hpos)));
+				return (String.format(typeStr, 5, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, 6, signature.get(hpos)));
+				return (String.format(typeStr, 6, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, 4, signature.get(hpos)));
+				return (String.format(typeStr, 4, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, 7, signature.get(hpos)));
+				return (String.format(typeStr, 7, varName));
 			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, 3, signature.get(hpos)));
+				return (String.format(typeStr, 3, varName));
 			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				return (String.format(typeStr, 1, signature.get(hpos)));
+				return (String.format(typeStr, 1, varName));
 			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				return (String.format(typeStr, 2, signature.get(hpos)));
+				return (String.format(typeStr, 2, varName));
 			}
 		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, 1, signature.get(hpos)));
+			return (String.format(typeStr, 1, varName));
 		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, 0, signature.get(hpos)));
+			return (String.format(typeStr, 0, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
@@ -1320,7 +1352,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			}
 		} else if (term instanceof Variable) {
-			Set<String> viewdef = index.getColumnReferences((Variable) term);
+			Collection<String> viewdef = index.getColumnReferences((Variable) term);
 			String def = viewdef.iterator().next();
 			String col = trim(def.split("\\.")[1]);
 			String table = def.split("\\.")[0];
@@ -1420,7 +1452,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return jdbcutil.getSQLLexicalForm(uc.toString());
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			LinkedHashSet<String> posList = index.getColumnReferences(var);
+			Collection<String> posList = index.getColumnReferences(var);
 			if (posList == null || posList.size() == 0) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
@@ -1605,7 +1637,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Map<Function, String> viewNames = new HashMap<Function, String>();
 		Map<Function, String> tableNames = new HashMap<Function, String>();
 		Map<Function, DataDefinition> dataDefinitions = new HashMap<Function, DataDefinition>();
-		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<Variable, LinkedHashSet<String>>();
+		//Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<Variable, LinkedHashSet<String>>();
+		Multimap<Variable, String> columnReferences = ArrayListMultimap.create();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -1650,7 +1683,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} 
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
-			String tableName = tablePredicate.toString();
+			String tableName = tablePredicate.getName();
 			DataDefinition def = metadata.getDefinition(tableName);
 	
 			if (def == null) {
@@ -1685,17 +1718,27 @@ public class SQLGenerator implements SQLQueryGenerator {
 			viewName = sqladapter.sqlQuote(viewName);
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
-				if (!(term instanceof Variable)) {
-					continue;
+				
+				if(term instanceof Variable) {
+					/*
+					 * the index of attributes of the definition starts from 1
+					 */
+					String columnName = def.getAttributeName(index + 1);
+					String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
+					columnReferences.put((Variable)term, reference);
 				}
-				LinkedHashSet<String> references = columnReferences.get(term);
-				if (references == null) {
-					references = new LinkedHashSet<String>();
-					columnReferences.put((Variable) term, references);
-				}
-				String columnName = def.getAttributeName(index + 1);
-				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
-				references.add(reference);
+				
+//				if (!(term instanceof Variable)) {
+//					continue;
+//				}
+//				LinkedHashSet<String> references = columnReferences.get(term);
+//				if (references == null) {
+//					references = new LinkedHashSet<String>();
+//					columnReferences.put((Variable) term, references);
+//				}
+//				String columnName = def.getAttributeName(index + 1);
+//				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
+//				references.add(reference);
 			}
 		}
 
@@ -1707,7 +1750,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * @param var
 		 *            The variable we want the referenced columns.
 		 */
-		public LinkedHashSet<String> getColumnReferences(Variable var) {
+		public Collection<String> getColumnReferences(Variable var) {
 			return columnReferences.get(var);
 		}
 
