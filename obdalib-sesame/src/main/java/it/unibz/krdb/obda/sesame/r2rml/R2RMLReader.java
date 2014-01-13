@@ -19,21 +19,21 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * limitations under the License.
  * #L%
  */
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-
-import org.openrdf.model.Graph;
-
+/**
+ * @author timea bagosi
+ * Class responsible to construct an OBDA model from an R2RML mapping file or graph.
+ */
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+
+import org.openrdf.model.Graph;
 
 public class R2RMLReader {
 	
@@ -71,6 +71,11 @@ public class R2RMLReader {
 		this.obdaModel = model;
 	}
 		
+	/**
+	 * the method that gives the obda model based on the given graph
+	 * @param sourceUri - the uri of the datasource of the model
+	 * @return the read obda model
+	 */
 	public OBDAModel readModel(URI sourceUri){
 		try {
 			//add to the model the mappings retrieved from the manager
@@ -81,6 +86,10 @@ public class R2RMLReader {
 		return obdaModel;
 	}
 	
+	/**
+	 * method to read the mappings from the graph
+	 * @return list of obdaMappingAxioms
+	 */
 	public ArrayList<OBDAMappingAxiom> readMappings(){
 		return manager.getMappings(graph);
 	}

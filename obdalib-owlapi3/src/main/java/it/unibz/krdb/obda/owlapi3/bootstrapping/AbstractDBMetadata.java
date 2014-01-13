@@ -66,6 +66,13 @@ public abstract class AbstractDBMetadata
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
 	
+	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
+		this.source = source;	
+		DirectMappingEngine engine = new DirectMappingEngine(metadata, baseuri, model.getMappings(source.getSourceID()).size());
+		this.model =  engine.extractMappings(model, source);
+		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
+	}
+	
 	protected OBDAModel getOBDAModel()
 	{
 		return this.model;
