@@ -30,7 +30,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -50,6 +49,12 @@ public class JDBCConnectionManager {
 	public static final String JDBC_RESULTSETTYPE = "resultsettype";
 	public static final String JDBC_RESULTSETCONCUR = "resultsetconcur";
 
+	// These are used by getOtherMetadata to signal whether the
+	// unquoted table names should be put in lower (Postgres), upper (db2) or no change(mysql)
+	private static final int JDBC_ORIGINALCASE = 0;
+	private static final int JDBC_LOWERCASE = 1;
+	private static final int JDBC_UPPERCASE = 2;
+	
 	private static JDBCConnectionManager instance = null;
 
 	private HashMap<String, Object> properties = null;
@@ -235,9 +240,15 @@ public class JDBCConnectionManager {
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn, tables);
-		}  else {
-			// For other database engines
-			metadata = getOtherMetaData(md, conn, tables);
+		} else if (md.getDatabaseProductName().contains("DB2")) {
+			// If the database engine is IBM DB2
+			metadata = getOtherMetaData(md, conn, tables, JDBC_UPPERCASE);
+		}  else if (md.getDatabaseProductName().contains("PostgreSQL")) {
+			// Postgres treats unquoted identifiers as lowercase
+			metadata = getOtherMetaData(md, conn, tables, JDBC_LOWERCASE);
+		} else {
+			// For other database engines, i.e. mysql
+			metadata = getOtherMetaData(md, conn, tables, JDBC_ORIGINALCASE);
 		}
 		return metadata;
 	}
@@ -306,8 +317,9 @@ public class JDBCConnectionManager {
 	 * Future plan to retrive all tables when this list is empty?
 	 * 
 	 * @param tables 
+	 * @param lowerCaseId: Decides whether casing of unquoted object identifiers should be changed
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables, int caseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		
@@ -326,7 +338,8 @@ public class JDBCConnectionManager {
 			RelationJSQL table = table_iter.next();
 			ResultSet rsColumns = null;
 			Set<String> tableColumns = new HashSet<String>();
-			String tblName = table.getTableName();
+			String tblName = table.getTableName(); 
+			
 			/**
 			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
 			 * provided, otherwise without.
@@ -338,11 +351,26 @@ public class JDBCConnectionManager {
 			else
 				tableSchema = null;
 
+			switch(caseIds){
+			case JDBC_LOWERCASE:
+				if(!table.isTableQuoted())
+				tblName = tblName.toLowerCase();
+				if(tableSchema != null && !table.isSchemaQuoted())
+					tableSchema = tableSchema.toLowerCase();
+				break;
+			case JDBC_UPPERCASE: 
+				if(!table.isTableQuoted())
+				tblName = tblName.toUpperCase();
+				if(tableSchema != null && !table.isSchemaQuoted())
+					tableSchema = tableSchema.toUpperCase();
+				break;
+			}
+			
 			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
-			
+
 			try {
 				rsColumns = md.getColumns(null, tableSchema, tblName, null);
 				if (rsColumns == null) {
@@ -569,7 +597,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * Currently only retrieves metadata for the tables listed
 	 * 
-	 * Future plan to retrive all tables when this list is empty?
+	 * Future plan to retrieve all tables when this list is empty?
 	 * 
 	 * @param tables 
 	 */
@@ -577,7 +605,7 @@ public class JDBCConnectionManager {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;
-				
+		
 		try {
 			/* Obtain the statement object for query execution */
 			stmt = conn.createStatement();
@@ -588,11 +616,15 @@ public class JDBCConnectionManager {
 			if (resultSet.next()) {
 				loggedUser = resultSet.getString("user");
 			}
-			/**
-			 *  The sql to extract table names is now removed, since we instead use the
-			 *  table names from the source sql of the mappings, given as the parameter tables
-			 */
+			resultSet.close();
+			resultSet = null;
+
 			
+			/**
+			 * The tables contains all tables which occur in the sql source queries
+			 * Note that different spellings (casing, quotation marks, optional schema prefix) 
+			 * may lead to the same table occurring several times 
+			 */
 			Iterator<RelationJSQL> table_iter = tables.iterator();
 			/* Obtain the column information for each relational object */
 			while (table_iter.hasNext()) {
@@ -602,6 +634,8 @@ public class JDBCConnectionManager {
 //					String tblName = resultSet.getString("object_name");
 //					tableOwner = resultSet.getString("owner_name");
 					String tblName = table.getTableName();
+					if(!table.isTableQuoted())
+						tblName = tblName.toUpperCase();
 					/**
 					 * givenTableName is exactly the name the user provided, including schema prefix if that was
 					 * provided, otherwise without.
@@ -613,10 +647,14 @@ public class JDBCConnectionManager {
 					 * also have worked in the latter case.
 					 */
 					String tableOwner;
-					if( table.getSchema()!=null)
+					if( table.getSchema()!=null){
 						tableOwner = table.getSchema();
+						if(!table.isSchemaQuoted())
+							tableOwner = tableOwner.toUpperCase();
+					}
 					else
-						tableOwner = loggedUser;
+						tableOwner = loggedUser.toUpperCase();
+						
 					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
@@ -677,7 +715,7 @@ public class JDBCConnectionManager {
 		return pk;
 	}
 	
-	/* Retrives the foreign key(s) from a table */
+	/* Retrieves the foreign key(s) from a table */
 	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		Map<String, Reference> fk = new HashMap<String, Reference>();
 		ResultSet rsForeignKeys = null;

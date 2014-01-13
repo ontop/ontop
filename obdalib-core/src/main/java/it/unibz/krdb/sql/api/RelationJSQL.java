@@ -44,6 +44,14 @@ public class RelationJSQL implements Serializable, Cloneable  {
 		return table.getAlias();
 	}
 	
+	public boolean isTableQuoted(){
+		return table.isTableQuoted();
+	}
+	
+	public boolean isSchemaQuoted(){
+		return table.isSchemaQuoted();
+	}
+	
 	@Override
 	public String toString() {
 		return table.toString();
