@@ -1412,7 +1412,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					columnReferences.put((Variable) term, references);
 				}
 				String columnName = def.getAttributeName(index + 1);
-				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
+				String reference = sqladapter.sqlUnquotedQualifiedColumn(viewName, columnName);
 				references.add(reference);
 			}
 		}
@@ -1450,7 +1450,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String viewName = getView(atom);
 			DataDefinition def = dataDefinitions.get(atom);
 			String columnname = def.getAttributeName(column + 1);
-			return sqladapter.sqlQualifiedColumn(viewName, columnname);
+			return sqladapter.sqlUnquotedQualifiedColumn(viewName, columnname);
 		}
 	}
 }
