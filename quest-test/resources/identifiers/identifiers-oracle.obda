@@ -17,14 +17,6 @@ mappingId	Countries2
 target		:Country2-{COL} a :Country2 . 
 source		select country_name COL FROM HR.countries
 
-mappingId	WeirdTableName
-target		:Country3-{Name} a :Country3 . 
-source		select "Name" from "Test"
-
-mappingId	wEIRDtABLEnAME
-target		:Country4-{nAME} a :Country4 . 
-source		select "nAME" from "tEST"
-
 
 ]]
 
