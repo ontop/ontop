@@ -321,7 +321,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(StringValue stringValue) {
-		// TODO Auto-generated method stub
+		notSupported=true;
 		
 	}
 
