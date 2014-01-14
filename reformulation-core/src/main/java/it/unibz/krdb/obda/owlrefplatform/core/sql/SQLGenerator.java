@@ -1450,7 +1450,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String viewName = getView(atom);
 			DataDefinition def = dataDefinitions.get(atom);
 			String columnname = def.getAttributeName(column + 1);
-			return sqladapter.sqlUnquotedQualifiedColumn(viewName, columnname);
+			return sqladapter.sqlQuotedQualifiedColumn(viewName, columnname);
 		}
 	}
 }
