@@ -411,7 +411,6 @@ public class DatalogDependencyGraphGenerator {
 	
 	
 	public void setBodyIndex(Predicate pred, CQIE rule) {
-		
 		ruleIndexByBodyPredicate.put(pred, rule);		
 	}
 	/**
@@ -421,8 +420,11 @@ public class DatalogDependencyGraphGenerator {
 	 * @param rule
 	 */
 	public void removeOneRuleFromBodyIndex(Predicate pred, CQIE rule) {
-
-		ruleIndexByBodyPredicate.remove(pred, rule);
+		if (ruleIndexByBodyPredicate.containsKey(pred)){
+			ruleIndexByBodyPredicate.remove(pred, rule);
+		}else {
+			System.err.println("No Such Key as"+pred);
+		}
 	}
 	
 

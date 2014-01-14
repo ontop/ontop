@@ -61,6 +61,7 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 /**
@@ -366,7 +367,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
-			Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 			
 			for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
@@ -374,17 +374,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
 					ruleIndex = depGraph.getRuleIndex();
+					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 					Collection<CQIE> workingRules = ruleIndex.get(pred);
 					Predicate preFather =  depGraph.getFatherPredicate(pred);
 					Collection<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
 
 					
-					fatherWorkingRules= ruleIndexByBody.get(pred);
-					
+					for (CQIE fatherRule:  ruleIndexByBody.get(pred)) {
+						CQIE clonRule = fatherRule.clone();
+						fatherWorkingRules.add(clonRule);
+					}
 					
 					for (CQIE rule : fatherWorkingRules) {
-						// CQIE rule = workingList.get(queryIdx);
-
+						
+						int queryIdx=workingList.indexOf(rule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
 						List<Function> currentTerms = rule.getBody();
@@ -397,7 +400,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				
 
 						
-						int queryIdx=workingList.indexOf(rule);
+					
 						
 						if (result == null) {
 							/*
@@ -425,8 +428,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								workingList.remove(queryIdx);
 								workingList.removeAll(workingRules);
 								workingList.add(queryIdx, newquery);
+
+								//Here we update the index head arom -> rule
 								depGraph.removeOneRulePredicateFromRuleIndex(preFather,rule);
 								depGraph.setRuleInGraph(preFather, newquery);
+							
+								//Here we update the index body atom -> rule
+								for (Term termPredicate: tempList){
+									if (termPredicate instanceof Function){
+										Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
+										depGraph.removeOneRuleFromBodyIndex(mypred, rule);
+										depGraph.setBodyIndex(mypred, newquery);
+									}
+								}
+								
 							}
 						}
 					} // end for workingRules
@@ -462,9 +477,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					
 					
 					
+
 					Collection<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
 
-					fatherWorkingRules= ruleIndexByBody.get(pred);
+					
+					for (CQIE fatherRule:  ruleIndexByBody.get(pred)) {
+						CQIE clonRule = fatherRule.clone();
+						fatherWorkingRules.add(clonRule);
+					}
 					
 					
 					for (CQIE rule : fatherWorkingRules) {
@@ -510,8 +530,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						for (CQIE newquery : result) {
 							if (!workingList.contains(newquery)) {
 								workingList.add(queryIdx, newquery);
+								
+								
 								depGraph.removeOneRulePredicateFromRuleIndex(preFather,rule);
 								depGraph.setRuleInGraph(preFather, newquery);
+							
+							
+								//Here we update the index body atom -> rule
+								for (Term termPredicate: tempList){
+									if (termPredicate instanceof Function){
+										Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
+										depGraph.removeOneRuleFromBodyIndex(mypred, rule);
+										depGraph.setBodyIndex(mypred, newquery);
+									}
+								}
+							
 							}
 						}
 					} // end for fatherWorkingRules
@@ -680,11 +713,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					// I am doing bottom up here
 					rulesDefiningTheAtom = ruleIndex.get(pred);
 				}
-			} else {
+			} else  if (pred.equals(resolvPred)) {
 					// I am doing top-down
 					//I am using the mappings 
 					rulesDefiningTheAtom = mappings.get(pred);
 				
+			} else if (!pred.equals(resolvPred)){
+				return emptyList;
 			}
 			
 			
@@ -949,9 +984,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				 */
 
 				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
-				List<CQIE> result = resolveDataAtom(resolvPred, focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
+				List<CQIE> result = new LinkedList<CQIE>();
+				Predicate pred = focusLiteral.getFunctionSymbol();
+				 if (pred.equals(resolvPred)) {
+					 result = resolveDataAtom(resolvPred, focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
 						isLeftJoinSecondArgument,includeMappings);
-
+				 }
+				 
 				if (result == null)
 					return null;
 
