@@ -58,7 +58,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 	
 	@Override
-	public String sqlQualifiedColumn(String tablename, String columnname) {
+	public String sqlQuotedQualifiedColumn(String tablename, String columnname) {
 		return String.format("%s.`%s`", tablename, columnname);
 	}
 
