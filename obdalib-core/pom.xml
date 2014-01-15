@@ -24,6 +24,11 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
+		<!--  jsql parser -->	 
+		 <dependency>
+   			 <groupId>com.github.jsqlparser</groupId>
+    		<artifactId>jsqlparser</artifactId>
+		</dependency>
 		
 		<dependency>
 			<groupId>junit</groupId>

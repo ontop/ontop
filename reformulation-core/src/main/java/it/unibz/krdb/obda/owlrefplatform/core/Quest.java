@@ -227,7 +227,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/*
 	 * The following are caches to queries that Quest has seen in the past. They
-	 * are used by the statementts
+	 * are used by the statements
 	 */
 
 	Map<String, String> querycache = new ConcurrentHashMap<String, String>();
@@ -277,7 +277,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 *            . The TBox must not be null, even if its empty. At least, the
 	 *            TBox must define all the vocabulary of the system.
 	 * @param mappings
-	 *            . The mappings of the system. The vocabuarly of the mappings
+	 *            . The mappings of the system. The vocabulary of the mappings
 	 *            must be subset or equal to the vocabulary of the ontology.
 	 * @param config
 	 *            . The configuration parameters for quest. See

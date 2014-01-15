@@ -27,6 +27,13 @@ public class ViewDefinition extends DataDefinition {
 
 	private String statement;
 	
+	/*
+	 * TODO: Check if really needed
+	 */
+	public ViewDefinition() {
+		super();
+	}
+	
 	public ViewDefinition(String name) {
 		super(name);
 	}
