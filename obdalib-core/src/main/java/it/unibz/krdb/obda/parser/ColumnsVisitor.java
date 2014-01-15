@@ -81,7 +81,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 	 * @return
 	 */
 	
-	public ArrayList<String> getColumns(Select select) {
+	public List<String> getColumns(Select select) {
 		
 		columns = new ArrayList<String> ();
 		
@@ -141,11 +141,10 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 
 	/* visit also the Operation as UNION*/
 	@Override
-	public void visit(SetOperationList setOpList) { 
-		for (PlainSelect ps: setOpList.getPlainSelects())
-		{
-			ps.accept(this);
-		}
+	public void visit(SetOperationList setOpList) {
+		// NOTE: don't use for loop, as loop will result duplicated columns
+		//for (PlainSelect ps: setOpList.getPlainSelects())
+		setOpList.getPlainSelects().get(0).accept(this);
 		
 	}
 
@@ -183,10 +182,11 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-	
-	 selectExpr.getExpression().accept(this);
-	 
-		
+		// selectExpr.getExpression().accept(this);
+		/*
+		 * Here we found a column
+		 */
+		this.columns.add(selectExpr.getAlias());
 	}
 
 	@Override
