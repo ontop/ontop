@@ -88,9 +88,9 @@ public class MappingAnalyzer {
 				// the model.
 				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
 				
-				// This is the new way to get the parsed sql, since it is already parsed by the mapping parser
-				// Currently disabled, to prevent interference with the MetaMappingExpander
-				//QueryTree queryTree = axiom.getSourceQueryTree();
+				// Get the parsed sql, since it is already parsed by the mapping parser
+				// consider also MetaMappingExpander
+				//VisitedQuery queryParsed = ...;
 				
 				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
@@ -100,7 +100,7 @@ public class MappingAnalyzer {
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(queryParsed);
 
-				// We can get easily the table from the SQL query tree
+				// We can get easily the table from the SQL 
 				ArrayList<RelationJSQL> tableList = queryParsed.getTableSet();
 
 				// Construct the body from the source query
@@ -468,76 +468,58 @@ public class MappingAnalyzer {
 				// simple attribute name
 				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
 				
-				String COLUMNNAME = columnName.toUpperCase();
-				String columnname = columnName.toLowerCase();
+	lookupTable.add(columnName, index);
 				
-				lookupTable.add(columnName, index);
-				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(columnName), columnName);
-				}
+				String lowercaseColumn= columnName.toLowerCase();
 				
-				// If the column name in the select string is in lower case
-				if (aliasMap.containsKey(columnname)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(columnname), columnName);
-				}
 				
-				// If the column name in the select string is in upper case
-				if (aliasMap.containsKey(COLUMNNAME)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
-				}
+				if (aliasMap.containsKey(lowercaseColumn)) { // register the alias name, if any
+						lookupTable.add(aliasMap.get(lowercaseColumn), columnName);
+					}
+				
+				
 				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
 				lookupTable.add(tableColumnName, index);
-				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
-				}
+				
+								
+				// attribute name with table name prefix
+				String tablecolumnname = tableColumnName.toLowerCase();
+				if (aliasMap.containsKey(tablecolumnname))
+				{ // register the alias name, if any
+					lookupTable.add(aliasMap.get(tablecolumnname), tableColumnName);
+				}	
+				
 				
 				// attribute name with table given name prefix
 				String givenTableColumnName = tableGivenName + "." + columnName;
 				lookupTable.add(givenTableColumnName, tableColumnName);
-				if (aliasMap.containsKey(givenTableColumnName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(givenTableColumnName), tableColumnName);
+				
+				String giventablecolumnname= givenTableColumnName.toLowerCase();
+				if (aliasMap.containsKey(giventablecolumnname)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(giventablecolumnname), tableColumnName);
 				}
 				
-				// attribute name with table name prefix
-				String tablecolumnname = tableName + "." + columnname;
-				//lookupTable.add(tablecolumnname, tableColumnName);
-				if (aliasMap.containsKey(tablecolumnname)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(tablecolumnname), tableColumnName);
-				}
-
-
-				// attribute name with table name prefix
-				String tableCOLUMNNAME = tableName + "." + COLUMNNAME;
-				//lookupTable.add(tableColumnName, columnName);
-				if (aliasMap.containsKey(tableCOLUMNNAME)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(tableCOLUMNNAME), tableColumnName);
-				}
-
 				
 				// full qualified attribute name
 				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
 				lookupTable.add(qualifiedColumnName, tableColumnName);
-				if (aliasMap.containsKey(qualifiedColumnName)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(qualifiedColumnName), tableColumnName);
+				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
+				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(qualifiedcolumnname), tableColumnName);
 				}
 				
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias!=null) {
 					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
-					lookupTable.add(qualifiedColumnAlias, index);
-					if (aliasMap.containsKey(qualifiedColumnAlias)) {
-						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);
-					}
-					if (aliasMap.containsKey(qualifiedColumnAlias.toLowerCase())) {
-						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toLowerCase()), qualifiedColumnAlias);
-					}
-
-					if (aliasMap.containsKey(qualifiedColumnAlias.toUpperCase())) {
-						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toUpperCase()), qualifiedColumnAlias);
-					}
+					lookupTable.add(qualifiedColumnAlias, index);		
+						String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
+						if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
+							lookupTable.add(aliasMap.get(aliasColumnName), qualifiedColumnAlias);
+						}
+					
 				}
 			}
 			offset += size;
