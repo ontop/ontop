@@ -411,7 +411,9 @@ public class DatalogDependencyGraphGenerator {
 	
 	
 	public void setBodyIndex(Predicate pred, CQIE rule) {
-		ruleIndexByBodyPredicate.put(pred, rule);		
+		if (!ruleIndexByBodyPredicate.containsEntry(pred, rule)){
+			ruleIndexByBodyPredicate.put(pred, rule);		
+		}
 	}
 	/**
 	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code> from <code>ruleIndexByBodyPredicate</code>

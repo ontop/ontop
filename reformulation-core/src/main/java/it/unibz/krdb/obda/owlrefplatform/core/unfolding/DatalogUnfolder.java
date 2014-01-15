@@ -494,12 +494,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 						List<Function> currentTerms = rule.getBody();
 						List<Term> tempList = new LinkedList<Term>();
-						
+						boolean includeMappings=true;
+
 						for (Function a : currentTerms) {
 								tempList.add(a);
 						}
 						
-						boolean includeMappings=true;
+						
 						List<CQIE> result = computePartialEvaluation( pred, tempList, rule, rcount, termidx, false,includeMappings);
 				
 
@@ -540,13 +541,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								for (Term termPredicate: tempList){
 									if (termPredicate instanceof Function){
 										Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
-										depGraph.removeOneRuleFromBodyIndex(mypred, rule);
-										depGraph.setBodyIndex(mypred, newquery);
+										if (extensionalPredicates.contains(mypred)){
+											depGraph.removeOneRuleFromBodyIndex(mypred, rule);
+											depGraph.setBodyIndex(mypred, newquery);
+										}
 									}
 								}
 							
-							}
-						}
+							} //end workingList
+						} // end result
+						
+						
+						
+						
+						
 					} // end for fatherWorkingRules
 
 			}//end for extensionalPredicates	
@@ -1154,10 +1162,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 
 			List innerAtoms = getNestedList(termidx, partialEvalution);
-
+			
+		
 			innerAtoms.remove((int) termidx.peek());
+			
+			while (innerAtoms.contains(focusAtom)){
+				innerAtoms.remove(focusAtom);
+			}
+			
 			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
-
+			
 			Unifier.applyUnifier(partialEvalution, mgu, false);
 
 			/***
