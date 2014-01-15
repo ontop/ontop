@@ -468,7 +468,7 @@ public class MappingAnalyzer {
 				// simple attribute name
 				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
 				
-	lookupTable.add(columnName, index);
+				lookupTable.add(columnName, index);
 				
 				String lowercaseColumn= columnName.toLowerCase();
 				
