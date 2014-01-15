@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.parser.TablesNameVisitor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -164,7 +165,7 @@ public class VisitedQuery implements Serializable{
 	 * Get the list of columns 
 	 * @return
 	 */
-	public ArrayList<String> getColumns() {
+	public List<String> getColumns() {
 		ColumnsVisitor col = new ColumnsVisitor();
 		
 		return col.getColumns(select);
