@@ -76,17 +76,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
-	public String sqlUnquotedQualifiedColumn(String tablename, String columnname) {
-		// TODO: This should depend on whether the column name was quoted in the original sql query
-		return String.format("%s.%s", tablename, columnname);
-//		return String.format("%s.%s", tablename, columnname);
-	}
-
-	@Override
-	public String sqlQuotedQualifiedColumn(String tablename, String columnname) {
+	public String sqlQualifiedColumn(String tablename, String columnname) {
 		// TODO: This should depend on whether the column name was quoted in the original sql query
 		return String.format("%s.\"%s\"", tablename, columnname);
-//		return String.format("%s.%s", tablename, columnname);
 	}
 
 	
@@ -122,7 +114,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			if (needComma) {
 				sql += ", ";
 			}
-			sql += sqlQuotedQualifiedColumn(viewname, c.getVariable().getName());
+			sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
 			if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
 				sql += " DESC";
 			}
