@@ -10,6 +10,7 @@ package it.unibz.krdb.sql.api;
 
 import it.unibz.krdb.obda.parser.AggregationVisitor;
 import it.unibz.krdb.obda.parser.AliasMapVisitor;
+import it.unibz.krdb.obda.parser.ColumnsVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.SelectionVisitor;
@@ -157,6 +158,16 @@ public class VisitedQuery implements Serializable{
 		}
 		return projection;
 		
+	}
+	
+	/**
+	 * Get the list of columns 
+	 * @return
+	 */
+	public ArrayList<String> getColumns() {
+		ColumnsVisitor col = new ColumnsVisitor();
+		
+		return col.getColumns(select);
 	}
 	/**
 	 * Set the object construction for the SELECT clause, 
