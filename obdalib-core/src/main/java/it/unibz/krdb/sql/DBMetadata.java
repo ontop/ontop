@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
@@ -37,6 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.statement.Statement;
 /**
  * This class keeps the meta information from the database, also keeps the 
  * view definitions, table definitions, attributes of DB tables, etc.
@@ -381,6 +385,28 @@ public class DBMetadata implements Serializable {
 	 */
 	public ViewDefinition createViewDefinition(String name, String sqlString,
 			boolean isAnsPredicate) {
+		
+		VisitedQuery queryP = null;
+		List<String> columns;
+		try {
+			queryP = new VisitedQuery(sqlString);
+			columns = queryP.getColumns();
+		} catch (JSQLParserException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		Statement statement = queryP.getStatement();
+		
+		HashMap<String,String> aliasMap = queryP.getAliasMap();
+		
+		
+		 
+			 
+
+		
+		
 		ViewDefinition vd = new ViewDefinition(name);
 		vd.setSQL(sqlString);
 		int pos = 1;
