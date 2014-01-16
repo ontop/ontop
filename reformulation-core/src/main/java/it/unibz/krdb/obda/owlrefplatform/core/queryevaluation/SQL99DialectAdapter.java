@@ -131,7 +131,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 																// enclosing
 																// quotes

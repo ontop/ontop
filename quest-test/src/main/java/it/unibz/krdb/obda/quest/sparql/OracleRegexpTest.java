@@ -154,7 +154,7 @@ public class OracleRegexpTest extends TestCase {
 	 * @throws Exception
 	 */
 	public void testRegexpLike() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country; :name ?x_name . FILTER regexp(?x_name 'N[a-o]r*(way|ge)')}";
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country; :name ?x_name . FILTER regex(?x_name, '[A-Z][a-z]*')}";
 		runTests(query);
 	}
 	
