@@ -392,25 +392,12 @@ public class DBMetadata implements Serializable {
 			queryP = new VisitedQuery(sqlString);
 			columns = queryP.getColumns();
 		} catch (JSQLParserException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 				
 		ViewDefinition vd = new ViewDefinition(name);
 		vd.setSQL(sqlString);
 		int pos = 1;
-//		List<Attribute> listOfAttributes = new LinkedList<Attribute>();
-//		if (isAnsPredicate) {
-//			listOfAttributes = collectAttributesFromAnsView(sqlString);
-//		} else {
-//			listOfAttributes = collectAttributesFromQuery(sqlString);
-//		}
-
-//		for (Attribute attr : listOfAttributes) {
-//			vd.setAttribute(pos, attr);
-//			pos++;
-//
-//		}
 		
 		for (String column: columns){
 			vd.setAttribute(pos, new Attribute(column));
@@ -420,169 +407,6 @@ public class DBMetadata implements Serializable {
 		return vd;
 	}
 
-	private List<Attribute> collectAttributesFromQuery(String sqlString) {
-		List<Attribute> attributeList = new LinkedList<Attribute>();
-		int start =  6; // the position of 'select' keyword 
-		int end = sqlString.toLowerCase().indexOf("from");	// find the position of 'from' keyword	
-		
-		if (end == -1) {
-			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM keyword");
-		}
-		// The projection string will contain the column names separated by commas.
-		//but it might have commas inside REPLACE statements, therefore we need to go
-		//trough the string extracting the columns
-		String projection = sqlString.substring(start, end).trim();
-		char[] listchar = projection.toCharArray();
-		List<String> columns = new LinkedList<String>(); //here we keep the column names
-		String tempattr = new String();
-		getColumnsFromString(listchar, columns, tempattr, false);
-		
-		
-		
-		/*
-		 * Now we have to check every column and see if it has a proper format:
-		 * table.name
-		 * name
-		 * "something" AS name
-		 */
-		Pattern pattern = Pattern.compile("^((\\w|_)+(\\.(\\w|_)+){0,2})");
-		Pattern aliasPattern = Pattern.compile("[as]\\s+(.*)", Pattern.CASE_INSENSITIVE);
-		
-		for (int i = 0; i < columns.size(); i++) {
-			String columnName = columns.get(i).trim();
-			
-			Matcher matcher = pattern.matcher(columnName);
-			boolean patternFound = matcher.matches();
-			if (!patternFound) {
-				
-				Matcher aliasMatch = aliasPattern.matcher(columnName);
-				if (aliasMatch.find()) { // has an alias
-					columnName = aliasMatch.group(1);  // make the alias name as the column name
-				} else {
-					throw new RuntimeException("Cannot parse the expression: " + columnName + " in SELECT statment. AS statement is probably required");
-				}
-			}			
-			Attribute atname = new Attribute(columnName);
-			attributeList.add(atname);
-		}
-		return attributeList;
-	}
 
-	
-	
-	/**
-	 * This method takes the string generated from translated a Datalog rule defining an ans predicate into SQL.
-	 * and extract the variables in the SELECT statement. 
-	 * Observe that for each variable in ans the SQL translator generates 3 in SQL:
-	 * <ul>
-	 * <li> Quest Type</li>
-	 * <li> Quest Language</li>
-	 * <li> Value</li>
-	 * </ul>
-	 * In this last one is where the actual value from the database will be. Therefore it is the only one we keep.
-	 * @param sqlString
-	 * @return
-	 */
-	private List<Attribute> collectAttributesFromAnsView(String sqlString) {
-		List<Attribute> attributeList = new LinkedList<Attribute>();
-		System.err.println("DBMetadata: Optimize this collectAttribute");
-		int start =  sqlString.toLowerCase().indexOf("select") + 6; // the position of 'select' keyword 
-		int end = sqlString.toLowerCase().indexOf("from");	// find the position of 'from' keyword	
-		
-		if (end == -1) {
-			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM keyword");
-		}
-		// The projection string will contain the column names separated by commas.
-		//but it might have commas inside REPLACE statements, therefore we need to go
-		//trough the string extracting the columns
-		String projection = sqlString.substring(start, end).trim();
-		char[] listchar = projection.toCharArray();
-		List<String> columns = new LinkedList<String>(); //here we keep the column names
-		String tempattr = new String();
-		
-		getColumnsFromString(listchar, columns, tempattr, true);
-		
-		
-		
-		/*
-		 * Now we have to check every column and see if it has a proper format:
-		 * table.name
-		 * name
-		 * "something" AS name
-		 */
-		Pattern aliasPattern = Pattern.compile(".+[as]\\s+(.*)", Pattern.CASE_INSENSITIVE);
-		
-		for (int i = 0; i < columns.size(); i++) {
-			String columnName = columns.get(i).trim();
-			Matcher aliasMatch = aliasPattern.matcher(columnName);
-			if (aliasMatch.find()) { // has an alias
-					columnName = aliasMatch.group(1);  // make the alias name as the column name
-					columnName = columnName.substring(1, columnName.length()-1);
-				} else {
-					throw new RuntimeException("Cannot parse the expression: " + columnName + " in SELECT statment. AS statement is probably required");
-				}
-			Attribute atname = new Attribute(columnName);
-			attributeList.add(atname);
-		}			
-		return attributeList;
-	}
-
-	/*
-	 * This method is a helper method for {@link #collectAttributesFromAnsView} and
-	 * {@link #collectAttributesFromQuery}.
-	 * It takes the string between the 'select' and 'from' statement of the SQL
-	 * and return a clean list of string representing each column.
-	 * 
-	 */
-	private void getColumnsFromString(char[] listchar, List<String> columns,
-			String tempattr, boolean isAns) {
-		boolean ignore = false;
-		boolean isCast = false;
-		int bracketbalance =0;
-		int columnIndex = 0;
-
-		for (int i = 0, n = listchar.length; i < n; i++){
-			char symbol=listchar[i];
-			if (symbol!=','&& ( symbol!='(' || isCast ) && !ignore){
-				tempattr= tempattr + symbol;
-			} else if (symbol=='(' && ignore == false&& isCast == false) {
-				boolean castString = tempattr.trim().equals("CAST");
-				if (!castString){
-					ignore= true;
-					bracketbalance =1; 
-				} else {
-					isCast = true;
-				}
-				tempattr= tempattr + symbol;
-			} else if (ignore == true && bracketbalance>0) {
-				tempattr= tempattr + symbol;
-				if (symbol=='('){
-					bracketbalance++;
-				}
-				if (symbol==')'){
-					bracketbalance--;
-				}
-				
-			} else if  (ignore == true && bracketbalance==0){
-				ignore =  false;
-			} else if (symbol==',' && bracketbalance==0 && ignore == false){
-				columnIndex ++;
-				if (isAns && columnIndex % 3 == 0){
-					columns.add(removeQuotes(tempattr));
-				} else if (! isAns){
-					columns.add(removeQuotes(tempattr));
-				}
-				isCast = false;
-				tempattr = "";
-			} 
-			
-		}
-		columns.add(removeQuotes(tempattr));
-
-	}
-	
-	private String removeQuotes(String str) {
-		return str.replace("\"", "");
-	}
 
 }

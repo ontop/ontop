@@ -398,7 +398,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Here we normalize so that the form of the CQ is as close to the
 			 * form of a normal SQL algebra as possible, 
 			 */
-			String querystr = generateQueryFromSingleRule(cq,signature, null, true);
+			String querystr = generateQueryFromSingleRule(cq,signature, true);
 			
 			queryStrings.add(querystr);
 		}
@@ -446,7 +446,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 * @throws OBDAException
 	 */
-	public String generateQueryFromSingleRule(CQIE cq,	List<String> signature, Map<Variable, Term> mgu, boolean isAns1) throws OBDAException 
+	public String generateQueryFromSingleRule(CQIE cq,	List<String> signature, boolean isAns1) throws OBDAException 
 	{
 		//for (CQIE cq : query.getRules()) {
 
@@ -463,7 +463,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		String FROM = getFROM(cq.getBody(), index);
 		String WHERE = getWHERE(cq.getBody(), index);
-		String SELECT = getSelectClause(signature, cq, index, mgu, innerdistincts, isAns1);
+		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1);
 
 		String querystr = SELECT + FROM + WHERE;
 		return querystr ;
@@ -580,12 +580,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 			Function cqHead = rule.getHead();
 			
-			Map<Variable, Term> mgu = Unifier.getMGU(cqHead, fatherAtom);
-			
 			
 			List<String> varContainer = QueryUtils.getVariableNamesInAtom(cqHead);
 			/* Creates the SQL for the View */
-			String sqlQuery = generateQueryFromSingleRule(rule, varContainer, mgu, isAns1);
+			String sqlQuery = generateQueryFromSingleRule(rule, varContainer, isAns1);
 			
 			if (unionView.equals("")){
 				unionView = "(" + sqlQuery + ")";
@@ -1054,14 +1052,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	/**
 	 * produces the select clause of the sql query for the given CQIE
-	 * @param mgu 
-	 * 
 	 * @param q
 	 *            the query
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-			QueryAliasIndex index, Map<Variable, Term> mgu, boolean distinct, boolean isAns1) throws OBDAException {
+			QueryAliasIndex index, boolean distinct, boolean isAns1) throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
@@ -1085,12 +1081,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 			
-			//String varName = getVarName(inverse, ht);
 			
 			String varName = "v" + hpos;
-			
-			//String varName = signature.get(hpos);
-			//String varName = ht.toString();
 			
 			/*
 			 * For simplicity, we assume there is only one variable in the term ht.
@@ -1834,24 +1826,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 					 */
 					String columnName = def.getAttributeName(index + 1);
 					
-					//TODO: need more elegent way
 					columnName = trim(columnName);
 					
 					String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
 					columnReferences.put((Variable)term, reference);
 				}
 				
-//				if (!(term instanceof Variable)) {
-//					continue;
-//				}
-//				LinkedHashSet<String> references = columnReferences.get(term);
-//				if (references == null) {
-//					references = new LinkedHashSet<String>();
-//					columnReferences.put((Variable) term, references);
-//				}
-//				String columnName = def.getAttributeName(index + 1);
-//				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
-//				references.add(reference);
+
 			}
 		}
 
