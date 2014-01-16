@@ -694,7 +694,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				} else {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
-					MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
 					// This call should be used if the ParsedMappings 
 					// are reused for the parsing below

@@ -25,6 +25,8 @@ import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.VisitedQuery;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -41,6 +43,8 @@ import org.slf4j.LoggerFactory;
 public class SQLQueryTranslator {
 
 	private DBMetadata dbMetaData;
+	private Connection connection;
+	private String database;
 	
 	//This field will contain all the target SQL from the 
 	//mappings that could not be parsed by the parser.
@@ -51,14 +55,28 @@ public class SQLQueryTranslator {
 	private static Logger log = LoggerFactory.getLogger(SQLQueryTranslator.class);
 	
 	public SQLQueryTranslator(DBMetadata dbMetaData) {
+		connection=null;
+		database=dbMetaData.getDriverName();
 		this.dbMetaData = dbMetaData;
 		id_counter = 0;		
 	}
 	
 	/*
 	 * This constructor is used when the tables names and schemas are taken from the mappings
+	 * in MappingParser
 	 */
+	
+	public SQLQueryTranslator(Connection conn) throws SQLException {
+		connection=conn;
+		database=connection.getMetaData().getDriverName();
+		this.viewDefinitions = new ArrayList<ViewDefinition>();
+		this.dbMetaData = null;
+		id_counter = 0;		
+	}
+	
 	public SQLQueryTranslator() {
+		database=null;
+		connection=null;
 		this.viewDefinitions = new ArrayList<ViewDefinition>();
 		this.dbMetaData = null;
 		id_counter = 0;		
@@ -129,76 +147,20 @@ public class SQLQueryTranslator {
 		
 		String viewName = String.format("view_%s", id_counter++);
 		
-		ViewDefinition vd = createViewDefintion(viewName, query);
+		if(database!=null){
+		ViewDefinition vd = createViewDefinition(viewName, query);
 		
 		if(dbMetaData != null)
 			dbMetaData.add(vd);
 		else
 			viewDefinitions.add(vd);
+		}
 		
 		VisitedQuery vt = createViewParsed(viewName, query);
 		return vt;
 	}
 	
 		
-	private ViewDefinition createViewDefintion(String viewName, String query) {
-		int start = 6; // the keyword 'select'
-		int end = query.toLowerCase().indexOf("from");		
-		
-		if (end == -1) {
-			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
-		}
-		String projection = query.substring(start, end).trim();
-		String[] columns = projection.split(",");
-		
-		ViewDefinition viewDefinition = new ViewDefinition();
-		viewDefinition.setName(viewName);
-		viewDefinition.copy(query);		
-		for (int i = 0; i < columns.length; i++) {
-			String columnName = columns[i].trim();
-			
-			/*
-			 * Remove any identifier quotes
-			 * Example:
-			 * 		INPUT: "table"."column"
-			 * 		OUTPUT: table.column
-			 */
-			if (columnName.contains("\"")) {
-				columnName = columnName.replaceAll("\"", "");
-			} else if (columnName.contains("`")) {
-				columnName = columnName.replaceAll("`", "");
-			} else if (columnName.contains("[") && columnName.contains("]")) {
-				columnName = columnName.replaceAll("[", "").replaceAll("]", "");
-			}
-
-			/*
-			 * Get only the short name if the column name uses qualified name.
-			 * Example:
-			 * 		INPUT: table.column
-			 * 		OUTPUT: column
-			 */
-			if (columnName.contains(".")) {
-				columnName = columnName.substring(columnName.lastIndexOf(".")+1, columnName.length()); // get only the name
-			}
-			
-			/*
-			 * Take the alias name if the column name has it.
-			 */
-			String[] aliasSplitters = new String[3];
-			aliasSplitters[0] = " as ";
-			aliasSplitters[1] = " AS ";
-			aliasSplitters[2] = " ";
-			for(String aliasSplitter : aliasSplitters){
-				if (columnName.contains(aliasSplitter)) { // has an alias
-					columnName = columnName.split(aliasSplitter)[1].trim();
-					break;
-				}
-			}
-			
-			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
-		}
-		return viewDefinition;
-	}
 	
 	/*
 	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROMitem expression
@@ -236,5 +198,84 @@ public class SQLQueryTranslator {
 		return queryParsed;
 	}
 	
+	
+	private ViewDefinition createViewDefinition(String viewName, String query) {
+		int start = 6; // the keyword 'select'
+		int end = query.toLowerCase().indexOf("from");	
+		
+		boolean uppercase=false;
+		boolean quoted = false;
+		if (end == -1) {
+			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
+		}
+			
+		if (database.contains("Oracle") || database.contains("DB2") ) {
+			// If the database engine is Oracle or DB2 unquoted columns are changed in uppercase
+			uppercase=true;
+		}
+		
+		String projection = query.substring(start, end).trim();
+		String[] columns = projection.split(",");
+		
+		ViewDefinition viewDefinition = new ViewDefinition();
+		viewDefinition.setName(viewName);
+		viewDefinition.copy(query);		
+		for (int i = 0; i < columns.length; i++) {
+			String columnName = columns[i].trim();
+			
+			/*
+			 * Remove any identifier quotes
+			 * Example:
+			 * 		INPUT: "table"."column"
+			 * 		OUTPUT: table.column
+			 */
+			if (columnName.contains("\"")) {
+				columnName = columnName.replaceAll("\"", "");
+				quoted=true;
+			} else if (columnName.contains("`")) {
+				columnName = columnName.replaceAll("`", "");
+				quoted=true;
+			} else if (columnName.contains("[") && columnName.contains("]")) {
+				columnName = columnName.replaceAll("[", "").replaceAll("]", "");
+				quoted=true;
+			}
+			
+
+			/*
+			 * Get only the short name if the column name uses qualified name.
+			 * Example:
+			 * 		INPUT: table.column
+			 * 		OUTPUT: column
+			 */
+			if (columnName.contains(".")) {
+				columnName = columnName.substring(columnName.lastIndexOf(".")+1, columnName.length()); // get only the name
+			}
+			
+			/*
+			 * Take the alias name if the column name has it.
+			 */
+			String[] aliasSplitters = new String[3];
+			aliasSplitters[0] = " as ";
+			aliasSplitters[1] = " AS ";
+			aliasSplitters[2] = " ";
+			for(String aliasSplitter : aliasSplitters){
+				if (columnName.contains(aliasSplitter)) { // has an alias
+					columnName = columnName.split(aliasSplitter)[1].trim();
+					quoted=false; // if an alias is present we do not need to change the case of the column because it wan't be used
+					break;
+				}
+			}
+			if(!quoted){
+				if(uppercase)
+					columnName=columnName.toUpperCase();
+				else
+					columnName=columnName.toLowerCase();
+			}
+		
+			
+			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
+		}
+		return viewDefinition;
+	}
 
 }

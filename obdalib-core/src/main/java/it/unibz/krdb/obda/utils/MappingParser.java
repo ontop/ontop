@@ -27,6 +27,8 @@ import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.VisitedQuery;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -45,9 +47,9 @@ public class MappingParser {
 	private ArrayList<ParsedMapping> parsedMappings;
 	private ArrayList<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public MappingParser(ArrayList<OBDAMappingAxiom> mappingList){
+	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingList) throws SQLException{
 		this.mappingList = mappingList;
-		this.translator = new SQLQueryTranslator();
+		this.translator = new SQLQueryTranslator(conn);
 		this.parsedMappings = this.parseMappings();
 	}
 	
