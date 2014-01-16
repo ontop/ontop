@@ -56,7 +56,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 																// enclosing
 																// quotes
-		String sql = " REGEXP_LIKE " + "('" + pattern; 
+		String sql = " REGEXP_LIKE " + "( " + columnname + " , '" + pattern; 
 		String flags = "";
 		if(caseinSensitive)
 			flags += "i";
@@ -66,7 +66,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 			flags += "n";
 		
 		//if(flags.length() > 0)
-		sql += "', '" + flags;
-		return sql + "')";
+		sql += "' , '" + flags;
+		return sql + "' )";
 	}
 }
