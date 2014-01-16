@@ -387,7 +387,7 @@ public class DBMetadata implements Serializable {
 			boolean isAnsPredicate) {
 		
 		VisitedQuery queryP = null;
-		List<String> columns;
+		List<String> columns = null;
 		try {
 			queryP = new VisitedQuery(sqlString);
 			columns = queryP.getColumns();
@@ -395,33 +395,28 @@ public class DBMetadata implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		Statement statement = queryP.getStatement();
-		
-		HashMap<String,String> aliasMap = queryP.getAliasMap();
-		
-		
-		 
-			 
-
-		
-		
+				
 		ViewDefinition vd = new ViewDefinition(name);
 		vd.setSQL(sqlString);
 		int pos = 1;
-		List<Attribute> listOfAttributes = new LinkedList<Attribute>();
-		if (isAnsPredicate) {
-			listOfAttributes = collectAttributesFromAnsView(sqlString);
-		} else {
-			listOfAttributes = collectAttributesFromQuery(sqlString);
-		}
+//		List<Attribute> listOfAttributes = new LinkedList<Attribute>();
+//		if (isAnsPredicate) {
+//			listOfAttributes = collectAttributesFromAnsView(sqlString);
+//		} else {
+//			listOfAttributes = collectAttributesFromQuery(sqlString);
+//		}
 
-		for (Attribute attr : listOfAttributes) {
-			vd.setAttribute(pos, attr);
+//		for (Attribute attr : listOfAttributes) {
+//			vd.setAttribute(pos, attr);
+//			pos++;
+//
+//		}
+		
+		for (String column: columns){
+			vd.setAttribute(pos, new Attribute(column));
 			pos++;
-
 		}
+		
 		return vd;
 	}
 

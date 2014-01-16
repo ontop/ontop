@@ -106,6 +106,45 @@ public class QueryUtils {
 		return results;
 	}
 
+	
+	/**
+	 * Finds one atom with variable <code>var</code> in the body of the
+	 * <code>rule</code>
+	 * 
+	 * @param rule
+	 * @param var
+	 * @return
+	 */
+	public static Function findOneAtomInRuleBody(CQIE rule,
+			Variable var) {
+
+		Queue<Term> queue = new LinkedList<Term>(rule.getBody());
+		
+		while (!queue.isEmpty()) {
+			Term qHead = queue.poll();
+			if (qHead instanceof Function) {
+				Function func = (Function) qHead;
+
+				if (func.isBooleanFunction() || func.isArithmeticFunction()
+						|| func.isDataTypeFunction()
+						|| func.isAlgebraFunction()) {
+					queue.addAll(func.getTerms());
+				} else if (func.isDataFunction()) {
+					
+					if (func.getTerms().contains(var)){
+						return func;
+					}
+					
+					
+				}
+			} else /* !(queueHead instanceof Function) */{
+				// NO-OP
+			}
+		}
+
+		return null;
+	}
+	
 	/**
 	 * 
 	 * collects the variable names in the input <code>atom</code>
