@@ -42,8 +42,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -71,19 +69,12 @@ import java.util.Set;
 import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import static com.google.common.base.Preconditions.checkState;
-
-
-//import com.hp.hpl.jena.rdf.model.Literal;
 
 public class SQLGenerator implements SQLQueryGenerator {
 
@@ -234,6 +225,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 	
+	/**
+	 * 
+	 * 
+	 * Generates the map of predicates to their canonical atoms.
+	 * 
+	 * In the canonical atoms, all the variables are in a function of URI template or datatype
+	 * 
+	 * For instance : ans5 -> ans5(rdf:Literal(name), URI(":{}", id), xsd:integer(salary))
+	 *
+	 * 
+	 * @param queryProgram
+	 */
 	private void generatePredicateCanonicalAtomsMap(DatalogProgram queryProgram) {
 		
 		predicateCanonicalAtoms = Maps.newHashMap();
@@ -346,7 +349,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param ruleIndex
 	 * 		The index that maps intentional predicates to its rules
 	 * @param ruleIndexByBodyPredicate 
-	 * @param predicatesBottomUp
+	 * @param predicatesInBottomUp
 	 * 		The topologically ordered predicates in <code> query </query>. {@link #DatalogDependencyGraphGenerator}
 	 * @param extensionalPredicates
 	 * 		The predicates that are not defined by any rule in <code> query </query>
@@ -355,10 +358,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
 			String indent,  Multimap<Predicate, CQIE> ruleIndex, Multimap<Predicate, CQIE> ruleIndexByBodyPredicate, 
-			List<Predicate> predicatesBottomUp, List<Predicate> extensionalPredicates) throws OBDAException {
+			List<Predicate> predicatesInBottomUp, List<Predicate> extensionalPredicates) throws OBDAException {
 
 
-		int listSize = predicatesBottomUp.size();
+		int numPreds = predicatesInBottomUp.size();
 		int i = 0;
 
 		/**
@@ -366,17 +369,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 
 		
-		//create a view for every ans prodicate in the Datalog input program. 
-		while( i<listSize -1 ){
-			Predicate pred = predicatesBottomUp.get(i);
-			if (extensionalPredicates.contains(pred)){
+		// create a view for every ans prodicate in the Datalog input program.
+		while (i < numPreds - 1) {
+			Predicate pred = predicatesInBottomUp.get(i);
+			if (extensionalPredicates.contains(pred)) {
 				/*
 				 * extensional predicates are defined by DBs
 				 */
 			} else {
-				createViewFrom(pred,metadata, ruleIndex, ruleIndexByBodyPredicate, query, signature, false);
+				boolean isAns1 = false;
+				createViewFrom(pred, metadata, ruleIndex,
+						ruleIndexByBodyPredicate, query, signature, isAns1);
 			}
-			i++ ;
+			i++;
 		}	
 
 		
@@ -385,11 +390,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		
 		//This should be ans1, and the rules defining it.
-		Predicate predAns1 = predicatesBottomUp.get(i);
+		Predicate predAns1 = predicatesInBottomUp.get(i);
 		Collection<CQIE> ansrules = ruleIndex.get(predAns1);
 
 		
-		List<String> queryStrings = new LinkedList<String>();
+		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules.size());
 		/* Main loop, constructing the SPJ query for each CQ */
 		
 		for (CQIE cq : ansrules) {
@@ -398,7 +403,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Here we normalize so that the form of the CQ is as close to the
 			 * form of a normal SQL algebra as possible, 
 			 */
-			String querystr = generateQueryFromSingleRule(cq,signature, true);
+			boolean isAns1 = true;
+			String querystr = generateQueryFromSingleRule(cq,signature, isAns1);
 			
 			queryStrings.add(querystr);
 		}
@@ -550,36 +556,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Collection<CQIE> ruleList = ruleIndex.get(pred);
 		
-		
-		Collection<CQIE> fatherRules = ruleIndexByBodyPredicate.get(pred);
-		
-		
-		Preconditions.checkElementIndex(0, fatherRules.size(),	"no father rules found");
-		
-		/**
-		 * Use the first one for the signature
-		 */
-		CQIE fatherRule = fatherRules.iterator().next();
-		
-		Collection<Function> fatherAtoms = QueryUtils.findAtomsInRuleBody(fatherRule, pred);
-		
-		/*
-		 *  We assume that the atom only occur once
-		 */
-		Preconditions.checkState(fatherAtoms.size() == 1);
-		
-		Function fatherAtom = fatherAtoms.iterator().next();
-		
-		
-		
 		String unionView = "";
-		
 
 		for (CQIE rule : ruleList) {
-		
-			
 			Function cqHead = rule.getHead();
-			
 			
 			List<String> varContainer = QueryUtils.getVariableNamesInAtom(cqHead);
 			/* Creates the SQL for the View */
@@ -861,12 +841,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getFROM(List<Function> atoms, QueryAliasIndex index) {
-//		List<Function> atoms = new LinkedList<Function>();
-//		for (Function atom : query.getBody()) {
-//			atoms.add((Function) atom);
-//		}
-//		String tableDefinitions = getTableDefinitions(atoms, index, true, false, "");
-		//List<Function> atoms = query.getBody();
 		String tableDefinitions = getTableDefinitions(atoms, index, true, false, "");
 		return "\n FROM \n" + tableDefinitions;
 	}
@@ -1034,17 +1008,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
 		}
 		// Return varchar for unknown
-		return 12;
+		return Types.VARCHAR;
 	}
 
 	private String getWHERE(List<Function> atoms, QueryAliasIndex index) {
-//		List<Function> atoms = new LinkedList<Function>();
-//		for (Function atom : query.getBody()) {
-//			atoms.add((Function) atom);
-//		}
-//		List<Function> atoms = query.getBody();
 		String conditions = getConditionsString(atoms, index, false, "");
-		if (conditions.length() == 0) {
+		if (conditions.isEmpty()) {
 			return "";
 		}
 		return "\nWHERE \n" + conditions;
@@ -1081,7 +1050,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 			
-			
+			/*
+			 * When isAns1==1, we may need the use the <code>signature</code> for the varName 
+			 */
 			String varName = "v" + hpos;
 			
 			/*
@@ -1098,7 +1069,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				
 				if(ht instanceof Variable){
-				
+					/* 
+					 * In case of Variable, we wrap the variable with a proper URI or datatype
+					 */
 					Function atom = QueryUtils.findOneAtomInRuleBody(query, (Variable) ht);
 					int j = atom.getTerms().indexOf(ht);
 					Term canonicalAtom = predicateCanonicalAtoms.get(atom.getFunctionSymbol());
@@ -1180,10 +1153,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
 
 				if(isAns1){
-				
-				/***
-				 * New template based URI building functions
-				 */
+					/*
+					 * New template based URI building functions
+					 */
 					mainColumn = getSQLStringForTemplateFunction(ov, index);
 				} else {
 					/*
@@ -1193,13 +1165,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					
 				}
 
-				
-
 			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				/***
+				/*
 				 * New template based BNODE building functions
 				 */
-
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			} else {
@@ -1260,12 +1229,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
-	//private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
 	private String getTypeColumnForSELECT(Term ht, String varName) {
 
 		String typeStr = "%s AS \"%sQuestType\"";
-
-		//String varName = signature.get(hpos);
 		
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;

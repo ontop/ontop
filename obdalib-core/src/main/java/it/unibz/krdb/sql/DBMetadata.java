@@ -36,11 +36,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.statement.Statement;
 /**
  * This class keeps the meta information from the database, also keeps the 
  * view definitions, table definitions, attributes of DB tables, etc.
@@ -128,7 +125,7 @@ public class DBMetadata implements Serializable {
 
 	/**
 	 * Retrieves the data definition object based on its name. The
-	 * <name>name</name> can be either a table name or a view name.
+	 * <code>name</code> can be either a table name or a view name.
 	 * 
 	 * @param name
 	 *            The string name.
@@ -385,25 +382,25 @@ public class DBMetadata implements Serializable {
 	 */
 	public ViewDefinition createViewDefinition(String name, String sqlString,
 			boolean isAnsPredicate) {
-		
-		VisitedQuery queryP = null;
+
+		VisitedQuery visitedQuery = null;
 		List<String> columns = null;
 		try {
-			queryP = new VisitedQuery(sqlString);
-			columns = queryP.getColumns();
+			visitedQuery = new VisitedQuery(sqlString);
+			columns = visitedQuery.getColumns();
 		} catch (JSQLParserException e) {
 			e.printStackTrace();
 		}
-				
+
 		ViewDefinition vd = new ViewDefinition(name);
 		vd.setSQL(sqlString);
 		int pos = 1;
-		
-		for (String column: columns){
+
+		for (String column : columns) {
 			vd.setAttribute(pos, new Attribute(column));
 			pos++;
 		}
-		
+
 		return vd;
 	}
 
