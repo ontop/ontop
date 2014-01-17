@@ -41,10 +41,8 @@ public interface SQLDialectAdapter {
 	/*
 	 * Table/Column name functions
 	 */
-
-	public String sqlQuotedQualifiedColumn(String tablename, String columnname);
 	
-	public String sqlUnquotedQualifiedColumn(String tablename, String columnname);
+	public String sqlQualifiedColumn(String tablename, String columnname);
 
 	public String sqlTableName(String tablename, String viewname);
 
