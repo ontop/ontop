@@ -113,29 +113,14 @@ public class OracleRegexpTest extends TestCase {
 	
 
 	
-	private void runTests(String query) throws Exception {
+	private String runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		StringBuilder bf = new StringBuilder(query);
+		String retval;
 		try {
-			
-
 			QuestOWLResultSet rs = st.executeTuple(query);
-			/*
-			boolean nextRow = rs.nextRow();
-			
-			*/
 			assertTrue(rs.nextRow());
-//			while (rs.nextRow()){
-//				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-//				System.out.println(ind1.toString());
-//			}
-		
-/*
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
-	*/		
-
+			OWLIndividual ind1 =	rs.getOWLIndividual("country")	 ;
+			retval = ind1.toString();
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -147,6 +132,7 @@ public class OracleRegexpTest extends TestCase {
 			conn.close();
 			reasoner.dispose();
 		}
+		return retval;
 	}
 
 	/**
@@ -154,10 +140,19 @@ public class OracleRegexpTest extends TestCase {
 	 * @throws Exception
 	 */
 	public void testRegexpLike() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country; :name ?x_name . FILTER regex(?x_name, '[A-Z][a-z]*')}";
-		runTests(query);
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, 'E[a-z]*t')}";
+		String countryName = runTests(query);
+		assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
 	}
 	
-	
+	/**
+	 * Tests the use of case-insensitive SPARQL like
+	 * @throws Exception
+	 */
+	public void testRegexpInsenstiveLike() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, 'e[g|P|y]*T', 'i')}";
+		String countryName = runTests(query);
+		assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
+	}	
 		
 }
