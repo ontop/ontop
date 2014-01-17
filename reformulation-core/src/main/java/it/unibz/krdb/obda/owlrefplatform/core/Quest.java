@@ -744,7 +744,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
-			unfoldingProgram = analyzer.constructDatalogProgram();
+ 			unfoldingProgram = analyzer.constructDatalogProgram();
 
 			/***
 			 * T-Mappings and Fact mappings

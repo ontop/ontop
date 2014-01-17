@@ -28,6 +28,9 @@ import it.unibz.krdb.sql.api.VisitedQuery;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
@@ -209,13 +212,15 @@ public class SQLQueryTranslator {
 			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
 		}
 			
-		if (database.contains("Oracle") || database.contains("DB2") ) {
-			// If the database engine is Oracle or DB2 unquoted columns are changed in uppercase
+		if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2")) {
+			// If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
 			uppercase=true;
 		}
 		
 		String projection = query.substring(start, end).trim();
-		String[] columns = projection.split(",");
+		
+		//split where comma is present but not inside quotes
+		String[] columns = projection.split(",+(?![^\\(]*\\))");  
 		
 		ViewDefinition viewDefinition = new ViewDefinition();
 		viewDefinition.setName(viewName);
@@ -223,6 +228,22 @@ public class SQLQueryTranslator {
 		for (int i = 0; i < columns.length; i++) {
 			String columnName = columns[i].trim();
 			
+			
+			/*
+			 * Take the alias name if the column name has it.
+			 */
+			String[] aliasSplitters = new String[2];
+			aliasSplitters[0] = " as ";
+			aliasSplitters[1] = " AS ";
+			
+			for(String aliasSplitter : aliasSplitters){
+				if (columnName.contains(aliasSplitter)) { // has an alias
+					columnName = columnName.split(aliasSplitter)[1].trim();
+					break;
+				}
+			}
+			if(columnName.contains(" "))
+				columnName = columnName.split("\\s+(?![^']*')")[1].trim();;
 			/*
 			 * Remove any identifier quotes
 			 * Example:
@@ -251,20 +272,7 @@ public class SQLQueryTranslator {
 				columnName = columnName.substring(columnName.lastIndexOf(".")+1, columnName.length()); // get only the name
 			}
 			
-			/*
-			 * Take the alias name if the column name has it.
-			 */
-			String[] aliasSplitters = new String[3];
-			aliasSplitters[0] = " as ";
-			aliasSplitters[1] = " AS ";
-			aliasSplitters[2] = " ";
-			for(String aliasSplitter : aliasSplitters){
-				if (columnName.contains(aliasSplitter)) { // has an alias
-					columnName = columnName.split(aliasSplitter)[1].trim();
-					quoted=false; // if an alias is present we do not need to change the case of the column because it wan't be used
-					break;
-				}
-			}
+
 			if(!quoted){
 				if(uppercase)
 					columnName=columnName.toUpperCase();
