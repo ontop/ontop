@@ -135,5 +135,25 @@ public class PostgresIdentifierTest extends TestCase {
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
 	}
 
+	/**
+	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
+	 * @throws Exception
+	 */
+	public void testUppercaseUnquotedView() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+	}
+
+	/**
+	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
+	 * @throws Exception
+	 */
+	public void testUppercaseQuotedView() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
+	}
+
 			
 }

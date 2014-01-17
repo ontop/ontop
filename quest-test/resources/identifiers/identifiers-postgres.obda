@@ -13,6 +13,13 @@ mappingId	Countries
 target		:Country-{letter} a :Country . 
 source		select Type_Char as letter from "Characters"
 
+mappingId	Countries2
+target		:Country2-{LETTER} a :Country2 . 
+source		select substr(Type_Char, 1) as LETTER from "Characters"
+
+mappingId	Countries3
+target		:Country3-{LETTER} a :Country3 . 
+source		select substr(Type_Char, 1) as "LETTER" from "Characters"
 
 ]]
 
