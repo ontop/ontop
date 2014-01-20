@@ -46,9 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that oracle identifiers for tables and columns are treated
- * correctly. Especially, that the unquoted identifers are treated as uppercase, and
- * that the case of quoted identifiers is not changed
+ * Tests that mysql identifiers for tables and columns are treated
+ * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
  */
 public class MySQLIdentifierTest extends TestCase {
 
@@ -138,6 +137,23 @@ public class MySQLIdentifierTest extends TestCase {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runTests(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
+	}
+	public void testUppercaseAlias() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
+	}
+	
+	public void testLowercaseNoAlias() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+	}
+	
+	public void testLowercaseQuoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
 	}
 
 	
