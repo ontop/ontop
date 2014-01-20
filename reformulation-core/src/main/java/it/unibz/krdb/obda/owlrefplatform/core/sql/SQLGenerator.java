@@ -1075,7 +1075,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String mainColumn;
 			if(!isAns1){
 				typeColumn = getTypeColumnForSELECT(ht, varName);
-				 mainColumn = getMainColumnForSELECT(ht, varName, index, isAns1);
+				 mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
 			} else {
 				
 				if(ht instanceof Variable){
@@ -1091,10 +1091,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 					OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 					Function f = factory.getFunction(predicate, ht);
 					typeColumn = getTypeColumnForSELECT(f,  varName);
-					mainColumn = getMainColumnForSELECT(f, varName, index, isAns1);
+					mainColumn = getMainColumnForSELECT(f, signature, hpos, varName, index, isAns1);
+					
+					
+					
 				} else {
 					typeColumn = getTypeColumnForSELECT(ht, varName);
-					mainColumn = getMainColumnForSELECT(ht, varName, index, isAns1);
+					mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
 				}
 			}
 			String langColumn = getLangColumnForSELECT(ht, varName,	index);
@@ -1116,7 +1119,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 	private String getMainColumnForSELECT(Term ht,
-			String varName, QueryAliasIndex index, boolean isAns1) {
+			List<String> signature, int hpos, String varName, QueryAliasIndex index, boolean isAns1) {
 
 		String mainColumn = null;
 
@@ -1198,8 +1201,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
-		//String varName = signature.get(hpos);
-		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varName));
+		String format ;
+		String varNameAns1;
+		if (isAns1){
+			varNameAns1 = signature.get(hpos);
+			 format = String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varNameAns1));
+				
+		} else{
+			format = String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varName));
+					
+		}
+		
+		return format;
 	}
 
 	private String getLangColumnForSELECT(Term ht, String varName, QueryAliasIndex index) {
