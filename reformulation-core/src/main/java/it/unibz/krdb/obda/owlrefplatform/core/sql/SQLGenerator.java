@@ -105,6 +105,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
+	private boolean havingCond = false;
+	private String havingStr = "";
 	private Map<String, Integer> uriRefIds;
 	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
@@ -138,7 +140,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String modifier = "";
 			List<Variable> groupby = query.getQueryModifiers().getGroupConditions();
 			if (!groupby.isEmpty()) {
-				modifier += sqladapter.sqlGroupBy(groupby, outerViewName) + "\n";
+				subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " + havingStr + "\n";
 			}
 			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
 			if (!conditions.isEmpty()) {
@@ -149,15 +151,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (limit != -1 || offset != -1) {
 				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
 			}
-			// if it is a COUNT query
-//			if (query.getQueryModifiers().isCount()) {
-//				String sql = "SELECT COUNT(*)\n";
-//				sql += "FROM (\n";
-//				sql += subquery + "\n";
-//				sql += ") " + outerViewName + "\n";
-//				sql += modifier;
-//				return sql;
-//			}
+
 			String sql = "SELECT *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
@@ -286,7 +280,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function innerAtomAsFunction = (Function) innerAtom;
 			if (innerAtomAsFunction.isBooleanFunction()) {
 				String condition = getSQLCondition(innerAtomAsFunction, index);
-				conditions.add(condition);
+				if (!havingCond) { 
+					conditions.add(condition);
+				} else {
+					havingStr = condition;
+					havingCond = false;
+				}
 			}else if (innerAtomAsFunction.isDataTypeFunction()) {
 				String condition = getSQLString(innerAtom, index, false);
 				conditions.add(condition);
@@ -339,6 +338,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				Term right = atom.getTerm(1);
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
+				if (havingCond) {
+					//havingCond = false;
+					return String.format("HAVING (" + expressionFormat + ")", leftOp, rightOp);
+				}
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
 			} else if (atom.isArithmeticFunction()) {
 				// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
@@ -1274,6 +1277,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
+				havingCond = true;
+				return "COUNT(" + columnName + ")";
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_AVG_URI)) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
+				havingCond = true;
+				return "AVG(" + columnName + ")";
+			}else if (functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
+				havingCond = true;
+				return "SUM(" + columnName + ")";
 			}
 		}
 

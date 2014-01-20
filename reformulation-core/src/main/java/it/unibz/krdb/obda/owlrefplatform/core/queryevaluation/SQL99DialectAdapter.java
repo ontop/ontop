@@ -128,7 +128,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			if (needComma) {
 				sql += ", ";
 			}
-			sql += sqlQualifiedColumn(viewname, v.getName());
+			//sql += sqlQualifiedColumn(viewname, v.getName());
+			sql += String.format("\"%s\"", v.getName());
 		needComma = true;
 		}
 		return sql;

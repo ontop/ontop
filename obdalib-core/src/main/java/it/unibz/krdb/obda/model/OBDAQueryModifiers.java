@@ -134,7 +134,7 @@ public class OBDAQueryModifiers {
 	}
 
 	public boolean hasModifiers() {
-		return isCount || isDistinct || hasLimit() || hasOffset() || hasOrder() || hasGroup();
+		return isDistinct || hasLimit() || hasOffset() || hasOrder() || hasGroup();
 	}
 
 	/**

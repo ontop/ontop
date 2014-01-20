@@ -151,30 +151,28 @@ public class AggregatesTest extends TestCase {
 
 		//test queries
 		String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT * WHERE {?x a :Stock }";
-		// aggregate queries
-		String query_test1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?value WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		String query_test2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (?value AS ?new) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
+		String query1_1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (?value AS ?new) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		
+		// COUNT
 		String query2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		String query2_1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
-		String query2_2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x HAVING (?value > 0)";
+		String query2_2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x HAVING (COUNT(?value) > 0)";
 		
-		//String query3 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (MIN(?value) AS ?min) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		//String query4 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (MAX(?value) AS ?max) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		String query5 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (AVG(?value) AS ?vavg) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x";
-		String query6 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
+		String query3 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (AVG(?value) AS ?vavg) WHERE {?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
+		String query4 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		
-		String query7 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?value WHERE {?x a :Transaction. ?x :amountOfTransaction ?value OPTIONAL {?x :hasDate ?date} } GROUP BY ?x ?value HAVING (AVG(?value > 10))";
+		String query5 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?value ?date WHERE {?x a :Transaction. ?x :amountOfTransaction ?value OPTIONAL {?x :transactionDate ?date} } GROUP BY ?x ?value ?date";
 		try {
-			//executeQueryAssertResults(query1, st, 10);
+			executeQueryAssertResults(query2_2, st, 1);
+//			executeQueryAssertResults(query1, st, 10);
+//			executeQueryAssertResults(query1_1, st, 4);
+//			executeQueryAssertResults(query2, st, 1);
+//			executeQueryAssertResults(query2_1, st, 1);
+//			executeQueryAssertResults(query2_2, st, 1);
 			
-			//executeQueryAssertResults(query_test1, st, 4);
-			//executeQueryAssertResults(query_test2, st, 4);
-			//executeQueryAssertResults(query2_1, st, 2);
-			
-			//executeQueryAssertResults(query5, st, 2);
-			executeQueryAssertResults(query6, st, 1);
-			//executeQueryAssertResults(query7, st, 2);
+			//executeQueryAssertResults(query3, st, 1);
+			//executeQueryAssertResults(query4, st, 1);
+			//executeQueryAssertResults(query5, st, 4);
 		} catch (Exception e) {
 			throw e;
 		} finally {
