@@ -131,7 +131,7 @@ public class LeftJoinTestVirtual extends TestCase {
 		String query5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :age ?age} }";
 		
 		try {
-			executeQueryAssertResults(query_multi, st, 4);
+			executeQueryAssertResults(query_multi, st, 6);
 			//executeQueryAssertResults(query1, st, 3);
 			//executeQueryAssertResults(query2, st, 4);
 			//executeQueryAssertResults(query3, st, 4);
