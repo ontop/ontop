@@ -796,7 +796,7 @@ public class QuestStatement implements OBDAStatement {
 					// if unifiable, apply to head of tbox rule
 					Function ruleHead = rule.getHead();
 					Function copyRuleHead = (Function) ruleHead.clone();
-					Unifier.applyUnifier(copyRuleHead, theta);
+					Unifier.applyUnifier(copyRuleHead, theta,false);
 
 					removedAtom.add(copyRuleHead);
 				}

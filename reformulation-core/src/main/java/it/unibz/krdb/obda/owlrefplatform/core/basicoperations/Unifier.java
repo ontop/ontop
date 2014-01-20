@@ -42,6 +42,7 @@ import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -126,7 +127,7 @@ public class Unifier {
 				newatom.getTerms().set(i, t2);
 			}
 		}
-		applyUnifier(newatom, unifier);
+		applyUnifier(newatom, unifier, isEquality(newatom));
 		return newatom;
 	}
 
@@ -151,9 +152,9 @@ public class Unifier {
 
 		/* applying the unifier to every term in the head */
 		Function head = newq.getHead();
-		applyUnifier(head, unifier);
+		applyUnifier(head, unifier, isEquality(head));
 		for (Function bodyatom : newq.getBody()) {
-			applyUnifier(bodyatom, unifier);
+				applyUnifier(bodyatom, unifier, isEquality(bodyatom));
 		}
 		return newq;
 	}
@@ -183,9 +184,9 @@ public class Unifier {
 	// }
 
 	public static void applyUnifier(Function term,
-			Map<Variable, Term> unifier) {
+			Map<Variable, Term> unifier, boolean isEquality) {
 		List<Term> subTerms = term.getTerms();
-		applyUnifier(subTerms, term, unifier);
+		applyUnifier(subTerms, term, unifier, isEquality);
 	}
 	
 	public static void applyUnifierToGetFact(Function term,
@@ -203,8 +204,9 @@ public class Unifier {
 
 	
 	public static void applyUnifier(List<Term> terms, Function atom,
-			Map<Variable, Term> unifier) {
-		applyUnifier(terms, atom, unifier,0);
+			Map<Variable, Term> unifier, boolean isEquality) {
+		
+		applyUnifier(terms, atom, unifier,0, isEquality);
 	}
 	/***
 	 * Applies the subsittution to all the terms in the list. Note that this
@@ -216,7 +218,9 @@ public class Unifier {
 	 * @param unifier
 	 */
 	public static void applyUnifier(List<Term> terms, Function atom,
-			Map<Variable, Term> unifier, int fromIndex) {
+			Map<Variable, Term> unifier, int fromIndex, boolean isequality) {
+	
+		
 		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
 			/*
@@ -225,6 +229,9 @@ public class Unifier {
 			 */
 			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
+				if (isequality && replacement!=null){
+					replacement = replacement.getReferencedVariables().iterator().next();
+				}
 				if (replacement != null){
 					if(atom != null){
 						/*
@@ -237,8 +244,10 @@ public class Unifier {
 				}
 			} else if (t instanceof Function) {
 				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
-
+				boolean equality= isEquality(t2);
+				applyUnifier(t2, unifier, equality);
+				
+	
 			}
 		}
 	}
@@ -267,7 +276,7 @@ public class Unifier {
 				}
 			} else if (t instanceof Function) {
 				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
+				applyUnifier(t2, unifier, isEquality(t2));
 			}
 		}
 	}
@@ -393,9 +402,8 @@ public class Unifier {
 			 * Applying the newly computed substitution to the 'replacement' of
 			 * the existing substitutions
 			 */
-			applyUnifier(terms1, null, mgu, termidx + 1);
-			applyUnifier(terms2, null, mgu, termidx + 1);
-
+			applyUnifier(terms1, null, mgu, termidx + 1, isEquality(first));
+			applyUnifier(terms2, null, mgu, termidx + 1,isEquality(second));
 		}
 		return mgu;
 	}
@@ -570,4 +578,24 @@ public class Unifier {
 							+ ", " + t2.getClass());
 		}
 	}
+	/**
+	* This method returns true if the atom has the shape EQ(a,b). False otherwise
+	* 
+	* @param atom1
+	* @return
+	*/
+	private static boolean isEquality(Function atom1) {
+		boolean isEquality;
+		if (atom1.isBooleanFunction()){
+			if (atom1.getFunctionSymbol().equals(OBDAVocabulary.EQ)){
+				isEquality = true;
+			} else {
+				isEquality = false;
+			}
+		}else{
+			isEquality = false;
+		}
+		return isEquality;
+	}
+
 }

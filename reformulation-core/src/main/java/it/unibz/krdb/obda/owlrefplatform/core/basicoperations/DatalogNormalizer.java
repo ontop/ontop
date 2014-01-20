@@ -276,7 +276,8 @@ public class DatalogNormalizer {
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			Unifier.applyUnifier(atom, mgu);
+			//TODO: DOUBLE CHECK THIS FALSE
+			Unifier.applyUnifier(atom, mgu,false);
 			if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
 				Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
 				if (s == null) {
