@@ -78,7 +78,7 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && (schema.startsWith("\"") || schema.startsWith("'")))
+		if(schema!=null && (schema.startsWith("\"") || schema.startsWith("`")))
 			this.schema = schema.substring(1, schema.length()-1);
 		else
 			this.schema = schema;
@@ -106,7 +106,7 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if((tableName.startsWith("\"") || tableName.startsWith("'")))
+		if(tableName.startsWith("\"") || tableName.startsWith("`") )
 		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
 			quotedTable = true;

@@ -428,7 +428,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Column tableColumn) {
 		String tableName= tableColumn.getColumnName();
-		if(tableName.startsWith("\"") || tableName.startsWith("'"))
+		if(tableName.startsWith("\"")|| tableName.startsWith("`"))
 			tableColumn.setColumnName(tableName.substring(1, tableName.length()-1));
 				
 		

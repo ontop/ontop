@@ -398,7 +398,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	@Override
 	public void visit(Column tableColumn) {
 		String columnName= tableColumn.getColumnName();
-		if(columnName.startsWith("\"") || columnName.startsWith("'"))
+		if(columnName.startsWith("\"") || columnName.startsWith("`"))
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}

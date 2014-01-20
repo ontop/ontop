@@ -113,7 +113,7 @@ public class MappingAnalyzer {
 					// Construct the predicate using the table name
 					int arity = dbMetaData.getDefinition(tableName).countAttribute();
 					Predicate predicate = dfac.getPredicate(predicateName, arity);
-
+					
 					// Swap the column name with a new variable from the lookup table
 					List<Term> terms = new ArrayList<Term>();
 					for (int i = 1; i <= arity; i++) {
@@ -467,6 +467,7 @@ public class MappingAnalyzer {
 				lookupTable.add(columnName, index);
 				
 				String lowercaseColumn= columnName.toLowerCase();
+				
 				
 				
 				if (aliasMap.containsKey(lowercaseColumn)) { // register the alias name, if any
