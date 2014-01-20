@@ -21,5 +21,14 @@ mappingId	Countries3
 target		:Country3-{COL} a :Country3 . 
 source		select 'Country Name' COL FROM dual
 
+mappingId	Countries4
+target		:Country4-{col} a :Country4 . 
+source		select To_Char(country_name) "col" FROM HR.countries
+
+mappingId	Countries5
+target		:Country5-{COL} a :Country5 . 
+source		select To_Char(country_name) col FROM HR.countries
+
+
 ]]
 

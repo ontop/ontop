@@ -146,4 +146,25 @@ public class OracleIdentifierTest extends TestCase {
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>", val);
 	}
 	
+	/**
+	 * Test use of lowercase, quoted alias in a view definition 
+	 * @throws Exception
+	 */
+	public void testLowerCaseColumnViewDefQuoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-Argentina>", val);
+	}
+
+	/**
+	 * Test use of lowercase, unquoted alias in a view definition 
+	 * @throws Exception
+	 */
+	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-Argentina>", val);
+	}
+	
 }
+
