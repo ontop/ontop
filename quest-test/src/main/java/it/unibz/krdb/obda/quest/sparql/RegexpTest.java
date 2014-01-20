@@ -99,8 +99,7 @@ public class RegexpTest extends TestCase {
 		return Arrays.asList(new Object[][] {
 				 {"mysql" },
 				 {"pgsql"},
-				 {"oracle" },
-				 {"db2" }});
+				 {"oracle" }});
 	}
 
 	
@@ -172,7 +171,7 @@ public class RegexpTest extends TestCase {
 	 * @throws Exception
 	 */
 	@Test
-	public void testRegexpLike() throws Exception {
+	public void testSparqlRegexpFilter() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'J[ano]*').}";
 		String broker = runTests(query);
 		assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
@@ -183,7 +182,7 @@ public class RegexpTest extends TestCase {
 	 * @throws Exception
 	 */
 	@Test
-	public void testRegexpInsensitiveLike() throws Exception {
+	public void testSparqlCaseinsensitiveRegexFilter() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'j[ANO]*', 'i').}";
 		String broker = runTests(query);
 		assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");

@@ -54,4 +54,16 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		return "CAST(" + value + " AS " + strType + ")";
 	}
+	
+	/**
+	 * Based on documentation of postgres 9.1 at 
+	 * http://www.postgresql.org/docs/9.3/static/functions-matching.html
+	 */
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		return columnname + " ~" + ((caseinSensitive)? "* " : " ") + "'" + pattern + "'";
+	}
 }
