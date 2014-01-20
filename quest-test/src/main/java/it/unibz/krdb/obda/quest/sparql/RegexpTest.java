@@ -40,10 +40,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized.Parameters;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -54,10 +61,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that the system can handle the SPARQL "LIKE" keyword in the oracle setting
- * (i.e. that it is translated to REGEXP_LIKE and not LIKE in oracle sql)
+ * Tests that the system can handle the SPARQL "regex" FILTER
+ * This is a parameterized class, see junit documentation
+ * Tests oracle, mysql, postgres and mssql
  */
-public class MySQLRegexpTest extends TestCase {
+@RunWith(org.junit.runners.Parameterized.class)
+public class RegexpTest extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -70,10 +79,33 @@ public class MySQLRegexpTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	private String obdafile;
+	
 	private QuestOWL reasoner;
 
+	/**
+	 * Constructor is necessary for parameterized test
+	 */
+	public RegexpTest(String database){
+		this.obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".obda";
+	}
+
+
+	/**
+	 * Returns the obda files for the different database engines
+	 */
+	@Parameters
+	public static Collection<Object[]> getObdaFiles(){
+		return Arrays.asList(new Object[][] {
+				 {"mysql" },
+				 {"pgsql"},
+				 {"oracle" },
+				 {"db2" }});
+	}
+
+	
 	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		
@@ -104,8 +136,8 @@ public class MySQLRegexpTest extends TestCase {
 
 		
 	}
-
-
+	
+	@After
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
@@ -139,6 +171,7 @@ public class MySQLRegexpTest extends TestCase {
 	 * Tests the use of SPARQL like
 	 * @throws Exception
 	 */
+	@Test
 	public void testRegexpLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'J[ano]*').}";
 		String broker = runTests(query);
@@ -149,6 +182,7 @@ public class MySQLRegexpTest extends TestCase {
 	 * Tests the use of case-insensitive SPARQL like
 	 * @throws Exception
 	 */
+	@Test
 	public void testRegexpInsensitiveLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'j[ANO]*', 'i').}";
 		String broker = runTests(query);
