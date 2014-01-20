@@ -75,7 +75,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-
+/**
+ * This class generates a SQL string from the datalog program coming from the unfolder.
+ * 
+ * @author mrezk, mariano, guohui
+ *
+ */
 public class SQLGenerator implements SQLQueryGenerator {
 
 	private static final long serialVersionUID = 7477161929752147045L;
@@ -119,7 +124,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	
 	
 	private Map<String, Integer> uriRefIds;
-
+	private Multimap<Predicate, CQIE> ruleIndex ;
+//	private List<Function> ansViews = new LinkedList<Function>(); 
 	/*
 	 * The map of predicates to the canonical atoms.
 	 * 
@@ -182,11 +188,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 		normalizeProgram(queryProgram);
 		
 		
+		
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
 
 		sqlAnsViewMap = new HashMap<Predicate, String>();
 		
-		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
+		ruleIndex = depGraph.getRuleIndex();
+		
+	
+
 		
 		Multimap<Predicate, CQIE> ruleIndexByBodyPredicate = depGraph.getRuleIndexByBodyPredicate();
 		
@@ -1707,9 +1717,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		//Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<Variable, LinkedHashSet<String>>();
 		Multimap<Variable, String> columnReferences = ArrayListMultimap.create();
 
+
 		int dataTableCount = 0;
 		boolean isEmpty = false;
-
+		
+		
 		public QueryAliasIndex(CQIE query) {
 			List<Function> body = query.getBody();
 			generateViews(body);
@@ -1781,6 +1793,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		private void indexVariables(Function atom) {
 			DataDefinition def = dataDefinitions.get(atom);
+			Predicate atomName= atom.getFunctionSymbol();
 			String viewName = viewNames.get(atom);
 			viewName = sqladapter.sqlQuote(viewName);
 			for (int index = 0; index < atom.getTerms().size(); index++) {
@@ -1790,7 +1803,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 					/*
 					 * the index of attributes of the definition starts from 1
 					 */
-					String columnName = def.getAttributeName(index + 1);
+					String columnName ;
+					
+					
+					if (ruleIndex.containsKey(atomName)){
+						//If I am here it means that it is not a database table but a view from an Ans predicate
+						int attPos = 3*(index+1);
+						columnName = def.getAttributeName(attPos);
+					}else{
+						columnName = def.getAttributeName(index + 1);	
+					}
+					
 					
 					columnName = trim(columnName);
 					

@@ -73,7 +73,7 @@ public class LeftJoinTestVirtual extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		String url = "jdbc:h2:mem:ljtest";
+		String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
 
