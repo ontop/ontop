@@ -162,8 +162,10 @@ public class AggregatesTest extends TestCase {
 		String query4 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		
 		String query5 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?value ?date WHERE {?x a :Transaction. ?x :amountOfTransaction ?value OPTIONAL {?x :transactionDate ?date} } GROUP BY ?x ?value ?date";
+		
+		String query6 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?value ?broker WHERE {{?x a :Transaction. ?x :amountOfTransaction ?value } UNION {?x :isExecutedBy ?broker} } GROUP BY ?value ?broker";
 		try {
-			executeQueryAssertResults(query2_2, st, 1);
+	//		executeQueryAssertResults(query2_2, st, 1);
 //			executeQueryAssertResults(query1, st, 10);
 //			executeQueryAssertResults(query1_1, st, 4);
 //			executeQueryAssertResults(query2, st, 1);
@@ -173,6 +175,7 @@ public class AggregatesTest extends TestCase {
 			//executeQueryAssertResults(query3, st, 1);
 			//executeQueryAssertResults(query4, st, 1);
 			//executeQueryAssertResults(query5, st, 4);
+			executeQueryAssertResults(query6, st, 7);
 		} catch (Exception e) {
 			throw e;
 		} finally {
