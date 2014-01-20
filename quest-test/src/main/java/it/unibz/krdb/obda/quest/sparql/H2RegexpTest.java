@@ -32,20 +32,22 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+import java.util.Scanner;
 
 import junit.framework.TestCase;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized.Parameters;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -53,12 +55,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that the system can handle the SPARQL "regex" FILTER
- * This is a parameterized class, see junit documentation
- * Tests oracle, mysql, postgres and mssql
+ * Tests that the system can handle the SPARQL "LIKE" keyword in the oracle setting
+ * (i.e. that it is translated to REGEXP_LIKE and not LIKE in oracle sql)
  */
-@RunWith(org.junit.runners.Parameterized.class)
-public class RegexpTest extends TestCase {
+public class H2RegexpTest extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -70,34 +70,34 @@ public class RegexpTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	private String obdafile;
-	
+	final String owlfile = "resources/regexp/oracle-regexp.owl";
+	final String obdafile = "resources/regexp/h2-regexp.obda";
 	private QuestOWL reasoner;
+	private Connection sqlConnection;
 
-	/**
-	 * Constructor is necessary for parameterized test
-	 */
-	public RegexpTest(String database, boolean isH2){
-		this.obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".obda";
-	}
-
-
-	/**
-	 * Returns the obda files for the different database engines
-	 */
-	@Parameters
-	public static Collection<Object[]> getObdaFiles(){
-		return Arrays.asList(new Object[][] {
-				 {"mysql", false },
-				 {"pgsql", false},
-				 {"oracle", false }});
-	}
-
-	
 	@Override
-	@Before
 	public void setUp() throws Exception {
+		try {
+			 sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questrepository","sa", "");
+			    java.sql.Statement s = sqlConnection.createStatement();
+			  
+			    try {
+			    	String text = new Scanner( new File("resources/regexp/create.sql") ).useDelimiter("\\A").next();
+			    	s.execute(text);
+			    	//Server.startWebServer(sqlConnection);
+			    	 
+			    } catch(SQLException sqle) {
+			        System.out.println("Exception in creating db from script");
+			    }
+			   
+			    s.close();
+		} catch (Exception exc) {
+			try {
+				tearDown();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}	
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -126,11 +126,23 @@ public class RegexpTest extends TestCase {
 
 		
 	}
-	
-	@After
+
+
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
+		if (!sqlConnection.isClosed()) {
+			java.sql.Statement s = sqlConnection.createStatement();
+			try {
+				s.execute("DROP ALL OBJECTS DELETE FILES");
+			} catch (SQLException sqle) {
+				System.out.println("Table not found, not dropping");
+			} finally {
+				s.close();
+				sqlConnection.close();
+			}
+		}
+
 	}
 	
 
@@ -141,7 +153,7 @@ public class RegexpTest extends TestCase {
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+			OWLIndividual ind1 =	rs.getOWLIndividual("country")	 ;
 			retval = ind1.toString();
 		} catch (Exception e) {
 			throw e;
@@ -161,22 +173,20 @@ public class RegexpTest extends TestCase {
 	 * Tests the use of SPARQL like
 	 * @throws Exception
 	 */
-	@Test
-	public void testSparqlRegexpFilter() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'J[ano]*').}";
-		String broker = runTests(query);
-		assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
+	public void testRegexpLike() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, 'B[b-o]*')}";
+		String countryName = runTests(query);
+		assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
 	}
 	
 	/**
 	 * Tests the use of case-insensitive SPARQL like
 	 * @throws Exception
 	 */
-	@Test
-	public void testSparqlCaseinsensitiveRegexFilter() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'j[ANO]*', 'i').}";
-		String broker = runTests(query);
-		assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
-	}
+	public void testRegexpInsenstiveLike() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, 'b[B-O]*', 'i')}";
+		String countryName = runTests(query);
+		assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
+	}	
 		
 }

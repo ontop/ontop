@@ -41,4 +41,17 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
+	
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		if (caseinSensitive) {
+			return " LOWER(" + columnname + ") REGEX " + "'"
+					+ pattern.toLowerCase() + "'";
+		}
+		return columnname + " REGEX " + "'" + pattern + "'";
+	}
+	
 }
