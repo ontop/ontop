@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.parser.AliasMapVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.SelectionVisitor;
+import it.unibz.krdb.obda.parser.SubSelectVisitor;
 import it.unibz.krdb.obda.parser.TablesNameVisitor;
 
 import java.io.Serializable;
@@ -41,6 +42,7 @@ public class VisitedQuery implements Serializable{
 	
 	
 	private ArrayList<RelationJSQL> tableSet;
+	private ArrayList<SelectJSQL> selectsSet;
 	private HashMap<String, String> aliasMap;
 	private ArrayList<String> joins;
 	private SelectionJSQL selection;
@@ -100,7 +102,7 @@ public class VisitedQuery implements Serializable{
 	}
 	
 	/**
-	 * Returns all the tables in this query tree.
+	 * Returns all the tables in this query.
 	 */
 	public ArrayList<RelationJSQL> getTableSet() {
 		
@@ -109,6 +111,18 @@ public class VisitedQuery implements Serializable{
 			tableSet =tnp.getTableList(select);
 		}
 		return tableSet;
+	}
+	
+	/**
+	 * Returns all the subSelect in this query .
+	 */
+	public ArrayList<SelectJSQL> getSubSelectSet() {
+		
+		if(selectsSet== null){
+			SubSelectVisitor tnp = new SubSelectVisitor();
+			selectsSet =tnp.getSubSelectList(select);
+		}
+		return selectsSet;
 	}
 	
 	/**

@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.SelectJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 import it.unibz.krdb.sql.api.VisitedQuery;
 
@@ -517,6 +518,16 @@ public class MappingAnalyzer {
 							lookupTable.add(aliasMap.get(aliasColumnName), qualifiedColumnAlias);
 						}
 					
+				}
+				
+				//check if we do not have subselect with alias name assigned
+				for(SelectJSQL subSelect: queryParsed.getSubSelectSet()){
+					String subSelectAlias = subSelect.getAlias();
+					String aliasColumnName = subSelectAlias.toLowerCase() + "." + lowercaseColumn;
+					lookupTable.add(aliasColumnName, index);
+					if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
+						lookupTable.add(aliasMap.get(aliasColumnName), aliasColumnName);
+					}
 				}
 			}
 			offset += size;
