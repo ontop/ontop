@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+
+[SourceDeclaration]
+sourceUri	RandBStockExchange
+connectionUrl jdbc:db2://10.7.20.39:50001/stock
+username	db2inst2
+password	fish
+driverClass	com.ibm.db2.jcc.DB2Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{id} a :Country.
+source		select "id" from "address"
+
+mappingId	Countries2
+target		:Country2-{id} a :Country2. 
+source		select "id" from db2inst2."address"
+]]
