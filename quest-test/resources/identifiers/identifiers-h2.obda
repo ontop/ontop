@@ -1,0 +1,34 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	h2
+connectionUrl	jdbc:h2:mem:countries
+username	sa	
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{country_name} a :Country . 
+source		select country_name FROM countries
+
+mappingId	Countries2
+target		:Country2-{COL} a :Country2 . 
+source		select "COUNTRY_NAME" COL FROM "COUNTRIES"
+
+mappingId	Countries3
+target		:Country3-{movie_name}-{Primary_Key}-{constant} a :Country3 . 
+source		select movie_name, "Primary_Key", 'Constant' constant from "movies"
+
+mappingId	Countries4
+target		:Country4-{col} a :Country4 . 
+source		select "primary_key" "col" FROM countries
+
+mappingId	Countries5
+target		:Country5-{COL} a :Country5 . 
+source		select "primary_key" col FROM countries
+
+
+]]
+
