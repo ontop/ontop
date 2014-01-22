@@ -60,7 +60,7 @@ public class SQLQueryTranslator {
 	public SQLQueryTranslator(DBMetadata dbMetaData) {
 		connection=null;
 		database=dbMetaData.getDriverName();
-		this.dbMetaData = dbMetaData;
+ 		this.dbMetaData = dbMetaData;
 		id_counter = 0;		
 	}
 	

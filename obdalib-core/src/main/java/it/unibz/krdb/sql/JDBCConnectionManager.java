@@ -240,7 +240,7 @@ public class JDBCConnectionManager {
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn, tables);
-		} else if (md.getDatabaseProductName().contains("DB2")) {
+		} else if (md.getDatabaseProductName().contains("DB2")|| md.getDatabaseProductName().contains("H2")) {
 			// If the database engine is IBM DB2
 			metadata = getOtherMetaData(md, conn, tables, JDBC_UPPERCASE);
 		}  else if (md.getDatabaseProductName().contains("PostgreSQL")) {

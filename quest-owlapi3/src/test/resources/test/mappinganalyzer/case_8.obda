@@ -12,5 +12,5 @@ driverClass	      org.h2.Driver
 [MappingDeclaration] @collection [[
 mappingId	M:0
 target	    :{id} a :A ; :P :id .
-source	    SELECT table1.id as id, table2.sid as id FROM table1, table2
+source	    SELECT "table1"."id" as id, "table2"."sid" as id FROM "table1", "table2"
 ]]
