@@ -58,7 +58,7 @@ public class MsSQLIdentifierTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/identifiers/stockexchange.owl";
-	final String obdafile = "resources/identifiers/stockexchange-mssql.obda";
+	final String obdafile = "resources/identifiers/small-stockexchange-mssql.obda";
 	private QuestOWL reasoner;
 
 	@Override
@@ -139,9 +139,20 @@ public class MsSQLIdentifierTest extends TestCase {
 	}
 
 	public void testUppercaseUnquoted() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker} ORDER BY ?x";
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Company} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#firstNameJoana>", val);
+		assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#company-211>", val);		
 	}
 		
+	public void testLowercaseQuoted() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT  ?x WHERE {?x a :StockBroker} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>", val);
+	}
+	
+	public void testAliasQuoted() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT  ?x WHERE {?x a :Investor} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#person-111>", val);
+	}
 }

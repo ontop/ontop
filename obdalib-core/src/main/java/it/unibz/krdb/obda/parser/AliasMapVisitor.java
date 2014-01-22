@@ -143,7 +143,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		if ( alias != null) {
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
-			if(alias.startsWith("\"") || alias.startsWith("`")){
+			if(alias.startsWith("\"") || alias.startsWith("`") || alias.startsWith("[")){
 				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
 			}
 			else
@@ -336,7 +336,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		if(tableColumn.getColumnName().contains("\""))
+		if(tableColumn.getColumnName().contains("\"")|| tableColumn.getColumnName().contains("["))
 			tableColumn.setColumnName(tableColumn.getColumnName().substring(1, tableColumn.getColumnName().length()-1));
 		
 	}

@@ -1,0 +1,36 @@
+[PrefixDeclaration]
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	IdentifierMsSQL
+connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=stockexchange
+username	mssql
+password	obdaps83
+driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-addresses
+target		:address-{id} a :Address .
+source		select id from address
+
+mappingId	mapping-brokers
+target		:company-{id} a :Company .
+source		select ID from company
+
+mappingId	mapping-broker-address
+target		:person-{id} a :StockBroker  ; :firstName {name} .  
+source		select id, name from [broker] where name='Joana'
+
+mappingId	mapping-investors
+target		:person-{investor} a :Investor ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
+source		select [id] as [investor], name, lastname, dateofbirth, ssn from client
+
+
+
+]]
+

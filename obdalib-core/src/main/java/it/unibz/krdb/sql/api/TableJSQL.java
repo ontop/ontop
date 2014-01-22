@@ -106,7 +106,7 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if(tableName.startsWith("\"") || tableName.startsWith("`") )
+		if(tableName.startsWith("\"") || tableName.startsWith("`")  || tableName.startsWith("["))
 		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
 			quotedTable = true;
