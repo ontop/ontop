@@ -45,10 +45,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that mysql identifiers for tables and columns are treated
+ * Tests that mssql identifiers for tables and columns are treated
  * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
  */
-public class MySQLIdentifierTest extends TestCase {
+public class MsSQLIdentifierTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -57,8 +57,8 @@ public class MySQLIdentifierTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-mysql.obda";
+	final String owlfile = "resources/identifiers/stockexchange.owl";
+	final String obdafile = "resources/identifiers/stockexchange-mssql.obda";
 	private QuestOWL reasoner;
 
 	@Override
@@ -133,28 +133,15 @@ public class MySQLIdentifierTest extends TestCase {
 	 * @throws Exception
 	 */
 	public void testLowercaseUnquoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Address} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
-	}
-	public void testUppercaseAlias() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
-	}
-	
-	public void testLowercaseNoAlias() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
-	}
-	
-	public void testLowercaseQuoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
+		assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#address-991>", val);
 	}
 
-	
-			
+	public void testUppercaseUnquoted() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#firstNameJoana>", val);
+	}
+		
 }

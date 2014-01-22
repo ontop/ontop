@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /***
  * Tests that mysql identifiers for tables and columns are treated
- * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
+ * correctly. Especially, how backticks are treated
  */
 public class MySQLBackticksTest extends TestCase {
 
