@@ -207,7 +207,7 @@ public class SQLQueryTranslator {
 		int end = query.toLowerCase().indexOf("from");	
 		
 		boolean uppercase=false;
-		boolean quoted = false;
+		boolean quoted;
 		if (end == -1) {
 			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
 		}
@@ -226,6 +226,7 @@ public class SQLQueryTranslator {
 		viewDefinition.setName(viewName);
 		viewDefinition.copy(query);		
 		for (int i = 0; i < columns.length; i++) {
+			quoted = false;
 			String columnName = columns[i].trim();
 			
 			
