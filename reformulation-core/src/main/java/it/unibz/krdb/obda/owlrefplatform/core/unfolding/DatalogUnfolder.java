@@ -26,16 +26,15 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
@@ -48,20 +47,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 /**
@@ -470,7 +466,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 			
-			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
+		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 			ruleIndex = depGraph.getRuleIndex();
 			Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
@@ -825,27 +821,27 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param inputquery
 	 * @return
 	 */
-	private DatalogProgram unfoldToDatalog(DatalogProgram inputquery) {
-		HashSet<CQIE> relevantrules = new HashSet<CQIE>();
-		for (CQIE cq : inputquery.getRules()) {
-			for (Function atom : cq.getBody()) {
-				for (CQIE rule : unfoldingProgram.getRules(atom.getFunctionSymbol())) {
-					/*
-					 * No repeteatin is assured by the HashSet and the hashing
-					 * implemented in each CQIE
-					 */
-					relevantrules.add(rule);
-				}
-			}
-		}
-		/**
-		 * Done collecting relevant rules, appending the original query.
-		 */
-		LinkedList<CQIE> result = new LinkedList<CQIE>();
-		result.addAll(inputquery.getRules());
-		result.addAll(relevantrules);
-		return termFactory.getDatalogProgram(result);
-	}
+//	private DatalogProgram unfoldToDatalog(DatalogProgram inputquery) {
+//		HashSet<CQIE> relevantrules = new HashSet<CQIE>();
+//		for (CQIE cq : inputquery.getRules()) {
+//			for (Function atom : cq.getBody()) {
+//				for (CQIE rule : unfoldingProgram.getRules(atom.getFunctionSymbol())) {
+//					/*
+//					 * No repeteatin is assured by the HashSet and the hashing
+//					 * implemented in each CQIE
+//					 */
+//					relevantrules.add(rule);
+//				}
+//			}
+//		}
+//		/**
+//		 * Done collecting relevant rules, appending the original query.
+//		 */
+//		LinkedList<CQIE> result = new LinkedList<CQIE>();
+//		result.addAll(inputquery.getRules());
+//		result.addAll(relevantrules);
+//		return termFactory.getDatalogProgram(result);
+//	}
 
 
 	
@@ -1273,9 +1269,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		replaceInnerLJ(freshRule, newbody, termidx1);
 		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
 
-		OBDAVocabulary myNull = new OBDAVocabulary();
 		for (Variable var : variablesArg2) {
-			unifier.put(var, myNull.NULL);
+			unifier.put(var, OBDAVocabulary.NULL);
 		}
 		// Now I need to add the null to the variables of the second
 		// LJ data argument
