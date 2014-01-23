@@ -140,9 +140,15 @@ public class DB2IdentifierTest extends TestCase {
 	 * Test use of lowercase, unquoted table, schema and column identifiers
 	 * @throws Exception
 	 */
-	public void testLowercaseUnquoted() throws Exception {
+	public void testLowercaseUnquotedSchema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val = runTests(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-991>", val);
+	}
+	
+	public void testAliasUnquotedColumn() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-991>", val);
 	}
 }

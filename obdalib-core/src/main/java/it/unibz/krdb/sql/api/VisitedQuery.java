@@ -74,10 +74,10 @@ public class VisitedQuery implements Serializable{
 				
 				//getting the values we also eliminate or handle the quotes
 				tableSet = getTableSet();
-				aliasMap = getAliasMap();
 				joins = getJoinCondition();
-				selection = getSelection();
 				projection = getProjection();
+				selection = getSelection();
+				aliasMap = getAliasMap();
 				groupByClause =getGroupByClause();
 				
 			}

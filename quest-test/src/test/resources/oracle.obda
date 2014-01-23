@@ -26,7 +26,7 @@ target		:Land-{ALIAS} a :Land .
 source		select COUNTRIES.COUNTRY_NAME ALIAS FROM HR.COUNTRIES
 
 mappingId	LandQuote
-target		:LandQuote-{COUNTRY_NAME} a :LandQuote . 
+target		:LandQuote-{countryNameAlias} a :LandQuote . 
 source		select "COUNTRIES".COUNTRY_NAME countryNameAlias FROM HR.COUNTRIES
 
 mappingId	CountryEgypt

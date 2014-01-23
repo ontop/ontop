@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.identifiers;
+package it.unibz.krdb.obda.parser;
 
 /*
  * #%L
@@ -37,7 +37,6 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -45,10 +44,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that mssql identifiers for tables and columns are treated
- * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
+ * A simple test that check if the system is able to handle Mappings for
+ * classes/roles and attributes even if there are no URI templates. i.e., the
+ * database stores URI's directly.
+ * 
+ * We are going to create an H2 DB, the .sql file is fixed. We will map directly
+ * there and then query on top.
  */
-public class MsSQLIdentifierTest extends TestCase {
+public class MultiSchemaTestDB2 extends TestCase {
+
+	// TODO We need to extend this test to import the contents of the mappings
+	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -57,8 +63,8 @@ public class MsSQLIdentifierTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-mssql.obda";
+	final String owlfile = "src/test/resources/multischemadb2.owl";
+	final String obdafile = "src/test/resources/multischemadb2.obda";
 	private QuestOWL reasoner;
 
 	@Override
@@ -101,18 +107,28 @@ public class MsSQLIdentifierTest extends TestCase {
 	
 
 	
-	private String runTests(String query) throws Exception {
+	private void runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		//StringBuilder bf = new StringBuilder(query);
-		String retval;
+		StringBuilder bf = new StringBuilder(query);
 		try {
 			
 
 			QuestOWLResultSet rs = st.executeTuple(query);
+			/*
+			boolean nextRow = rs.nextRow();
 			
+			*/
 			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-			retval = ind1.toString();
+//			while (rs.nextRow()){
+//				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+//				System.out.println(ind1.toString());
+//			}
+		
+/*
+			assertEquals("<uri1>", ind1.toString());
+			assertEquals("<uri1>", ind2.toString());
+			assertEquals("\"value1\"", val.toString());
+	*/		
 
 		} catch (Exception e) {
 			throw e;
@@ -125,34 +141,36 @@ public class MsSQLIdentifierTest extends TestCase {
 			conn.close();
 			reasoner.dispose();
 		}
-		return retval;
 	}
 
 	/**
-	 * Test use of lowercase column identifiers (also in target)
+	 * Test use of two aliases to same table
 	 * @throws Exception
 	 */
-	public void testLowercaseUnquoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-991>", val);
-	}
-
-	public void testUppercaseUnquoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-211>", val);	
-	}
-		
-	public void testLowercaseQuoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-112>", val);
+	public void testOneSchema() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Address}";
+		runTests(query);
 	}
 	
-	public void testAliasQuoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-111>", val);
+	public void testTableOneSchema() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Broker}";
+		runTests(query);
 	}
+	
+	public void testAliasOneSchema() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Worker}";
+		runTests(query);
+	}
+	
+	public void testSchemaWhere() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x ?r WHERE { ?x :isBroker ?r }";
+		runTests(query);
+	}
+	
+	public void testMultischema() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x :hasFile ?r }";
+		runTests(query);
+	}
+	
+		
 }

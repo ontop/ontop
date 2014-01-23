@@ -15,7 +15,7 @@ import net.sf.jsqlparser.schema.Table;
 
 public class TableJSQL implements Serializable{
 	
-	private static final long serialVersionUID = 7031993308873750327L;
+	private final long serialVersionUID = 7031993308873750327L;
 	/**
 	 * Class TableJSQL used to store the information about the tables. We distinguish between givenName and Name.
 	 * Since with Name we don't want to consider columns.
