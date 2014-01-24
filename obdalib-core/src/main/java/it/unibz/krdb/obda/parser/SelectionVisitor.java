@@ -344,24 +344,21 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 		Expression e = inExpression.getLeftExpression();
 		ItemsList e1 = inExpression.getLeftItemsList();
-		if (e1 instanceof SubSelect)
-		{}
-		else if (e1 instanceof ExpressionList)
-		{}
-		else if (e1 instanceof MultiExpressionList)
-		{}
-//		Expression e2 = between.getBetweenExpressionEnd();
-//		
-//		GreaterThanEquals gte = new GreaterThanEquals();
-//		gte.setLeftExpression(e);
-//		gte.setRightExpression(e1);
-//		gte.accept(this);
-//		
-//		MinorThanEquals mte = new MinorThanEquals();
-//		mte.setLeftExpression(e);
-//		mte.setRightExpression(e2);
-//		mte.accept(this);
-		
+		if (e1 instanceof SubSelect){
+			((SubSelect)e1).accept(this);
+		}
+		else if (e1 instanceof ExpressionList) {
+			for (Expression expr : ((ExpressionList)e1).getExpressions()) {
+				expr.accept(this);
+			}
+		}
+		else if (e1 instanceof MultiExpressionList) {
+			for (ExpressionList exp : ((MultiExpressionList)e1).getExprList()){
+				for (Expression expr : ((ExpressionList)exp).getExpressions()) {
+					expr.accept(this);
+				}
+			}
+		}
 	}
 
 	/*
