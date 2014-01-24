@@ -643,6 +643,13 @@ public class ParserTest extends TestCase {
 		
 	}
 	
+	public void test_12() {
+		final boolean result = parseJSQL("select name from grade, student where score BETWEEN 6 AND 8");
+		printJSQL("test_12", result);
+		assertTrue(result);
+		
+	}
+	
 	private String queryText;
 
 	VisitedQuery queryP;

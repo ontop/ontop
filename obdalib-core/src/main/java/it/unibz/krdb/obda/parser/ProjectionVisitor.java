@@ -363,7 +363,9 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Between between) {
-		// TODO Auto-generated method stub
+		between.getLeftExpression().accept(this);
+		between.getBetweenExpressionStart().accept(this);
+		between.getBetweenExpressionEnd().accept(this);
 		
 	}
 
@@ -387,8 +389,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(InExpression inExpression) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override

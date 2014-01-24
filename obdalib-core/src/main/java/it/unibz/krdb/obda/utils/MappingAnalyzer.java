@@ -55,7 +55,12 @@ import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.Between;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 
 //import com.hp.hpl.jena.iri.IRI;
@@ -251,12 +256,13 @@ public class MappingAnalyzer {
 	private Function manageParenthesis(Parenthesis paren, LookupTable lookupTable){
 		Expression inside = paren.getExpression();
 		
-		if (inside instanceof BinaryExpression){
+	//	if (inside instanceof BinaryExpression)
+		{
 			BinaryExpression insideB= (BinaryExpression) inside;
 			return getFunction(insideB, lookupTable);
 		}
 		
-		throw new RuntimeException("Empty or irregular parenthesis: " + paren);
+		//throw new RuntimeException("Empty or irregular parenthesis: " + paren);
 	}
 	
 	/**
@@ -283,6 +289,45 @@ public class MappingAnalyzer {
 		}
 	}
 
+	
+	/**
+	 *  Recursive methods to create a {@link Function} starting from a {@link BinaryExpression}
+	 *  We consider all possible values of the left and right expressions
+	 * @param pred
+	 * @param lookupTable
+	 * @return
+	 */
+
+	private Function getFunction(Expression pred, LookupTable lookupTable) {
+		if (pred instanceof BinaryExpression) {
+			return getFunction((BinaryExpression) pred, lookupTable);
+		} else if (pred instanceof IsNullExpression) {
+			return getFunction((IsNullExpression) pred, lookupTable);
+		} else if (pred instanceof Parenthesis) {
+			Expression inside = ((Parenthesis) pred).getExpression();
+			return getFunction(inside, lookupTable);
+		} else if (pred instanceof Between) {
+			Between between = (Between) pred;
+			Expression e = between.getLeftExpression();
+			Expression e1 = between.getBetweenExpressionStart();
+			Expression e2 = between.getBetweenExpressionEnd();
+
+			GreaterThanEquals gte = new GreaterThanEquals();
+			gte.setLeftExpression(e);
+			gte.setRightExpression(e1);
+
+			MinorThanEquals mte = new MinorThanEquals();
+			mte.setLeftExpression(e);
+			mte.setRightExpression(e2);
+
+			AndExpression ande = new AndExpression(gte, mte);
+			return getFunction(ande, lookupTable);
+		} else if (pred instanceof InExpression) {
+			return null;
+		} else
+			return null;
+	}
+
 	/**
 	 *  Recursive methods to create a {@link Function} starting from a {@link BinaryExpression}
 	 *  We consider all possible values of the left and right expressions
@@ -297,84 +342,23 @@ public class MappingAnalyzer {
 		
 		String leftValueName = left.toString();
 		String termLeftName = lookupTable.lookup(leftValueName);
-		Term t1=null;
+		Term t1 = null;
 		
 		if (termLeftName == null) {
-			if(left instanceof BinaryExpression)
-				t1=getFunction((BinaryExpression) left, lookupTable);
-			else if (left instanceof IsNullExpression)
-				t1=getFunction((IsNullExpression) left, lookupTable);
-			else if (left instanceof Parenthesis){
-				t1= manageParenthesis((Parenthesis) left, lookupTable);
-			}
-			else
-			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
+			t1 = getFunction(left, lookupTable);
 		}
-		else
-		{
+		else {
 			t1 = dfac.getVariable(termLeftName);
 		}
-		
-		String termRightName = "";
+	
 		Term t2 = null;
 		
-		if(right instanceof BinaryExpression)
-			t2=getFunction((BinaryExpression) right, lookupTable);
-		else if (right instanceof IsNullExpression)
-			t2=getFunction((IsNullExpression) right, lookupTable);
-		else if (right instanceof Parenthesis)
-			t2= manageParenthesis((Parenthesis) right, lookupTable);
-		else
-			if (right instanceof Column) {
-				//if the columns contains a boolean value
-				String rightValueName = ((Column) right).getColumnName();
-				if(rightValueName.toLowerCase().equals("true") || rightValueName.toLowerCase().equals("false"))
-					t2 = dfac.getConstantLiteral(rightValueName, COL_TYPE.BOOLEAN);
-				
-				else{
-					
-					termRightName = lookupTable.lookup(right.toString());
-					if (termRightName == null) {
-						throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
-					}
-					t2 = dfac.getVariable(termRightName);
-				}
-			} else 
+		t2 = getFunction(right, lookupTable);
+		if (t2 == null) {
+			t2 = getValueConstant(right, lookupTable);
+		}
 			
-				if (right instanceof StringValue) {
-					termRightName= ((StringValue) right).getValue();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
-					
-				}else if (right instanceof DateValue) {
-					termRightName= ((DateValue) right).getValue().toString();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-						
-				}else if ( right instanceof TimeValue) {
-					termRightName= ((TimeValue) right).getValue().toString();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
-					
-				}else if (right instanceof TimestampValue) {
-					termRightName= ((TimestampValue) right).getValue().toString();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
-					
-				}else if (right instanceof LongValue) {
-					termRightName= ((LongValue) right).getStringValue();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
-					
-				} else if (right instanceof DoubleValue) {
-					termRightName= ((DoubleValue) right).toString();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
-					
-				} else {
-					termRightName= right.toString();
-					t2 = dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
-					
-				}
-
-		
-		String op = pred.getStringExpression();
-		
-		
+		String op = pred.getStringExpression();		
 		Function funct = null;
 		if( op.equals("="))
 			funct = dfac.getFunctionEQ(t1, t2);
@@ -403,6 +387,59 @@ public class MappingAnalyzer {
 		
 		return funct;
 		
+	}
+	
+	/**
+	 * Return a valueConstant or Variable constructed from the given expression
+	 * @param pred the expression to process
+	 * @param lookupTable in case of variable
+	 * @return constructed valueconstant or variable
+	 */
+	private Term getValueConstant(Expression pred, LookupTable lookupTable){
+		String termRightName = "";
+		if (pred instanceof Column) {
+			//if the columns contains a boolean value
+			String rightValueName = ((Column) pred).getColumnName();
+			if(rightValueName.toLowerCase().equals("true") || rightValueName.toLowerCase().equals("false")) {
+				return dfac.getConstantLiteral(rightValueName, COL_TYPE.BOOLEAN);
+			}
+			else{
+				termRightName = lookupTable.lookup(pred.toString());
+				if (termRightName == null) {
+					throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
+				}
+				return dfac.getVariable(termRightName);
+			}
+		}  else			
+			if (pred instanceof StringValue) {
+				termRightName= ((StringValue) pred).getValue();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
+				
+			}else if (pred instanceof DateValue) {
+				termRightName= ((DateValue) pred).getValue().toString();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+					
+			}else if ( pred instanceof TimeValue) {
+				termRightName= ((TimeValue) pred).getValue().toString();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+				
+			}else if (pred instanceof TimestampValue) {
+				termRightName= ((TimestampValue) pred).getValue().toString();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME); 
+				
+			}else if (pred instanceof LongValue) {
+				termRightName= ((LongValue) pred).getStringValue();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+				
+			} else if (pred instanceof DoubleValue) {
+				termRightName= ((DoubleValue) pred).toString();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
+				
+			} else {
+				termRightName= pred.toString();
+				return dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
+				
+			}
 	}
 
 	/**

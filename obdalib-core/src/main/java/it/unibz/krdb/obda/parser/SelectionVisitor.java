@@ -51,14 +51,17 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -297,8 +300,9 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Between between) {
-		//we do not support BETWEEN
-		
+		between.getLeftExpression().accept(this);
+		between.getBetweenExpressionStart().accept(this);
+		between.getBetweenExpressionEnd().accept(this);
 	}
 
 	/*
@@ -337,6 +341,26 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(InExpression inExpression) {
+
+		Expression e = inExpression.getLeftExpression();
+		ItemsList e1 = inExpression.getLeftItemsList();
+		if (e1 instanceof SubSelect)
+		{}
+		else if (e1 instanceof ExpressionList)
+		{}
+		else if (e1 instanceof MultiExpressionList)
+		{}
+//		Expression e2 = between.getBetweenExpressionEnd();
+//		
+//		GreaterThanEquals gte = new GreaterThanEquals();
+//		gte.setLeftExpression(e);
+//		gte.setRightExpression(e1);
+//		gte.accept(this);
+//		
+//		MinorThanEquals mte = new MinorThanEquals();
+//		mte.setLeftExpression(e);
+//		mte.setRightExpression(e2);
+//		mte.accept(this);
 		
 	}
 
