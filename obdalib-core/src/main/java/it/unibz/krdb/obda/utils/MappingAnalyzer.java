@@ -166,33 +166,13 @@ public class MappingAnalyzer {
 					Stack<Function> filterFunctionStack = new Stack<Function>();
 					
 					Expression conditions = selection.getRawConditions();
-				
-					Object element = conditions;
-					if (element instanceof BinaryExpression) {
-						BinaryExpression pred = (BinaryExpression) element;
+					Function filterFunction = getFunction(conditions, lookupTable);
+					filterFunctionStack.push(filterFunction);
 					
-						Function filterFunction = getFunction(pred, lookupTable);
-						
-						filterFunctionStack.push(filterFunction);
-
-					} else if (element instanceof IsNullExpression) {
-						IsNullExpression pred = (IsNullExpression) element;
-						Function filterFunction = getFunction(pred, lookupTable);
-						filterFunctionStack.push(filterFunction);
-					
-						
-					} else if (element instanceof Parenthesis) {
-						Parenthesis pred = (Parenthesis) element;
-	
-						Function filterFunction = manageParenthesis(pred,lookupTable);
-						filterFunctionStack.push(filterFunction);
-						}
-						
-
 					// The filter function stack must have 1 element left
 					if (filterFunctionStack.size() == 1) {
-						Function filterFunction = filterFunctionStack.pop();
-						Function atom = dfac.getFunction(filterFunction.getFunctionSymbol(), filterFunction.getTerms());
+						Function filterFunct = filterFunctionStack.pop();
+						Function atom = dfac.getFunction(filterFunct.getFunctionSymbol(), filterFunct.getTerms());
 						atoms.add(atom);
 					} else {						
 						throwInvalidFilterExpressionException(filterFunctionStack);
@@ -247,23 +227,7 @@ public class MappingAnalyzer {
 		throw new RuntimeException("Illegal filter expression: " + filterExpression.toString());
 	}
 	
-	/**
-	 * Used to retrieve the expression contained in the parenthesis. Call getFunction 
-	 * @param paren 
-	 * @param lookupTable
-	 * @return a function from the OBDADataFactory
-	 */
-	private Function manageParenthesis(Parenthesis paren, LookupTable lookupTable){
-		Expression inside = paren.getExpression();
-		
-	//	if (inside instanceof BinaryExpression)
-		{
-			BinaryExpression insideB= (BinaryExpression) inside;
-			return getFunction(insideB, lookupTable);
-		}
-		
-		//throw new RuntimeException("Empty or irregular parenthesis: " + paren);
-	}
+	
 	
 	/**
 	 * Methods to create a {@link Function} starting from a {@link IsNullExpression}
@@ -271,7 +235,6 @@ public class MappingAnalyzer {
 	 * @param lookupTable
 	 * @return a function from the OBDADataFactory
 	 */
-	
 	private Function getFunction(IsNullExpression pred, LookupTable lookupTable) {
 		
 		Expression column = pred.getLeftExpression();
@@ -297,7 +260,6 @@ public class MappingAnalyzer {
 	 * @param lookupTable
 	 * @return
 	 */
-
 	private Function getFunction(Expression pred, LookupTable lookupTable) {
 		if (pred instanceof BinaryExpression) {
 			return getFunction((BinaryExpression) pred, lookupTable);
