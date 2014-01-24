@@ -110,7 +110,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * (either cause of lack of MGU, or because of a rule for the predicate of
 	 * the atom) is logically empty w.r.t. to the program.
 	 */
-	private Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
+	private List<Predicate> extensionalPredicates = new LinkedList<Predicate>();
 	private HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
@@ -315,11 +315,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			Stack<Integer> termidx = new Stack<Integer>();
 
-			List<Function> currentTerms = rule.getBody();
-			List<Term> tempList = new LinkedList<Term>();
-			for (Function a : currentTerms) {
-				tempList.add(a);
-			}
+			List<Term> tempList = getBodyTerms(rule);
 
 			List<CQIE> result = computePartialEvaluation(null, tempList, rule, rcount, termidx, false, includeMappings);
 
@@ -396,12 +392,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						int queryIdx=workingList.indexOf(rule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
-						List<Function> currentTerms = rule.getBody();
-						List<Term> tempList = new LinkedList<Term>();
-						
-						for (Function a : currentTerms) {
-								tempList.add(a);
-						}
+						List<Term> tempList = getBodyTerms(rule);
 						List<CQIE> result = computePartialEvaluation( pred, tempList, rule, rcount, termidx, false,includeMappings);
 				
 
@@ -436,15 +427,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								workingList.add(queryIdx, newquery);
 
 								//Here we update the index head arom -> rule
-								depGraph.removeOneRulePredicateFromRuleIndex(preFather,rule);
-								depGraph.setRuleInGraph(preFather, newquery);
+								depGraph.removeRuleFromRuleIndex(preFather,rule);
+								depGraph.addRuleToRuleIndex(preFather, newquery);
 							
 								//Here we update the index body atom -> rule
 								for (Term termPredicate: tempList){
 									if (termPredicate instanceof Function){
 										Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
-										depGraph.removeOneRuleFromBodyIndex(mypred, rule);
-										depGraph.setBodyIndex(mypred, newquery);
+										depGraph.removeRuleFromBodyIndex(mypred, rule);
+										depGraph.addRuleToBodyIndex(mypred, newquery);
 									}
 								}
 								
@@ -462,174 +453,180 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 		
 		
-		
+		/**
+		 * This method does the partial evaluation w.r.t. the mappings. 
+		 * It first iterates over the extensional predicates that need to be undolded w.r.t. the mappings.
+		 * Then does the partial evaluation for each extensional atom. and updates the rules in working list.
+		 * 
+		 * @param workingList
+		 */
 		private void computePartialEvaluationWRTMappings(List<CQIE> workingList) {
-
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
-			
+		
 			
 			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
-			
-			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
-			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+			boolean includeMappings=true;
+			boolean keepLooping=true;
+			extensionalPredicates =  depGraph.getExtensionalPredicates();
 			ruleIndex = depGraph.getRuleIndex();
 			Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
-			
+
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
-					Predicate pred = extensionalPredicates.get(predIdx);
-					Predicate preFather =  depGraph.getFatherPredicate(pred);
-					//query rules using pred
-					
-					
-					
+				Predicate pred = extensionalPredicates.get(predIdx);
+				Predicate preFather =  depGraph.getFatherPredicate(pred);
 
-					Collection<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
-
+			
+				List<CQIE> result = new LinkedList<CQIE>();
+				List<CQIE> fatherCollection = new LinkedList<CQIE>();
+		
+				//The next loop unfold all the atoms of the predicate pred
+				do
+				{
+		
+					result.clear();
+					fatherCollection.clear();
 					
-					for (CQIE fatherRule:  ruleIndexByBody.get(pred)) {
-						CQIE clonRule = fatherRule.clone();
-						fatherWorkingRules.add(clonRule);
+					Collection<CQIE> ruleCollection = ruleIndexByBody.get(pred);
+					
+					
+					for (CQIE fatherRule:  ruleCollection) {
+						CQIE copyruleCqie = fatherRule.clone();
+						fatherCollection.add(copyruleCqie);
 					}
 					
-					
-					for (CQIE rule : fatherWorkingRules) {
-						// CQIE rule = workingList.get(queryIdx);
-
+					for (CQIE fatherRule:  fatherCollection) {
+						List<Term> ruleTerms = getBodyTerms(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
-
-						List<Function> currentTerms = rule.getBody();
-						List<Term> tempList = new LinkedList<Term>();
-						boolean includeMappings=true;
-
-						for (Function a : currentTerms) {
-								tempList.add(a);
-						}
 						
+						//here we perform the partial evaluation
+						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, false, includeMappings);
 						
-						List<CQIE> result = computePartialEvaluation( pred, tempList, rule, rcount, termidx, false,includeMappings);
-				
-
-						int queryIdx=workingList.indexOf(rule);
-						
-						if (result == null) {
-							/*
-							 * If the result is null the rule is logically empty
-							 */
-							
-							workingList.remove(queryIdx);
-							// queryIdx -= 1;
-							continue;
-
-						} else if (result.size() == 0) {
-							/*
-							 * This rule is already a partial evaluation
-							 */
-							continue;
-						}
-						/*
-						 * One more step in the partial evaluation was computed, we
-						 * need to remove the old query and add the result instead.
-						 * Each of the new queries could still require more steps of
-						 * evaluation, so we decrease the index.
-						 */
-						workingList.remove(queryIdx);
-						for (CQIE newquery : result) {
-							if (!workingList.contains(newquery)) {
-								workingList.add(queryIdx, newquery);
-								
-								
-								depGraph.removeOneRulePredicateFromRuleIndex(preFather,rule);
-								depGraph.setRuleInGraph(preFather, newquery);
-							
-							
-								//Here we update the index body atom -> rule
-								for (Term termPredicate: tempList){
-									if (termPredicate instanceof Function){
-										Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
-										if (extensionalPredicates.contains(mypred)){
-											depGraph.removeOneRuleFromBodyIndex(mypred, rule);
-											depGraph.setBodyIndex(mypred, newquery);
-										}
-									}
-								}
-							
-							} //end workingList
-						} // end result
-						
-						
-						
-						
-						
-					} // end for fatherWorkingRules
-
-			}//end for extensionalPredicates	
-			
-			
-			
-			/*
-			//Now we loop only in the query, no need of the mappings anymore.
-			
-			for (int predIdx = 0; predIdx < predicatesInBottomUp.size()-1; predIdx++) {
-
-					Predicate pred = predicatesInBottomUp.get(predIdx);
-					Predicate preFather =  depGraph.getFatherPredicate(pred);
+						addDistinctList(result, partialEvaluation);
+		
+						//updating indexes with intermediate results
+						keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
+					} 
+					//firstIteration = false;
 					
-					//query rules using pred
-					List<CQIE> OriginalcandidateMatches= ruleIndex.get(preFather);
-					List<CQIE> candidateMatches =new LinkedList<CQIE>();
-					
-					
-					for (CQIE rule: OriginalcandidateMatches){
-						candidateMatches.add(rule) ;
+				}while(keepLooping);
+			}
+			
+			
+
+			// I add to the working list all the rules touched by the unfolder!
+			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
+				Predicate pred = extensionalPredicates.get(predIdx);
+				Predicate preFather =  depGraph.getFatherPredicate(pred);
+
+				Collection<CQIE> rulesToAdd= ruleIndex.get(preFather);
+
+				for (CQIE resultingRule: rulesToAdd){
+					if (!workingList.contains(resultingRule)){
+						workingList.add(resultingRule);
 					}
-			
-					
-					//TODO: CHANGE!!
-					int[] resolutionCount = new int[1000];
-					Map<Variable, Term> mgu = new HashMap<Variable,Term>();
-					if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
+				}
 
-						List<CQIE> rulesToUnify = ruleIndex.get(pred);
+			}
+			
+
+		}
+
+		/**
+		 * This method just copy the contain of one list into another without repeating elements
+		 * @param result
+		 * @param inputList
+		 */
+		private void addDistinctList(List<CQIE> result, List<CQIE> inputList) {
+			for (CQIE resultingRule: inputList){
+					if (!result.contains(resultingRule)){
+						result.add(resultingRule);
+					}
+			}
+		}
+
+		/**
+		 * This method has several tasks:
+		 * <ul>
+		 * <li> Update the ruleIndex
+		 * <li> Update the bodyIndex
+		 * <li> Delete keys from the body index that have alreay been unfolded and therefore not needed
+		 * <li> Determine if there is a need to keep unfolding pred
+		 * <li> Delete the rules from workingList that have been touched
+		 * </ul>
+		 * @param depGraph
+		 * @param pred
+		 * @param preFather
+		 * @param result
+		 * @param fatherRule
+		 * @param workingList
+		 * @return
+		 */
+		private boolean updateIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred,
+				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
+		
+			for (CQIE newquery : result) {
+				//Update the ruleIndex
+				depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
+				depGraph.addRuleToRuleIndex(preFather, newquery);
+
+				//Delete the rules from workingList that have been touched
+				if (workingList.contains(fatherRule)){
+					workingList.remove(fatherRule);
+				}
+
+
+
+				List<Term> bodyTerms = getBodyTerms(newquery);
+
+				//Update the bodyIndex
+				boolean hasPred = false;
+				for (Term termPredicate: bodyTerms){
+					if (termPredicate instanceof Function){
+						Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
+						if (extensionalPredicates.contains(mypred)){
+							depGraph.removeRuleFromBodyIndex(mypred, fatherRule);
+							depGraph.addRuleToBodyIndex(mypred, newquery);
+
+						}
 						
-						for (CQIE ruleUni:rulesToUnify){
-							
-							Function focusAtom = ruleUni.getHead();
-							
-							for (CQIE candidateRule : candidateMatches) {
-								
-								resolutionCount[0] += 1;
-								/* getting a rule with unique variables */
-								/*CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
-								
-								Queue<Term> queueInAtom = new LinkedList<Term>();
-								queueInAtom.addAll(candidateRule.getBody());
-								
-								while (!queueInAtom.isEmpty()) {
-									Term queueHead = queueInAtom.poll();
-									if (queueHead instanceof Function) {
-										Function funcRoot = (Function) queueHead;
-										
-										if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
-												|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
-											for (Term term : funcRoot.getTerms()) {
-												queueInAtom.add(term);
-											}
-										}  else if (funcRoot.isDataFunction()) {
-												mgu = Unifier.getMGU(funcRoot, focusAtom);
-												if (mgu !=null){
-													CQIE partialEvalution = candidateRule.clone();
-													Unifier.applyUnifier(partialEvalution, mgu, false);	
-												}
-										}
-										
-								}
-							}//end while
-								
-							}//end for candidateMatches
-						} // end for rulesToUnify
-					} //end if
-				}//end for predicatesInBottomUp*/
+						if (mypred.equals(pred)){
+							hasPred=true;
+						}
+					}
+				} //end for terms in rule
+				
+				//Determine if there is a need to keep unfolding pred
+				if (!hasPred){
+					depGraph.removeRuleFromBodyIndex(pred, fatherRule);
+					return false; //I finish with pred I can move on
+				}else{
+					return true; // keep doing the loop
+				}
+
+
+			} // end for queries in result
+			return false; //I finish with pred I can move on
+		}
+
+		
+		
+		
+	
+
+		/**
+		 * Returns the list of terms inside the functions atoms in the body
+		 * @param rule
+		 * @return
+		 */
+		private List<Term> getBodyTerms(CQIE rule) {
+			List<Function> currentTerms = rule.getBody();
+			List<Term> tempList = new LinkedList<Term>();
+
+			for (Function a : currentTerms) {
+					tempList.add(a);
+			}
+			return tempList;
 		}			
 					
 					
@@ -708,7 +705,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 * Leaf predicates are ignored (as boolean or algebra predicates)
 			 */
 			Predicate pred = focusAtom.getFunctionSymbol();
-			if (extensionalPredicates.contains(pred)) {
+			if (extensionalPredicates.contains(pred) && !includeMappings) {
 				// The atom is a leaf, that means that is a data atom that
 				// has no resolvent rule, and marks the end points to compute
 				// partial evaluations
@@ -955,71 +952,71 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 
-	private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
-			boolean parentIsLeftJoin, boolean includeMappings) {
+    private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
+            boolean parentIsLeftJoin, boolean includeMappings) {
 
-		int nonBooleanAtomCounter = 0;
+    int nonBooleanAtomCounter = 0;
 
-		for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
-			termidx.push(atomIdx);
+    for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
+            termidx.push(atomIdx);
 
-			Function focusLiteral = (Function) currentTerms.get(atomIdx);
+            Function focusLiteral = (Function) currentTerms.get(atomIdx);
 
-			if (focusLiteral.isBooleanFunction() || focusLiteral.isArithmeticFunction() || focusLiteral.isDataTypeFunction()) {
-				termidx.pop();
-				continue;
-			} else if (focusLiteral.isAlgebraFunction()) {
-				nonBooleanAtomCounter += 1;
-				/*
-				 * These may contain data atoms that need to be unfolded, we
-				 * need to recursively unfold each term.
-				 */
+            if (focusLiteral.isBooleanFunction() || focusLiteral.isArithmeticFunction() || focusLiteral.isDataTypeFunction()) {
+                    termidx.pop();
+                    continue;
+            } else if (focusLiteral.isAlgebraFunction()) {
+                    nonBooleanAtomCounter += 1;
+                    /*
+                     * These may contain data atoms that need to be unfolded, we
+                     * need to recursively unfold each term.
+                     */
 
-				// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
+                    // for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
 
-				Predicate predicate = focusLiteral.getFunctionSymbol();
-				boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
-				List<CQIE> result = new LinkedList<CQIE>();
-				result = computePartialEvaluation(resolvPred,  focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin, includeMappings);
+                    Predicate predicate = focusLiteral.getFunctionSymbol();
+                    boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+                    List<CQIE> result = new LinkedList<CQIE>();
+                    result = computePartialEvaluation(resolvPred,  focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin, includeMappings);
 
-				if (result == null)
-					return null;
+                    if (result == null)
+                            return null;
 
-				if (result.size() > 0) {
-					return result;
-				}
+                    if (result.size() > 0) {
+                            return result;
+                    }
 
-			} else if (focusLiteral.isDataFunction()) {
-				nonBooleanAtomCounter += 1;
+            } else if (focusLiteral.isDataFunction()) {
+                    nonBooleanAtomCounter += 1;
 
-				/*
-				 * This is a data atom, it should be unfolded with the usual
-				 * resolution algorithm.
-				 */
+                    /*
+                     * This is a data atom, it should be unfolded with the usual
+                     * resolution algorithm.
+                     */
 
-				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
-				List<CQIE> result = new LinkedList<CQIE>();
-				Predicate pred = focusLiteral.getFunctionSymbol();
-				 if (pred.equals(resolvPred)) {
-					 result = resolveDataAtom(resolvPred, focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
-						isLeftJoinSecondArgument,includeMappings);
-				 }
-				 
-				if (result == null)
-					return null;
+                    boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
+                    List<CQIE> result = new LinkedList<CQIE>();
+                    Predicate pred = focusLiteral.getFunctionSymbol();
+                     if (pred.equals(resolvPred)) {
+                             result = resolveDataAtom(resolvPred, focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
+                                    isLeftJoinSecondArgument,includeMappings);
+                     }
+                     
+                    if (result == null)
+                            return null;
 
-				if (result.size() > 0)
-					return result;
-			} else {
-				throw new IllegalArgumentException(
-						"Error during unfolding, trying to unfold a non-algrbra/non-data function. Offending atom: "
-								+ focusLiteral.toString());
-			}
-			termidx.pop();
-		}
+                    if (result.size() > 0)
+                            return result;
+            } else {
+                    throw new IllegalArgumentException(
+                                    "Error during unfolding, trying to unfold a non-algrbra/non-data function. Offending atom: "
+                                                    + focusLiteral.toString());
+            }
+            termidx.pop();
+    }
 
-		return new LinkedList<CQIE>();
-	}
+    return new LinkedList<CQIE>();
+}
 	
 
 

@@ -172,7 +172,10 @@ public class DatalogDependencyGraphGenerator {
 		for (Function bodyAtom : rule.getBody()) {
 
 			if (bodyAtom.isDataFunction()) {
-				ruleIndexByBodyPredicate.put(bodyAtom.getFunctionSymbol(), rule);
+				Predicate functionSymbol = bodyAtom.getFunctionSymbol();
+				if (!ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
+					ruleIndexByBodyPredicate.put(functionSymbol, rule);
+				}
 			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
 				updateRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
 			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
@@ -266,22 +269,22 @@ public class DatalogDependencyGraphGenerator {
 	 * @param pred
 	 * @param rule
 	 */
-	public void removeOneRulePredicateFromRuleIndex(Predicate pred, CQIE rule) {
-
-		ruleIndex.remove(pred, rule);
+	public void removeRuleFromRuleIndex(Predicate pred, CQIE rule) {
+		if (ruleIndex.containsEntry(pred, rule)){
+			ruleIndex.remove(pred, rule);
+		}
 	}
 	
 
 	
 	/**
 	 * Adds a rule to the <code>ruleIndex</code>
-	 * Be careful. This method may cause a missmatch between the graph and the indexes.
+	 * Be careful. This method may cause a mismatch between the graph and the indexes.
 	 * @return 
 	 */
-	public void setRuleInGraph(Predicate pred, CQIE rule) {
+	public void addRuleToRuleIndex(Predicate pred, CQIE rule) {
 		
 		ruleIndex.put(pred, rule);
-		
 	}
 	
 	
@@ -408,20 +411,21 @@ public class DatalogDependencyGraphGenerator {
 	 * Be careful. This method may cause a missmatch between the graph and the indexes.
 	 * @return 
 	 */
-	
-	
-	public void setBodyIndex(Predicate pred, CQIE rule) {
+	public void addRuleToBodyIndex(Predicate pred, CQIE rule) {
 		if (!ruleIndexByBodyPredicate.containsEntry(pred, rule)){
 			ruleIndexByBodyPredicate.put(pred, rule);		
 		}
 	}
+
+	
+	
 	/**
 	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code> from <code>ruleIndexByBodyPredicate</code>
 	 * Be careful. This method may cause a mismatch between the graph and the indexes.
 	 * @param pred
 	 * @param rule
 	 */
-	public void removeOneRuleFromBodyIndex(Predicate pred, CQIE rule) {
+	public void removeRuleFromBodyIndex(Predicate pred, CQIE rule) {
 		if (ruleIndexByBodyPredicate.containsKey(pred)){
 			ruleIndexByBodyPredicate.remove(pred, rule);
 		}else {
