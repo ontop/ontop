@@ -564,7 +564,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 */
 		private boolean updateIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred,
 				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
-		
+			boolean hasPred = false;
+			
 			for (CQIE newquery : result) {
 				//Update the ruleIndex
 				depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
@@ -580,7 +581,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				List<Term> bodyTerms = getBodyTerms(newquery);
 
 				//Update the bodyIndex
-				boolean hasPred = false;
+			
 				for (Term termPredicate: bodyTerms){
 					if (termPredicate instanceof Function){
 						Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
@@ -595,18 +596,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						}
 					}
 				} //end for terms in rule
-				
-				//Determine if there is a need to keep unfolding pred
-				if (!hasPred){
-					depGraph.removeRuleFromBodyIndex(pred, fatherRule);
-					return false; //I finish with pred I can move on
-				}else{
-					return true; // keep doing the loop
-				}
-
-
 			} // end for queries in result
-			return false; //I finish with pred I can move on
+			
+			//Determine if there is a need to keep unfolding pred
+			if (!hasPred){
+				depGraph.removeRuleFromBodyIndex(pred, fatherRule);
+				return false; //I finish with pred I can move on
+			}else{
+				return true; // keep doing the loop
+			}
+			
 		}
 
 		
