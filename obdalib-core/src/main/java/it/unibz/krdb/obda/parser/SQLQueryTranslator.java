@@ -219,7 +219,7 @@ public class SQLQueryTranslator {
 		
 		String projection = query.substring(start, end).trim();
 		
-		//split where comma is present but not inside quotes
+		//split where comma is present but not inside parenthesis
 		String[] columns = projection.split(",+(?![^\\(]*\\))");  
 		
 		ViewDefinition viewDefinition = new ViewDefinition();
@@ -243,22 +243,19 @@ public class SQLQueryTranslator {
 					break;
 				}
 			}
+			////split where space is present but not inside single quotes
 			if(columnName.contains(" "))
-				columnName = columnName.split("\\s+(?![^']*')")[1].trim();;
+				columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();;
 			/*
 			 * Remove any identifier quotes
 			 * Example:
 			 * 		INPUT: "table"."column"
 			 * 		OUTPUT: table.column
 			 */
-			if (columnName.contains("\"")) {
-				columnName = columnName.replaceAll("\"", "");
-				quoted=true;
-			} else if (columnName.contains("`")) {
-				columnName = columnName.replaceAll("`", "");
-				quoted=true;
-			} else if (columnName.contains("[") && columnName.contains("]")) {
-				columnName = columnName.replaceAll("[", "").replaceAll("]", "");
+			Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
+			Matcher matcher = pattern.matcher(columnName);
+			if (matcher.find()) {
+				columnName = columnName.replaceAll("[\\[\\]\"`]", "");
 				quoted=true;
 			}
 			

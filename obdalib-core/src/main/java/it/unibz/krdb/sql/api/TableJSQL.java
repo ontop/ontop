@@ -9,17 +9,19 @@
 package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.schema.Table;
 
 
 public class TableJSQL implements Serializable{
 	
-	private final long serialVersionUID = 7031993308873750327L;
+	static private final long serialVersionUID = 7031993308873750327L;
 	/**
 	 * Class TableJSQL used to store the information about the tables. We distinguish between givenName and Name.
 	 * Since with Name we don't want to consider columns.
 	 */
+	
 	
 	private String schema;
 	private String tableName;
@@ -53,6 +55,7 @@ public class TableJSQL implements Serializable{
 	 * 
 	 */
 	public TableJSQL(String schema, String tableName, String givenName) {
+			
 			setSchema(schema);
 			setGivenSchema(schema);
 			setTableName(tableName);
@@ -62,6 +65,7 @@ public class TableJSQL implements Serializable{
 		}
 	
 	public TableJSQL(Table table){
+		
 		setSchema(table.getSchemaName());
 		setGivenSchema(table.getSchemaName());
 		setTableName(table.getName());
@@ -78,7 +82,7 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && (schema.startsWith("\"") || schema.startsWith("`")))
+		if(schema!=null && VisitedQuery.pQuotes.matcher(schema).matches())
 			this.schema = schema.substring(1, schema.length()-1);
 		else
 			this.schema = schema;
@@ -106,7 +110,7 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if(tableName.startsWith("\"") || tableName.startsWith("`")  || tableName.startsWith("["))
+		if(VisitedQuery.pQuotes.matcher(tableName).matches())
 		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
 			quotedTable = true;

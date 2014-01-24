@@ -9,6 +9,9 @@
 
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,7 +122,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 				{
 					String columnName= column.getColumnName();
 					
-					if(columnName.startsWith("\"") || columnName.startsWith("'"))
+					if(VisitedQuery.pQuotes.matcher(columnName).matches())
 					{
 						columnName=columnName.substring(1, columnName.length()-1);
 						column.setColumnName(columnName);
@@ -436,9 +439,19 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(Column col) {
+		Table table= col.getTable();
+		if(table.getName()!=null){
+			
+			TableJSQL fixTable = new TableJSQL(table);
+			table.setAlias(fixTable.getAlias());
+			table.setName(fixTable.getTableName());
+			table.setSchemaName(fixTable.getSchema());
+		
+		}
 		String columnName= col.getColumnName();
-		if(columnName.contains("\""))
-		col.setColumnName(columnName.substring(1, columnName.length()-1));
+		if(VisitedQuery.pQuotes.matcher(columnName).matches())
+			col.setColumnName(columnName.substring(1, columnName.length()-1));
+		
 	}
 	
 	/*
@@ -599,7 +612,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			{
 				String columnName= column.getColumnName();
 				
-				if(columnName.startsWith("\"") || columnName.startsWith("'"))
+				if(VisitedQuery.pQuotes.matcher(columnName).matches())
 				{
 					columnName=columnName.substring(1, columnName.length()-1);
 					column.setColumnName(columnName);

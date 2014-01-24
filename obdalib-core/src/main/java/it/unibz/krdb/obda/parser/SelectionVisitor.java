@@ -13,6 +13,7 @@ import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -409,7 +410,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		
 		}
 		String columnName= tableColumn.getColumnName();
-		if(columnName.startsWith("\"")|| columnName.startsWith("`")|| columnName.startsWith("]"))
+		if(VisitedQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}

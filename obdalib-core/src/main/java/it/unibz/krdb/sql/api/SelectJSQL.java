@@ -2,8 +2,6 @@ package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
 
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class SelectJSQL implements Serializable{

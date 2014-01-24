@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.parser.TablesNameVisitor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -40,7 +41,7 @@ public class VisitedQuery implements Serializable{
 	 
 	private Select select; //the parsed query
 	
-	
+	public static Pattern pQuotes;
 	private ArrayList<RelationJSQL> tableSet;
 	private ArrayList<SelectJSQL> selectsSet;
 	private HashMap<String, String> aliasMap;
@@ -65,6 +66,12 @@ public class VisitedQuery implements Serializable{
 	 */
 	
 	public VisitedQuery(String queryString) throws JSQLParserException {
+		
+		/**
+		 * pattern used to remove quotes from the beginning and the end of columns
+		 */
+		pQuotes= Pattern.compile("[\"`\\[].*[\"`\\]]"); 
+		
 		query = queryString;
 	 
 	
