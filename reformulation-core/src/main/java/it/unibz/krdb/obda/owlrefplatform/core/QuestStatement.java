@@ -492,17 +492,7 @@ public class QuestStatement implements OBDAStatement {
 		return unfolding;
 	}
 
-	private void removeNonAnswerQueries(DatalogProgram program) {
-		List<CQIE> toRemove = new LinkedList<CQIE>();
-		for (CQIE rule : program.getRules()) {
-			Predicate headPredicate = rule.getHead().getPredicate();
-			if (!headPredicate.getName().toString().equals("ans1")) {
-				toRemove.add(rule);
-			}
-		}
-		program.removeRules(toRemove);
-	}
-
+	
 	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
 		if (((DatalogProgram) query).getRules().size() == 0) {
 			return "";

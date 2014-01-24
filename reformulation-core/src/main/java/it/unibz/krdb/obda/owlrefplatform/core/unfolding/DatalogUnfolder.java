@@ -58,6 +58,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.naming.PartialResultException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -502,12 +504,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						//here we perform the partial evaluation
 						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, false, includeMappings);
 						
-						addDistinctList(result, partialEvaluation);
-		
-						//updating indexes with intermediate results
-						keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
-					} 
-					//firstIteration = false;
+						if (partialEvaluation != null){
+							addDistinctList(result, partialEvaluation);
+							//updating indexes with intermediate results
+							keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
+						} else{
+							keepLooping = updateNullIndexes(depGraph, pred, preFather,  fatherRule,  workingList);
+						}
+					} //end for father collection
+					
+					
+				if (result.isEmpty() )
+				{
+					keepLooping = false;
+				}
 					
 				}while(keepLooping);
 			}
@@ -529,6 +539,45 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			}
 			
+
+		}
+		/**
+		 * This method will update the indexes when the result of unfolding fatherRule is null.
+		 * 
+		 * @param depGraph
+		 * @param pred
+		 * @param preFather
+		 * @param fatherRule
+		 * @param workingList
+		 * @return
+		 */
+		private boolean updateNullIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
+			
+			
+			depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
+
+			//Delete the rules from workingList that have been touched
+			if (workingList.contains(fatherRule)){
+				workingList.remove(fatherRule);
+			}
+
+
+
+			List<Term> bodyTerms = getBodyTerms(fatherRule);
+
+			//Update the bodyIndex
+		
+			for (Term termPredicate: bodyTerms){
+				if (termPredicate instanceof Function){
+					Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
+					if (extensionalPredicates.contains(mypred)){
+						depGraph.removeRuleFromBodyIndex(mypred, fatherRule);
+					}
+				}
+			} //end for terms in rule
+			return true;
+		
+	
 
 		}
 
