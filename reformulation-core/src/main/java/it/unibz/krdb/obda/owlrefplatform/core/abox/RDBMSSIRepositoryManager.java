@@ -757,9 +757,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					Description propReplacement = reasonerDag.getReplacementFor(propDesc);
-					if (propReplacement != null) {
-						Property desc = (Property) propReplacement;
+					if (!reasonerDag.isCanonicalRepresentative(propDesc)) {
+						Property desc = (Property) reasonerDag.getRepresentativeFor(propDesc);
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -822,7 +821,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent */
 				OClass c = (OClass)ofac.createClass(name);
-				OClass equivalent = (OClass)reasonerDag.getReplacementFor(c);
+				OClass equivalent = (OClass)reasonerDag.getRepresentativeFor(c);
 				return classIndexes.get(equivalent.getPredicate().getName());
 			}
 					
@@ -834,7 +833,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
 				Property c = ofac.createObjectProperty(name);
-				Property equivalent = (Property)reasonerDag.getReplacementFor(c);
+				Property equivalent = (Property)reasonerDag.getRepresentativeFor(c);
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				
@@ -844,7 +843,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				/* object property equivalent failed, we now look for data property equivalent */
 				
 				c = ofac.createDataProperty(name);
-				equivalent = (Property)reasonerDag.getReplacementFor(c);
+				equivalent = (Property)reasonerDag.getRepresentativeFor(c);
 				
 				index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				return index1;
@@ -1269,7 +1268,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			uriidStm.addBatch();			
 
 			classStm.setInt(1, uri_id);
-			int conceptIndex = getConceptIndex(concept);
+			int conceptIndex = getIndex(concept.getName(), 1);
 			classStm.setInt(2, conceptIndex);
 			classStm.setBoolean(3, c1isBNode);
 			classStm.addBatch();
@@ -1308,29 +1307,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		Description propReplacement = reasonerDag.getReplacementFor(property);
-		if (propReplacement != null) {
-			Property desc = (Property) propReplacement;
+		if (!reasonerDag.isCanonicalRepresentative(property)) {
+			Property desc = (Property) reasonerDag.getRepresentativeFor(property);
 			if (desc.isInverse()) {
 				return true;
 			}
 		}
-		return false;
-	}
-
-	private int getConceptIndex(Predicate concept) {
-		return getIndex(concept.getName(), 1);
-		/* Integer idxc = indexes.get(concept);
-		if (idxc == null) {
-			ClassDescription description = ofac.createClass(concept);
-			Description node = pureIsa.getNode(description);
-			if (node == null) {
-				log.error("Found class without node: " + concept);
-			}
-			idxc = new Integer(engine.getIndex(node));
-			indexes.put(concept, idxc);
-		}
-		return idxc.intValue(); */
+		return false; // representative is never an inverse
 	}
 
 	/***
@@ -1978,7 +1961,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
 		for (Description node : reasonerDag.getClassNames()) {
-			if (reasonerDag.hasReplacementFor(node))
+			if (!reasonerDag.isCanonicalRepresentative(node))
 				continue;
 
 			classNodesMaps.add(node);

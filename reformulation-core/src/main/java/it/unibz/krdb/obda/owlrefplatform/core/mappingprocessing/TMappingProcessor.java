@@ -371,7 +371,7 @@ public class TMappingProcessor implements Serializable {
 			/* setting up the queue for the next iteration */
 
 			/* we only create mappings for named properties and not considering equivalences*/
-			if (reasoner.hasReplacementFor(currentProperty)) 
+			if (!reasoner.isCanonicalRepresentative(currentProperty)) 
 				continue;
 			
 
@@ -470,7 +470,7 @@ public class TMappingProcessor implements Serializable {
 
 		for (OClass currentProperty : reasoner.getClassNames()) {
 
-			if (reasoner.hasReplacementFor(currentProperty)) //don't consider the equivalences
+			if (!reasoner.isCanonicalRepresentative(currentProperty)) //don't consider the equivalences
 				continue;
 
 

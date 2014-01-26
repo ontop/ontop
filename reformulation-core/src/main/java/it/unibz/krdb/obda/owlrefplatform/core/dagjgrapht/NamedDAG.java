@@ -137,61 +137,55 @@ public class NamedDAG  {
 				}
 			
 				if (node instanceof Property) {
+					// node is the inverse of a property
 					Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
 					if (processedNodes.contains(posNode)) {
-						eliminateNode(namedDag, node);
+						eliminateNode(namedDag, node);   // eliminates inverse property only if the property has need processed
 						processedNodes.add(node);					
 						continue;
 					}
 				}
-			
-				Set<Description> namedEquivalences = new LinkedHashSet<Description>();
-				for (Description vertex : reasoner.getEquivalences(node)) {
-					if (reasoner.isNamed(vertex)) 
-						namedEquivalences.add(vertex);
-				}
-							
-				if(!namedEquivalences.isEmpty()) {
-					Description newReference = namedEquivalences.iterator().next();
-					newReference = reasoner.getRepresentativeFor(newReference);
-					
-					//replacements.remove(newReference);
-					namedDag.addVertex(newReference);
 				
-					/*
-					 * Re-pointing all links to and from the eliminated node to the new
-					 * representative node
-					 */
+				// obtain a representative for the equivalence class
+				Description nodeRep = reasoner.getRepresentativeFor(node); 
+							
+				if(reasoner.isNamed(nodeRep)) { 
+					// node is not named, but has a named equivalence
+					
+					namedDag.addVertex(nodeRep);
+				
+					// redirect all links to and from the eliminated node to the representative node
 					
 					for (DefaultEdge incEdge : namedDag.incomingEdgesOf(node)) {
 						Description source = namedDag.getEdgeSource(incEdge);
-						namedDag.removeAllEdges(source, node);
 					
-						if (!source.equals(newReference))
-							namedDag.addEdge(source, newReference);
+						if (!source.equals(nodeRep))
+							namedDag.addEdge(source, nodeRep);
 					}
 					
 					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(node)) {
 						Description target = namedDag.getEdgeTarget(outEdge);
-						namedDag.removeAllEdges(node, target);
 					
-						if (!target.equals(newReference))
-							namedDag.addEdge(newReference, target);
+						if (!target.equals(nodeRep))
+							namedDag.addEdge(nodeRep, target);
 					}
 					
-					namedDag.removeVertex(node);
-					processedNodes.add(node);
-					 
+					namedDag.removeVertex(node); // removed all adjacent edges as well
+
 					if (node instanceof Property) {
-						/*remove the inverse */
+						// node is the inverse of a property
+						// remove the property because its inverse has a named representative
 						Property posNode = descFactory.createProperty(((Property)node).getPredicate(), false);
 						eliminateNode(namedDag, posNode);
 					}
 				}
 				else {
+					// no named equivalences
 					eliminateNode(namedDag, node);
-					processedNodes.add(node);
 				}
+				
+				processedNodes.add(node);
+				
 			} // end while
 		} // end for each root
 		
@@ -200,30 +194,21 @@ public class NamedDAG  {
 	}
 	
 	private static void eliminateNode(SimpleDirectedGraph <Description,DefaultEdge>  namedDag, Description node) {
-		Set<DefaultEdge> incomingEdges = new HashSet<DefaultEdge>(
-				namedDag.incomingEdgesOf(node));
 
-		// I do a copy of the dag not to remove edges that I still need to
-		// consider in the loops
-		SimpleDirectedGraph <Description,DefaultEdge> copyDAG = 
-					(SimpleDirectedGraph <Description,DefaultEdge>) namedDag.clone();
-		Set<DefaultEdge> outgoingEdges = new HashSet<DefaultEdge>(
-				copyDAG.outgoingEdgesOf(node));
-		for (DefaultEdge incEdge : incomingEdges) {
-
+		// no need to copy -- the node is removed after all the connections are made
+		
+		for (DefaultEdge incEdge : namedDag.incomingEdgesOf(node)) { 
 			Description source = namedDag.getEdgeSource(incEdge);
-			namedDag.removeAllEdges(source, node);
 
-			for (DefaultEdge outEdge : outgoingEdges) {
-				Description target = copyDAG.getEdgeTarget(outEdge);
-				namedDag.removeAllEdges(node, target);
+			for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(node)) {
+				Description target = namedDag.getEdgeTarget(outEdge);
 
 				if (!source.equals(target))
 					namedDag.addEdge(source, target);
 			}
 
 		}
-		namedDag.removeVertex(node);		
+		namedDag.removeVertex(node);		// removes all adjacent edges as well
 	}	
 	
 }

@@ -86,15 +86,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getRepresentativeFor(first);
 	}
 	
-
-	public boolean hasReplacementFor(Description v) {
-		return (replacements.get(v) != null);
+	public boolean isCanonicalRepresentative(Description v) {
+		return (replacements.get(v) == null);
 	}
 
-	@Deprecated 
-	public Description getReplacementFor(Description v) {
-		return replacements.get(v);
-	}
+	
 	
 	
 	@Deprecated
