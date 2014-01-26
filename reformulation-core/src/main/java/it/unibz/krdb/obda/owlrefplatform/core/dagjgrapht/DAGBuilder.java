@@ -61,8 +61,7 @@ public class DAGBuilder {
 	 * @param representatives a map between the node and its representative node
 	 */
 	public static SimpleDirectedGraph <Description,DefaultEdge> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Map<Description, EquivalenceClass<Description>> equivalencesMap, 
-			Map<Description, Description> replacements) {
+			Map<Description, EquivalenceClass<Description>> equivalencesMap) {
 
 		DefaultDirectedGraph<Description,DefaultEdge> copy = 
 				new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
@@ -77,8 +76,15 @@ public class DAGBuilder {
 			copy.addEdge(s, t, e);
 		}
 	
+		Map<Description, Description> replacements = new HashMap<Description, Description>();
 		eliminateCycles(copy, equivalencesMap, replacements);
 		eliminateRedundantEdges(copy);
+		
+		for (Description d : replacements.keySet()) {
+			EquivalenceClass<Description> cl = equivalencesMap.get(d);
+			Description rep = replacements.get(d);
+			cl.setRepresentative(rep);
+		}
 
 		SimpleDirectedGraph <Description,DefaultEdge> dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
 		Graphs.addGraph(dag, copy);

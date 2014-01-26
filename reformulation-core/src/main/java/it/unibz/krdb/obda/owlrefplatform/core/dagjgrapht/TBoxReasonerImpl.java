@@ -43,10 +43,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
-	//map between an element  and the representative between the equivalent elements
-	private final Map<Description, Description> replacements; 
-	
-	//map of the equivalent elements of an element
+	// maps descriptions to their equivalence classes (and their representatives)
+	// (does not contain a record for singleton equivalcence classes -- to be fixed)
 	private final Map<Description, EquivalenceClass<Description>> equivalencesClasses; 
 	
 	private Set<OClass> classNames;
@@ -60,25 +58,28 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private TBoxReasonerImpl(DefaultDirectedGraph<Description,DefaultEdge> graph) {
 		this.graph = graph;
 		
-		replacements = new HashMap<Description, Description>();
 		equivalencesClasses = new HashMap<Description, EquivalenceClass<Description>>();
-		this.dag = DAGBuilder.getDAG(graph, equivalencesClasses, replacements);
+		this.dag = DAGBuilder.getDAG(graph, equivalencesClasses);
 	}
 
 
 	@Override
 	public String toString() {
 		return dag.toString() + 
-				"\n\nReplacements\n" + replacements.toString() + 
+				//"\n\nReplacements\n" + replacements.toString() + 
 				"\n\nEquivalenceMap\n" + equivalencesClasses;
 	}
 	
 	
 	public Description getRepresentativeFor(Description v) {
-		Description rep = replacements.get(v);
-		if (rep != null)   // there is a proper replacement
-			return rep;
-		return v;		   // no replacement -- return the node
+//		Description rep = replacements.get(v);
+//		if (rep != null)   // there is a proper replacement
+//			return rep;
+//		return v;		   // no replacement -- return the node
+		EquivalenceClass<Description> e = equivalencesClasses.get(v);
+		if (e == null)
+			return v;
+		return e.getRepresentative();
 	}
 	
 	public Description getRepresentativeFor(EquivalenceClass<Description> nodes) {
@@ -87,7 +88,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	public boolean isCanonicalRepresentative(Description v) {
-		return (replacements.get(v) == null);
+		//return (replacements.get(v) == null);
+		EquivalenceClass<Description> e = equivalencesClasses.get(v);
+		if (e == null)
+			return true;
+		return e.getRepresentative().equals(v);
 	}
 
 	

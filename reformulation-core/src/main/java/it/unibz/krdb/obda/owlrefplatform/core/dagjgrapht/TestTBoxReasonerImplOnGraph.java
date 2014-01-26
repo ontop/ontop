@@ -566,9 +566,8 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				processedNodes.add(existsInvNode);
 				processedNodes.add(existsNode);
 			}
-			Map<Description, Description> replacements = new HashMap<Description, Description>();
 			Map<Description, EquivalenceClass<Description>> equivalencesClasses = new HashMap<Description, EquivalenceClass<Description>>();
-			DAGBuilder.getDAG(graph, equivalencesClasses, replacements);
+			DAGBuilder.getDAG(graph, equivalencesClasses);
 	}
 	
 	@Override
