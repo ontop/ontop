@@ -141,11 +141,11 @@ public class SigmaTBoxOptimizer {
 	}
 
 	private boolean check_directly_redundant(Description parent, Description child) {
-		Description sp = sigmaChain.getNode(parent);
-		Description sc = sigmaChain.getNode(child);
-		Description tc = isaChain.getNode(child);
+		Description sp = sigmaChain.getRepresentativeFor(parent);
+		Description sc = sigmaChain.getRepresentativeFor(child);
+		Description tc = isaChain.getRepresentativeFor(child);
 
-		if (sp == null || sc == null || tc == null) 
+		if (!sigmaChain.containsVertex(sp) || !sigmaChain.containsVertex(sc) || !isaChain.containsVertex(tc)) 
 			return false;
 		
 		Set<EquivalenceClass<Description>> spChildren =  sigmaChain.getDirectChildren(sp);

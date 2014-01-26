@@ -144,20 +144,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	
-	/**
-	 * Allows to obtain the node present in the DAG. 
-	 * @param  node a node that we want to know if it is part of the DAG
-	 * @return the node, or its representative, or null if it is not present in the DAG
-	 */
-	public Description getNode(Description node) {
-		if(replacements.containsKey(node))
-			node = replacements.get(node);
-		else
-			if(!dag.containsVertex(node))
-				node = null;
-		return node;
+	// checks whether the DAG contains node
+	public boolean containsVertex(Description node) {
+		return dag.containsVertex(node);
 	}
-		
+	
 	@Deprecated
 	public Set<Description> vertexSet() {
 		return dag.vertexSet();
@@ -429,7 +420,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 						.createPropertySomeRestriction(existsR.getPredicate(),
 								!existsR.isInverse());
 				Description existsNode = node;
-				Description existsInvNode = tbox.getNode(existsRin);
+				Description existsInvNode = tbox.getRepresentativeFor(existsRin);
 				Set<EquivalenceClass<Description>> childrenExist 
 						= new HashSet<EquivalenceClass<Description>>(
 									tbox.getDirectChildren(existsNode));

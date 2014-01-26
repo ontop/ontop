@@ -1731,7 +1731,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
-		Description roleNode = reasonerDag.getNode(role);
+		Description roleNode = reasonerDag.getRepresentativeFor(role);
 		Set<EquivalenceClass<Description>> ancestors = reasonerDag.getAncestors(roleNode);
 
 		for (EquivalenceClass<Description> node : ancestors) {
@@ -1891,7 +1891,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<Predicate> roles = ontology.getRoles();
 		for (Predicate rolepred : roles) {
 
-			Description node = reasonerDag.getNode(ofac.createProperty(rolepred));
+			Description node = reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
 			// We only map named roles
 			if (!(node instanceof Property)
 					|| ((Property) node).isInverse()) {
@@ -2002,7 +2002,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode;
 				Property role = ofac.createProperty(existsDesc.getPredicate(),
 						existsDesc.isInverse());
-				Description roleNode = reasonerDag.getNode(role);
+				Description roleNode = reasonerDag.getRepresentativeFor(role);
 
 				for (Description possiblyRedundantNode : existChildren) {
 					/* Here we have ER */
@@ -2010,7 +2010,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Property role2 = ofac
 							.createProperty(existsDesc2.getPredicate(),
 									existsDesc2.isInverse());
-					Description roleNode2 = reasonerDag.getNode(role2);
+					Description roleNode2 = reasonerDag.getRepresentativeFor(role2);
 
 					for(EquivalenceClass<Description> descendants: reasonerDag.getDescendants(roleNode)){
 						if(descendants.contains(roleNode2))
