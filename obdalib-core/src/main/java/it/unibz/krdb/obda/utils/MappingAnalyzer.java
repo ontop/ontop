@@ -46,6 +46,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -151,29 +152,10 @@ public class MappingAnalyzer {
 
 				// For the join conditions WE STILL NEED TO CONSIDER NOT EQUI
 				// JOIN
-				ArrayList<String> joinConditions = queryParsed
-						.getJoinCondition();
-				for (String predicate : joinConditions) {
+				ArrayList<Expression> joinConditions = queryParsed.getJoinCondition();
+				for (Expression predicate : joinConditions) {
 
-					String[] value = predicate.split("=");
-					String leftValue = value[0].trim();
-					String rightValue = value[1].trim();
-
-					String lookup1 = lookupTable.lookup(leftValue);
-					String lookup2 = lookupTable.lookup(rightValue);
-					if (lookup1 == null)
-						throw new RuntimeException(
-								"Unable to get column name for variable: "
-										+ leftValue);
-					if (lookup2 == null)
-						throw new RuntimeException(
-								"Unable to get column name for variable: "
-										+ rightValue);
-
-					Term t1 = dfac.getVariable(lookup1);
-					Term t2 = dfac.getVariable(lookup2);
-
-					Function atom = dfac.getFunctionEQ(t1, t2);
+					Function atom = getFunction(predicate, lookupTable);
 					atoms.add(atom);
 				}
 
@@ -353,23 +335,24 @@ public class MappingAnalyzer {
 		Expression left = pred.getLeftExpression();
 		Expression right = pred.getRightExpression();
 
-		String leftValueName = left.toString();
-		String termLeftName = lookupTable.lookup(leftValueName);
+		//left term can be function or column variable
 		Term t1 = null;
-
-		if (termLeftName == null) {
-			t1 = getFunction(left, lookupTable);
-		} else {
-			t1 = dfac.getVariable(termLeftName);
+		t1 = getFunction(left, lookupTable);
+		if (t1 == null) {
+			t1 = getVariable(left, lookupTable);
 		}
 
+		//right term can be function, column variable or data value
 		Term t2 = null;
-
 		t2 = getFunction(right, lookupTable);
+		if (t2 == null) {
+			t2 = getVariable(right, lookupTable);
+		}
 		if (t2 == null) {
 			t2 = getValueConstant(right, lookupTable);
 		}
-
+		
+		//get boolean operation
 		String op = pred.getStringExpression();
 		Function funct = null;
 		if (op.equals("="))
@@ -401,6 +384,20 @@ public class MappingAnalyzer {
 
 	}
 
+	private Term getVariable(Expression pred, LookupTable lookupTable) {
+		String termName = "";
+		if (pred instanceof Column) {
+			String columnName = ((Column) pred).getColumnName();
+			termName = lookupTable.lookup(pred.toString());
+			if (termName == null) {
+				throw new RuntimeException(
+						"Unable to find column name for variable: "
+								+ columnName);
+			}
+			return dfac.getVariable(termName);
+		}
+		return null;
+	}
 	/**
 	 * Return a valueConstant or Variable constructed from the given expression
 	 * 
@@ -414,21 +411,15 @@ public class MappingAnalyzer {
 		String termRightName = "";
 		if (pred instanceof Column) {
 			// if the columns contains a boolean value
-			String rightValueName = ((Column) pred).getColumnName();
-			if (rightValueName.toLowerCase().equals("true")
-					|| rightValueName.toLowerCase().equals("false")) {
+			String columnName = ((Column) pred).getColumnName();
+			if (columnName.toLowerCase().equals("true")
+					|| columnName.toLowerCase().equals("false")) {
 				return dfac
-						.getConstantLiteral(rightValueName, COL_TYPE.BOOLEAN);
-			} else {
-				termRightName = lookupTable.lookup(pred.toString());
-				if (termRightName == null) {
-					throw new RuntimeException(
-							"Unable to find column name for variable: "
-									+ rightValueName);
-				}
-				return dfac.getVariable(termRightName);
+						.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
 			}
-		} else if (pred instanceof StringValue) {
+			return null;
+		}
+		else if (pred instanceof StringValue) {
 			termRightName = ((StringValue) pred).getValue();
 			return dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
 
@@ -491,7 +482,7 @@ public class MappingAnalyzer {
 		return result;
 	}
 
-	private LookupTable createLookupTable(VisitedQuery queryParsed) {
+	private LookupTable createLookupTable(VisitedQuery queryParsed) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
 
 		// Collect all the possible column names from tables.

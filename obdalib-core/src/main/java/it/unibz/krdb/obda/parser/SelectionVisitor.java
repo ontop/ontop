@@ -64,11 +64,16 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.FromItemVisitor;
+import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.ValuesList;
 import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
@@ -76,7 +81,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
  * 
  * 
  */
-public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
+public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
 	
 //	ArrayList<SelectionJSQL> selections; // add if we want to consider the UNION case
 	SelectionJSQL selection;
@@ -127,6 +132,8 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		 * First check if we are setting a new selection. Add the expression contained in the SelectionJSQL
 		 * in the WHERE clause.
 		 */
+		//FROM (subselect) -> process
+		//plainSelect.getFromItem().accept(this);
 		
 		if(setSel){
 			plainSelect.setWhere(selection.getRawConditions());
@@ -342,10 +349,10 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	@Override
 	public void visit(InExpression inExpression) {
 
-		Expression e = inExpression.getLeftExpression();
+		//Expression e = inExpression.getLeftExpression();
 		ItemsList e1 = inExpression.getLeftItemsList();
 		if (e1 instanceof SubSelect){
-			((SubSelect)e1).accept(this);
+			((SubSelect)e1).accept((ExpressionVisitor)this);
 		}
 		else if (e1 instanceof ExpressionList) {
 			for (Expression expr : ((ExpressionList)e1).getExpressions()) {
@@ -594,6 +601,30 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 			left.accept(this);
 			right.accept(this);
 		}
+		
+	}
+
+	@Override
+	public void visit(Table tableName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SubJoin subjoin) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(LateralSubSelect lateralSubSelect) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(ValuesList valuesList) {
+		// TODO Auto-generated method stub
 		
 	}
 

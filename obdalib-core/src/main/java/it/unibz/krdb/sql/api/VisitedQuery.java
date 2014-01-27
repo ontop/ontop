@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
@@ -44,7 +45,7 @@ public class VisitedQuery implements Serializable{
 	
 	private ArrayList<RelationJSQL> tableSet;
 	private HashMap<String, String> aliasMap;
-	private ArrayList<String> joins;
+	private ArrayList<Expression> joins;
 	private SelectionJSQL selection;
 	private ProjectionJSQL projection;
 	private AggregationJSQL groupByClause;
@@ -75,9 +76,9 @@ public class VisitedQuery implements Serializable{
 				//getting the values we also eliminate or handle the quotes
 				tableSet = getTableSet();
 				aliasMap = getAliasMap();
-				joins = getJoinCondition();
 				selection = getSelection();
 				projection = getProjection();
+				joins = getJoinCondition();
 				groupByClause =getGroupByClause();
 				
 			}
@@ -104,7 +105,7 @@ public class VisitedQuery implements Serializable{
 	/**
 	 * Returns all the tables in this query tree.
 	 */
-	public ArrayList<RelationJSQL> getTableSet() {
+	public ArrayList<RelationJSQL> getTableSet() throws JSQLParserException {
 		
 		if(tableSet== null){
 			TablesNameVisitor tnp = new TablesNameVisitor();
@@ -128,7 +129,7 @@ public class VisitedQuery implements Serializable{
 	 * Get the string construction of the join condition. The string has the
 	 * format of "VAR1=VAR2".
 	 */
-	public ArrayList<String> getJoinCondition() {
+	public ArrayList<Expression> getJoinCondition() throws JSQLParserException {
 		if(joins==null){
 			JoinConditionVisitor joinCV = new JoinConditionVisitor();
 			joins= joinCV.getJoinConditions(select);

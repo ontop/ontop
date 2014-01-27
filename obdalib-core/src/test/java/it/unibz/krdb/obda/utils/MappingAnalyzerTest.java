@@ -180,4 +180,17 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
+//	public void testAnalysis_17() throws Exception {
+//		runAnalysis(
+//				"select Student.student_id as StudentId from Student JOIN Enrollment USING (student_id) ",
+//				":S_{StudentId} a :Student .");
+//	}
+	
+	public void testAnalysis_18() throws Exception {
+		runAnalysis(
+				"select id as StudentId from Student JOIN Enrollment ON student_id = StudentId ",
+				":S_{StudentId} a :Student .");
+	}
+	
+
 }
