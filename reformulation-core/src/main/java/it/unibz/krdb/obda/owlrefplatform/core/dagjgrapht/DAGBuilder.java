@@ -226,30 +226,22 @@ public class DAGBuilder {
 		Set<Description> processedNodes = new HashSet<Description>();
 		Set<Description> chosenNodes = new HashSet<Description>();
 
+		// PROCESSING ONLY PROPERTIES FIRST
+		
 		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) {
 
 			if (equivalenceSet.size() < 2)
 				continue;
 
-			/*
-			 * Avoiding processing nodes two times, but assign the equivalentMap
-			 */
 			boolean ignore = false;
 
 			for (Description node : equivalenceSet) {
-
-				if (!ignore && processedNodes.contains(node)) {
+				if (processedNodes.contains(node) || !(node instanceof Property)) { 
 					ignore = true;
+					break;
 				}
-				// assign to each node the equivalent map set
-				//equivalencesMap.put(node, equivalenceSet);
-
-				if (!ignore && !(node instanceof Property)) {
-					ignore = true;
-				}
-
 			}
-
+			
 			/*
 			 * We consider first the elements that are connected with other
 			 * named roles, checking if between their parents there is an
@@ -258,12 +250,9 @@ public class DAGBuilder {
 
 			if (!ignore) {
 
-				Iterator<Description> iterator = equivalenceSet.iterator();
-				while (iterator.hasNext()) {
-					Description representative = iterator.next();
+				for (Description representative : equivalenceSet) {
 
-					Set<DefaultEdge> edges = graph.outgoingEdgesOf(representative);
-					for (DefaultEdge outEdge : edges) {
+					for (DefaultEdge outEdge : graph.outgoingEdgesOf(representative)) {
 						Description target = graph.getEdgeTarget(outEdge);
 
 						if (processedNodes.contains(target))
@@ -297,24 +286,18 @@ public class DAGBuilder {
 
 			// if it is inverse I search a not inverse element as representative
 			if (((Property) representative).isInverse()) {
-				boolean notInverse = false;
-				for (Description equivalent : equivalenceSet) {
-					if (equivalent instanceof Property
-							&& !((Property) equivalent).isInverse()) {
-						notRepresentative = representative;
+				notRepresentative = representative;
+				representative = null;
+				for (Description equivalent : equivalenceSet) { // all equivalents are properties!
+					if (!((Property) equivalent).isInverse()) {
 						representative = equivalent;
-						notInverse = true;
 						break;
 					}
 				}
-				if (!notInverse)
-					representative = null; // if all inverse they will be added
-											// later in another set with
-											// property
 			}
 
-			if (representative == null)
-				continue;
+			if (representative == null) // equivalence class contains inverses only 
+				continue;				// they will be added when we consider their properties
 
 			Property prop = (Property) representative;
 			Description inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
@@ -397,6 +380,8 @@ public class DAGBuilder {
 
 		// processedNodes.clear();
 
+		// PROCESS CLASES ONLY
+		
 		for (EquivalenceClass<Description> equivalenceClassSet : equivalenceClassSets) {
 
 			if (equivalenceClassSet.size() < 2)
@@ -404,14 +389,10 @@ public class DAGBuilder {
 			
 			boolean ignore = false;
 			for (Description node : equivalenceClassSet) {
-
-				if (!ignore && processedClassNodes.contains(node)
-						|| node instanceof Property) {
+				if (processedClassNodes.contains(node) || (node instanceof Property)) {
 					ignore = true;
 					break;
-
 				}
-
 			}
 			if (ignore)
 				continue;
@@ -439,7 +420,6 @@ public class DAGBuilder {
 							notRepresentative = representative;
 							representative = equivalent;
 							namedElement = true;
-
 							break;
 						}
 					}
@@ -454,9 +434,7 @@ public class DAGBuilder {
 						if (element.equals(representative)) {
 							replacements.remove(element);
 							continue;
-
 						}
-
 						replacements.put(element, representative);
 					}
 
@@ -489,17 +467,9 @@ public class DAGBuilder {
 				if (representative instanceof PropertySomeRestriction) {
 					
 					for (Description equivalent : equivalenceClassSet) {
-						// Description equivalent=replacements.get(e);
-						// if(equivalent==null)
-						// equivalent=e;
 						if (equivalent instanceof OClass) {
 							notRepresentative = representative;
 							representative = equivalent;
-							// namedElement=true;
-							// replacements.put(notRepresentative,
-							// representative);
-							// equivalencesMap.put(notRepresentative,
-							// equivalenceSet);
 							break;
 						}
 					}
@@ -507,13 +477,11 @@ public class DAGBuilder {
 				}
 
 				processedClassNodes.add(representative);
-				// equivalencesMap.put(representative, equivalenceClassSet);
 
 				while (iterator.hasNext()) {
 
 					Description eliminatedNode = iterator.next();
-
-					
+				
 					if (eliminatedNode.equals(representative)
 							& notRepresentative != null)
 						eliminatedNode = notRepresentative;
@@ -527,16 +495,17 @@ public class DAGBuilder {
 					 * in the first part with property if substitute check if
 					 * its replacements still has to be processed
 					 */
-					if (replacement != null)
+					if (replacement != null) {
 						if (!processedClassNodes.contains(replacement)) {
 							processedClassNodes.add(eliminatedNode);
 							eliminatedNode = replacement;
 							replacements.put(eliminatedNode, representative);
-						} else {
+						} 
+						else {
 							processedClassNodes.add(eliminatedNode);
 							continue;
 						}
-					
+					}
 					removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
 
 					processedClassNodes.add(eliminatedNode);
@@ -583,35 +552,6 @@ public class DAGBuilder {
 	}
 	
 
-	/*
-	 * Alterntative version but slower to eliminate redundances public void
-	 * eliminateRedundances(){ LinkedList<DefaultEdge> redundantEdges = new
-	 * LinkedList<DefaultEdge>(); TopologicalOrderIterator<Description,
-	 * DefaultEdge> iterator =new TopologicalOrderIterator<Description,
-	 * DefaultEdge>(modifiedGraph);
-	 * 
-	 * while (iterator.hasNext()) { Description vertex= iterator.next();
-	 * Set<DefaultEdge> edges = modifiedGraph.outgoingEdgesOf(vertex); for
-	 * (DefaultEdge edge : edges) { for (DefaultEdge edge2 : edges) {
-	 * if(edge.equals(edge2)) continue;
-	 * if(isReachable(modifiedGraph.getEdgeTarget(edge),
-	 * modifiedGraph.getEdgeTarget(edge2)))
-	 * 
-	 * redundantEdges.add(edge2); } } }
-	 * 
-	 * 
-	 * modifiedGraph.removeAllEdges(redundantEdges);
-	 * 
-	 * 
-	 * 
-	 * }
-	 * 
-	 * boolean isReachable(Description node, Description vertex){
-	 * BreadthFirstIterator<Description, DefaultEdge> iterator= new
-	 * BreadthFirstIterator<Description, DefaultEdge>(modifiedGraph, node);
-	 * while(iterator.hasNext()){ Description parent=iterator.next();
-	 * if(parent.equals(vertex)) return true; } return false; }
-	 */
 
 	
 	
