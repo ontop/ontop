@@ -272,7 +272,6 @@ public class DAGBuilder {
 						break;
 				}
 			}
-
 			if (ignore)
 				continue;
 
@@ -282,12 +281,12 @@ public class DAGBuilder {
 			
 			// find a representative 
 			Property prop = null;
-			for (Description representative : equivalenceSet) {
+			for (Description representative : equivalenceSet) 
 				if (!((Property) representative).isInverse()) {
 					prop = (Property)representative;
 					break;
 				}
-			}
+			
 			if (prop == null) 	// equivalence class contains inverses only 
 				continue;		// they will be added when we consider their properties
 
@@ -354,12 +353,11 @@ public class DAGBuilder {
 				continue;
 			
 			boolean ignore = false;
-			for (Description node : equivalenceClassSet) {
+			for (Description node : equivalenceClassSet) 
 				if (processedClassNodes.contains(node) || (node instanceof Property)) {
 					ignore = true;
 					break;
 				}
-			}
 			if (ignore)
 				continue;
 
@@ -381,7 +379,6 @@ public class DAGBuilder {
 				if (representative instanceof PropertySomeRestriction) {
 					boolean namedElement = false;
 					for (Description equivalent : equivalenceClassSet) {
-
 						if (equivalent instanceof OClass) {
 							notRepresentative = representative;
 							representative = equivalent;
@@ -424,7 +421,8 @@ public class DAGBuilder {
 					processedClassNodes.add(eliminatedNode);
 				}
 
-			} else { // If a node has not yet been assigned
+			} 
+			else { // If a node has not yet been assigned
 
 				
 				Description notRepresentative = null;
