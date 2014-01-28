@@ -490,99 +490,99 @@ public class MappingAnalyzer {
 
 		// Collect all known column aliases
 		HashMap<String, String> aliasMap = queryParsed.getAliasMap();
-
+		
 		int offset = 0; // the index offset
 
 		for (RelationJSQL table : tableList) {
-
+			
 			String tableName = table.getTableName();
 			String tableGivenName = table.getGivenName();
 			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
 			if (def == null) {
-				def = dbMetaData.getDefinition(tableName);
-				if (def == null) {
-					throw new RuntimeException(
-							"Definition not found for table '" + tableGivenName
-									+ "'.");
-				}
+				 def = dbMetaData.getDefinition(tableName);
+				 if (def == null) {
+					 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
+				 }
 			}
 			int size = def.countAttribute();
 
 			for (int i = 1; i <= size; i++) {
 				// assigned index number
 				int index = i + offset;
-
+				
 				// simple attribute name
-				String columnName = dbMetaData.getAttributeName(tableGivenName,
-						i);
-
+				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
+				
+				String COLUMNNAME = columnName.toUpperCase();
+				String columnname = columnName.toLowerCase();
+				
 				lookupTable.add(columnName, index);
-
-				String lowercaseColumn = columnName.toLowerCase();
-
-				if (aliasMap.containsKey(lowercaseColumn)) { // register the
-																// alias name,
-																// if any
-					lookupTable.add(aliasMap.get(lowercaseColumn), columnName);
+				if (aliasMap.containsKey(columnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(columnName), columnName);
 				}
-
+				
+				// If the column name in the select string is in lower case
+				if (aliasMap.containsKey(columnname)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(columnname), columnName);
+				}
+				
+				// If the column name in the select string is in upper case
+				if (aliasMap.containsKey(COLUMNNAME)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(COLUMNNAME), columnName);
+				}
+				
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
 				lookupTable.add(tableColumnName, index);
-
-				// attribute name with table name prefix
-				String tablecolumnname = tableColumnName.toLowerCase();
-				if (aliasMap.containsKey(tablecolumnname)) { // register the
-																// alias name,
-																// if any
-					lookupTable.add(aliasMap.get(tablecolumnname),
-							tableColumnName);
+				if (aliasMap.containsKey(tableColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tableColumnName), tableColumnName);
 				}
-
+				
 				// attribute name with table given name prefix
 				String givenTableColumnName = tableGivenName + "." + columnName;
 				lookupTable.add(givenTableColumnName, tableColumnName);
-
-				String giventablecolumnname = givenTableColumnName
-						.toLowerCase();
-				if (aliasMap.containsKey(giventablecolumnname)) { // register
-																	// the alias
-																	// name, if
-																	// any
-					lookupTable.add(aliasMap.get(giventablecolumnname),
-							tableColumnName);
+				if (aliasMap.containsKey(givenTableColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(givenTableColumnName), tableColumnName);
+				}
+				
+				// attribute name with table name prefix
+				String tablecolumnname = tableName + "." + columnname;
+				//lookupTable.add(tablecolumnname, tableColumnName);
+				if (aliasMap.containsKey(tablecolumnname)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tablecolumnname), tableColumnName);
 				}
 
+
+				// attribute name with table name prefix
+				String tableCOLUMNNAME = tableName + "." + COLUMNNAME;
+				//lookupTable.add(tableColumnName, columnName);
+				if (aliasMap.containsKey(tableCOLUMNNAME)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(tableCOLUMNNAME), tableColumnName);
+				}
+
+				
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData
-						.getFullQualifiedAttributeName(tableGivenName, i);
+				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
 				lookupTable.add(qualifiedColumnName, tableColumnName);
-				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
-				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the
-																	// alias
-																	// name, if
-																	// any
-					lookupTable.add(aliasMap.get(qualifiedcolumnname),
-							tableColumnName);
+				if (aliasMap.containsKey(qualifiedColumnName)) { // register the alias name, if any
+					lookupTable.add(aliasMap.get(qualifiedColumnName), tableColumnName);
 				}
-
+				
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
-				if (tableAlias != null) {
-					String qualifiedColumnAlias = dbMetaData
-							.getFullQualifiedAttributeName(tableGivenName,
-									tableAlias, i);
+				if (tableAlias!=null) {
+					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
-					String aliasColumnName = tableAlias.toLowerCase() + "."
-							+ lowercaseColumn;
-					if (aliasMap.containsKey(aliasColumnName)) { // register the
-																	// alias
-																	// name, if
-																	// any
-						lookupTable.add(aliasMap.get(aliasColumnName),
-								qualifiedColumnAlias);
+					if (aliasMap.containsKey(qualifiedColumnAlias)) {
+						lookupTable.add(aliasMap.get(qualifiedColumnAlias), qualifiedColumnAlias);
+					}
+					if (aliasMap.containsKey(qualifiedColumnAlias.toLowerCase())) {
+						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toLowerCase()), qualifiedColumnAlias);
 					}
 
+					if (aliasMap.containsKey(qualifiedColumnAlias.toUpperCase())) {
+						lookupTable.add(aliasMap.get(qualifiedColumnAlias.toUpperCase()), qualifiedColumnAlias);
+					}
 				}
 			}
 			offset += size;
