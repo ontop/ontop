@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -43,11 +44,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogT
 import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -102,6 +105,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
 	
+	/**
+	 * This field will contain the number of mappings that an ans predicate is related to.
+	 * If it is more than 1, we will not unfold it in the left join case.
+	 */
+	private Map<Predicate, Integer> mapCount = new HashMap<Predicate,Integer>();
+	
 	
 	/***
 	 * Leaf predicates are those that do not appear in the head of any rule. If
@@ -127,7 +136,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * Creating a local index for the rules according to their predicate
 		 */
 
-	
+		//TODO: this should not be mappings when working with the query!!
 		for (CQIE mappingrule : unfoldingProgram.getRules()) {
 			Function head = mappingrule.getHead();
 
@@ -155,7 +164,23 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		extensionalPredicates.addAll(allPredicates);
 	}
 	
-	
+	/**
+	 * Since we need the mappings here to treat correctly the unfolding of the leftjoin even when we unfold with respect to the program alone
+	 * @param unfoldingProgram
+	 * @param hashMap
+	 * @param mappings2
+	 */
+/*	public DatalogUnfolder(DatalogProgram unfoldingProgram,
+			HashMap<Predicate, List<Integer>> hashMap,
+			Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings2) {
+		// TODO Auto-generated constructor stub
+		
+		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
+		
+		
+		
+	}*/
+
 	@Override
 	/***
 	 * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
@@ -376,12 +401,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
 				Predicate pred = predicatesInBottomUp.get(predIdx);
+				Predicate preFather =  depGraph.getFatherPredicate(pred);
+				
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
 					ruleIndex = depGraph.getRuleIndex();
 					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 					Collection<CQIE> workingRules = ruleIndex.get(pred);
-					Predicate preFather =  depGraph.getFatherPredicate(pred);
+				
 					
 					fatherCollection.clear();
 					Collection<CQIE> ruleCollection = ruleIndexByBody.get(pred);
@@ -461,9 +488,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						
 					} // end for workingRules
 
-				} else { // it is an extensional predicate
-					continue;
-				}
+				} //else { // it is an extensional predicate
+					
+					//int numMap= mappings.get(pred).size();
+					//mapCount.put(preFather, numMap);
+					//continue;
+				//}
 
 			} // end for over the ordered predicates
 			return rcount[1];
@@ -665,11 +695,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			
 			
-			
+			//TODO: check what happens here when the concept has several mappings and it appears several times in the rule
 			
 			//Determine if there is a need to keep unfolding pred
 			if (ruleIndexByBody.get(pred).isEmpty()){
 				return false; //I finish with pred I can move on
+			}else if (result.contains(fatherRule)){ 
+				return false; // otherwise it will loop for ever. I am in the case when a concept in the LJ has several mappings
 			}else{
 				return true; // keep doing the loop
 			}
@@ -802,8 +834,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			
 			
-			
-			/*
+            boolean hasOneMapping = true ;
+            if (includeMappings && mappings.containsKey(resolvPred)){
+                hasOneMapping = mappings.get(resolvPred).size()<2;
+            }  
+            
+            /*
 			 * If there are none, the atom is logically empty, careful, LEFT JOIN
 			 * alert!
 			 */
@@ -817,12 +853,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					result = new LinkedList<CQIE>();
 					result.add(newRuleWithNullBindings);
 				}
-			} else {
+			} else if (hasOneMapping || !isSecondAtomInLeftJoin){
 				
 				//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
 				result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+			} else if (!hasOneMapping && isSecondAtomInLeftJoin) {
+				// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and 
+				result = new LinkedList<CQIE>();
+				result.add(rule);
+				result.addAll(rulesDefiningTheAtom);
 			}
-
+			
+			
+			//TODO: improve this... looks awkward 
 			if (result == null) {
 				// this is the case for second atom in leaft join generating more
 				// than one rull, we
@@ -1060,7 +1103,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                      * This is a data atom, it should be unfolded with the usual
                      * resolution algorithm.
                      */
-
+					
                     boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
                     List<CQIE> result = new LinkedList<CQIE>();
                     Predicate pred = focusLiteral.getFunctionSymbol();
@@ -1215,9 +1258,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// if we are in a left join, we need to make sure the fresh rule
 			// has only one data atom
 			if (isLeftJoin) {
-			CQIE foldedJoinsRule = foldJOIN(freshRule);
-			if (foldedJoinsRule != null)
-				freshRule = foldedJoinsRule;
+				CQIE foldedJoinsRule = foldJOIN(freshRule);
+				if (foldedJoinsRule != null)
+					freshRule = foldedJoinsRule;
 			}
 
 			/*
@@ -1262,7 +1305,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			rulesGeneratedSoFar += 1;
 
-			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
+
+
+			
+			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
 				/*
 				 * We had disjunction on the second atom of the lejoin, that is,
 				 * more than two rules that unified. LeftJoin is not

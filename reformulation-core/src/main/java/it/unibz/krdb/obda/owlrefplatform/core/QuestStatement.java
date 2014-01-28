@@ -442,6 +442,7 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Translated query: \n{}", program);
 
+			//TODO: cant we use here QuestInstance???
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 			
 			//removeNonAnswerQueries(program);
