@@ -419,33 +419,25 @@ public class DAGBuilder {
 			} 
 			else { // If a node has not yet been assigned
 
-				
-				Description notRepresentative = null;
-
 				// I want to consider a named class as representative element
 				if (representative instanceof PropertySomeRestriction) {
 					
-					for (Description equivalent : equivalenceClassSet) {
+					for (Description equivalent : equivalenceClassSet) 
 						if (equivalent instanceof OClass) {
-							notRepresentative = representative;
 							representative = equivalent;
 							break;
 						}
-					}
-					
 				}
 
 				processedClassNodes.add(representative);
 
-				while (iterator.hasNext()) {
-
-					Description eliminatedNode = iterator.next();
-				
-					if (eliminatedNode.equals(representative)
-							& notRepresentative != null)
-						eliminatedNode = notRepresentative;
+				for (Description eliminatedNode : equivalenceClassSet) {
 
 					Description replacement = replacements.get(eliminatedNode);
+					Description r = (replacement == null) ? eliminatedNode : replacement;
+				
+					if (r.equals(representative))
+						continue;
 
 					replacements.put(eliminatedNode, representative);
 
@@ -481,33 +473,21 @@ public class DAGBuilder {
 		 * the representative node
 		 */
 
-		Set<DefaultEdge> edges = new HashSet<DefaultEdge>(
-				graph.incomingEdgesOf(eliminatedNode));
-
-		for (DefaultEdge incEdge : edges) {
+		for (DefaultEdge incEdge : graph.incomingEdgesOf(eliminatedNode)) {
 			Description source = graph.getEdgeSource(incEdge);
-			graph.removeAllEdges(source, eliminatedNode);
 
-			if (source.equals(representative))
-				continue;
-
-			graph.addEdge(source, representative);
+			if (!source.equals(representative))
+				graph.addEdge(source, representative);
 		}
 
-		edges = new HashSet<DefaultEdge>(
-				graph.outgoingEdgesOf(eliminatedNode));
-
-		for (DefaultEdge outEdge : edges) {
+		for (DefaultEdge outEdge : graph.outgoingEdgesOf(eliminatedNode)) {
 			Description target = graph.getEdgeTarget(outEdge);
-			graph.removeAllEdges(eliminatedNode, target);
 
-			if (target.equals(representative))
-				continue;
-			
-			graph.addEdge(representative, target);
+			if (!target.equals(representative))
+				graph.addEdge(representative, target);
 		}
 
-		graph.removeVertex(eliminatedNode);		
+		graph.removeVertex(eliminatedNode);		// removes all edges as well
 	}
 	
 
