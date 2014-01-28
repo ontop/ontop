@@ -320,13 +320,13 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for ANY
 	public void test_3_8_1() {
 		// ANY AND SOME are the same
 		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)");
 		printJSQL("test_3_8_1", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
@@ -338,12 +338,13 @@ public class ParserTest extends TestCase {
 
 	}
 
+//	ADDED EXCEPTION IN JSQL for ANY
 	public void test_3_9_1() {
-		// ANY AND SOME are the same
+		// ANY AND SOME are the same 
 		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)");
 		printJSQL("test_3_9_1", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
@@ -370,12 +371,12 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for ALL
 	public void test_4_4() {
 		final boolean result = parseJSQL("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
 				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)");
 		printJSQL("test_4_4", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
@@ -462,11 +463,11 @@ public class ParserTest extends TestCase {
 		assertTrue(result);
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for subqueries with WHERE conditions
 	public void test_5_10() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t2.score FROM (SELECT id, name FROM student WHERE student.name='John') AS t1 JOIN grade as t2 ON t1.id=t2.st_id");
 		printJSQL("test_5_10", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
@@ -486,76 +487,76 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for subqueries with joins
 	public void test_6_2() {
 		final boolean result = parseJSQL("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1");
 		printJSQL("test_6_2", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for subqueries with joins
 	public void test_6_3() {
 		final boolean result = parseJSQL("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1 WHERE t1.score>=25");
 		printJSQL("test_6_3", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for concat
 	public void test_7_1() {
 		final boolean result = parseJSQL("SELECT ('ID-' || student.id) as sid FROM student");
 		printJSQL("test_7_1", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for operation
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
 	public void test_8_1() {
 		final boolean result = parseJSQL("SELECT name FROM student UNION ALL SELECT name FROM erasmus");
 		printJSQL("test_8_1", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
 	public void test_8_2() {
 		final boolean result = parseJSQL("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax");
 		printJSQL("test_8_2", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
 	public void test_8_3() {
 		final boolean result = parseJSQL("SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20");
 		printJSQL("test_8_3", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
 	public void test_8_4() {
 		final boolean result = parseJSQL("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus");
 		printJSQL("test_8_4", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
 	public void test_8_5() {
 		final boolean result = parseJSQL("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id "
 				+ "UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
 		printJSQL("test_8_5", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
