@@ -377,30 +377,25 @@ public class DAGBuilder {
 
 				// I want to consider a named class as representative element
 				if (representative instanceof PropertySomeRestriction) {
-					boolean namedElement = false;
-					for (Description equivalent : equivalenceClassSet) {
+					notRepresentative = representative; // save -- it may be the first element up to replacements
+					representative = null;
+					
+					for (Description equivalent : equivalenceClassSet) 
 						if (equivalent instanceof OClass) {
-							notRepresentative = representative;
 							representative = equivalent;
-							namedElement = true;
 							break;
 						}
-					}
 
-					// //if all propertysomerestriction they have been added
-					// before when working over roles
-					
-					if (!namedElement)
+					// if none of the equivalences is a named class 
+					// then they all have been added before when working over properties
+					if (representative == null)
 						continue;
 
-					for (Description element : equivalenceClassSet) {
-						if (element.equals(representative)) {
+					for (Description element : equivalenceClassSet) 
+						if (element.equals(representative)) 
 							replacements.remove(element);
-							continue;
-						}
-						replacements.put(element, representative);
-					}
-
+						else
+							replacements.put(element, representative);
 				}
 				processedClassNodes.add(representative);
 
