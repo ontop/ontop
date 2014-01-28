@@ -394,6 +394,8 @@ public class MappingAnalyzer {
 			funct = dfac.getFunctionSubstract(t1, t2);
 		else if (op.equals("*"))
 			funct = dfac.getFunctionMultiply(t1, t2);
+		else if (op.equals("LIKE"))
+			funct = dfac.getFunctionLike(t1, t2);
 		else
 			throw new RuntimeException("Unknown opertor: " + op);
 

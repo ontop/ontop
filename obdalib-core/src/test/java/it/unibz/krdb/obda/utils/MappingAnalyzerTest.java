@@ -180,4 +180,10 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
+
+	public void testAnalysis_21() throws Exception {
+		runAnalysis(
+				"select id, first_name, last_name from Student where last_name like '%lli'",
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
+	}
 }

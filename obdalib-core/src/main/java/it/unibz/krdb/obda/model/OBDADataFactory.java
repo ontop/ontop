@@ -140,6 +140,8 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionIsNotNull(Term term);
 
 	public Function getLANGMATCHESFunction(Term term1, Term term2);
+	
+	public Function getFunctionLike(Term term1, Term term2);
 
 	/*
 	 * Numerical arithmethic functions

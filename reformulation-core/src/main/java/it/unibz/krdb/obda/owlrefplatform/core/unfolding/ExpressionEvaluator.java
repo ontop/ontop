@@ -268,6 +268,8 @@ public class ExpressionEvaluator {
 			return evalLangMatches(term);
 		} else if (pred == OBDAVocabulary.SPARQL_REGEX) {
 			return evalRegex(term);
+		} else if (pred == OBDAVocabulary.SPARQL_LIKE) {
+				return term;
 		} else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "

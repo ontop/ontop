@@ -174,20 +174,22 @@ public class LungCancerH2TestVirtual extends TestCase {
 			
 		
 		
-//		String query = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm ?y }";
+		String query = "PREFIX : <http://example.org/> SELECT * WHERE { ?y :hasStage <http://example.org/stages/limi> }";
 		
 		try {
-			executeQueryAssertResults(query3, st, 1);
-			executeQueryAssertResults(query4, st, 2);
-			executeQueryAssertResults(query1, st, 2);
-			executeQueryAssertResults(query2, st, 1);
+			executeQueryAssertResults(query, st, 1);
 			
-			
-			executeGraphQueryAssertResults(query5, st, 8);
-			executeGraphQueryAssertResults(query6, st, 34);
-			executeGraphQueryAssertResults(query7, st, 4);
-			executeGraphQueryAssertResults(query8, st, 16);
-			executeGraphQueryAssertResults(query9, st, 9);
+//			executeQueryAssertResults(query3, st, 1);
+//			executeQueryAssertResults(query4, st, 2);
+//			executeQueryAssertResults(query1, st, 2);
+//			executeQueryAssertResults(query2, st, 1);
+//			
+//			
+//			executeGraphQueryAssertResults(query5, st, 8);
+//			executeGraphQueryAssertResults(query6, st, 34);
+//			executeGraphQueryAssertResults(query7, st, 4);
+//			executeGraphQueryAssertResults(query8, st, 16);
+//			executeGraphQueryAssertResults(query9, st, 9);
 			 // NOTE CHECK THE CONTENT OF THIS QUERY, it seems to return the correct number of results but incorrect content, compare to the SELECT version which is correct
 			
 
