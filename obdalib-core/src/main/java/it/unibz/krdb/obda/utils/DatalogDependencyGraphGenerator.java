@@ -168,7 +168,7 @@ public class DatalogDependencyGraphGenerator {
 	 * 
 	 * @param rule
 	 */
-	private void updateRuleIndexByBodyPredicate(CQIE rule) {
+	public void updateRuleIndexByBodyPredicate(CQIE rule) {
 		for (Function bodyAtom : rule.getBody()) {
 
 			if (bodyAtom.isDataFunction()) {
@@ -185,6 +185,75 @@ public class DatalogDependencyGraphGenerator {
 			}
 		}
 	}
+	
+	
+	
+	/**
+	 * Removes the old indexes given by a rule.
+	 * 
+	 * @param rule
+	 */
+	public void removeOldRuleIndexByBodyPredicate(CQIE rule) {
+		for (Function bodyAtom : rule.getBody()) {
+
+			if (bodyAtom.isDataFunction()) {
+				Predicate functionSymbol = bodyAtom.getFunctionSymbol();
+				if (ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
+					ruleIndexByBodyPredicate.remove(functionSymbol, rule);
+				}
+			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
+				removeRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
+			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
+				continue;
+			} else {
+				throw new IllegalStateException("Unknown Function");
+			}
+		}
+	}
+
+	
+	
+	/**
+	 * 
+	 * This is a helper method for {@link #removeRuleIndexByBodyPredicate}.
+	 * 
+	 * This method traverses in an atom, and removes the predicates  in the
+	 * bodyIndex
+	 * @param rule 
+	 * 
+	 * 
+	 * @param bodyAtom
+	 */
+	private void removeRuleIndexByBodyPredicate_traverseBodyAtom(
+			CQIE rule, Function bodyAtom) {
+
+		Queue<Term> queueInAtom = new LinkedList<Term>();
+
+		queueInAtom.add(bodyAtom);
+		while (!queueInAtom.isEmpty()) {
+			Term queueHead = queueInAtom.poll();
+			if (queueHead instanceof Function) {
+				Function funcRoot = (Function) queueHead;
+				
+				if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
+						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
+					for (Term term : funcRoot.getTerms()) {
+						queueInAtom.add(term);
+					}
+				}  else if (funcRoot.isDataFunction()) {
+					ruleIndexByBodyPredicate.remove(funcRoot.getFunctionSymbol(), rule);
+				}
+			} else {
+				// NO-OP
+			}
+
+		}
+
+	}	
+	
+	
+	
+	
 	
 	/**
 	 * 
@@ -214,7 +283,9 @@ public class DatalogDependencyGraphGenerator {
 						queueInAtom.add(term);
 					}
 				}  else if (funcRoot.isDataFunction()) {
-					ruleIndexByBodyPredicate.put(funcRoot.getFunctionSymbol(), rule);
+					if (!ruleIndexByBodyPredicate.containsEntry(funcRoot.getFunctionSymbol(), rule)){
+						ruleIndexByBodyPredicate.put(funcRoot.getFunctionSymbol(), rule);
+					}
 				}
 			} else {
 				// NO-OP
@@ -283,8 +354,9 @@ public class DatalogDependencyGraphGenerator {
 	 * @return 
 	 */
 	public void addRuleToRuleIndex(Predicate pred, CQIE rule) {
-		
-		ruleIndex.put(pred, rule);
+		if (!ruleIndex.containsEntry(pred, rule)){
+			ruleIndex.put(pred, rule);
+		}
 	}
 	
 	

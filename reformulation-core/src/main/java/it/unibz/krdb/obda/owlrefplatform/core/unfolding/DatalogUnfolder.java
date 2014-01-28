@@ -98,7 +98,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
 	private Multimap<Predicate, CQIE> ruleIndex;
-	
+	private Multimap<Predicate, CQIE> ruleIndexByBody;
 
 	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
 	
@@ -371,7 +371,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
-			
+			List<CQIE> fatherCollection = new LinkedList<CQIE>();
+
 			for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
 				Predicate pred = predicatesInBottomUp.get(predIdx);
@@ -381,21 +382,25 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 					Collection<CQIE> workingRules = ruleIndex.get(pred);
 					Predicate preFather =  depGraph.getFatherPredicate(pred);
-					Collection<CQIE> fatherWorkingRules =new LinkedList<CQIE>();
-
 					
-					for (CQIE fatherRule:  ruleIndexByBody.get(pred)) {
-						CQIE clonRule = fatherRule.clone();
-						fatherWorkingRules.add(clonRule);
+					fatherCollection.clear();
+					Collection<CQIE> ruleCollection = ruleIndexByBody.get(pred);
+	
+					
+					
+					
+					for (CQIE fatherRule:  ruleCollection) {
+						CQIE copyruleCqie = fatherRule.clone();
+						fatherCollection.add(copyruleCqie);
 					}
 					
-					for (CQIE rule : fatherWorkingRules) {
+					for (CQIE fatherRule : fatherCollection) {
 						
-						int queryIdx=workingList.indexOf(rule);
+						int queryIdx=workingList.indexOf(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
-						List<Term> tempList = getBodyTerms(rule);
-						List<CQIE> result = computePartialEvaluation( pred, tempList, rule, rcount, termidx, false,includeMappings);
+						List<Term> fatherTerms = getBodyTerms(fatherRule);
+						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, false,includeMappings);
 				
 
 						
@@ -422,27 +427,38 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						 * Each of the new queries could still require more steps of
 						 * evaluation, so we decrease the index.
 						 */
+						workingList.remove(queryIdx);
+						workingList.removeAll(workingRules);
+
 						for (CQIE newquery : result) {
 							if (!workingList.contains(newquery)) {
-								workingList.remove(queryIdx);
-								workingList.removeAll(workingRules);
-								workingList.add(queryIdx, newquery);
-
+								
 								//Here we update the index head arom -> rule
-								depGraph.removeRuleFromRuleIndex(preFather,rule);
+								depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
 								depGraph.addRuleToRuleIndex(preFather, newquery);
 							
-								//Here we update the index body atom -> rule
-								for (Term termPredicate: tempList){
-									if (termPredicate instanceof Function){
-										Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
-										depGraph.removeRuleFromBodyIndex(mypred, rule);
-										depGraph.addRuleToBodyIndex(mypred, newquery);
-									}
-								}
 								
-							}
-						}
+								//Delete the rules from workingList that have been touched
+								workingList.add(queryIdx, newquery);
+
+							
+								//Here we update the index body atom -> rule
+
+								
+								//I remove all the old indexes	with the old rule
+								depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
+								
+								
+								//I update the new indexes with the new rule
+								depGraph.updateRuleIndexByBodyPredicate(newquery);
+								
+							} //end if
+						}// end for result
+						
+						
+						
+						
+						
 					} // end for workingRules
 
 				} else { // it is an extensional predicate
@@ -463,6 +479,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param workingList
 		 */
 		private void computePartialEvaluationWRTMappings(List<CQIE> workingList) {
+
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
 			
@@ -471,7 +488,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			boolean keepLooping=true;
 			extensionalPredicates =  depGraph.getExtensionalPredicates();
 			ruleIndex = depGraph.getRuleIndex();
-			Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
+			ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
@@ -563,18 +580,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 
 
-			List<Term> bodyTerms = getBodyTerms(fatherRule);
 
 			//Update the bodyIndex
-		
-			for (Term termPredicate: bodyTerms){
-				if (termPredicate instanceof Function){
-					Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
-					if (extensionalPredicates.contains(mypred)){
-						depGraph.removeRuleFromBodyIndex(mypred, fatherRule);
-					}
-				}
-			} //end for terms in rule
+	
+			depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
+			
 			return true;
 		
 	
@@ -627,11 +637,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 
 
-				List<Term> bodyTerms = getBodyTerms(newquery);
+				//List<Term> bodyTerms = getBodyTerms(newquery);
 
 				//Update the bodyIndex
-			
-				for (Term termPredicate: bodyTerms){
+				
+				depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
+				depGraph.updateRuleIndexByBodyPredicate(newquery);
+
+				
+				
+/*				for (Term termPredicate: bodyTerms){
 					if (termPredicate instanceof Function){
 						Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
 						if (extensionalPredicates.contains(mypred)){
@@ -645,11 +660,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						}
 					}
 				} //end for terms in rule
+			*/
 			} // end for queries in result
 			
+			
+			
+			
+			
 			//Determine if there is a need to keep unfolding pred
-			if (!hasPred){
-				depGraph.removeRuleFromBodyIndex(pred, fatherRule);
+			if (ruleIndexByBody.get(pred).isEmpty()){
 				return false; //I finish with pred I can move on
 			}else{
 				return true; // keep doing the loop
@@ -1281,7 +1300,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Function> newbody = new LinkedList<Function>();
 		HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
 		HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
-
+		boolean containsVar=false;
 		// Here we build the new LJ body where we remove the 2nd
 		// data atom
 		for (Function atom : innerAtoms) {
@@ -1294,7 +1313,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					newbody.add(atom);
 				} else if (ArgumentAtoms != 2) {
 					newbody.add(atom);
-				} else {
+				} else if (ArgumentAtoms == 2){
 					// Here we keep the variables of the second LJ
 					// data argument
 					variablesArg2 = (HashSet<Variable>) atom.getReferencedVariables();
@@ -1308,8 +1327,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					} // end for removing variables
 					continue;
 				}
-			} else {
-				newbody.add(atom);
+				//TODO: is that correct?? what if there is a complex expression?????
+			} else if (atom.isBooleanFunction()&& ArgumentAtoms >=2){
+				for (Variable var: variablesArg2){
+					containsVar = atom.getReferencedVariables().contains(var);
+					if (containsVar){
+							innerAtoms.remove(atom);
+							break;
+						}
+				}
 			}
 
 		}// end for rule body

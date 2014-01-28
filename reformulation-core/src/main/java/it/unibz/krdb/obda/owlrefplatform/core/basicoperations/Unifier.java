@@ -229,7 +229,7 @@ public class Unifier {
 			 */
 			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
-				if (isequality && replacement!=null){
+				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL){
 					replacement = replacement.getReferencedVariables().iterator().next();
 				}
 				if (replacement != null){
