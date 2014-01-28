@@ -54,6 +54,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -475,8 +476,18 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(SubSelect subSelect) {
-		subSelect.getSelectBody().accept(this);
-		
+		if (subSelect.getSelectBody() instanceof PlainSelect) {
+
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
+
+			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
+				notSupported = true;
+			} else {
+				subSelBody.accept(this);
+			}
+		} else
+			notSupported = true;
+
 	}
 
 	@Override
@@ -589,6 +600,12 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		notSupported = true;
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
+		notSupported = true;
 	}
 
 	

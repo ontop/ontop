@@ -65,6 +65,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
@@ -166,8 +167,17 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(SubSelect subSelect) {
-		notSupported = true;
-	//	subSelect.getSelectBody().accept(this);
+		if (subSelect.getSelectBody() instanceof PlainSelect) {
+			
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
+			
+			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
+				notSupported = true;
+			} else {
+				subSelBody.accept(this);
+			}
+		} else
+			notSupported = true;
 	}
 
 	/*
@@ -459,5 +469,11 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		notSupported = true;
 		
 		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
+		notSupported = true;
 	}
 }
