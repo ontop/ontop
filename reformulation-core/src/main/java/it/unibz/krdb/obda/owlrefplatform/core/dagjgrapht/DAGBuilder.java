@@ -280,26 +280,17 @@ public class DAGBuilder {
 			 * 
 			 */
 			
-			Iterator<Description> iterator = equivalenceSet.iterator();
-			Description representative = iterator.next();
-			Description notRepresentative = null;
-
-			// if it is inverse I search a not inverse element as representative
-			if (((Property) representative).isInverse()) {
-				notRepresentative = representative;
-				representative = null;
-				for (Description equivalent : equivalenceSet) { // all equivalents are properties!
-					if (!((Property) equivalent).isInverse()) {
-						representative = equivalent;
-						break;
-					}
+			// find a representative 
+			Property prop = null;
+			for (Description representative : equivalenceSet) {
+				if (!((Property) representative).isInverse()) {
+					prop = (Property)representative;
+					break;
 				}
 			}
+			if (prop == null) 	// equivalence class contains inverses only 
+				continue;		// they will be added when we consider their properties
 
-			if (representative == null) // equivalence class contains inverses only 
-				continue;				// they will be added when we consider their properties
-
-			Property prop = (Property) representative;
 			Description inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
 			Description domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
 			Description range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
@@ -308,66 +299,43 @@ public class DAGBuilder {
 			processedNodes.add(domain);
 			processedNodes.add(range);
 
-			processedNodes.add(representative);
+			processedNodes.add(prop);
 
 			//remove all the equivalent node (eliminatedNode)
-			
-			while (iterator.hasNext()) {
-				Description eliminatedNode = iterator.next();
-				if (eliminatedNode.equals(representative)
-						& notRepresentative != null)
-					eliminatedNode = notRepresentative;
-				replacements.put(eliminatedNode, representative);
-
-				removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
+			for (Description eliminatedNode : equivalenceSet) {
+				if (eliminatedNode == prop)
+					continue;
+				
+				removeNodeAndRedirectEdges(graph, eliminatedNode, prop);
 				processedNodes.add(eliminatedNode);
+				replacements.put(eliminatedNode, prop);
 
-				if (eliminatedNode instanceof Property) {
+				/*
+				 * we need to collapse the inverses and existentials of the property
+				 */
 
-					/*
-					 * we are dealing with properties, so we need to also
-					 * collapse the inverses and existentials
-					 */
+				Property equiprop = (Property) eliminatedNode;
+				Description equivinverseNode = fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse());
+				Description equivDomainNode = fac.createPropertySomeRestriction(equiprop.getPredicate(), equiprop.isInverse());
+				Description equivRangeNode = fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse());
 
-					Property equiprop = (Property) eliminatedNode;
-					Description equivinverseNode = fac.createProperty(
-							equiprop.getPredicate(), !equiprop.isInverse());
-
-					Description equivDomainNode = fac.createPropertySomeRestriction(
-									equiprop.getPredicate(), equiprop.isInverse());
-
-					Description equivRangeNode = fac.createPropertySomeRestriction(
-									equiprop.getPredicate(), !equiprop.isInverse());
-
-					/* 
-					 * Particular case in which the representative is in a cycle
-					 * with its inverse. We add everything to the named role. 
-					 */
+				removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
+				processedNodes.add(equivDomainNode);
+				replacements.put(equivDomainNode, domain);
+				
+				if (!equivinverseNode.equals(prop))  {
+					 // the representative is not equivalent to its inverse 
+					//   (if it is, we do not need to do anything with its inverse, 
+					//        i.e., the representative itself)
+					removeNodeAndRedirectEdges(graph, equivinverseNode, inverse);
+					processedNodes.add(equivinverseNode);
+					replacements.put(equivinverseNode, inverse);
 					
-					if (equivinverseNode.equals((Property) representative)) {
-						removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
-						processedNodes.add(equivDomainNode);
-
-						replacements.put(equivDomainNode, domain);
-					}
-
-					else {
-						removeNodeAndRedirectEdges(graph, equivinverseNode, inverse);
-						processedNodes.add(equivinverseNode);
-						removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
-						processedNodes.add(equivDomainNode);
-						removeNodeAndRedirectEdges(graph, equivRangeNode, range);
-						processedNodes.add(equivRangeNode);
-
-						replacements.put(equivinverseNode, inverse);
-						replacements.put(equivDomainNode, domain);
-						replacements.put(equivRangeNode, range);
-					}
+					removeNodeAndRedirectEdges(graph, equivRangeNode, range);
+					processedNodes.add(equivRangeNode);
+					replacements.put(equivRangeNode, range);
 				}
-
 			}
-
-			
 		}
 
 		/*
@@ -377,8 +345,6 @@ public class DAGBuilder {
 		List<EquivalenceClass<Description>> equivalenceClassSets = inspector
 				.stronglyConnectedSets();
 		Set<Description> processedClassNodes = new HashSet<Description>();
-
-		// processedNodes.clear();
 
 		// PROCESS CLASES ONLY
 		
