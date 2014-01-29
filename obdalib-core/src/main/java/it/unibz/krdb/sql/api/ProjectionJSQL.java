@@ -214,7 +214,7 @@ public class ProjectionJSQL implements Serializable {
 			if (column.getExpression().toString().equalsIgnoreCase(name)) {
 				return true;
 			}
-			if (column.getAlias().equalsIgnoreCase(name)) {
+			if (column.getAlias().getName().equalsIgnoreCase(name)) {
 				return true;
 			}
 		}

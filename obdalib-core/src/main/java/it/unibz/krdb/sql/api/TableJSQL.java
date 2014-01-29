@@ -10,6 +10,7 @@ package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
 
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 
 
@@ -138,11 +139,11 @@ public class TableJSQL implements Serializable{
 	}
 	
 
-	public void setAlias(String alias) {
+	public void setAlias(Alias alias) {
 		if (alias == null) {
 			return;
 		}
-		this.alias = alias;
+		this.alias = alias.getName();
 	}
 
 	public String getAlias() {

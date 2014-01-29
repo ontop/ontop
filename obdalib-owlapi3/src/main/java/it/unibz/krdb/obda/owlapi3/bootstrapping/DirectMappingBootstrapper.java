@@ -20,30 +20,19 @@ package it.unibz.krdb.obda.owlapi3.bootstrapping;
  * #L%
  */
 
-import java.sql.SQLException;
-
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.sql.DBMetadata;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
-import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
 
 public class DirectMappingBootstrapper extends AbstractDBMetadata{
 	
-	
-	public DirectMappingBootstrapper() {
-		
-	}
 	
 	public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver) throws Exception{
 		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
@@ -58,6 +47,10 @@ public class DirectMappingBootstrapper extends AbstractDBMetadata{
 
 	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
 		getOntologyAndDirectMappings(baseUri, ontology, model, source);
+	}
+	
+	public DirectMappingBootstrapper(DBMetadata metadata, String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
+		getOntologyAndDirectMappings(metadata, baseUri, ontology, model, source);
 	}
 
 	/***

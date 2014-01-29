@@ -50,6 +50,7 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -186,7 +187,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		/*
 		 * Here we found a column
 		 */
-		this.columns.add(selectExpr.getAlias());
+		this.columns.add(selectExpr.getAlias().getName());
 	}
 
 	@Override
@@ -468,6 +469,13 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

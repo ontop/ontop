@@ -62,6 +62,7 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -142,7 +143,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		if (selectExpr.getAlias() != null) {
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
-			aliasMap.put(e.toString().toLowerCase(), selectExpr.getAlias());
+			aliasMap.put(e.toString().toLowerCase(), selectExpr.getAlias().getName());
 	
 		}
 	}
@@ -435,6 +436,12 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

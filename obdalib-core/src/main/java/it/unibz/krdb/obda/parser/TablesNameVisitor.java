@@ -14,6 +14,7 @@ import it.unibz.krdb.sql.api.TableJSQL;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -64,6 +65,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
@@ -95,6 +97,8 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 * - names anymore.
 	 */
 	private List<String> otherItemNames;
+	
+	private boolean notSupported = false;
 
 
 	/**
@@ -103,7 +107,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 * @param select
 	 * @return
 	 */
-	public ArrayList<RelationJSQL> getTableList(Select select) {
+	public ArrayList<RelationJSQL> getTableList(Select select) throws JSQLParserException {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -111,7 +115,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 			}
 		}
 		select.getSelectBody().accept(this);
-
+		
+		if(notSupported) // used to throw exception for the currently unsupported methods
+			throw new JSQLParserException("Query not yet supported");
+		
 		return tables;
 	}
 	
@@ -160,7 +167,17 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(SubSelect subSelect) {
-		subSelect.getSelectBody().accept(this);
+		if (subSelect.getSelectBody() instanceof PlainSelect) {
+			
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
+			
+			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
+				notSupported = true;
+			} else {
+				subSelBody.accept(this);
+			}
+		} else
+			notSupported = true;
 	}
 
 	/*
@@ -204,6 +221,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Function function) {
+		notSupported = true;
 	}
 
 	@Override
@@ -233,6 +251,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
+		notSupported = true;
 	}
 
 	@Override
@@ -320,27 +339,32 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(CaseExpression caseExpression) {
+		notSupported = true;
 	}
 
 
 	@Override
 	public void visit(WhenClause whenClause) {
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		allComparisonExpression.getSubSelect().getSelectBody().accept(this);
+		notSupported = true;
+	//	allComparisonExpression.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
+		notSupported = true;
+		//anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(SubJoin subjoin) {
-		subjoin.getLeft().accept(this);
-		subjoin.getJoin().getRightItem().accept(this);
+		notSupported = true;
+//		subjoin.getLeft().accept(this);
+//		subjoin.getJoin().getRightItem().accept(this);
 	}
 
 	@Override
@@ -350,22 +374,26 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Matches matches) {
-		visitBinaryExpression(matches);
+		notSupported = true;
+		//visitBinaryExpression(matches);
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
-		visitBinaryExpression(bitwiseAnd);
+		notSupported = true;
+		//visitBinaryExpression(bitwiseAnd);
 	}
 
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
-		visitBinaryExpression(bitwiseOr);
+		notSupported = true;
+		//visitBinaryExpression(bitwiseOr);
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
-		visitBinaryExpression(bitwiseXor);
+		notSupported = true;
+		//visitBinaryExpression(bitwiseXor);
 	}
 
 	@Override
@@ -375,11 +403,13 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Modulo modulo) {
-		visitBinaryExpression(modulo);
+		notSupported = true;
+		//visitBinaryExpression(modulo);
 	}
 
 	@Override
 	public void visit(AnalyticExpression analytic) {
+		notSupported = true;
 	}
 
 	/*
@@ -388,29 +418,34 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 */
 	@Override
 	public void visit(SetOperationList list) {
-		for (PlainSelect plainSelect : list.getPlainSelects()) {
-			visit(plainSelect);
-		}
+		notSupported = true;
+//		for (PlainSelect plainSelect : list.getPlainSelects()) {
+//			visit(plainSelect);
+//		}
 	}
 
 	@Override
 	public void visit(ExtractExpression eexpr) {
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(LateralSubSelect lateralSubSelect) {
-		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
+		notSupported = true;
+	//	lateralSubSelect.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(MultiExpressionList multiExprList) {
-		for (ExpressionList exprList : multiExprList.getExprList()) {
-			exprList.accept(this);
-		}
+		notSupported = true;
+//		for (ExpressionList exprList : multiExprList.getExprList()) {
+//			exprList.accept(this);
+//		}
 	}
 
 	@Override
 	public void visit(ValuesList valuesList) {
+		notSupported = true;
 	}
 
 	private void init() {
@@ -421,15 +456,24 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(IntervalExpression iexpr) {
+		notSupported = true;
 	}
 
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
+		notSupported = true;
     }
 
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {
+		notSupported = true;
 		
 		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
+		notSupported = true;
 	}
 }

@@ -12,6 +12,7 @@ package it.unibz.krdb.obda.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -59,8 +60,10 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
@@ -81,7 +84,8 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
 	
-	ArrayList<String> joinConditions;
+	ArrayList<Expression> joinConditions;
+	boolean notSupported = false;
 	
 	/**
 	 * Obtain the join conditions in a format "expression condition expression"
@@ -90,10 +94,13 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 * @param select statement with the parsed query
 	 * @return a list of string containing the join conditions
 	 */
-	public ArrayList<String> getJoinConditions(Select select) {
-		joinConditions = new ArrayList<String>();
+	public ArrayList<Expression> getJoinConditions(Select select)  throws JSQLParserException {
+		joinConditions = new ArrayList<Expression>();
 		select.getSelectBody().accept(this);
 	
+		if(notSupported) // used to throw exception for the currently unsupported methods
+			throw new JSQLParserException("Query not yet supported");
+		
 		return joinConditions;
 	}
 
@@ -104,8 +111,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(PlainSelect plainSelect) {
-		
-		plainSelect.getFromItem().accept(this);
+		FromItem fromItem = plainSelect.getFromItem();
+		fromItem.accept(this);
 		
 		List<Join> joins = plainSelect.getJoins();
 		
@@ -113,8 +120,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 		for (Join join : joins){
 			Expression expr = join.getOnExpression();
 			
-			
-			if (join.getUsingColumns()!=null) //Consider the case of JOIN USING...
+			if (join.getUsingColumns()!=null) // JOIN USING column
 				for (Column column : join.getUsingColumns())
 				{
 					String columnName= column.getColumnName();
@@ -124,14 +130,37 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 						columnName=columnName.substring(1, columnName.length()-1);
 						column.setColumnName(columnName);
 					}
-					
-					joinConditions.add(plainSelect.getFromItem()+"."+columnName+" = "+join.getRightItem()+"."+columnName);
-					
+					if (fromItem instanceof Table && join.getRightItem() instanceof Table) {
+						Table table1 = (Table)fromItem;
+						BinaryExpression bexpr = new EqualsTo();
+						Column column1 = new Column();
+						column1.setColumnName(columnName);
+						column1.setTable(table1);
+						bexpr.setLeftExpression(column1);
+						
+						Column column2 = new Column();
+						column2.setColumnName(columnName);
+						column2.setTable((Table)join.getRightItem());
+						bexpr.setRightExpression(column2);
+						joinConditions.add(bexpr);
+								//plainSelect.getFromItem()+"."+columnName+ bexpr.getStringExpression() +join.getRightItem()+"."+columnName);
+						
+						
+					} else {
+						//more complex structure in FROM or JOIN e.g. subselects
+					//	plainSelect.getFromItem().accept(this);
+					//	join.getRightItem().accept(this);
+						notSupported = true;
+						
+					}
 				}
 					
-			else{
-				if(expr!=null)
+			else{ //JOIN ON cond
+				if(expr!=null) {
+					join.getRightItem().accept(this);
 					expr.accept(this);
+					
+				} 
 				//we do not consider simple joins
 //				else
 //					if(join.isSimple())
@@ -143,7 +172,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	}
 
 	@Override
-	public void visit(SetOperationList operations) {
+	public void visit(SetOperationList operations) { //UNION
+		 notSupported = true;
 		// we do not consider the case of union
 		/*for (PlainSelect plainSelect: operations.getPlainSelects()){
 			plainSelect.getFromItem().accept(this);
@@ -331,7 +361,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			
 			left.accept(this);
 			right.accept(this);
-			joinConditions.add(binaryExpression.toString());
+			joinConditions.add(binaryExpression);
 		}
 		else
 		{
@@ -446,26 +476,37 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.statement.select.SubSelect)
 	 */
 	@Override
-	public void visit(SubSelect sub) {
-		sub.getSelectBody().accept(this);
-		
+	public void visit(SubSelect subSelect) {
+		if (subSelect.getSelectBody() instanceof PlainSelect) {
+
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
+
+			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
+				notSupported = true;
+			} else {
+				subSelBody.accept(this);
+			}
+		} else
+			notSupported = true;
 	}
 
 	@Override
 	public void visit(CaseExpression arg0) {
 		// we do not support case expression
+		notSupported = true;
 		
 	}
 
 	@Override
 	public void visit(WhenClause arg0) {
 		// we do not support when expression
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(ExistsExpression exists) {
 		// we do not support exists
+		notSupported = true;
 	}
 
 	/*
@@ -474,8 +515,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(AllComparisonExpression all) {
-		all.getSubSelect().getSelectBody().accept(this);;
-		
+		notSupported = true;
 	}
 
 	/*
@@ -484,8 +524,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(AnyComparisonExpression any) {
-		any.getSubSelect().getSelectBody();
-		
+		notSupported = true;
 	}
 
 	/*
@@ -494,8 +533,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(Concat arg0) {
-		visitBinaryExpression(arg0);
-		
+		notSupported = true;
 	}
 
 	/*
@@ -504,8 +542,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(Matches arg0) {
-		visitBinaryExpression(arg0);
-		
+		notSupported = true;
 	}
 
 	/*
@@ -514,8 +551,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(BitwiseAnd arg0) {
-		visitBinaryExpression(arg0);
-		
+		notSupported = true;
 	}
 
 	/*
@@ -524,8 +560,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(BitwiseOr arg0) {
-		visitBinaryExpression(arg0);
-		
+		notSupported = true;
 	}
 
 	/*
@@ -534,14 +569,13 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(BitwiseXor arg0) {
-		visitBinaryExpression(arg0);
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(CastExpression arg0) {
 		// we do not consider CAST expression
-		
+		notSupported = true;
 	}
 
 	/*
@@ -550,38 +584,36 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(Modulo arg0) {
-		visitBinaryExpression(arg0);
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(AnalyticExpression arg0) {
 		// we do not consider AnalyticExpression
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(ExtractExpression arg0) {
 		// we do not consider ExtractExpression
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(IntervalExpression arg0) {
 		// we do not consider IntervalExpression
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {
 		// we do not consider OracleHierarchicalExpression
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(Table tableName) {
 		// we do not execute anything
-		
 	}
 
 	/*
@@ -590,29 +622,43 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(SubJoin subjoin) {
-		Join join =subjoin.getJoin();
-		Expression expr = join.getOnExpression();
-		
-		
-		if (join.getUsingColumns()!=null)
-			for (Column column : join.getUsingColumns())
-			{
-				String columnName= column.getColumnName();
-				
-				if(columnName.startsWith("\"") || columnName.startsWith("'"))
-				{
-					columnName=columnName.substring(1, columnName.length()-1);
-					column.setColumnName(columnName);
-				}
-				
-				joinConditions.add(subjoin.getLeft()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
-			}
-				
-		else{
-			if(expr!=null)
-				expr.accept(this);
-		}
-		
+//		Join join =subjoin.getJoin();
+//		Expression expr = join.getOnExpression();
+//		
+//		
+//		if (join.getUsingColumns()!=null)
+//			for (Column column : join.getUsingColumns())
+//			{
+//				String columnName= column.getColumnName();
+//				
+//				if(columnName.startsWith("\"") || columnName.startsWith("'"))
+//				{
+//					columnName=columnName.substring(1, columnName.length()-1);
+//					column.setColumnName(columnName);
+//				}
+//				if (subjoin.getLeft() instanceof Table && join.getRightItem() instanceof Table) {
+//					Table table1 = (Table)subjoin.getLeft();
+//					BinaryExpression bexpr = new EqualsTo();
+//					Column column1 = new Column();
+//					column1.setColumnName(columnName);
+//					column1.setTable(table1);
+//					bexpr.setLeftExpression(column1);
+//					
+//					Column column2 = new Column();
+//					column2.setColumnName(columnName);
+//					column2.setTable((Table)join.getRightItem());
+//					bexpr.setRightExpression(column2);
+//					joinConditions.add(bexpr);
+//							//subjoin.getLeft()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
+//					
+//				} else {}
+//			}
+//				
+//		else{
+//			if(expr!=null)
+//				expr.accept(this);
+//		}
+		notSupported = true;
 	}
 
 	/*
@@ -621,14 +667,18 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(LateralSubSelect lateralSubSelect) {
-		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
-		
+		notSupported = true;
 	}
 
 	@Override
 	public void visit(ValuesList valuesList) {
 		// we do not execute anything
-		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
+		notSupported = true;
 	}
 
 }
