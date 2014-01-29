@@ -341,6 +341,8 @@ public class MappingAnalyzer {
 		if (t1 == null) {
 			t1 = getVariable(left, lookupTable);
 		}
+		if(t1 == null)
+			throw new RuntimeException("Unable to find column name for variable: " +left);
 
 		//right term can be function, column variable or data value
 		Term t2 = null;
@@ -387,12 +389,9 @@ public class MappingAnalyzer {
 	private Term getVariable(Expression pred, LookupTable lookupTable) {
 		String termName = "";
 		if (pred instanceof Column) {
-			String columnName = ((Column) pred).getColumnName();
 			termName = lookupTable.lookup(pred.toString());
 			if (termName == null) {
-				throw new RuntimeException(
-						"Unable to find column name for variable: "
-								+ columnName);
+				return null;
 			}
 			return dfac.getVariable(termName);
 		}
@@ -417,7 +416,11 @@ public class MappingAnalyzer {
 				return dfac
 						.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
 			}
-			return null;
+			else 
+				throw new RuntimeException(
+						"Unable to find column name for variable: "
+								+ columnName);
+			
 		}
 		else if (pred instanceof StringValue) {
 			termRightName = ((StringValue) pred).getValue();
