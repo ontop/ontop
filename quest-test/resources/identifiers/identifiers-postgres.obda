@@ -1,0 +1,29 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:postgresql://10.7.20.39/datatypes
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{letter} a :Country . 
+source		select Type_Char as letter from "Characters"
+
+mappingId	Countries2
+target		:Country2-{LETTER} a :Country2 . 
+source		select substr(Type_Char, 1) as LETTER from "Characters"
+
+mappingId	Countries3
+target		:Country3-{LETTER} a :Country3 . 
+source		select substr(Type_Char, 1) as "LETTER" from "Characters"
+
+mappingId	Countries4
+target		:Country4-{LETTER} a :Country4 . 
+source		select Type_Char as "LETTER" from "Characters"
+
+]]
+

@@ -12,7 +12,7 @@
 <cl_Authors>
 	 a rr:TriplesMap;
 	rr:logicalTable [ rr:sqlQuery """
-		select wr_code, wr_name from tb_affiliated_writers
+		select wr_code, wr_name from books1.tb_affiliated_writers
 	""" ];
 	rr:subjectMap [ rr:template "http://meraka/moss/exampleBooks.owl#author/{\"wr_code\"}/";
 					 rr:class <http://meraka/moss/exampleBooks.owl#Author>

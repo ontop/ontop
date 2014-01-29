@@ -824,6 +824,24 @@ public class ParserTest extends TestCase {
 		assertTrue(result2);
 	}
 	
+	//JSQL support constant but the old parser do not, we put at the moment a not support flag
+	public void test_12_0 () {
+		final boolean result = parseJSQL("select 'KLH' as unit from sys.all_tables AT");
+		printJSQL("test_12_0", result);
+		assertFalse(result);
+		final boolean result2 = parseSQL("select 'KLH' as unit from sys.all_tables AT");
+		printSQL("test_12_0", result2);
+		assertFalse(result2);
+	}
+	
+	public void test_12_1 () {
+		final boolean result = parseJSQL("select ceo as unit from sys.all_tables where ceo='KLH'");
+		printJSQL("test_12_1", result);
+		assertTrue(result);
+		final boolean result2 = parseSQL("select ceo as unit from sys.all_tables where ceo='KLH'");
+		printSQL("test_12_1", result2);
+		assertTrue(result2);
+	}
 	private String queryText;
 
 	VisitedQuery queryP;

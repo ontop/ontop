@@ -12,6 +12,8 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
 import it.unibz.krdb.sql.api.SelectionJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -61,6 +63,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
@@ -397,9 +400,18 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
 	@Override
 	public void visit(Column tableColumn) {
-		String tableName= tableColumn.getColumnName();
-		if(tableName.contains("\""))
-			tableColumn.setColumnName(tableName.substring(1, tableName.length()-1));
+		Table table= tableColumn.getTable();
+		if(table.getName()!=null){
+			
+			TableJSQL fixTable = new TableJSQL(table);
+			table.setAlias(fixTable.getAlias());
+			table.setName(fixTable.getTableName());
+			table.setSchemaName(fixTable.getSchema());
+		
+		}
+		String columnName= tableColumn.getColumnName();
+		if(VisitedQuery.pQuotes.matcher(columnName).matches())
+			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}
 
