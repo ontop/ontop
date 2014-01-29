@@ -50,4 +50,23 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		throw new RuntimeException("Unsupported SQL type");
 	}
+	
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		String sql = " REGEXP_LIKE " + "( " + columnname + " , '" + pattern; 
+		String flags = "";
+		if(caseinSensitive)
+			flags += "i";
+		if (multiLine)
+			flags += "m";
+		if(dotAllMode)
+			flags += "n";
+		
+		//if(flags.length() > 0)
+		sql += "' , '" + flags;
+		return sql + "' )";
+	}
 }

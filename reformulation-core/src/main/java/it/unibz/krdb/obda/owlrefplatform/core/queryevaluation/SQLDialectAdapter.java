@@ -63,5 +63,5 @@ public interface SQLDialectAdapter {
 	 */
 	public String sqlCast(String value, int type);
 	
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive);
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
 }
