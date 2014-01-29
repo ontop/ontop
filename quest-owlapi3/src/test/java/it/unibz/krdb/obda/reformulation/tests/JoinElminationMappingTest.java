@@ -86,9 +86,9 @@ public class JoinElminationMappingTest extends TestCase {
 		Statement st = conn.createStatement();
 
 		String createStr = 
-				"CREATE TABLE \"address\" (" + "\"id\" integer NOT NULL," + "\"street\" character varying(100),"
-				+ "\"number\" integer," + "\"city\" character varying(100)," + "\"state\" character varying(100),"
-				+ "\"country\" character varying(100), PRIMARY KEY(\"id\")" + ");";
+				"CREATE TABLE address (" + "id integer NOT NULL," + "street character varying(100),"
+				+ "number integer," + "city character varying(100)," + "state character varying(100),"
+				+ "country character varying(100), PRIMARY KEY(id)" + ");";
 
 		st.executeUpdate(createStr);
 		conn.commit();
@@ -115,7 +115,7 @@ public class JoinElminationMappingTest extends TestCase {
 
 	private void dropTables() throws SQLException, IOException {
 		Statement st = conn.createStatement();
-		st.executeUpdate("DROP TABLE \"address\";");
+		st.executeUpdate("DROP TABLE address;");
 		st.close();
 		conn.commit();
 	}

@@ -1,0 +1,40 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	MultiSchemaDB2
+connectionUrl	jdbc:db2://10.7.20.39:50001/stock
+username	db2inst2
+password	fish
+driverClass	com.ibm.db2.jcc.DB2Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Address
+target		:Address-{id} a :Address . 
+source		select "id" FROM DB2INST2."address"
+
+mappingId	Name
+target		:Broker-{name} a :Broker . 
+source		select "broker"."name" FROM db2inst2."broker"
+
+mappingId	Worker
+target		:Worker-{worker} a :Worker . 
+source		select "broker"."name" as worker  FROM DB2INST2."broker"
+
+mappingId	Client
+target		:Client-{NameOfClient} :isBroker :Broker-{brokerName} . 
+source		SELECT "broker".name as brokerName, "client".name as NameOfClient, "broker".id FROM DB2INST2."client", DB2INST2."broker" WHERE "broker"."id" = "client"."id"
+
+mappingId	Mix
+target		:Broker2-{id} :hasFile :Med-{med} . 
+source		SELECT "id", med from "address", SYSTOOLS.policy
+
+
+
+
+
+
+
+
+]]
+
