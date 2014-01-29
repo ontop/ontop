@@ -33,10 +33,17 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
 
 
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -50,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * correctly. Especially, that the unquoted identifers are treated as uppercase, and
  * that the case of quoted identifiers is not changed
  */
-public class PostgresIdentifierTest extends TestCase {
+public class H2IdentifierTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -60,11 +67,27 @@ public class PostgresIdentifierTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-postgres.obda";
+	final String obdafile = "resources/identifiers/identifiers-h2.obda";
 	private QuestOWL reasoner;
+	private Connection sqlConnection;
 
 	@Override
+	@Before
 	public void setUp() throws Exception {
+		try {
+			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
+			    java.sql.Statement s = sqlConnection.createStatement();
+			  
+			    try {
+			    	String text = new Scanner( new File("resources/identifiers/create-h2.sql") ).useDelimiter("\\A").next();
+			    	s.execute(text);
+			    	//Server.startWebServer(sqlConnection);
+			    	 
+			    } catch(SQLException sqle) {
+			        System.out.println("Exception in creating db from script");
+			    }
+			   
+			    s.close();
 		
 		
 		// Loading the OWL file
@@ -91,14 +114,32 @@ public class PostgresIdentifierTest extends TestCase {
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
-
+		} catch (Exception exc) {
+			try {
+				tearDown();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}	
 		
 	}
 
 
+	@After
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
+		if (!sqlConnection.isClosed()) {
+			java.sql.Statement s = sqlConnection.createStatement();
+			try {
+				s.execute("DROP ALL OBJECTS DELETE FILES");
+			} catch (SQLException sqle) {
+				System.out.println("Table not found, not dropping");
+			} finally {
+				s.close();
+				sqlConnection.close();
+			}
+		}
 	}
 	
 
@@ -126,41 +167,60 @@ public class PostgresIdentifierTest extends TestCase {
 	}
 
 	/**
-	 * Test use of quoted mixed case table name
+	 * Test use of lowercase, unquoted table, schema and column identifiers (also in target)
 	 * @throws Exception
 	 */
+	@Test
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>", val);
+	}
+
+
+	/**
+	 * Test use of lowercase, unquoted table and column identifiers (also in target) with uppercase table identifiers
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpperCaseTableUnquoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>", val);
 	}
 	
-	public void testUppercaseAlias() throws Exception {
+	/**
+	 * Test use of lowercase, quoted alias in a view definition 
+	 * @throws Exception
+	 */
+	@Test
+	public void testLowerCaseColumnViewDefQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
-	}
-
-
-	/**
-	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
-	 * @throws Exception
-	 */
-	public void testUppercaseUnquotedView() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-1010>", val);
 	}
 
 	/**
-	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
+	 * Test use of lowercase, unquoted alias in a view definition 
 	 * @throws Exception
 	 */
-	public void testUppercaseQuotedView() throws Exception {
+	@Test
+	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-1010>", val);
+	}
+	
+	/**
+	 * Test access to lowercase table name, mixed case column name, and constant alias 
+	 * @throws Exception
+	 */
+	@Test
+	public void testLowerCaseTable() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-BladeRunner-2020-Constant>", val);
 	}
-
-			
+	
 }
+

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibz.krdb.sql.api.ProjectionJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -56,6 +58,7 @@ import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
@@ -251,6 +254,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	public void visit(SelectExpressionItem selectExpr) {
 	 projection.add(selectExpr, bdistinctOn);
 	 selectExpr.getExpression().accept(this);
+	
 	 
 		
 	}
@@ -330,7 +334,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(StringValue stringValue) {
-		// TODO Auto-generated method stub
+		notSupported=true;
 		
 	}
 
@@ -471,6 +475,19 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		if(tableName.startsWith("\"") || tableName.startsWith("'"))
 			tableColumn.setColumnName(tableName.substring(1, tableName.length()-1));
 				
+		Table table= tableColumn.getTable();
+		if(table.getName()!=null){
+			
+			TableJSQL fixTable = new TableJSQL(table);
+			table.setAlias(fixTable.getAlias());
+			table.setName(fixTable.getTableName());
+			table.setSchemaName(fixTable.getSchema());
+		
+		}
+		String columnName= tableColumn.getColumnName();
+		if(VisitedQuery.pQuotes.matcher(columnName).matches())
+			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
+		
 		
 	}
 

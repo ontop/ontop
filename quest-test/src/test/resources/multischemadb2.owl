@@ -22,22 +22,22 @@
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Declaration>
-        <Class IRI="#Country"/>
+        <Class IRI="#Address"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#CountryEgypt"/>
+        <Class IRI="#Broker"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#CountryNotEgypt"/>
+        <Class IRI="#Worker"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#CountryPrefixNQ"/>
+        <Class IRI="#Client"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#CountryWithRegion"/>
+        <Class IRI="#Broker2"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#Land"/>
+        <Class IRI="#Med"/>
     </Declaration>
     <Declaration>
         <Class IRI="#LandQuote"/>
@@ -63,7 +63,10 @@
     <Declaration>
         <Class IRI="#Something"/>
     </Declaration>    <Declaration>
-        <ObjectProperty IRI="#countryIsInRegion"/>
+        <ObjectProperty IRI="#isBroker"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasFile"/>
     </Declaration>
 </Ontology>
 

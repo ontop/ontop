@@ -9,6 +9,7 @@
 package it.unibz.krdb.sql.api;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
@@ -25,7 +26,8 @@ public class TableJSQL implements Serializable{
 	private String schema;
 	private String tableName;
 	private String name;
-	private String alias;
+	private String aliasName;
+	private Alias alias;
 	
 	
 	
@@ -79,7 +81,7 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && (schema.startsWith("\"") || schema.startsWith("'")))
+		if(schema!=null && VisitedQuery.pQuotes.matcher(schema).matches())
 			this.schema = schema.substring(1, schema.length()-1);
 		else
 			this.schema = schema;
@@ -107,7 +109,7 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if((tableName.startsWith("\"") || tableName.startsWith("'")))
+		if(VisitedQuery.pQuotes.matcher(tableName).matches())
 		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
 			quotedTable = true;
@@ -143,11 +145,22 @@ public class TableJSQL implements Serializable{
 		if (alias == null) {
 			return;
 		}
-		this.alias = alias.getName();
+		this.alias = alias;
+		this.aliasName = alias.getName();
 	}
 
-	public String getAlias() {
+	public void setAliasName(String alias) {
+		this.aliasName = alias;
+		if (alias != null)
+			this.alias.setName(alias);
+	}
+	
+	public Alias getAlias() {
 		return alias;
+	}
+	
+	public String getAliasName() { 
+		return this.aliasName;
 	}
 	
 	/**

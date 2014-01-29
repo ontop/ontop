@@ -143,32 +143,28 @@ public class OracleIdentifierTest extends TestCase {
 	public void testUpperCaseTableUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val =  runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-text>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>", val);
 	}
 	
 	/**
-	 * Tests column and tables with lowercase characters can be accessed
-	 * Note that this is not recommended by Oracle, and probably uncommon, but possible
-	 * 
+	 * Test use of lowercase, quoted alias in a view definition 
 	 * @throws Exception
 	 */
-	public void testWeirdNames() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val =  runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-Name>", val);
-	}
-	
-	/**
-	 * Tests column names only differing in case can be accessed
-	 * Note that this is not recommended by Oracle, and probably uncommon, but possible
-	 * 
-	 * @throws Exception
-	 */
-	public void testwEIRDnAMES() throws Exception {
+	public void testLowerCaseColumnViewDefQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
 		String val =  runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-nAME>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-Argentina>", val);
+	}
+
+	/**
+	 * Test use of lowercase, unquoted alias in a view definition 
+	 * @throws Exception
+	 */
+	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
+		String val =  runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-Argentina>", val);
 	}
 	
-			
 }
+

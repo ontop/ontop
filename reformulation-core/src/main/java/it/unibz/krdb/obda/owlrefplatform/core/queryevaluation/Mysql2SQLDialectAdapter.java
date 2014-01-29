@@ -64,9 +64,11 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlTableName(String tablename, String viewname) {
-		return String.format("`%s` %s", tablename, viewname);
+		return String.format("%s %s", tablename, viewname);
 	}
 
+	/*Now we use the table name given by the user, 
+	  and we assume that it includes the quotes if needed*/
 	@Override
 	public String sqlQuote(String name) {
 		return String.format("`%s`", name);

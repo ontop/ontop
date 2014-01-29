@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * correctly. Especially, that the unquoted identifers are treated as uppercase, and
  * that the case of quoted identifiers is not changed
  */
-public class PostgresIdentifierTest extends TestCase {
+public class DB2IdentifierTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -60,7 +60,7 @@ public class PostgresIdentifierTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-postgres.obda";
+	final String obdafile = "resources/identifiers/identifiers-db2.obda";
 	private QuestOWL reasoner;
 
 	@Override
@@ -126,41 +126,29 @@ public class PostgresIdentifierTest extends TestCase {
 	}
 
 	/**
-	 * Test use of quoted mixed case table name
+	 * Test use of quoted table and column identifiers
 	 * @throws Exception
 	 */
-	public void testLowercaseUnquoted() throws Exception {
+	public void testLowercaseQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-991>", val);
 	}
+			
 	
-	public void testUppercaseAlias() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
-	}
-
-
 	/**
-	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
+	 * Test use of lowercase, unquoted table, schema and column identifiers
 	 * @throws Exception
 	 */
-	public void testUppercaseUnquotedView() throws Exception {
+	public void testLowercaseUnquotedSchema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-991>", val);
 	}
-
-	/**
-	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
-	 * @throws Exception
-	 */
-	public void testUppercaseQuotedView() throws Exception {
+	
+	public void testAliasUnquotedColumn() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-991>", val);
 	}
-
-			
 }

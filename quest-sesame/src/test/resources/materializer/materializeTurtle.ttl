@@ -1,0 +1,102 @@
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "aaa"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "bbb"@es .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "ccc"@fr .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "aaa"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "bbb"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "ccc"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "2012-05-01T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "2013-06-02T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "2011-07-07T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "1.01E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "2.02E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "3.03E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "101"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "202"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "303"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "11"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "22"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#s> "33"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> a <http://www.semanticweb.org/ontologies/MaterializeTest.owl#A> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> a <http://www.semanticweb.org/ontologies/MaterializeTest.owl#A> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> a <http://www.semanticweb.org/ontologies/MaterializeTest.owl#A> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> a <http://www.semanticweb.org/ontologies/MaterializeTest.owl#B> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> a <http://www.semanticweb.org/ontologies/MaterializeTest.owl#B> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> a <http://www.semanticweb.org/ontologies/MaterializeTest.owl#B> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#q> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#q> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#q> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "aaa"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "bbb"@es .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "ccc"@fr .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "2012-05-01T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "2013-06-02T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "2011-07-07T00:00:00.0"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "aaa"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "bbb"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "ccc"@en .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "11"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "22"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "33"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "1.01E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "2.02E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "3.03E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "101"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/2> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "202"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+
+<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3> <http://www.semanticweb.org/ontologies/MaterializeTest.owl#p> "303"^^<http://www.w3.org/2001/XMLSchema#decimal> .

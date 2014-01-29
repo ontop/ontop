@@ -9,6 +9,9 @@
 
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,7 +128,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 				{
 					String columnName= column.getColumnName();
 					
-					if(columnName.startsWith("\"") || columnName.startsWith("'"))
+					if(VisitedQuery.pQuotes.matcher(columnName).matches())
 					{
 						columnName=columnName.substring(1, columnName.length()-1);
 						column.setColumnName(columnName);
@@ -466,9 +469,19 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(Column col) {
+		Table table= col.getTable();
+		if(table.getName()!=null){
+			
+			TableJSQL fixTable = new TableJSQL(table);
+			table.setAlias(fixTable.getAlias());
+			table.setName(fixTable.getTableName());
+			table.setSchemaName(fixTable.getSchema());
+		
+		}
 		String columnName= col.getColumnName();
-		if(columnName.contains("\""))
-		col.setColumnName(columnName.substring(1, columnName.length()-1));
+		if(VisitedQuery.pQuotes.matcher(columnName).matches())
+			col.setColumnName(columnName.substring(1, columnName.length()-1));
+		
 	}
 	
 	/*
@@ -622,6 +635,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 */
 	@Override
 	public void visit(SubJoin subjoin) {
+		notSupported = true;
 //		Join join =subjoin.getJoin();
 //		Expression expr = join.getOnExpression();
 //		
@@ -631,34 +645,20 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 //			{
 //				String columnName= column.getColumnName();
 //				
-//				if(columnName.startsWith("\"") || columnName.startsWith("'"))
+//				if(VisitedQuery.pQuotes.matcher(columnName).matches())
 //				{
 //					columnName=columnName.substring(1, columnName.length()-1);
 //					column.setColumnName(columnName);
 //				}
-//				if (subjoin.getLeft() instanceof Table && join.getRightItem() instanceof Table) {
-//					Table table1 = (Table)subjoin.getLeft();
-//					BinaryExpression bexpr = new EqualsTo();
-//					Column column1 = new Column();
-//					column1.setColumnName(columnName);
-//					column1.setTable(table1);
-//					bexpr.setLeftExpression(column1);
-//					
-//					Column column2 = new Column();
-//					column2.setColumnName(columnName);
-//					column2.setTable((Table)join.getRightItem());
-//					bexpr.setRightExpression(column2);
-//					joinConditions.add(bexpr);
-//							//subjoin.getLeft()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
-//					
-//				} else {}
+//				
+//				joinConditions.add(subjoin.getLeft()+"."+column.getColumnName()+" = "+join.getRightItem()+"."+column.getColumnName());
 //			}
 //				
 //		else{
 //			if(expr!=null)
 //				expr.accept(this);
 //		}
-		notSupported = true;
+//		
 	}
 
 	/*

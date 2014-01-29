@@ -8,6 +8,8 @@
  */
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.sql.api.VisitedQuery;
+
 import java.util.HashMap;
 
 /** 
@@ -140,11 +142,16 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		if (selectExpr.getAlias() != null) {
+		String alias = selectExpr.getAlias().getName();
+		if ( alias != null) {
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
-			aliasMap.put(e.toString().toLowerCase(), selectExpr.getAlias().getName());
-	
+			//remove alias quotes if present
+			if(VisitedQuery.pQuotes.matcher(alias).matches()){
+				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
+			}
+			else
+				aliasMap.put(e.toString().toLowerCase(), alias);
 		}
 	}
 	@Override
@@ -328,13 +335,11 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	}
 
 	/*
-	 * Remove the quotes in the alias if present. Each alias has a distinct column (non-Javadoc)
+	 * We do not modify the column we are only interested if the alias is present. Each alias has a distinct column (non-Javadoc)
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		if(tableColumn.getColumnName().contains("\""))
-			tableColumn.setColumnName(tableColumn.getColumnName().substring(1, tableColumn.getColumnName().length()-1));
 		
 	}
 

@@ -14,5 +14,8 @@ target		:Country-{BK_TITLE} a :Country .
 source		select BK_TITLE from TB_BOOKS	
 
 
+mappingId	Countries2
+target		:Country2-{BK_TITLE} a :Country2 . 
+source		select BK_TITLE from TB_BOOKS where BK_TITLE IS NOT NULL
 ]]
 

@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
-
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -46,11 +45,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that oracle identifiers for tables and columns are treated
- * correctly. Especially, that the unquoted identifers are treated as uppercase, and
- * that the case of quoted identifiers is not changed
+ * Tests that mssql identifiers for tables and columns are treated
+ * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
  */
-public class PostgresIdentifierTest extends TestCase {
+public class MsSQLIdentifierTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -60,7 +58,7 @@ public class PostgresIdentifierTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-postgres.obda";
+	final String obdafile = "resources/identifiers/identifiers-mssql.obda";
 	private QuestOWL reasoner;
 
 	@Override
@@ -105,12 +103,17 @@ public class PostgresIdentifierTest extends TestCase {
 	
 	private String runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
+		//StringBuilder bf = new StringBuilder(query);
 		String retval;
 		try {
+			
+
 			QuestOWLResultSet rs = st.executeTuple(query);
+			
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
 			retval = ind1.toString();
+
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -126,41 +129,30 @@ public class PostgresIdentifierTest extends TestCase {
 	}
 
 	/**
-	 * Test use of quoted mixed case table name
+	 * Test use of lowercase column identifiers (also in target)
 	 * @throws Exception
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
-	}
-	
-	public void testUppercaseAlias() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-991>", val);
 	}
 
-
-	/**
-	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
-	 * @throws Exception
-	 */
-	public void testUppercaseUnquotedView() throws Exception {
+	public void testUppercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-211>", val);	
 	}
-
-	/**
-	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
-	 * @throws Exception
-	 */
-	public void testUppercaseQuotedView() throws Exception {
+		
+	public void testLowercaseQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
 		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-112>", val);
 	}
-
-			
+	
+	public void testAliasQuoted() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-111>", val);
+	}
 }

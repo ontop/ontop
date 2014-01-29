@@ -153,7 +153,7 @@ public class ProjectionJSQL implements Serializable {
 
 	@Override
 	public String toString() {
-		String str = getType();
+		StringBuilder str = new StringBuilder(getType());
 
 		boolean bNeedComma = false;
 		boolean bParenthesis= true;
@@ -162,22 +162,22 @@ public class ProjectionJSQL implements Serializable {
 		{
 			
 			if (bNeedComma) {
-				str += ",";
+				str.append(",");
 			}
-			str += " ";
+			str.append(" ");
 			
 			if (bParenthesis){
-				str += "(";
+				str.append("(");
 				bParenthesis = false;
 			}
 			
-			str += column.toString();
+			str.append(column.toString());
 			bNeedComma = true;
 		}
 		
 		if(!selectDistinctList.isEmpty())
 		{
-			str += ")";
+			str.append(")");
 			bNeedComma = false;
 		}
 			
@@ -185,20 +185,20 @@ public class ProjectionJSQL implements Serializable {
 		for (SelectExpressionItem column : selectList) {
 
 			if (bNeedComma) {
-				str += ",";
+				str.append(",");
 			}
-			str += " ";
-			str += column.toString();
+			str.append(" ");
+			str.append(column.toString());
 			bNeedComma = true;
 		}
 		
 		
 			if(allcolumns!=null)
-				str+= " *";
+				str.append(" *");
 			if( tablecolumns!=null)
-				str+= " "+tablecolumns.getTable()+".*";
+				str.append(" "+tablecolumns.getTable()+".*");
 		
-		return str + " " + "from";
+		return str.append(" from").toString();
 	}
 	
 	/**
