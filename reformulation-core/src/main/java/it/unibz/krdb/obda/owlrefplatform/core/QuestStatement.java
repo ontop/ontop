@@ -709,6 +709,7 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Start the rewriting process...");
 			try {
 				final long startTime = System.currentTimeMillis();
+				//This unfolding resolve the rules using only the query program, and not the mappings.
 				programAfterRewriting = getRewriting(program);
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
@@ -724,6 +725,7 @@ public class QuestStatement implements OBDAStatement {
 
 			try {
 				final long startTime = System.currentTimeMillis();
+				//Here we do include the mappings, and get the final SQL-ready program
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
 				final long endTime = System.currentTimeMillis();
 				unfoldingTime = endTime - startTime;

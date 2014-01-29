@@ -9,6 +9,6 @@
   </appender>
 
   <root level="DEBUG">
-    <appender-ref ref="STDOUT" />
+    <appender-ref ref="STDOUT" />"quest-test/src/test/resources/logback-test.xml"
   </root>
 </configuration>
