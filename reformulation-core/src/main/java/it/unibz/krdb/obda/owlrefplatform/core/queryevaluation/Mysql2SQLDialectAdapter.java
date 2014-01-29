@@ -109,16 +109,18 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	/**
 	 * Based on information in MySQL 5. 1 manual at
 	 * http://dev.mysql.com/doc/refman/5.1/en/regexp.html
+	 * and
+	 * http://dev.mysql.com/doc/refman/5.1/en/pattern-matching.html
 	 */
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 		// enclosing
 		// quotes
-		if (caseinSensitive) {
-			return " LOWER(" + columnname + ") REGEXP " + "'"
-					+ pattern.toLowerCase() + "'";
-		}
-		return columnname + " REGEXP " + "'" + pattern + "'";
+		String sql = columnname + " REGEXP ";
+		if (!caseinSensitive) 
+			sql += "BINARY ";
+			
+		return sql + "'" + pattern + "'";
 	}
 }

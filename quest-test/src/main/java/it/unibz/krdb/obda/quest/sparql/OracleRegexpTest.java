@@ -148,7 +148,7 @@ public class OracleRegexpTest extends TestCase {
 					"'^E[a-z]*t$', 'm'", 
 					"'Eg'", 
 					"'^e[g|P|y]*T$', 'i'",
-					"'.Egypt', 's'"
+					"'^Egypt$', 'sm'"
 					};
 			for (String regex : queries){
 				String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, " + regex + ")}";

@@ -134,26 +134,18 @@ public class RegexpTest extends TestCase {
 	}
 	
 
-	
-	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+		QuestOWLResultSet rs = st.executeTuple(query);
+		if(hasResult){
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
 			retval = ind1.toString();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
+		} else {
+			assertFalse(rs.nextRow());
+			retval = "";
 		}
+
 		return retval;
 	}
 
@@ -162,21 +154,40 @@ public class RegexpTest extends TestCase {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSparqlRegexpFilter() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'J[ano]*').}";
-		String broker = runTests(query);
-		assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
+	public void testSparql2sqlRegex() throws Exception {
+		QuestOWLStatement st = null;
+		try {
+			st = conn.createStatement();
+
+			String[] queries = {
+					"'J[ano]*'", 
+					"'j[ANO]*', 'i'",
+					"'^J[ano]*$'",
+					"'^J[ano]*$', 'm'",
+					"'J'"
+					};
+			for (String regex : queries){
+				String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, " + regex + ")}";
+				String broker = runTest(st, query, true);
+				assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
+			}
+			String[] wrongs = {
+					"'^j[ANO]*$'",
+					"'j[ANO]*'"
+					};
+			for (String regex : wrongs){
+				String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, " + regex + ")}";
+				String res = runTest(st, query, false);
+				assertEquals(res, "");
+			}
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (st != null)
+				st.close();
+		}
 	}
 	
-	/**
-	 * Tests the use of case-insensitive SPARQL like
-	 * @throws Exception
-	 */
-	@Test
-	public void testSparqlCaseinsensitiveRegexFilter() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, 'j[ANO]*', 'i').}";
-		String broker = runTests(query);
-		assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
-	}
-		
+
+
 }
