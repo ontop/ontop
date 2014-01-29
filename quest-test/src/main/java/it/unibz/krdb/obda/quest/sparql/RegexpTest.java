@@ -33,8 +33,12 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Scanner;
 
 
 import junit.framework.TestCase;
@@ -74,12 +78,14 @@ public class RegexpTest extends TestCase {
 	private String obdafile;
 	
 	private QuestOWL reasoner;
-
+	private Connection sqlConnection;
+	private boolean isH2;
 	/**
 	 * Constructor is necessary for parameterized test
 	 */
 	public RegexpTest(String database, boolean isH2){
 		this.obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".obda";
+		this.isH2 = isH2;
 	}
 
 
@@ -89,15 +95,48 @@ public class RegexpTest extends TestCase {
 	@Parameters
 	public static Collection<Object[]> getObdaFiles(){
 		return Arrays.asList(new Object[][] {
+				{"h2", true}
+				/*, 
 				 {"mysql", false },
 				 {"pgsql", false},
-				 {"oracle", false }});
+				 {"oracle", false }*/
+				 });
 	}
 
+	
+	private void createH2Database() throws Exception {
+		try {
+			sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questrepository","fish", "fish");
+			java.sql.Statement s = sqlConnection.createStatement();
+
+			try {
+				String text = new Scanner( new File("resources/regexp/create.sql") ).useDelimiter("\\A").next();
+				s.execute(text);
+				//Server.startWebServer(sqlConnection);
+				
+			} catch(SQLException sqle) {
+				System.out.println("Exception in creating db from script");
+				sqle.printStackTrace();
+				throw sqle;
+			}
+
+			s.close();
+		} catch (Exception exc) {
+			try {
+				deleteH2Database();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				throw e2;
+			}
+		}	
+	}
 	
 	@Override
 	@Before
 	public void setUp() throws Exception {
+		if(this.isH2)
+			this.createH2Database();
+				
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -131,6 +170,22 @@ public class RegexpTest extends TestCase {
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
+		if(this.isH2)
+			deleteH2Database();
+	}
+	
+	private void deleteH2Database() throws Exception {
+		if (!sqlConnection.isClosed()) {
+			java.sql.Statement s = sqlConnection.createStatement();
+			try {
+				s.execute("DROP ALL OBJECTS DELETE FILES");
+			} catch (SQLException sqle) {
+				System.out.println("Table not found, not dropping");
+			} finally {
+				s.close();
+				sqlConnection.close();
+			}
+		}
 	}
 	
 

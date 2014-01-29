@@ -48,10 +48,10 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 																// enclosing
 																// quotes
 		if (caseinSensitive) {
-			return " LOWER(" + columnname + ") REGEX " + "'"
+			return " LOWER(" + columnname + ") regexp " + "'"
 					+ pattern.toLowerCase() + "'";
 		}
-		return columnname + " REGEX " + "'" + pattern + "'";
+		return columnname + " regexp " + "'" + pattern + "'";
 	}
 	
 }
