@@ -661,8 +661,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
+				
+				
+				
+				//TODO: do this more efficient !!!!
+				
+				
+				/*if (!leftOp.equals("'null'")  && !rightOp.equals("'null'")){
+					return String.format("(" + expressionFormat + ")", leftOp, rightOp);
+				}else if (leftOp.equals("'null'")  && !rightOp.equals("'null'")){
+					expressionFormat= getBooleanOperatorString(OBDAVocabulary.IS_NULL);
+					return String.format( expressionFormat ,  rightOp);
+				}else if (!leftOp.equals("'null'")  && rightOp.equals("'null'")){
+					expressionFormat= getBooleanOperatorString(OBDAVocabulary.IS_NULL);
+					return String.format( expressionFormat ,  leftOp);
+				}else{
+					return "(1=1)";	
+				}*/
+				
+				
+				
 			} else if (atom.isArithmeticFunction()) {
-				// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
+		// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
 				String expressionFormat = getNumericalOperatorString(functionSymbol);
 				Term left = atom.getTerm(0);
 				Term right = atom.getTerm(1);
@@ -1174,7 +1194,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 					/*
 					 * TODO: Handle the case of multiple variables
 					 */
-					mainColumn = getSQLString(((Variable) ov.getTerm(1)), index, false);
+					
+					Variable termVar;
+					
+					if (ov.getFunctionSymbol().getArity() == 1) {
+						termVar = (Variable) ov.getTerm(0);
+					} else {
+						termVar = (Variable) ov.getTerm(1);
+					}
+					mainColumn = getSQLString(termVar, index, false);
 					
 				}
 

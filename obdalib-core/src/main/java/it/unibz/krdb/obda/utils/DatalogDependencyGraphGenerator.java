@@ -168,11 +168,14 @@ public class DatalogDependencyGraphGenerator {
 	 * 
 	 * @param rule
 	 */
-	private void updateRuleIndexByBodyPredicate(CQIE rule) {
+	public void updateRuleIndexByBodyPredicate(CQIE rule) {
 		for (Function bodyAtom : rule.getBody()) {
 
 			if (bodyAtom.isDataFunction()) {
-				ruleIndexByBodyPredicate.put(bodyAtom.getFunctionSymbol(), rule);
+				Predicate functionSymbol = bodyAtom.getFunctionSymbol();
+				if (!ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
+					ruleIndexByBodyPredicate.put(functionSymbol, rule);
+				}
 			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
 				updateRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
 			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
@@ -182,6 +185,75 @@ public class DatalogDependencyGraphGenerator {
 			}
 		}
 	}
+	
+	
+	
+	/**
+	 * Removes the old indexes given by a rule.
+	 * 
+	 * @param rule
+	 */
+	public void removeOldRuleIndexByBodyPredicate(CQIE rule) {
+		for (Function bodyAtom : rule.getBody()) {
+
+			if (bodyAtom.isDataFunction()) {
+				Predicate functionSymbol = bodyAtom.getFunctionSymbol();
+				if (ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
+					ruleIndexByBodyPredicate.remove(functionSymbol, rule);
+				}
+			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
+				removeRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
+			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
+				continue;
+			} else {
+				throw new IllegalStateException("Unknown Function");
+			}
+		}
+	}
+
+	
+	
+	/**
+	 * 
+	 * This is a helper method for {@link #removeRuleIndexByBodyPredicate}.
+	 * 
+	 * This method traverses in an atom, and removes the predicates  in the
+	 * bodyIndex
+	 * @param rule 
+	 * 
+	 * 
+	 * @param bodyAtom
+	 */
+	private void removeRuleIndexByBodyPredicate_traverseBodyAtom(
+			CQIE rule, Function bodyAtom) {
+
+		Queue<Term> queueInAtom = new LinkedList<Term>();
+
+		queueInAtom.add(bodyAtom);
+		while (!queueInAtom.isEmpty()) {
+			Term queueHead = queueInAtom.poll();
+			if (queueHead instanceof Function) {
+				Function funcRoot = (Function) queueHead;
+				
+				if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
+						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
+					for (Term term : funcRoot.getTerms()) {
+						queueInAtom.add(term);
+					}
+				}  else if (funcRoot.isDataFunction()) {
+					ruleIndexByBodyPredicate.remove(funcRoot.getFunctionSymbol(), rule);
+				}
+			} else {
+				// NO-OP
+			}
+
+		}
+
+	}	
+	
+	
+	
+	
 	
 	/**
 	 * 
@@ -211,7 +283,9 @@ public class DatalogDependencyGraphGenerator {
 						queueInAtom.add(term);
 					}
 				}  else if (funcRoot.isDataFunction()) {
-					ruleIndexByBodyPredicate.put(funcRoot.getFunctionSymbol(), rule);
+					if (!ruleIndexByBodyPredicate.containsEntry(funcRoot.getFunctionSymbol(), rule)){
+						ruleIndexByBodyPredicate.put(funcRoot.getFunctionSymbol(), rule);
+					}
 				}
 			} else {
 				// NO-OP
@@ -266,22 +340,23 @@ public class DatalogDependencyGraphGenerator {
 	 * @param pred
 	 * @param rule
 	 */
-	public void removeOneRulePredicateFromRuleIndex(Predicate pred, CQIE rule) {
-
-		ruleIndex.remove(pred, rule);
+	public void removeRuleFromRuleIndex(Predicate pred, CQIE rule) {
+		if (ruleIndex.containsEntry(pred, rule)){
+			ruleIndex.remove(pred, rule);
+		}
 	}
 	
 
 	
 	/**
 	 * Adds a rule to the <code>ruleIndex</code>
-	 * Be careful. This method may cause a missmatch between the graph and the indexes.
+	 * Be careful. This method may cause a mismatch between the graph and the indexes.
 	 * @return 
 	 */
-	public void setRuleInGraph(Predicate pred, CQIE rule) {
-		
-		ruleIndex.put(pred, rule);
-		
+	public void addRuleToRuleIndex(Predicate pred, CQIE rule) {
+		if (!ruleIndex.containsEntry(pred, rule)){
+			ruleIndex.put(pred, rule);
+		}
 	}
 	
 	
@@ -408,20 +483,21 @@ public class DatalogDependencyGraphGenerator {
 	 * Be careful. This method may cause a missmatch between the graph and the indexes.
 	 * @return 
 	 */
-	
-	
-	public void setBodyIndex(Predicate pred, CQIE rule) {
+	public void addRuleToBodyIndex(Predicate pred, CQIE rule) {
 		if (!ruleIndexByBodyPredicate.containsEntry(pred, rule)){
 			ruleIndexByBodyPredicate.put(pred, rule);		
 		}
 	}
+
+	
+	
 	/**
 	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code> from <code>ruleIndexByBodyPredicate</code>
 	 * Be careful. This method may cause a mismatch between the graph and the indexes.
 	 * @param pred
 	 * @param rule
 	 */
-	public void removeOneRuleFromBodyIndex(Predicate pred, CQIE rule) {
+	public void removeRuleFromBodyIndex(Predicate pred, CQIE rule) {
 		if (ruleIndexByBodyPredicate.containsKey(pred)){
 			ruleIndexByBodyPredicate.remove(pred, rule);
 		}else {

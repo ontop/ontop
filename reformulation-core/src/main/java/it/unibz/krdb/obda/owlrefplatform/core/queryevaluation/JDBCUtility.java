@@ -129,7 +129,7 @@ public class JDBCUtility implements Serializable {
 		String sql = null;
 		if (constant.getType() == COL_TYPE.BNODE || constant.getType() == COL_TYPE.LITERAL || constant.getType() == COL_TYPE.OBJECT
 				|| constant.getType() == COL_TYPE.STRING) {
-			sql = "'" + constant.getValue() + "'";
+				sql = "'" + constant.getValue() + "'";
 		} else if (constant.getType() == COL_TYPE.BOOLEAN) {
 			sql = getSQLLexicalFormBoolean(constant);
 		} else if (constant.getType() == COL_TYPE.DATETIME) {

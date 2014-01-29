@@ -174,8 +174,8 @@ public class DatalogNormalizer {
 					}
 					i -= 1;
 				}
-			}
-		}
+			} // end join
+		} // end for body
 	}
 
 	public static CQIE foldJoinTrees(CQIE query, boolean clone) {
