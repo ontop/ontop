@@ -95,11 +95,10 @@ public class RegexpTest extends TestCase {
 	@Parameters
 	public static Collection<Object[]> getObdaFiles(){
 		return Arrays.asList(new Object[][] {
-				{"h2", true}
-				/*, 
+				{"h2", true}, 
 				 {"mysql", false },
 				 {"pgsql", false},
-				 {"oracle", false }*/
+				 {"oracle", false }
 				 });
 	}
 
