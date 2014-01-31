@@ -61,14 +61,14 @@ public class SigmaTBoxOptimizer {
 			log.debug("Starting semantic-reduction");
 
 			for(EquivalenceClass<Description> nodes: isa.getNodes()) {
-				Description node = isa.getRepresentativeFor(nodes);
+				Description node = nodes.getRepresentative();
 				for (EquivalenceClass<Description> descendants : isa.getDescendants(node)) {
 						Description descendant = isa.getRepresentativeFor(descendants);
 						if (!descendant.equals(node)) 
 							addToTBox(optimizedTBox, descendant, node);
 				}
 				
-				for (Description equivalent : isa.getEquivalences(node)) {
+				for (Description equivalent : nodes) {
 					if (!equivalent.equals(node)) {
 						addToTBox(optimizedTBox, node, equivalent);					
 						addToTBox(optimizedTBox, equivalent, node);
@@ -162,14 +162,14 @@ public class SigmaTBoxOptimizer {
 		Ontology sigma = descFactory.createOntology("sigma");
 
 		for (EquivalenceClass<Description> nodes : reasoner.getNodes()) {
-			Description node = reasoner.getRepresentativeFor(nodes);
+			Description node = nodes.getRepresentative();
 			for (EquivalenceClass<Description> descendants : reasoner.getDescendants(node)) {
 				Description descendant = reasoner.getRepresentativeFor(descendants);
 
 				if (!descendant.equals(node)) 
 					addToSigma(sigma, descendant, node);
 			}
-			for (Description equivalent : reasoner.getEquivalences(node)) {
+			for (Description equivalent : nodes) {
 				if (!equivalent.equals(node))  {
 					addToSigma(sigma, node, equivalent);
 					addToSigma(sigma, equivalent, node);					

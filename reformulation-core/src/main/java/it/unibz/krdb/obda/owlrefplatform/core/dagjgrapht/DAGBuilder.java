@@ -203,17 +203,19 @@ public class DAGBuilder {
 		List<EquivalenceClass<Description>> classEquivalenceClasses = 
 				new LinkedList<EquivalenceClass<Description>>();
 		
-		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) 
+		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  {
+			for (Description node : equivalenceSet) 
+				equivalencesMap.put(node, equivalenceSet);
+			
 			if (equivalenceSet.size() > 1) {
-				for (Description node : equivalenceSet) 
-					equivalencesMap.put(node, equivalenceSet);
-				
 				if (equivalenceSet.iterator().next() instanceof Property)
 					propertyEquivalenceClasses.add(equivalenceSet);
 				else
 					classEquivalenceClasses.add(equivalenceSet);					
 			}
-
+			else
+				equivalenceSet.setRepresentative(equivalenceSet.iterator().next());
+		}
 		
 		
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
@@ -327,13 +329,8 @@ public class DAGBuilder {
 			if (representative == null) {
 				PropertySomeRestriction first = (PropertySomeRestriction)equivalenceClassSet.iterator().next();
 				Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
-				EquivalenceClass<Description> propEquivalenceClass = equivalencesMap.get(prop);
-				if (propEquivalenceClass == null)
-					representative = first;
-				else {
-					Property propRep = (Property) propEquivalenceClass.getRepresentative();
-					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
-				}
+				Property propRep = (Property) equivalencesMap.get(prop).getRepresentative();
+				representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
 			}
 
 			for (Description e : equivalenceClassSet) {

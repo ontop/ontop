@@ -69,10 +69,10 @@ public class EquivalenceTBoxOptimizer {
 			equivalenceMap = new HashMap<Predicate, Description>();
 
 			for(EquivalenceClass<Description> nodes : reasoner.getNodes()) {
-				Description node = reasoner.getRepresentativeFor(nodes);
+				Description node = nodes.getRepresentative();
 							
 				if (node instanceof Property) {
-					for (Description equivalent : reasoner.getEquivalences(node)) {
+					for (Description equivalent : nodes) {
 						if (equivalent.equals(node)) 
 							continue;
 
@@ -92,7 +92,7 @@ public class EquivalenceTBoxOptimizer {
 					}
 				}
 				else { // is a class 
-					for (Description equivalent : reasoner.getEquivalences(node)) {
+					for (Description equivalent : nodes) {
 						if (equivalent.equals(node)) 
 							continue;
 
@@ -128,7 +128,7 @@ public class EquivalenceTBoxOptimizer {
 			getEquivalenceMap();
 			
 			for(EquivalenceClass<Description> nodes : reasoner.getNodes()) {
-				Description node = reasoner.getRepresentativeFor(nodes);
+				Description node = nodes.getRepresentative();
 				
 				for (EquivalenceClass<Description> descendants : reasoner.getDescendants(node)) {
 					Description descendant = reasoner.getRepresentativeFor(descendants);
@@ -136,7 +136,7 @@ public class EquivalenceTBoxOptimizer {
 					if (!descendant.equals(node))  // exclude trivial inclusions
 						addToTBox(optimizedTBox, descendant, node);
 				}
-				for (Description equivalent : reasoner.getEquivalences(node)) {
+				for (Description equivalent : nodes) {
 					if (!equivalent.equals(node)) {
 						Predicate equivalentp = VocabularyExtractor.getPredicate(equivalent);
 						

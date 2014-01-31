@@ -44,7 +44,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
 	
 	// maps descriptions to their equivalence classes (and their representatives)
-	// (does not contain a record for singleton equivalcence classes -- to be fixed)
 	private final Map<Description, EquivalenceClass<Description>> equivalencesClasses; 
 	
 	private Set<OClass> classNames;
@@ -72,10 +71,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	
 	public Description getRepresentativeFor(Description v) {
-//		Description rep = replacements.get(v);
-//		if (rep != null)   // there is a proper replacement
-//			return rep;
-//		return v;		   // no replacement -- return the node
 		EquivalenceClass<Description> e = equivalencesClasses.get(v);
 		if (e == null)
 			return v;
@@ -90,8 +85,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public boolean isCanonicalRepresentative(Description v) {
 		//return (replacements.get(v) == null);
 		EquivalenceClass<Description> e = equivalencesClasses.get(v);
-		if (e == null)
-			return true;
 		return e.getRepresentative().equals(v);
 	}
 
@@ -180,8 +173,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 			// get the child node and its equivalent nodes
 			EquivalenceClass<Description> equivalences = getEquivalences(source);
-			if (!equivalences.isEmpty())
-				result.add(equivalences);
+			result.add(equivalences);
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -210,8 +202,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 			// get the child node and its equivalent nodes
 			EquivalenceClass<Description> equivalences = getEquivalences(target);
-			if (!equivalences.isEmpty())
-				result.add(equivalences);
+			result.add(equivalences);
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -331,8 +322,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	@Override
 	public EquivalenceClass<Description> getEquivalences(Description desc) {
 		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
-		if (c == null)
-			c = new EquivalenceClass<Description>(Collections.singleton(desc), desc);
 		return c;
 	}
 	
@@ -351,7 +340,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
 		for (Description vertex : dag.vertexSet()) 
-				result.add(getEquivalences(vertex));
+			result.add(getEquivalences(vertex));
 
 		return result;
 	}

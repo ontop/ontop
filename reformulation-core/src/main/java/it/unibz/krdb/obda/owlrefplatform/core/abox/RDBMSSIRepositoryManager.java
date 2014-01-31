@@ -1731,8 +1731,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
-		Description roleNode = reasonerDag.getRepresentativeFor(role);
-		Set<EquivalenceClass<Description>> ancestors = reasonerDag.getAncestors(roleNode);
+		//Description roleNode = reasonerDag.getRepresentativeFor(role);
+		Set<EquivalenceClass<Description>> ancestors = reasonerDag.getAncestors(role);
 
 		for (EquivalenceClass<Description> node : ancestors) {
 			for(Description desc: node)
@@ -1918,7 +1918,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			while (!childrenQueue.isEmpty()) {
 				EquivalenceClass<Description> children = childrenQueue.poll();
-				Description child = reasonerDag.getRepresentativeFor(children);
+				Description child = children.getRepresentative();
 				if(child.equals(node))
 					continue;
 				if ((child instanceof Property)
@@ -2002,7 +2002,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode;
 				Property role = ofac.createProperty(existsDesc.getPredicate(),
 						existsDesc.isInverse());
-				Description roleNode = reasonerDag.getRepresentativeFor(role);
+				//Description roleNode = reasonerDag.getRepresentativeFor(role);
 
 				for (Description possiblyRedundantNode : existChildren) {
 					/* Here we have ER */
@@ -2010,10 +2010,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Property role2 = ofac
 							.createProperty(existsDesc2.getPredicate(),
 									existsDesc2.isInverse());
-					Description roleNode2 = reasonerDag.getRepresentativeFor(role2);
+					//Description roleNode2 = reasonerDag.getRepresentativeFor(role2);
 
-					for(EquivalenceClass<Description> descendants: reasonerDag.getDescendants(roleNode)){
-						if(descendants.contains(roleNode2))
+					for(EquivalenceClass<Description> descendants: reasonerDag.getDescendants(role)){
+						if (descendants.contains(role2))
 						/*
 						 * The DAG implies that R ISA S, so we remove ER
 						 */
