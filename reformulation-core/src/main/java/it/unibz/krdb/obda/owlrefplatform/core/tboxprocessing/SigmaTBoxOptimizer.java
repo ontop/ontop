@@ -145,7 +145,8 @@ public class SigmaTBoxOptimizer {
 		Description sc = sigmaChain.getRepresentativeFor(child);
 		Description tc = isaChain.getRepresentativeFor(child);
 
-		if (!sigmaChain.containsVertex(sp) || !sigmaChain.containsVertex(sc) || !isaChain.containsVertex(tc)) 
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null || tc == null) 
 			return false;
 		
 		Set<EquivalenceClass<Description>> spChildren =  sigmaChain.getDirectChildren(sp);

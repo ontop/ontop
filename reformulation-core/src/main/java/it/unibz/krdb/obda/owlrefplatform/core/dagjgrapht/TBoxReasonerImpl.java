@@ -72,9 +72,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public Description getRepresentativeFor(Description v) {
 		EquivalenceClass<Description> e = equivalencesClasses.get(v);
-		if (e == null)
-			return v;
-		return e.getRepresentative();
+		if (e != null)
+			return e.getRepresentative();
+		return null;
 	}
 	
 	public Description getRepresentativeFor(EquivalenceClass<Description> nodes) {
@@ -142,10 +142,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	
-	// checks whether the DAG contains node
-	public boolean containsVertex(Description node) {
-		return dag.containsVertex(node);
-	}
 	
 	@Deprecated
 	public Set<Description> vertexSet() {
