@@ -13,6 +13,11 @@ public class EquivalenceClass<T> implements Iterable<T> {
 		this.representative = null;
 	}
 	
+	public EquivalenceClass(Set<T> members, T representative) {
+		this.members = members;
+		this.representative = representative;
+	}
+	
 	public void setRepresentative(T representative) {
 		this.representative = representative;
 	}

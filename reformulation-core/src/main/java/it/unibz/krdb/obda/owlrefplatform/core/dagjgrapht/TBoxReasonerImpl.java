@@ -332,7 +332,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public EquivalenceClass<Description> getEquivalences(Description desc) {
 		EquivalenceClass<Description> c = equivalencesClasses.get(desc);
 		if (c == null)
-			c = new EquivalenceClass<Description>(Collections.singleton(desc));
+			c = new EquivalenceClass<Description>(Collections.singleton(desc), desc);
 		return c;
 	}
 	
@@ -390,102 +390,65 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		
 		// move everything to a graph that admits cycles
-			DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
-					new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
+				new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 
-			{
-				SimpleDirectedGraph <Description,DefaultEdge> dag = tbox.dag;
+		// clone all the vertex and edges from dag
+		for (Description v : tbox.dag.vertexSet()) {
+			modifiedGraph.addVertex(v);
 
-				// clone all the vertex and edges from dag
-				for (Description v : dag.vertexSet()) {
-					modifiedGraph.addVertex(v);
+		}
+		for (DefaultEdge e : tbox.dag.edgeSet()) {
+			Description s = tbox.dag.getEdgeSource(e);
+			Description t = tbox.dag.getEdgeTarget(e);
+			modifiedGraph.addEdge(s, t, e);
+		}
 
-				}
-				for (DefaultEdge e : dag.edgeSet()) {
-					Description s = dag.getEdgeSource(e);
-					Description t = dag.getEdgeTarget(e);
-					modifiedGraph.addEdge(s, t, e);
-				}
+		Collection<Description> nodes = new HashSet<Description>(tbox.dag.vertexSet());
+		OntologyFactory fac = OntologyFactoryImpl.getInstance();
+		HashSet<Description> processedNodes = new HashSet<Description>();
+		
+		for (Description node : nodes) {
+			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
+				continue;
+
+			/*
+			 * Adding a cycle between exists R and exists R- for each R.
+			 */
+
+			PropertySomeRestriction existsNode = (PropertySomeRestriction) node;
+			Description existsInvNode = tbox.getRepresentativeFor(
+						fac.createPropertySomeRestriction(existsNode.getPredicate(), !existsNode.isInverse()));
+			
+			for (EquivalenceClass<Description> children : tbox.getDirectChildren(existsNode)) {
+				Description child = children.getRepresentative(); 
+				if (!child.equals(existsInvNode))
+					modifiedGraph.addEdge(child, existsInvNode);
 			}
-			Collection<Description> nodes = new HashSet<Description>(tbox.dag.vertexSet());
-			OntologyFactory fac = OntologyFactoryImpl.getInstance();
-			HashSet<Description> processedNodes = new HashSet<Description>();
-			for (Description node : nodes) {
-				if (!(node instanceof PropertySomeRestriction)
-						|| processedNodes.contains(node)) {
-					continue;
-				}
-
-				/*
-				 * Adding a cycle between exists R and exists R- for each R.
-				 */
-
-				PropertySomeRestriction existsR = (PropertySomeRestriction) node;
-				PropertySomeRestriction existsRin = fac
-						.createPropertySomeRestriction(existsR.getPredicate(),
-								!existsR.isInverse());
-				Description existsNode = node;
-				Description existsInvNode = tbox.getRepresentativeFor(existsRin);
-				Set<EquivalenceClass<Description>> childrenExist 
-						= new HashSet<EquivalenceClass<Description>>(
-									tbox.getDirectChildren(existsNode));
-				Set<EquivalenceClass<Description>> childrenExistInv 
-						= new HashSet<EquivalenceClass<Description>>(
-									tbox.getDirectChildren(existsInvNode));
-
-				for (EquivalenceClass<Description> children : childrenExist) {
-					// for(Description child:children){
-					// DAGOperations.addParentEdge(child, existsInvNode);
-					Description firstChild = children.iterator().next();
-					Description child = tbox.getRepresentativeFor(firstChild);
-					if (!child.equals(existsInvNode))
-						modifiedGraph.addEdge(child, existsInvNode);
-
-					// }
-				}
-				for (EquivalenceClass<Description> children : childrenExistInv) {
-					// for(Description child:children){
-					// DAGOperations.addParentEdge(child, existsNode);
-					Description firstChild = children.iterator().next();
-					Description child = tbox.getRepresentativeFor(firstChild);
-					if (!child.equals(existsNode))
-						modifiedGraph.addEdge(child, existsNode);
-
-					// }
-				}
-
-				Set<EquivalenceClass<Description>> parentExist 
-						= new HashSet<EquivalenceClass<Description>>(
-								tbox.getDirectParents(existsNode));
-				Set<EquivalenceClass<Description>> parentsExistInv 
-						= new HashSet<EquivalenceClass<Description>>(
-								tbox.getDirectParents(existsInvNode));
-
-				for (EquivalenceClass<Description> parents : parentExist) {
-					Description firstParent = parents.iterator().next();
-					Description parent = tbox.getRepresentativeFor(firstParent);
-					if (!parent.equals(existsInvNode))
-						modifiedGraph.addEdge(existsInvNode, parent);
-
-					// }
-				}
-
-				for (EquivalenceClass<Description> parents : parentsExistInv) {
-					Description firstParent = parents.iterator().next();
-					Description parent = tbox.getRepresentativeFor(firstParent);
-					if (!parent.equals(existsInvNode))
-						modifiedGraph.addEdge(existsNode, parent);
-
-					// }
-				}
-
-				processedNodes.add(existsInvNode);
-				processedNodes.add(existsNode);
+			for (EquivalenceClass<Description> children : tbox.getDirectChildren(existsInvNode)) {
+				Description child = children.getRepresentative(); 
+				if (!child.equals(existsNode))
+					modifiedGraph.addEdge(child, existsNode);
 			}
 
-			/* Collapsing the cycles */
-			return new TBoxReasonerImpl(modifiedGraph);
+			for (EquivalenceClass<Description> parents : tbox.getDirectParents(existsNode)) {
+				Description parent = parents.getRepresentative(); 
+				if (!parent.equals(existsInvNode))
+					modifiedGraph.addEdge(existsInvNode, parent);
+			}
+
+			for (EquivalenceClass<Description> parents : tbox.getDirectParents(existsInvNode)) {
+				Description parent = parents.getRepresentative(); 
+				if (!parent.equals(existsInvNode))
+					modifiedGraph.addEdge(existsNode, parent);
+			}
+
+			processedNodes.add(existsNode);
+			processedNodes.add(existsInvNode);
+		}
+
+		/* Collapsing the cycles */
+		return new TBoxReasonerImpl(modifiedGraph);
 	}
-
 
 }
