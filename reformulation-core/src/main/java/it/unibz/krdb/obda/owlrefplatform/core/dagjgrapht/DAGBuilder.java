@@ -406,37 +406,30 @@ public class DAGBuilder {
 						break;
 					}
 
-				processedClasses.add(representative);
-
 				for (Description eliminatedNode : equivalenceClassSet) {
 
-					Description replacement = replacements.get(eliminatedNode);
-					Description r = (replacement == null) ? eliminatedNode : replacement;
-				
-					if (r.equals(representative))
-						continue;
-
-					replacements.put(eliminatedNode, representative);
-
+					Description replacement = replacements.get(eliminatedNode);			
 					/*
 					 * check if the node has been already replaced by an other
 					 * in the first part with property if substitute check if
 					 * its replacements still has to be processed
 					 */
 					if (replacement != null) {
-						if (!processedClasses.contains(replacement)) {
-							processedClasses.add(eliminatedNode);
-							eliminatedNode = replacement;
-							replacements.put(eliminatedNode, representative);
+						
+						// replacement cannot be equal to the representative !!!
+						// if (!replacement.equals(representative)) {
+						replacements.put(eliminatedNode, representative);
+						
+						if (!processedClasses.contains(replacement)) {			
+							removeNodeAndRedirectEdges(graph, replacement, representative, replacements);
+							processedClasses.add(replacement);
 						} 
-						else {
-							processedClasses.add(eliminatedNode);
-							continue;
-						}
 					}
-					removeNodeAndRedirectEdges(graph, eliminatedNode, representative, null);
-
-					processedClasses.add(eliminatedNode);
+					else {						
+						if (eliminatedNode != representative) 
+							removeNodeAndRedirectEdges(graph, eliminatedNode, representative, replacements);
+					}
+					processedClasses.add(eliminatedNode);					
 				}
 			}
 		}
