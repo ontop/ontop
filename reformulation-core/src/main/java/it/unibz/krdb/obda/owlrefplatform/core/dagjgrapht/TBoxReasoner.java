@@ -27,6 +27,7 @@ public interface TBoxReasoner {
 
 	public Set<EquivalenceClass<Description>> getDescendants(Description desc);
 
+	// returns the equivalence class of desc and all equivalence classes of ancestors
 	public Set<EquivalenceClass<Description>> getAncestors(Description desc);
 
 	public EquivalenceClass<Description> getEquivalences(Description desc);
