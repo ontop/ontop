@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,16 +76,9 @@ public class DAGBuilder {
 			copy.addEdge(s, t, e);
 		}
 	
-		Map<Description, Description> replacements = new HashMap<Description, Description>();
-		eliminateCycles(copy, equivalencesMap, replacements);
+		eliminateCycles(copy, equivalencesMap);
 		eliminateRedundantEdges(copy);
 		
-		for (Description d : replacements.keySet()) {
-			EquivalenceClass<Description> cl = equivalencesMap.get(d);
-			Description rep = replacements.get(d);
-			cl.setRepresentative(rep);
-		}
-
 		SimpleDirectedGraph <Description,DefaultEdge> dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
 		Graphs.addGraph(dag, copy);
 		
@@ -199,21 +191,29 @@ public class DAGBuilder {
 	 */
 
 	private static void eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Map<Description, EquivalenceClass<Description>> equivalencesMap, 
-			Map<Description, Description> replacements) {
+			Map<Description, EquivalenceClass<Description>> equivalencesMap) {
 
 		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(graph);
 
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
-		List<EquivalenceClass<Description>> equivalenceSets = inspector
-				.stronglyConnectedSets();
-
-		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) {
-			if (equivalenceSet.size() > 1)
+		List<EquivalenceClass<Description>> equivalenceSets = inspector.stronglyConnectedSets();
+		List<EquivalenceClass<Description>> propertyEquivalenceClasses = 
+				new LinkedList<EquivalenceClass<Description>>();
+		List<EquivalenceClass<Description>> classEquivalenceClasses = 
+				new LinkedList<EquivalenceClass<Description>>();
+		
+		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) 
+			if (equivalenceSet.size() > 1) {
 				for (Description node : equivalenceSet) 
 					equivalencesMap.put(node, equivalenceSet);
-		}
+				
+				if (equivalenceSet.iterator().next() instanceof Property)
+					propertyEquivalenceClasses.add(equivalenceSet);
+				else
+					classEquivalenceClasses.add(equivalenceSet);					
+			}
+
 		
 		
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
@@ -226,18 +226,17 @@ public class DAGBuilder {
 		 */
 		Set<Property> processedProperties = new HashSet<Property>();
 		Set<Property> chosenProperties = new HashSet<Property>();
+		Map<PropertySomeRestriction, PropertySomeRestriction> replacements 
+					= new HashMap<PropertySomeRestriction, PropertySomeRestriction>();
 
-		// PROCESSING ONLY PROPERTIES FIRST
+		// PROCESS ONLY PROPERTIES
 		
-		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets) {
-
-			if (equivalenceSet.size() < 2)
-				continue;
+		for (EquivalenceClass<Description> equivalenceSet : propertyEquivalenceClasses) {
 
 			boolean ignore = false;
 
 			for (Description e : equivalenceSet) 
-				if (!(e instanceof Property) || processedProperties.contains(e)) { 
+				if (processedProperties.contains(e)) { 
 					ignore = true;
 					break;
 				}
@@ -295,7 +294,7 @@ public class DAGBuilder {
 
 				// remove everything but the representative
 				if (e != prop) {
-					removeNodeAndRedirectEdges(graph, e, prop, replacements);
+					removeNodeAndRedirectEdges(graph, e, prop);
 					
 					PropertySomeRestriction eDomain = fac.createPropertySomeRestriction(eProp.getPredicate(), eProp.isInverse());
 					replacements.put(eDomain, domain); // set the representative
@@ -308,24 +307,24 @@ public class DAGBuilder {
 					// if the inverse is not equivalent to the representative 
 					// then we remove the inverse (with its domain)
 					// but keep the representative for the inverse
-					removeNodeAndRedirectEdges(graph, eInverse, inverse, replacements);	
+					removeNodeAndRedirectEdges(graph, eInverse, inverse);	
 
 					PropertySomeRestriction eRange = fac.createPropertySomeRestriction(eProp.getPredicate(), !eProp.isInverse());
 					replacements.put(eRange, range); // set the representative
 				}
 				processedProperties.add(eInverse);
 			}
+			
+			equivalenceSet.setRepresentative(prop);
+			EquivalenceClass<Description> inverseEquivalenceSet = equivalencesMap.get(inverse);
+			inverseEquivalenceSet.setRepresentative(inverse);			
 		}
 
 		/*
 		 * PROCESS CLASSES ONLY
 		 */
 
-		for (EquivalenceClass<Description> equivalenceClassSet : equivalenceSets) {
-
-			Description first = equivalenceClassSet.iterator().next();
-			if (!(first instanceof BasicClassDescription))
-				continue;
+		for (EquivalenceClass<Description> equivalenceClassSet : classEquivalenceClasses) {
 			
 			BasicClassDescription representative = null;
 			
@@ -335,21 +334,24 @@ public class DAGBuilder {
 					representative = (BasicClassDescription)e;
 					break;
 				}
+			
 			if (representative == null) {
-				BasicClassDescription nodeReplacement = (BasicClassDescription)replacements.get(first);	
-				representative = (nodeReplacement == null) ? (BasicClassDescription)first : nodeReplacement;
+				BasicClassDescription first = (BasicClassDescription)equivalenceClassSet.iterator().next();
+				BasicClassDescription nodeReplacement = replacements.get(first);	
+				representative = (nodeReplacement == null) ? first : nodeReplacement;
 			}
 
 			for (Description e : equivalenceClassSet) {
 				// careful -- proper equality check is required because the replacement is "generated"
 				if (!e.equals(representative))  
-					removeNodeAndRedirectEdges(graph, e, representative, replacements);
+					removeNodeAndRedirectEdges(graph, e, representative);
 			}
+			equivalenceClassSet.setRepresentative(representative);
 		}
 	}
 	
 	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Description eliminatedNode, Description representative, Map<Description, Description> replacements) {
+			Description eliminatedNode, Description representative) {
 		/*
 		 * Re-pointing all links to and from the eliminated node to
 		 * the representative node
@@ -370,8 +372,6 @@ public class DAGBuilder {
 		}
 
 		graph.removeVertex(eliminatedNode);		// removes all edges as well
-		
-		replacements.put(eliminatedNode, representative);	
 	}
 	
 
