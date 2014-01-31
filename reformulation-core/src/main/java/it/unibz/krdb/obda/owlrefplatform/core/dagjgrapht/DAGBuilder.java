@@ -223,8 +223,9 @@ public class DAGBuilder {
 		 * component should be ignored, since a cycle involving the same nodes
 		 * or nodes for inverse descriptions has already been processed.
 		 */
-		Set<Description> processedNodes = new HashSet<Description>();
-		Set<Description> chosenNodes = new HashSet<Description>();
+		Set<Property> processedProperties = new HashSet<Property>();
+		Set<PropertySomeRestriction> processedSomeValuesFrom = new HashSet<PropertySomeRestriction>();
+		Set<Property> chosenProperties = new HashSet<Property>();
 
 		// PROCESSING ONLY PROPERTIES FIRST
 		
@@ -235,12 +236,13 @@ public class DAGBuilder {
 
 			boolean ignore = false;
 
-			for (Description node : equivalenceSet) {
-				if (processedNodes.contains(node) || !(node instanceof Property)) { 
+			for (Description e : equivalenceSet) 
+				if (!(e instanceof Property) || processedProperties.contains(e)) { 
 					ignore = true;
 					break;
 				}
-			}
+			if (ignore)
+				continue;
 			
 			/*
 			 * We consider first the elements that are connected with other
@@ -248,32 +250,25 @@ public class DAGBuilder {
 			 * already assigned named role or an inverse
 			 */
 
-			if (!ignore) {
+			for (Description e : equivalenceSet) {
+				for (DefaultEdge outEdge : graph.outgoingEdgesOf(e)) {
+					Property target = (Property) graph.getEdgeTarget(outEdge);
 
-				for (Description representative : equivalenceSet) {
-
-					for (DefaultEdge outEdge : graph.outgoingEdgesOf(representative)) {
-						Description target = graph.getEdgeTarget(outEdge);
-
-						if (processedNodes.contains(target))
-							if (((Property) target).isInverse()) {
-								ignore = true;
-								chosenNodes.addAll(equivalenceSet.getMembers());
-								break;
-							}
-
-						if (chosenNodes.contains(target)) {
-							ignore = true;
-							chosenNodes.addAll(equivalenceSet.getMembers());
-							break;
-						}
-					}
-					if (ignore)
+					if (chosenProperties.contains(target) || 
+							(processedProperties.contains(target) && target.isInverse())) {
+						ignore = true;
 						break;
+					}
 				}
+				if (ignore) 
+					break;
 			}
-			if (ignore)
-				continue;
+			if (ignore) {
+				for (Description e : equivalenceSet) 
+					chosenProperties.add((Property)e);
+				
+				continue;				
+			}
 
 			/* Assign the representative role with its inverse, domain and range
 			 * 
@@ -288,52 +283,37 @@ public class DAGBuilder {
 				}
 			
 			if (prop == null) 	// equivalence class contains inverses only 
-				continue;		// they will be added when we consider their properties
+				continue;		// they are processed when we consider their properties
 
-			Description inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
-			Description domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
-			Description range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
+			Property inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
+			PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
+			PropertySomeRestriction range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
 
-			processedNodes.add(inverse);
-			processedNodes.add(domain);
-			processedNodes.add(range);
+			// remove all the equivalent node
+			for (Description e : equivalenceSet) {			
+				Property eProp = (Property) e;
+				PropertySomeRestriction eDomain = fac.createPropertySomeRestriction(eProp.getPredicate(), eProp.isInverse());
 
-			processedNodes.add(prop);
+				// remove everything but the representative
+				if (e != prop) {
+					removeNodeAndRedirectEdges(graph, e, prop, replacements);
+					removeNodeAndRedirectEdges(graph, eDomain, domain, replacements);
+				}		
+				processedProperties.add(eProp);
+				processedSomeValuesFrom.add(eDomain);
 
-			//remove all the equivalent node (eliminatedNode)
-			for (Description eliminatedNode : equivalenceSet) {
-				if (eliminatedNode == prop)
-					continue;
+				Property eInverse = fac.createProperty(eProp.getPredicate(), !eProp.isInverse());
+				PropertySomeRestriction eRange = fac.createPropertySomeRestriction(eProp.getPredicate(), !eProp.isInverse());
 				
-				removeNodeAndRedirectEdges(graph, eliminatedNode, prop);
-				processedNodes.add(eliminatedNode);
-				replacements.put(eliminatedNode, prop);
-
-				/*
-				 * we need to collapse the inverses and existentials of the property
-				 */
-
-				Property equiprop = (Property) eliminatedNode;
-				Description equivinverseNode = fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse());
-				Description equivDomainNode = fac.createPropertySomeRestriction(equiprop.getPredicate(), equiprop.isInverse());
-				Description equivRangeNode = fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse());
-
-				removeNodeAndRedirectEdges(graph, equivDomainNode, domain);
-				processedNodes.add(equivDomainNode);
-				replacements.put(equivDomainNode, domain);
-				
-				if (!equivinverseNode.equals(prop))  {
-					 // the representative is not equivalent to its inverse 
-					//   (if it is, we do not need to do anything with its inverse, 
-					//        i.e., the representative itself)
-					removeNodeAndRedirectEdges(graph, equivinverseNode, inverse);
-					processedNodes.add(equivinverseNode);
-					replacements.put(equivinverseNode, inverse);
-					
-					removeNodeAndRedirectEdges(graph, equivRangeNode, range);
-					processedNodes.add(equivRangeNode);
-					replacements.put(equivRangeNode, range);
+				if ((e != prop) && !eInverse.equals(prop))  {
+					// if the inverse is not equivalent to the representative 
+					// then we remove the inverse (with its domain)
+					// but keep the representative for the inverse
+					removeNodeAndRedirectEdges(graph, eInverse, inverse, replacements);					
+					removeNodeAndRedirectEdges(graph, eRange, range, replacements);
 				}
+				processedProperties.add(eInverse);
+				processedSomeValuesFrom.add(eRange);
 			}
 		}
 
@@ -341,95 +321,92 @@ public class DAGBuilder {
 		 * Second check of the strongly connected components for the classes
 		 * 
 		 */
-		List<EquivalenceClass<Description>> equivalenceClassSets = inspector
-				.stronglyConnectedSets();
-		Set<Description> processedClassNodes = new HashSet<Description>();
+		Set<Description> processedClasses = new HashSet<Description>();
 
-		// PROCESS CLASES ONLY
+		// PROCESS CLASSES ONLY
 		
-		for (EquivalenceClass<Description> equivalenceClassSet : equivalenceClassSets) {
+		for (EquivalenceClass<Description> equivalenceClassSet : equivalenceSets) {
 
 			if (equivalenceClassSet.size() < 2)
 				continue;
 			
 			boolean ignore = false;
 			for (Description node : equivalenceClassSet) 
-				if (processedClassNodes.contains(node) || (node instanceof Property)) {
+				if (processedClasses.contains(node) || (node instanceof Property)) {
 					ignore = true;
 					break;
 				}
 			if (ignore)
 				continue;
 
-			Iterator<Description> iterator = equivalenceClassSet.iterator();
-			Description node = iterator.next();
-			Description representative = replacements.get(node);
-			if (representative == null)
-				representative = node;
+			Description node = equivalenceClassSet.iterator().next();
 
 			/*
 			 *  if a node has already been assigned I check if it is named,
 			 *  if not it is substitute with an equivalent named node if it is present
 			 */
 			
-			if (processedNodes.contains(representative)) {
-				Description notRepresentative = null;
+			if (processedSomeValuesFrom.contains(node)) {
+				// the current representative is a PropertySomeRestriction 
+				// the property of which has an equivalent one
 
-				// I want to consider a named class as representative element
-				if (representative instanceof PropertySomeRestriction) {
-					notRepresentative = representative; // save -- it may be the first element up to replacements
-					representative = null;
+				Description replFirstElement = replacements.get(node); // save -- it may be the first element up to replacements
+				if (replFirstElement == null)
+					replFirstElement = node;
+				
+				Description representative = null;
 					
-					for (Description equivalent : equivalenceClassSet) 
-						if (equivalent instanceof OClass) {
-							representative = equivalent;
-							break;
-						}
+				for (Description equivalent : equivalenceClassSet) 
+					if (equivalent instanceof OClass) {
+						representative = equivalent;
+						break;
+					}
 
-					// if none of the equivalences is a named class 
-					// then they all have been added before when working over properties
-					if (representative == null)
-						continue;
+				// if none of the equivalences is a named class 
+				// then they all have been added before when working over properties
+				if (representative == null)
+					continue;
 
-					for (Description element : equivalenceClassSet) 
-						if (element.equals(representative)) 
-							replacements.remove(element);
-						else
-							replacements.put(element, representative);
-				}
-				processedClassNodes.add(representative);
+				// representative is a class name
+				// reset the replacements
+				for (Description e : equivalenceClassSet) 
+					if (!e.equals(representative)) 
+						replacements.put(e, representative);
 
-				while (iterator.hasNext()) {
+				processedClasses.add(representative);
 
-					Description eliminatedNode = iterator.next();
+				Description firstEl = equivalenceClassSet.iterator().next();
+				for  (Description eliminatedNode : equivalenceClassSet) {
+					
+					// assert(!eliminatedNode.equals(replFirstElement));
 					// I want to consider only the nodes that are not yet been
 					// processed
-					if (processedNodes.contains(eliminatedNode)
-							|| eliminatedNode.equals(notRepresentative))
+					if (processedSomeValuesFrom.contains(eliminatedNode))
 						continue;
 
-					if (eliminatedNode.equals(representative))
-						eliminatedNode = notRepresentative;
+					if (eliminatedNode == firstEl)
+						continue;
 
-					removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
+					if (eliminatedNode == representative)
+						eliminatedNode = replFirstElement;
 
-					processedClassNodes.add(eliminatedNode);
+					removeNodeAndRedirectEdges(graph, eliminatedNode, representative, null);
+
+					processedClasses.add(eliminatedNode);
 				}
 
 			} 
 			else { // If a node has not yet been assigned
 
-				// I want to consider a named class as representative element
-				if (representative instanceof PropertySomeRestriction) {
-					
-					for (Description equivalent : equivalenceClassSet) 
-						if (equivalent instanceof OClass) {
-							representative = equivalent;
-							break;
-						}
-				}
+				Description representative = node;
+				// find a named class as a representative 
+				for (Description e : equivalenceClassSet) 
+					if (e instanceof OClass) {
+						representative = e;
+						break;
+					}
 
-				processedClassNodes.add(representative);
+				processedClasses.add(representative);
 
 				for (Description eliminatedNode : equivalenceClassSet) {
 
@@ -447,19 +424,19 @@ public class DAGBuilder {
 					 * its replacements still has to be processed
 					 */
 					if (replacement != null) {
-						if (!processedClassNodes.contains(replacement)) {
-							processedClassNodes.add(eliminatedNode);
+						if (!processedClasses.contains(replacement)) {
+							processedClasses.add(eliminatedNode);
 							eliminatedNode = replacement;
 							replacements.put(eliminatedNode, representative);
 						} 
 						else {
-							processedClassNodes.add(eliminatedNode);
+							processedClasses.add(eliminatedNode);
 							continue;
 						}
 					}
-					removeNodeAndRedirectEdges(graph, eliminatedNode, representative);
+					removeNodeAndRedirectEdges(graph, eliminatedNode, representative, null);
 
-					processedClassNodes.add(eliminatedNode);
+					processedClasses.add(eliminatedNode);
 				}
 			}
 		}
@@ -467,7 +444,7 @@ public class DAGBuilder {
 	}
 	
 	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Description eliminatedNode, Description representative) {
+			Description eliminatedNode, Description representative, Map<Description, Description> replacements) {
 		/*
 		 * Re-pointing all links to and from the eliminated node to
 		 * the representative node
@@ -488,6 +465,10 @@ public class DAGBuilder {
 		}
 
 		graph.removeVertex(eliminatedNode);		// removes all edges as well
+		
+		if (replacements != null)
+			replacements.put(eliminatedNode, representative);
+		
 	}
 	
 
