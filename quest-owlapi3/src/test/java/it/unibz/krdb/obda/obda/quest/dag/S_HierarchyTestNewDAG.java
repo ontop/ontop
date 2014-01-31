@@ -85,7 +85,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		boolean result = false;
 		TBoxReasoner reasonerd1= getReasoner(d1);
 
-		for(Description vertex: d1.vertexSet()){
+		for(EquivalenceClass<Description> node : d1.getNodes()) {
+			Description vertex = node.getRepresentative();
 			if(named){
 
 				if(d1.getPropertyNames().contains(vertex) || d1.getClassNames().contains(vertex)){
@@ -133,7 +134,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		boolean result = false;
 		TBoxReasoner reasonerd1 = getReasoner(d1);
 
-		for(Description vertex: d1.vertexSet()){
+		for(EquivalenceClass<Description> node : d1.getNodes()) {
+			Description vertex = node.getRepresentative();
 			if(named){
 
 				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){

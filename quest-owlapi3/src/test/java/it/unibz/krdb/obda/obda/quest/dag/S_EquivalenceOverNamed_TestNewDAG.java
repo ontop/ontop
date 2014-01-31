@@ -122,7 +122,9 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				Set<EquivalenceClass<Description>> setd1 = new HashSet<EquivalenceClass<Description>>();
 				Set<EquivalenceClass<Description>> setd2 = new HashSet<EquivalenceClass<Description>>();
 
-				for(Description vertex: d1.vertexSet()){
+				
+				for(EquivalenceClass<Description> node : d1.getNodes()) {
+					Description vertex = node.getRepresentative();
 					if(named){
 
 						if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
@@ -198,9 +200,6 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 						setd1	= d1.getDescendants(vertex);
 						log.info("vertex {}", vertex);
 						log.debug("descendants {} ", setd1);
-						for(Description v: d2.vertexSet()){
-					
-						}
 						setd2	=reasonerd2.getDescendants(vertex);
 						log.debug("descendants {} ", setd2);
 						
@@ -235,7 +234,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
-				for(Description vertex: d1.vertexSet()){
+				for(EquivalenceClass<Description> node : d1.getNodes()) {
+					Description vertex = node.getRepresentative();
 					if(named){
 
 						if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
@@ -335,7 +335,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
-				for(Description vertex: d1.vertexSet()){
+				for(EquivalenceClass<Description> node : d1.getNodes()) {
+					Description vertex = node.getRepresentative();
 					if(named){
 
 						if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
@@ -482,7 +483,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
-				for(Description vertex: d1.vertexSet()){
+				for(EquivalenceClass<Description> node : d1.getNodes()) {
+					Description vertex = node.getRepresentative();
 					if(named){
 
 						if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
@@ -630,7 +632,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				Set<EquivalenceClass<Description>> setd1 = null;
 				Set<EquivalenceClass<Description>> setd2 = null;
 
-				for(Description vertex: d1.vertexSet()){
+				for(EquivalenceClass<Description> node : d1.getNodes()) {
+					Description vertex = node.getRepresentative();
 					if(named){
 
 						if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
@@ -733,7 +736,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 					numberVertexesD1= d1.vertexSet().size();
 				
 				//number of vertexes in the dag
-				int numberVertexesD2 = d2.vertexSet().size();
+				int numberVertexesD2 = d2.getNodes().size();
 
 				//number of vertexes in the equivalent mapping
 				int numberEquivalents=0;

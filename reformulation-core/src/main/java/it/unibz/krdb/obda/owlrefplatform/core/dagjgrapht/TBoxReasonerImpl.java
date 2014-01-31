@@ -141,13 +141,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return getClassNames().contains(node) || getPropertyNames().contains(node);
 	}
 
-	
-	
-	@Deprecated
-	public Set<Description> vertexSet() {
-		return dag.vertexSet();
-	}
-	
 	/**
 	 * return the direct children starting from the given node of the dag
 	 * 

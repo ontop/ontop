@@ -11,6 +11,7 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.HashSet;
@@ -28,20 +29,19 @@ public class DAGTest extends TestCase {
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
 		Set<Description> classes= new HashSet<Description>();
-		for(Description node : reasoner.vertexSet()){
-			if(node instanceof ClassDescription){
-				for(Description c: reasoner.getEquivalences(node) )
-				classes.add(c);
+		for(EquivalenceClass<Description> node : reasoner.getNodes()) {
+			if(node.getRepresentative() instanceof ClassDescription) {
+				for(Description c: node)
+					classes.add(c);
 			}
 		}
 		
 		Set<Description> roles= new HashSet<Description>();
-		for(Description node : reasoner.vertexSet()){
-			if(node instanceof Property){
-				for(Description r: reasoner.getEquivalences(node) )
+		for(EquivalenceClass<Description> node : reasoner.getNodes()) {
+			if(node.getRepresentative() instanceof Property) {
+				for(Description r: node)
 					roles.add(r);
-				}
-			
+			}
 		}
 		
 		System.out.println(roles);
