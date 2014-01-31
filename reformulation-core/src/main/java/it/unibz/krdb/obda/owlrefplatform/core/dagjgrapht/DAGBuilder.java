@@ -226,8 +226,6 @@ public class DAGBuilder {
 		 */
 		Set<Property> processedProperties = new HashSet<Property>();
 		Set<Property> chosenProperties = new HashSet<Property>();
-		Map<PropertySomeRestriction, PropertySomeRestriction> replacements 
-					= new HashMap<PropertySomeRestriction, PropertySomeRestriction>();
 
 		// PROCESS ONLY PROPERTIES
 		
@@ -285,33 +283,24 @@ public class DAGBuilder {
 				continue;		// they are processed when we consider their properties
 
 			Property inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
-			PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
-			PropertySomeRestriction range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
 
 			// remove all the equivalent node
 			for (Description e : equivalenceSet) {			
 				Property eProp = (Property) e;
 
-				// remove everything but the representative
-				if (e != prop) {
+				// remove if not the representative
+				if (e != prop) 
 					removeNodeAndRedirectEdges(graph, e, prop);
-					
-					PropertySomeRestriction eDomain = fac.createPropertySomeRestriction(eProp.getPredicate(), eProp.isInverse());
-					replacements.put(eDomain, domain); // set the representative
-				}		
+						
 				processedProperties.add(eProp);
 
 				Property eInverse = fac.createProperty(eProp.getPredicate(), !eProp.isInverse());
 				
-				if ((e != prop) && !eInverse.equals(prop))  {
-					// if the inverse is not equivalent to the representative 
-					// then we remove the inverse (with its domain)
-					// but keep the representative for the inverse
+				// if the inverse is not equivalent to the representative 
+				// then we remove the inverse
+				if ((e != prop) && !eInverse.equals(prop))  
 					removeNodeAndRedirectEdges(graph, eInverse, inverse);	
-
-					PropertySomeRestriction eRange = fac.createPropertySomeRestriction(eProp.getPredicate(), !eProp.isInverse());
-					replacements.put(eRange, range); // set the representative
-				}
+				
 				processedProperties.add(eInverse);
 			}
 			
@@ -336,9 +325,15 @@ public class DAGBuilder {
 				}
 			
 			if (representative == null) {
-				BasicClassDescription first = (BasicClassDescription)equivalenceClassSet.iterator().next();
-				BasicClassDescription nodeReplacement = replacements.get(first);	
-				representative = (nodeReplacement == null) ? first : nodeReplacement;
+				PropertySomeRestriction first = (PropertySomeRestriction)equivalenceClassSet.iterator().next();
+				Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
+				EquivalenceClass<Description> propEquivalenceClass = equivalencesMap.get(prop);
+				if (propEquivalenceClass == null)
+					representative = first;
+				else {
+					Property propRep = (Property) propEquivalenceClass.getRepresentative();
+					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
+				}
 			}
 
 			for (Description e : equivalenceClassSet) {
