@@ -11,6 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -318,122 +319,42 @@ public class DAGBuilder {
 		}
 
 		/*
-		 * Second check of the strongly connected components for the classes
-		 * 
+		 * PROCESS CLASSES ONLY
 		 */
-		Set<Description> processedClasses = new HashSet<Description>();
 
-		// PROCESS CLASSES ONLY
-		
 		for (EquivalenceClass<Description> equivalenceClassSet : equivalenceSets) {
 
 			if (equivalenceClassSet.size() < 2)
 				continue;
 			
-			boolean ignore = false;
-			for (Description node : equivalenceClassSet) 
-				if (processedClasses.contains(node) || (node instanceof Property)) {
-					ignore = true;
+			Description first = equivalenceClassSet.iterator().next();
+			if (!(first instanceof BasicClassDescription))
+				continue;
+			
+			BasicClassDescription node = (BasicClassDescription)first;
+			
+			// find a named class as a representative 
+			for (Description e : equivalenceClassSet) 
+				if (e instanceof OClass) {
+					node = (BasicClassDescription)e;
 					break;
 				}
-			if (ignore)
-				continue;
+			BasicClassDescription nodeReplacement = (BasicClassDescription)replacements.get(node);			
+			BasicClassDescription representative = (nodeReplacement == null) ? node : nodeReplacement;
 
-			Description node = equivalenceClassSet.iterator().next();
+			for (Description eliminatedNode : equivalenceClassSet) {
 
-			/*
-			 *  if a node has already been assigned I check if it is named,
-			 *  if not it is substitute with an equivalent named node if it is present
-			 */
-			
-			if (processedSomeValuesFrom.contains(node)) {
-				// the current representative is a PropertySomeRestriction 
-				// the property of which has an equivalent one
-
-				Description replFirstElement = replacements.get(node); // save -- it may be the first element up to replacements
-				if (replFirstElement == null)
-					replFirstElement = node;
-				
-				Description representative = null;
-					
-				for (Description equivalent : equivalenceClassSet) 
-					if (equivalent instanceof OClass) {
-						representative = equivalent;
-						break;
-					}
-
-				// if none of the equivalences is a named class 
-				// then they all have been added before when working over properties
-				if (representative == null)
-					continue;
-
-				// representative is a class name
-				// reset the replacements
-				for (Description e : equivalenceClassSet) 
-					if (!e.equals(representative)) 
-						replacements.put(e, representative);
-
-				processedClasses.add(representative);
-
-				Description firstEl = equivalenceClassSet.iterator().next();
-				for  (Description eliminatedNode : equivalenceClassSet) {
-					
-					// assert(!eliminatedNode.equals(replFirstElement));
-					// I want to consider only the nodes that are not yet been
-					// processed
-					if (processedSomeValuesFrom.contains(eliminatedNode))
-						continue;
-
-					if (eliminatedNode == firstEl)
-						continue;
-
-					if (eliminatedNode == representative)
-						eliminatedNode = replFirstElement;
-
-					removeNodeAndRedirectEdges(graph, eliminatedNode, representative, null);
-
-					processedClasses.add(eliminatedNode);
-				}
-
-			} 
-			else { // If a node has not yet been assigned
-
-				Description representative = node;
-				// find a named class as a representative 
-				for (Description e : equivalenceClassSet) 
-					if (e instanceof OClass) {
-						representative = e;
-						break;
-					}
-
-				for (Description eliminatedNode : equivalenceClassSet) {
-
-					Description replacement = replacements.get(eliminatedNode);			
-					/*
-					 * check if the node has been already replaced by an other
-					 * in the first part with property if substitute check if
-					 * its replacements still has to be processed
-					 */
-					if (replacement != null) {
-						
-						// replacement cannot be equal to the representative !!!
-						// if (!replacement.equals(representative)) {
-						replacements.put(eliminatedNode, representative);
-						
-						if (!processedClasses.contains(replacement)) {			
-							removeNodeAndRedirectEdges(graph, replacement, representative, replacements);
-							processedClasses.add(replacement);
-						} 
-					}
-					else {						
-						if (eliminatedNode != representative) 
-							removeNodeAndRedirectEdges(graph, eliminatedNode, representative, replacements);
-					}
-					processedClasses.add(eliminatedNode);					
+				// careful -- proper equality check is required because the replacement is "generated"
+				if (!eliminatedNode.equals(representative))  { 
+					Description replacement = replacements.get(eliminatedNode);		
+					// either not a non-singleton SomeValuesFrom or a representative of a non-singleton SomeValuesFrom
+					if (!processedSomeValuesFrom.contains(eliminatedNode) || (replacement == null))
+						removeNodeAndRedirectEdges(graph, eliminatedNode, representative, replacements);
+					else
+						replacements.put(eliminatedNode, representative); // override the previous representative
 				}
 			}
 		}
-
 	}
 	
 	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, 
@@ -459,9 +380,7 @@ public class DAGBuilder {
 
 		graph.removeVertex(eliminatedNode);		// removes all edges as well
 		
-		if (replacements != null)
-			replacements.put(eliminatedNode, representative);
-		
+		replacements.put(eliminatedNode, representative);	
 	}
 	
 
