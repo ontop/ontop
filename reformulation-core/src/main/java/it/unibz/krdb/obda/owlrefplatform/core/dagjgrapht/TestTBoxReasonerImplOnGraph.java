@@ -315,20 +315,8 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
 					reversed, desc);
 
-			// I don't want to consider the current node
-			Description current = iterator.next();
-
-			// get equivalences of the current node
-//			Set<Description> equivalenceSet = getEquivalences(current, named);
-			// iterate over the subsequent nodes, they are all descendant of
-			// desc
 			while (iterator.hasNext()) {
 				Description node = iterator.next();
-
-				// I don't want to add between the descendants a node equivalent
-				// to the starting node
-				if (node.equals(current))
-					continue;
 
 				if (named) { // add only the named classes and property
 					if (namedClasses.contains(node) | property.contains(node)) {

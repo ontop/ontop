@@ -63,7 +63,7 @@ public class SigmaTBoxOptimizer {
 			for(EquivalenceClass<Description> nodes: isa.getNodes()) {
 				Description node = nodes.getRepresentative();
 				for (EquivalenceClass<Description> descendants : isa.getDescendants(node)) {
-						Description descendant = isa.getRepresentativeFor(descendants);
+						Description descendant = descendants.getRepresentative();
 						if (!descendant.equals(node)) 
 							addToTBox(optimizedTBox, descendant, node);
 				}
@@ -165,7 +165,7 @@ public class SigmaTBoxOptimizer {
 		for (EquivalenceClass<Description> nodes : reasoner.getNodes()) {
 			Description node = nodes.getRepresentative();
 			for (EquivalenceClass<Description> descendants : reasoner.getDescendants(node)) {
-				Description descendant = reasoner.getRepresentativeFor(descendants);
+				Description descendant = descendants.getRepresentative();
 
 				if (!descendant.equals(node)) 
 					addToSigma(sigma, descendant, node);

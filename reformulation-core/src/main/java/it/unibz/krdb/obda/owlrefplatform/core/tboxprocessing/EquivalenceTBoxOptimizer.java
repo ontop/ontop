@@ -131,7 +131,7 @@ public class EquivalenceTBoxOptimizer {
 				Description node = nodes.getRepresentative();
 				
 				for (EquivalenceClass<Description> descendants : reasoner.getDescendants(node)) {
-					Description descendant = reasoner.getRepresentativeFor(descendants);
+					Description descendant = descendants.getRepresentative();
 
 					if (!descendant.equals(node))  // exclude trivial inclusions
 						addToTBox(optimizedTBox, descendant, node);

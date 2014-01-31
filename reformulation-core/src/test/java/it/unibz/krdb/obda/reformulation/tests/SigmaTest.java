@@ -53,12 +53,12 @@ public class SigmaTest extends TestCase {
 
         assertTrue(sigma.getDescendants(ac).contains(sigma.getEquivalences(er)));
 
-     // Roman: was 1, which, I think, is wrong: A has two subclasses, ER and C
-        assertEquals(2, sigma.getDescendants(ac).size());  
+     // Roman: was 1, which, I think, is wrong: A has two subclasses, ER and C (now 3 because it's reflexive)
+        assertEquals(3, sigma.getDescendants(ac).size());   // getDescendants is reflexive
 
-        assertEquals(0, sigma.getDescendants(er).size());
+        assertEquals(1, sigma.getDescendants(er).size());  // getDescendants is reflexive
 
-        assertEquals(0, sigma.getDescendants(cc).size());
+        assertEquals(1, sigma.getDescendants(cc).size());  // getDescendants is reflexive
 
     }
 }

@@ -65,19 +65,19 @@ public class DAGChainTest extends TestCase {
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 2);
+		assertEquals(numDescendants, 3); // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(bc).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(bc)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 1);
+		assertEquals(numDescendants, 2);  // getDescendants is reflexive
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 0);
+		assertEquals(numDescendants, 1);  // getDescendants is reflexive
 	}
 
 	public void test_exists_simple() {
@@ -127,26 +127,26 @@ public class DAGChainTest extends TestCase {
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 3);
+		assertEquals(numDescendants, 4);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(er)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 1);
+		assertEquals(numDescendants, 2);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ier)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 1);
+		assertEquals(numDescendants, 2);  // getDescendants is reflexive
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 0);
+		assertEquals(numDescendants, 1);  // getDescendants is reflexive
 	}
 
 	public void test_exists_complex() {
@@ -193,7 +193,7 @@ public class DAGChainTest extends TestCase {
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 4);
+		assertEquals(numDescendants, 5);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(dc).contains(reasoner.getEquivalences(er)));
 		assertTrue(reasoner.getDescendants(dc).contains(reasoner.getEquivalences(ier)));
@@ -203,7 +203,7 @@ public class DAGChainTest extends TestCase {
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(dc)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 4);
+		assertEquals(numDescendants, 5);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(cc)));
@@ -211,7 +211,7 @@ public class DAGChainTest extends TestCase {
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(er)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 2);
+		assertEquals(numDescendants, 3);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(cc)));
@@ -219,18 +219,18 @@ public class DAGChainTest extends TestCase {
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ier)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 2);
+		assertEquals(numDescendants, 3);  // getDescendants is reflexive
 
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(bc)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 0);
+		assertEquals(numDescendants, 1);  // getDescendants is reflexive
 		numDescendants=0;
 		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
-		assertEquals(numDescendants, 0);
+		assertEquals(numDescendants, 1);  // getDescendants is reflexive
 
 	}
 

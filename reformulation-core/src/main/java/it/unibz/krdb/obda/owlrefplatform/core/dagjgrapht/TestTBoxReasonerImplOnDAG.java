@@ -199,22 +199,6 @@ public class TestTBoxReasonerImplOnDAG implements TBoxReasoner {
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
 					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
 
-		// I don't want to consider the current node
-		iterator.next();
-
-		Description startNode = desc;
-		EquivalenceClass<Description> sourcesStart = getEquivalences(startNode);
-		Set<Description> sourcesStartnoNode = new HashSet<Description>();
-		for (Description equivalent : sourcesStart) {
-			if (equivalent.equals(startNode))
-				continue;
-			sourcesStartnoNode.add(equivalent);
-		}
-
-		if (!sourcesStartnoNode.isEmpty())
-			result.add(new EquivalenceClass<Description>(sourcesStartnoNode));
-
-		// iterate over the subsequent nodes, they are all descendant of desc
 		while (iterator.hasNext()) {
 			Description child = iterator.next();
 
