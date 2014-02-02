@@ -101,7 +101,7 @@ private boolean testIndexes(SemanticIndexEngineImpl engine){
 	Map<Description, SemanticIndexRange> ranges=engine.getIntervals();
 	
 	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: engine.getNamedDAG().vertexSet()){
+	for(Description vertex: engine.getIndexes().keySet() /*.getNamedDAG().vertexSet()*/){
 		int index= indexes.get(vertex);
 		for(Description parent: engine.getNamedDAG().getSuccessors(vertex)){
 			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));

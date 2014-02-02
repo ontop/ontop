@@ -497,19 +497,20 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Creating cache of semantic indexes and ranges
 		 */
 		// HACKY WAY -- TO BE CHANGED
-		Set<Description> descriptions = ((SemanticIndexEngineImpl)engine).getNamedDAG().vertexSet();
+		Set<Description> descriptions = engine.getIndexes().keySet(); // ((SemanticIndexEngineImpl)engine).getNamedDAG().vertexSet();
 		for (Description description : descriptions) {
 			if (description instanceof OClass) {
 
 				OClass cdesc = (OClass) description;
-				int idx = engine.getIndex(description);
-				List<Interval> intervals = engine.getIntervals(description);
+				int idx = engine.getIndex(cdesc);
+				List<Interval> intervals = engine.getIntervals(cdesc);
 
 				String iri = cdesc.getPredicate().getName();
 				classIndexes.put(iri, idx);
 				classIntervals.put(iri, intervals);
 
-			} else if (description instanceof PropertyImpl) {
+			} 
+			else if (description instanceof PropertyImpl) {
 				PropertyImpl cdesc = (PropertyImpl) description;
 
 				if (cdesc.isInverse()) {
@@ -517,15 +518,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					continue;
 				}
 
-
-				int idx = engine.getIndex(description);
-
-				List<Interval> intervals = engine.getIntervals(description);
+				int idx = engine.getIndex(cdesc);
+				List<Interval> intervals = engine.getIntervals(cdesc);
 
 				String iri = cdesc.getPredicate().getName();
 				roleIndexes.put(iri, idx);
 				roleIntervals.put(iri, intervals);
-
 			} 
 		}
 

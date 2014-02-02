@@ -278,7 +278,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
 
-		for (Description vertex : dag.vertexSet()) 
+		for (Description vertex : vertexSet()) 
 				result.add(getEquivalences(vertex));
 
 		return result;

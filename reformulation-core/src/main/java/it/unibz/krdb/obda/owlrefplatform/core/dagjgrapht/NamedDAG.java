@@ -49,6 +49,7 @@ public class NamedDAG  {
 		return dag.toString();
 	}
 	
+	// the real working method (used in the SemanticIndexEngineImple)
 	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
 		DirectedGraph<Description, DefaultEdge> reversed =
 				new EdgeReversedGraph<Description, DefaultEdge>(dag); // WOULD IT NOT BE BETTER TO CACHE?
