@@ -74,33 +74,30 @@ public class NamedDAG  {
 	
 	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
 
-		DirectedGraph<Description, DefaultEdge> dag = reasoner.getDag();
-
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag 
 					= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
 
-		for (Description v : dag.vertexSet()) {
-			namedDag.addVertex(v);
-		}
-		for (DefaultEdge e : dag.edgeSet()) {
-			Description s = dag.getEdgeSource(e);
-			Description t = dag.getEdgeTarget(e);
-			namedDag.addEdge(s, t, e);
-		}
+		for (EquivalenceClass<Description> v : reasoner.getNodes()) 
+			namedDag.addVertex(v.getRepresentative());
+		
+		for (EquivalenceClass<Description> s : reasoner.getNodes()) 
+			for (EquivalenceClass<Description> t : reasoner.getDirectParents(s.getRepresentative())) 
+				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
+		
 
-		for (Description node: dag.vertexSet()) 
-			if (!reasoner.isNamed(node)) {
+		for (EquivalenceClass<Description> v : reasoner.getNodes()) 
+			if (!reasoner.isNamed(v.getRepresentative())) {
 				// eliminate node
-				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(node)) { 
+				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(v.getRepresentative())) { 
 					Description source = namedDag.getEdgeSource(incEdge);
 
-					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(node)) {
+					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(v.getRepresentative())) {
 						Description target = namedDag.getEdgeTarget(outEdge);
 
 						namedDag.addEdge(source, target);
 					}
 				}
-				namedDag.removeVertex(node);		// removes all adjacent edges as well				
+				namedDag.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
 			}
 		
 		NamedDAG dagImpl = new NamedDAG(namedDag);

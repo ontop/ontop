@@ -28,7 +28,6 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -292,11 +291,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	// INTERNAL DETAILS
 	
 
-	// single use -- getNamedDAG!! 
-	@Deprecated
-	public DirectedGraph<Description, DefaultEdge> getDag() {
-		return dag;
-	}
 	
 	@Deprecated // test only
 	public DefaultDirectedGraph<Description,DefaultEdge> getGraph() {
