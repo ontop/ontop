@@ -11,14 +11,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.Description;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 

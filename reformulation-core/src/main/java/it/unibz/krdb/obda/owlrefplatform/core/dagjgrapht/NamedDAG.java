@@ -82,29 +82,26 @@ public class NamedDAG  {
 	
 	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
 
+		DirectedGraph<Description, DefaultEdge> dag = reasoner.getDag();
+
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag 
 					= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
-		{
-			SimpleDirectedGraph<Description, DefaultEdge> dag = reasoner.getDag();
-			
-			for (Description v : dag.vertexSet()) {
-				namedDag.addVertex(v);
-			}
-			for (DefaultEdge e : dag.edgeSet()) {
-				Description s = dag.getEdgeSource(e);
-				Description t = dag.getEdgeTarget(e);
-				namedDag.addEdge(s, t, e);
-			}
+
+		for (Description v : dag.vertexSet()) {
+			namedDag.addVertex(v);
+		}
+		for (DefaultEdge e : dag.edgeSet()) {
+			Description s = dag.getEdgeSource(e);
+			Description t = dag.getEdgeTarget(e);
+			namedDag.addEdge(s, t, e);
 		}
 
-		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
-				
 		/*
 		 * Test with a reversed graph so that the incoming edges 
 		 * represent the parents of the node
 		 */
 		
-		DirectedGraph<Description, DefaultEdge> reversed = reasoner.getReversedDag();
+		DirectedGraph<Description, DefaultEdge> reversed = new EdgeReversedGraph<Description, DefaultEdge>(dag);
 
 		LinkedList<Description> roots = new LinkedList<Description>();
 		for (Description n : reversed.vertexSet()) {
@@ -112,6 +109,9 @@ public class NamedDAG  {
 				roots.add(n);
 			}
 		}
+
+		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+		
 		
 		Set<Description> processedNodes = new HashSet<Description>();
 		

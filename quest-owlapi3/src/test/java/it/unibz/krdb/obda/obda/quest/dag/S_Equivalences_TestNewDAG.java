@@ -165,7 +165,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			Description vertex = node.getRepresentative();
 			if(named){
 
-				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
+				if(d1.isNamed(vertex)) {
 					setd1	= d1.getDescendants(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("descendants {} ", setd1);
@@ -265,7 +265,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			Description vertex = node.getRepresentative();
 			if(named){
 
-				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
+				if(d1.isNamed(vertex)) {
 					setd1	= d1.getDirectChildren(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("children {} ", setd1);
@@ -367,7 +367,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			Description vertex = node.getRepresentative();
 			if(named){
 
-				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
+				if(d1.isNamed(vertex)) {
 					setd1	= d1.getAncestors(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("ancestors {} ", setd1);
@@ -468,7 +468,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			Description vertex = node.getRepresentative();
 			if(named){
 
-				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
+				if(d1.isNamed(vertex)) {
 					setd1	= d1.getDirectParents(vertex);
 					log.info("vertex {}", vertex);
 					log.debug("parents {} ", setd1);
@@ -535,7 +535,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of edges in the graph
 		int numberEdgesD1= d1.edgeSet().size();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.edges();
+		int numberEdgesD2 = d2.edgeSet().size();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;

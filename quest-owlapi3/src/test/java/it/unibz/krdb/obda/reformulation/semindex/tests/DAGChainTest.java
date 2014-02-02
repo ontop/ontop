@@ -107,7 +107,7 @@ public class DAGChainTest extends TestCase {
 		
 		//generate Graph
 		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
-		DefaultDirectedGraph<Description,DefaultEdge> res = res0.getGraph();
+		DefaultDirectedGraph<Description,DefaultEdge> res1 = res0.getGraph();
 
 		
 		
@@ -115,7 +115,7 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		TestTBoxReasonerImplOnGraph reasoner= new TestTBoxReasonerImplOnGraph(res);
+		TestTBoxReasonerImplOnGraph reasoner= new TestTBoxReasonerImplOnGraph(res1);
 		reasoner.convertIntoChainDAG();
 
 		

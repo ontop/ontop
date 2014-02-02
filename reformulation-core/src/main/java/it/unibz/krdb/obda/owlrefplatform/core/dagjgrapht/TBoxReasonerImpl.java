@@ -41,7 +41,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
-	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
+	private final DirectedGraph <Description,DefaultEdge> dag;
+	private final DirectedGraph<Description, DefaultEdge> reversedDag;
 	
 	// maps descriptions to their equivalence classes (and their representatives)
 	private final Map<Description, EquivalenceClass<Description>> equivalencesClasses; 
@@ -59,6 +60,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		equivalencesClasses = new HashMap<Description, EquivalenceClass<Description>>();
 		this.dag = DAGBuilder.getDAG(graph, equivalencesClasses);
+		this.reversedDag = new EdgeReversedGraph<Description, DefaultEdge>(dag);
 	}
 
 
@@ -90,16 +92,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	
 	
-	
-	@Deprecated
-	public DefaultDirectedGraph<Description,DefaultEdge> getGraph() {
-		return graph;
-	}
-	
-	@Deprecated // test only
-	public int edges() {
-		return dag.edgeSet().size();
-	}
 
 	/**
 	 * Allows to have all named roles in the DAG even the equivalent named roles
@@ -215,11 +207,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		Description node = getRepresentativeFor(desc);
 		
-		// reverse the dag
-		DirectedGraph<Description, DefaultEdge> reversed = getReversedDag();
-
 		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
+					new BreadthFirstIterator<Description, DefaultEdge>(reversedDag, node);
 
 		while (iterator.hasNext()) {
 			Description child = iterator.next();
@@ -302,18 +291,27 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	// INTERNAL DETAILS
 	
-	
-	DirectedGraph<Description, DefaultEdge> getReversedDag() {
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>(dag);
-		return reversed;
-	}
-	
 
+	// single use -- getNamedDAG!! 
 	@Deprecated
-	public SimpleDirectedGraph<Description, DefaultEdge> getDag() {
+	public DirectedGraph<Description, DefaultEdge> getDag() {
 		return dag;
 	}
+	
+	@Deprecated // test only
+	public DefaultDirectedGraph<Description,DefaultEdge> getGraph() {
+		return graph;
+	}
+	
+	@Deprecated // test only
+	public Set<DefaultEdge> edgeSet() {
+		return dag.edgeSet();
+	}
+	
+	
+	
+	
+	
 	
 
 	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {

@@ -157,7 +157,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	public boolean isNamed(Description vertex) {
-		return reasoner.getClassNames().contains(vertex) || reasoner.getPropertyNames().contains(vertex);
+		return reasoner.isNamed(vertex);
 	}
 	
 	/**
