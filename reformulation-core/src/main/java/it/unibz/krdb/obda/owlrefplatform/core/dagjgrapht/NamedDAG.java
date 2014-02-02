@@ -152,7 +152,7 @@ public class NamedDAG  {
 							
 				if(reasoner.isNamed(nodeRep)) { 
 					// node is not named, but has a named equivalence
-					
+					// ROMAN: i'm not sure how this can happen
 					namedDag.addVertex(nodeRep);
 				
 					// redirect all links to and from the eliminated node to the representative node
