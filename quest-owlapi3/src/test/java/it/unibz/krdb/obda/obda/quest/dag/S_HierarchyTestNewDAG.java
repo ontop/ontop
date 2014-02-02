@@ -2,10 +2,9 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_NamedTBoxReasonerImpl;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -59,15 +58,16 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl dag1= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasonerImpl d1= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-			TestTBoxReasonerImplOnNamedDAG dag2= new TestTBoxReasonerImplOnNamedDAG(dag1);
+			TestTBoxReasonerImplOnNamedDAG dag2= new TestTBoxReasonerImplOnNamedDAG(d1);
 			log.debug("Input number {}", i+1 );
-			log.info("First dag {}", dag1);
+			log.info("First dag {}", d1);
 			log.info("Second dag {}", dag2);
-
+			Test_NamedTBoxReasonerImpl dag1 = new Test_NamedTBoxReasonerImpl(d1);
+			
 			assertTrue(testDescendants(dag1,dag2,true));
 			assertTrue(testAncestors(dag1,dag2,true));
 			assertTrue(checkforNamedVertexesOnly(dag2));
@@ -77,27 +77,22 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	}
 
 
-	private static TBoxReasoner getReasoner(TBoxReasonerImpl dag) {
-		return new TestTBoxReasonerImplOnDAG(dag);
-	}
-
-	private boolean testDescendants(TBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
+	private boolean testDescendants(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd1= getReasoner(d1);
 
 		for(EquivalenceClass<Description> node : d1.getNodes()) {
 			Description vertex = node.getRepresentative();
 			if(named){
 
-				if(d1.getPropertyNames().contains(vertex) || d1.getClassNames().contains(vertex)){
-					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getDescendants(vertex);
+				if(d1.isNamed(vertex)) {
+					Set<EquivalenceClass<Description>> setd1	= d1.getDescendants(vertex);
 					Set<EquivalenceClass<Description>> setd2	= d2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
 			}
 			else
-				result=reasonerd1.getDescendants(vertex).equals(d2.getDescendants(vertex));
+				result = d1.getDescendants(vertex).equals(d2.getDescendants(vertex));
 			if(!result)
 				break;
 		}
@@ -106,22 +101,21 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	}
 
-	private boolean testDescendants(TestTBoxReasonerImplOnNamedDAG d1, TBoxReasonerImpl d2, boolean named){
+	private boolean testDescendants(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd2= getReasoner(d2);
 
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
 				if(d1.reasoner().isNamed(vertex)){
 					Set<EquivalenceClass<Description>> setd1	= d1.getDescendants(vertex);
-					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getDescendants(vertex);
+					Set<EquivalenceClass<Description>> setd2	= d2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
 			}
 			else
-				result=d1.getDescendants(vertex).equals(reasonerd2.getDescendants(vertex));
+				result=d1.getDescendants(vertex).equals(d2.getDescendants(vertex));
 			if(!result)
 				break;
 		}
@@ -130,45 +124,43 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	}
 
-	private boolean testAncestors(TBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
+	private boolean testAncestors(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd1 = getReasoner(d1);
 
 		for(EquivalenceClass<Description> node : d1.getNodes()) {
 			Description vertex = node.getRepresentative();
 			if(named){
 
-				if(d1.getPropertyNames().contains(vertex)| d1.getClassNames().contains(vertex)){
-					Set<EquivalenceClass<Description>> setd1	=reasonerd1.getAncestors(vertex);
+				if(d1.isNamed(vertex)) {
+					Set<EquivalenceClass<Description>> setd1	= d1.getAncestors(vertex);
 					Set<EquivalenceClass<Description>> setd2	= d2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}
 			}
 			else
-				result=reasonerd1.getAncestors(vertex).equals(d2.getAncestors(vertex));
+				result=d1.getAncestors(vertex).equals(d2.getAncestors(vertex));
 			if(!result)
 				break;
 		}
 		return result;
 	}
 	
-	private boolean testAncestors(TestTBoxReasonerImplOnNamedDAG d1, TBoxReasonerImpl d2, boolean named){
+	private boolean testAncestors(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2, boolean named){
 		boolean result = false;
-		TBoxReasoner reasonerd2 = getReasoner(d2);
 
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
 				if(d1.reasoner().isNamed(vertex)){
 					Set<EquivalenceClass<Description>> setd1	= d1.getAncestors(vertex);
-					Set<EquivalenceClass<Description>> setd2	=reasonerd2.getAncestors(vertex);
+					Set<EquivalenceClass<Description>> setd2	= d2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}
 			}
 			else
-				result=d1.getAncestors(vertex).equals(reasonerd2.getAncestors(vertex));
+				result=d1.getAncestors(vertex).equals(d2.getAncestors(vertex));
 			if(!result)
 				break;
 		}
