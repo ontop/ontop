@@ -142,8 +142,8 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		String alias = selectExpr.getAlias().getName();
-		if ( alias != null) {
+		if ( selectExpr.getAlias() != null) {
+			String alias = selectExpr.getAlias().getName();
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present

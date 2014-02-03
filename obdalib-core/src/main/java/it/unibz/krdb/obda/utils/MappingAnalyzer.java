@@ -577,10 +577,12 @@ public class MappingAnalyzer {
 				//check if we do not have subselect with alias name assigned
 				for(SelectJSQL subSelect: queryParsed.getSubSelectSet()){
 					String subSelectAlias = subSelect.getAlias();
-					String aliasColumnName = subSelectAlias.toLowerCase() + "." + lowercaseColumn;
-					lookupTable.add(aliasColumnName, index);
-					if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
-						lookupTable.add(aliasMap.get(aliasColumnName), aliasColumnName);
+					if (subSelectAlias!=null) {
+						String aliasColumnName = subSelectAlias.toLowerCase() + "." + lowercaseColumn;
+						lookupTable.add(aliasColumnName, index);
+						if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
+							lookupTable.add(aliasMap.get(aliasColumnName), aliasColumnName);
+						}
 					}
 				}
 			}
