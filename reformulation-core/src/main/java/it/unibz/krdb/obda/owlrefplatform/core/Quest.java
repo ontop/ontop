@@ -701,6 +701,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					mParser.addViewDefs(metadata);
 				}
 			}
+			
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
@@ -742,7 +743,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
-			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
+//			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
 

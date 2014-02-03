@@ -163,7 +163,6 @@ public class SQLQueryTranslator {
 		return vt;
 	}
 	
-		
 	
 	/*
 	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROMitem expression

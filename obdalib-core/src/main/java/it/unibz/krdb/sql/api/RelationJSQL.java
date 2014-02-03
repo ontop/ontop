@@ -41,7 +41,9 @@ public class RelationJSQL implements Serializable, Cloneable  {
 		return table.getGivenName();
 	}
 	public String getAlias() {
-		return table.getAlias();
+		if (table.getAlias() != null)
+			return table.getAlias().getName();
+		return null;
 	}
 	
 	public boolean isTableQuoted(){

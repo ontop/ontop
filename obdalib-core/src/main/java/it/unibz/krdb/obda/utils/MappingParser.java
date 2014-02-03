@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import net.sf.jsqlparser.JSQLParserException;
+
 
 
 /**
@@ -58,8 +60,9 @@ public class MappingParser {
 	 * Called by getOracleMetaData
 	 * 
 	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
+	 * @throws JSQLParserException 
 	 */
-	public ArrayList<RelationJSQL> getRealTables(){
+	public ArrayList<RelationJSQL> getRealTables() throws JSQLParserException{
 		if(this.realTables == null){
 			ArrayList<RelationJSQL> _realTables = this.getTables();
 			ArrayList<RelationJSQL> removeThese = new ArrayList<RelationJSQL>();
@@ -88,7 +91,7 @@ public class MappingParser {
 		return parsedMappings;
 	}
 	
-	public ArrayList<RelationJSQL> getTables(){
+	public ArrayList<RelationJSQL> getTables() throws JSQLParserException{
 		ArrayList<RelationJSQL> tables = new ArrayList<RelationJSQL>();
 		for(ParsedMapping pm : parsedMappings){
 			VisitedQuery query = pm.getSourceQueryParsed();
