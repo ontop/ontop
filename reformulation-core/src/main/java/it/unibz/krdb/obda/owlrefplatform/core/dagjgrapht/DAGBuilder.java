@@ -97,47 +97,31 @@ public class DAGBuilder {
 	 * candidate redundant edges.) <br>
 	 */
 	private static void eliminateRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> graph) {
-		/* Compute the candidate nodes */
-		List<Description> candidates = new LinkedList<Description>();
-		Set<Description> vertexes = graph.vertexSet();
-		for (Description vertex : vertexes) {
-			int outdegree = graph.outDegreeOf(vertex);
-			if (outdegree > 1) {
-				candidates.add(vertex);
-			}
-		}
 
 		/*
 		 * for each candidate x and each outgoing edge x -> y, we will check if
 		 * y appears in the set of redundant edges
 		 */
 
-		for (Description candidate : candidates) {
+		for (Description vertex : graph.vertexSet()) {
+			int outdegree = graph.outDegreeOf(vertex);
+			if (outdegree <= 1)
+				continue;
 
-			Set<DefaultEdge> possiblyRedundantEdges = new LinkedHashSet<DefaultEdge>();
-
-			possiblyRedundantEdges.addAll(graph.outgoingEdgesOf(candidate));
+			Set<DefaultEdge> possiblyRedundantEdges = new LinkedHashSet<DefaultEdge>(graph.outgoingEdgesOf(vertex));
 
 			Set<DefaultEdge> eliminatedEdges = new HashSet<DefaultEdge>();
 
-			// registering the target of the possible redundant targets for this
-			// node
-			Set<Description> targets = new HashSet<Description>();
-
+			// registering the target of the possible redundant targets for this node
 			Map<Description, DefaultEdge> targetEdgeMap = new HashMap<Description, DefaultEdge>();
-
-			for (DefaultEdge edge : possiblyRedundantEdges) {
-				Description target = graph.getEdgeTarget(edge);
-				targets.add(target);
-				targetEdgeMap.put(target, edge);
-			}
+			for (DefaultEdge edge : possiblyRedundantEdges) 
+				targetEdgeMap.put(graph.getEdgeTarget(edge), edge);
 
 			for (DefaultEdge currentPathEdge : possiblyRedundantEdges) {
 				Description currentTarget = graph.getEdgeTarget(currentPathEdge);
-				if (eliminatedEdges.contains(currentPathEdge))
-					continue;
-				eliminateRedundantEdge(graph, currentPathEdge, targets, targetEdgeMap,
-						currentTarget, eliminatedEdges);
+				
+				if (!eliminatedEdges.contains(currentPathEdge))
+					eliminateRedundantEdge(graph, currentPathEdge, targetEdgeMap, currentTarget, eliminatedEdges);
 			}
 
 		}
@@ -146,29 +130,23 @@ public class DAGBuilder {
 
 	private static void eliminateRedundantEdge(DefaultDirectedGraph<Description,DefaultEdge> graph, 
 			DefaultEdge safeEdge,
-			Set<Description> targets,
 			Map<Description, DefaultEdge> targetEdgeMap,
-			Description currentTarget, Set<DefaultEdge> eliminatedEdges) {
+			Description currentTarget, 
+			Set<DefaultEdge> eliminatedEdges) {
 		
-		if (targets.contains(currentTarget)) {
-			DefaultEdge edge = targetEdgeMap.get(currentTarget);
-			if (!edge.equals(safeEdge)) {
-				/*
-				 * This is a redundant edge, removing it.
-				 */
-				graph.removeEdge(edge);
-				eliminatedEdges.add(edge);
-			}
+		DefaultEdge edge = targetEdgeMap.get(currentTarget);
+		if ((edge != null) && !edge.equals(safeEdge)) {
+			// the edge is redundant
+			graph.removeEdge(edge);
+			eliminatedEdges.add(edge);
 		}
 
 		// continue traversing the dag up
-		Set<DefaultEdge> edgesInPath = graph.outgoingEdgesOf(currentTarget);
-		for (DefaultEdge outEdge : edgesInPath) {
+		for (DefaultEdge outEdge : graph.outgoingEdgesOf(currentTarget)) {
 			Description target = graph.getEdgeTarget(outEdge);
 			// System.out.println("target "+target+" "+outEdge);
-			eliminateRedundantEdge(graph, safeEdge, targets, targetEdgeMap, target, eliminatedEdges);
+			eliminateRedundantEdge(graph, safeEdge, targetEdgeMap, target, eliminatedEdges);
 		}
-
 	}
 
 	/***

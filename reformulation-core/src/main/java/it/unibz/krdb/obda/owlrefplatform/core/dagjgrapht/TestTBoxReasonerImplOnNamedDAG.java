@@ -39,7 +39,7 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	}
 
 	public Set<Description> vertexSet() {
-		return dag.vertexSet();
+		return dag.getDag().vertexSet();
 	}
 	
 	public TBoxReasonerImpl reasoner() {

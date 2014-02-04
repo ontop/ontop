@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public class VocabularyExtractor {
 
-	public Set<Predicate> getVocabulary(Ontology ontology) {
+	public static Set<Predicate> getVocabulary(Ontology ontology) {
 		Set<Predicate> result = new HashSet<Predicate>();
 
 		for (Axiom axiom : ontology.getAssertions()) {

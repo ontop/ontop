@@ -47,13 +47,9 @@ public class NamedDAG  {
 		return reversed;
 	}
 
-	public Set<Description> vertexSet() {
-		return dag.vertexSet();
-	}
-
 	
 	
-	@Deprecated // USED ONLY IN TESTS (2 calls)
+	@Deprecated // USED ONLY IN TESTS (3 calls)
 	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
 		return dag;
 	}

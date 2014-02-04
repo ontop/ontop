@@ -10,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -63,9 +63,9 @@ public class SigmaTBoxOptimizer {
 			for(EquivalenceClass<Description> nodes: isa.getNodes()) {
 				Description node = nodes.getRepresentative();
 				for (EquivalenceClass<Description> descendants : isa.getDescendants(node)) {
-						Description descendant = descendants.getRepresentative();
-						if (!descendant.equals(node)) 
-							addToTBox(optimizedTBox, descendant, node);
+					Description descendant = descendants.getRepresentative();
+					if (!descendant.equals(node)) 
+						addToTBox(optimizedTBox, descendant, node);
 				}
 				
 				for (Description equivalent : nodes) {
@@ -81,15 +81,22 @@ public class SigmaTBoxOptimizer {
 
 	private void addToTBox(Ontology rv, Description sub, Description sup) {
 		
-		if (sub instanceof ClassDescription) {
+		if (sub instanceof BasicClassDescription) {
 			if (!check_redundant(sup, sub)) 
-				rv.addAssertion(fac.createSubClassAxiom((ClassDescription) sub, (ClassDescription) sup));
+				rv.addAssertion(fac.createSubClassAxiom((BasicClassDescription) sub, (BasicClassDescription) sup));
 		} 
 		else {
 			if (!check_redundant_role((Property)sup, (Property)sub)) 
 				rv.addAssertion(fac.createSubPropertyAxiom((Property) sub, (Property) sup));
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
 	
 	private boolean check_redundant_role(Property parent, Property child) {
 
@@ -98,7 +105,7 @@ public class SigmaTBoxOptimizer {
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
 			for (EquivalenceClass<Description> children_prime : isa.getDirectChildren(parent)) {
-				Property child_prime = (Property) children_prime.iterator().next();
+				Property child_prime = (Property) children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant_role(child_prime, child) && 
@@ -128,7 +135,7 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 			for (EquivalenceClass<Description> children_prime : isa.getDirectChildren(parent)) {
-			Description child_prime = children_prime.iterator().next();
+			Description child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant(child_prime, child) && 
@@ -141,22 +148,37 @@ public class SigmaTBoxOptimizer {
 	}
 
 	private boolean check_directly_redundant(Description parent, Description child) {
+		
 		Description sp = sigmaChain.getRepresentativeFor(parent);
 		Description sc = sigmaChain.getRepresentativeFor(child);
-		Description tc = isaChain.getRepresentativeFor(child);
-
-		// if one of them is not in the respective DAG
-		if (sp == null || sc == null || tc == null) 
-			return false;
 		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
+
 		Set<EquivalenceClass<Description>> spChildren =  sigmaChain.getDirectChildren(sp);
 		EquivalenceClass<Description> scEquivalent = sigmaChain.getEquivalences(sc);
+		
+		if (!spChildren.contains(scEquivalent))
+			return false;
+		
+		
+		
+		Description tc = isaChain.getRepresentativeFor(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
 		Set<EquivalenceClass<Description>> scChildren = sigmaChain.getDescendants(sc);
 		Set<EquivalenceClass<Description>> tcChildren = isaChain.getDescendants(tc);
 
-		boolean redundant = spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
-		return redundant;
+		return scChildren.containsAll(tcChildren);
 	}
+	
+	
+	
+	
+	
 	
 	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
 		OntologyFactory descFactory = new OntologyFactoryImpl();
@@ -186,11 +208,10 @@ public class SigmaTBoxOptimizer {
 	 */
 	
 	private static void addToSigma(Ontology sigma, Description subn, Description supern) {
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		
-		if (subn instanceof ClassDescription) {
+		if (subn instanceof BasicClassDescription) {
 			if (!(supern instanceof PropertySomeRestriction)) {
-				Axiom ax = fac.createSubClassAxiom((ClassDescription) subn, (ClassDescription) supern);
+				Axiom ax = fac.createSubClassAxiom((BasicClassDescription) subn, (BasicClassDescription) supern);
 				sigma.addEntities(ax.getReferencedEntities());
 				sigma.addAssertion(ax);						
 			}
@@ -201,5 +222,6 @@ public class SigmaTBoxOptimizer {
 			sigma.addAssertion(ax);						
 		}		
 	}
+	
 	
 }
