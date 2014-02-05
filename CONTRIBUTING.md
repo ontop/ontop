@@ -1,8 +1,5 @@
 # How to contribute to Ontop
 
-Have questions, found a bug in our code, or have an idea for a feature? Here are some notes on
-how to best report them so we can get it fixed as quickly as possible.
-
 ## General Questions and Discussion
 
 We have a Google group for anything related to support, discussion and announcements. Please join for any inquiry.
@@ -22,7 +19,20 @@ Know how to fix something or provide new features?
 
 For trivial contribution (e.g. fixing typos in the docs), please use the Pull Requst of GitHub.
 
-For non-trivial contribution, please contact us first. 
-We are now preparing the contribution agreement to enable you to do 
-this and still be able to maintain our license scheme.
+For non-trivial contribution, please contact us first. Contributions to the project are welcome and encouraged. The
+contributor should sign a Contribution License Agreement (CLA) that
+allows FUB and the ontop team to redistribute their work under the
+terms of the Apache 2.0 license. If the contributor works for an
+institution that owns the work being contributed by the contributor,
+then a corporate CLA must be additionally signed. The CLAs are
+available for download bellow, once signed please FAX or email a
+scanned copy of them to the given number/email address:
+
+
+* [Individual Contributor License Agreement (CLA)](https://raw.github.com/ontop/ontop/master/documentation/ontop-cla-2013-11-04.txt)
+* [Corporate License Agreement](https://raw.github.com/ontop/ontop/master/documentation/ontop-cla-corporate-2013-11-04.txt)"
+
+If you have any questions, please contact the ontop team.
+
+
 
