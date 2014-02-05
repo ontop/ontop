@@ -26,6 +26,13 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 public class OBDAVocabulary {
 	
+	/*
+	 * Singleton
+	 */
+	private OBDAVocabulary(){
+		
+	}
+	
 
 	/* Constants */
 

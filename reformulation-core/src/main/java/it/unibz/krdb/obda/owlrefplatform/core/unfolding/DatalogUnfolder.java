@@ -58,6 +58,8 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 /**
@@ -81,7 +83,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
 	
-	private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
+	//private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
+	private final List<CQIE> emptyList = ImmutableList.of();
 	
 	private enum UnfoldingMode {
 		UCQ, DATALOG
@@ -148,7 +151,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 
 		/*
-		 * the predicates taht do not appear in the head of rules are leaf
+		 * the predicates that do not appear in the head of rules are leaf
 		 * predicates
 		 */
 		allPredicates.removeAll(mappings.keySet());
@@ -374,10 +377,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
  * TODO: ADD COMMENT !!
  * 
  * @param workingList
- * @param includeMappings
+ * @param includingMappings
  * @return
  */
-		private int computePartialEvaluationBUP(List<CQIE> workingList, boolean includeMappings) {
+		private int computePartialEvaluationBUP(List<CQIE> workingList, boolean includingMappings) {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 			
@@ -405,8 +408,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					Collection<CQIE> ruleCollection = ruleIndexByBody.get(pred);
 	
 					
-					
-					
 					for (CQIE fatherRule:  ruleCollection) {
 						CQIE copyruleCqie = fatherRule.clone();
 						fatherCollection.add(copyruleCqie);
@@ -418,17 +419,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						Stack<Integer> termidx = new Stack<Integer>();
 
 						List<Term> fatherTerms = getBodyTerms(fatherRule);
-						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, false,includeMappings);
-				
-
-						
-					
+						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, false,includingMappings);
 						
 						if (result == null) {
 							/*
 							 * If the result is null the rule is logically empty
 							 */
-							
 							workingList.remove(queryIdx);
 							// queryIdx -= 1;
 							continue;
@@ -743,7 +739,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		/***
 		 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
-		 * atoms). The resolution step will will try to match the <strong>focus atom
+		 * atoms). The resolution step will try to match the <strong>focused atom
 		 * a</strong> in the input <strong>rule r</strong> againts the rules in
 		 * {@link #unfoldingProgram}.
 		 * <p>
@@ -762,7 +758,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * 
 		 * 
 		 * 
-		 * @param focusAtom
+		 * @param focusedAtom
 		 *            The atom to be resolved.
 		 * @param rule
 		 *            The rule in which this atom resides
@@ -774,7 +770,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param resolutionCount
 		 *            The number of resolution attemts done globaly, needed to spawn
 		 *            fresh variables.
-		 * @param includeMappings 
+		 * @param includingMappings 
 		 * @param atomindx
 		 *            The location of the focustAtom in the currentlist
 		 * @return <ul>
@@ -787,19 +783,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * 
 		 * @see Unifier
 		 */	
+	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
+				boolean isSecondAtomInLeftJoin, boolean includingMappings) {
 
-		
-		private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
-				boolean isSecondAtomInLeftJoin, boolean includeMappings) {
-
-			if (!focusAtom.isDataFunction())
-				throw new RuntimeException("Cannot unfold a non-data atom: " + focusAtom);
+			if (!focusedAtom.isDataFunction())
+				throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
 
 			/*
 			 * Leaf predicates are ignored (as boolean or algebra predicates)
 			 */
-			Predicate pred = focusAtom.getFunctionSymbol();
-			if (extensionalPredicates.contains(pred) && !includeMappings) {
+			Predicate pred = focusedAtom.getFunctionSymbol();
+			if (extensionalPredicates.contains(pred) && !includingMappings) {
 				// The atom is a leaf, that means that is a data atom that
 				// has no resolvent rule, and marks the end points to compute
 				// partial evaluations
@@ -809,9 +803,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			Collection<CQIE> rulesDefiningTheAtom = new LinkedList<CQIE>();
 
-			if (!includeMappings){
-			//therefore we are doing bottom-up of the query	
-				if (ruleIndex.keySet().contains(pred) && !pred.equals(resolvPred)) {
+			if (!includingMappings){
+				// therefore we are doing bottom-up of the query	
+				
+				if (ruleIndex.containsKey(pred) && !pred.equals(resolvPred)) {
 					//Since it is not resolvPred, we are are not going to resolve it
 					return emptyList;
 				} else if (pred.equals(resolvPred)) {
@@ -830,8 +825,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			
             boolean hasOneMapping = true ;
-            if (includeMappings && mappings.containsKey(resolvPred)){
-                hasOneMapping = mappings.get(resolvPred).size()<2;
+            if (includingMappings && mappings.containsKey(resolvPred)){
+                //hasOneMapping = mappings.get(resolvPred).size() < 2;
+            	hasOneMapping = mappings.get(resolvPred).size() == 1;
             }  
             
             /*
@@ -844,17 +840,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!isSecondAtomInLeftJoin)
 					return null;
 				else {
-					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
-					result = new LinkedList<CQIE>();
-					result.add(newRuleWithNullBindings);
+					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusedAtom, rule, termidx);
+					
+					result = Lists.newArrayList(newRuleWithNullBindings);
+					
+//					result = new LinkedList<CQIE>();
+//					result.add(newRuleWithNullBindings);
 				}
 			} else if (hasOneMapping || !isSecondAtomInLeftJoin){
 				
 				//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
-				result = generateResolutionResult(focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+				result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
 			} else if (!hasOneMapping && isSecondAtomInLeftJoin) {
-				// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and 
-				result = new LinkedList<CQIE>();
+				// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and
+				result = Lists.newArrayListWithExpectedSize(1 + rulesDefiningTheAtom.size() + 1);
+				//result = new LinkedList<CQIE>();
 				result.add(rule);
 				result.addAll(rulesDefiningTheAtom);
 			}
@@ -871,9 +871,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!isSecondAtomInLeftJoin)
 					return null;
 				else {
-					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
-					result = new LinkedList<CQIE>();
-					result.add(newRuleWithNullBindings);
+					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusedAtom, rule, termidx);
+//					result = new LinkedList<CQIE>();
+//					result.add(newRuleWithNullBindings);
+					result = Lists.newArrayList(newRuleWithNullBindings);
+
 				}
 			}
 			return result;
@@ -1040,37 +1042,38 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 	
 	/***
-	 * Goes trhough each term, and recursively each inner term trying to resovle
+	 * Goes through each term, and recursively each inner term trying to resolve
 	 * each atom. Returns an empty list if the partial evaluation is completed
-	 * (no atoms can be resovled and each atom is a leaf atom), null if there is
-	 * at least one atom that is not leaf and cant be resolved, or a list with
-	 * one or more queries if there was one atom that could be resolved againts
-	 * one or more rules. The list containts the result of the resolution steps
-	 * againts those rules.
+	 * (no atoms can be resolved and each atom is a leaf atom), null if there is
+	 * at least one atom that is not leaf and can't be resolved, or a list with
+	 * one or more queries if there was one atom that could be resolved against
+	 * one or more rules. The list contains the result of the resolution steps
+	 * against those rules.
 	 * @param resolvPred 
 	 * 
 	 * @param currentTerms
 	 * @param rule
 	 * @param resolutionCount
 	 * @param termidx
-	 * @param includeMappings 
+	 * 			a stack used to track the depth first searching (DFS) 
+	 * @param includingMappings 
 	 * @return
 	 */
 
     private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
-            boolean parentIsLeftJoin, boolean includeMappings) {
+            boolean parentIsLeftJoin, boolean includingMappings) {
 
-    int nonBooleanAtomCounter = 0;
-
-    for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
+	    int nonBooleanAtomCounter = 0;
+	
+	    for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
             termidx.push(atomIdx);
 
-            Function focusLiteral = (Function) currentTerms.get(atomIdx);
+            Function focusedLiteral = (Function) currentTerms.get(atomIdx);
 
-            if (focusLiteral.isBooleanFunction() || focusLiteral.isArithmeticFunction() || focusLiteral.isDataTypeFunction()) {
+            if (focusedLiteral.isBooleanFunction() || focusedLiteral.isArithmeticFunction() || focusedLiteral.isDataTypeFunction()) {
                     termidx.pop();
                     continue;
-            } else if (focusLiteral.isAlgebraFunction()) {
+            } else if (focusedLiteral.isAlgebraFunction()) {
                     nonBooleanAtomCounter += 1;
                     /*
                      * These may contain data atoms that need to be unfolded, we
@@ -1079,10 +1082,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
                     // for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
 
-                    Predicate predicate = focusLiteral.getFunctionSymbol();
-                    boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
-                    List<CQIE> result = new LinkedList<CQIE>();
-                    result = computePartialEvaluation(resolvPred,  focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin, includeMappings);
+                    Predicate predicate = focusedLiteral.getFunctionSymbol();
+                    boolean focusedAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+                    List<CQIE> result = computePartialEvaluation(resolvPred,  focusedLiteral.getTerms(), rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings);
 
                     if (result == null)
                             return null;
@@ -1091,7 +1093,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                             return result;
                     }
 
-            } else if (focusLiteral.isDataFunction()) {
+            } else if (focusedLiteral.isDataFunction()) {
                     nonBooleanAtomCounter += 1;
 
                     /*
@@ -1099,13 +1101,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                      * resolution algorithm.
                      */
 					
-                    boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
-                    List<CQIE> result = new LinkedList<CQIE>();
-                    Predicate pred = focusLiteral.getFunctionSymbol();
-                     if (pred.equals(resolvPred)) {
-                             result = resolveDataAtom(resolvPred, focusLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
-                                    isLeftJoinSecondArgument,includeMappings);
-                     }
+                    boolean isLeftJoinSecondArgument = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
+                    List<CQIE> result = null;
+                    Predicate pred = focusedLiteral.getFunctionSymbol();
+                    
+                    if (pred.equals(resolvPred)) {
+                         result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
+                                    isLeftJoinSecondArgument, includingMappings);
+                    }
                      
                     if (result == null)
                             return null;
@@ -1115,13 +1118,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
             } else {
                     throw new IllegalArgumentException(
                                     "Error during unfolding, trying to unfold a non-algrbra/non-data function. Offending atom: "
-                                                    + focusLiteral.toString());
+                                                    + focusedLiteral.toString());
             }
             termidx.pop();
-    }
+	    }
 
-    return new LinkedList<CQIE>();
-}
+	    return new LinkedList<CQIE>();
+    }
 	
 
 
