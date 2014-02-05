@@ -30,7 +30,7 @@ scanned copy of them to the given number/email address:
 
 
 * [Individual Contributor License Agreement (CLA)](https://raw.github.com/ontop/ontop/master/documentation/ontop-cla-2013-11-04.txt)
-* [Corporate License Agreement](https://raw.github.com/ontop/ontop/master/documentation/ontop-cla-corporate-2013-11-04.txt)"
+* [Corporate License Agreement](https://raw.github.com/ontop/ontop/master/documentation/ontop-cla-corporate-2013-11-04.txt)
 
 If you have any questions, please contact the ontop team.
 
