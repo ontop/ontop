@@ -49,7 +49,7 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.10
+export VERSION=1.10.1-SNAPSHOT
 export REVISION=0
 
 
@@ -98,8 +98,8 @@ echo "-----------------------------------------"
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
 mvn assembly:assembly -DskipTests
-cp target/quest-distribution-$VERSION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
-unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-$VERSION-dependencies.zip
+cp target/ontop-distribution-$VERSION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
+unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/ontop-distribution-$VERSION-dependencies.zip
 cp $OPENRDF_SESAME_PATH/$OPENRDF_SESAME_FILENAME.war $QUEST_SESAME_DIST/
 cp $OPENRDF_WORKBENCH_PATH/$OPENRDF_WORKBENCH_FILENAME.war $QUEST_SESAME_DIST/
 
@@ -144,7 +144,7 @@ echo "-----------------------------------------"
 rm -fr $OWL_API_DIST
 mkdir $OWL_API_DIST
 echo "[INFO] Copying files..."
-cp target/quest-distribution-$VERSION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
+cp target/ontop-distribution-$VERSION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
 
 echo ""
 echo "Done."
