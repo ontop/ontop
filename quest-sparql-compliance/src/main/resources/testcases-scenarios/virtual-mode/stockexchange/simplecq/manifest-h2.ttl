@@ -132,3 +132,14 @@
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-h2.obda> .
     
+    
+:transaction-offer-stock rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q12: Get broker from regex on name" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy "Dag Hovland" ;
+    mf:action
+            [ qt:query <broker-regex-name.rq> ] ;
+    mf:result <broker-regex-name.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-h2.obda> .
+    
