@@ -426,6 +426,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 * If the result is null the rule is logically empty
 							 */
 							workingList.remove(queryIdx);
+							
+							System.out.println("UDPATE INDEX!!");
+							
 							// queryIdx -= 1;
 							continue;
 
@@ -441,6 +444,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						 * Each of the new queries could still require more steps of
 						 * evaluation, so we decrease the index.
 						 */
+						
 						workingList.remove(queryIdx);
 						workingList.removeAll(workingRules);
 
@@ -1083,12 +1087,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                     // for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
 
                     Predicate predicate = focusedLiteral.getFunctionSymbol();
+                    boolean isLeftJoinSecondArgument = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
                     boolean focusedAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
                     List<CQIE> result = computePartialEvaluation(resolvPred,  focusedLiteral.getTerms(), rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings);
 
                     if (result == null)
+                    	if (!isLeftJoinSecondArgument){
                             return null;
-
+                    	}else{
+                    		termidx.pop();
+        					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusedLiteral, rule, termidx);
+        					result = new LinkedList<CQIE>();
+        					result.add(newRuleWithNullBindings);
+        					return result;
+                    	}
                     if (result.size() > 0) {
                             return result;
                     }
@@ -1106,15 +1118,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                     Predicate pred = focusedLiteral.getFunctionSymbol();
                     
                     if (pred.equals(resolvPred)) {
-                         result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
-                                    isLeftJoinSecondArgument, includingMappings);
+                    	result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
+                    			isLeftJoinSecondArgument, includingMappings);
+                    	if (result == null)
+                    		return null;
+
+                    	if (result.size() > 0)
+                    		return result;
                     }
                      
-                    if (result == null)
-                            return null;
-
-                    if (result.size() > 0)
-                            return result;
+              
             } else {
                     throw new IllegalArgumentException(
                                     "Error during unfolding, trying to unfold a non-algrbra/non-data function. Offending atom: "

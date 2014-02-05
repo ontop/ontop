@@ -132,8 +132,8 @@ public class LeftJoinTestVirtual extends TestCase {
 		String query6 = "PREFIX : <http://www.example.org/test#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick1 ?nick1 OPTIONAL { {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
 		
 		try {
-			executeQueryAssertResults(query_multi, st, 6);
-			//executeQueryAssertResults(query6, st, 6);
+//			executeQueryAssertResults(query_multi, st, 6);
+			executeQueryAssertResults(query6, st, 6);
 //			executeQueryAssertResults(query1, st, 3);
 //			executeQueryAssertResults(query2, st, 4);
 //			executeQueryAssertResults(query3, st, 4);
