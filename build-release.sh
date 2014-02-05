@@ -49,8 +49,8 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.11
-export REVISION=0-SNAPSHOT
+export VERSION=1.10
+export REVISION=1-SNAPSHOT
 
 
 # Start building the packages
@@ -145,7 +145,6 @@ rm -fr $OWL_API_DIST
 mkdir $OWL_API_DIST
 echo "[INFO] Copying files..."
 cp target/ontop-distribution-$VERSION.$REVISION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
-
 
 echo ""
 echo "Done."
