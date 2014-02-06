@@ -79,7 +79,7 @@
 :query-5b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q5B: Find products that are similar to a given product, with different FILTER settings" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <query-5b.rq> ] ;
     mf:result <query-result-5b.ttl> ;
