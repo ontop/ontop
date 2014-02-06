@@ -69,7 +69,7 @@ public class LeftJoinTestVirtual extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person-simple.obda";
+	final String obdafile = "src/test/resources/person.obda";
 
 	@Override
 	public void setUp() throws Exception {
