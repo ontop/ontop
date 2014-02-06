@@ -504,6 +504,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
 			
+			System.out.println("Initial-----");
+			for (CQIE rule: workingList){
+				System.out.println(rule);
+			}
+			
 			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
@@ -546,11 +551,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						//here we perform the partial evaluation
 						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, false, includeMappings);
 						
+						
+						
 						if (partialEvaluation != null){
+							System.out.println("Result");
+							for (CQIE rule: partialEvaluation){
+								System.out.println(rule);
+							}
+						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
 							keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
 						} else{
+							System.out.println("Empty:"+pred);
 							keepLooping = updateNullIndexes(depGraph, pred, preFather,  fatherRule,  workingList);
 						}
 					} //end for father collection
