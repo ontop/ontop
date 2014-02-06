@@ -79,42 +79,40 @@ public class DAGBuilder {
 		}
 	
 		eliminateCycles(copy, equivalencesMap);
-		eliminateRedundantEdges(copy);
-		
-		SimpleDirectedGraph <Description,DefaultEdge> dag = new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class);
-		Graphs.addGraph(dag, copy);
+
+		SimpleDirectedGraph <Description,DefaultEdge> dag = getWithoutRedundantEdges(copy);
 		
 		return dag;
 	}
 
-	/***
-	 * Eliminates redundant edges to ensure that the remaining DAG is the
-	 * transitive reduction of the original DAG.
-	 * 
-	 * <p>
-	 * This is done with an ad-hoc algorithm that functions as follows:
-	 * 
-	 * <p>
-	 * Compute the set of all nodes with more than 2 outgoing edges (these have
-	 * candidate redundant edges.) <br>
+	/**
 	 */
-	private static void eliminateRedundantEdges(DefaultDirectedGraph<Description,DefaultEdge> graph) {
+	private static <T> SimpleDirectedGraph <T,DefaultEdge> getWithoutRedundantEdges(DefaultDirectedGraph<T,DefaultEdge> graph) {
 
-		Collection<DefaultEdge> redundant = new LinkedList<DefaultEdge>();
+		SimpleDirectedGraph <T,DefaultEdge> dag = new SimpleDirectedGraph <T,DefaultEdge> (DefaultEdge.class);
 
+		for (T v : graph.vertexSet())
+			dag.addVertex(v);
+		
 		for (DefaultEdge edge : graph.edgeSet()) {
-			Description v1 = graph.getEdgeSource(edge);
-			if (graph.outDegreeOf(v1) <= 1)
-				continue;
-			
-			Description v2 = graph.getEdgeTarget(edge);
-			for (DefaultEdge e2 : graph.outgoingEdgesOf(v1)) 
-				if (graph.containsEdge(graph.getEdgeTarget(e2), v2)) {
-					redundant.add(edge);
-					break;
-				}
+			T v1 = graph.getEdgeSource(edge);
+			T v2 = graph.getEdgeTarget(edge);
+			boolean redundant = false;
+
+			if (graph.outDegreeOf(v1) > 1) {
+				// an edge is redundant if 
+				//  its source has an edge going to a vertex 
+				//         from which the target is reachable (in one step) 
+				for (DefaultEdge e2 : graph.outgoingEdgesOf(v1)) 
+					if (graph.containsEdge(graph.getEdgeTarget(e2), v2)) {
+						redundant = true;
+						break;
+					}
+			}
+			if (!redundant)
+				dag.addEdge(v1, v2);
 		}
-		graph.removeAllEdges(redundant);		
+		return dag;
 	}
 
 	/***
@@ -172,21 +170,15 @@ public class DAGBuilder {
 		 * component should be ignored, since a cycle involving the same nodes
 		 * or nodes for inverse descriptions has already been processed.
 		 */
-		Set<Property> processedProperties = new HashSet<Property>();
-		Set<Property> chosenProperties = new HashSet<Property>();
+		Set<EquivalenceClass<Description>> processedPropertyClasses = new HashSet<EquivalenceClass<Description>>();
+		Set<EquivalenceClass<Description>> chosenPropertyClasses = new HashSet<EquivalenceClass<Description>>();
 
 		// PROCESS ONLY PROPERTIES
 		
 		for (EquivalenceClass<Description> equivalenceSet : propertyEquivalenceClasses) {
 
-			boolean ignore = false;
-
-			for (Description e : equivalenceSet) 
-				if (processedProperties.contains(e)) { 
-					ignore = true;
-					break;
-				}
-			if (ignore)
+			//System.out.println("PROPERTY: " + equivalenceSet);
+			if (processedPropertyClasses.contains(equivalenceSet))
 				continue;
 			
 			/*
@@ -195,12 +187,21 @@ public class DAGBuilder {
 			 * already assigned named role or an inverse
 			 */
 
+			// THIS DOES NOT ALWAYS WORK
+			// THE CODE BELOW IS BASED ON THE ASSUMPTION THAT THE DAG IS TRAVERSED FROM THE TOP 
+			// AND NONE OF THE NODES HAS TWO PARENTS
+			
+			boolean ignore = false;
+
 			for (Description e : equivalenceSet) {
 				for (DefaultEdge outEdge : graph.outgoingEdgesOf(e)) {
 					Property target = (Property) graph.getEdgeTarget(outEdge);
+					EquivalenceClass<Description> targetClass = equivalencesMap.get(target); 
 
-					if (chosenProperties.contains(target) || 
-							(processedProperties.contains(target) && target.isInverse())) {
+					if (chosenPropertyClasses.contains(targetClass) || 
+							(processedPropertyClasses.contains(targetClass) && target.isInverse())) {
+						
+						chosenPropertyClasses.add(equivalenceSet); 
 						ignore = true;
 						break;
 					}
@@ -209,10 +210,8 @@ public class DAGBuilder {
 					break;
 			}
 			if (ignore) {
-				for (Description e : equivalenceSet) 
-					chosenProperties.add((Property)e);
-				
-				continue;				
+				//System.out.println("CHOSEN: " + chosenPropertyClasses);
+				continue;
 			}
 
 			/* Assign the representative role with its inverse, domain and range
@@ -240,23 +239,25 @@ public class DAGBuilder {
 				if (e != prop) 
 					removeNodeAndRedirectEdges(graph, e, prop);
 						
-				processedProperties.add(eProp);
-
 				Property eInverse = fac.createProperty(eProp.getPredicate(), !eProp.isInverse());
 				
 				// if the inverse is not equivalent to the representative 
 				// then we remove the inverse
 				if ((e != prop) && !eInverse.equals(prop))  
 					removeNodeAndRedirectEdges(graph, eInverse, inverse);	
-				
-				processedProperties.add(eInverse);
 			}
 			
 			equivalenceSet.setRepresentative(prop);
 			EquivalenceClass<Description> inverseEquivalenceSet = equivalencesMap.get(inverse);
 			inverseEquivalenceSet.setRepresentative(inverse);			
+			
+			processedPropertyClasses.add(equivalenceSet);
+			processedPropertyClasses.add(inverseEquivalenceSet);
 		}
 
+		//System.out.println("RESULT: " + graph);
+		//System.out.println("MAP: " + equivalencesMap);
+		
 		/*
 		 * PROCESS CLASSES ONLY
 		 */
