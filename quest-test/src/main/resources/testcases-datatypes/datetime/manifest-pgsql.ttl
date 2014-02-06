@@ -21,7 +21,7 @@
     mf:name    "Type: DATE" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <date.rq> ] ;
     mf:result <noresult.ttl> ;
@@ -31,7 +31,7 @@
 :date-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - using basic graph pattern" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <date-bgp.rq> ] ;
     mf:result <date.ttl> ;
@@ -43,7 +43,7 @@
     mf:name    "Type: TIME" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <time.rq> ] ;
     mf:result <noresult.ttl> ;
@@ -53,7 +53,7 @@
 :time-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - using basic graph pattern" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <time-bgp.rq> ] ;
     mf:result <time.ttl> ;
@@ -65,7 +65,7 @@
     mf:name    "Type: TIME WITH TIMEZONE" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <time_tz.rq> ] ;
     mf:result <noresult.ttl> ;
@@ -75,7 +75,7 @@
 :time_tz-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME WITH TIMEZONE - using basic graph pattern" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <time_tz-bgp.rq> ] ;
     mf:result <time_tz.ttl> ;
@@ -85,7 +85,7 @@
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp.rq> ] ;
     mf:result <timestamp.ttl> ;
@@ -95,7 +95,7 @@
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP - cast to Literal" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp-str.rq> ] ;
     mf:result <timestamp.ttl> ;
@@ -105,7 +105,7 @@
 :timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp_tz.rq> ] ;
     mf:result <timestamp_tz.ttl> ;
@@ -115,7 +115,7 @@
 :timestamp_tz-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE - cast to Literal" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp_tz-str.rq> ] ;
     mf:result <timestamp_tz.ttl> ;

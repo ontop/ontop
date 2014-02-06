@@ -19,7 +19,7 @@
     mf:name    "Type: DATE" ;
     mf:comment	"Oracle JDBC returns java.sql.TIMESTAMP instead of java.sql.DATE, therefore, Quest may fail parsing the data input" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <date-oracle.rq> ] ;
     mf:result <noresult.ttl> ;
@@ -31,7 +31,7 @@
     mf:name    "Type: DATE - using basic graph pattern" ;
     mf:comment	"Oracle JDBC returns java.sql.TIMESTAMP instead of java.sql.DATE, therefore, Quest may fail parsing the data input" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <date-bgp-oracle.rq> ] ;
     mf:result <noresult.ttl> ;
@@ -42,7 +42,7 @@
     mf:name    "Type: DATE - cast to xsd:string" ;
     mf:comment	"The column was overriden by xsd:string so that Quest won't parse the data input" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <date-oracle.rq> ] ;
     mf:result <date.ttl> ;
@@ -54,7 +54,7 @@
     mf:name    "Type: DATE - cast to xsd:string and use basic graph pattern" ;
     mf:comment	"The column was overriden by xsd:string so that Quest won't parse the data input" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <date-bgp-oracle.rq> ] ;
     mf:result <noresult.ttl> ;
@@ -64,7 +64,7 @@
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp.rq> ] ;
     mf:result <timestamp.ttl> ;
@@ -74,7 +74,7 @@
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP - cast to Literal" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp-str-oracle.rq> ] ;
     mf:result <timestamp.ttl> ;

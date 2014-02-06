@@ -24,7 +24,7 @@
 :int rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <int-oracle.rq> ] ;
     mf:result <int.ttl> ;
@@ -34,7 +34,7 @@
 :integer rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INTEGER" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <integer-oracle.rq> ] ;
     mf:result <integer.ttl> ;
@@ -44,7 +44,7 @@
 :smallint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SMALLINT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <smallint-oracle.rq> ] ;
     mf:result <smallint.ttl> ;
@@ -54,7 +54,7 @@
 :dec rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DEC" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <dec.rq> ] ;
     mf:result <dec.ttl> ;
@@ -64,7 +64,7 @@
 :decimal rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DECIMAL" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <decimal.rq> ] ;
     mf:result <decimal.ttl> ;
@@ -74,7 +74,7 @@
 :number rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NUMBER" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <number.rq> ] ;
     mf:result <number.ttl> ;
@@ -84,7 +84,7 @@
 :numeric rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NUMERIC" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <numeric.rq> ] ;
     mf:result <numeric.ttl> ;
@@ -94,7 +94,7 @@
 :real rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: REAL" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <real.rq> ] ;
     mf:result <real.ttl> ;
@@ -104,7 +104,7 @@
 :float rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: FLOAT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <float.rq> ] ;
     mf:result <float.ttl> ;
@@ -114,7 +114,7 @@
 :double rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DOUBLE PRECISION" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <double.rq> ] ;
     mf:result <double.ttl> ;

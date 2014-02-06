@@ -15,7 +15,7 @@
 :bit rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <bit.rq> ] ;
     mf:result <bit.ttl> ;
