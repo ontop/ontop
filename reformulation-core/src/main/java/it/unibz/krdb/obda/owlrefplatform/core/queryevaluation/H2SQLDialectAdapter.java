@@ -47,11 +47,15 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 																// enclosing
 																// quotes
-		if (caseinSensitive) {
-			return " LOWER(" + columnname + ") regexp " + "'"
-					+ pattern.toLowerCase() + "'";
-		}
-		return columnname + " regexp " + "'" + pattern + "'";
+		// embedded options: 
+		
+		String pflags = "(?";
+		if (multiLine)
+			pflags += "m"; // equivalent of Pattern.MULTILINE
+		if (dotAllMode)
+			pflags += "s"; // equivalent of Pattern.DOTALL
+		pflags +=")";
+		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
 	}
 	
 }
