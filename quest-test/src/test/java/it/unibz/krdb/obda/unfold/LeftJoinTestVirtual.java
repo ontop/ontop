@@ -124,6 +124,9 @@ public class LeftJoinTestVirtual extends TestCase {
 		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
 		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
+		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
+		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
+		
 		String query1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name . ?p :age ?age }";
 		String query2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick11 ?nick1} OPTIONAL {?p :nick22 ?nick2} }";		
 		String query3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick11 ?nick1} }";
@@ -133,7 +136,9 @@ public class LeftJoinTestVirtual extends TestCase {
 		
 		try {
 //			executeQueryAssertResults(query_multi, st, 6);
-			executeQueryAssertResults(query6, st, 6);
+			executeQueryAssertResults(query_multi3, st, 4);
+			//executeQueryAssertResults(query_multi4, st, 6);
+//			executeQueryAssertResults(query6, st, 6);
 //			executeQueryAssertResults(query1, st, 3);
 //			executeQueryAssertResults(query2, st, 4);
 //			executeQueryAssertResults(query3, st, 4);
