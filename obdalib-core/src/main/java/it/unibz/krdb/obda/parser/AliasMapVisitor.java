@@ -18,7 +18,6 @@ import java.util.HashMap;
 
 
 
-
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -65,6 +64,7 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -142,8 +142,8 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		String alias = selectExpr.getAlias();
-		if ( alias != null) {
+		if ( selectExpr.getAlias() != null) {
+			String alias = selectExpr.getAlias().getName();
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
@@ -441,6 +441,12 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

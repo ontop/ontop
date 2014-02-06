@@ -243,6 +243,8 @@ public class OBDAVocabulary {
 	public static final String SPARQL_LANG_URI = "lang";
 
 	public static final String SPARQL_REGEX_URI = "regex";
+	
+	public static final String SPARQL_LIKE_URI = "like";
 
 	/* SPARQL Algebra predicate */
 
@@ -278,4 +280,7 @@ public class OBDAVocabulary {
 
 	public static final Predicate SPARQL_REGEX = new BooleanOperationPredicateImpl(
 			SPARQL_REGEX_URI, 3);
+	
+	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
+			SPARQL_LIKE_URI, 2);
 }

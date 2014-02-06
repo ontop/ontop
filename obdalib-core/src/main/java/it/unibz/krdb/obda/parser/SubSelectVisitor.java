@@ -8,12 +8,9 @@
  */
 package it.unibz.krdb.obda.parser;
 
-import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.SelectJSQL;
-import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -65,6 +62,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
@@ -421,6 +419,12 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {
 		
+		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
 		
 	}
 }

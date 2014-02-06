@@ -24,7 +24,7 @@
 :char rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <char.rq> ] ;
     mf:result <char.ttl> ;
@@ -34,7 +34,7 @@
 :char-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <char-graph.rq> ] ;
     mf:result <char.ttl> ;
@@ -44,7 +44,7 @@
 :varchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar.rq> ] ;
     mf:result <varchar.ttl> ;
@@ -54,7 +54,7 @@
 :varchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar-graph.rq> ] ;
     mf:result <varchar.ttl> ;
@@ -64,7 +64,7 @@
 :text rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <text.rq> ] ;
     mf:result <text.ttl> ;
@@ -74,7 +74,7 @@
 :text-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <text-graph.rq> ] ;
     mf:result <text.ttl> ;
@@ -84,7 +84,7 @@
 :character rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHARACTER" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <character.rq> ] ;
     mf:result <character.ttl> ;
@@ -94,7 +94,7 @@
 :character-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHARACTER-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <character-graph.rq> ] ;
     mf:result <character.ttl> ;
@@ -104,7 +104,7 @@
 :name rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NAME" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <name.rq> ] ;
     mf:result <name.ttl> ;
@@ -114,7 +114,7 @@
 :name-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NAME-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <name-graph.rq> ] ;
     mf:result <name.ttl> ;

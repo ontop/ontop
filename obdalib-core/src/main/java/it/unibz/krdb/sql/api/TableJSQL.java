@@ -11,22 +11,23 @@ package it.unibz.krdb.sql.api;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 
 
 public class TableJSQL implements Serializable{
 	
-	static private final long serialVersionUID = 7031993308873750327L;
+	private static final long serialVersionUID = 7031993308873750327L;
 	/**
 	 * Class TableJSQL used to store the information about the tables. We distinguish between givenName and Name.
 	 * Since with Name we don't want to consider columns.
 	 */
 	
-	
 	private String schema;
 	private String tableName;
 	private String name;
-	private String alias;
+	private String aliasName;
+	private Alias alias;
 	
 	
 	
@@ -55,7 +56,6 @@ public class TableJSQL implements Serializable{
 	 * 
 	 */
 	public TableJSQL(String schema, String tableName, String givenName) {
-			
 			setSchema(schema);
 			setGivenSchema(schema);
 			setTableName(tableName);
@@ -65,7 +65,6 @@ public class TableJSQL implements Serializable{
 		}
 	
 	public TableJSQL(Table table){
-		
 		setSchema(table.getSchemaName());
 		setGivenSchema(table.getSchemaName());
 		setTableName(table.getName());
@@ -142,15 +141,26 @@ public class TableJSQL implements Serializable{
 	}
 	
 
-	public void setAlias(String alias) {
+	public void setAlias(Alias alias) {
 		if (alias == null) {
 			return;
 		}
 		this.alias = alias;
+		this.aliasName = alias.getName();
 	}
 
-	public String getAlias() {
+	public void setAliasName(String alias) {
+		this.aliasName = alias;
+		if (alias != null)
+			this.alias.setName(alias);
+	}
+	
+	public Alias getAlias() {
 		return alias;
+	}
+	
+	public String getAliasName() { 
+		return this.aliasName;
 	}
 	
 	/**

@@ -22,7 +22,7 @@
 :integer rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INTEGER" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <integer.rq> ] ;
     mf:result <integer.ttl> ;
@@ -32,7 +32,7 @@
 :smallint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SMALLINT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <smallint.rq> ] ;
     mf:result <smallint.ttl> ;
@@ -42,7 +42,7 @@
  :bigint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIGINT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <bigint.rq> ] ;
     mf:result <bigint.ttl> ;
@@ -52,7 +52,7 @@
  :numeric rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NUMERIC" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <numeric.rq> ] ;
     mf:result <numeric.ttl> ;
@@ -62,7 +62,7 @@
  :real rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: REAL" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <real.rq> ] ;
     mf:result <real.ttl> ;
@@ -72,7 +72,7 @@
  :double rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DOUBLE PRECISION" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <double.rq> ] ;
     mf:result <double.ttl> ;
@@ -82,7 +82,7 @@
 :serial rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SERIAL" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <serial.rq> ] ;
     mf:result <serial.ttl> ;
@@ -92,7 +92,7 @@
 :bigserial rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIG SERIAL" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <bigserial.rq> ] ;
     mf:result <bigserial.ttl> ;

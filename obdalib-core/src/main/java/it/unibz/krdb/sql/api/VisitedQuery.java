@@ -10,6 +10,7 @@ package it.unibz.krdb.sql.api;
 
 import it.unibz.krdb.obda.parser.AggregationVisitor;
 import it.unibz.krdb.obda.parser.AliasMapVisitor;
+import it.unibz.krdb.obda.parser.ColumnsVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.SelectionVisitor;
@@ -19,9 +20,11 @@ import it.unibz.krdb.obda.parser.TablesNameVisitor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
@@ -45,7 +48,7 @@ public class VisitedQuery implements Serializable{
 	private ArrayList<RelationJSQL> tableSet;
 	private ArrayList<SelectJSQL> selectsSet;
 	private HashMap<String, String> aliasMap;
-	private ArrayList<String> joins;
+	private ArrayList<Expression> joins;
 	private SelectionJSQL selection;
 	private ProjectionJSQL projection;
 	private AggregationJSQL groupByClause;
@@ -81,9 +84,9 @@ public class VisitedQuery implements Serializable{
 				
 				//getting the values we also eliminate or handle the quotes
 				tableSet = getTableSet();
-				joins = getJoinCondition();
-				projection = getProjection();
 				selection = getSelection();
+				projection = getProjection();
+				joins = getJoinCondition();
 				aliasMap = getAliasMap();
 				groupByClause =getGroupByClause();
 				
@@ -111,7 +114,7 @@ public class VisitedQuery implements Serializable{
 	/**
 	 * Returns all the tables in this query.
 	 */
-	public ArrayList<RelationJSQL> getTableSet() {
+	public ArrayList<RelationJSQL> getTableSet() throws JSQLParserException {
 		
 		if(tableSet== null){
 			TablesNameVisitor tnp = new TablesNameVisitor();
@@ -147,7 +150,7 @@ public class VisitedQuery implements Serializable{
 	 * Get the string construction of the join condition. The string has the
 	 * format of "VAR1=VAR2".
 	 */
-	public ArrayList<String> getJoinCondition() {
+	public ArrayList<Expression> getJoinCondition() throws JSQLParserException {
 		if(joins==null){
 			JoinConditionVisitor joinCV = new JoinConditionVisitor();
 			joins= joinCV.getJoinConditions(select);
@@ -178,6 +181,16 @@ public class VisitedQuery implements Serializable{
 		}
 		return projection;
 		
+	}
+	
+	/**
+	 * Get the list of columns 
+	 * @return
+	 */
+	public List<String> getColumns() {
+		ColumnsVisitor col = new ColumnsVisitor();
+		
+		return col.getColumns(select);
 	}
 	/**
 	 * Set the object construction for the SELECT clause, 

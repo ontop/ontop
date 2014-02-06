@@ -27,7 +27,7 @@ import org.openrdf.repository.config.RepositoryRegistry;
 
 public class SesameRepositoryFactory implements RepositoryFactory{
 
-	public static final String REPOSITORY_TYPE = "obda:QuestRepository";
+	public static final String REPOSITORY_TYPE = "obda:OntopRepository";
    
 	public String getRepositoryType() {
 		return REPOSITORY_TYPE;
@@ -53,15 +53,15 @@ public class SesameRepositoryFactory implements RepositoryFactory{
 					boolean existential = ((SesameRepositoryConfig) config).getExistential();
 					String rewriting = ((SesameRepositoryConfig) config).getRewriting();
 					
-					if (((SesameRepositoryConfig) config).getQuestType().equals("quest-inmemory"))
+					if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-inmemory"))
 					{
 						return new SesameClassicInMemoryRepo(name, owlfile, existential, rewriting);
 					}
-					else if (((SesameRepositoryConfig) config).getQuestType().equals("quest-remote"))
+					else if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-remote"))
 					{
 						return new SesameClassicJDBCRepo(name, owlfile);
 					}
-					else if (((SesameRepositoryConfig) config).getQuestType().equals("quest-virtual")) 
+					else if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-virtual")) 
 					{
 						String obdafile = ((SesameRepositoryConfig) config).getObdaFile();
 						return new SesameVirtualRepo(name, owlfile, obdafile, existential, rewriting);

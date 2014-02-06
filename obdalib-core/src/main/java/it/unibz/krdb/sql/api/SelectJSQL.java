@@ -24,7 +24,8 @@ public class SelectJSQL implements Serializable{
 		}
 		
 		public SelectJSQL(SubSelect sSelect){
-			setAlias(sSelect.getAlias());
+			if(sSelect.getAlias()!= null)
+				setAlias(sSelect.getAlias().getName());
 			setBody(sSelect.getSelectBody().toString());
 
 		}

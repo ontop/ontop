@@ -88,6 +88,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String ADD_OPERATOR = "%s + %s";
 	private static final String SUBSTRACT_OPERATOR = "%s - %s";
 	private static final String MULTIPLY_OPERATOR = "%s * %s";
+	
+	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
 	private static final String INDENT = "    ";
 
@@ -1313,6 +1315,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_NOT_NULL_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.IS_TRUE)) {
 			operator = IS_TRUE_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
+			operator = LIKE_OPERATOR;
 		} else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}

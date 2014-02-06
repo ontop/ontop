@@ -270,11 +270,13 @@ public class MetaMappingExpander {
 		SelectionJSQL selection = null;
 		try {
 			selection = sourceParsedQuery.getSelection();
+			
 		} catch (JSQLParserException e1) {
-			// TODO Auto-generated catch block
+			
 			e1.printStackTrace();
 		}
 		SelectionJSQL newSelection;
+		
 		if(selection != null){
 			newSelection = selection;
 		} else {
@@ -283,6 +285,7 @@ public class MetaMappingExpander {
 		
 			int j=0;
 			for(SelectExpressionItem column : columnsForTemplate){
+				
 				Expression columnRefExpression = column.getExpression();
 				
 				StringValue clsStringValue = new StringValue("'"+params.get(j)+"'");
