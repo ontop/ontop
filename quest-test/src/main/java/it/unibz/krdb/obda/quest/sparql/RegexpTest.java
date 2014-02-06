@@ -98,7 +98,8 @@ public class RegexpTest extends TestCase {
 				{"h2", true}, 
 				 {"mysql", false },
 				 {"pgsql", false},
-				 {"oracle", false }
+				 {"oracle", false },
+				 //no support for mssql and db2
 				 });
 	}
 
