@@ -6,5 +6,5 @@ SELECT ?product ?label
 WHERE {
     ?product rdfs:label ?label .
     ?product rdf:type bsbm:Product .
-    FILTER regex(?label, "%tentio%")
+    FILTER regex(?label, "tentio")
 }
