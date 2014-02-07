@@ -69,6 +69,7 @@ import java.util.Set;
 import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -568,6 +569,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		
 		String unionView = "";
 
+		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
+		
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 			
@@ -575,12 +578,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer, isAns1);
 			
-			if (unionView.equals("")){
-				unionView = "(" + sqlQuery + ")";
-			} else {
-				unionView = unionView + "\n" + "\n UNION \n (" + sqlQuery + ")";
-			}
-
+			sqls.add(sqlQuery);
+		}
+		
+		if(sqls.size() == 1){
+			unionView = sqls.iterator().next();
+		} else {
+			unionView = "(" + Joiner.on(")\n UNION \n (").join(sqls) + ")";
 		}
 		
 		
