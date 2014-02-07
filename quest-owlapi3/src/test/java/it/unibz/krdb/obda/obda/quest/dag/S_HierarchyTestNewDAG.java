@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_NamedTBoxReasonerImpl;
@@ -80,13 +80,13 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	private boolean testDescendants(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 		boolean result = false;
 
-		for(EquivalenceClass<Description> node : d1.getNodes()) {
+		for(Equivalences<Description> node : d1.getNodes()) {
 			Description vertex = node.getRepresentative();
 			if(named){
 
 				if(d1.isNamed(vertex)) {
-					Set<EquivalenceClass<Description>> setd1	= d1.getDescendants(vertex);
-					Set<EquivalenceClass<Description>> setd2	= d2.getDescendants(vertex);
+					Set<Equivalences<Description>> setd1	= d1.getDescendants(vertex);
+					Set<Equivalences<Description>> setd2	= d2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
@@ -108,8 +108,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			if(named){
 
 				if(d1.reasoner().isNamed(vertex)){
-					Set<EquivalenceClass<Description>> setd1	= d1.getDescendants(vertex);
-					Set<EquivalenceClass<Description>> setd2	= d2.getDescendants(vertex);
+					Set<Equivalences<Description>> setd1	= d1.getDescendants(vertex);
+					Set<Equivalences<Description>> setd2	= d2.getDescendants(vertex);
 
 					result= setd1.equals(setd2);
 				}
@@ -127,13 +127,13 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	private boolean testAncestors(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
 		boolean result = false;
 
-		for(EquivalenceClass<Description> node : d1.getNodes()) {
+		for(Equivalences<Description> node : d1.getNodes()) {
 			Description vertex = node.getRepresentative();
 			if(named){
 
 				if(d1.isNamed(vertex)) {
-					Set<EquivalenceClass<Description>> setd1	= d1.getAncestors(vertex);
-					Set<EquivalenceClass<Description>> setd2	= d2.getAncestors(vertex);
+					Set<Equivalences<Description>> setd1	= d1.getAncestors(vertex);
+					Set<Equivalences<Description>> setd2	= d2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}
@@ -153,8 +153,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			if(named){
 
 				if(d1.reasoner().isNamed(vertex)){
-					Set<EquivalenceClass<Description>> setd1	= d1.getAncestors(vertex);
-					Set<EquivalenceClass<Description>> setd2	= d2.getAncestors(vertex);
+					Set<Equivalences<Description>> setd1	= d1.getAncestors(vertex);
+					Set<Equivalences<Description>> setd2	= d2.getAncestors(vertex);
 
 					result= setd1.equals(setd2);
 				}

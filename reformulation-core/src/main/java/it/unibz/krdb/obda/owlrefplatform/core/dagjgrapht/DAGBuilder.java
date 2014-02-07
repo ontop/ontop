@@ -63,7 +63,7 @@ public class DAGBuilder {
 	 * @param representatives a map between the node and its representative node
 	 */
 	public static SimpleDirectedGraph <Description,DefaultEdge> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Map<Description, EquivalenceClass<Description>> equivalencesMap) {
+			Map<Description, Equivalences<Description>> equivalencesMap) {
 
 		DefaultDirectedGraph<Description,DefaultEdge> copy = 
 				new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
@@ -78,13 +78,13 @@ public class DAGBuilder {
 			copy.addEdge(s, t, e);
 		}
 	
-		DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge> dag0 = eliminateCycles(copy, equivalencesMap);
+		DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> dag0 = eliminateCycles(copy, equivalencesMap);
 
-		SimpleDirectedGraph <EquivalenceClass<Description>,DefaultEdge> dag1 = getWithoutRedundantEdges(dag0);
+		SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> dag1 = getWithoutRedundantEdges(dag0);
 		
 		SimpleDirectedGraph <Description,DefaultEdge> dag2 = new SimpleDirectedGraph <Description,DefaultEdge>(DefaultEdge.class);
 		
-		for (EquivalenceClass<Description> c : dag1.vertexSet())
+		for (Equivalences<Description> c : dag1.vertexSet())
 			dag2.addVertex(c.getRepresentative());
 		
 		for (DefaultEdge e : dag1.edgeSet())
@@ -142,26 +142,26 @@ public class DAGBuilder {
 	 * 
 	 */
 
-	private static DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge> eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Map<Description, EquivalenceClass<Description>> equivalencesMap) {
+	private static DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+			Map<Description, Equivalences<Description>> equivalencesMap) {
 
-		DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge> dag = 
-				new DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge>(DefaultEdge.class);
+		DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> dag = 
+				new DefaultDirectedGraph<Equivalences<Description>,DefaultEdge>(DefaultEdge.class);
 
 		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(graph);
 
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
-		List<EquivalenceClass<Description>> equivalenceSets = inspector.stronglyConnectedSets();
+		List<Equivalences<Description>> equivalenceSets = inspector.stronglyConnectedSets();
 
-		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  {
+		for (Equivalences<Description> equivalenceSet : equivalenceSets)  {
 			for (Description node : equivalenceSet) 
 				equivalencesMap.put(node, equivalenceSet);
 			
 			dag.addVertex(equivalenceSet);
 		}
 
-		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  {
+		for (Equivalences<Description> equivalenceSet : equivalenceSets)  {
 			for (Description e : equivalenceSet) {			
 				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
 					Description t = graph.getEdgeTarget(edge);
@@ -178,14 +178,18 @@ public class DAGBuilder {
 
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
-		List<EquivalenceClass<Description>> propertyEquivalenceClasses = new LinkedList<EquivalenceClass<Description>>();
+		List<Equivalences<Description>> propertyEquivalenceClasses = new LinkedList<Equivalences<Description>>();
 		
-		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  			
+		for (Equivalences<Description> equivalenceSet : equivalenceSets)  			
 			if (equivalenceSet.iterator().next() instanceof Property) {
 				if (equivalenceSet.size() > 1) 
 					propertyEquivalenceClasses.add(equivalenceSet);
-				else
-					equivalenceSet.setRepresentative(equivalenceSet.iterator().next());
+				else {
+					Property p = (Property)equivalenceSet.iterator().next();
+					equivalenceSet.setRepresentative(p);
+					if (!p.isInverse())
+						equivalenceSet.setIndexed();
+				}
 			}
 		
 		
@@ -197,12 +201,12 @@ public class DAGBuilder {
 		 * component should be ignored, since a cycle involving the same nodes
 		 * or nodes for inverse descriptions has already been processed.
 		 */
-		Set<EquivalenceClass<Description>> processedPropertyClasses = new HashSet<EquivalenceClass<Description>>();
-		Set<EquivalenceClass<Description>> chosenPropertyClasses = new HashSet<EquivalenceClass<Description>>();
+		Set<Equivalences<Description>> processedPropertyClasses = new HashSet<Equivalences<Description>>();
+		Set<Equivalences<Description>> chosenPropertyClasses = new HashSet<Equivalences<Description>>();
 
 		// PROCESS ONLY PROPERTIES
 		
-		for (EquivalenceClass<Description> equivalenceSet : propertyEquivalenceClasses) {
+		for (Equivalences<Description> equivalenceSet : propertyEquivalenceClasses) {
 
 			//System.out.println("PROPERTY: " + equivalenceSet);
 			if (processedPropertyClasses.contains(equivalenceSet))
@@ -223,7 +227,7 @@ public class DAGBuilder {
 			for (Description e : equivalenceSet) {
 				for (DefaultEdge outEdge : graph.outgoingEdgesOf(e)) {
 					Property target = (Property) graph.getEdgeTarget(outEdge);
-					EquivalenceClass<Description> targetClass = equivalencesMap.get(target); 
+					Equivalences<Description> targetClass = equivalencesMap.get(target); 
 
 					if (chosenPropertyClasses.contains(targetClass) || 
 							(processedPropertyClasses.contains(targetClass) && target.isInverse())) {
@@ -269,13 +273,20 @@ public class DAGBuilder {
 			}
 			
 			equivalenceSet.setRepresentative(prop);
-			EquivalenceClass<Description> inverseEquivalenceSet = equivalencesMap.get(inverse);
+			equivalenceSet.setIndexed();
+			Equivalences<Description> inverseEquivalenceSet = equivalencesMap.get(inverse);
 			inverseEquivalenceSet.setRepresentative(inverse);			
 			
 			processedPropertyClasses.add(equivalenceSet);
 			processedPropertyClasses.add(inverseEquivalenceSet);
 		}
 
+		for (Equivalences<Description> equivalenceClass : dag.vertexSet()) {
+			if (equivalenceClass.iterator().next() instanceof Property)
+				if (equivalenceClass.getRepresentative() == null)
+					System.out.println("NULL REP FOR: " + equivalenceClass);
+		}
+		
 		//System.out.println("RESULT: " + graph);
 		//System.out.println("MAP: " + equivalencesMap);
 		
@@ -283,13 +294,14 @@ public class DAGBuilder {
 		 * PROCESS CLASSES ONLY
 		 */
 
-		for (EquivalenceClass<Description> equivalenceClassSet : dag.vertexSet()) {
+		for (Equivalences<Description> equivalenceClassSet : dag.vertexSet()) {
 
 			if (!(equivalenceClassSet.iterator().next() instanceof BasicClassDescription))
 				continue;
 			
 			if (equivalenceClassSet.size() <= 1) {
 				equivalenceClassSet.setRepresentative(equivalenceClassSet.iterator().next());
+				equivalenceClassSet.setIndexed();
 				continue;
 			}
 	
@@ -308,6 +320,8 @@ public class DAGBuilder {
 				Property propRep = (Property) equivalencesMap.get(prop).getRepresentative();
 				representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
 			}
+			else
+				equivalenceClassSet.setIndexed();
 
 			equivalenceClassSet.setRepresentative(representative);
 		}
@@ -339,7 +353,7 @@ public class DAGBuilder {
 	}
 	
 
-	private static Property getNamedRepresentative(EquivalenceClass<Description> properties) {
+	private static Property getNamedRepresentative(Equivalences<Description> properties) {
 		Property representative = null;
 		// find representative
 		for (Description rep : properties) 

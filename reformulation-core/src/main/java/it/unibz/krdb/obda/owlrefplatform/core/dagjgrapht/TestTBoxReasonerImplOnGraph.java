@@ -94,16 +94,16 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
-	public Set<EquivalenceClass<Description>> getDirectChildren(Description desc) {
+	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
 		return getDirectChildren(desc,false);
 	}
 	
-	public Set<EquivalenceClass<Description>> getDirectChildren(Description desc,
+	public Set<Equivalences<Description>> getDirectChildren(Description desc,
 			boolean named) {
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 			// get equivalences of the current node
-		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
+		Equivalences<Description> equivalenceSet = getEquivalences(desc);
 			// I want to consider also the children of the equivalent nodes
 			for (Description n : equivalenceSet) {
 				Set<DefaultEdge> edges = graph.incomingEdgesOf(n);
@@ -115,10 +115,10 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 					if (equivalenceSet.contains(source)) {
 						continue;
 					}
-					EquivalenceClass<Description> equivalences = getEquivalences(source);
+					Equivalences<Description> equivalences = getEquivalences(source);
 					if (named) { // if true I search only for the named nodes
 
-						EquivalenceClass<Description> namedEquivalences = getEquivalences(source, true);
+						Equivalences<Description> namedEquivalences = getEquivalences(source, true);
 
 						if (!namedEquivalences.isEmpty())
 							result.add(namedEquivalences);
@@ -148,12 +148,12 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *  Private method that searches for the first named children
 	 */
 
-	private Set<EquivalenceClass<Description>> getNamedChildren(Description desc) {
+	private Set<Equivalences<Description>> getNamedChildren(Description desc) {
 
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 			// get equivalences of the current node
-		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
+		Equivalences<Description> equivalenceSet = getEquivalences(desc);
 			// I want to consider also the children of the equivalent nodes
 
 			Set<DefaultEdge> edges = graph.incomingEdgesOf(desc);
@@ -165,9 +165,9 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				if (equivalenceSet.contains(source)) {
 					continue;
 				}
-				EquivalenceClass<Description> equivalences = getEquivalences(source);
+				Equivalences<Description> equivalences = getEquivalences(source);
 
-				EquivalenceClass<Description> namedEquivalences = getEquivalences(source, true);
+				Equivalences<Description> namedEquivalences = getEquivalences(source, true);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -198,16 +198,16 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         the same set of description
 	 * */
 	@Override
-	public Set<EquivalenceClass<Description>> getDirectParents(Description desc) {
+	public Set<Equivalences<Description>> getDirectParents(Description desc) {
 		return getDirectParents(desc,false);
 	}
 
-	public Set<EquivalenceClass<Description>> getDirectParents(Description desc, boolean named) {
+	public Set<Equivalences<Description>> getDirectParents(Description desc, boolean named) {
 
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 		// get equivalences of the current node
-		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc);
+		Equivalences<Description> equivalenceSet = getEquivalences(desc);
 
 			// I want to consider also the parents of the equivalent nodes
 			for (Description n : equivalenceSet) {
@@ -220,11 +220,11 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 					if (equivalenceSet.contains(target)) {
 						continue;
 					}
-					EquivalenceClass<Description> equivalences = getEquivalences(target);
+					Equivalences<Description> equivalences = getEquivalences(target);
 
 					if (named) { // if true I search only for the named nodes
 
-						EquivalenceClass<Description> namedEquivalences = getEquivalences(target, true);
+						Equivalences<Description> namedEquivalences = getEquivalences(target, true);
 						if (!namedEquivalences.isEmpty())
 							result.add(namedEquivalences);
 						else {
@@ -252,12 +252,12 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *  private method that search for the first named parents
 	 */
 	
-	private Set<EquivalenceClass<Description>> getNamedParents(Description desc) {
+	private Set<Equivalences<Description>> getNamedParents(Description desc) {
 
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 			// get equivalences of the current node
-		EquivalenceClass<Description> equivalenceSet = getEquivalences(desc, false);
+		Equivalences<Description> equivalenceSet = getEquivalences(desc, false);
 			// I want to consider also the parents of the equivalent nodes
 
 			Set<DefaultEdge> edges = graph.outgoingEdgesOf(desc);
@@ -269,9 +269,9 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				if (equivalenceSet.contains(target)) {
 					continue;
 				}
-				EquivalenceClass<Description> equivalences = getEquivalences(target);
+				Equivalences<Description> equivalences = getEquivalences(target);
 
-				EquivalenceClass<Description> namedEquivalences = getEquivalences(target, true);
+				Equivalences<Description> namedEquivalences = getEquivalences(target, true);
 
 				if (!namedEquivalences.isEmpty())
 					result.add(namedEquivalences);
@@ -301,12 +301,12 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
-	public Set<EquivalenceClass<Description>> getDescendants(Description desc) {
+	public Set<Equivalences<Description>> getDescendants(Description desc) {
 		return getDescendants(desc, false);
 	}
 	
-	public Set<EquivalenceClass<Description>> getDescendants(Description desc, boolean named) {
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+	public Set<Equivalences<Description>> getDescendants(Description desc, boolean named) {
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 		// reverse the graph
 			DirectedGraph<Description, DefaultEdge> reversed = new EdgeReversedGraph<Description, DefaultEdge>(
@@ -323,13 +323,13 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 						Set<Description> sources = new HashSet<Description>();
 						sources.add(node);
 
-						result.add(new EquivalenceClass<Description>(sources));
+						result.add(new Equivalences<Description>(sources));
 					}
 				} else {
 					Set<Description> sources = new HashSet<Description>();
 					sources.add(node);
 
-					result.add(new EquivalenceClass<Description>(sources));
+					result.add(new Equivalences<Description>(sources));
 				}
 
 			}
@@ -351,12 +351,12 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 */
 
 	@Override
-	public Set<EquivalenceClass<Description>> getAncestors(Description desc) {
+	public Set<Equivalences<Description>> getAncestors(Description desc) {
 		return getAncestors(desc, false);
 	}
 	
-	public Set<EquivalenceClass<Description>> getAncestors(Description desc, boolean named) {
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+	public Set<Equivalences<Description>> getAncestors(Description desc, boolean named) {
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 		
 			iterator = new BreadthFirstIterator<Description, DefaultEdge>(
@@ -370,13 +370,13 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 						Set<Description> sources = new HashSet<Description>();
 						sources.add(node);
 
-						result.add(new EquivalenceClass<Description>(sources));
+						result.add(new Equivalences<Description>(sources));
 					}
 				} else {
 					Set<Description> sources = new HashSet<Description>();
 					sources.add(node);
 
-					result.add(new EquivalenceClass<Description>(sources));
+					result.add(new Equivalences<Description>(sources));
 				}
 
 			}
@@ -398,11 +398,11 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalenceClass<Description> getEquivalences(Description desc) {
+	public Equivalences<Description> getEquivalences(Description desc) {
 		return getEquivalences(desc, false);
 	}
 	
-	public EquivalenceClass<Description> getEquivalences(Description desc, boolean named) {
+	public Equivalences<Description> getEquivalences(Description desc, boolean named) {
 
 			// search for cycles
 			StrongConnectivityInspector<Description, DefaultEdge> inspector = 
@@ -425,10 +425,10 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 									equivalences.add(vertex);
 								}
 							}
-							return new EquivalenceClass<Description>(equivalences);
+							return new Equivalences<Description>(equivalences);
 						}
 
-						return new EquivalenceClass<Description>(equivalenceSet);
+						return new Equivalences<Description>(equivalenceSet);
 					}
 
 				}
@@ -438,15 +438,15 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 			// if there are not equivalent node return the node or nothing
 			if (named) {
 				if (namedClasses.contains(desc) | property.contains(desc)) {
-					return new EquivalenceClass<Description>(Collections
+					return new Equivalences<Description>(Collections
 							.singleton(desc));
 				} else { // return empty set if the node we are considering
 							// (desc) is not a named class or propertu
 					equivalences = Collections.emptySet();
-					return new EquivalenceClass<Description>(equivalences);
+					return new Equivalences<Description>(equivalences);
 				}
 			}
-			return new EquivalenceClass<Description>(Collections.singleton(desc));
+			return new Equivalences<Description>(Collections.singleton(desc));
 	}
 	
 	/**
@@ -459,8 +459,8 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	public Set<EquivalenceClass<Description>> getNodes(boolean named) {
-		LinkedHashSet<EquivalenceClass<Description>> result = new LinkedHashSet<EquivalenceClass<Description>>();
+	public Set<Equivalences<Description>> getNodes(boolean named) {
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 		for (Description vertex : graph.vertexSet()) {
 				result.add(getEquivalences(vertex, named));
@@ -499,19 +499,19 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 								!existsR.isInverse());
 				Description existsNode = node;
 				Description existsInvNode = existsRin;
-				Set<EquivalenceClass<Description>> childrenExist = new HashSet<EquivalenceClass<Description>>(
+				Set<Equivalences<Description>> childrenExist = new HashSet<Equivalences<Description>>(
 						getDirectChildren(existsNode));
-				Set<EquivalenceClass<Description>> childrenExistInv = new HashSet<EquivalenceClass<Description>>(
+				Set<Equivalences<Description>> childrenExistInv = new HashSet<Equivalences<Description>>(
 						getDirectChildren(existsInvNode));
 
-				for (EquivalenceClass<Description> children : childrenExist) {
+				for (Equivalences<Description> children : childrenExist) {
 					for (Description child : children) {
 						// DAGOperations.addParentEdge(child, existsInvNode);
 						graph.addEdge(child, existsInvNode);
 
 					}
 				}
-				for (EquivalenceClass<Description> children : childrenExistInv) {
+				for (Equivalences<Description> children : childrenExistInv) {
 					for (Description child : children) {
 						// DAGOperations.addParentEdge(child, existsNode);
 						graph.addEdge(child, existsNode);
@@ -519,12 +519,12 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 					}
 				}
 
-				Set<EquivalenceClass<Description>> parentExist = new HashSet<EquivalenceClass<Description>>(
+				Set<Equivalences<Description>> parentExist = new HashSet<Equivalences<Description>>(
 						getDirectParents(existsNode));
-				Set<EquivalenceClass<Description>> parentsExistInv = new HashSet<EquivalenceClass<Description>>(
+				Set<Equivalences<Description>> parentsExistInv = new HashSet<Equivalences<Description>>(
 						getDirectParents(existsInvNode));
 
-				for (EquivalenceClass<Description> parents : parentExist) {
+				for (Equivalences<Description> parents : parentExist) {
 					for (Description parent : parents) {
 						// DAGOperations.addParentEdge(existsInvNode, parent);
 						graph.addEdge(existsInvNode, parent);
@@ -532,7 +532,7 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 					}
 				}
 
-				for (EquivalenceClass<Description> parents : parentsExistInv) {
+				for (Equivalences<Description> parents : parentsExistInv) {
 					for (Description parent : parents) {
 						// DAGOperations.addParentEdge(existsNode,parent);
 						graph.addEdge(existsNode, parent);
@@ -543,12 +543,12 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				processedNodes.add(existsInvNode);
 				processedNodes.add(existsNode);
 			}
-			Map<Description, EquivalenceClass<Description>> equivalencesClasses = new HashMap<Description, EquivalenceClass<Description>>();
+			Map<Description, Equivalences<Description>> equivalencesClasses = new HashMap<Description, Equivalences<Description>>();
 			DAGBuilder.getDAG(graph, equivalencesClasses);
 	}
 	
 	@Override
-	public Set<EquivalenceClass<Description>> getNodes() {
+	public Set<Equivalences<Description>> getNodes() {
 		// TODO Auto-generated method stub
 		return null;
 	}

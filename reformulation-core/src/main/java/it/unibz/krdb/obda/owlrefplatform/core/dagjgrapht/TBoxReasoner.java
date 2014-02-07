@@ -21,27 +21,27 @@ import java.util.Set;
  */
 public interface TBoxReasoner {
 
-	public Set<EquivalenceClass<Description>> getDirectChildren(Description desc);
+	public Set<Equivalences<Description>> getDirectChildren(Description desc);
 
-	public Set<EquivalenceClass<Description>> getDirectParents(Description desc);
+	public Set<Equivalences<Description>> getDirectParents(Description desc);
 
 	/**
 	 * Reflexive and transitive closure of the sub-description relation
 	 * @param desc: a class or a property
 	 * @return equivalence classes for all sub-descriptions (including desc)
 	 */
-	public Set<EquivalenceClass<Description>> getDescendants(Description desc);
+	public Set<Equivalences<Description>> getDescendants(Description desc);
 
 	/**
 	 * Reflexive and transitive closure of the super-description relation
 	 * @param desc: a class or a property
 	 * @return equivalence classes for all super-descriptions (including desc)
 	 */
-	public Set<EquivalenceClass<Description>> getAncestors(Description desc);
+	public Set<Equivalences<Description>> getAncestors(Description desc);
 
-	public EquivalenceClass<Description> getEquivalences(Description desc);
+	public Equivalences<Description> getEquivalences(Description desc);
 	
-	public Set<EquivalenceClass<Description>> getNodes();
+	public Set<Equivalences<Description>> getNodes();
 	
 
 }

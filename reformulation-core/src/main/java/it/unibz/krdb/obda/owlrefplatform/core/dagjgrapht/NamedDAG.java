@@ -73,16 +73,16 @@ public class NamedDAG  {
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag 
 					= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
 
-		for (EquivalenceClass<Description> v : reasoner.getNodes()) 
+		for (Equivalences<Description> v : reasoner.getNodes()) 
 			namedDag.addVertex(v.getRepresentative());
 		
-		for (EquivalenceClass<Description> s : reasoner.getNodes()) 
-			for (EquivalenceClass<Description> t : reasoner.getDirectParents(s.getRepresentative())) 
+		for (Equivalences<Description> s : reasoner.getNodes()) 
+			for (Equivalences<Description> t : reasoner.getDirectParents(s.getRepresentative())) 
 				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
 		
 
-		for (EquivalenceClass<Description> v : reasoner.getNodes()) 
-			if (!reasoner.isNamed(v.getRepresentative())) {
+		for (Equivalences<Description> v : reasoner.getNodes()) 
+			if (!v.isIndexed()) {
 				// eliminate node
 				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(v.getRepresentative())) { 
 					Description source = namedDag.getEdgeSource(incEdge);
@@ -95,7 +95,7 @@ public class NamedDAG  {
 				}
 				namedDag.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
 			}
-		
+				
 		NamedDAG dagImpl = new NamedDAG(namedDag);
 		return dagImpl;
 	}

@@ -19,7 +19,7 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
 
@@ -62,19 +62,19 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
 		int numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 3); // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(bc).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(bc)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(bc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 2);  // getDescendants is reflexive
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);  // getDescendants is reflexive
@@ -124,26 +124,26 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(ier)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
 		int numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 4);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(er)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(er)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 2);  // getDescendants is reflexive
 
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ier)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(ier)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 2);  // getDescendants is reflexive
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);  // getDescendants is reflexive
@@ -190,7 +190,7 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(cc)));
 		assertTrue(reasoner.getDescendants(ac).contains(reasoner.getEquivalences(bc)));
 		int numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ac)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(ac)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 5);  // getDescendants is reflexive
@@ -200,7 +200,7 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(dc).contains(reasoner.getEquivalences(cc)));
 		assertTrue(reasoner.getDescendants(dc).contains(reasoner.getEquivalences(bc)));
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(dc)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(dc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 5);  // getDescendants is reflexive
@@ -208,7 +208,7 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(er).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(er)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(er)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 3);  // getDescendants is reflexive
@@ -216,18 +216,18 @@ public class DAGChainTest extends TestCase {
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(bc)));
 		assertTrue(reasoner.getDescendants(ier).contains(reasoner.getEquivalences(cc)));
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(ier)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(ier)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 3);  // getDescendants is reflexive
 
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(bc)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(bc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);  // getDescendants is reflexive
 		numDescendants=0;
-		for(EquivalenceClass<Description> equiDescendants: reasoner.getDescendants(cc)){
+		for(Equivalences<Description> equiDescendants: reasoner.getDescendants(cc)){
 			numDescendants+=equiDescendants.size();
 		}
 		assertEquals(numDescendants, 1);  // getDescendants is reflexive

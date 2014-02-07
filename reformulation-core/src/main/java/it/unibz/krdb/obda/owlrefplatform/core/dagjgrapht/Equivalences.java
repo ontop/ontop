@@ -3,19 +3,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import java.util.Iterator;
 import java.util.Set;
 
-public class EquivalenceClass<T> implements Iterable<T> {
+public class Equivalences<T> implements Iterable<T> {
 	
 	final private Set<T> members;
 	private T representative;
+	private boolean isIndexed;
 
-	public EquivalenceClass(Set<T> members) {
-		this.members = members;
-		this.representative = null;
+	public Equivalences(Set<T> members) {
+		this(members, null);
 	}
 	
-	public EquivalenceClass(Set<T> members, T representative) {
+	public Equivalences(Set<T> members, T representative) {
 		this.members = members;
 		this.representative = representative;
+		this.isIndexed = false;
 	}
 	
 	public void setRepresentative(T representative) {
@@ -24,6 +25,14 @@ public class EquivalenceClass<T> implements Iterable<T> {
 	
 	public T getRepresentative() {
 		return representative;
+	}
+	
+	public boolean isIndexed() {
+		return isIndexed;
+	}
+	
+	public void setIndexed() {
+		isIndexed = true;
 	}
 	
 	public Set<T> getMembers() {
@@ -49,9 +58,9 @@ public class EquivalenceClass<T> implements Iterable<T> {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof EquivalenceClass<?>) {
+		if (o instanceof Equivalences<?>) {
 			@SuppressWarnings("unchecked")
-			EquivalenceClass<T> other = (EquivalenceClass<T>)o;
+			Equivalences<T> other = (Equivalences<T>)o;
 			return this.members.equals(other.members);
 		}
 		return false;
@@ -64,6 +73,6 @@ public class EquivalenceClass<T> implements Iterable<T> {
 	
 	@Override
 	public String toString() {
-		return "C[" + representative + ": " + members + "]";
+		return "C[" + (isIndexed ? "SI, " : "") + representative + ": " + members + "]";
 	}
 }

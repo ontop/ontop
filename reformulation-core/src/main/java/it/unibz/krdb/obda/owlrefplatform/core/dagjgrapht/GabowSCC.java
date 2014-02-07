@@ -27,7 +27,7 @@ public class GabowSCC<V, E>
     private Deque<VertexNumber<V>> stack = new ArrayDeque<VertexNumber<V>>();
     
     // the result of the computation, cached for future calls
-    private List<EquivalenceClass<V>> stronglyConnectedSets;
+    private List<Equivalences<V>> stronglyConnectedSets;
 
     // maps vertices to their VertexNumber object
     private Map<V, VertexNumber<V>> vertexToVertexNumber;
@@ -85,11 +85,11 @@ public class GabowSCC<V, E>
      * @return <code>List</code> of <code>EquivalanceClass</code>es containing the strongly
      * connected components
      */
-    public List<EquivalenceClass<V>> stronglyConnectedSets()
+    public List<Equivalences<V>> stronglyConnectedSets()
     {
         if (stronglyConnectedSets == null) {
             
-            stronglyConnectedSets = new Vector<EquivalenceClass<V>>();
+            stronglyConnectedSets = new Vector<Equivalences<V>>();
 
             // create VertexData objects for all vertices, store them
             createVertexNumber();
@@ -162,7 +162,7 @@ public class GabowSCC<V, E>
                  L.add(r.getVertex()); 
                  r.setNumber(c);
              } 
-             stronglyConnectedSets.add(new EquivalenceClass<V>(L)); 
+             stronglyConnectedSets.add(new Equivalences<V>(L)); 
          } 
     }
 

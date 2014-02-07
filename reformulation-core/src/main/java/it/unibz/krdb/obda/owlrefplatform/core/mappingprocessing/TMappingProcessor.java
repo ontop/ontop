@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalenceClass;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
@@ -384,7 +384,7 @@ public class TMappingProcessor implements Serializable {
 			}
 
 
-			for (EquivalenceClass<Description> descendants : reasoner.getDescendants(currentProperty)) {
+			for (Equivalences<Description> descendants : reasoner.getDescendants(currentProperty)) {
 				for(Description descendant: descendants){
 
 				/*
@@ -483,7 +483,7 @@ public class TMappingProcessor implements Serializable {
 				mappingIndex.put(currentPredicate, currentNodeMappings);
 			}
 
-			for (EquivalenceClass<Description> descendants : reasoner.getDescendants(currentProperty)) {
+			for (Equivalences<Description> descendants : reasoner.getDescendants(currentProperty)) {
 				for(Description descendant: descendants){
 				
 					
