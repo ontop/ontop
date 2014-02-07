@@ -209,7 +209,7 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getEnd());
 
 		d = dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "C2"));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "C1",true)));
+		assertTrue(d.equals(dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "C1",true))));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "C3"));
@@ -227,7 +227,7 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getEnd());
 
 		d = dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "B2"));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "B3",true)));
+		assertTrue(d.equals(dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "B3",true))));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "B3"));

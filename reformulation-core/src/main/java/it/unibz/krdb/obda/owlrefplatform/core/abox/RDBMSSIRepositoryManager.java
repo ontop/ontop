@@ -844,6 +844,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				equivalent = (Property)reasonerDag.getRepresentativeFor(c);
 				
 				index1 = roleIndexes.get(equivalent.getPredicate().getName());
+				if (index1 == null) {
+					System.out.println(name + " IN " + roleIndexes);
+				}
 				return index1;
 			}
 			
