@@ -78,11 +78,19 @@ public class DAGBuilder {
 			copy.addEdge(s, t, e);
 		}
 	
-		eliminateCycles(copy, equivalencesMap);
+		DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge> dag0 = eliminateCycles(copy, equivalencesMap);
 
-		SimpleDirectedGraph <Description,DefaultEdge> dag = getWithoutRedundantEdges(copy);
+		SimpleDirectedGraph <EquivalenceClass<Description>,DefaultEdge> dag1 = getWithoutRedundantEdges(dag0);
 		
-		return dag;
+		SimpleDirectedGraph <Description,DefaultEdge> dag2 = new SimpleDirectedGraph <Description,DefaultEdge>(DefaultEdge.class);
+		
+		for (EquivalenceClass<Description> c : dag1.vertexSet())
+			dag2.addVertex(c.getRepresentative());
+		
+		for (DefaultEdge e : dag1.edgeSet())
+			dag2.addEdge(dag1.getEdgeSource(e).getRepresentative(), dag1.getEdgeTarget(e).getRepresentative());
+				
+		return dag2;
 	}
 
 	/**
@@ -134,32 +142,51 @@ public class DAGBuilder {
 	 * 
 	 */
 
-	private static void eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+	private static DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge> eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
 			Map<Description, EquivalenceClass<Description>> equivalencesMap) {
+
+		DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge> dag = 
+				new DefaultDirectedGraph<EquivalenceClass<Description>,DefaultEdge>(DefaultEdge.class);
 
 		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(graph);
 
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
 		List<EquivalenceClass<Description>> equivalenceSets = inspector.stronglyConnectedSets();
-		List<EquivalenceClass<Description>> propertyEquivalenceClasses = 
-				new LinkedList<EquivalenceClass<Description>>();
-		List<EquivalenceClass<Description>> classEquivalenceClasses = 
-				new LinkedList<EquivalenceClass<Description>>();
-		
+
 		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  {
 			for (Description node : equivalenceSet) 
 				equivalencesMap.put(node, equivalenceSet);
 			
-			if (equivalenceSet.size() > 1) {
-				if (equivalenceSet.iterator().next() instanceof Property)
+			dag.addVertex(equivalenceSet);
+		}
+
+		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  {
+			for (Description e : equivalenceSet) {			
+				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
+					Description t = graph.getEdgeTarget(edge);
+					if (!equivalenceSet.contains(t))
+						dag.addEdge(equivalenceSet, equivalencesMap.get(t));
+				}
+				for (DefaultEdge edge : graph.incomingEdgesOf(e)) {
+					Description s = graph.getEdgeSource(edge);
+					if (!equivalenceSet.contains(s))
+						dag.addEdge(equivalencesMap.get(s), equivalenceSet);
+				}
+			}
+		}
+
+		// each set contains vertices which together form a strongly connected
+		// component within the given graph
+		List<EquivalenceClass<Description>> propertyEquivalenceClasses = new LinkedList<EquivalenceClass<Description>>();
+		
+		for (EquivalenceClass<Description> equivalenceSet : equivalenceSets)  			
+			if (equivalenceSet.iterator().next() instanceof Property) {
+				if (equivalenceSet.size() > 1) 
 					propertyEquivalenceClasses.add(equivalenceSet);
 				else
-					classEquivalenceClasses.add(equivalenceSet);					
+					equivalenceSet.setRepresentative(equivalenceSet.iterator().next());
 			}
-			else
-				equivalenceSet.setRepresentative(equivalenceSet.iterator().next());
-		}
 		
 		
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
@@ -219,13 +246,7 @@ public class DAGBuilder {
 			 */
 			
 			// find a representative 
-			Property prop = null;
-			for (Description representative : equivalenceSet) 
-				if (!((Property) representative).isInverse()) {
-					prop = (Property)representative;
-					break;
-				}
-			
+			Property prop = getNamedRepresentative(equivalenceSet);
 			if (prop == null) 	// equivalence class contains inverses only 
 				continue;		// they are processed when we consider their properties
 
@@ -262,8 +283,16 @@ public class DAGBuilder {
 		 * PROCESS CLASSES ONLY
 		 */
 
-		for (EquivalenceClass<Description> equivalenceClassSet : classEquivalenceClasses) {
+		for (EquivalenceClass<Description> equivalenceClassSet : dag.vertexSet()) {
+
+			if (!(equivalenceClassSet.iterator().next() instanceof BasicClassDescription))
+				continue;
 			
+			if (equivalenceClassSet.size() <= 1) {
+				equivalenceClassSet.setRepresentative(equivalenceClassSet.iterator().next());
+				continue;
+			}
+	
 			BasicClassDescription representative = null;
 			
 			// find a named class as a representative 
@@ -280,13 +309,9 @@ public class DAGBuilder {
 				representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
 			}
 
-			for (Description e : equivalenceClassSet) {
-				// careful -- proper equality check is required because the replacement is "generated"
-				if (!e.equals(representative))  
-					removeNodeAndRedirectEdges(graph, e, representative);
-			}
 			equivalenceClassSet.setRepresentative(representative);
 		}
+		return dag;
 	}
 	
 	private static void removeNodeAndRedirectEdges(DefaultDirectedGraph<Description,DefaultEdge> graph, 
@@ -314,6 +339,16 @@ public class DAGBuilder {
 	}
 	
 
+	private static Property getNamedRepresentative(EquivalenceClass<Description> properties) {
+		Property representative = null;
+		// find representative
+		for (Description rep : properties) 
+			if (!((Property) rep).isInverse()) {
+				representative = (Property)rep;
+				break;
+			}
+		return representative;
+	}
 
 	
 	
