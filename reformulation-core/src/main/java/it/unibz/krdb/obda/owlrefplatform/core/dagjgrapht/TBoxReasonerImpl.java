@@ -28,6 +28,7 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -40,8 +41,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
-	private final DirectedGraph <Description,DefaultEdge> dag;
-	private final DirectedGraph<Description, DefaultEdge> reversedDag;
+	private final SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> dag;
+	private final DirectedGraph <Equivalences<Description>,DefaultEdge> reversedDag;
 	
 	// maps descriptions to their equivalence classes (and their representatives)
 	private final Map<Description, Equivalences<Description>> equivalencesClasses; 
@@ -59,7 +60,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		equivalencesClasses = new HashMap<Description, Equivalences<Description>>();
 		this.dag = DAGBuilder.getDAG(graph, equivalencesClasses);
-		this.reversedDag = new EdgeReversedGraph<Description, DefaultEdge>(dag);
+		this.reversedDag = new EdgeReversedGraph<Equivalences<Description>, DefaultEdge>(dag);
 	}
 
 
@@ -99,9 +100,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<Property> getPropertyNames() {
 		if (propertyNames == null) {
 			propertyNames = new LinkedHashSet<Property> ();
-			for (Description v: dag.vertexSet()) 
-				if (v instanceof Property)
-					for (Description r : getEquivalences(v)) {
+			for (Equivalences<Description> v: dag.vertexSet()) 
+				for (Description r : v) 
+					if (r instanceof Property) {
 						Property p = (Property) r;
 						if (!p.isInverse())
 							propertyNames.add(p);
@@ -118,11 +119,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<OClass> getClassNames() {
 		if (classNames == null) {
 			 classNames = new LinkedHashSet<OClass> ();
-			 for (Description v: dag.vertexSet())
-				if (v instanceof OClass) 
-					for (Description e : getEquivalences(v))
-						if (e instanceof OClass)
-							classNames.add((OClass)e);
+			 for (Equivalences<Description> v: dag.vertexSet())
+				for (Description e : v)
+					if (e instanceof OClass)
+						classNames.add((OClass)e);
 		}
 		return classNames;
 	}
@@ -149,15 +149,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
-		// take the representative node
-		Description node = getRepresentativeFor(desc);
+		Equivalences<Description> node = getEquivalences(desc);
 
 		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {	
-			Description source = dag.getEdgeSource(edge);
-
-			// get the child node and its equivalent nodes
-			Equivalences<Description> equivalences = getEquivalences(source);
-			result.add(equivalences);
+			Equivalences<Description> source = dag.getEdgeSource(edge);
+			result.add(source);
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -179,14 +175,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 		
 		// take the representative node
-		Description node = getRepresentativeFor(desc);
+		Equivalences<Description> node = getEquivalences(desc);
 
 		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
-			Description target = dag.getEdgeTarget(edge);
-
-			// get the child node and its equivalent nodes
-			Equivalences<Description> equivalences = getEquivalences(target);
-			result.add(equivalences);
+			Equivalences<Description> target = dag.getEdgeTarget(edge);
+			result.add(target);
 		}
 
 		return Collections.unmodifiableSet(result);
@@ -208,17 +201,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
-		Description node = getRepresentativeFor(desc);
+		Equivalences<Description> node = getEquivalences(desc);
 		
-		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Description, DefaultEdge>(reversedDag, node);
+		AbstractGraphIterator<Equivalences<Description>, DefaultEdge>  iterator = 
+					new BreadthFirstIterator<Equivalences<Description>, DefaultEdge>(reversedDag, node);
 
 		while (iterator.hasNext()) {
-			Description child = iterator.next();
-
-			// add the node and its equivalent nodes
-			Equivalences<Description> sources = getEquivalences(child);
-			result.add(sources);
+			Equivalences<Description> child = iterator.next();
+			result.add(child);
 		}
 
 		// add each of them to the result
@@ -241,17 +231,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
-		Description node = getRepresentativeFor(desc);
+		Equivalences<Description> node = getEquivalences(desc);
 
-		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
-				new BreadthFirstIterator<Description, DefaultEdge>(dag, node);
+		AbstractGraphIterator<Equivalences<Description>, DefaultEdge>  iterator = 
+				new BreadthFirstIterator<Equivalences<Description>, DefaultEdge>(dag, node);
 
 		while (iterator.hasNext()) {
-			Description parent = iterator.next();
-
-			// add the node and its equivalent nodes
-			Equivalences<Description> sources = getEquivalences(parent);
-			result.add(sources);
+			Equivalences<Description> parent = iterator.next();
+			result.add(parent);
 		}
 
 		// add each of them to the result
@@ -283,13 +270,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public Set<Equivalences<Description>> getNodes() {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		for (Description vertex : dag.vertexSet()) 
-			result.add(getEquivalences(vertex));
-
-		return result;
+		return dag.vertexSet();
 	}
 
 	// INTERNAL DETAILS
@@ -334,21 +315,23 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
-		for (Description v : tbox.dag.vertexSet()) {
-			modifiedGraph.addVertex(v);
+		for (Equivalences<Description> v : tbox.dag.vertexSet()) {
+			modifiedGraph.addVertex(v.getRepresentative());
 
 		}
 		for (DefaultEdge e : tbox.dag.edgeSet()) {
-			Description s = tbox.dag.getEdgeSource(e);
-			Description t = tbox.dag.getEdgeTarget(e);
-			modifiedGraph.addEdge(s, t, e);
+			Equivalences<Description> s = tbox.dag.getEdgeSource(e);
+			Equivalences<Description> t = tbox.dag.getEdgeTarget(e);
+			modifiedGraph.addEdge(s.getRepresentative(), t.getRepresentative());
 		}
 
-		Collection<Description> nodes = new HashSet<Description>(tbox.dag.vertexSet());
+		Collection<Equivalences<Description>> nodes = new HashSet<Equivalences<Description>>(tbox.dag.vertexSet());
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<Description> processedNodes = new HashSet<Description>();
 		
-		for (Description node : nodes) {
+		for (Equivalences<Description> n : nodes) {
+			Description node = n.getRepresentative();
+			
 			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
 				continue;
 

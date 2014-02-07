@@ -62,7 +62,7 @@ public class DAGBuilder {
 	 * @param equivalents a map between the node and its equivalent nodes
 	 * @param representatives a map between the node and its representative node
 	 */
-	public static SimpleDirectedGraph <Description,DefaultEdge> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph, 
+	public static SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph, 
 			Map<Description, Equivalences<Description>> equivalencesMap) {
 
 		DefaultDirectedGraph<Description,DefaultEdge> copy = 
@@ -81,16 +81,8 @@ public class DAGBuilder {
 		DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> dag0 = eliminateCycles(copy, equivalencesMap);
 
 		SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> dag1 = getWithoutRedundantEdges(dag0);
-		
-		SimpleDirectedGraph <Description,DefaultEdge> dag2 = new SimpleDirectedGraph <Description,DefaultEdge>(DefaultEdge.class);
-		
-		for (Equivalences<Description> c : dag1.vertexSet())
-			dag2.addVertex(c.getRepresentative());
-		
-		for (DefaultEdge e : dag1.edgeSet())
-			dag2.addEdge(dag1.getEdgeSource(e).getRepresentative(), dag1.getEdgeTarget(e).getRepresentative());
-				
-		return dag2;
+						
+		return dag1;
 	}
 
 	/**
@@ -298,32 +290,31 @@ public class DAGBuilder {
 
 			if (!(equivalenceClassSet.iterator().next() instanceof BasicClassDescription))
 				continue;
-			
-			if (equivalenceClassSet.size() <= 1) {
-				equivalenceClassSet.setRepresentative(equivalenceClassSet.iterator().next());
-				equivalenceClassSet.setIndexed();
-				continue;
-			}
-	
+
 			BasicClassDescription representative = null;
 			
-			// find a named class as a representative 
-			for (Description e : equivalenceClassSet) 
-				if (e instanceof OClass) {
-					representative = (BasicClassDescription)e;
-					break;
-				}
-			
-			if (representative == null) {
-				PropertySomeRestriction first = (PropertySomeRestriction)equivalenceClassSet.iterator().next();
-				Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
-				Property propRep = (Property) equivalencesMap.get(prop).getRepresentative();
-				representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
+			if (equivalenceClassSet.size() <= 1) {
+				representative = (BasicClassDescription)equivalenceClassSet.iterator().next();
 			}
-			else
-				equivalenceClassSet.setIndexed();
+			else {
+				// find a named class as a representative 
+				for (Description e : equivalenceClassSet) 
+					if (e instanceof OClass) {
+						representative = (BasicClassDescription)e;
+						break;
+					}
+				
+				if (representative == null) {
+					PropertySomeRestriction first = (PropertySomeRestriction)equivalenceClassSet.iterator().next();
+					Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
+					Property propRep = (Property) equivalencesMap.get(prop).getRepresentative();
+					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
+				}
+			}
 
 			equivalenceClassSet.setRepresentative(representative);
+			if (representative instanceof OClass)
+				equivalenceClassSet.setIndexed();
 		}
 		return dag;
 	}
