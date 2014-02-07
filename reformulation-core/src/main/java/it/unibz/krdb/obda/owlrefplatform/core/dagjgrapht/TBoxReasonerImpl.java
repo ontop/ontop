@@ -52,7 +52,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	
 	public TBoxReasonerImpl(Ontology onto) {
-		this(DAGBuilder.getGraph(onto, false));
+		this(OntologyGraph.getGraph(onto, false));
 	}
 
 	private TBoxReasonerImpl(DefaultDirectedGraph<Description,DefaultEdge> graph) {
@@ -295,7 +295,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
 		
-		return new TBoxReasonerImpl((DAGBuilder.getGraph(onto, true)));		
+		return new TBoxReasonerImpl((OntologyGraph.getGraph(onto, true)));		
 	}
 	
 	/***

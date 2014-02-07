@@ -9,37 +9,24 @@
 
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
-import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
-import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
  * Starting from a graph build a DAG. 
@@ -56,6 +43,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class DAGBuilder {
 
+	private static OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 	/**
 	 * *Construct a DAG starting from a given graph with already known
@@ -68,17 +56,54 @@ public class DAGBuilder {
 	public static SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph, 
 			Map<Description, Equivalences<Description>> equivalencesMap) {
 
-		DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> dag0 = eliminateCycles(graph, equivalencesMap);
+		SimpleDirectedGraph<Equivalences<Description>,DefaultEdge> dag0 = factorize(graph, equivalencesMap);
 
-		SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> dag1 = getWithoutRedundantEdges(dag0);
-						
-		return dag1;
+		choosePropertyRepresentatives(dag0, equivalencesMap);
+		
+		chooseClassRepresentatives(dag0, equivalencesMap);
+		
+		return dag0;
 	}
 
 	/**
 	 */
-	private static <T> SimpleDirectedGraph <T,DefaultEdge> getWithoutRedundantEdges(DefaultDirectedGraph<T,DefaultEdge> graph) {
+	private static <T> SimpleDirectedGraph<Equivalences<T>,DefaultEdge> factorize(DefaultDirectedGraph<T,DefaultEdge> graph, 
+																			Map<T, Equivalences<T>> equivalencesMap) {
 
+		// each set contains vertices which together form a strongly connected
+		// component within the given graph
+		GabowSCC<T, DefaultEdge> inspector = new GabowSCC<T, DefaultEdge>(graph);
+		List<Equivalences<T>> equivalenceSets = inspector.stronglyConnectedSets();
+
+		SimpleDirectedGraph<Equivalences<T>,DefaultEdge> dag = 
+				new SimpleDirectedGraph<Equivalences<T>,DefaultEdge>(DefaultEdge.class);
+		
+		for (Equivalences<T> equivalenceSet : equivalenceSets)  {
+			for (T node : equivalenceSet) 
+				equivalencesMap.put(node, equivalenceSet);
+			
+			dag.addVertex(equivalenceSet);
+		}
+
+		for (Equivalences<T> equivalenceSet : equivalenceSets)  {
+			for (T e : equivalenceSet) {			
+				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
+					T t = graph.getEdgeTarget(edge);
+					if (!equivalenceSet.contains(t))
+						dag.addEdge(equivalenceSet, equivalencesMap.get(t));
+				}
+				for (DefaultEdge edge : graph.incomingEdgesOf(e)) {
+					T s = graph.getEdgeSource(edge);
+					if (!equivalenceSet.contains(s))
+						dag.addEdge(equivalencesMap.get(s), equivalenceSet);
+				}
+			}
+		}
+		return removeRedundantEdges(dag);
+	}
+
+	private static <T> SimpleDirectedGraph<T,DefaultEdge> removeRedundantEdges(SimpleDirectedGraph<T,DefaultEdge> graph) {
+	
 		SimpleDirectedGraph <T,DefaultEdge> dag = new SimpleDirectedGraph <T,DefaultEdge> (DefaultEdge.class);
 
 		for (T v : graph.vertexSet())
@@ -124,87 +149,44 @@ public class DAGBuilder {
 	 * 
 	 */
 
-	private static DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> eliminateCycles(DefaultDirectedGraph<Description,DefaultEdge> graph, 
-			Map<Description, Equivalences<Description>> equivalencesMap) {
-
-		DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> dag = 
-				new DefaultDirectedGraph<Equivalences<Description>,DefaultEdge>(DefaultEdge.class);
-
-		GabowSCC<Description, DefaultEdge> inspector = new GabowSCC<Description, DefaultEdge>(graph);
-
-		// each set contains vertices which together form a strongly connected
-		// component within the given graph
-		List<Equivalences<Description>> equivalenceSets = inspector.stronglyConnectedSets();
-
-		for (Equivalences<Description> equivalenceSet : equivalenceSets)  {
-			for (Description node : equivalenceSet) 
-				equivalencesMap.put(node, equivalenceSet);
-			
-			dag.addVertex(equivalenceSet);
-		}
-
-		for (Equivalences<Description> equivalenceSet : equivalenceSets)  {
-			for (Description e : equivalenceSet) {			
-				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
-					Description t = graph.getEdgeTarget(edge);
-					if (!equivalenceSet.contains(t))
-						dag.addEdge(equivalenceSet, equivalencesMap.get(t));
-				}
-				for (DefaultEdge edge : graph.incomingEdgesOf(e)) {
-					Description s = graph.getEdgeSource(edge);
-					if (!equivalenceSet.contains(s))
-						dag.addEdge(equivalencesMap.get(s), equivalenceSet);
-				}
-			}
-		}
-
-		// each set contains vertices which together form a strongly connected
-		// component within the given graph
-		List<Equivalences<Description>> propertyEquivalenceClasses = new LinkedList<Equivalences<Description>>();
+	private static void choosePropertyRepresentatives(SimpleDirectedGraph<Equivalences<Description>,DefaultEdge> dag, 
+															Map<Description, Equivalences<Description>> equivalencesMap) {
 		
-		for (Equivalences<Description> equivalenceSet : equivalenceSets)  			
-			if (equivalenceSet.iterator().next() instanceof Property) {
-				if (equivalenceSet.size() > 1) 
-					propertyEquivalenceClasses.add(equivalenceSet);
-				else {
-					Property p = (Property)equivalenceSet.iterator().next();
-					equivalenceSet.setRepresentative(p);
-					if (!p.isInverse())
-						equivalenceSet.setIndexed();
-				}
-			}
-		
-		
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-
 		Deque<Equivalences<Description>> asymmetric1 = new LinkedList<Equivalences<Description>>();
 		Deque<Equivalences<Description>> asymmetric2 = new LinkedList<Equivalences<Description>>();
 		Set<Equivalences<Description>> symmetric = new HashSet<Equivalences<Description>>();
 		
-		for (Equivalences<Description> equivalenceClass : dag.vertexSet()) {
-			if (!(equivalenceClass.iterator().next() instanceof Property))
+		for (Equivalences<Description> equivalenceSet : dag.vertexSet()) {
+			if (!(equivalenceSet.iterator().next() instanceof Property))
 				continue;
 			
-			if (equivalenceClass.getRepresentative() != null)
+			if (equivalenceSet.size() == 1) {
+				Property p = (Property)equivalenceSet.iterator().next();
+				equivalenceSet.setRepresentative(p);
+				if (!p.isInverse())
+					equivalenceSet.setIndexed();
+			}
+
+			if (equivalenceSet.getRepresentative() != null)
 				continue;
 			
-			Property representative = getNamedRepresentative(equivalenceClass);
+			Property representative = getNamedRepresentative(equivalenceSet);
 			if (representative == null)
-				representative = (Property)equivalenceClass.iterator().next();
+				representative = (Property)equivalenceSet.iterator().next();
 			
-			equivalenceClass.setRepresentative(representative);
+			equivalenceSet.setRepresentative(representative);
 			
 			Property inverse = fac.createProperty(representative.getPredicate(), !representative.isInverse());
 			Equivalences<Description> inverseEquivalenceSet = equivalencesMap.get(inverse);
 			if (!inverseEquivalenceSet.contains(representative)) {
 				inverseEquivalenceSet.setRepresentative(inverse);
-				assert (equivalenceClass != inverseEquivalenceSet);
-				asymmetric1.add(equivalenceClass);
+				assert (equivalenceSet != inverseEquivalenceSet);
+				asymmetric1.add(equivalenceSet);
 				asymmetric2.add(inverseEquivalenceSet);
 			}
 			else {
-				assert (equivalenceClass == inverseEquivalenceSet);
-				symmetric.add(equivalenceClass);				
+				assert (equivalenceSet == inverseEquivalenceSet);
+				symmetric.add(equivalenceSet);				
 			}			
 		}
 
@@ -264,45 +246,45 @@ public class DAGBuilder {
 		*/
 		//System.out.println("RESULT: " + dag);
 		//System.out.println("MAP: " + equivalencesMap);
-		
-		/*
-		 * PROCESS CLASSES ONLY
-		 */
 
-		for (Equivalences<Description> equivalenceClassSet : dag.vertexSet()) {
+	}	
+	
+	private static void chooseClassRepresentatives(SimpleDirectedGraph<Equivalences<Description>,DefaultEdge> dag, 
+				Map<Description, Equivalences<Description>> equivalencesMap) {
 
-			if (!(equivalenceClassSet.iterator().next() instanceof BasicClassDescription))
+		for (Equivalences<Description> equivalenceSet : dag.vertexSet()) {
+
+			if (!(equivalenceSet.iterator().next() instanceof BasicClassDescription))
 				continue;
 
 			BasicClassDescription representative = null;
 			
-			if (equivalenceClassSet.size() <= 1) {
-				representative = (BasicClassDescription)equivalenceClassSet.iterator().next();
+			if (equivalenceSet.size() <= 1) {
+				representative = (BasicClassDescription)equivalenceSet.iterator().next();
 			}
 			else {
 				// find a named class as a representative 
-				for (Description e : equivalenceClassSet) 
+				for (Description e : equivalenceSet) 
 					if (e instanceof OClass) {
 						representative = (BasicClassDescription)e;
 						break;
 					}
 				
 				if (representative == null) {
-					PropertySomeRestriction first = (PropertySomeRestriction)equivalenceClassSet.iterator().next();
+					PropertySomeRestriction first = (PropertySomeRestriction)equivalenceSet.iterator().next();
 					Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
 					Property propRep = (Property) equivalencesMap.get(prop).getRepresentative();
 					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
 				}
 			}
 
-			equivalenceClassSet.setRepresentative(representative);
+			equivalenceSet.setRepresentative(representative);
 			if (representative instanceof OClass)
-				equivalenceClassSet.setIndexed();
+				equivalenceSet.setIndexed();
 		}
-		return dag;
 	}
 	
-	private static Set<Equivalences<Description>> getRoleComponent(DefaultDirectedGraph<Equivalences<Description>,DefaultEdge> dag, 
+	private static Set<Equivalences<Description>> getRoleComponent(SimpleDirectedGraph<Equivalences<Description>,DefaultEdge> dag, 
 																		Equivalences<Description> node, Set<Equivalences<Description>> symmetric)		{
 		
 		Set<Equivalences<Description>> set = new HashSet<Equivalences<Description>>();
@@ -345,87 +327,6 @@ public class DAGBuilder {
 	}
 
 	
-	
-	/**
-	 * Build the graph from the TBox axioms of the ontology
-	 * 
-	 * @param ontology TBox containing the axioms
-	 * @param chain 
-	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
-	 * relation of the original DAG gets extended to the reachability relation
-	 * of T and Sigma chains.
-	 */
-	public static DefaultDirectedGraph<Description,DefaultEdge> getGraph (Ontology ontology, boolean chain) {
-		
-		DefaultDirectedGraph<Description,DefaultEdge> graph = new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
-		OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
-		
-		
-		for (Predicate conceptp : ontology.getConcepts()) {
-			ClassDescription concept = descFactory.createClass(conceptp);
-			graph.addVertex(concept);
-		}
 
-		/*
-		 * For each role we add nodes for its inverse, its domain and its range
-		 */
-		for (Predicate rolep : ontology.getRoles()) {
-			Property role = descFactory.createProperty(rolep);
-			Property roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
-			PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
-			PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
-			graph.addVertex(role);
-			graph.addVertex(roleInv);
-			graph.addVertex(existsRole);
-			graph.addVertex(existsRoleInv);
-			if (chain) {
-				graph.addEdge(existsRoleInv, existsRole);				
-				graph.addEdge(existsRole, existsRoleInv);				
-			}
-		}
-
-		for (Axiom assertion : ontology.getAssertions()) {
-
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
-				ClassDescription parent = clsIncl.getSuper();
-				ClassDescription child = clsIncl.getSub();
-				graph.addVertex(child);
-				graph.addVertex(parent);
-				graph.addEdge(child, parent);
-			} 
-			else if (assertion instanceof SubPropertyAxiomImpl) {
-				SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
-				Property parent = roleIncl.getSuper();
-				Property child = roleIncl.getSub();
-				Property parentInv = descFactory.createProperty(parent.getPredicate(), !parent.isInverse());
-				Property childInv = descFactory.createProperty(child.getPredicate(), !child.isInverse());
-
-				// This adds the direct edge and the inverse, e.g., R ISA S and
-				// R- ISA S-,
-				// R- ISA S and R ISA S-
-				graph.addVertex(child);
-				graph.addVertex(parent);
-				graph.addVertex(childInv);
-				graph.addVertex(parentInv);
-				graph.addEdge(child, parent);
-				graph.addEdge(childInv, parentInv);
-				
-				//add also edges between the existential
-				ClassDescription existsParent = descFactory.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
-				ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
-				ClassDescription existsParentInv = descFactory.getPropertySomeRestriction(parent.getPredicate(), !parent.isInverse());
-				ClassDescription existChildInv = descFactory.getPropertySomeRestriction(child.getPredicate(), !child.isInverse());
-				graph.addVertex(existChild);
-				graph.addVertex(existsParent);
-				graph.addEdge(existChild, existsParent);
-				
-				graph.addVertex(existChildInv);
-				graph.addVertex(existsParentInv);
-				graph.addEdge(existChildInv, existsParentInv);			
-			}
-		}
-		return graph;
-	}
 	
 }
