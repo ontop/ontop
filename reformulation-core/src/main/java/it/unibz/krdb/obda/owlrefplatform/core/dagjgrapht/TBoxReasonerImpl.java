@@ -35,7 +35,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final DefaultDirectedGraph<Property,DefaultEdge> propertyGraph; // test only
 	private final DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph; // test only
-	private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
+	//private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
 	private final EquivalencesDAG<Property> propertyDAG;
 	private final EquivalencesDAG<BasicClassDescription> classDAG;
@@ -54,7 +54,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
 		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
 
-		graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 		Graphs.addGraph(graph, propertyGraph);
 		Graphs.addGraph(graph, classGraph);
 
@@ -71,7 +71,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		this.classGraph = classGraph;
 		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
 		
-		graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 		Graphs.addGraph(graph, propertyGraph);
 		Graphs.addGraph(graph, classGraph);
 
@@ -188,29 +188,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return classDAG.getDirectChildren(classDAG.getVertex(desc));
 	}
 	
-	@Deprecated // NOT ONLY TEST 
-	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) {
-			for (Equivalences<Property> e : getDirectSubProperties((Property)desc)) {
-				Description parent = e.getRepresentative();
-				Equivalences<Description> namedEquivalences = getEquivalences(parent);
-				result.add(namedEquivalences);
-			}
-		}
-		else {
-			for (Equivalences<BasicClassDescription> e : getDirectSubClasses((BasicClassDescription)desc)) {
-				Description parent = e.getRepresentative();		
-				Equivalences<Description> namedEquivalences = getEquivalences(parent);
-				result.add(namedEquivalences);
-			}
-			
-		}
-		return result;
-	}
-
 
 	/**
 	 * return the direct parents starting from the given node of the dag
@@ -230,28 +207,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return classDAG.getDirectParents(classDAG.getVertex(desc));
 	}
 	
-	@Deprecated // TEST ONLY
-	public Set<Equivalences<Description>> getDirectParents(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) {
-			for (Equivalences<Property> e : getDirectSuperProperties((Property)desc)) {
-				Description parent = e.getRepresentative();
-				Equivalences<Description> namedEquivalences = getEquivalences(parent);
-				result.add(namedEquivalences);
-			}
-		}
-		else {
-			for (Equivalences<BasicClassDescription> e : getDirectSuperClasses((BasicClassDescription)desc)) {
-				Description parent = e.getRepresentative();		
-				Equivalences<Description> namedEquivalences = getEquivalences(parent);
-				result.add(namedEquivalences);
-			}
-			
-		}
-		return result;
-	}
 
 
 	/**
@@ -273,23 +228,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return classDAG.getDescendants(classDAG.getVertex(desc));
 	}
 	
-	@Deprecated // NOT ONLY (!) TESTS
-	public Set<Equivalences<Description>> getDescendants(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) 
-			for (Equivalences<Property> e : getSubProperties((Property)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				result.add(nodes);			
-			}
-		else 
-			for (Equivalences<BasicClassDescription> e : getSubClasses((BasicClassDescription)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				result.add(nodes);			
-			}
-		return result;
-	}
 
 	/**
 	 * Traverse the graph return the ancestors starting from the given node of
@@ -311,24 +249,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return classDAG.getAncestors(classDAG.getVertex(desc));
 	}
 
-	@Deprecated // TEST ONLY
-	public Set<Equivalences<Description>> getAncestors(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) 
-			for (Equivalences<Property> e : getSuperProperties((Property)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				result.add(nodes);			
-			}
-		else 
-			for (Equivalences<BasicClassDescription> e : getSuperClasses((BasicClassDescription)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				result.add(nodes);			
-			}
-		return result;
-	}
-	
 	
 	/**
 	 * Return the equivalences starting from the given node of the dag
@@ -380,10 +300,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 
 	
-	@Deprecated // test only
-	public DefaultDirectedGraph<Description,DefaultEdge> getGraph() {
-		return graph;
-	}
 	
 	@Deprecated // test only
 	public DefaultDirectedGraph<BasicClassDescription,DefaultEdge> getClassGraph() {
@@ -396,8 +312,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	@Deprecated // test only
-	public EquivalencesDAG<Description> getDAG() {
-		return dag;
+	public int edgeSetSize() {
+		return propertyDAG.edgeSetSize() + classDAG.edgeSetSize();
 	}
 	
 	

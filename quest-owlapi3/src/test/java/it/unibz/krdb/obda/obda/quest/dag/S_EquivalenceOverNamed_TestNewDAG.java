@@ -84,11 +84,11 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			String fileInput=input.get(i);
 
 			TBoxReasonerImpl d2= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-			DefaultDirectedGraph<Description,DefaultEdge> graph1= d2.getGraph(); // S_InputOWL.createGraph(fileInput);
 			//transform in a named graph
 			TestTBoxReasonerImplOnNamedDAG namedDag2 = new TestTBoxReasonerImplOnNamedDAG(d2);
 			log.debug("Input number {}", i+1 );
-			log.info("First graph {}", graph1);
+			log.info("First graph {}", d2.getClassGraph());
+			log.info("First graph {}", d2.getPropertyGraph());
 			log.info("Second dag {}", namedDag2);
 			Test_NamedTBoxReasonerImpl dag2 = new Test_NamedTBoxReasonerImpl(d2);
 

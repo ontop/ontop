@@ -118,12 +118,12 @@ public class SigmaTBoxOptimizer {
 				check_directly_redundant(existParentDesc, existChildDesc);
 	}
 
-	private boolean check_redundant(Description parent, Description child) {
+	private boolean check_redundant(Property parent, Property child) {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<Description> children_prime : isa.getDirectChildren(parent)) {
-			Description child_prime = children_prime.getRepresentative();
+			for (Equivalences<Property> children_prime : isa.getDirectSubProperties(parent)) {
+				Property child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant(child_prime, child) && 
@@ -135,34 +135,78 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 
-	private boolean check_directly_redundant(Description parent, Description child) {
+	private boolean check_redundant(BasicClassDescription parent, BasicClassDescription child) {
+		if (check_directly_redundant(parent, child))
+			return true;
+		else {
+			for (Equivalences<BasicClassDescription> children_prime : isa.getDirectSubClasses(parent)) {
+				BasicClassDescription child_prime = children_prime.getRepresentative();
+
+				if (!child_prime.equals(child) && 
+						check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean check_directly_redundant(Property parent, Property child) {
 		
-		Description sp = sigmaChain.getRepresentativeFor(parent);
-		Description sc = sigmaChain.getRepresentativeFor(child);
+		Property sp = (Property)sigmaChain.getRepresentativeFor(parent);
+		Property sc = (Property)sigmaChain.getRepresentativeFor(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<Description>> spChildren =  sigmaChain.getDirectChildren(sp);
-		Equivalences<Description> scEquivalent = sigmaChain.getEquivalences(sc);
+		Set<Equivalences<Property>> spChildren =  sigmaChain.getDirectSubProperties(sp);
+		Equivalences<Property> scEquivalent = sigmaChain.getEquivalences(sc);
 		
 		if (!spChildren.contains(scEquivalent))
 			return false;
 		
 		
 		
-		Description tc = isaChain.getRepresentativeFor(child);
+		Property tc = (Property)isaChain.getRepresentativeFor(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<Description>> scChildren = sigmaChain.getDescendants(sc);
-		Set<Equivalences<Description>> tcChildren = isaChain.getDescendants(tc);
+		Set<Equivalences<Property>> scChildren = sigmaChain.getSubProperties(sc);
+		Set<Equivalences<Property>> tcChildren = isaChain.getSubProperties(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
 	
+	private boolean check_directly_redundant(BasicClassDescription parent, BasicClassDescription child) {
+		
+		BasicClassDescription sp = (BasicClassDescription)sigmaChain.getRepresentativeFor(parent);
+		BasicClassDescription sc = (BasicClassDescription)sigmaChain.getRepresentativeFor(child);
+		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
+
+		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getDirectSubClasses(sp);
+		Equivalences<BasicClassDescription> scEquivalent = sigmaChain.getEquivalences(sc);
+		
+		if (!spChildren.contains(scEquivalent))
+			return false;
+		
+		
+		
+		BasicClassDescription tc = (BasicClassDescription)isaChain.getRepresentativeFor(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
+		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getSubClasses(sc);
+		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getSubClasses(tc);
+
+		return scChildren.containsAll(tcChildren);
+	}
 	
 	
 	

@@ -43,16 +43,11 @@ public class S_NewGraphTest  extends TestCase{
 
 		log.info("Generating graph");
 		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
-		DefaultDirectedGraph<Description,DefaultEdge> graph = r.getGraph();
-		System.out.println(graph);
 		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(r);
 		
 		log.info("See information");
-		System.out.println("vertexes"+ graph.vertexSet());
-		log.debug("vertexes {}", graph.vertexSet());
-		//System.out.println(reasoner.getClasses());
-		//System.out.println(reasoner.getRoles());
-		System.out.println(graph.edgeSet());
+		log.debug("properties {}", reasoner.getPropertyGraph());
+		log.debug("classes {}", reasoner.getClassGraph());
 //		
 		log.info("From graph to dag");
 		System.out.println(r);
@@ -60,7 +55,7 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("See information");
 		System.out.println(r.getClasses());
 		System.out.println(r.getProperties());
-		System.out.println(r.getDAG());
+		//System.out.println(r.getDAG());
 		
 //		log.info("See relations");
 //		TBoxReasonerImpl tbox= new TBoxReasonerImpl(dag);

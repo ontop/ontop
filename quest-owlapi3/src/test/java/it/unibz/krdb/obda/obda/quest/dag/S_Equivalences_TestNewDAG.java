@@ -261,7 +261,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of edges in the graph
 		int numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.getDAG().edgeSetSize();
+		int numberEdgesD2 = d2.edgeSetSize();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
