@@ -8,6 +8,7 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
@@ -39,6 +41,8 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class TBoxReasonerImpl implements TBoxReasoner {
 
+	private final DefaultDirectedGraph<Property,DefaultEdge> propertyGraph; // test only
+	private final DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph; // test only
 	private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
 	private final EquivalencesDAG<Description> dag;
@@ -46,14 +50,32 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private Set<OClass> classNames;
 	private Set<Property> propertyNames;
 	
+
 	
+
 	public TBoxReasonerImpl(Ontology onto) {
-		this(OntologyGraph.getGraph(onto, false));
+		propertyGraph = OntologyGraph.getPropertyGraph(onto);
+		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
+		graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		Graphs.addGraph(graph, propertyGraph);
+		Graphs.addGraph(graph, classGraph);
+
+		dag = new EquivalencesDAG<Description>(graph);
+		DAGBuilder.choosePropertyRepresentatives(dag);
+		DAGBuilder.chooseClassRepresentatives(dag);
 	}
 
-	private TBoxReasonerImpl(DefaultDirectedGraph<Description,DefaultEdge> graph) {
-		this.graph = graph;
-		this.dag = DAGBuilder.getDAG(graph);
+	private TBoxReasonerImpl(DefaultDirectedGraph<Property,DefaultEdge> propertyGraph, 
+					DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph) {
+		this.propertyGraph = propertyGraph;
+		this.classGraph = classGraph;
+		graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		Graphs.addGraph(graph, propertyGraph);
+		Graphs.addGraph(graph, classGraph);
+
+		dag = new EquivalencesDAG<Description>(graph);
+		DAGBuilder.choosePropertyRepresentatives(dag);
+		DAGBuilder.chooseClassRepresentatives(dag);
 	}
 
 
@@ -234,10 +256,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	
 
-	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
-		
-		return new TBoxReasonerImpl((OntologyGraph.getGraph(onto, true)));		
-	}
+//	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
+//		
+//		return new TBoxReasonerImpl((OntologyGraph.getGraph(onto, true)));		
+//	}
 	
 	/***
 	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
@@ -252,19 +274,20 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		
 		// move everything to a graph that admits cycles
-		DefaultDirectedGraph<Description,DefaultEdge> modifiedGraph = 
-				new  DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> modifiedGraph = 
+				new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
 		for (Equivalences<Description> v : tbox.dag.vertexSet()) {
-			modifiedGraph.addVertex(v.getRepresentative());
-
+			if (v.getRepresentative() instanceof BasicClassDescription)
+				modifiedGraph.addVertex((BasicClassDescription)v.getRepresentative());
 		}
-		for (Equivalences<Description> v : tbox.dag.vertexSet()) {
-			Description s = v.getRepresentative();
-			for (Equivalences<Description> vp : tbox.dag.getDirectParents(v))
-				modifiedGraph.addEdge(s, vp.getRepresentative());
-		}
+		for (Equivalences<Description> v : tbox.dag.vertexSet()) 
+			if (v.getRepresentative() instanceof BasicClassDescription) {
+				BasicClassDescription s = (BasicClassDescription)v.getRepresentative();
+				for (Equivalences<Description> vp : tbox.dag.getDirectParents(v))
+					modifiedGraph.addEdge(s, (BasicClassDescription)vp.getRepresentative());
+			}
 
 		Collection<Equivalences<Description>> nodes = new HashSet<Equivalences<Description>>(tbox.dag.vertexSet());
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
@@ -272,6 +295,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		for (Equivalences<Description> n : nodes) {
 			Description node = n.getRepresentative();
+			
+			if (!(node instanceof BasicClassDescription))
+				continue;
 			
 			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
 				continue;
@@ -281,28 +307,28 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			 */
 
 			PropertySomeRestriction existsNode = (PropertySomeRestriction) node;
-			Description existsInvNode = tbox.getRepresentativeFor(
+			BasicClassDescription existsInvNode = (BasicClassDescription)tbox.getRepresentativeFor(
 						fac.createPropertySomeRestriction(existsNode.getPredicate(), !existsNode.isInverse()));
 			
 			for (Equivalences<Description> children : tbox.getDirectChildren(existsNode)) {
-				Description child = children.getRepresentative(); 
+				BasicClassDescription child = (BasicClassDescription)children.getRepresentative(); 
 				if (!child.equals(existsInvNode))
 					modifiedGraph.addEdge(child, existsInvNode);
 			}
 			for (Equivalences<Description> children : tbox.getDirectChildren(existsInvNode)) {
-				Description child = children.getRepresentative(); 
+				BasicClassDescription child = (BasicClassDescription)children.getRepresentative(); 
 				if (!child.equals(existsNode))
 					modifiedGraph.addEdge(child, existsNode);
 			}
 
 			for (Equivalences<Description> parents : tbox.getDirectParents(existsNode)) {
-				Description parent = parents.getRepresentative(); 
+				BasicClassDescription parent = (BasicClassDescription)parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
 					modifiedGraph.addEdge(existsInvNode, parent);
 			}
 
 			for (Equivalences<Description> parents : tbox.getDirectParents(existsInvNode)) {
-				Description parent = parents.getRepresentative(); 
+				BasicClassDescription parent = (BasicClassDescription)parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
 					modifiedGraph.addEdge(existsNode, parent);
 			}
@@ -312,7 +338,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 
 		/* Collapsing the cycles */
-		return new TBoxReasonerImpl(modifiedGraph);
+		return new TBoxReasonerImpl(tbox.propertyGraph, modifiedGraph);
 	}
 
 }

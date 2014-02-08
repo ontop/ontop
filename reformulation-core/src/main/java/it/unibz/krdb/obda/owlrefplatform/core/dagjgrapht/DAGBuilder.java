@@ -42,23 +42,6 @@ public class DAGBuilder {
 
 	private static OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
-	/**
-	 * *Construct a DAG starting from a given graph with already known
-	 * equivalent nodes and representative nodes
-	 * 
-	 * @param graph needs a graph with or without cycles
-	 * @param equivalents a map between the node and its equivalent nodes
-	 */
-	public static EquivalencesDAG<Description> getDAG(DefaultDirectedGraph<Description,DefaultEdge> graph) {
-
-		EquivalencesDAG<Description> dag = new EquivalencesDAG<Description>(graph);
-		
-		choosePropertyRepresentatives(dag);
-		
-		chooseClassRepresentatives(dag);
-		
-		return dag;
-	}
 
 	/**
 	 */
@@ -80,7 +63,7 @@ public class DAGBuilder {
 	 * 
 	 */
 
-	private static void choosePropertyRepresentatives(EquivalencesDAG<Description> dag) {
+	public static void choosePropertyRepresentatives(EquivalencesDAG<Description> dag) {
 		
 		Deque<Equivalences<Description>> asymmetric1 = new LinkedList<Equivalences<Description>>();
 		Deque<Equivalences<Description>> asymmetric2 = new LinkedList<Equivalences<Description>>();
@@ -179,7 +162,7 @@ public class DAGBuilder {
 
 	}	
 	
-	private static void chooseClassRepresentatives(EquivalencesDAG<Description> dag) {
+	public static void chooseClassRepresentatives(EquivalencesDAG<Description> dag) {
 
 		for (Equivalences<Description> equivalenceSet : dag.vertexSet()) {
 

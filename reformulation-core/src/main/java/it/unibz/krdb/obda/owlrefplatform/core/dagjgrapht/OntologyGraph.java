@@ -12,7 +12,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -21,7 +20,6 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -39,7 +37,7 @@ public class OntologyGraph {
 	 * @return the graph of the property inclusions 
 	 */
 	
-	private static DefaultDirectedGraph<Property,DefaultEdge> getPropertyGraph (Ontology ontology) {
+	public static DefaultDirectedGraph<Property,DefaultEdge> getPropertyGraph (Ontology ontology) {
 		
 		DefaultDirectedGraph<Property,DefaultEdge> graph 
 							= new  DefaultDirectedGraph<Property,DefaultEdge>(DefaultEdge.class);
@@ -142,18 +140,4 @@ public class OntologyGraph {
 		return classGraph;
 	}
 	
-	
-	
-	public static DefaultDirectedGraph<Description,DefaultEdge> getGraph (Ontology ontology, boolean chain) {
-		
-		DefaultDirectedGraph<Property,DefaultEdge> propertyGraph = getPropertyGraph(ontology);
-		
-		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph = getClassGraph(ontology, propertyGraph, chain);
-		
-		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
-		Graphs.addGraph(graph, propertyGraph);
-		Graphs.addGraph(graph, classGraph);
-		return graph;
-	}
-
 }
