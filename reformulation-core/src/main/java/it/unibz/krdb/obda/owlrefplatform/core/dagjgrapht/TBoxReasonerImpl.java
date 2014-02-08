@@ -103,25 +103,33 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public String toString() {
-		return dag.toString();
+		return propertyDAG.toString() + "\n" + classDAG.toString();
 	}
 	
 	
 	public Description getRepresentativeFor(Description v) {
-		Equivalences<Description> e = dag.getVertex(v);
-		if (e != null)
-			return e.getRepresentative();
+		if (v instanceof Property) {
+			Equivalences<Property> e = propertyDAG.getVertex((Property)v);
+			if (e != null)
+				return e.getRepresentative();
+		}
+		else {
+			Equivalences<BasicClassDescription> e = classDAG.getVertex((BasicClassDescription)v);
+			if (e != null)
+				return e.getRepresentative();			
+		}
 		return null;
 	}
 	
-	public Description getRepresentativeFor(Equivalences<Description> nodes) {
-		Description first = nodes.iterator().next();
-		return getRepresentativeFor(first);
-	}
 	
-	public boolean isCanonicalRepresentative(Description v) {
+	public boolean isCanonicalRepresentative(Property v) {
 		//return (replacements.get(v) == null);
-		Equivalences<Description> e = dag.getVertex(v);
+		Equivalences<Property> e = propertyDAG.getVertex(v);
+		return e.getRepresentative().equals(v);
+	}
+	public boolean isCanonicalRepresentative(BasicClassDescription v) {
+		//return (replacements.get(v) == null);
+		Equivalences<BasicClassDescription> e = classDAG.getVertex(v);
 		return e.getRepresentative().equals(v);
 	}
 
@@ -135,13 +143,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<Property> getPropertyNames() {
 		if (propertyNames == null) {
 			propertyNames = new LinkedHashSet<Property> ();
-			for (Equivalences<Description> v: dag.vertexSet()) 
-				for (Description r : v) 
-					if (r instanceof Property) {
-						Property p = (Property) r;
-						if (!p.isInverse())
-							propertyNames.add(p);
-					}
+			for (Equivalences<Property> v: propertyDAG.vertexSet()) 
+				for (Property r : v) 
+					if (!r.isInverse())
+						propertyNames.add(r);
 		}
 		return propertyNames;
 	}
@@ -154,8 +159,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<OClass> getClassNames() {
 		if (classNames == null) {
 			 classNames = new LinkedHashSet<OClass> ();
-			 for (Equivalences<Description> v: dag.vertexSet())
-				for (Description e : v)
+			 for (Equivalences<BasicClassDescription> v: classDAG.vertexSet())
+				for (BasicClassDescription e : v)
 					if (e instanceof OClass)
 						classNames.add((OClass)e);
 		}
