@@ -39,7 +39,8 @@ public interface TBoxReasoner {
 	 * @param desc: a class or a property
 	 * @return equivalence classes for all super-descriptions (including desc)
 	 */
-	public Set<Equivalences<Description>> getAncestors(Description desc);
+	public Set<Equivalences<Property>> getSuperProperties(Property desc);
+	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc);
 
 	public Equivalences<Property> getEquivalences(Property desc);
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc);

@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
@@ -1733,10 +1734,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
 		//Description roleNode = reasonerDag.getRepresentativeFor(role);
-		Set<Equivalences<Description>> ancestors = reasonerDag.getAncestors(role);
+		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getSuperClasses(role);
 
-		for (Equivalences<Description> node : ancestors) {
-			for(Description desc: node)
+		for (Equivalences<BasicClassDescription> node : ancestors) {
+			for(BasicClassDescription desc: node)
 			{
 				if (desc instanceof DataType) {
 					DataType datatype = (DataType) desc;

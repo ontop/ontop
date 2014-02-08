@@ -8,7 +8,10 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -121,12 +124,21 @@ public class Test_NamedTBoxReasonerImpl {
 	public Set<Equivalences<Description>> getAncestors(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-		for (Equivalences<Description> e : reasoner.getAncestors(desc)) {
-			Equivalences<Description> nodes = getEquivalences(e.getRepresentative());
-			if (!nodes.isEmpty())
-				result.add(nodes);			
-		}
 
+		if (desc instanceof Property) {
+			for (Equivalences<Property> e : reasoner.getSuperProperties((Property)desc)) {
+				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+				if (!nodes.isEmpty())
+					result.add(nodes);			
+			}
+		}
+		else {
+			for (Equivalences<BasicClassDescription> e : reasoner.getSuperClasses((BasicClassDescription)desc)) {
+				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+				if (!nodes.isEmpty())
+					result.add(nodes);			
+			}
+		}
 		return result;
 	}
 
@@ -138,6 +150,31 @@ public class Test_NamedTBoxReasonerImpl {
 	 * @return we return a set of description with equivalent nodes 
 	 */
 
+	public Equivalences<Property> getEquivalences(Property desc) {
+
+		Set<Property> equivalences = new LinkedHashSet<Property>();
+			for (Property vertex : reasoner.getEquivalences(desc)) {
+				if (isNamed(vertex)) 
+					equivalences.add(vertex);
+			}
+		if (!equivalences.isEmpty())
+			return new Equivalences<Property>(equivalences, reasoner.getEquivalences(desc).getRepresentative());
+		
+		return new Equivalences<Property>(equivalences);
+	}
+	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
+
+		Set<BasicClassDescription> equivalences = new LinkedHashSet<BasicClassDescription>();
+			for (BasicClassDescription vertex : reasoner.getEquivalences(desc)) {
+				if (isNamed(vertex)) 
+					equivalences.add(vertex);
+			}
+		if (!equivalences.isEmpty())
+			return new Equivalences<BasicClassDescription>(equivalences, reasoner.getEquivalences(desc).getRepresentative());
+		
+		return new Equivalences<BasicClassDescription>(equivalences);
+	}
+	
 	public Equivalences<Description> getEquivalences(Description desc) {
 
 		Set<Description> equivalences = new LinkedHashSet<Description>();

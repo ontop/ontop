@@ -227,10 +227,33 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	@Override
-	public Set<Equivalences<Description>> getAncestors(Description desc) {
-		return dag.getAncestors(dag.getVertex(desc));
+	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
+		return propertyDAG.getAncestors(propertyDAG.getVertex(desc));
+	}
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
+		return classDAG.getAncestors(classDAG.getVertex(desc));
 	}
 
+	@Deprecated // TEST ONLY
+	public Set<Equivalences<Description>> getAncestors(Description desc) {
+
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+
+		if (desc instanceof Property) 
+			for (Equivalences<Property> e : getSuperProperties((Property)desc)) {
+				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+				result.add(nodes);			
+			}
+		else 
+			for (Equivalences<BasicClassDescription> e : getSuperClasses((BasicClassDescription)desc)) {
+				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+				result.add(nodes);			
+			}
+		return result;
+	}
+	
+	
 	/**
 	 * Return the equivalences starting from the given node of the dag
 	 * 
