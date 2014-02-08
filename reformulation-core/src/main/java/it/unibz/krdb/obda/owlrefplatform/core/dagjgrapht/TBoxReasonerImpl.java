@@ -240,6 +240,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	@Override
+	public Equivalences<Property> getEquivalences(Property desc) {
+		return propertyDAG.getVertex(desc);
+	}
+	@Override
+	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
+		return classDAG.getVertex(desc);
+	}
+	@Override
 	public Equivalences<Description> getEquivalences(Description desc) {
 		return dag.getVertex(desc);
 	}

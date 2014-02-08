@@ -9,7 +9,9 @@
 
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.Set;
 
@@ -39,6 +41,9 @@ public interface TBoxReasoner {
 	 */
 	public Set<Equivalences<Description>> getAncestors(Description desc);
 
+	public Equivalences<Property> getEquivalences(Property desc);
+	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc);
+	@Deprecated
 	public Equivalences<Description> getEquivalences(Description desc);
 	
 	public Set<Equivalences<Description>> getNodes();
