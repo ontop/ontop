@@ -51,14 +51,14 @@ public class SigmaTest extends TestCase {
 		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
         TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
 
-        assertTrue(sigma.getDescendants(ac).contains(sigma.getEquivalences(er)));
+        assertTrue(sigma.getSubClasses(ac).contains(sigma.getEquivalences(er)));
 
      // Roman: was 1, which, I think, is wrong: A has two subclasses, ER and C (now 3 because it's reflexive)
-        assertEquals(3, sigma.getDescendants(ac).size());   // getDescendants is reflexive
+        assertEquals(3, sigma.getSubClasses(ac).size());   // getDescendants is reflexive
 
-        assertEquals(1, sigma.getDescendants(er).size());  // getDescendants is reflexive
+        assertEquals(1, sigma.getSubClasses(er).size());  // getDescendants is reflexive
 
-        assertEquals(1, sigma.getDescendants(cc).size());  // getDescendants is reflexive
+        assertEquals(1, sigma.getSubClasses(cc).size());  // getDescendants is reflexive
 
     }
 }

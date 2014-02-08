@@ -1938,7 +1938,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				Property role = ((Property) inverseNode);
 				for (Description possibleRedundantNode : roleInverseChildren) {
 					Property possibleRedundantRole = ((Property) possibleRedundantNode);
-					if (reasonerDag.getDescendants(role)
+					if (reasonerDag.getSubProperties(role)
 							.contains(possibleRedundantRole))
 						inverseRedundants.add(possibleRedundantNode);
 				}
@@ -1962,7 +1962,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<Description> classNodesMaps = new HashSet<Description>();
 		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
 		
-		for (Description node : reasonerDag.getClassNames()) {
+		for (BasicClassDescription node : reasonerDag.getClassNames()) {
 			if (!reasonerDag.isCanonicalRepresentative(node))
 				continue;
 
@@ -1984,7 +1984,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				}
 				
 			}
-			for (Equivalences<Description> children : reasonerDag.getDescendants(node)) {
+			for (Equivalences<BasicClassDescription> children : reasonerDag.getSubClasses(node)) {
 				for (Description child:children){
 
 				if (child instanceof PropertySomeRestrictionImpl) {
@@ -2014,7 +2014,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 									existsDesc2.isInverse());
 					//Description roleNode2 = reasonerDag.getRepresentativeFor(role2);
 
-					for(Equivalences<Description> descendants: reasonerDag.getDescendants(role)){
+					for(Equivalences<Property> descendants: reasonerDag.getSubProperties(role)){
 						if (descendants.contains(role2))
 						/*
 						 * The DAG implies that R ISA S, so we remove ER

@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -384,8 +385,8 @@ public class TMappingProcessor implements Serializable {
 			}
 
 
-			for (Equivalences<Description> descendants : reasoner.getDescendants(currentProperty)) {
-				for(Description descendant: descendants){
+			for (Equivalences<Property> descendants : reasoner.getSubProperties(currentProperty)) {
+				for(Property childproperty: descendants){
 
 				/*
 				 * adding the mappings of the children as own mappings, the new
@@ -393,7 +394,6 @@ public class TMappingProcessor implements Serializable {
 				 * predicate and, if the child is inverse and the current is
 				 * positive, it will also invert the terms in the head
 				 */
-				Property childproperty = (Property) descendant;
 				List<CQIE> childMappings = originalMappings.getRules(childproperty.getPredicate());
 
 				boolean requiresInverse = (currentProperty.isInverse() != childproperty.isInverse());
@@ -483,8 +483,8 @@ public class TMappingProcessor implements Serializable {
 				mappingIndex.put(currentPredicate, currentNodeMappings);
 			}
 
-			for (Equivalences<Description> descendants : reasoner.getDescendants(currentProperty)) {
-				for(Description descendant: descendants){
+			for (Equivalences<BasicClassDescription> descendants : reasoner.getSubClasses(currentProperty)) {
+				for(BasicClassDescription childDescription: descendants){
 				
 					
 
@@ -493,7 +493,6 @@ public class TMappingProcessor implements Serializable {
 				 * mappings. There are three cases, when the child is a named
 				 * class, or when it is an \exists P or \exists \inv P.
 				 */
-				ClassDescription childDescription = (ClassDescription) descendant;
 				Predicate childPredicate = null;
 				boolean isClass = true;
 				boolean isInverse = false;
@@ -506,7 +505,7 @@ public class TMappingProcessor implements Serializable {
 					isInverse = ((PropertySomeRestriction) childDescription).isInverse();
 					isClass = false;
 				} else {
-					throw new RuntimeException("Unknown type of node in DAG: " + descendant);
+					throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
 				}
 
 				List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);

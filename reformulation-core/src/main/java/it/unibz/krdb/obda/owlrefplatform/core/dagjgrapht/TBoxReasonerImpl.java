@@ -211,8 +211,29 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
+	public Set<Equivalences<Property>> getSubProperties(Property desc) {
+		return propertyDAG.getDescendants(propertyDAG.getVertex(desc));
+	}
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
+		return classDAG.getDescendants(classDAG.getVertex(desc));
+	}
+	@Override // NOT ONLY (!) TESTS
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
-		return dag.getDescendants(dag.getVertex(desc));
+
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+
+		if (desc instanceof Property) 
+			for (Equivalences<Property> e : getSubProperties((Property)desc)) {
+				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+				result.add(nodes);			
+			}
+		else 
+			for (Equivalences<BasicClassDescription> e : getSubClasses((BasicClassDescription)desc)) {
+				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+				result.add(nodes);			
+			}
+		return result;
 	}
 
 	/**
