@@ -167,10 +167,20 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return classNames;
 	}
 
-
+	
 	public boolean isNamed(Description node) {
-		return dag.getVertex(node).isIndexed();
+		if (node instanceof Property)
+			return propertyDAG.getVertex((Property)node).isIndexed();
+		else
+			return classDAG.getVertex((BasicClassDescription)node).isIndexed();
 	}
+
+//	public boolean isNamed(Property node) {
+//		return propertyDAG.getVertex(node).isIndexed();
+//	}
+//	public boolean isNamed(BasicClassDescription node) {
+//		return classDAG.getVertex(node).isIndexed();
+//	}
 
 //	public boolean isNamed0(Description node) {
 //		return getClassNames().contains(node) || getPropertyNames().contains(node);
@@ -349,26 +359,20 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
-		for (Equivalences<Description> v : tbox.dag.vertexSet()) {
-			if (v.getRepresentative() instanceof BasicClassDescription)
-				modifiedGraph.addVertex((BasicClassDescription)v.getRepresentative());
+		for (Equivalences<BasicClassDescription> v : tbox.getClasses()) 
+			modifiedGraph.addVertex(v.getRepresentative());
+		
+		for (Equivalences<BasicClassDescription> v : tbox.getClasses()) {
+			BasicClassDescription s = v.getRepresentative();
+			for (Equivalences<BasicClassDescription> vp : tbox.getDirectSuperClasses(s))
+				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
-		for (Equivalences<Description> v : tbox.dag.vertexSet()) 
-			if (v.getRepresentative() instanceof BasicClassDescription) {
-				BasicClassDescription s = (BasicClassDescription)v.getRepresentative();
-				for (Equivalences<Description> vp : tbox.dag.getDirectParents(v))
-					modifiedGraph.addEdge(s, (BasicClassDescription)vp.getRepresentative());
-			}
 
-		Collection<Equivalences<Description>> nodes = new HashSet<Equivalences<Description>>(tbox.dag.vertexSet());
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<Description> processedNodes = new HashSet<Description>();
 		
-		for (Equivalences<Description> n : nodes) {
-			Description node = n.getRepresentative();
-			
-			if (!(node instanceof BasicClassDescription))
-				continue;
+		for (Equivalences<BasicClassDescription> n : tbox.getClasses()) {
+			BasicClassDescription node = n.getRepresentative();
 			
 			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
 				continue;
