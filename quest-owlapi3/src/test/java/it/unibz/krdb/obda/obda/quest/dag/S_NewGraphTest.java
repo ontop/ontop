@@ -58,9 +58,8 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(r);
 		
 		log.info("See information");
-		System.out.println(r.getNodes());
-		System.out.println(r.getClassNames());
-		System.out.println(r.getPropertyNames());
+		System.out.println(r.getClasses());
+		System.out.println(r.getProperties());
 		System.out.println(r.getDAG());
 		
 //		log.info("See relations");

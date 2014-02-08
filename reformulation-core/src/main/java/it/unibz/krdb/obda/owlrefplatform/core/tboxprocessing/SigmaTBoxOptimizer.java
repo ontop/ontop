@@ -60,36 +60,24 @@ public class SigmaTBoxOptimizer {
 
 			log.debug("Starting semantic-reduction");
 
-			for(Equivalences<Description> nodes: isa.getNodes()) {
-				Description node = nodes.getRepresentative();
-				for (Equivalences<Description> descendants : isa.getDescendants(node)) {
-					Description descendant = descendants.getRepresentative();
-					if (!descendant.equals(node)) 
-						addToTBox(optimizedTBox, descendant, node);
+			TBoxTraversal.traverse(isa, new TBoxTraverseListener() {
+
+				@Override
+				public void onInclusion(Property sub, Property sup) {
+					if (!check_redundant_role(sup, sub)) 
+						optimizedTBox.addAssertion(fac.createSubPropertyAxiom(sub, sup));
 				}
-				
-				for (Description equivalent : nodes) {
-					if (!equivalent.equals(node)) {
-						addToTBox(optimizedTBox, node, equivalent);					
-						addToTBox(optimizedTBox, equivalent, node);
-					}
+
+				@Override
+				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+					if (!check_redundant(sup, sub)) 
+						optimizedTBox.addAssertion(fac.createSubClassAxiom(sub, sup));
 				}
-			}
+			});
 		}
 		return optimizedTBox;
 	}
 
-	private void addToTBox(Ontology rv, Description sub, Description sup) {
-		
-		if (sub instanceof BasicClassDescription) {
-			if (!check_redundant(sup, sub)) 
-				rv.addAssertion(fac.createSubClassAxiom((BasicClassDescription) sub, (BasicClassDescription) sup));
-		} 
-		else {
-			if (!check_redundant_role((Property)sup, (Property)sub)) 
-				rv.addAssertion(fac.createSubPropertyAxiom((Property) sub, (Property) sup));
-		}
-	}
 	
 	
 	
@@ -181,47 +169,28 @@ public class SigmaTBoxOptimizer {
 	
 	
 	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
-		OntologyFactory descFactory = new OntologyFactoryImpl();
-		Ontology sigma = descFactory.createOntology("sigma");
 
-		for (Equivalences<Description> nodes : reasoner.getNodes()) {
-			Description node = nodes.getRepresentative();
-			for (Equivalences<Description> descendants : reasoner.getDescendants(node)) {
-				Description descendant = descendants.getRepresentative();
+		final Ontology sigma = fac.createOntology("sigma");
 
-				if (!descendant.equals(node)) 
-					addToSigma(sigma, descendant, node);
-			}
-			for (Description equivalent : nodes) {
-				if (!equivalent.equals(node))  {
-					addToSigma(sigma, node, equivalent);
-					addToSigma(sigma, equivalent, node);					
-				}
-			}
-		}
-
-		return sigma;
-	}
-	
-	/**
-	 * Creating subClassOf or subPropertyOf axioms
-	 */
-	
-	private static void addToSigma(Ontology sigma, Description subn, Description supern) {
-		
-		if (subn instanceof BasicClassDescription) {
-			if (!(supern instanceof PropertySomeRestriction)) {
-				Axiom ax = fac.createSubClassAxiom((BasicClassDescription) subn, (BasicClassDescription) supern);
+		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
+			
+			@Override
+			public void onInclusion(Property sub, Property sup) {
+				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
 				sigma.addEntities(ax.getReferencedEntities());
 				sigma.addAssertion(ax);						
 			}
-		} 
-		else {
-			Axiom ax = fac.createSubPropertyAxiom((Property) subn, (Property) supern);
-			sigma.addEntities(ax.getReferencedEntities());
-			sigma.addAssertion(ax);						
-		}		
+
+			@Override
+			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+				if (!(sup instanceof PropertySomeRestriction)) {
+					Axiom ax = fac.createSubClassAxiom(sub, sup);
+					sigma.addEntities(ax.getReferencedEntities());
+					sigma.addAssertion(ax);						
+				}
+			}
+		});
+		
+		return sigma;
 	}
-	
-	
 }
