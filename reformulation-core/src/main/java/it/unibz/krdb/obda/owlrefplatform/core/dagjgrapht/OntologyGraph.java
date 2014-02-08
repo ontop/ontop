@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano
+ * This source code is available under the terms of the Affero General Public
+ * License v3.
+ * 
+ * Please see LICENSE.txt for full license terms, including the availability of
+ * proprietary exceptions.
+ */
+
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.Predicate;
@@ -21,13 +30,13 @@ public class OntologyGraph {
 	private static OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	
 	/**
-	 * Build the graph from the TBox axioms of the ontology
+	 *  graph representation of property inclusions in the ontology
+	 *  
+	 *  adds inclusions between the inverses of R and S if
+	 *         R is declared a sub-property of S in the ontology
 	 * 
-	 * @param ontology TBox containing the axioms
-	 * @param chain 
-	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
-	 * relation of the original DAG gets extended to the reachability relation
-	 * of T and Sigma chains.
+	 * @param an ontology 
+	 * @return the graph of the property inclusions 
 	 */
 	
 	private static DefaultDirectedGraph<Property,DefaultEdge> getPropertyGraph (Ontology ontology) {
@@ -67,6 +76,21 @@ public class OntologyGraph {
 	}
 	
 	
+	/**
+	 * graph representation of the class inclusions in the ontology
+	 * 
+	 * adds inclusions of the domain of R in the domain of S if
+	 *           the provided property graph has an edge from R to S
+	 *           (given the getPropertyGraph algorithm, this also 
+	 *           implies inclusions of the range of R in the range of S
+	 * 
+	 * @param ontology
+	 * @param propertyGraph obtained by getPropertyGraph
+	 * @param chain adds all equivalences \exists R = \exists R-, so that 
+	 *              the result can be used to construct Sigma chains
+	 * @return the graph of the concept inclusions
+	 */
+	
 	public static DefaultDirectedGraph<BasicClassDescription,DefaultEdge> getClassGraph (Ontology ontology, 
 													DefaultDirectedGraph<Property,DefaultEdge> propertyGraph, boolean chain) {
 		
@@ -84,7 +108,7 @@ public class OntologyGraph {
 			classGraph.addVertex(existsRole);			
 		}
 
-		// edges between the domains and ranges for subproperties
+		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : propertyGraph.edgeSet()) {
 			Property child = propertyGraph.getEdgeSource(edge);
 			Property parent = propertyGraph.getEdgeTarget(edge);

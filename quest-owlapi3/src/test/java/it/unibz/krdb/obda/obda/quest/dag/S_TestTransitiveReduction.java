@@ -100,7 +100,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of edges in the graph
 		int  numberEdgesD1= g1.edgeSet().size();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.edgeSet().size();
+		int numberEdgesD2 = d2.getDAG().edgeSetSize();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;

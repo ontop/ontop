@@ -61,7 +61,7 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(r.getNodes());
 		System.out.println(r.getClassNames());
 		System.out.println(r.getPropertyNames());
-		System.out.println(r.edgeSet());
+		System.out.println(r.getDAG());
 		
 //		log.info("See relations");
 //		TBoxReasonerImpl tbox= new TBoxReasonerImpl(dag);

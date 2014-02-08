@@ -41,11 +41,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
-	private final SimpleDirectedGraph <Equivalences<Description>,DefaultEdge> dag;
-	private final DirectedGraph <Equivalences<Description>,DefaultEdge> reversedDag;
-	
-	// maps descriptions to their equivalence classes (and their representatives)
-	private final Map<Description, Equivalences<Description>> equivalencesClasses; 
+	private final EquivalencesDAG<Description> dag;
 	
 	private Set<OClass> classNames;
 	private Set<Property> propertyNames;
@@ -57,23 +53,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private TBoxReasonerImpl(DefaultDirectedGraph<Description,DefaultEdge> graph) {
 		this.graph = graph;
-		
-		equivalencesClasses = new HashMap<Description, Equivalences<Description>>();
-		this.dag = DAGBuilder.getDAG(graph, equivalencesClasses);
-		this.reversedDag = new EdgeReversedGraph<Equivalences<Description>, DefaultEdge>(dag);
+		this.dag = DAGBuilder.getDAG(graph);
 	}
 
 
 	@Override
 	public String toString() {
-		return dag.toString() + 
-				//"\n\nReplacements\n" + replacements.toString() + 
-				"\n\nEquivalenceMap\n" + equivalencesClasses;
+		return dag.toString();
 	}
 	
 	
 	public Description getRepresentativeFor(Description v) {
-		Equivalences<Description> e = equivalencesClasses.get(v);
+		Equivalences<Description> e = dag.getVertex(v);
 		if (e != null)
 			return e.getRepresentative();
 		return null;
@@ -86,7 +77,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public boolean isCanonicalRepresentative(Description v) {
 		//return (replacements.get(v) == null);
-		Equivalences<Description> e = equivalencesClasses.get(v);
+		Equivalences<Description> e = dag.getVertex(v);
 		return e.getRepresentative().equals(v);
 	}
 
@@ -129,7 +120,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	public boolean isNamed(Description node) {
-		return equivalencesClasses.get(node).isIndexed();
+		return dag.getVertex(node).isIndexed();
 	}
 
 //	public boolean isNamed0(Description node) {
@@ -146,17 +137,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 	@Override
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
-		
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		Equivalences<Description> node = getEquivalences(desc);
-
-		for (DefaultEdge edge : dag.incomingEdgesOf(node)) {	
-			Equivalences<Description> source = dag.getEdgeSource(edge);
-			result.add(source);
-		}
-
-		return Collections.unmodifiableSet(result);
+		return dag.getDirectChildren(dag.getVertex(desc));
 	}
 
 
@@ -171,18 +152,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * */
 	@Override
 	public Set<Equivalences<Description>> getDirectParents(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-		
-		// take the representative node
-		Equivalences<Description> node = getEquivalences(desc);
-
-		for (DefaultEdge edge : dag.outgoingEdgesOf(node)) {
-			Equivalences<Description> target = dag.getEdgeTarget(edge);
-			result.add(target);
-		}
-
-		return Collections.unmodifiableSet(result);
+		return dag.getDirectParents(dag.getVertex(desc));
 	}
 
 
@@ -198,21 +168,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 	@Override
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		Equivalences<Description> node = getEquivalences(desc);
-		
-		AbstractGraphIterator<Equivalences<Description>, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Equivalences<Description>, DefaultEdge>(reversedDag, node);
-
-		while (iterator.hasNext()) {
-			Equivalences<Description> child = iterator.next();
-			result.add(child);
-		}
-
-		// add each of them to the result
-		return Collections.unmodifiableSet(result);
+		return dag.getDescendants(dag.getVertex(desc));
 	}
 
 	/**
@@ -228,21 +184,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public Set<Equivalences<Description>> getAncestors(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		Equivalences<Description> node = getEquivalences(desc);
-
-		AbstractGraphIterator<Equivalences<Description>, DefaultEdge>  iterator = 
-				new BreadthFirstIterator<Equivalences<Description>, DefaultEdge>(dag, node);
-
-		while (iterator.hasNext()) {
-			Equivalences<Description> parent = iterator.next();
-			result.add(parent);
-		}
-
-		// add each of them to the result
-		return Collections.unmodifiableSet(result);
+		return dag.getAncestors(dag.getVertex(desc));
 	}
 
 	/**
@@ -255,8 +197,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public Equivalences<Description> getEquivalences(Description desc) {
-		Equivalences<Description> c = equivalencesClasses.get(desc);
-		return c;
+		return dag.getVertex(desc);
 	}
 	
 	
@@ -283,8 +224,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	@Deprecated // test only
-	public Set<DefaultEdge> edgeSet() {
-		return dag.edgeSet();
+	public EquivalencesDAG<Description> getDAG() {
+		return dag;
 	}
 	
 	
@@ -319,10 +260,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			modifiedGraph.addVertex(v.getRepresentative());
 
 		}
-		for (DefaultEdge e : tbox.dag.edgeSet()) {
-			Equivalences<Description> s = tbox.dag.getEdgeSource(e);
-			Equivalences<Description> t = tbox.dag.getEdgeTarget(e);
-			modifiedGraph.addEdge(s.getRepresentative(), t.getRepresentative());
+		for (Equivalences<Description> v : tbox.dag.vertexSet()) {
+			Description s = v.getRepresentative();
+			for (Equivalences<Description> vp : tbox.dag.getDirectParents(v))
+				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
 
 		Collection<Equivalences<Description>> nodes = new HashSet<Equivalences<Description>>(tbox.dag.vertexSet());

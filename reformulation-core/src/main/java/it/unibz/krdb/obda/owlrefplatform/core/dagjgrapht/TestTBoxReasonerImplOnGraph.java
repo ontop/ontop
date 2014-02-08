@@ -474,7 +474,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 * relation of the original DAG gets extended to the reachability relation
 	 * of T and Sigma chains.
 	 * 
-	 * 
 	 */
 	
 	public void convertIntoChainDAG() {
@@ -543,8 +542,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 				processedNodes.add(existsInvNode);
 				processedNodes.add(existsNode);
 			}
-			Map<Description, Equivalences<Description>> equivalencesClasses = new HashMap<Description, Equivalences<Description>>();
-			DAGBuilder.getDAG(graph, equivalencesClasses);
 	}
 	
 	@Override
