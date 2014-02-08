@@ -23,8 +23,6 @@ import java.util.Set;
  */
 public interface TBoxReasoner {
 	
-	@Deprecated
-	public Set<Equivalences<Description>> getDirectChildren(Description desc);
 	public Set<Equivalences<Property>> getDirectSubProperties(Property desc);
 	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc);
 
@@ -36,8 +34,6 @@ public interface TBoxReasoner {
 	 * @param desc: a class or a property
 	 * @return equivalence classes for all sub-descriptions (including desc)
 	 */
-	@Deprecated
-	public Set<Equivalences<Description>> getDescendants(Description desc);
 	public Set<Equivalences<Property>> getSubProperties(Property desc);
 	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc);
 
@@ -51,8 +47,6 @@ public interface TBoxReasoner {
 
 	public Equivalences<Property> getEquivalences(Property desc);
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc);
-	@Deprecated
-	public Equivalences<Description> getEquivalences(Description desc);
 	
 	public Set<Equivalences<Description>> getNodes();
 	

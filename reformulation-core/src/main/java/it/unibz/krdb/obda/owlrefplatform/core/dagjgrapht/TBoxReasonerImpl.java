@@ -187,7 +187,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
 		return classDAG.getDirectChildren(classDAG.getVertex(desc));
 	}
-	@Override // NOT ONLY TEST 
+	
+	@Deprecated // NOT ONLY TEST 
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -271,7 +272,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
 		return classDAG.getDescendants(classDAG.getVertex(desc));
 	}
-	@Override // NOT ONLY (!) TESTS
+	
+	@Deprecated // NOT ONLY (!) TESTS
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -344,7 +346,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
 		return classDAG.getVertex(desc);
 	}
-	@Override
+	// NOT ONLY TESTS
+	@Deprecated
 	public Equivalences<Description> getEquivalences(Description desc) {
 		return dag.getVertex(desc);
 	}

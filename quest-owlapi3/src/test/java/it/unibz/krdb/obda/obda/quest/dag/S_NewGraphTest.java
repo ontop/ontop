@@ -50,8 +50,8 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("See information");
 		System.out.println("vertexes"+ graph.vertexSet());
 		log.debug("vertexes {}", graph.vertexSet());
-		System.out.println(reasoner.getClasses());
-		System.out.println(reasoner.getRoles());
+		//System.out.println(reasoner.getClasses());
+		//System.out.println(reasoner.getRoles());
 		System.out.println(graph.edgeSet());
 //		
 		log.info("From graph to dag");

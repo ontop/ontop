@@ -64,21 +64,10 @@ public class TestTBoxReasonerImplOnGraph {
 			}
 		}
 	}
-
-	//return all roles in the graph
-	public Set<Property> getRoles() {
-		return property;
-	}
-
-	/**
-	 * Allows to have all named classes in the graph
-	 * @return  set of all named concepts in the graph
-	 */
-
-	public Set<OClass> getClasses(){
-		return namedClasses;
-	}
 	
+	public boolean isNamed(Description vertex) {
+		return property.contains(vertex) || namedClasses.contains(vertex);
+	}
 	
 	/**
 	 * return the direct children starting from the given node of the dag

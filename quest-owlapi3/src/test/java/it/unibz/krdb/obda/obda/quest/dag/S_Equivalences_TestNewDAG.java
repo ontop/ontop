@@ -111,7 +111,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(reasonerd1.getRoles().contains(vertex)| reasonerd1.getClasses().contains(vertex)){
+				if(reasonerd1.isNamed(vertex)){
 
 					setd1	=reasonerd1.getDescendants(vertex, named);
 					log.info("vertex {}", vertex);
@@ -213,7 +213,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(reasonerd1.getRoles().contains(vertex)| reasonerd1.getClasses().contains(vertex)){
+				if(reasonerd1.isNamed(vertex)){
 
 					setd1	=reasonerd1.getDirectChildren(vertex, named);
 					log.info("vertex {}", vertex);
@@ -311,7 +311,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(reasonerd1.getRoles().contains(vertex)| reasonerd1.getClasses().contains(vertex)){
+				if(reasonerd1.isNamed(vertex)){
 
 					setd1	=reasonerd1.getAncestors(vertex, named);
 					log.info("vertex {}", vertex);
@@ -415,7 +415,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for(Description vertex: d1.vertexSet()){
 			if(named){
 
-				if(reasonerd1.getRoles().contains(vertex)| reasonerd1.getClasses().contains(vertex)){
+				if(reasonerd1.isNamed(vertex)){
 
 					setd1	=reasonerd1.getDirectParents(vertex, named);
 					log.info("vertex {}", vertex);
