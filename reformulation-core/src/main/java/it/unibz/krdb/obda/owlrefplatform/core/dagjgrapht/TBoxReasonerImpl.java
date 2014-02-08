@@ -18,21 +18,13 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
  * Allows to reason over the TBox using  DAG or graph
@@ -45,6 +37,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph; // test only
 	private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
+	private final EquivalencesDAG<Property> propertyDAG;
+	private final EquivalencesDAG<BasicClassDescription> classDAG;
 	private final EquivalencesDAG<Description> dag;
 	
 	private Set<OClass> classNames;
@@ -55,28 +49,56 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public TBoxReasonerImpl(Ontology onto) {
 		propertyGraph = OntologyGraph.getPropertyGraph(onto);
+		propertyDAG = new EquivalencesDAG<Property>(propertyGraph);
+		
 		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
+		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
+
 		graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 		Graphs.addGraph(graph, propertyGraph);
 		Graphs.addGraph(graph, classGraph);
 
 		dag = new EquivalencesDAG<Description>(graph);
-		DAGBuilder.choosePropertyRepresentatives(dag);
-		DAGBuilder.chooseClassRepresentatives(dag);
+		
+		setup();
 	}
 
 	private TBoxReasonerImpl(DefaultDirectedGraph<Property,DefaultEdge> propertyGraph, 
 					DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph) {
 		this.propertyGraph = propertyGraph;
+		propertyDAG = new EquivalencesDAG<Property>(propertyGraph);
+		
 		this.classGraph = classGraph;
+		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
+		
 		graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
 		Graphs.addGraph(graph, propertyGraph);
 		Graphs.addGraph(graph, classGraph);
 
 		dag = new EquivalencesDAG<Description>(graph);
+		
+		setup();
+	}
+
+	
+	private void setup() {
 		DAGBuilder.choosePropertyRepresentatives(dag);
 		DAGBuilder.chooseClassRepresentatives(dag);
+
+		for (Equivalences<BasicClassDescription> e : classDAG.vertexSet()) {
+			Equivalences<Description> de = dag.getVertex(e.iterator().next());
+			e.setRepresentative((BasicClassDescription)de.getRepresentative());
+			if (de.isIndexed())
+				e.isIndexed();
+		}
+		for (Equivalences<Property> e : propertyDAG.vertexSet()) {
+			Equivalences<Description> de = dag.getVertex(e.iterator().next());
+			e.setRepresentative((Property)de.getRepresentative());
+			if (de.isIndexed())
+				e.isIndexed();
+		}		
 	}
+
 
 
 	@Override

@@ -24,7 +24,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * TEST ONLY CLASS
  */
 
-public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
+public class TestTBoxReasonerImplOnNamedDAG  {
 
 	private NamedDAG dag;
 	private TBoxReasonerImpl reasoner;
@@ -58,7 +58,6 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	@Override
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
 		
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -121,7 +120,6 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 * */
-	@Override
 	public Set<Equivalences<Description>> getDirectParents(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -186,7 +184,6 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	@Override
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -222,7 +219,6 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Override
 	public Set<Equivalences<Description>> getAncestors(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -253,7 +249,6 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * @return we return a set of description with equivalent nodes 
 	 */
 
-	@Override
 	public Equivalences<Description> getEquivalences(Description desc) {
 		
 		Set<Description> equivalences = new LinkedHashSet<Description>();
@@ -273,7 +268,6 @@ public class TestTBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Override
 	public Set<Equivalences<Description>> getNodes() {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();

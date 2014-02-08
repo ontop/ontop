@@ -19,7 +19,7 @@ import java.util.Set;
  * 
  */
 
-public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
+public class Test_NamedTBoxReasonerImpl {
 
 	private TBoxReasonerImpl reasoner;
 
@@ -39,7 +39,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	@Override
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
 		
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -68,7 +67,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 * */
-	@Override
 	public Set<Equivalences<Description>> getDirectParents(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -98,7 +96,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	@Override
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -121,7 +118,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Override
 	public Set<Equivalences<Description>> getAncestors(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -142,7 +138,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 * @return we return a set of description with equivalent nodes 
 	 */
 
-	@Override
 	public Equivalences<Description> getEquivalences(Description desc) {
 
 		Set<Description> equivalences = new LinkedHashSet<Description>();
@@ -168,7 +163,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Override
 	public Set<Equivalences<Description>> getNodes() {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();

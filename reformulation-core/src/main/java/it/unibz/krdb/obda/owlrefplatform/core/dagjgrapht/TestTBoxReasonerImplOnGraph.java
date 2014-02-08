@@ -17,11 +17,9 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
@@ -39,7 +37,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * 
  */
 
-public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
+public class TestTBoxReasonerImplOnGraph {
 
 	private DefaultDirectedGraph<Description,DefaultEdge> graph;
 	AbstractGraphIterator<Description, DefaultEdge> iterator;
@@ -93,7 +91,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	@Override
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
 		return getDirectChildren(desc,false);
 	}
@@ -197,7 +194,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 * */
-	@Override
 	public Set<Equivalences<Description>> getDirectParents(Description desc) {
 		return getDirectParents(desc,false);
 	}
@@ -300,7 +296,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	@Override
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
 		return getDescendants(desc, false);
 	}
@@ -350,7 +345,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Override
 	public Set<Equivalences<Description>> getAncestors(Description desc) {
 		return getAncestors(desc, false);
 	}
@@ -397,7 +391,6 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 	 * @return we return a set of description with equivalent nodes 
 	 */
 
-	@Override
 	public Equivalences<Description> getEquivalences(Description desc) {
 		return getEquivalences(desc, false);
 	}
@@ -544,9 +537,4 @@ public class TestTBoxReasonerImplOnGraph implements TBoxReasoner {
 			}
 	}
 	
-	@Override
-	public Set<Equivalences<Description>> getNodes() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
