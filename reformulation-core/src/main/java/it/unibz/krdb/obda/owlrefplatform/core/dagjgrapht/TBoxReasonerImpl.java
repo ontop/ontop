@@ -195,8 +195,35 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 * */
 	@Override
+	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
+		return propertyDAG.getDirectParents(propertyDAG.getVertex(desc));
+	}
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
+		return classDAG.getDirectParents(classDAG.getVertex(desc));
+	}
+	
+	@Deprecated // TEST ONLY
 	public Set<Equivalences<Description>> getDirectParents(Description desc) {
-		return dag.getDirectParents(dag.getVertex(desc));
+
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+
+		if (desc instanceof Property) {
+			for (Equivalences<Property> e : getDirectSuperProperties((Property)desc)) {
+				Description parent = e.getRepresentative();
+				Equivalences<Description> namedEquivalences = getEquivalences(parent);
+				result.add(namedEquivalences);
+			}
+		}
+		else {
+			for (Equivalences<BasicClassDescription> e : getDirectSuperClasses((BasicClassDescription)desc)) {
+				Description parent = e.getRepresentative();		
+				Equivalences<Description> namedEquivalences = getEquivalences(parent);
+				result.add(namedEquivalences);
+			}
+			
+		}
+		return result;
 	}
 
 
@@ -395,14 +422,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					modifiedGraph.addEdge(child, existsNode);
 			}
 
-			for (Equivalences<Description> parents : tbox.getDirectParents(existsNode)) {
-				BasicClassDescription parent = (BasicClassDescription)parents.getRepresentative(); 
+			for (Equivalences<BasicClassDescription> parents : tbox.getDirectSuperClasses(existsNode)) {
+				BasicClassDescription parent = parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
 					modifiedGraph.addEdge(existsInvNode, parent);
 			}
 
-			for (Equivalences<Description> parents : tbox.getDirectParents(existsInvNode)) {
-				BasicClassDescription parent = (BasicClassDescription)parents.getRepresentative(); 
+			for (Equivalences<BasicClassDescription> parents : tbox.getDirectSuperClasses(existsInvNode)) {
+				BasicClassDescription parent = parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
 					modifiedGraph.addEdge(existsNode, parent);
 			}

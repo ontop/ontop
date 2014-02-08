@@ -8,7 +8,10 @@
  */
 
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
+
 import java.util.List;
 import java.util.Set;
 
@@ -76,10 +79,14 @@ public class NamedDAG  {
 		for (Equivalences<Description> v : reasoner.getNodes()) 
 			namedDag.addVertex(v.getRepresentative());
 		
-		for (Equivalences<Description> s : reasoner.getNodes()) 
-			for (Equivalences<Description> t : reasoner.getDirectParents(s.getRepresentative())) 
-				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
-		
+		for (Equivalences<Description> s : reasoner.getNodes()) {
+			if (s.getRepresentative() instanceof Property)
+				for (Equivalences<Property> t : reasoner.getDirectSuperProperties((Property)s.getRepresentative())) 
+					namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
+			else
+				for (Equivalences<BasicClassDescription> t : reasoner.getDirectSuperClasses((BasicClassDescription)s.getRepresentative())) 
+					namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
+		}
 
 		for (Equivalences<Description> v : reasoner.getNodes()) 
 			if (!v.isIndexed()) {
