@@ -386,6 +386,16 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	@Deprecated // test only
+	public DefaultDirectedGraph<BasicClassDescription,DefaultEdge> getClassGraph() {
+		return classGraph;
+	}
+	
+	@Deprecated // test only
+	public DefaultDirectedGraph<Property,DefaultEdge> getPropertyGraph() {
+		return propertyGraph;
+	}
+	
+	@Deprecated // test only
 	public EquivalencesDAG<Description> getDAG() {
 		return dag;
 	}

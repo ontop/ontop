@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_NamedTBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -490,22 +490,21 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		}
 		return true;
 	}
-
+/*
 			private boolean checkVertexReduction(DefaultDirectedGraph<Description,DefaultEdge> d1, Test_NamedTBoxReasonerImpl d2, boolean named){
 
 				//number of vertexes in the graph
 				int numberVertexesD1= 0;
-				/*
-				if(d2.isaNamedDAG()){
-					for (Description v: d1.vertexSet()){
-						if(d1.getRoles().contains(v)| d1.getClasses().contains(v)){	
-							numberVertexesD1++;
-							System.out.println(v);
-						}
-					}
-				}
-				else
-				*/ 
+				//
+				//if(d2.isaNamedDAG()){
+				//	for (Description v: d1.vertexSet()){
+				//		if(d1.getRoles().contains(v)| d1.getClasses().contains(v)){	
+				//			numberVertexesD1++;
+				//			System.out.println(v);
+				//		}
+				//	}
+				//}
+				//else			 
 					numberVertexesD1= d1.vertexSet().size();
 				
 				//number of vertexes in the dag
@@ -575,7 +574,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				return numberEdgesD1>= (numberEquivalents+ numberEdgesD2);
 
 			}
-			
+*/			
 			private boolean checkforNamedVertexesOnly(TestTBoxReasonerImplOnNamedDAG namedDag2){
 				boolean result = false;
 				for(Description vertex: namedDag2.vertexSet()){

@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnGraph;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import java.io.File;
 
@@ -45,7 +45,7 @@ public class S_NewGraphTest  extends TestCase{
 		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
 		DefaultDirectedGraph<Description,DefaultEdge> graph = r.getGraph();
 		System.out.println(graph);
-		TestTBoxReasonerImplOnGraph reasoner = new TestTBoxReasonerImplOnGraph(graph);
+		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(r);
 		
 		log.info("See information");
 		System.out.println("vertexes"+ graph.vertexSet());
