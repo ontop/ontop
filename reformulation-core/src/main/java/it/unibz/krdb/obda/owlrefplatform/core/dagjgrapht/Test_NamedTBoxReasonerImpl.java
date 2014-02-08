@@ -243,8 +243,13 @@ public class Test_NamedTBoxReasonerImpl {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
-		for (Equivalences<Description> e : reasoner.getNodes()) {
-			Equivalences<Description> nodes = getEquivalences(e.getRepresentative());
+		for (Equivalences<Property> e : reasoner.getProperties()) {
+			Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
+		}
+		for (Equivalences<BasicClassDescription> e : reasoner.getClasses()) {
+			Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
 			if (!nodes.isEmpty())
 				result.add(nodes);			
 		}
