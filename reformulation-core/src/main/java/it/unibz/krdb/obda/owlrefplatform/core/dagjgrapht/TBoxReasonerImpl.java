@@ -89,13 +89,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			Equivalences<Description> de = dag.getVertex(e.iterator().next());
 			e.setRepresentative((BasicClassDescription)de.getRepresentative());
 			if (de.isIndexed())
-				e.isIndexed();
+				e.setIndexed();
 		}
 		for (Equivalences<Property> e : propertyDAG.vertexSet()) {
 			Equivalences<Description> de = dag.getVertex(e.iterator().next());
 			e.setRepresentative((Property)de.getRepresentative());
 			if (de.isIndexed())
-				e.isIndexed();
+				e.setIndexed();
 		}		
 	}
 

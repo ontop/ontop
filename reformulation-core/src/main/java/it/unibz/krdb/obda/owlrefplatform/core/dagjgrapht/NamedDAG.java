@@ -76,19 +76,35 @@ public class NamedDAG  {
 		SimpleDirectedGraph <Description,DefaultEdge>  namedDag 
 					= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
 
-		for (Equivalences<Description> v : reasoner.getNodes()) 
+		for (Equivalences<Property> v : reasoner.getProperties()) 
 			namedDag.addVertex(v.getRepresentative());
 		
-		for (Equivalences<Description> s : reasoner.getNodes()) {
-			if (s.getRepresentative() instanceof Property)
-				for (Equivalences<Property> t : reasoner.getDirectSuperProperties((Property)s.getRepresentative())) 
-					namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
-			else
-				for (Equivalences<BasicClassDescription> t : reasoner.getDirectSuperClasses((BasicClassDescription)s.getRepresentative())) 
-					namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
-		}
+		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
+			namedDag.addVertex(v.getRepresentative());
+		
+		for (Equivalences<Property> s : reasoner.getProperties()) 
+			for (Equivalences<Property> t : reasoner.getDirectSuperProperties(s.getRepresentative())) 
+				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
+		
+		for (Equivalences<BasicClassDescription> s : reasoner.getClasses()) 
+			for (Equivalences<BasicClassDescription> t : reasoner.getDirectSuperClasses(s.getRepresentative())) 
+				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
 
-		for (Equivalences<Description> v : reasoner.getNodes()) 
+		for (Equivalences<Property> v : reasoner.getProperties()) 
+			if (!v.isIndexed()) {
+				// eliminate node
+				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(v.getRepresentative())) { 
+					Description source = namedDag.getEdgeSource(incEdge);
+
+					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(v.getRepresentative())) {
+						Description target = namedDag.getEdgeTarget(outEdge);
+
+						namedDag.addEdge(source, target);
+					}
+				}
+				namedDag.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
+			}
+		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
 			if (!v.isIndexed()) {
 				// eliminate node
 				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(v.getRepresentative())) { 
