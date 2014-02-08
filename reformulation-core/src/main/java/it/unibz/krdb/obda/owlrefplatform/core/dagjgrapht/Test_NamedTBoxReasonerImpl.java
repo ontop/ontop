@@ -46,15 +46,31 @@ public class Test_NamedTBoxReasonerImpl {
 		
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
-		for (Equivalences<Description> e : reasoner.getDirectChildren(desc)) {
-			Description child = e.getRepresentative();
+		if (desc instanceof Property) {
+			for (Equivalences<Property> e : reasoner.getDirectSubProperties((Property)desc)) {
+				Description child = e.getRepresentative();
+				
+				// get the child node and its equivalent nodes
+				Equivalences<Description> namedEquivalences = getEquivalences(child);
+				if (!namedEquivalences.isEmpty())
+					result.add(namedEquivalences);
+				else 
+					result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
+			}
 			
-			// get the child node and its equivalent nodes
-			Equivalences<Description> namedEquivalences = getEquivalences(child);
-			if (!namedEquivalences.isEmpty())
-				result.add(namedEquivalences);
-			else 
-				result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
+		}
+		else {
+			for (Equivalences<BasicClassDescription> e : reasoner.getDirectSubClasses((BasicClassDescription)desc)) {
+				Description child = e.getRepresentative();
+				
+				// get the child node and its equivalent nodes
+				Equivalences<Description> namedEquivalences = getEquivalences(child);
+				if (!namedEquivalences.isEmpty())
+					result.add(namedEquivalences);
+				else 
+					result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
+			}
+			
 		}
 
 		return result;

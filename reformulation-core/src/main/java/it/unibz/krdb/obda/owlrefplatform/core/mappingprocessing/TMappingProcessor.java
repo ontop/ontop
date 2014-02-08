@@ -652,14 +652,20 @@ public class TMappingProcessor implements Serializable {
 		}
 	}
 
+/*	
 	private List<Description> getLeafs(Collection<Description> nodes) {
 		LinkedList<Description> leafs = new LinkedList<Description>();
 		for (Description node : nodes) {
-			if (reasoner.getDirectChildren(node).isEmpty())
-
-				leafs.add(node);
+			if (node instanceof Property) {
+				if (reasoner.getDirectSubProperties((Property)node).isEmpty())
+					leafs.add(node);
+			}
+			else {
+				if (reasoner.getDirectSubClasses((BasicClassDescription)node).isEmpty())
+					leafs.add(node);				
+			}
 		}
 		return leafs;
 	}
-
+*/
 }

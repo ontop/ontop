@@ -1887,13 +1887,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		// // e.printStackTrace();
 		// }
 
-		Set<Description> roleNodes = new HashSet<Description>();
-		Map<Description, List<Description>> roleInverseMaps = new HashMap<Description, List<Description>>();
+		Set<Property> roleNodes = new HashSet<Property>();
+		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
 		Set<Predicate> roles = ontology.getRoles();
 		for (Predicate rolepred : roles) {
 
-			Description node = reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
+			Property node = (Property)reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
 			// We only map named roles
 			if (!(node instanceof Property)
 					|| ((Property) node).isInverse()) {
@@ -1901,9 +1901,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 			roleNodes.add(node);
 
-			List<Description> roleInverseChildren = roleInverseMaps.get(node);
+			List<Property> roleInverseChildren = roleInverseMaps.get(node);
 			if (roleInverseChildren == null) {
-				roleInverseChildren = new LinkedList<Description>();
+				roleInverseChildren = new LinkedList<Property>();
 				roleInverseMaps.put(node, roleInverseChildren);
 			}
 
@@ -1913,21 +1913,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * 
 			 * Collecting the top most allows us to avoid redundancy elimination
 			 */
-			Queue<Equivalences<Description>> childrenQueue = new LinkedList<Equivalences<Description>>();
-			childrenQueue.addAll(reasonerDag.getDirectChildren(node));
+			Queue<Equivalences<Property>> childrenQueue = new LinkedList<Equivalences<Property>>();
+			childrenQueue.addAll(reasonerDag.getDirectSubProperties(node));
 			childrenQueue.add(reasonerDag.getEquivalences(node));
 
 
 			while (!childrenQueue.isEmpty()) {
-				Equivalences<Description> children = childrenQueue.poll();
-				Description child = children.getRepresentative();
+				Equivalences<Property> children = childrenQueue.poll();
+				Property child = children.getRepresentative();
 				if(child.equals(node))
 					continue;
 				if ((child instanceof Property)
 						&& ((Property) child).isInverse()) {
 					roleInverseChildren.add(child);
 				} else {
-					childrenQueue.addAll((reasonerDag.getDirectChildren(child)));
+					childrenQueue.addAll((reasonerDag.getDirectSubProperties(child)));
 				}
 			}
 

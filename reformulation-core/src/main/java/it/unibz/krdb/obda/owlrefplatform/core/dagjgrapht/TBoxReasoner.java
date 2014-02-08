@@ -22,8 +22,11 @@ import java.util.Set;
  *
  */
 public interface TBoxReasoner {
-
+	
+	@Deprecated
 	public Set<Equivalences<Description>> getDirectChildren(Description desc);
+	public Set<Equivalences<Property>> getDirectSubProperties(Property desc);
+	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc);
 
 	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc);
 	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc);

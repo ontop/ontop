@@ -180,8 +180,34 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 	@Override
+	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {
+		return propertyDAG.getDirectChildren(propertyDAG.getVertex(desc));
+	}
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
+		return classDAG.getDirectChildren(classDAG.getVertex(desc));
+	}
+	@Override // NOT ONLY TEST 
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
-		return dag.getDirectChildren(dag.getVertex(desc));
+
+		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+
+		if (desc instanceof Property) {
+			for (Equivalences<Property> e : getDirectSubProperties((Property)desc)) {
+				Description parent = e.getRepresentative();
+				Equivalences<Description> namedEquivalences = getEquivalences(parent);
+				result.add(namedEquivalences);
+			}
+		}
+		else {
+			for (Equivalences<BasicClassDescription> e : getDirectSubClasses((BasicClassDescription)desc)) {
+				Description parent = e.getRepresentative();		
+				Equivalences<Description> namedEquivalences = getEquivalences(parent);
+				result.add(namedEquivalences);
+			}
+			
+		}
+		return result;
 	}
 
 
@@ -411,13 +437,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			BasicClassDescription existsInvNode = (BasicClassDescription)tbox.getRepresentativeFor(
 						fac.createPropertySomeRestriction(existsNode.getPredicate(), !existsNode.isInverse()));
 			
-			for (Equivalences<Description> children : tbox.getDirectChildren(existsNode)) {
-				BasicClassDescription child = (BasicClassDescription)children.getRepresentative(); 
+			for (Equivalences<BasicClassDescription> children : tbox.getDirectSubClasses(existsNode)) {
+				BasicClassDescription child = children.getRepresentative(); 
 				if (!child.equals(existsInvNode))
 					modifiedGraph.addEdge(child, existsInvNode);
 			}
-			for (Equivalences<Description> children : tbox.getDirectChildren(existsInvNode)) {
-				BasicClassDescription child = (BasicClassDescription)children.getRepresentative(); 
+			for (Equivalences<BasicClassDescription> children : tbox.getDirectSubClasses(existsInvNode)) {
+				BasicClassDescription child = children.getRepresentative(); 
 				if (!child.equals(existsNode))
 					modifiedGraph.addEdge(child, existsNode);
 			}

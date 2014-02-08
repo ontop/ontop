@@ -104,8 +104,8 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Equivalences<Description> children_prime : isa.getDirectChildren(parent)) {
-				Property child_prime = (Property) children_prime.getRepresentative();
+			for (Equivalences<Property> children_prime : isa.getDirectSubProperties(parent)) {
+				Property child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant_role(child_prime, child) && 
