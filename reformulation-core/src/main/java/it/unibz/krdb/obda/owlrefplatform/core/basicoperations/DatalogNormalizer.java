@@ -51,18 +51,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /***
  * Implements several transformations on the rules of a datalog program that
  * make it easier to evaluate query containment, or to translate into SQL.
  * 
- * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>, mrezk 
  * 
  */
 public class DatalogNormalizer {
 
 	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
+	private final static Map<Variable, Term> substitutionsTotal= new HashMap<Variable,Term>();
+	
 	/***
 	 * Normalizes all the rules in a Datalog program, pushing equalities into
 	 * the atoms of the queries, when possible
@@ -344,8 +350,9 @@ public class DatalogNormalizer {
 		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
 		int[] newVarCounter = { 1 };
 
-		Set<Function> booleanAtoms = new HashSet<Function>();
+		//Set<Function> booleanAtoms = new HashSet<Function>();
 		List<Function> equalities = new LinkedList<Function>();
+		
 		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
 		List<Function> body = query.getBody();
 		body.addAll(equalities);
@@ -443,11 +450,19 @@ public class DatalogNormalizer {
 	 * 
 	 * @param currentTerms
 	 * @param substitutions
+	 * @return 
 	 */
 
-	private static void pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter,
+	@SuppressWarnings("unchecked")
+	private static List<Function> pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter,
 			boolean isLeftJoin) {
 
+
+		//Multimap<Variable, Function> mapVarAtom =  HashMultimap.create();
+		
+		List<Function> eqGoOutside = new LinkedList<Function>();
+
+		
 		for (int i = 0; i < currentTerms.size(); i++) {
 
 			Term term = (Term) currentTerms.get(i);
@@ -464,10 +479,23 @@ public class DatalogNormalizer {
 			List<Term> subterms = atom.getTerms();
 
 			if (atom.isAlgebraFunction()) {
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
-					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, true);
-				else
-					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false);
+				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN){
+					eqGoOutside.addAll(pullOutEqualities(subterms, substitutions, eqList, newVarCounter, true));
+					
+					Set<Variable> uniVarTm = new HashSet<Variable>();
+					getVariablesFromList(subterms, uniVarTm);
+
+					for (Function eq:eqGoOutside){
+						if (uniVarTm.containsAll(eq.getReferencedVariables())){
+							subterms.add(eq);
+							eqGoOutside.remove(eq);
+						}
+					}
+				}
+				
+				else{
+					eqGoOutside.addAll(pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false));
+				}
 
 			} else if (atom.isBooleanFunction()) {
 				continue;
@@ -479,7 +507,8 @@ public class DatalogNormalizer {
 			for (int j = 0; j < subterms.size(); j++) {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
-
+					
+					//mapVarAtom.put((Variable)subTerm, atom);
 					renameVariable(substitutions, eqList, newVarCounter, atom,	subterms, j, (Variable) subTerm);
 					
 				} else if (subTerm instanceof Constant) {
@@ -517,10 +546,51 @@ public class DatalogNormalizer {
 					}
 				}
 			} // end for subterms
+			
+			
+			
+			
+			
+			
+			
+			
+			//TODO: WHat about the JOIN????
+			if (isLeftJoin){
+/*
+				Set<Variable> uniVarTm = new HashSet<Variable>();
+				getVariablesFromList(currentTerms, uniVarTm);
 
-			currentTerms.addAll(i + 1, eqList);
-			i = i + eqList.size();
-			eqList.clear();
+				for (Function eq:eqList){
+					
+					//If the variables in the equality are contained in the current terms we add the equality
+					boolean containsVars = uniVarTm.contains(eq.getReferencedVariables());
+					if (containsVars){
+						
+						currentTerms.add(i + 1, eq);
+						eqList.remove(eq);
+					}
+				} //END FOR
+				*/
+				eqGoOutside.addAll(eqList);
+				eqList.clear();
+			}else{
+				currentTerms.addAll(i + 1, eqList);
+				i = i + eqList.size();
+				eqList.clear();
+			}
+			
+		}//end for current terms
+		return eqGoOutside;
+	}
+
+	/**
+	 * @param currentTerms
+	 * @param uniVar
+	 */
+	private static void getVariablesFromList(List currentTerms,
+			Set<Variable> uniVar) {
+		for (Object te:currentTerms){
+			uniVar.addAll(((Term) te).getReferencedVariables());
 		}
 	}
 
@@ -574,6 +644,7 @@ public class DatalogNormalizer {
 		Variable var1 = (Variable) subTerm;
 		Variable var2 = (Variable) substitutions.get(var1);
 
+		
 		if (var2 == null) {
 			/*
 			 * No substitution exists, hence, no action but generate a new
@@ -583,6 +654,7 @@ public class DatalogNormalizer {
 			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
 
 			substitutions.put(var1, var2);
+			substitutionsTotal.put(var1, var2);
 			subterms.set(j, var2);
 
 		} else {
@@ -592,12 +664,20 @@ public class DatalogNormalizer {
 			 * current value, and add an equality between the substitution and
 			 * the new value.
 			 */
+			
+			while (substitutionsTotal.containsKey(var2)){
+				var2=(Variable) substitutionsTotal.get(var2);
+			}
 
 			if (atom.isDataFunction()) {
 				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
 
 				subterms.set(j, newVariable);
+
 				Function equality = fac.getFunctionEQ(var2, newVariable);
+
+				substitutionsTotal.put(var2, newVariable);
+
 				eqList.add(equality);
 
 			} else { // if its not data function, just replace

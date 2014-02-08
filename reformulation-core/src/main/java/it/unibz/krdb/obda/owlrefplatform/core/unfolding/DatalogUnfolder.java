@@ -200,6 +200,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		//TODO: SEE WHAT TO DO WITH THIS METHOD !!
 		for (CQIE rule: partialEvaluation.getRules()){
+			
 			DatalogNormalizer.pullOutEqualities(rule);
 			System.out.println(rule);
 		}
@@ -269,9 +270,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
-		for (CQIE query : workingSet) {	
-			DatalogNormalizer.enforceEqualities(query, false);
-		}
+	
 
 		if (includeMappings){
 			computePartialEvaluationWRTMappings(workingSet);
