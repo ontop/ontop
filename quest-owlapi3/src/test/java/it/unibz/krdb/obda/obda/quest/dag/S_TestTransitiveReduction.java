@@ -121,7 +121,7 @@ public class S_TestTransitiveReduction extends TestCase {
 
 		TestTBoxReasonerImplOnGraph reasonerd1= new TestTBoxReasonerImplOnGraph(g1);
 
-		Set<Equivalences<Description>> nodesg1= reasonerd1.getNodes(false);
+		Set<Equivalences<Description>> nodesg1= reasonerd1.getNodes();
 		Iterator<Equivalences<Description>> it2 =nodesg1.iterator();
 		
 

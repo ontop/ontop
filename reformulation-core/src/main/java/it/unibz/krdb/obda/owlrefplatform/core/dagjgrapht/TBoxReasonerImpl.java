@@ -361,7 +361,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Deprecated
+	@Deprecated // TESTS ONLY
 	public Set<Equivalences<Description>> getNodes() {
 		return dag.vertexSet();
 	}
