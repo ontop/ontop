@@ -1155,6 +1155,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = jdbcutil.getSQLLexicalForm(uc.getURI().toString());
+		} else if (ht instanceof Variable){
+			// TODO: guohui
+			// Hacky
+			Variable termVar = (Variable)ht;
+			mainColumn = getSQLString(termVar , index, false);
+
 		} else if (ht == OBDAVocabulary.NULL) {
 			mainColumn = "NULL";
 		} else if (ht instanceof Function) {
@@ -1322,6 +1328,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (ht instanceof URIConstant) {
 			return (String.format(typeStr, 1, varName));
 		} else if (ht == OBDAVocabulary.NULL) {
+			return (String.format(typeStr, 0, varName));
+		} else if (ht instanceof Variable){
+			//TODO guohui this is a hacky solution
 			return (String.format(typeStr, 0, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
