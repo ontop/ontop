@@ -505,8 +505,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		DatalogNormalizer.foldJoinTrees(cq, false);
 
 //			log.debug("Before pulling out equalities: \n{}", cq);
-		
-		DatalogNormalizer.pullOutEqualities(cq);
+	
+		//we dont need this anymore, done before
+//	DatalogNormalizer.pullOutEqualities(cq);
 		
 //			log.debug("Before pulling out Left Join Conditions: \n{}", cq);
 		

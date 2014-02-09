@@ -200,12 +200,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		//TODO: SEE WHAT TO DO WITH THIS METHOD !!
 		
-		for (CQIE rule: partialEvaluation.getRules()){
-			
-			DatalogNormalizer.pullOutEqualities(rule);
-			System.out.println(rule);
+		if (!includeMappings){
+			for (CQIE rule: partialEvaluation.getRules()){
+
+				DatalogNormalizer.pullOutEqualities(rule);
+				System.out.println(rule);
+			}
 		}
-		
 		
 		return dp;
 	}
