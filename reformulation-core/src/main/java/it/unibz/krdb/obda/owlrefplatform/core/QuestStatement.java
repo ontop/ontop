@@ -729,6 +729,18 @@ public class QuestStatement implements OBDAStatement {
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
 				final long endTime = System.currentTimeMillis();
 				unfoldingTime = endTime - startTime;
+
+
+
+				//TODO: SEE WHAT TO DO WITH THIS METHOD !!
+
+				for (CQIE rule: programAfterUnfolding.getRules()){
+					DatalogNormalizer.pullOutEqualities(rule);
+					System.out.println(rule);
+				}
+				
+				
+				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
