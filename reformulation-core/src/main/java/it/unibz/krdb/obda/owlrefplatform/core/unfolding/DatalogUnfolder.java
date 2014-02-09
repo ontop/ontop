@@ -199,12 +199,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		dp.appendRule(partialEvaluation.getRules());
 
 		//TODO: SEE WHAT TO DO WITH THIS METHOD !!
-		/*
+		
 		for (CQIE rule: partialEvaluation.getRules()){
 			
 			DatalogNormalizer.pullOutEqualities(rule);
 			System.out.println(rule);
-		}*/
+		}
 		
 		
 		return dp;
