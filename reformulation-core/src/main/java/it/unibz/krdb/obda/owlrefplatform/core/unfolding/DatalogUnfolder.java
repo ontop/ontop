@@ -374,7 +374,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 	
 /**
- * TODO: ADD COMMENT !!
+ * <p>
+ * TODO: This method compute the partial evaluation of the query in a bottom-up fashion without considering the mappings.
+ * It will start the leaves parents (ans predicates) and start going up. If there is a leftjoin it will stop unfolding
+ * </p>
+ * 
+ * <p>
+ * Consider the program
+ * <ul>
+ * <li> Ans1(x) :- Ans(2)
+ * <li> Ans2(x) :- Emploee
+ * </ul>
+ * It will start by considering Ans2(x)---pred--- use the index to find the father atom, Ans1(x), and the father rule.
+ * It gives all this information to  computePartialEvaluation and returns the unfolding program afterwards since Ans1 has no father atom.
+ * </p>
  * 
  * @param workingList
  * @param includingMappings
@@ -392,44 +405,55 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 			List<CQIE> fatherCollection = new LinkedList<CQIE>();
 
+			//We iterate over the ordered predicates in the program according to the dependencies
 			for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
+				//get the predicate
 				Predicate pred = predicatesInBottomUp.get(predIdx);
+				//get the father predicate
 				Predicate preFather =  depGraph.getFatherPredicate(pred);
 				
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
+					//get all the indexes we need
 					ruleIndex = depGraph.getRuleIndex();
 					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
-					Collection<CQIE> workingRules = ruleIndex.get(pred);
-				
+					
+					
 					
 					fatherCollection.clear();
+					
+					//The rules USING pred
 					Collection<CQIE> ruleCollection = ruleIndexByBody.get(pred);
-	
 					
-					for (CQIE fatherRule:  ruleCollection) {
-						CQIE copyruleCqie = fatherRule.clone();
-						fatherCollection.add(copyruleCqie);
-					}
+					//The rules DEFINING pred
+					Collection<CQIE> workingRules = ruleIndex.get(pred);
 					
+					
+					cloneRules(fatherCollection, ruleCollection);
+					
+					//We unfold every rule of the father atom that contains pred
 					for (CQIE fatherRule : fatherCollection) {
+						
 						
 						int queryIdx=workingList.indexOf(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
 						List<Term> fatherTerms = getBodyTerms(fatherRule);
-						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, false,includingMappings);
+						
+						/*
+						 * This we compute the partial evaluation. The variable parentIsLeftJoin is false because here we do not process 
+						 * the atom itself, but we delegate this task to computePartialEvaluation. Inside that method we check if the atom
+						 * is a leftjoin, in case that it is an algebra atom.
+						 */
+						boolean parentIsLeftJoin = false;
+						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,includingMappings);
 						
 						if (result == null) {
 							/*
 							 * If the result is null the rule is logically empty
 							 */
 							workingList.remove(queryIdx);
-							
-							System.out.println("UDPATE INDEX!!");
-							
-							// queryIdx -= 1;
 							continue;
 
 						} else if (result.size() == 0) {
@@ -489,6 +513,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			} // end for over the ordered predicates
 			return rcount[1];
 		}
+
+/**
+ * @param fatherCollection
+ * @param ruleCollection
+ */
+private void cloneRules(List<CQIE> fatherCollection,
+		Collection<CQIE> ruleCollection) {
+	for (CQIE fatherRule:  ruleCollection) {
+		CQIE copyruleCqie = fatherRule.clone();
+		fatherCollection.add(copyruleCqie);
+	}
+}
 	
 		
 		
@@ -539,10 +575,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					Collection<CQIE> ruleCollection = ruleIndexByBody.get(pred);
 					
 					
-					for (CQIE fatherRule:  ruleCollection) {
-						CQIE copyruleCqie = fatherRule.clone();
-						fatherCollection.add(copyruleCqie);
-					}
+					cloneRules(fatherCollection, ruleCollection);
 					
 					for (CQIE fatherRule:  fatherCollection) {
 						List<Term> ruleTerms = getBodyTerms(fatherRule);
