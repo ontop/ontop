@@ -733,12 +733,17 @@ public class QuestStatement implements OBDAStatement {
 
 
 				//TODO: SEE WHAT TO DO WITH THIS METHOD !!
-
+				//TODO: CREATE  PROERLY
+				
+				DatalogProgram programEqOut= programAfterRewriting;
+				programEqOut.removeAllRules();
+				
 				for (CQIE rule: programAfterUnfolding.getRules()){
-					DatalogNormalizer.pullOutEqualities(rule);
+					programEqOut.appendRule(DatalogNormalizer.pullOutEqualities(rule));
 					System.out.println(rule);
 				}
 				
+				programAfterUnfolding = programEqOut;
 				
 				
 			} catch (Exception e1) {
