@@ -365,6 +365,8 @@ public class DatalogNormalizer {
 
 		Unifier.applyUnifier(query, substitutions, false);
 		
+		substitutionsTotal.clear();
+		
 		/**
 		 * For debugging only
 		 */
