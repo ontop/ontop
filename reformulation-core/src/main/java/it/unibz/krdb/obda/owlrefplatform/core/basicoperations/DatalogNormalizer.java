@@ -484,11 +484,12 @@ public class DatalogNormalizer {
 					
 					Set<Variable> uniVarTm = new HashSet<Variable>();
 					getVariablesFromList(subterms, uniVarTm);
-
+					
+					//I find the scope of the equality
 					for (Function eq:eqGoOutside){
 						if (uniVarTm.containsAll(eq.getReferencedVariables())){
 							subterms.add(eq);
-							eqGoOutside.remove(eq);
+							//eqGoOutside.remove(eq);
 						}
 					}
 				}
@@ -672,13 +673,19 @@ public class DatalogNormalizer {
 			if (atom.isDataFunction()) {
 				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
 
+				//replace the variable name
 				subterms.set(j, newVariable);
 
-				Function equality = fac.getFunctionEQ(var2, newVariable);
-
+				//record the change
 				substitutionsTotal.put(var2, newVariable);
 
+				
+				//create the equality
+				Function equality = fac.getFunctionEQ(var2, newVariable);
 				eqList.add(equality);
+				
+
+
 
 			} else { // if its not data function, just replace
 						// variable
