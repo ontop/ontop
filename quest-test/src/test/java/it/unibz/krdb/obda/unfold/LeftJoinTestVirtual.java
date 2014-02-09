@@ -139,7 +139,7 @@ public class LeftJoinTestVirtual extends TestCase {
 			//executeQueryAssertResults(query_multi1, st, 4);
 			//executeQueryAssertResults(query_multi2, st, 6);
 			executeQueryAssertResults(query_multi3, st, 4);
-			//executeQueryAssertResults(query_multi4, st, 6);
+			//executeQueryAssertResults(query_multi4, st, 4);
 
 //			executeQueryAssertResults(query1, st, 3);
 //			executeQueryAssertResults(query2, st, 4);

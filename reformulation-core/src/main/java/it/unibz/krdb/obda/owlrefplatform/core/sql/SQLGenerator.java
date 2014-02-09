@@ -510,7 +510,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		
 //			log.debug("Before pulling out Left Join Conditions: \n{}", cq);
 		
-		DatalogNormalizer.pullOutLeftJoinConditions(cq);
+// 		----- TODO check if we really need ---
+//		DatalogNormalizer.pullOutLeftJoinConditions(cq);
 		
 //			log.debug("Before pulling up nested references: \n{}", cq);
 
@@ -567,7 +568,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Collection<CQIE> ruleList = ruleIndex.get(pred);
 		
-		String unionView = "";
+		String unionView;
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
 		
@@ -894,6 +895,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		LinkedHashSet<String> equalityConditions = new LinkedHashSet<String>();
 
 		// if (processShared)
+		
+		// guohui: After normalization, do we have shared variables?
 		LinkedHashSet<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(atoms, index, processShared);
 		equalityConditions.addAll(conditionsSharedVariablesAndConstants);
 		LinkedHashSet<String> booleanConditions = getBooleanConditionsString(atoms, index);

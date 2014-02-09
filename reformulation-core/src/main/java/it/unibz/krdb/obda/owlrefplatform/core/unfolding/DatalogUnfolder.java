@@ -1097,10 +1097,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                      */
 
                     // for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
+                    
+                    // TODO: check
+                    //parentIsLeftJoin = focusedLiteral.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_LEFTJOIN);
 
                     Predicate predicate = focusedLiteral.getFunctionSymbol();
                     boolean isLeftJoinSecondArgument = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
                     boolean focusedAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+                    
+                    
+//                    if(focusedAtomIsLeftJoin && parentIsLeftJoin){
+//                    	return emptyList;
+//                    }
+                    
                     List<CQIE> result = computePartialEvaluation(resolvPred,  focusedLiteral.getTerms(), rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings);
 
                     if (result == null)
@@ -1331,7 +1340,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 
 			
-			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
+			//if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
+			if (isSecondAtomOfLeftJoin ) {
 				/*
 				 * We had disjunction on the second atom of the lejoin, that is,
 				 * more than two rules that unified. LeftJoin is not
