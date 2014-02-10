@@ -346,7 +346,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	public static void pullOutEqualities(CQIE query) {
+	public static CQIE pullOutEqualities(CQIE query) {
 		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
 		int[] newVarCounter = { 1 };
 
@@ -371,6 +371,7 @@ public class DatalogNormalizer {
 		 * For debugging only
 		 */
 		QueryUtils.clearCache(query);
+		return query;
 
 	}
 
