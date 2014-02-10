@@ -15,7 +15,7 @@ CREATE TABLE "people" (
   PRIMARY KEY ("id")
 ) ;
 
-INSERT INTO "people" VALUES (1,'Alice',18,'alice@example.org','alice1','alice2'),(2,'Bob',19,'bob@example.org','bob1',NULL),(3,'Eve',20,'eve@example.org',NULL,NULL),(4,'Mark',NULL,'mark@example.org','mark1',NULL);
+INSERT INTO "people" VALUES (1,'Alice',18,'alice@example.org','alice1','alice2'),(2,'Bob',19,'bob@example.org','bob1',NULL),(3,'Eve',20,'eve@example.org',NULL,'eve2'),(4,'Mark',NULL,'mark@example.org','mark1',NULL);
 
 CREATE TABLE "salary1" (
   "id" int DEFAULT NULL,

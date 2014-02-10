@@ -302,6 +302,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 								}
 							}
 							
+							/*
+							 * FIXME: when no matched term found
+							 */
+							
 						}
 						
 						/*

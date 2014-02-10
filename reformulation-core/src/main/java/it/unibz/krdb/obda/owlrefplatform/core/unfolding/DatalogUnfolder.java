@@ -1376,7 +1376,10 @@ private void cloneRules(List<CQIE> fatherCollection,
 
 			
 			//if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
-			if (isSecondAtomOfLeftJoin ) {
+			//if (isSecondAtomOfLeftJoin ) {
+			if (isLeftJoin) {
+				// guohui: I changed it to not unfold inside the leftjoin, regardless of the position 
+				
 				/*
 				 * We had disjunction on the second atom of the lejoin, that is,
 				 * more than two rules that unified. LeftJoin is not
