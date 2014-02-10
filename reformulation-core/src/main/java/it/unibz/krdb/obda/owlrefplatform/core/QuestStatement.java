@@ -498,6 +498,11 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		
+		// PUSH TYPE HERE
+		
+		DatalogNormalizer.pushTypes(unfolding);
+		
+		
 		log.debug("Partial evaluation ended.");
 
 		return unfolding;
