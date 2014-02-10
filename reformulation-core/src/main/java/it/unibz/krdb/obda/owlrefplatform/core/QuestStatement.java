@@ -475,6 +475,13 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Start the partial evaluation process...");
 
 		
+		log.debug("Pulling out equalities...");
+		for (CQIE rule: query.getRules()){
+			DatalogNormalizer.pullOutEqualities(rule);
+			System.out.println(rule);
+		}
+		
+		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true);
 		log.debug("Partial evaluation: \n{}", unfolding);
@@ -723,6 +730,8 @@ public class QuestStatement implements OBDAStatement {
 				throw obdaException;
 			}
 
+			//Pulling our EQUALITIES!!
+	
 			try {
 				final long startTime = System.currentTimeMillis();
 				//Here we do include the mappings, and get the final SQL-ready program
@@ -731,7 +740,7 @@ public class QuestStatement implements OBDAStatement {
 				unfoldingTime = endTime - startTime;
 
 
-
+/*
 				//TODO: SEE WHAT TO DO WITH THIS METHOD !!
 				//TODO: CREATE  PROERLY
 				
@@ -744,7 +753,7 @@ public class QuestStatement implements OBDAStatement {
 				}
 				
 				programAfterUnfolding = programEqOut;
-				
+		*/		
 				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
