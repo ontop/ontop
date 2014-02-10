@@ -1367,7 +1367,7 @@ private void cloneRules(List<CQIE> fatherCollection,
 			
 			//if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
 			//if (isSecondAtomOfLeftJoin ) {
-			if (isLeftJoin) {
+			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
 				// guohui: I changed it to not unfold inside the leftjoin, regardless of the position 
 				
 				/*
