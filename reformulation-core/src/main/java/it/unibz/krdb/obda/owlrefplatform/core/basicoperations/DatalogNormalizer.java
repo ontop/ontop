@@ -1163,4 +1163,11 @@ public class DatalogNormalizer {
 		currentBooleans.addAll(tempConditionBooleans);
 
 	}
+
+	public static void pushTypes(DatalogProgram unfolding) {
+		// TODO Auto-generated method stub
+		// guohui
+		
+		
+	}
 }
