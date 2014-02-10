@@ -474,13 +474,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		
-		log.debug("Pulling out equalities...");
-		for (CQIE rule: query.getRules()){
-			DatalogNormalizer.pullOutEqualities(rule);
-			System.out.println(rule);
-		}
-		
+			
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true);
@@ -495,6 +489,15 @@ public class QuestStatement implements OBDAStatement {
 		evaluator.evaluateExpressions(unfolding);
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
+		
+		
+		log.debug("Pulling out equalities...");
+		for (CQIE rule: unfolding.getRules()){
+			DatalogNormalizer.pullOutEqualities(rule);
+			System.out.println(rule);
+		}
+
+		
 		log.debug("Partial evaluation ended.");
 
 		return unfolding;
