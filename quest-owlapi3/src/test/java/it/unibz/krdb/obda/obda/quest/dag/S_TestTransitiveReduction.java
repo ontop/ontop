@@ -111,25 +111,19 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		Set<Equivalences<Description>> nodesd2= d2.getNodes();
-		Iterator<Equivalences<Description>> it1 =nodesd2.iterator();
-		while (it1.hasNext()) {
-			Equivalences<Description> equivalents=it1.next();
-
-			//two nodes have two edges, three nodes have three edges...
-			if(equivalents.size()>=2){
+		for(Equivalences<Property> equivalents: d2.getProperties()) 
+			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
-			}
-		}
+			
+		for(Equivalences<BasicClassDescription> equivalents: d2.getClasses()) 
+			if(equivalents.size()>=2)
+				numberEquivalents += equivalents.size();
+
 
 		{
-			Set<Equivalences<Property>> nodesg1= reasonerd1.getProperties();
-			Iterator<Equivalences<Property>> it2 =nodesg1.iterator();
 			DefaultDirectedGraph<Property,DefaultEdge> g1 = 	reasonerd1.getPropertyGraph();	
-
-			while (it2.hasNext()) {
+			for (Equivalences<Property> equivalents: reasonerd1.getProperties()) {
 				
-				Equivalences<Property> equivalents=it2.next();
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
@@ -156,13 +150,10 @@ public class S_TestTransitiveReduction extends TestCase {
 			}
 		}
 		{
-			Set<Equivalences<BasicClassDescription>> nodesg1= reasonerd1.getClasses();
-			Iterator<Equivalences<BasicClassDescription>> it2 =nodesg1.iterator();
 			DefaultDirectedGraph<BasicClassDescription,DefaultEdge> g1 = 	reasonerd1.getClassGraph();	
 
-			while (it2.hasNext()) {
+			for (Equivalences<BasicClassDescription> equivalents : reasonerd1.getClasses()) {
 				
-				Equivalences<BasicClassDescription> equivalents=it2.next();
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges

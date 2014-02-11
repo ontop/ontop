@@ -37,7 +37,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final EquivalencesDAG<Property> propertyDAG;
 	private final EquivalencesDAG<BasicClassDescription> classDAG;
-	private final EquivalencesDAG<Description> dag;
 	
 	private Set<OClass> classNames;
 	private Set<Property> propertyNames;
@@ -52,12 +51,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
 		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
 
-		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
-		Graphs.addGraph(graph, propertyGraph);
-		Graphs.addGraph(graph, classGraph);
-
-		dag = new EquivalencesDAG<Description>(graph);
-		
 		setup();
 	}
 
@@ -68,18 +61,19 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		this.classGraph = classGraph;
 		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
-		
-		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
-		Graphs.addGraph(graph, propertyGraph);
-		Graphs.addGraph(graph, classGraph);
 
-		dag = new EquivalencesDAG<Description>(graph);
-		
 		setup();
 	}
 
 	
 	private void setup() {
+		
+		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
+		Graphs.addGraph(graph, propertyGraph);
+		Graphs.addGraph(graph, classGraph);
+
+		EquivalencesDAG<Description> dag = new EquivalencesDAG<Description>(graph);
+
 		DAGBuilder.choosePropertyRepresentatives(dag);
 		DAGBuilder.chooseClassRepresentatives(dag);
 
@@ -282,11 +276,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *         the same set of description
 	 */
 
-	@Deprecated // TESTS ONLY
-	public Set<Equivalences<Description>> getNodes() {
-		return dag.vertexSet();
-	}
-	
 	@Override
 	public Set<Equivalences<BasicClassDescription>> getClasses() {
 		return classDAG.vertexSet();
