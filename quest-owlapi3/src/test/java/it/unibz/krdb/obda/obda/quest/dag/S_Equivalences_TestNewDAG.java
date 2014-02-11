@@ -236,18 +236,21 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of vertexes in the graph
 		int numberVertexesD1= reasonerd1.vertexSetSize();
 		//number of vertexes in the dag
-		int numberVertexesD2 = d2.getNodes().size();
+		int numberVertexesD2 = d2.vertexSetSize();
 
 		//number of vertexes in the equivalent mapping
 		int numberEquivalents=0;
 
-		Set<Equivalences<Description>> nodesd2= d2.getNodes();
 		Set<Description> set2 = new HashSet<Description>();
-		Iterator<Equivalences<Description>> it1 =nodesd2.iterator();
-		while (it1.hasNext()) {
-			Equivalences<Description> equivalents=it1.next();
+		
+		for (Equivalences<Property> equivalents : d2.getProperties()) {
 			numberEquivalents += equivalents.size()-1;
 			set2.addAll(equivalents.getMembers());	
+		}
+		
+		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses()) {
+			numberEquivalents += equivalents.size()-1;
+			set2.addAll(equivalents.getMembers());				
 		}
 
 		log.info("vertex dag {}", numberVertexesD2);
@@ -266,16 +269,16 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
 
-		Set<Equivalences<Description>> nodesd2= d2.getNodes();
-		Iterator<Equivalences<Description>> it1 =nodesd2.iterator();
-		while (it1.hasNext()) {
-			Equivalences<Description> equivalents=it1.next();
-
+		for (Equivalences<Property> equivalents : d2.getProperties())
 			//two nodes have two edges, three nodes have three edges...
-			if(equivalents.size()>=2){
+			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
-			}
-		}
+		
+		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses())
+			//two nodes have two edges, three nodes have three edges...
+			if(equivalents.size() >= 2)
+				numberEquivalents += equivalents.size();
+			
 
 		log.info("edges graph {}", numberEdgesD1);
 		log.info("edges dag {}", numberEdgesD2);

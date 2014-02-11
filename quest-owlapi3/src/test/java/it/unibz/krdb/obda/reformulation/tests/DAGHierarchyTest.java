@@ -19,7 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnNamedDAG;
 
 import java.io.File;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
-		TestTBoxReasonerImplOnNamedDAG namedReasoner = new TestTBoxReasonerImplOnNamedDAG(dag);
+		Test_TBoxReasonerImplOnNamedDAG namedReasoner = new Test_TBoxReasonerImplOnNamedDAG(dag);
 
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -126,7 +126,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		A = ofac.createClass(ontoURI + "A");
 		assertTrue(descendants.contains(namedReasoner.getEquivalences(A)));
-		Description B = ofac.createClass(ontoURI + "B");
+		BasicClassDescription B = ofac.createClass(ontoURI + "B");
 		assertTrue(descendants.contains(namedReasoner.getEquivalences(B)));
 		C = ofac.createClass(ontoURI + "C"); // equivalent class
 		assertTrue(descendants.contains(namedReasoner.getEquivalences(C)));
@@ -154,7 +154,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
-		TestTBoxReasonerImplOnNamedDAG namedReasoner = new TestTBoxReasonerImplOnNamedDAG(dag);
+		Test_TBoxReasonerImplOnNamedDAG namedReasoner = new Test_TBoxReasonerImplOnNamedDAG(dag);
 
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -265,7 +265,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
-		TestTBoxReasonerImplOnNamedDAG namedReasoner = new TestTBoxReasonerImplOnNamedDAG(dag);
+		Test_TBoxReasonerImplOnNamedDAG namedReasoner = new Test_TBoxReasonerImplOnNamedDAG(dag);
 
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -361,7 +361,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate DAG
 		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
-		TestTBoxReasonerImplOnNamedDAG namedReasoner = new TestTBoxReasonerImplOnNamedDAG(dag);
+		Test_TBoxReasonerImplOnNamedDAG namedReasoner = new Test_TBoxReasonerImplOnNamedDAG(dag);
 		
 		final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 

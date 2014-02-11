@@ -17,7 +17,6 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -35,7 +34,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	private final DefaultDirectedGraph<Property,DefaultEdge> propertyGraph; // test only
 	private final DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph; // test only
-	//private final DefaultDirectedGraph<Description,DefaultEdge> graph; // test only
 
 	private final EquivalencesDAG<Property> propertyDAG;
 	private final EquivalencesDAG<BasicClassDescription> classDAG;
@@ -168,19 +166,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	
-	public boolean isNamed(Description node) {
-		if (node instanceof Property)
-			return propertyDAG.getVertex((Property)node).isIndexed();
-		else
-			return classDAG.getVertex((BasicClassDescription)node).isIndexed();
+	public boolean isNamed(Property node) {
+		return propertyDAG.getVertex(node).isIndexed();
 	}
-
-//	public boolean isNamed(Property node) {
-//		return propertyDAG.getVertex(node).isIndexed();
-//	}
-//	public boolean isNamed(BasicClassDescription node) {
-//		return classDAG.getVertex(node).isIndexed();
-//	}
+	public boolean isNamed(BasicClassDescription node) {
+		return classDAG.getVertex(node).isIndexed();
+	}
 
 //	public boolean isNamed0(Description node) {
 //		return getClassNames().contains(node) || getPropertyNames().contains(node);
@@ -281,11 +272,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
 		return classDAG.getVertex(desc);
 	}
-	// NOT ONLY TESTS
-	@Deprecated
-	public Equivalences<Description> getEquivalences(Description desc) {
-		return dag.getVertex(desc);
-	}
 	
 	
 	/**
@@ -331,6 +317,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return propertyDAG.edgeSetSize() + classDAG.edgeSetSize();
 	}
 	
+	@Deprecated // test only
+	public int vertexSetSize() {
+		return propertyDAG.vertexSet().size() + classDAG.vertexSet().size();
+	}
 	
 	
 	

@@ -79,36 +79,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	
-	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) {
-			for (Equivalences<Property> e : reasoner.getDirectSubProperties((Property)desc)) {
-				Description child = e.getRepresentative();
-				
-				// get the child node and its equivalent nodes
-				Equivalences<Description> namedEquivalences = getEquivalences(child);
-				if (!namedEquivalences.isEmpty())
-					result.add(namedEquivalences);
-				else 
-					result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
-			}
-		}
-		else {
-			for (Equivalences<BasicClassDescription> e : reasoner.getDirectSubClasses((BasicClassDescription)desc)) {
-				Description child = e.getRepresentative();
-				
-				// get the child node and its equivalent nodes
-				Equivalences<Description> namedEquivalences = getEquivalences(child);
-				if (!namedEquivalences.isEmpty())
-					result.add(namedEquivalences);
-				else 
-					result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
-			}			
-		}
-		return result;
-	}
-
 
 	/**
 	 * return the direct parents starting from the given node of the dag
@@ -151,40 +121,9 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 			else 
 				result.addAll(getDirectSuperClasses(parent)); // recursive call if the parent is not named
 		}
-		return null;
-	}
-
-
-	public Set<Equivalences<Description>> getDirectParents(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) {
-			for (Equivalences<Property> e : reasoner.getDirectSuperProperties((Property)desc)) {
-				Description parent = e.getRepresentative();
-				
-				// get the child node and its equivalent nodes
-				Equivalences<Description> namedEquivalences = getEquivalences(parent);
-				if (!namedEquivalences.isEmpty())
-					result.add(namedEquivalences);
-				else 
-					result.addAll(getDirectParents(parent)); // recursive call if the parent is not named
-			}
-		}
-		else {
-			for (Equivalences<BasicClassDescription> e : reasoner.getDirectSuperClasses((BasicClassDescription)desc)) {
-				Description parent = e.getRepresentative();
-				
-				// get the child node and its equivalent nodes
-				Equivalences<Description> namedEquivalences = getEquivalences(parent);
-				if (!namedEquivalences.isEmpty())
-					result.add(namedEquivalences);
-				else 
-					result.addAll(getDirectParents(parent)); // recursive call if the parent is not named
-			}			
-		}
 		return result;
 	}
+
 
 
 	/**
@@ -270,7 +209,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
 		Set<Property> equivalences = new LinkedHashSet<Property>();
 			for (Property vertex : reasoner.getEquivalences(desc)) {
-				if (isNamed(vertex)) 
+				if (reasoner.isNamed(vertex)) 
 					equivalences.add(vertex);
 			}
 		if (!equivalences.isEmpty())
@@ -282,7 +221,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
 		Set<BasicClassDescription> equivalences = new LinkedHashSet<BasicClassDescription>();
 			for (BasicClassDescription vertex : reasoner.getEquivalences(desc)) {
-				if (isNamed(vertex)) 
+				if (reasoner.isNamed(vertex)) 
 					equivalences.add(vertex);
 			}
 		if (!equivalences.isEmpty())
@@ -291,23 +230,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 		return new Equivalences<BasicClassDescription>(equivalences);
 	}
 	
-	public Equivalences<Description> getEquivalences(Description desc) {
 
-		Set<Description> equivalences = new LinkedHashSet<Description>();
-			for (Description vertex : reasoner.getEquivalences(desc)) {
-				if (isNamed(vertex)) 
-					equivalences.add(vertex);
-			}
-		if (!equivalences.isEmpty())
-			return new Equivalences<Description>(equivalences, reasoner.getEquivalences(desc).getRepresentative());
-		
-		return new Equivalences<Description>(equivalences);
-	}
-	
-	public boolean isNamed(Description vertex) {
-		return reasoner.isNamed(vertex);
-	}
-	
 	/**
 	 * Return all the nodes in the DAG or graph
 	 * 
@@ -315,24 +238,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-
-	public Set<Equivalences<Description>> getNodes() {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		for (Equivalences<Property> e : reasoner.getProperties()) {
-			Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-			if (!nodes.isEmpty())
-				result.add(nodes);			
-		}
-		for (Equivalences<BasicClassDescription> e : reasoner.getClasses()) {
-			Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-			if (!nodes.isEmpty())
-				result.add(nodes);			
-		}
-
-		return result;
-	}
 
 
 	@Override

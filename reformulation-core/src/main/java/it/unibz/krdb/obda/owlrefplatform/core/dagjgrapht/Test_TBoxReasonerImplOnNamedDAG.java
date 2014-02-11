@@ -25,7 +25,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * TEST ONLY CLASS
  */
 
-public class TestTBoxReasonerImplOnNamedDAG  {
+public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	private NamedDAG dag;
 	private TBoxReasonerImpl reasoner;
@@ -34,25 +34,13 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public TestTBoxReasonerImplOnNamedDAG(TBoxReasonerImpl reasoner) {
+	public Test_TBoxReasonerImplOnNamedDAG(TBoxReasonerImpl reasoner) {
 		this.reasoner = reasoner;
 		this.dag = NamedDAG.getNamedDAG(reasoner);
 	}
 
-	public Set<Description> vertexSet() {
-		return dag.getDag().vertexSet();
-	}
-	
-	public TBoxReasonerImpl reasoner() {
-		return reasoner;
-	}
-	
 	public int getEdgesSize() {
 		return dag.getDag().edgeSet().size();
-	}
-	
-	public boolean isNamed(Description node) {
-		return reasoner.isNamed(node);
 	}
 	
 	/**
@@ -63,58 +51,43 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
+	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {
 		
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
 		// take the representative node
 		Description node = reasoner.getRepresentativeFor(desc);
-
-//		for (DefaultEdge edge : dag.getDag().incomingEdgesOf(node)) {			
-//			Description source = dag.getDag().getEdgeSource(edge);
 		for (Description source: dag.getPredecessors(node)) {
 
 			// get the child node and its equivalent nodes
-			Equivalences<Description> namedEquivalences = getEquivalences(source);
+			Equivalences<Property> namedEquivalences = getEquivalences((Property)source);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
-				result.addAll(getNamedChildren(source));
+				result.addAll(getDirectSubProperties((Property)source));
 		}
 
-		return Collections.unmodifiableSet(result);
-	}
-
-	/*
-	 *  Private method that searches for the first named children
-	 */
-
-	private Set<Equivalences<Description>> getNamedChildren(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		// get equivalences of the current node
-		Equivalences<Description> equivalenceSet = getEquivalences(desc);
-		// I want to consider also the children of the equivalent nodes
-		//Set<DefaultEdge> edges = dag.getDag().incomingEdgesOf(desc);
-		//for (DefaultEdge edge : edges) {
-		//	Description source = dag.getDag().getEdgeSource(edge);
-		for (Description source: dag.getPredecessors(desc)) {
-
-			// I don't want to consider as children the equivalent node of
-			// the current node desc
-			if (equivalenceSet.contains(source)) 
-				continue;
-
-			Equivalences<Description> namedEquivalences = getEquivalences(source);
-			if (!namedEquivalences.isEmpty())
-				result.add(namedEquivalences);
-			else 
-				result.addAll(getNamedChildren(source));
-		}
-			
 		return result;
 	}
+	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
+		
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+
+		// take the representative node
+		Description node = reasoner.getRepresentativeFor(desc);
+		for (Description source: dag.getPredecessors(node)) {
+
+			// get the child node and its equivalent nodes
+			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences((BasicClassDescription)source);
+			if (!namedEquivalences.isEmpty())
+				result.add(namedEquivalences);
+			else 
+				result.addAll(getDirectSubClasses((BasicClassDescription)source));
+		}
+
+		return result;
+	}
+
 
 	/**
 	 * return the direct parents starting from the given node of the dag
@@ -125,57 +98,40 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 * */
-	public Set<Equivalences<Description>> getDirectParents(Description desc) {
+	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
 
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 		
 		// take the representative node
 		Description node = reasoner.getRepresentativeFor(desc);
-
-//		for (DefaultEdge edge : dag.getDag().outgoingEdgesOf(node)) {
-//			Description target = dag.getDag().getEdgeTarget(edge);
 		for (Description target: dag.getSuccessors(node)) {
 
 			// get the child node and its equivalent nodes
-			Equivalences<Description> namedEquivalences = getEquivalences(target);
-			if (!namedEquivalences.isEmpty())
-				result.add(namedEquivalences);
-			else {
-				result.addAll(getNamedParents(target));
-			}
-		}
-
-		return Collections.unmodifiableSet(result);
-	}
-
-	/*
-	 *  private method that search for the first named parents
-	 */
-	
-	private Set<Equivalences<Description>> getNamedParents(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		// get equivalences of the current node
-		Equivalences<Description> equivalenceSet = getEquivalences(desc);
-		// I want to consider also the parents of the equivalent nodes
-
-//		Set<DefaultEdge> edges = dag.getDag().outgoingEdgesOf(desc);
-//		for (DefaultEdge edge : edges) {
-//		Description target = dag.getDag().getEdgeTarget(edge);
-		for (Description target: dag.getSuccessors(desc)) {
-
-			// I don't want to consider as parents the equivalent node of
-			// the current node desc
-			if (equivalenceSet.contains(target)) 
-				continue;
-
-			Equivalences<Description> namedEquivalences = getEquivalences(target);
+			Equivalences<Property> namedEquivalences = getEquivalences((Property)target);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
-				result.addAll(getNamedParents(target));
+				result.addAll(getDirectSuperProperties((Property)target));
 		}
+
+		return result;
+	}
+	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
+
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+		
+		// take the representative node
+		Description node = reasoner.getRepresentativeFor(desc);
+		for (Description target: dag.getSuccessors(node)) {
+
+			// get the child node and its equivalent nodes
+			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences((BasicClassDescription)target);
+			if (!namedEquivalences.isEmpty())
+				result.add(namedEquivalences);
+			else 
+				result.addAll(getDirectSuperClasses((BasicClassDescription)target));
+		}
+
 		return result;
 	}
 
@@ -294,16 +250,6 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 * @return we return a set of description with equivalent nodes 
 	 */
 
-	public Equivalences<Description> getEquivalences(Description desc) {
-		
-		Set<Description> equivalences = new LinkedHashSet<Description>();
-			for (Description vertex : reasoner.getEquivalences(desc)) {
-				if (reasoner.isNamed(vertex)) {
-						equivalences.add(vertex);
-				}
-			}
-		return new Equivalences<Description>(equivalences);
-	}
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
 		
 		Set<BasicClassDescription> equivalences = new LinkedHashSet<BasicClassDescription>();
@@ -341,7 +287,7 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 
 		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
-		for (Description vertex : vertexSet()) 
+		for (Description vertex : dag.getDag().vertexSet()) 
 			if (vertex instanceof Property)
 				result.add(getEquivalences((Property)vertex));
 
@@ -352,7 +298,7 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 
 		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
 
-		for (Description vertex : vertexSet()) 
+		for (Description vertex : dag.getDag().vertexSet()) 
 			if (vertex instanceof BasicClassDescription)
 				result.add(getEquivalences((BasicClassDescription)vertex));
 
