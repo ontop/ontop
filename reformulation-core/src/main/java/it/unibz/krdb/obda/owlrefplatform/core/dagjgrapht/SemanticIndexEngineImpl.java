@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -76,13 +78,26 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 	 * */
 	private void mergeRangeNode(Description d) {
 
-		for (Description ch : namedDag.getPredecessors(d)) { 
-			if (!ch.equals(d)) { // Roman: was !=
-				mergeRangeNode(ch);
+		if (d instanceof Property) {
+			for (Description ch : namedDag.getPredecessors((Property)d)) { 
+				if (!ch.equals(d)) { // Roman: was !=
+					mergeRangeNode(ch);
 
-				//merge the index of the node with the index of his child
-				ranges.get(d).addRange(ranges.get(ch));
+					//merge the index of the node with the index of his child
+					ranges.get(d).addRange(ranges.get(ch));
+				}
 			}
+		}
+		else {
+			for (Description ch : namedDag.getPredecessors((BasicClassDescription)d)) { 
+				if (!ch.equals(d)) { // Roman: was !=
+					mergeRangeNode(ch);
+
+					//merge the index of the node with the index of his child
+					ranges.get(d).addRange(ranges.get(ch));
+				}
+			}
+			
 		}
 	}
 

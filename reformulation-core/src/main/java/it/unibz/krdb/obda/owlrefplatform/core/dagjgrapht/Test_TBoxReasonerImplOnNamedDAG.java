@@ -40,7 +40,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	}
 
 	public int getEdgesSize() {
-		return dag.getDag().edgeSet().size();
+		return dag.getPropertyDag().edgeSet().size() + dag.getClassDag().edgeSet().size();
 	}
 	
 	/**
@@ -56,15 +56,15 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
 		// take the representative node
-		Description node = reasoner.getRepresentativeFor(desc);
-		for (Description source: dag.getPredecessors(node)) {
+		Property node = (Property) reasoner.getRepresentativeFor(desc);
+		for (Property source: dag.getPredecessors(node)) {
 
 			// get the child node and its equivalent nodes
-			Equivalences<Property> namedEquivalences = getEquivalences((Property)source);
+			Equivalences<Property> namedEquivalences = getEquivalences(source);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
-				result.addAll(getDirectSubProperties((Property)source));
+				result.addAll(getDirectSubProperties(source));
 		}
 
 		return result;
@@ -74,15 +74,15 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
 
 		// take the representative node
-		Description node = reasoner.getRepresentativeFor(desc);
-		for (Description source: dag.getPredecessors(node)) {
+		BasicClassDescription node = (BasicClassDescription)reasoner.getRepresentativeFor(desc);
+		for (BasicClassDescription source: dag.getPredecessors(node)) {
 
 			// get the child node and its equivalent nodes
-			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences((BasicClassDescription)source);
+			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences(source);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
-				result.addAll(getDirectSubClasses((BasicClassDescription)source));
+				result.addAll(getDirectSubClasses(source));
 		}
 
 		return result;
@@ -103,15 +103,15 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 		
 		// take the representative node
-		Description node = reasoner.getRepresentativeFor(desc);
-		for (Description target: dag.getSuccessors(node)) {
+		Property node = (Property)reasoner.getRepresentativeFor(desc);
+		for (Property target: dag.getSuccessors(node)) {
 
 			// get the child node and its equivalent nodes
-			Equivalences<Property> namedEquivalences = getEquivalences((Property)target);
+			Equivalences<Property> namedEquivalences = getEquivalences(target);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
-				result.addAll(getDirectSuperProperties((Property)target));
+				result.addAll(getDirectSuperProperties(target));
 		}
 
 		return result;
@@ -121,15 +121,15 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
 		
 		// take the representative node
-		Description node = reasoner.getRepresentativeFor(desc);
-		for (Description target: dag.getSuccessors(node)) {
+		BasicClassDescription node = (BasicClassDescription)reasoner.getRepresentativeFor(desc);
+		for (BasicClassDescription target: dag.getSuccessors(node)) {
 
 			// get the child node and its equivalent nodes
-			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences((BasicClassDescription)target);
+			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences(target);
 			if (!namedEquivalences.isEmpty())
 				result.add(namedEquivalences);
 			else 
-				result.addAll(getDirectSuperClasses((BasicClassDescription)target));
+				result.addAll(getDirectSuperClasses(target));
 		}
 
 		return result;
@@ -148,18 +148,18 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	public Set<Equivalences<Property>> getSubProperties(Property desc) {
 
 		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
-		Description node = reasoner.getRepresentativeFor(desc);
+		Property node = (Property)reasoner.getRepresentativeFor(desc);
 		
 		// reverse the dag
-		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
-		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
+		DirectedGraph<Property, DefaultEdge> reversed = dag.getReversedPropertyDag();
+		BreadthFirstIterator<Property, DefaultEdge>  iterator = 
+					new BreadthFirstIterator<Property, DefaultEdge>(reversed, node);
 
 		while (iterator.hasNext()) {
-			Description child = iterator.next();
+			Property child = iterator.next();
 
 			// add the node and its equivalent nodes
-			Equivalences<Property> sources = getEquivalences((Property)child);
+			Equivalences<Property> sources = getEquivalences(child);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -169,18 +169,18 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
 
 		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
-		Description node = reasoner.getRepresentativeFor(desc);
+		BasicClassDescription node = (BasicClassDescription)reasoner.getRepresentativeFor(desc);
 		
 		// reverse the dag
-		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
-		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
+		DirectedGraph<BasicClassDescription, DefaultEdge> reversed = dag.getReversedClassDag();
+		BreadthFirstIterator<BasicClassDescription, DefaultEdge>  iterator = 
+					new BreadthFirstIterator<BasicClassDescription, DefaultEdge>(reversed, node);
 
 		while (iterator.hasNext()) {
-			Description child = iterator.next();
+			BasicClassDescription child = iterator.next();
 
 			// add the node and its equivalent nodes
-			Equivalences<BasicClassDescription> sources = getEquivalences((BasicClassDescription)child);
+			Equivalences<BasicClassDescription> sources = getEquivalences(child);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -203,16 +203,16 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
-		Description node = reasoner.getRepresentativeFor(desc);
+		Property node = (Property)reasoner.getRepresentativeFor(desc);
 
-		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
-				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
+		BreadthFirstIterator<Property, DefaultEdge>  iterator = 
+				new BreadthFirstIterator<Property, DefaultEdge>(dag.getPropertyDag(), node);
 
 		while (iterator.hasNext()) {
-			Description parent = iterator.next();
+			Property parent = iterator.next();
 
 			// add the node and its equivalent nodes
-			Equivalences<Property> sources = getEquivalences((Property)parent);
+			Equivalences<Property> sources = getEquivalences(parent);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -224,16 +224,16 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
 
-		Description node = reasoner.getRepresentativeFor(desc);
+		BasicClassDescription node = (BasicClassDescription)reasoner.getRepresentativeFor(desc);
 
-		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
-				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
+		BreadthFirstIterator<BasicClassDescription, DefaultEdge>  iterator = 
+				new BreadthFirstIterator<BasicClassDescription, DefaultEdge>(dag.getClassDag(), node);
 
 		while (iterator.hasNext()) {
-			Description parent = iterator.next();
+			BasicClassDescription parent = iterator.next();
 
 			// add the node and its equivalent nodes
-			Equivalences<BasicClassDescription> sources = getEquivalences((BasicClassDescription)parent);
+			Equivalences<BasicClassDescription> sources = getEquivalences(parent);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
@@ -287,9 +287,8 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
-		for (Description vertex : dag.getDag().vertexSet()) 
-			if (vertex instanceof Property)
-				result.add(getEquivalences((Property)vertex));
+		for (Property vertex : dag.getPropertyDag().vertexSet()) 
+			result.add(getEquivalences((Property)vertex));
 
 		return result;
 	}
@@ -298,9 +297,8 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
 
-		for (Description vertex : dag.getDag().vertexSet()) 
-			if (vertex instanceof BasicClassDescription)
-				result.add(getEquivalences((BasicClassDescription)vertex));
+		for (BasicClassDescription vertex : dag.getClassDag().vertexSet()) 
+			result.add(getEquivalences(vertex));
 
 		return result;
 	}

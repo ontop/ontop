@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
@@ -103,13 +105,20 @@ private boolean testIndexes(SemanticIndexEngineImpl engine){
 	//check that the index of the node is contained in the intervals of the parent node
 	for(Description vertex: engine.getIndexes().keySet() /*.getNamedDAG().vertexSet()*/){
 		int index= indexes.get(vertex);
-		for(Description parent: engine.getNamedDAG().getSuccessors(vertex)){
-			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
-			
-			if(!result)
-				break;
+		if (vertex instanceof Property) {
+			for(Description parent: engine.getNamedDAG().getSuccessors((Property)vertex)){
+				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));
+				if(!result)
+					break;
+			}
 		}
-		
+		else {
+			for(Description parent: engine.getNamedDAG().getSuccessors((BasicClassDescription)vertex)){
+				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));
+				if(!result)
+					break;
+			}			
+		}
 		
 	}
 	

@@ -31,38 +31,55 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class NamedDAG  {
 	
-	private final SimpleDirectedGraph <Description,DefaultEdge> dag;
+	private final SimpleDirectedGraph <Property,DefaultEdge> propertyDAG;
+	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
 	
 	// constructor is accessible within the class only
-	private NamedDAG(SimpleDirectedGraph<Description,DefaultEdge> dag) {
-		this.dag = dag;
+	private NamedDAG(SimpleDirectedGraph<Property,DefaultEdge> propertyDAG, SimpleDirectedGraph<BasicClassDescription,DefaultEdge> classDAG) {
+		this.propertyDAG = propertyDAG;
+		this.classDAG = classDAG;
 	}
 	
 	@Override
 	public String toString() {
-		return dag.toString();
+		return propertyDAG.toString() + classDAG.toString();
 	}
 	
 	// the real working method (used in the SemanticIndexEngineImple)
-	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>(dag); // WOULD IT NOT BE BETTER TO CACHE?
+	public DirectedGraph<Property, DefaultEdge> getReversedPropertyDag() {
+		DirectedGraph<Property, DefaultEdge> reversed =
+				new EdgeReversedGraph<Property, DefaultEdge>(propertyDAG); // WOULD IT NOT BE BETTER TO CACHE?
+		return reversed;
+	}
+	public DirectedGraph<BasicClassDescription, DefaultEdge> getReversedClassDag() {
+		DirectedGraph<BasicClassDescription, DefaultEdge> reversed =
+				new EdgeReversedGraph<BasicClassDescription, DefaultEdge>(classDAG); // WOULD IT NOT BE BETTER TO CACHE?
 		return reversed;
 	}
 
 	
 	
 	@Deprecated // USED ONLY IN TESTS (3 calls)
-	public SimpleDirectedGraph <Description,DefaultEdge> getDag() {
-		return dag;
+	public SimpleDirectedGraph <Property,DefaultEdge> getPropertyDag() {
+		return propertyDAG;
+	}
+	@Deprecated // USED ONLY IN TESTS (3 calls)
+	public SimpleDirectedGraph <BasicClassDescription,DefaultEdge> getClassDag() {
+		return classDAG;
 	}
 	
-	public List<Description> getSuccessors(Description desc) {
-		return Graphs.successorListOf(dag, desc);		
+	public List<Property> getSuccessors(Property desc) {
+		return Graphs.successorListOf(propertyDAG, desc);		
+	}
+	public List<BasicClassDescription> getSuccessors(BasicClassDescription desc) {
+		return Graphs.successorListOf(classDAG, desc);		
 	}
 	
-	public List<Description> getPredecessors(Description desc) {
-		return Graphs.predecessorListOf(dag, desc);		
+	public List<Property> getPredecessors(Property desc) {
+		return Graphs.predecessorListOf(propertyDAG, desc);		
+	}
+	public List<BasicClassDescription> getPredecessors(BasicClassDescription desc) {
+		return Graphs.predecessorListOf(classDAG, desc);		
 	}
 	
 	
@@ -70,57 +87,76 @@ public class NamedDAG  {
 	 * Constructor for the NamedDAGBuilder
 	 * @param dag the DAG from which we want to maintain only the named descriptions
 	 */
+
 	
 	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
 
-		SimpleDirectedGraph <Description,DefaultEdge>  namedDag 
-					= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
+		SimpleDirectedGraph <Property,DefaultEdge>  propertyDAG 
+					= new SimpleDirectedGraph <Property,DefaultEdge> (DefaultEdge.class); 
 
 		for (Equivalences<Property> v : reasoner.getProperties()) 
-			namedDag.addVertex(v.getRepresentative());
-		
-		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
-			namedDag.addVertex(v.getRepresentative());
-		
+			propertyDAG.addVertex(v.getRepresentative());
+
 		for (Equivalences<Property> s : reasoner.getProperties()) 
 			for (Equivalences<Property> t : reasoner.getDirectSuperProperties(s.getRepresentative())) 
-				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
+				propertyDAG.addEdge(s.getRepresentative(), t.getRepresentative());
+		
+		for (Equivalences<Property> v : reasoner.getProperties()) 
+			if (!v.isIndexed()) {
+				// eliminate node
+				for (DefaultEdge incEdge : propertyDAG.incomingEdgesOf(v.getRepresentative())) { 
+					Property source = propertyDAG.getEdgeSource(incEdge);
+
+					for (DefaultEdge outEdge : propertyDAG.outgoingEdgesOf(v.getRepresentative())) {
+						Property target = propertyDAG.getEdgeTarget(outEdge);
+
+						propertyDAG.addEdge(source, target);
+					}
+				}
+				propertyDAG.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
+			}
+	
+		
+		
+		
+		
+		SimpleDirectedGraph <BasicClassDescription,DefaultEdge>  classDAG 
+		= new SimpleDirectedGraph <BasicClassDescription,DefaultEdge> (DefaultEdge.class); 
+		
+		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
+			classDAG.addVertex(v.getRepresentative());
 		
 		for (Equivalences<BasicClassDescription> s : reasoner.getClasses()) 
 			for (Equivalences<BasicClassDescription> t : reasoner.getDirectSuperClasses(s.getRepresentative())) 
-				namedDag.addEdge(s.getRepresentative(), t.getRepresentative());
+				classDAG.addEdge(s.getRepresentative(), t.getRepresentative());
 
-		for (Equivalences<Property> v : reasoner.getProperties()) 
-			if (!v.isIndexed()) {
-				// eliminate node
-				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(v.getRepresentative())) { 
-					Description source = namedDag.getEdgeSource(incEdge);
-
-					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(v.getRepresentative())) {
-						Description target = namedDag.getEdgeTarget(outEdge);
-
-						namedDag.addEdge(source, target);
-					}
-				}
-				namedDag.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
-			}
 		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
 			if (!v.isIndexed()) {
 				// eliminate node
-				for (DefaultEdge incEdge : namedDag.incomingEdgesOf(v.getRepresentative())) { 
-					Description source = namedDag.getEdgeSource(incEdge);
+				for (DefaultEdge incEdge : classDAG.incomingEdgesOf(v.getRepresentative())) { 
+					BasicClassDescription source = classDAG.getEdgeSource(incEdge);
 
-					for (DefaultEdge outEdge : namedDag.outgoingEdgesOf(v.getRepresentative())) {
-						Description target = namedDag.getEdgeTarget(outEdge);
+					for (DefaultEdge outEdge : classDAG.outgoingEdgesOf(v.getRepresentative())) {
+						BasicClassDescription target = classDAG.getEdgeTarget(outEdge);
 
-						namedDag.addEdge(source, target);
+						classDAG.addEdge(source, target);
 					}
 				}
-				namedDag.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
+				classDAG.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
 			}
 				
-		NamedDAG dagImpl = new NamedDAG(namedDag);
+		NamedDAG dagImpl = new NamedDAG(propertyDAG, classDAG);
 		return dagImpl;
+	}
+
+	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
+		SimpleDirectedGraph <Description,DefaultEdge>  dag 
+			= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
+		Graphs.addGraph(dag, propertyDAG);
+		Graphs.addGraph(dag, classDAG);
+		DirectedGraph<Description, DefaultEdge> reversed =
+				new EdgeReversedGraph<Description, DefaultEdge>(dag); // WOULD IT NOT BE BETTER TO CACHE?
+		return reversed;
 	}
 		
 }
