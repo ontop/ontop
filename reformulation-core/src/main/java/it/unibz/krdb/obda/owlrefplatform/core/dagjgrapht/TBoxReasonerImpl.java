@@ -68,27 +68,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	private void setup() {
 		
-		DefaultDirectedGraph<Description,DefaultEdge> graph = new DefaultDirectedGraph<Description,DefaultEdge>(DefaultEdge.class);
-		Graphs.addGraph(graph, propertyGraph);
-		Graphs.addGraph(graph, classGraph);
-
-		EquivalencesDAG<Description> dag = new EquivalencesDAG<Description>(graph);
-
-		DAGBuilder.choosePropertyRepresentatives(dag);
-		DAGBuilder.chooseClassRepresentatives(dag);
-
-		for (Equivalences<BasicClassDescription> e : classDAG.vertexSet()) {
-			Equivalences<Description> de = dag.getVertex(e.iterator().next());
-			e.setRepresentative((BasicClassDescription)de.getRepresentative());
-			if (de.isIndexed())
-				e.setIndexed();
-		}
-		for (Equivalences<Property> e : propertyDAG.vertexSet()) {
-			Equivalences<Description> de = dag.getVertex(e.iterator().next());
-			e.setRepresentative((Property)de.getRepresentative());
-			if (de.isIndexed())
-				e.setIndexed();
-		}		
+		DAGBuilder.choosePropertyRepresentatives(propertyDAG);
+		
+		DAGBuilder.chooseClassRepresentatives(classDAG, propertyDAG);
 	}
 
 
