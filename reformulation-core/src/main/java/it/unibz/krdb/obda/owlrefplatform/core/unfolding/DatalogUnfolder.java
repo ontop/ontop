@@ -1899,6 +1899,37 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	
+
+	
+
+	
+	
+	/**
+	 * This method add the type of the variables in sourceHead to the targetAtom, and then
+	 * uses this atom to update the head of fatherRule
+	 * 
+	 * @param sourceHead
+	 * @param targetAtom 
+	 * @param fatherRule
+	 * @return
+	 */
+	private static CQIE addTypes(Function sourceHead, Function targetAtom, CQIE fatherRule) {
+
+		//TODO: Check this variable!!!
+		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
+		mgu = Unifier.getMGU(sourceHead, targetAtom);
+		
+		if (mgu == null) {
+			return null;
+		}else{
+			Function newHead = (Function) fatherRule.getHead();
+			Unifier.applyUnifier(newHead, mgu, false);
+			fatherRule.updateHead(newHead);
+			return fatherRule;
+		}
+	}
+	
+	
 	
 	
 
@@ -1935,31 +1966,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 	
 
-	
-	
-	
-	
-	
-	/**
-	 * 
-	 * @param sourceHead
-	 * @param targetAtom 
-	 * @param fatherRule
-	 * @return
-	 */
-	private static CQIE addTypes(Function sourceHead, Function targetAtom, CQIE fatherRule) {
-
-		//TODO: Check this variable!!!
-		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
-		mgu = Unifier.getMGU(sourceHead, targetAtom);
-		
-		if (mgu == null) {
-			return null;
-		}else{
-			Unifier.applyUnifier(fatherRule, mgu, false);
-			return fatherRule;
-		}
-	}
 	
 	
 	
