@@ -24,7 +24,4 @@ public interface SemanticIndexEngine {
 	//obtain the set with all description with the indexes
 	public Set<Description> getIndexed();
 	
-	//obtain the map with all the intervals
-	public Map<Description, SemanticIndexRange> getIntervals();
-
 }

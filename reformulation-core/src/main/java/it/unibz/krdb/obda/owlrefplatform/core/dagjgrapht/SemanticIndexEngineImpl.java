@@ -143,8 +143,9 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 
 	@Override
 	public int getIndex(Description d) {
-		if(indexes.get(d) != null)
-			return indexes.get(d);
+		Integer idx = indexes.get(d); 
+		if (idx != null)
+			return idx;
 		return -1;
 	}
 	
@@ -152,13 +153,13 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 	public List<Interval> getIntervals(Description d) {
 
 		Description node = reasoner.getRepresentativeFor(d);
-		if(ranges.get(node) != null)
-			return ranges.get(node).getIntervals();
-		SemanticIndexRange range = new SemanticIndexRange(-1, -1);
+		SemanticIndexRange range = ranges.get(node);
+		if (range == null)
+			range = new SemanticIndexRange(-1, -1);
 		return range.getIntervals();
 	}
 	
-	@Override
+	// TEST ONLY
 	public Map<Description, SemanticIndexRange> getIntervals() {
 		return ranges;
 	}
