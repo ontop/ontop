@@ -22,7 +22,7 @@ import java.util.Set;
  * 
  */
 
-public class Test_NamedTBoxReasonerImpl {
+public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
 	private TBoxReasonerImpl reasoner;
 
@@ -42,8 +42,44 @@ public class Test_NamedTBoxReasonerImpl {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
+	
+	@Override
+	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {		
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
+
+		for (Equivalences<Property> e : reasoner.getDirectSubProperties(desc)) {
+			Property child = e.getRepresentative();
+			
+			// get the child node and its equivalent nodes
+			Equivalences<Property> namedEquivalences = getEquivalences(child);
+			if (!namedEquivalences.isEmpty())
+				result.add(namedEquivalences);
+			else 
+				result.addAll(getDirectSubProperties(child)); // recursive call if the child is not empty
+		}
+
+		return result;
+	}
+
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+
+		for (Equivalences<BasicClassDescription> e : reasoner.getDirectSubClasses(desc)) {
+			BasicClassDescription child = e.getRepresentative();
+			
+			// get the child node and its equivalent nodes
+			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences(child);
+			if (!namedEquivalences.isEmpty())
+				result.add(namedEquivalences);
+			else 
+				result.addAll(getDirectSubClasses(child)); // recursive call if the child is not empty
+		}
+		return result;
+	}
+
+	
 	public Set<Equivalences<Description>> getDirectChildren(Description desc) {
-		
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
 
 		if (desc instanceof Property) {
@@ -57,7 +93,6 @@ public class Test_NamedTBoxReasonerImpl {
 				else 
 					result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
 			}
-			
 		}
 		else {
 			for (Equivalences<BasicClassDescription> e : reasoner.getDirectSubClasses((BasicClassDescription)desc)) {
@@ -69,10 +104,8 @@ public class Test_NamedTBoxReasonerImpl {
 					result.add(namedEquivalences);
 				else 
 					result.addAll(getDirectChildren(child)); // recursive call if the child is not empty
-			}
-			
+			}			
 		}
-
 		return result;
 	}
 
@@ -86,6 +119,42 @@ public class Test_NamedTBoxReasonerImpl {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 * */
+
+	@Override
+	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
+
+		for (Equivalences<Property> e : reasoner.getDirectSuperProperties((Property)desc)) {
+			Property parent = e.getRepresentative();
+			
+			// get the child node and its equivalent nodes
+			Equivalences<Property> namedEquivalences = getEquivalences(parent);
+			if (!namedEquivalences.isEmpty())
+				result.add(namedEquivalences);
+			else 
+				result.addAll(getDirectSuperProperties(parent)); // recursive call if the parent is not named
+		}
+		return result;
+	}
+
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+		
+		for (Equivalences<BasicClassDescription> e : reasoner.getDirectSuperClasses(desc)) {
+			BasicClassDescription parent = e.getRepresentative();
+			
+			// get the child node and its equivalent nodes
+			Equivalences<BasicClassDescription> namedEquivalences = getEquivalences(parent);
+			if (!namedEquivalences.isEmpty())
+				result.add(namedEquivalences);
+			else 
+				result.addAll(getDirectSuperClasses(parent)); // recursive call if the parent is not named
+		}
+		return null;
+	}
+
+
 	public Set<Equivalences<Description>> getDirectParents(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -112,8 +181,7 @@ public class Test_NamedTBoxReasonerImpl {
 					result.add(namedEquivalences);
 				else 
 					result.addAll(getDirectParents(parent)); // recursive call if the parent is not named
-			}
-			
+			}			
 		}
 		return result;
 	}
@@ -129,6 +197,30 @@ public class Test_NamedTBoxReasonerImpl {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
+	@Override
+	public Set<Equivalences<Property>> getSubProperties(Property desc) {
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
+		
+		for (Equivalences<Property> e : reasoner.getSubProperties(desc)) {
+			Equivalences<Property> nodes = getEquivalences(e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
+		}
+		return result;
+	}
+
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+		
+		for (Equivalences<BasicClassDescription> e : reasoner.getSubClasses(desc)) {
+			Equivalences<BasicClassDescription> nodes = getEquivalences(e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
+		}
+		return result;
+	}
+
 	public Set<Equivalences<Description>> getDescendants(Description desc) {
 
 		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
@@ -159,27 +251,32 @@ public class Test_NamedTBoxReasonerImpl {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-
-	public Set<Equivalences<Description>> getAncestors(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) {
-			for (Equivalences<Property> e : reasoner.getSuperProperties((Property)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				if (!nodes.isEmpty())
-					result.add(nodes);			
-			}
+	@Override
+	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
+		
+		for (Equivalences<Property> e : reasoner.getSuperProperties(desc)) {
+			Equivalences<Property> nodes = getEquivalences(e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
 		}
-		else {
-			for (Equivalences<BasicClassDescription> e : reasoner.getSuperClasses((BasicClassDescription)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				if (!nodes.isEmpty())
-					result.add(nodes);			
-			}
-		}
+
 		return result;
 	}
+
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+
+		for (Equivalences<BasicClassDescription> e : reasoner.getSuperClasses(desc)) {
+			Equivalences<BasicClassDescription> nodes = getEquivalences(e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
+		}
+		
+		return result;
+	}
+
 
 	/**
 	 * Return the equivalences starting from the given node of the dag
@@ -254,6 +351,31 @@ public class Test_NamedTBoxReasonerImpl {
 				result.add(nodes);			
 		}
 
+		return result;
+	}
+
+
+	@Override
+	public Set<Equivalences<Property>> getProperties() {
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
+		
+		for (Equivalences<Property> e : reasoner.getProperties()) {
+			Equivalences<Property> nodes = getEquivalences(e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
+		}
+		return result;
+	}
+
+	@Override
+	public Set<Equivalences<BasicClassDescription>> getClasses() {
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+		
+		for (Equivalences<BasicClassDescription> e : reasoner.getClasses()) {
+			Equivalences<BasicClassDescription> nodes = getEquivalences(e.getRepresentative());
+			if (!nodes.isEmpty())
+				result.add(nodes);			
+		}
 		return result;
 	}
 

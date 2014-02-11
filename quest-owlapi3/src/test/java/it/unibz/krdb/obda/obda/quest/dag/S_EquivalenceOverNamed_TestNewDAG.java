@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TestTBoxReasonerImplOnNamedDAG;
@@ -365,38 +367,62 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 */
 	private boolean testAncestors(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2) {
 		
-		Set<Equivalences<Description>> setd1 = null;
-		Set<Equivalences<Description>> setd2 = null;
-
-		for(Equivalences<Description> node : d1.getNodes()) {
-			Description vertex = node.getRepresentative();
+		for(Equivalences<Property> v: d1.getProperties()){
+			Property vertex = v.getRepresentative();
 			if(d1.isNamed(vertex)){
-				setd1	= d1.getAncestors(vertex);
+				Set<Equivalences<Property>> setd1 = d1.getSuperProperties(vertex);
 				log.info("vertex {}", vertex);
 				log.debug("ancestors {} ", setd1);
-				setd2	= d2.getAncestors(vertex);
+				Set<Equivalences<Property>> setd2 = d2.getSuperProperties(vertex);
 				log.debug("ancestors {} ", setd2);
+				
+				if (!coincide(setd1, setd2))
+					return false;
 			}
-			if (!coincide(setd1, setd2))
-				return false;
+		}
+		for(Equivalences<BasicClassDescription> v: d1.getClasses()){
+			BasicClassDescription vertex = v.getRepresentative();
+			if(d1.isNamed(vertex)){
+				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSuperClasses(vertex);
+				log.info("vertex {}", vertex);
+				log.debug("ancestors {} ", setd1);
+				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSuperClasses(vertex);
+				log.debug("ancestors {} ", setd2);
+				
+				if (!coincide(setd1, setd2))
+					return false;
+			}
 		}
 		return true;
 	}
 
 	private boolean testAncestors(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2){
-		Set<Equivalences<Description>> setd1 = null;
-		Set<Equivalences<Description>> setd2 = null;
 
-		for(Description vertex: d1.vertexSet()){
-			if(d1.reasoner().isNamed(vertex)){
-				setd1	= d1.getAncestors(vertex);
+		for(Equivalences<Property> v: d1.getProperties()){
+			Property vertex = v.getRepresentative();
+			if(d1.isNamed(vertex)){
+				Set<Equivalences<Property>> setd1 = d1.getSuperProperties(vertex);
 				log.info("vertex {}", vertex);
 				log.debug("ancestors {} ", setd1);
-				setd2	= d2.getAncestors(vertex);
+				Set<Equivalences<Property>> setd2 = d2.getSuperProperties(vertex);
 				log.debug("ancestors {} ", setd2);
+				
+				if (!coincide(setd1, setd2))
+					return false;
 			}
-			if (!coincide(setd1, setd2))
-				return false;
+		}
+		for(Equivalences<BasicClassDescription> v: d1.getClasses()){
+			BasicClassDescription vertex = v.getRepresentative();
+			if(d1.isNamed(vertex)){
+				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSuperClasses(vertex);
+				log.info("vertex {}", vertex);
+				log.debug("ancestors {} ", setd1);
+				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSuperClasses(vertex);
+				log.debug("ancestors {} ", setd2);
+				
+				if (!coincide(setd1, setd2))
+					return false;
+			}
 		}
 		return true;
 	}

@@ -8,7 +8,9 @@
  */
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -48,6 +50,10 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	
 	public int getEdgesSize() {
 		return dag.getDag().edgeSet().size();
+	}
+	
+	public boolean isNamed(Description node) {
+		return reasoner.isNamed(node);
 	}
 	
 	/**
@@ -209,6 +215,7 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 		return Collections.unmodifiableSet(result);
 	}
 
+	
 	/**
 	 * Traverse the graph return the ancestors starting from the given node of
 	 * the dag
@@ -219,27 +226,48 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 *         the same set of description
 	 */
 
-	public Set<Equivalences<Description>> getAncestors(Description desc) {
+	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
 
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
 		Description node = reasoner.getRepresentativeFor(desc);
 
-		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
+		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
 				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
 
 		while (iterator.hasNext()) {
 			Description parent = iterator.next();
 
 			// add the node and its equivalent nodes
-			Equivalences<Description> sources = getEquivalences(parent);
+			Equivalences<Property> sources = getEquivalences((Property)parent);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
 
-		// add each of them to the result
-		return Collections.unmodifiableSet(result);
+		return result;
 	}
+	
+	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
+
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+
+		Description node = reasoner.getRepresentativeFor(desc);
+
+		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
+				new BreadthFirstIterator<Description, DefaultEdge>(dag.getDag(), node);
+
+		while (iterator.hasNext()) {
+			Description parent = iterator.next();
+
+			// add the node and its equivalent nodes
+			Equivalences<BasicClassDescription> sources = getEquivalences((BasicClassDescription)parent);
+			if (!sources.isEmpty())
+				result.add(sources);
+		}
+
+		return result;
+	}
+
 
 	/**
 	 * Return the equivalences starting from the given node of the dag
@@ -259,6 +287,30 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 			}
 		return new Equivalences<Description>(equivalences);
 	}
+	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
+		
+		Set<BasicClassDescription> equivalences = new LinkedHashSet<BasicClassDescription>();
+			for (BasicClassDescription vertex : reasoner.getEquivalences(desc)) {
+				if (reasoner.isNamed(vertex)) 
+						equivalences.add(vertex);
+			}
+			if (!equivalences.isEmpty())
+				return new Equivalences<BasicClassDescription>(equivalences, reasoner.getEquivalences(desc).getRepresentative());
+			
+			return new Equivalences<BasicClassDescription>(equivalences);
+	}
+	public Equivalences<Property> getEquivalences(Property desc) {
+		
+		Set<Property> equivalences = new LinkedHashSet<Property>();
+			for (Property vertex : reasoner.getEquivalences(desc)) {
+				if (reasoner.isNamed(vertex)) 
+						equivalences.add(vertex);
+			}
+			if (!equivalences.isEmpty())
+				return new Equivalences<Property>(equivalences, reasoner.getEquivalences(desc).getRepresentative());
+			
+			return new Equivalences<Property>(equivalences);
+	}
 	
 	/**
 	 * Return all the nodes in the DAG or graph
@@ -267,15 +319,27 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
+	
+	public Set<Equivalences<Property>> getProperties() {
 
-	public Set<Equivalences<Description>> getNodes() {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 
 		for (Description vertex : vertexSet()) 
-				result.add(getEquivalences(vertex));
+			if (vertex instanceof Property)
+				result.add(getEquivalences((Property)vertex));
 
 		return result;
 	}
 
+	public Set<Equivalences<BasicClassDescription>> getClasses() {
+
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+
+		for (Description vertex : vertexSet()) 
+			if (vertex instanceof BasicClassDescription)
+				result.add(getEquivalences((BasicClassDescription)vertex));
+
+		return result;
+	}
+	
 }
