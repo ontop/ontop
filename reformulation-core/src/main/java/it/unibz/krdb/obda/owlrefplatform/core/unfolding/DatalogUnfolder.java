@@ -1759,6 +1759,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 /**
  * This method is supposed to push the types from the variables in the lower strata of the program, up to the rules on top.
+ * This method will iterate over the rules in a bottom-up fashion.
  * For instance, consider the following example:
  * 
  * TODO: complete
@@ -1830,6 +1831,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						if (result == null && fails==workingRules.size()) {
 							//This means The rule cannot be unified, and therefore can be deleted
 							
+							//TODO: CHECK WHAT HAPPENS AFTER THIS!!!!!! !   !
 							workingList.remove(fatherIdx);
 							continue;
 
@@ -1858,7 +1860,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 
 	
-	
+	/**
+	 * Given the terms in the father rule, it will iterate over the term trying to find an atom fo unify with the head of the source rule.
+	 * @param currentTerms
+	 * @param sourceRule
+	 * @param fatherRule
+	 * @return
+	 */
 	
 	
 	private static List<CQIE> computeRuleExtendedTypes(	List currentTerms,
@@ -1868,6 +1876,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			Function sourceHead = sourceRule.getHead();
 			List<CQIE> result=new LinkedList<CQIE>();
 
+			//Iterate over the term of the father rule
 			for (Object focusedLiteral: currentTerms){
 				
 				Function focus= (Function) focusedLiteral;
@@ -1875,7 +1884,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (focus.isBooleanFunction() || focus.isArithmeticFunction() || focus.isDataTypeFunction()) {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
-					//iterate
+					//iterate inside the atom
 					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule));
 					
 				} else if (focus.isDataFunction()) {
@@ -1933,7 +1942,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 	
 
-
+	/**
+	 * Since we have new rules, we need to update all the index as usual.
+	 * 
+	 * @param workingList
+	 * @param fatherIdx
+	 * @param depGraph
+	 * @param result
+	 * @param preFather
+	 * @param fatherRule
+	 */
 	private static void updateIndexesinTypes(	List<CQIE> workingList, int fatherIdx, DatalogDependencyGraphGenerator depGraph,List<CQIE> result, 
 			Predicate preFather, CQIE fatherRule)
 	{
