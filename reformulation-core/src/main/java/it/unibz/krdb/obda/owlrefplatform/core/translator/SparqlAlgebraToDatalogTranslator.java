@@ -1236,9 +1236,10 @@ public class SparqlAlgebraToDatalogTranslator {
 							type.toString(), COL_TYPE.OBJECT));
 			}
 		} else if (v instanceof URIImpl) {
-			constantFunction = ofac.getFunction(ofac
-					.getUriTemplatePredicate(1), ofac.getConstantLiteral(
-							((URIImpl)v).stringValue(), COL_TYPE.OBJECT));
+			constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
+//			constantFunction = ofac.getFunction(ofac
+//					.getUriTemplatePredicate(1), ofac.getConstantLiteral(
+//							((URIImpl)v).stringValue(), COL_TYPE.OBJECT));
 			
 		} 
 		
