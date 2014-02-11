@@ -18,7 +18,6 @@ import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.AbstractGraphIterator;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
@@ -190,29 +189,47 @@ public class TestTBoxReasonerImplOnNamedDAG  {
 	 *         different nodes and equivalent nodes. equivalent nodes will be in
 	 *         the same set of description
 	 */
-	public Set<Equivalences<Description>> getDescendants(Description desc) {
+	public Set<Equivalences<Property>> getSubProperties(Property desc) {
 
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
+		LinkedHashSet<Equivalences<Property>> result = new LinkedHashSet<Equivalences<Property>>();
 		Description node = reasoner.getRepresentativeFor(desc);
 		
 		// reverse the dag
 		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
-
-		AbstractGraphIterator<Description, DefaultEdge>  iterator = 
+		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
 					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
 
 		while (iterator.hasNext()) {
 			Description child = iterator.next();
 
 			// add the node and its equivalent nodes
-			Equivalences<Description> sources = getEquivalences(child);
+			Equivalences<Property> sources = getEquivalences((Property)child);
 			if (!sources.isEmpty())
 				result.add(sources);
 		}
 
-		// add each of them to the result
-		return Collections.unmodifiableSet(result);
+		return result;
+	}
+	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
+
+		LinkedHashSet<Equivalences<BasicClassDescription>> result = new LinkedHashSet<Equivalences<BasicClassDescription>>();
+		Description node = reasoner.getRepresentativeFor(desc);
+		
+		// reverse the dag
+		DirectedGraph<Description, DefaultEdge> reversed = dag.getReversedDag();
+		BreadthFirstIterator<Description, DefaultEdge>  iterator = 
+					new BreadthFirstIterator<Description, DefaultEdge>(reversed, node);
+
+		while (iterator.hasNext()) {
+			Description child = iterator.next();
+
+			// add the node and its equivalent nodes
+			Equivalences<BasicClassDescription> sources = getEquivalences((BasicClassDescription)child);
+			if (!sources.isEmpty())
+				result.add(sources);
+		}
+		
+		return result;
 	}
 
 	

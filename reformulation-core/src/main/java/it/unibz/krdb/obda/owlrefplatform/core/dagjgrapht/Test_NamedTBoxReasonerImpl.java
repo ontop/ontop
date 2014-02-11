@@ -221,26 +221,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 		return result;
 	}
 
-	public Set<Equivalences<Description>> getDescendants(Description desc) {
-
-		LinkedHashSet<Equivalences<Description>> result = new LinkedHashSet<Equivalences<Description>>();
-
-		if (desc instanceof Property) {
-			for (Equivalences<Property> e : reasoner.getSubProperties((Property)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				if (!nodes.isEmpty())
-					result.add(nodes);			
-			}
-		}
-		else {
-			for (Equivalences<BasicClassDescription> e : reasoner.getSubClasses((BasicClassDescription)desc)) {
-				Equivalences<Description> nodes = getEquivalences((Description)e.getRepresentative());
-				if (!nodes.isEmpty())
-					result.add(nodes);			
-			}
-		}
-		return result;
-	}
 
 	/**
 	 * Traverse the graph return the ancestors starting from the given node of

@@ -70,60 +70,63 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			log.info("Second dag {}", dag2);
 			Test_NamedTBoxReasonerImpl dag1 = new Test_NamedTBoxReasonerImpl(d1);
 			
-			assertTrue(testDescendants(dag1,dag2,true));
+			assertTrue(testDescendants(dag1,dag2));
 			assertTrue(testAncestors(dag1,dag2));
 			assertTrue(checkforNamedVertexesOnly(dag2));
-			assertTrue(testDescendants(dag2,dag1,true));
-			assertTrue(testAncestors(dag2,dag1,true));
+			assertTrue(testDescendants(dag2,dag1));
+			assertTrue(testAncestors(dag2,dag1));
 		}
 	}
 
 
-	private boolean testDescendants(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
-		boolean result = false;
+	private boolean testDescendants(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2){
 
-		for(Equivalences<Description> node : d1.getNodes()) {
-			Description vertex = node.getRepresentative();
-			if(named){
+		for(Equivalences<Property> node : d1.getProperties()) {
+			Property vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<Property>> setd1 = d1.getSubProperties(vertex);
+				Set<Equivalences<Property>> setd2 = d2.getSubProperties(vertex);
 
-				if(d1.isNamed(vertex)) {
-					Set<Equivalences<Description>> setd1	= d1.getDescendants(vertex);
-					Set<Equivalences<Description>> setd2	= d2.getDescendants(vertex);
-
-					result= setd1.equals(setd2);
-				}
+				if(!setd1.equals(setd2))
+					return false;
 			}
-			else
-				result = d1.getDescendants(vertex).equals(d2.getDescendants(vertex));
-			if(!result)
-				break;
 		}
+		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
+			BasicClassDescription vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSubClasses(vertex);
+				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSubClasses(vertex);
 
-		return result;
-
+				if(!setd1.equals(setd2))
+					return false;
+			}
+		}
+		return true;
 	}
 
-	private boolean testDescendants(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2, boolean named){
-		boolean result = false;
+	private boolean testDescendants(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2){
+		
+		for(Equivalences<Property> node : d1.getProperties()) {
+			Property vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<Property>> setd1 = d1.getSubProperties(vertex);
+				Set<Equivalences<Property>> setd2 = d2.getSubProperties(vertex);
 
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.reasoner().isNamed(vertex)){
-					Set<Equivalences<Description>> setd1	= d1.getDescendants(vertex);
-					Set<Equivalences<Description>> setd2	= d2.getDescendants(vertex);
-
-					result= setd1.equals(setd2);
-				}
+				if(!setd1.equals(setd2))
+					return false;
 			}
-			else
-				result=d1.getDescendants(vertex).equals(d2.getDescendants(vertex));
-			if(!result)
-				break;
 		}
+		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
+			BasicClassDescription vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSubClasses(vertex);
+				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSubClasses(vertex);
 
-		return result;
-
+				if(!setd1.equals(setd2))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	private boolean testAncestors(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2){
@@ -151,7 +154,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		return true;
 	}
 	
-	private boolean testAncestors(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2, boolean named){
+	private boolean testAncestors(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2){
 		for(Equivalences<Property> node : d1.getProperties()) {
 			Property vertex = node.getRepresentative();
 			if(d1.isNamed(vertex)) {

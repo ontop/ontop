@@ -130,20 +130,29 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 	
 	private boolean testDescendants(Test_NamedTBoxReasonerImpl d1, TestTBoxReasonerImplOnNamedDAG d2){
 		
-		Set<Equivalences<Description>> setd1 = new HashSet<Equivalences<Description>>();
-		Set<Equivalences<Description>> setd2 = new HashSet<Equivalences<Description>>();
-		
-		for(Equivalences<Description> node : d1.getNodes()) {
-			Description vertex = node.getRepresentative();
+		for(Equivalences<Property> node : d1.getProperties()) {
+			Property vertex = node.getRepresentative();
 			if(d1.isNamed(vertex)) {
-				setd1	= d1.getDescendants(vertex);
+				Set<Equivalences<Property>> setd1 = d1.getSubProperties(vertex);
 				log.info("vertex {}", vertex);
 				log.debug("descendants {} ", setd1);
-				setd2	= d2.getDescendants(vertex);
+				Set<Equivalences<Property>> setd2 = d2.getSubProperties(vertex);
 				log.debug("descendants {} ", setd2);
+				if (!coincide(setd1, setd2))
+					return false;
 			}
-			if (!coincide(setd1, setd2))
-				return false;
+		}
+		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
+			BasicClassDescription vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSubClasses(vertex);
+				log.info("vertex {}", vertex);
+				log.debug("descendants {} ", setd1);
+				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSubClasses(vertex);
+				log.debug("descendants {} ", setd2);
+				if (!coincide(setd1, setd2))
+					return false;
+			}
 		}
 
 		return true;
@@ -151,21 +160,30 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 	private boolean testDescendants(TestTBoxReasonerImplOnNamedDAG d1, Test_NamedTBoxReasonerImpl d2) {
 		
-		Set<Equivalences<Description>> setd1 = new HashSet<Equivalences<Description>>();
-		Set<Equivalences<Description>> setd2 = new HashSet<Equivalences<Description>>();
-
-		for(Description vertex: d1.vertexSet()) {
-			if (d1.reasoner().isNamed(vertex)){
-				setd1	= d1.getDescendants(vertex);
+		for(Equivalences<Property> node : d1.getProperties()) {
+			Property vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<Property>> setd1 = d1.getSubProperties(vertex);
 				log.info("vertex {}", vertex);
 				log.debug("descendants {} ", setd1);
-				setd2	= d2.getDescendants(vertex);
+				Set<Equivalences<Property>> setd2 = d2.getSubProperties(vertex);
 				log.debug("descendants {} ", setd2);
+				if (!coincide(setd1, setd2))
+					return false;
 			}
-			if (!coincide(setd1, setd2))
-				return false;
 		}
-
+		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
+			BasicClassDescription vertex = node.getRepresentative();
+			if(d1.isNamed(vertex)) {
+				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSubClasses(vertex);
+				log.info("vertex {}", vertex);
+				log.debug("descendants {} ", setd1);
+				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSubClasses(vertex);
+				log.debug("descendants {} ", setd2);
+				if (!coincide(setd1, setd2))
+					return false;
+			}
+		}
 		return true;
 	}
 
