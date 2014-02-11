@@ -38,10 +38,13 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.utils.DatalogDependencyGraphGenerator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,6 +55,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
@@ -65,7 +71,7 @@ import com.google.common.collect.Multimap;
  * 
  */
 public class DatalogNormalizer {
-
+	private static Logger log = LoggerFactory.getLogger(DatalogNormalizer.class);
 	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private final static Map<Variable, Term> substitutionsTotal= new HashMap<Variable,Term>();
 	
@@ -1163,11 +1169,6 @@ public class DatalogNormalizer {
 		currentBooleans.addAll(tempConditionBooleans);
 
 	}
+				
 
-	public static void pushTypes(DatalogProgram unfolding) {
-		// TODO Auto-generated method stub
-		// guohui
-		
-		
-	}
 }

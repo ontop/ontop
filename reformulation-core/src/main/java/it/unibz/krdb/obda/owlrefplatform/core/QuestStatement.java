@@ -490,6 +490,13 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 		
+		// PUSH TYPE HERE
+		log.debug("Pushing types...");
+		List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding);
+		
+		//TODO: can we avoid using this intermediate variable???
+		unfolding.removeAllRules();
+		unfolding.appendRule(newTypedRules);
 		
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
@@ -498,9 +505,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		
-		// PUSH TYPE HERE
-		
-		DatalogNormalizer.pushTypes(unfolding);
+
 		
 		
 		log.debug("Partial evaluation ended.");
@@ -738,7 +743,6 @@ public class QuestStatement implements OBDAStatement {
 				throw obdaException;
 			}
 
-			//Pulling our EQUALITIES!!
 	
 			try {
 				final long startTime = System.currentTimeMillis();
@@ -748,20 +752,6 @@ public class QuestStatement implements OBDAStatement {
 				unfoldingTime = endTime - startTime;
 
 
-/*
-				//TODO: SEE WHAT TO DO WITH THIS METHOD !!
-				//TODO: CREATE  PROERLY
-				
-				DatalogProgram programEqOut= programAfterRewriting;
-				programEqOut.removeAllRules();
-				
-				for (CQIE rule: programAfterUnfolding.getRules()){
-					programEqOut.appendRule(DatalogNormalizer.pullOutEqualities(rule));
-					System.out.println(rule);
-				}
-				
-				programAfterUnfolding = programEqOut;
-		*/		
 				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);

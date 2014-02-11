@@ -408,6 +408,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 					//get all the indexes we need
 					ruleIndex = depGraph.getRuleIndex();
+					
+					//TODO: I already have a field for this!!!
 					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 					
 					
@@ -505,17 +507,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			return rcount[1];
 		}
 
-/**
- * @param fatherCollection
- * @param ruleCollection
- */
-private void cloneRules(List<CQIE> fatherCollection,
-		Collection<CQIE> ruleCollection) {
-	for (CQIE fatherRule:  ruleCollection) {
-		CQIE copyruleCqie = fatherRule.clone();
-		fatherCollection.add(copyruleCqie);
-	}
-}
+		/**
+		 * Clones the rules in ruleCollection into fatherCollection
+		 * 
+		 * @param fatherCollection
+		 * @param ruleCollection
+		 */
+		private void cloneRules(List<CQIE> fatherCollection,
+				Collection<CQIE> ruleCollection) {
+			for (CQIE fatherRule:  ruleCollection) {
+				CQIE copyruleCqie = fatherRule.clone();
+				fatherCollection.add(copyruleCqie);
+			}
+		}
 	
 		
 		
@@ -535,7 +539,7 @@ private void cloneRules(List<CQIE> fatherCollection,
 			for (CQIE rule: workingList){
 				System.out.println(rule);
 			}
-			
+			log.debug("Generating Dependency Graph!");
 			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
@@ -1367,7 +1371,7 @@ private void cloneRules(List<CQIE> fatherCollection,
 			
 			//if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
 			//if (isSecondAtomOfLeftJoin ) {
-			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
+			if (isLeftJoin) {
 				// guohui: I changed it to not unfold inside the leftjoin, regardless of the position 
 				
 				/*
@@ -1711,4 +1715,258 @@ private void cloneRules(List<CQIE> fatherCollection,
 
 
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//TODO: should it be static???
+
+/**
+ * This method is supposed to push the types from the variables in the lower strata of the program, up to the rules on top.
+ * For instance, consider the following example:
+ * 
+ * TODO: complete
+ * 
+ * @param unfolding
+ */
+	public  List<CQIE> pushTypes(DatalogProgram unfolding) {
+
+		List<CQIE> workingList = new LinkedList<CQIE>();
+		
+		cloneRules(workingList, unfolding.getRules());
+		
+		//TODO: We are generating this too many times!!! simplify!!!
+		log.debug("Generating Dependency Graph!");
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
+
+		List<CQIE> fatherCollection = new LinkedList<CQIE>();
+		Multimap<Predicate, CQIE> ruleIndex;
+		Multimap<Predicate, CQIE> ruleIndexByBody;
+
+		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
+
+		ruleIndex = depGraph.getRuleIndex();
+		ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
+
+
+
+		for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
+
+			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
+			//get the father predicate
+
+			if (!extensionalPredicates.contains(buPredicate)) {// it is a defined  predicate, like ans2,3.. etc
+
+				//get all the indexes we need
+				ruleIndex = depGraph.getRuleIndex();
+				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
+
+				fatherCollection.clear();
+
+				//The rules USING pred
+				Collection<CQIE> ruleCollection = ruleIndexByBody.get(buPredicate);
+
+				//The rules DEFINING pred
+				Collection<CQIE> workingRules = ruleIndex.get(buPredicate);
+
+
+				cloneRules(fatherCollection, ruleCollection);
+
+				//We unfold every rule of the father atom that contains pred
+				for (CQIE fatherRule : fatherCollection) {
+					int fails = 0;
+
+					
+					
+					int fatherIdx=workingList.indexOf(fatherRule);
+					Stack<Integer> termidx = new Stack<Integer>();
+					List<CQIE> result = new LinkedList<CQIE>();
+					
+					//the terms where buPredicate should appear
+					List<Function> currentTerms = fatherRule.getBody();
+
+					
+					for (CQIE sourceRule:workingRules){
+						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone());
+
+
+						if (result == null && fails==workingRules.size()) {
+							//This means The rule cannot be unified, and therefore can be deleted
+							
+							workingList.remove(fatherIdx);
+							continue;
+
+						} else {
+							/*
+							 * One more step in the partial evaluation was computed, we
+							 * need to remove the old query and add the result instead.
+							 * Each of the new queries could still require more steps of
+							 * evaluation, so we decrease the index.
+							 */
+							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
+							updateIndexesinTypes(workingList,fatherIdx,depGraph,result, fathead,fatherRule);
+							
+							continue;
+						}
+					}
+
+				} //end for
+
+			} //end if extensional
+			
+		}//end for predicates
+		return workingList;
+		
+	}
+
+
+	
+	
+	
+	
+	private static List<CQIE> computeRuleExtendedTypes(	List currentTerms,
+			CQIE sourceRule, CQIE fatherRule) {
+
+
+			Function sourceHead = sourceRule.getHead();
+			List<CQIE> result=new LinkedList<CQIE>();
+
+			for (Object focusedLiteral: currentTerms){
+				
+				Function focus= (Function) focusedLiteral;
+
+				if (focus.isBooleanFunction() || focus.isArithmeticFunction() || focus.isDataTypeFunction()) {
+					continue;
+				} else if (focus.isAlgebraFunction()) {
+					//iterate
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule));
+					
+				} else if (focus.isDataFunction()) {
+					//add type 
+					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
+						result.add(addTypes(sourceHead,focus,fatherRule));
+						break;
+					} else{
+						continue;
+					}
+				} //end dataFunction
+
+			} //end for father body
+			
+		if (result.isEmpty()){
+			return null;
+		}else{
+			return result;
+		}
+		
+	}
+
+	
+	
+	
+
+
+	private static void updateIndexesinTypes(	List<CQIE> workingList, int fatherIdx, DatalogDependencyGraphGenerator depGraph,List<CQIE> result, 
+			Predicate preFather, CQIE fatherRule)
+	{
+		workingList.remove(fatherIdx);
+
+		for (CQIE newquery : result) {
+			if (!workingList.contains(newquery)) {
+
+				//Here we update the index head atom -> rule
+				depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
+				depGraph.addRuleToRuleIndex(preFather, newquery);
+
+
+				//Delete the rules from workingList that have been touched
+				workingList.add(fatherIdx, newquery);
+
+
+				//Here we update the index body atom -> rule
+
+
+				//I remove all the old indexes	with the old rule
+				depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
+
+
+				//I update the new indexes with the new rule
+				depGraph.updateRuleIndexByBodyPredicate(newquery);
+
+			} //end if
+		}// end for result
+	}
+	
+
+	
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param sourceHead
+	 * @param targetAtom 
+	 * @param fatherRule
+	 * @return
+	 */
+	private static CQIE addTypes(Function sourceHead, Function targetAtom, CQIE fatherRule) {
+
+		//TODO: Check this variable!!!
+		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
+		mgu = Unifier.getMGU(sourceHead, targetAtom);
+		
+		if (mgu == null) {
+			return null;
+		}else{
+			Unifier.applyUnifier(fatherRule, mgu, false);
+			return fatherRule;
+		}
+	}
+	
+	
+	
+
+	
+				
+	
+	
+	
 }

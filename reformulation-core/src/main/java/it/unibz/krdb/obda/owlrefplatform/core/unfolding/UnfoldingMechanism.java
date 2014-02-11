@@ -20,12 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * This interface should be implemented by any class which implements an
@@ -62,5 +64,8 @@ public interface UnfoldingMechanism extends Serializable {
 	 */
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy,boolean includeMappings)
 			throws OBDAException;
+
+	//TODO: Check if this should be here!!
+	public List<CQIE> pushTypes(DatalogProgram unfolding);
 
 }
