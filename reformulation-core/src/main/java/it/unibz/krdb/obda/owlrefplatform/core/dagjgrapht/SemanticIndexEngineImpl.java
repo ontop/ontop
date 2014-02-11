@@ -159,12 +159,12 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 	}
 	
 	@Override
-	public Map<Description, Integer> getIndexes() {
-		return indexes;
+	public Map<Description, SemanticIndexRange> getIntervals() {
+		return ranges;
 	}
 
 	@Override
-	public Map<Description, SemanticIndexRange> getIntervals() {
-		return ranges;
+	public Set<Description> getIndexed() {
+		return indexes.keySet();
 	}
 }

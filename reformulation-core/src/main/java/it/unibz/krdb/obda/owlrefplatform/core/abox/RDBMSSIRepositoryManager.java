@@ -498,7 +498,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Creating cache of semantic indexes and ranges
 		 */
 		// HACKY WAY -- TO BE CHANGED
-		Set<Description> descriptions = engine.getIndexes().keySet(); // ((SemanticIndexEngineImpl)engine).getNamedDAG().vertexSet();
+		Set<Description> descriptions = engine.getIndexed(); // ((SemanticIndexEngineImpl)engine).getNamedDAG().vertexSet();
 		for (Description description : descriptions) {
 			if (description instanceof OClass) {
 
