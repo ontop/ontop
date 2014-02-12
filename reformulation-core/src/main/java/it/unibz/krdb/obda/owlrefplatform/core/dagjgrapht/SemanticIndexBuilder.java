@@ -166,8 +166,8 @@ public class SemanticIndexBuilder  {
 	
 	
 	// TEST ONLY
-	public Map<Description, SemanticIndexRange> getIntervals() {
-		return ranges;
+	public SemanticIndexRange getRange(Description d) {
+		return ranges.get(d);
 	}
 
 	public Set<Description> getIndexed() {

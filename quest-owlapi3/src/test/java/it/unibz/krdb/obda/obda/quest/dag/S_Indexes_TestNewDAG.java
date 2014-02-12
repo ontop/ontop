@@ -99,22 +99,20 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 	boolean result=true;
 		
 	//create semantic index
-	Map<Description, SemanticIndexRange> ranges=engine.getIntervals();
-	
 	//check that the index of the node is contained in the intervals of the parent node
 	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
 		if (vertex instanceof Property) {
 			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
-				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;
 			}
 		}
 		else {
 			for(Description parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
-				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;
 			}			
@@ -122,7 +120,7 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 		
 	}
 	
-	log.info("ranges {}", ranges);
+	//log.info("ranges {}", ranges);
 	
 	
 	return result;
