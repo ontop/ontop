@@ -78,7 +78,7 @@ public class SesameVirtualTest extends TestCase {
 			         result.close();
 			      }
 			      
-			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
+			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
 			      GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 			      GraphQueryResult gresult = graphQuery.evaluate();
 			      while(gresult.hasNext())
