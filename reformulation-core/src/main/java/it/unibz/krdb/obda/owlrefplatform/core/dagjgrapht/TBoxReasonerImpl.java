@@ -81,17 +81,16 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	public Description getRepresentativeFor(Description v) {
-		if (v instanceof Property) {
-			Equivalences<Property> e = propertyDAG.getVertex((Property)v);
+	public Description getRepresentativeFor(Property v) {
+			Equivalences<Property> e = propertyDAG.getVertex(v);
 			if (e != null)
 				return e.getRepresentative();
-		}
-		else {
-			Equivalences<BasicClassDescription> e = classDAG.getVertex((BasicClassDescription)v);
+		return null;
+	}
+	public Description getRepresentativeFor(BasicClassDescription v) {
+			Equivalences<BasicClassDescription> e = classDAG.getVertex(v);
 			if (e != null)
 				return e.getRepresentative();			
-		}
 		return null;
 	}
 	

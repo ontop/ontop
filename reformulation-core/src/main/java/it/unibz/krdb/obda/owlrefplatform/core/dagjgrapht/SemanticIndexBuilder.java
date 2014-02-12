@@ -152,7 +152,12 @@ public class SemanticIndexBuilder  {
 	
 	public List<Interval> getIntervals(Description d) {
 
-		Description node = reasoner.getRepresentativeFor(d);
+		Description node;
+		if (d instanceof Property)
+			node = reasoner.getRepresentativeFor((Property)d);
+		else
+			node = reasoner.getRepresentativeFor((BasicClassDescription)d);
+		
 		SemanticIndexRange range = ranges.get(node);
 		if (range == null)
 			range = new SemanticIndexRange(-1, -1);
