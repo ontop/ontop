@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -82,20 +82,20 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(dag);
+		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
 
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine);
 		
 		
-		assertTrue(testIndexes(engine));
+		assertTrue(testIndexes(engine, engine.getNamedDAG()));
 
 
 	}
 }
 
-private boolean testIndexes(SemanticIndexEngineImpl engine){
+private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 	boolean result=true;
 		
 	//create semantic index
@@ -106,14 +106,14 @@ private boolean testIndexes(SemanticIndexEngineImpl engine){
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
 		if (vertex instanceof Property) {
-			for(Description parent: engine.getNamedDAG().getSuccessors((Property)vertex)){
+			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
 				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;
 			}
 		}
 		else {
-			for(Description parent: engine.getNamedDAG().getSuccessors((BasicClassDescription)vertex)){
+			for(Description parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
 				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;

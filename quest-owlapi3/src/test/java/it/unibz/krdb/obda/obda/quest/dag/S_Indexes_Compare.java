@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -55,14 +55,14 @@ public void testIndexes() throws Exception{
 
 
 		//add input named graph
-		SemanticIndexEngineImpl engine = new SemanticIndexEngineImpl(dag);
+		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine.getNamedDAG());
 		
 		
-		testIndexes(engine);
+		testIndexes(engine, engine.getNamedDAG());
 
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
@@ -82,7 +82,7 @@ public void testIndexes() throws Exception{
 	}
 }
 
-private void testOldIndexes(DAG d1, SemanticIndexEngineImpl d2){
+private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	
 	
 	
@@ -110,7 +110,7 @@ private void testOldIndexes(DAG d1, SemanticIndexEngineImpl d2){
 	
 	
 }
-private boolean testIndexes(SemanticIndexEngineImpl engine) {
+private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
 	boolean result=false;
 	
 	
@@ -122,14 +122,14 @@ private boolean testIndexes(SemanticIndexEngineImpl engine) {
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
 		if (vertex instanceof Property) {
-			for(Description parent: engine.getNamedDAG().getSuccessors((Property)vertex)){
+			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
 				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));			
 				if(result)
 					break;
 			}
 		}
 		else {
-			for(Description parent: engine.getNamedDAG().getSuccessors((BasicClassDescription)vertex)){
+			for(Description parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
 				result = ranges.get(parent).contained(new SemanticIndexRange(index,index));			
 				if(result)
 					break;

@@ -26,13 +26,13 @@ import org.jgrapht.traverse.GraphIterator;
  * 
  * 
  */
-public class SemanticIndexEngineImpl implements SemanticIndexEngine {
+public class SemanticIndexBuilder  {
 
-	private TBoxReasonerImpl reasoner;
-	private NamedDAG namedDag;
+	private final TBoxReasonerImpl reasoner;
 	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
 	private int index_counter = 1;
+	private final NamedDAG namedDAG;
 
 	
 	/**
@@ -45,6 +45,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 		private Description reference; 		//last root node
 		private boolean newComponent = true;
 
+		
 		//search for the new root in the graph
 		@Override
 		public void connectedComponentStarted(ConnectedComponentTraversalEvent e) {
@@ -70,52 +71,48 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 			//merge all the interval for the current root of the graph
 			mergeRangeNode(reference);
 		}
-	}
+		/**  
+		 * Merge the indexes of the current connected component 
+		 * @param d  is the root node 
+		 * */
+		private void mergeRangeNode(Description d) {
 
-	/**  
-	 * Merge the indexes of the current connected component 
-	 * @param d  is the root node 
-	 * */
-	private void mergeRangeNode(Description d) {
+			if (d instanceof Property) {
+				for (Description ch : namedDAG.getPredecessors((Property)d)) { 
+					if (!ch.equals(d)) { // Roman: was !=
+						mergeRangeNode(ch);
 
-		if (d instanceof Property) {
-			for (Description ch : namedDag.getPredecessors((Property)d)) { 
-				if (!ch.equals(d)) { // Roman: was !=
-					mergeRangeNode(ch);
-
-					//merge the index of the node with the index of his child
-					ranges.get(d).addRange(ranges.get(ch));
+						//merge the index of the node with the index of his child
+						ranges.get(d).addRange(ranges.get(ch));
+					}
 				}
 			}
-		}
-		else {
-			for (Description ch : namedDag.getPredecessors((BasicClassDescription)d)) { 
-				if (!ch.equals(d)) { // Roman: was !=
-					mergeRangeNode(ch);
+			else {
+				for (Description ch : namedDAG.getPredecessors((BasicClassDescription)d)) { 
+					if (!ch.equals(d)) { // Roman: was !=
+						mergeRangeNode(ch);
 
-					//merge the index of the node with the index of his child
-					ranges.get(d).addRange(ranges.get(ch));
+						//merge the index of the node with the index of his child
+						ranges.get(d).addRange(ranges.get(ch));
+					}
 				}
+				
 			}
-			
 		}
 	}
 
-	@Deprecated // for tests only
-	public NamedDAG getNamedDAG() {
-		return namedDag;
-	}
-	
 	/**
 	 * Assign indexes for the named DAG, use a depth first listener over the DAG 
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
-	public SemanticIndexEngineImpl(TBoxReasonerImpl reasoner)  {
+	
+	public SemanticIndexBuilder(TBoxReasonerImpl reasoner)  {
 		this.reasoner = reasoner;
-		this.namedDag = NamedDAG.getNamedDAG(reasoner);
+		
+		namedDAG = NamedDAG.getNamedDAG(reasoner);
 		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
-		DirectedGraph<Description, DefaultEdge> reversed = namedDag.getReversedDag();
+		DirectedGraph<Description, DefaultEdge> reversed = namedDAG.getReversedDag();
 
 		LinkedList<Description> roots = new LinkedList<Description>();
 		for (Description n : reversed.vertexSet()) {
@@ -140,8 +137,11 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 		}
 		index_counter = 1;
 	}
+	
+	public NamedDAG getNamedDAG() {
+		return namedDAG;
+	}
 
-	@Override
 	public int getIndex(Description d) {
 		Integer idx = indexes.get(d); 
 		if (idx != null)
@@ -149,7 +149,7 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 		return -1;
 	}
 	
-	@Override
+	
 	public List<Interval> getIntervals(Description d) {
 
 		Description node = reasoner.getRepresentativeFor(d);
@@ -159,12 +159,12 @@ public class SemanticIndexEngineImpl implements SemanticIndexEngine {
 		return range.getIntervals();
 	}
 	
+	
 	// TEST ONLY
 	public Map<Description, SemanticIndexRange> getIntervals() {
 		return ranges;
 	}
 
-	@Override
 	public Set<Description> getIndexed() {
 		return indexes.keySet();
 	}
