@@ -36,25 +36,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 		this.propertyDAG = new EquivalencesNamedDAGImpl<Property>(reasoner.getProperties());
 		this.classDAG = new EquivalencesNamedDAGImpl<BasicClassDescription>(reasoner.getClasses());
 	}
-	
-	/**
-	 * return the direct children starting from the given node of the dag
-	 * 
-	 * @param desc node that we want to know the direct children
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	
-	@Override
-	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {		
-		return propertyDAG.getDirectSub(propertyDAG.getVertex(desc));
-	}
-
-	@Override
-	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSub(classDAG.getVertex(desc));
-	}
 
 
 	/**

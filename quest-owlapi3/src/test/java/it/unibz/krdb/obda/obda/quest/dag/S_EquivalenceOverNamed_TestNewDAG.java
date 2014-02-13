@@ -94,8 +94,10 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			assertTrue(testDescendants(dag2, namedDag2, reasoner));
 			assertTrue(testDescendants(namedDag2, dag2, reasoner));
-			assertTrue(testChildren(dag2, namedDag2, reasoner));
-			assertTrue(testChildren(namedDag2, dag2, reasoner));
+			assertTrue(testChildren(dag2.getClasses(), namedDag2.getClasses()));
+			assertTrue(testChildren(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testChildren(namedDag2.getClasses(), dag2.getClasses()));
+			assertTrue(testChildren(namedDag2.getProperties(), dag2.getProperties()));
 			assertTrue(testAncestors(dag2.getClasses(), namedDag2.getClasses()));
 			assertTrue(testAncestors(dag2.getProperties(), namedDag2.getProperties()));
 			assertTrue(testAncestors(namedDag2.getClasses(), dag2.getClasses()));
@@ -260,31 +262,16 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */
-	private boolean testChildren(TBoxReasoner d1, TBoxReasoner d2, TBoxReasonerImpl reasoner){
+	private <T> boolean testChildren(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2){
 
-		for(Equivalences<Property> node : d1.getProperties()) {
-			Property vertex = node.getRepresentative();
-			if(reasoner.isNamed(vertex)) {
-				Set<Equivalences<Property>> setd1	= d1.getDirectSubProperties(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("children {} ", setd1);
-				Set<Equivalences<Property>> setd2	= d2.getDirectSubProperties(vertex);
-				log.debug("children {} ", setd2);
-				if (!coincide(setd1, setd2))
-					return false;
-			}
-		}
-		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
-			BasicClassDescription vertex = node.getRepresentative();
-			if(reasoner.isNamed(vertex)) {
-				Set<Equivalences<BasicClassDescription>> setd1	= d1.getDirectSubClasses(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("children {} ", setd1);
-				Set<Equivalences<BasicClassDescription>> setd2	= d2.getDirectSubClasses(vertex);
-				log.debug("children {} ", setd2);
-				if (!coincide(setd1, setd2))
-					return false;
-			}
+		for(Equivalences<T> node : d1) {
+			Set<Equivalences<T>> setd1	= d1.getDirectSub(node);
+			log.info("vertex {}", node);
+			log.debug("children {} ", setd1);
+			Set<Equivalences<T>> setd2	= d2.getDirectSub(node);
+			log.debug("children {} ", setd2);
+			if (!coincide(setd1, setd2))
+				return false;
 		}
 
 		return true;

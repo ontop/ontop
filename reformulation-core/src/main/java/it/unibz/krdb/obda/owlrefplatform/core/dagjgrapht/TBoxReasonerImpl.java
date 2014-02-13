@@ -145,23 +145,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 //	public boolean isNamed0(Description node) {
 //		return getClassNames().contains(node) || getPropertyNames().contains(node);
 //	}
-
-	/**
-	 * return the direct children starting from the given node of the dag
-	 * 
-	 * @param desc node that we want to know the direct children
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	@Override
-	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {
-		return propertyDAG.getDirectSub(propertyDAG.getVertex(desc));
-	}
-	@Override
-	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSub(classDAG.getVertex(desc));
-	}
 	
 
 
@@ -303,12 +286,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			BasicClassDescription existsInvNode = (BasicClassDescription)tbox.getRepresentativeFor(
 						fac.createPropertySomeRestriction(existsNode.getPredicate(), !existsNode.isInverse()));
 			
-			for (Equivalences<BasicClassDescription> children : tbox.getDirectSubClasses(existsNode)) {
+			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(classes.getVertex(existsNode))) {
 				BasicClassDescription child = children.getRepresentative(); 
 				if (!child.equals(existsInvNode))
 					modifiedGraph.addEdge(child, existsInvNode);
 			}
-			for (Equivalences<BasicClassDescription> children : tbox.getDirectSubClasses(existsInvNode)) {
+			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(classes.getVertex(existsInvNode))) {
 				BasicClassDescription child = children.getRepresentative(); 
 				if (!child.equals(existsNode))
 					modifiedGraph.addEdge(child, existsNode);

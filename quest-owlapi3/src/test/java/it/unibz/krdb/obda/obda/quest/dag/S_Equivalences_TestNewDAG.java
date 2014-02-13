@@ -92,8 +92,10 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 			assertTrue(testDescendants(graphReasoner, reasoner));
 			assertTrue(testDescendants(reasoner, graphReasoner));
-			assertTrue(testChildren(graphReasoner, reasoner));
-			assertTrue(testChildren(reasoner, graphReasoner));
+			assertTrue(testChildren(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testChildren(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testChildren(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testChildren(reasoner.getProperties(), graphReasoner.getProperties()));
 			assertTrue(testAncestors(graphReasoner.getClasses(), reasoner.getClasses()));
 			assertTrue(testAncestors(graphReasoner.getProperties(), reasoner.getProperties()));
 			assertTrue(testAncestors(reasoner.getClasses(), graphReasoner.getClasses()));
@@ -152,27 +154,14 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	}
 
 		
-	private boolean testChildren(TBoxReasoner d1, TBoxReasoner d2) {
+	private <T> boolean testChildren(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 		
-		for(Equivalences<Property> vertex: d1.getProperties()){
-			Property p = vertex.getRepresentative();
-			Set<Equivalences<Property>> setd1 = d1.getDirectSubProperties(p);
+		for(Equivalences<T> vertex: d1) {
+			Set<Equivalences<T>> setd1 = d1.getDirectSub(vertex);
 			log.info("vertex {}", vertex);
 			log.debug("children {} ", setd1);
-			Set<Equivalences<Property>> setd2 = d2.getDirectSubProperties(p);
+			Set<Equivalences<T>> setd2 = d2.getDirectSub(vertex);
 			log.debug("children {} ", setd2);
-
-			if (!coincide(setd1, setd2))
-				return false;
-		}
-		for(Equivalences<BasicClassDescription> vertex: d1.getClasses()){
-			BasicClassDescription p = vertex.getRepresentative();
-			Set<Equivalences<BasicClassDescription>> setd1 = d1.getDirectSubClasses(p);
-			log.info("vertex {}", vertex);
-			log.debug("children {} ", setd1);
-			Set<Equivalences<BasicClassDescription>> setd2 = d2.getDirectSubClasses(p);
-			log.debug("children {} ", setd2);
-
 			if (!coincide(setd1, setd2))
 				return false;
 		}

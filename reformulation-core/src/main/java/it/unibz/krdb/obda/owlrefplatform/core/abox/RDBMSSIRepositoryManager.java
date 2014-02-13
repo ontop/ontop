@@ -42,6 +42,7 @@ import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -1747,8 +1748,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * 
 			 * Collecting the top most allows us to avoid redundancy elimination
 			 */
+			EquivalencesDAG<Property> properties = reasonerDag.getProperties();
+			
 			Queue<Equivalences<Property>> childrenQueue = new LinkedList<Equivalences<Property>>();
-			childrenQueue.addAll(reasonerDag.getDirectSubProperties(node));
+			childrenQueue.addAll(properties.getDirectSub(properties.getVertex(node)));
 			childrenQueue.add(reasonerDag.getEquivalences(node));
 
 
@@ -1761,7 +1764,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 						&& ((Property) child).isInverse()) {
 					roleInverseChildren.add(child);
 				} else {
-					childrenQueue.addAll((reasonerDag.getDirectSubProperties(child)));
+					childrenQueue.addAll((properties.getDirectSub(children)));
 				}
 			}
 

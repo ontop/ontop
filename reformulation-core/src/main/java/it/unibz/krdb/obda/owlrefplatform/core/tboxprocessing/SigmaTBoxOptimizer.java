@@ -92,7 +92,7 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Equivalences<Property> children_prime : isa.getDirectSubProperties(parent)) {
+			for (Equivalences<Property> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
 				Property child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -122,7 +122,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<Property> children_prime : isa.getDirectSubProperties(parent)) {
+			for (Equivalences<Property> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
 				Property child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -139,7 +139,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<BasicClassDescription> children_prime : isa.getDirectSubClasses(parent)) {
+			for (Equivalences<BasicClassDescription> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
 				BasicClassDescription child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -161,7 +161,7 @@ public class SigmaTBoxOptimizer {
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<Property>> spChildren =  sigmaChain.getDirectSubProperties(sp);
+		Set<Equivalences<Property>> spChildren =  sigmaChain.getProperties().getDirectSub(sigmaChain.getProperties().getVertex(sp));
 		Equivalences<Property> scEquivalent = sigmaChain.getEquivalences(sc);
 		
 		if (!spChildren.contains(scEquivalent))
@@ -189,7 +189,7 @@ public class SigmaTBoxOptimizer {
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getDirectSubClasses(sp);
+		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sigmaChain.getClasses().getVertex(sp));
 		Equivalences<BasicClassDescription> scEquivalent = sigmaChain.getEquivalences(sc);
 		
 		if (!spChildren.contains(scEquivalent))

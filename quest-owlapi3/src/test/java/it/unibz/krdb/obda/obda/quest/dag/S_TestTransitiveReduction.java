@@ -134,7 +134,7 @@ public class S_TestTransitiveReduction extends TestCase {
 					
 					//descendants of the vertex
 					Set<Equivalences<Property>> descendants = d2.getSubProperties(vertex);
-					Set<Equivalences<Property>> children = d2.getDirectSubProperties(vertex);
+					Set<Equivalences<Property>> children = d2.getProperties().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
@@ -164,7 +164,7 @@ public class S_TestTransitiveReduction extends TestCase {
 					
 					//descendants of the vertex
 					Set<Equivalences<BasicClassDescription>> descendants = d2.getSubClasses(vertex);
-					Set<Equivalences<BasicClassDescription>> children = d2.getDirectSubClasses(vertex);
+					Set<Equivalences<BasicClassDescription>> children = d2.getClasses().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
