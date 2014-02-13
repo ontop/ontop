@@ -47,6 +47,6 @@ public interface TBoxReasoner {
 	public Equivalences<Property> getEquivalences(Property desc);
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc);
 	
-	public Set<Equivalences<Property>> getProperties();
-	public Set<Equivalences<BasicClassDescription>> getClasses();
+	public EquivalencesDAG<Property> getProperties();
+	public EquivalencesDAG<BasicClassDescription> getClasses();
 }

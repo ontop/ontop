@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -35,8 +34,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final DefaultDirectedGraph<Property,DefaultEdge> propertyGraph; // test only
 	private final DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph; // test only
 
-	private final EquivalencesDAG<Property> propertyDAG;
-	private final EquivalencesDAG<BasicClassDescription> classDAG;
+	private final EquivalencesDAGImpl<Property> propertyDAG;
+	private final EquivalencesDAGImpl<BasicClassDescription> classDAG;
 	
 	private Set<OClass> classNames;
 	private Set<Property> propertyNames;
@@ -46,33 +45,28 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public TBoxReasonerImpl(Ontology onto) {
 		propertyGraph = OntologyGraph.getPropertyGraph(onto);
-		propertyDAG = new EquivalencesDAG<Property>(propertyGraph);
+		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
 		
 		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
-		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
+		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
 
-		setup();
+		DAGBuilder.choosePropertyRepresentatives(propertyDAG);
+		DAGBuilder.chooseClassRepresentatives(classDAG, propertyDAG);
 	}
 
 	private TBoxReasonerImpl(DefaultDirectedGraph<Property,DefaultEdge> propertyGraph, 
 					DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph) {
 		this.propertyGraph = propertyGraph;
-		propertyDAG = new EquivalencesDAG<Property>(propertyGraph);
+		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
 		
 		this.classGraph = classGraph;
-		classDAG = new EquivalencesDAG<BasicClassDescription>(classGraph);
+		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
 
-		setup();
-	}
-
-	
-	private void setup() {
-		
 		DAGBuilder.choosePropertyRepresentatives(propertyDAG);
-		
 		DAGBuilder.chooseClassRepresentatives(classDAG, propertyDAG);
 	}
 
+	
 
 
 	@Override
@@ -162,11 +156,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 	@Override
 	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {
-		return propertyDAG.getDirectChildren(propertyDAG.getVertex(desc));
+		return propertyDAG.getDirectSub(propertyDAG.getVertex(desc));
 	}
 	@Override
 	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
-		return classDAG.getDirectChildren(classDAG.getVertex(desc));
+		return classDAG.getDirectSub(classDAG.getVertex(desc));
 	}
 	
 
@@ -181,11 +175,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * */
 	@Override
 	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
-		return propertyDAG.getDirectParents(propertyDAG.getVertex(desc));
+		return propertyDAG.getDirectSuper(propertyDAG.getVertex(desc));
 	}
 	@Override
 	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
-		return classDAG.getDirectParents(classDAG.getVertex(desc));
+		return classDAG.getDirectSuper(classDAG.getVertex(desc));
 	}
 	
 
@@ -202,11 +196,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 	@Override
 	public Set<Equivalences<Property>> getSubProperties(Property desc) {
-		return propertyDAG.getDescendants(propertyDAG.getVertex(desc));
+		return propertyDAG.getSub(propertyDAG.getVertex(desc));
 	}
 	@Override
 	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
-		return classDAG.getDescendants(classDAG.getVertex(desc));
+		return classDAG.getSub(classDAG.getVertex(desc));
 	}
 	
 
@@ -223,11 +217,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	@Override
 	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
-		return propertyDAG.getAncestors(propertyDAG.getVertex(desc));
+		return propertyDAG.getSuper(propertyDAG.getVertex(desc));
 	}
 	@Override
 	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
-		return classDAG.getAncestors(classDAG.getVertex(desc));
+		return classDAG.getSuper(classDAG.getVertex(desc));
 	}
 
 	
@@ -258,12 +252,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	@Override
-	public Set<Equivalences<BasicClassDescription>> getClasses() {
-		return classDAG.vertexSet();
+	public EquivalencesDAG<BasicClassDescription> getClasses() {
+		return classDAG;
 	}
 
-	public Set<Equivalences<Property>> getProperties() {
-		return propertyDAG.vertexSet();
+	public EquivalencesDAG<Property> getProperties() {
+		return propertyDAG;
 	}
 	
 	

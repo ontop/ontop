@@ -427,7 +427,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			}
 */
 	private boolean testParents(TBoxReasoner d1, TBoxReasoner d2, TBoxReasonerImpl reasoner){
-		
+	
 		for(Equivalences<Property> node : d1.getProperties()) {
 			Property vertex = node.getRepresentative();
 			if(reasoner.isNamed(vertex)){
@@ -436,7 +436,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				log.debug("parents {} ", setd1);
 				Set<Equivalences<Property>> setd2	= d2.getDirectSuperProperties(vertex);
 				log.debug("parents {} ", setd2);
-				if (!coincide(setd1, setd2)) 
+				if (!coincide(setd1, setd2))  
 					return false;
 			}
 		}
@@ -448,7 +448,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				log.debug("parents {} ", setd1);
 				Set<Equivalences<BasicClassDescription>> setd2	= d2.getDirectSuperClasses(vertex);
 				log.debug("parents {} ", setd2);
-				if (!coincide(setd1, setd2)) 
+				if (!coincide(setd1, setd2))  
 					return false;
 			}
 		}

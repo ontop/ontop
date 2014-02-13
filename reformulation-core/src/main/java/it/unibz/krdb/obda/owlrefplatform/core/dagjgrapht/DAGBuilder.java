@@ -59,7 +59,7 @@ public class DAGBuilder {
 	 * 
 	 */
 
-	public static void choosePropertyRepresentatives(EquivalencesDAG<Property> dag) {
+	public static void choosePropertyRepresentatives(EquivalencesDAGImpl<Property> dag) {
 		
 		Deque<Equivalences<Property>> asymmetric = new LinkedList<Equivalences<Property>>();
 		
@@ -104,7 +104,7 @@ public class DAGBuilder {
 			Set<Equivalences<Property>> component = getRoleComponent(dag, c);
 			// find a maximal property (non-deterministic!!)
 			for (Equivalences<Property> equivalences : component) 
-				if (component.containsAll(dag.getDirectChildren(equivalences))) {
+				if (component.containsAll(dag.getDirectSub(equivalences))) {
 					Property p = getNamedRepresentative(equivalences);
 					if (p == null) {
 						invertedRepRequired = true;
@@ -182,13 +182,13 @@ public class DAGBuilder {
 
 		while (!queue.isEmpty()) {
 			Equivalences<Property> eq = queue.pollFirst();
-			for (Equivalences<Property> t : dag.getDirectChildren(eq)) {
+			for (Equivalences<Property> t : dag.getDirectSub(eq)) {
 				if (t.getRepresentative() == null && !set.contains(t)) {
 					set.add(t);
 					queue.add(t);
 				}
 			}
-			for (Equivalences<Property> s : dag.getDirectParents(eq)) {
+			for (Equivalences<Property> s : dag.getDirectSuper(eq)) {
 				if (s.getRepresentative() == null && !set.contains(s)) {
 					set.add(s);
 					queue.add(s);
@@ -223,7 +223,7 @@ public class DAGBuilder {
 	
 	
 	
-	public static void chooseClassRepresentatives(EquivalencesDAG<BasicClassDescription> dag, EquivalencesDAG<Property> propertyDAG) {
+	public static void chooseClassRepresentatives(EquivalencesDAGImpl<BasicClassDescription> dag, EquivalencesDAG<Property> propertyDAG) {
 
 		for (Equivalences<BasicClassDescription> equivalenceSet : dag.vertexSet()) {
 

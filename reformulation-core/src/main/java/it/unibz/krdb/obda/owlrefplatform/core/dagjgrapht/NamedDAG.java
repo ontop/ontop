@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.List;
-import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
