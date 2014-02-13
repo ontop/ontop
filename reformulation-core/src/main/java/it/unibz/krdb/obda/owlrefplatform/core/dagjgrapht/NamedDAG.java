@@ -87,63 +87,39 @@ public class NamedDAG  {
 	 * @param dag the DAG from which we want to maintain only the named descriptions
 	 */
 
+	private static <T> SimpleDirectedGraph <T,DefaultEdge> getNamedDAG(EquivalencesDAG<T> dag) {
+		
+		SimpleDirectedGraph<T,DefaultEdge>  namedDAG = new SimpleDirectedGraph <T,DefaultEdge> (DefaultEdge.class); 
+
+		for (Equivalences<T> v : dag) 
+			namedDAG.addVertex(v.getRepresentative());
+
+		for (Equivalences<T> s : dag) 
+			for (Equivalences<T> t : dag.getDirectSuper(s)) 
+				namedDAG.addEdge(s.getRepresentative(), t.getRepresentative());
+
+		for (Equivalences<T> v : dag) 
+			if (!v.isIndexed()) {
+				// eliminate node
+				for (DefaultEdge incEdge : namedDAG.incomingEdgesOf(v.getRepresentative())) { 
+					T source = namedDAG.getEdgeSource(incEdge);
+
+					for (DefaultEdge outEdge : namedDAG.outgoingEdgesOf(v.getRepresentative())) {
+						T target = namedDAG.getEdgeTarget(outEdge);
+
+						namedDAG.addEdge(source, target);
+					}
+				}
+				namedDAG.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
+			}
+		return namedDAG;
+	}
 	
 	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
-
-		SimpleDirectedGraph <Property,DefaultEdge>  propertyDAG 
-					= new SimpleDirectedGraph <Property,DefaultEdge> (DefaultEdge.class); 
-
-		for (Equivalences<Property> v : reasoner.getProperties()) 
-			propertyDAG.addVertex(v.getRepresentative());
-
-		for (Equivalences<Property> s : reasoner.getProperties()) 
-			for (Equivalences<Property> t : reasoner.getDirectSuperProperties(s.getRepresentative())) 
-				propertyDAG.addEdge(s.getRepresentative(), t.getRepresentative());
 		
-		for (Equivalences<Property> v : reasoner.getProperties()) 
-			if (!v.isIndexed()) {
-				// eliminate node
-				for (DefaultEdge incEdge : propertyDAG.incomingEdgesOf(v.getRepresentative())) { 
-					Property source = propertyDAG.getEdgeSource(incEdge);
-
-					for (DefaultEdge outEdge : propertyDAG.outgoingEdgesOf(v.getRepresentative())) {
-						Property target = propertyDAG.getEdgeTarget(outEdge);
-
-						propertyDAG.addEdge(source, target);
-					}
-				}
-				propertyDAG.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
-			}
-	
-		
-		
-		
-		
-		SimpleDirectedGraph <BasicClassDescription,DefaultEdge>  classDAG 
-		= new SimpleDirectedGraph <BasicClassDescription,DefaultEdge> (DefaultEdge.class); 
-		
-		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
-			classDAG.addVertex(v.getRepresentative());
-		
-		for (Equivalences<BasicClassDescription> s : reasoner.getClasses()) 
-			for (Equivalences<BasicClassDescription> t : reasoner.getDirectSuperClasses(s.getRepresentative())) 
-				classDAG.addEdge(s.getRepresentative(), t.getRepresentative());
-
-		for (Equivalences<BasicClassDescription> v : reasoner.getClasses()) 
-			if (!v.isIndexed()) {
-				// eliminate node
-				for (DefaultEdge incEdge : classDAG.incomingEdgesOf(v.getRepresentative())) { 
-					BasicClassDescription source = classDAG.getEdgeSource(incEdge);
-
-					for (DefaultEdge outEdge : classDAG.outgoingEdgesOf(v.getRepresentative())) {
-						BasicClassDescription target = classDAG.getEdgeTarget(outEdge);
-
-						classDAG.addEdge(source, target);
-					}
-				}
-				classDAG.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
-			}
-				
+		SimpleDirectedGraph<Property,DefaultEdge>  propertyDAG = getNamedDAG(reasoner.getProperties());
+		SimpleDirectedGraph<BasicClassDescription,DefaultEdge>  classDAG = getNamedDAG(reasoner.getClasses());
+						
 		NamedDAG dagImpl = new NamedDAG(propertyDAG, classDAG);
 		return dagImpl;
 	}

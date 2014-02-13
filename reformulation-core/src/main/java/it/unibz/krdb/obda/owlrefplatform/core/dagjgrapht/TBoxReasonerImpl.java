@@ -164,25 +164,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 
-	/**
-	 * return the direct parents starting from the given node of the dag
-	 * 
-	 * @param desc node from which we want to know the direct parents
-	 *            
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 * */
-	@Override
-	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
-		return propertyDAG.getDirectSuper(propertyDAG.getVertex(desc));
-	}
-	@Override
-	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSuper(classDAG.getVertex(desc));
-	}
-	
-
 
 	/**
 	 * Traverse the graph return the descendants starting from the given node of
@@ -289,24 +270,26 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
 		
 		
+		EquivalencesDAG<BasicClassDescription> classes = tbox.getClasses();
+		
 		// move everything to a graph that admits cycles
 		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> modifiedGraph = 
 				new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
-		for (Equivalences<BasicClassDescription> v : tbox.getClasses()) 
+		for (Equivalences<BasicClassDescription> v : classes) 
 			modifiedGraph.addVertex(v.getRepresentative());
 		
-		for (Equivalences<BasicClassDescription> v : tbox.getClasses()) {
+		for (Equivalences<BasicClassDescription> v : classes) {
 			BasicClassDescription s = v.getRepresentative();
-			for (Equivalences<BasicClassDescription> vp : tbox.getDirectSuperClasses(s))
+			for (Equivalences<BasicClassDescription> vp : classes.getDirectSuper(v))
 				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
 
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<Description> processedNodes = new HashSet<Description>();
 		
-		for (Equivalences<BasicClassDescription> n : tbox.getClasses()) {
+		for (Equivalences<BasicClassDescription> n : classes) {
 			BasicClassDescription node = n.getRepresentative();
 			
 			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
@@ -331,13 +314,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					modifiedGraph.addEdge(child, existsNode);
 			}
 
-			for (Equivalences<BasicClassDescription> parents : tbox.getDirectSuperClasses(existsNode)) {
+			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(classes.getVertex(existsNode))) {
 				BasicClassDescription parent = parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
 					modifiedGraph.addEdge(existsInvNode, parent);
 			}
 
-			for (Equivalences<BasicClassDescription> parents : tbox.getDirectSuperClasses(existsInvNode)) {
+			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(classes.getVertex(existsInvNode))) {
 				BasicClassDescription parent = parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
 					modifiedGraph.addEdge(existsNode, parent);

@@ -96,12 +96,14 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			assertTrue(testDescendants(namedDag2, dag2, reasoner));
 			assertTrue(testChildren(dag2, namedDag2, reasoner));
 			assertTrue(testChildren(namedDag2, dag2, reasoner));
-			assertTrue(testAncestors(dag2.getClasses(), namedDag2.getClasses(), reasoner));
-			assertTrue(testAncestors(dag2.getProperties(), namedDag2.getProperties(), reasoner));
-			assertTrue(testAncestors(namedDag2.getClasses(), dag2.getClasses(), reasoner));
-			assertTrue(testAncestors(namedDag2.getProperties(), dag2.getProperties(), reasoner));
-			assertTrue(testParents(dag2, namedDag2, reasoner));
-			assertTrue(testParents(namedDag2, dag2, reasoner));
+			assertTrue(testAncestors(dag2.getClasses(), namedDag2.getClasses()));
+			assertTrue(testAncestors(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testAncestors(namedDag2.getClasses(), dag2.getClasses()));
+			assertTrue(testAncestors(namedDag2.getProperties(), dag2.getProperties()));
+			assertTrue(testParents(dag2.getClasses(), namedDag2.getClasses()));
+			assertTrue(testParents(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testParents(namedDag2.getClasses(), dag2.getClasses()));
+			assertTrue(testParents(namedDag2.getProperties(), dag2.getProperties()));
 //			assertTrue(checkVertexReduction(graph1, namedDag2, true));
 			//check only if the number of edges is smaller
 			//assertTrue(checkEdgeReduction(graph1, namedDag2, true)); COMMENTED OUT BY ROMAN
@@ -345,20 +347,17 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */
-	private <T> boolean testAncestors(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2, TBoxReasonerImpl reasoner) {
+	private <T> boolean testAncestors(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 		
 		for(Equivalences<T> v: d1){
-			T vertex = v.getRepresentative();
-			if(v.isIndexed()){
-				Set<Equivalences<T>> setd1 = d1.getSuper(v);
-				log.info("vertex {}", vertex);
-				log.debug("ancestors {} ", setd1);
-				Set<Equivalences<T>> setd2 = d2.getSuper(v);
-				log.debug("ancestors {} ", setd2);
-				
-				if (!coincide(setd1, setd2))
-					return false;
-			}
+			Set<Equivalences<T>> setd1 = d1.getSuper(v);
+			log.info("vertex {}", v);
+			log.debug("ancestors {} ", setd1);
+			Set<Equivalences<T>> setd2 = d2.getSuper(v);
+			log.debug("ancestors {} ", setd2);
+			
+			if (!coincide(setd1, setd2))
+				return false;
 		}
 		return true;
 	}
@@ -416,31 +415,16 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */
-	private boolean testParents(TBoxReasoner d1, TBoxReasoner d2, TBoxReasonerImpl reasoner){
+	private <T> boolean testParents(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 	
-		for(Equivalences<Property> node : d1.getProperties()) {
-			Property vertex = node.getRepresentative();
-			if(reasoner.isNamed(vertex)){
-				Set<Equivalences<Property>> setd1	= d1.getDirectSuperProperties(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("parents {} ", setd1);
-				Set<Equivalences<Property>> setd2	= d2.getDirectSuperProperties(vertex);
-				log.debug("parents {} ", setd2);
-				if (!coincide(setd1, setd2))  
-					return false;
-			}
-		}
-		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
-			BasicClassDescription vertex = node.getRepresentative();
-			if(reasoner.isNamed(vertex)){
-				Set<Equivalences<BasicClassDescription>> setd1	= d1.getDirectSuperClasses(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("parents {} ", setd1);
-				Set<Equivalences<BasicClassDescription>> setd2	= d2.getDirectSuperClasses(vertex);
-				log.debug("parents {} ", setd2);
-				if (!coincide(setd1, setd2))  
-					return false;
-			}
+		for(Equivalences<T> node : d1) {
+			Set<Equivalences<T>> setd1	= d1.getDirectSuper(node);
+			log.info("vertex {}", node);
+			log.debug("parents {} ", setd1);
+			Set<Equivalences<T>> setd2	= d2.getDirectSuper(node);
+			log.debug("parents {} ", setd2);
+			if (!coincide(setd1, setd2))  
+				return false;
 		}
 		return true;
 	}

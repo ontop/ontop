@@ -25,9 +25,6 @@ public interface TBoxReasoner {
 	public Set<Equivalences<Property>> getDirectSubProperties(Property desc);
 	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc);
 
-	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc);
-	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc);
-
 	/**
 	 * Reflexive and transitive closure of the sub-description relation
 	 * @param desc: a class or a property

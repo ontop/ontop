@@ -98,8 +98,10 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			assertTrue(testAncestors(graphReasoner.getProperties(), reasoner.getProperties()));
 			assertTrue(testAncestors(reasoner.getClasses(), graphReasoner.getClasses()));
 			assertTrue(testAncestors(reasoner.getProperties(), graphReasoner.getProperties()));
-			assertTrue(testParents(graphReasoner ,reasoner));
-			assertTrue(testParents(reasoner, graphReasoner));
+			assertTrue(testParents(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testParents(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testParents(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testParents(reasoner.getProperties(), graphReasoner.getProperties()));
 			assertTrue(checkVertexReduction(graphReasoner, reasoner));
 			assertTrue(checkEdgeReduction(graphReasoner, reasoner));
 
@@ -193,25 +195,13 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	}
 
 
-	private boolean testParents(TBoxReasoner d1, TBoxReasoner d2) {
+	private <T> boolean testParents(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 		
-		for(Equivalences<Property> vertex: d1.getProperties()){
-			Property p = vertex.getRepresentative();
-			Set<Equivalences<Property>> setd1 = d1.getDirectSuperProperties(p);
+		for(Equivalences<T> vertex: d1){
+			Set<Equivalences<T>> setd1 = d1.getDirectSuper(vertex);
 			log.info("vertex {}", vertex);
 			log.debug("children {} ", setd1);
-			Set<Equivalences<Property>> setd2 = d2.getDirectSuperProperties(p);
-			log.debug("children {} ", setd2);
-
-			if (!coincide(setd1, setd2))
-				return false;
-		}
-		for(Equivalences<BasicClassDescription> vertex: d1.getClasses()){
-			BasicClassDescription p = vertex.getRepresentative();
-			Set<Equivalences<BasicClassDescription>> setd1 = d1.getDirectSuperClasses(p);
-			log.info("vertex {}", vertex);
-			log.debug("children {} ", setd1);
-			Set<Equivalences<BasicClassDescription>> setd2 = d2.getDirectSuperClasses(p);
+			Set<Equivalences<T>> setd2 = d2.getDirectSuper(vertex);
 			log.debug("children {} ", setd2);
 
 			if (!coincide(setd1, setd2))
