@@ -4,7 +4,7 @@ package it.unibz.ontop.sesame.completeness.test;
  * #%L
  * ontop-quest-sesame
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

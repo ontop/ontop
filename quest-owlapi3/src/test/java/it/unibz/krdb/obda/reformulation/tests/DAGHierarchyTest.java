@@ -12,7 +12,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #%L
  * ontop-quest-owlapi3
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
