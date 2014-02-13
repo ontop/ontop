@@ -12,7 +12,12 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 
 	Set<Equivalences<T>> getDirectSuper(Equivalences<T> v);
 
+	/**
+	 * Reflexive and transitive closure of the super-description relation
+	 * @param v: an equivalence set of a description
+	 * @return equivalence classes for all super-descriptions (including v)
+	 */
 	Set<Equivalences<T>> getSuper(Equivalences<T> v);
 	
-	boolean isIndexed(T v);
+	boolean isIndexed(Equivalences<T> v);
 }

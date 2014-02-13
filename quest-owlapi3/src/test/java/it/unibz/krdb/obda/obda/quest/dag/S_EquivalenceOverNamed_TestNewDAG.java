@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnNamedDAG;
@@ -95,8 +96,10 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			assertTrue(testDescendants(namedDag2, dag2, reasoner));
 			assertTrue(testChildren(dag2, namedDag2, reasoner));
 			assertTrue(testChildren(namedDag2, dag2, reasoner));
-			assertTrue(testAncestors(dag2, namedDag2, reasoner));
-			assertTrue(testAncestors(namedDag2, dag2, reasoner));
+			assertTrue(testAncestors(dag2.getClasses(), namedDag2.getClasses(), reasoner));
+			assertTrue(testAncestors(dag2.getProperties(), namedDag2.getProperties(), reasoner));
+			assertTrue(testAncestors(namedDag2.getClasses(), dag2.getClasses(), reasoner));
+			assertTrue(testAncestors(namedDag2.getProperties(), dag2.getProperties(), reasoner));
 			assertTrue(testParents(dag2, namedDag2, reasoner));
 			assertTrue(testParents(namedDag2, dag2, reasoner));
 //			assertTrue(checkVertexReduction(graph1, namedDag2, true));
@@ -342,28 +345,15 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */
-	private boolean testAncestors(TBoxReasoner d1, TBoxReasoner d2, TBoxReasonerImpl reasoner) {
+	private <T> boolean testAncestors(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2, TBoxReasonerImpl reasoner) {
 		
-		for(Equivalences<Property> v: d1.getProperties()){
-			Property vertex = v.getRepresentative();
-			if(reasoner.isNamed(vertex)){
-				Set<Equivalences<Property>> setd1 = d1.getSuperProperties(vertex);
+		for(Equivalences<T> v: d1){
+			T vertex = v.getRepresentative();
+			if(v.isIndexed()){
+				Set<Equivalences<T>> setd1 = d1.getSuper(v);
 				log.info("vertex {}", vertex);
 				log.debug("ancestors {} ", setd1);
-				Set<Equivalences<Property>> setd2 = d2.getSuperProperties(vertex);
-				log.debug("ancestors {} ", setd2);
-				
-				if (!coincide(setd1, setd2))
-					return false;
-			}
-		}
-		for(Equivalences<BasicClassDescription> v: d1.getClasses()){
-			BasicClassDescription vertex = v.getRepresentative();
-			if(reasoner.isNamed(vertex)){
-				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSuperClasses(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("ancestors {} ", setd1);
-				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSuperClasses(vertex);
+				Set<Equivalences<T>> setd2 = d2.getSuper(v);
 				log.debug("ancestors {} ", setd2);
 				
 				if (!coincide(setd1, setd2))

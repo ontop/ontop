@@ -217,7 +217,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	}
 
 	@Override
-	public boolean isIndexed(T v) {
-		return getVertex(v).isIndexed();
+	public boolean isIndexed(Equivalences<T> v) {
+		return getVertex(v.getRepresentative()).isIndexed();
 	}
 }

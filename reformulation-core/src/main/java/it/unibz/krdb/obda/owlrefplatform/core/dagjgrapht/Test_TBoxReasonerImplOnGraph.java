@@ -362,8 +362,8 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 		}
 
 		@Override
-		public boolean isIndexed(T v) {
-			return false;
+		public boolean isIndexed(Equivalences<T> v) {
+			return true;
 		}
 		
 	}

@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
@@ -93,8 +94,10 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			assertTrue(testDescendants(reasoner, graphReasoner));
 			assertTrue(testChildren(graphReasoner, reasoner));
 			assertTrue(testChildren(reasoner, graphReasoner));
-			assertTrue(testAncestors(graphReasoner, reasoner));
-			assertTrue(testAncestors(reasoner, graphReasoner));
+			assertTrue(testAncestors(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testAncestors(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testAncestors(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testAncestors(reasoner.getProperties(), graphReasoner.getProperties()));
 			assertTrue(testParents(graphReasoner ,reasoner));
 			assertTrue(testParents(reasoner, graphReasoner));
 			assertTrue(checkVertexReduction(graphReasoner, reasoner));
@@ -175,27 +178,14 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	}
 
 
-	private boolean testAncestors(TBoxReasoner d1, TBoxReasoner d2) {
+	private <T> boolean testAncestors(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 
-		for(Equivalences<Property> vertex: d1.getProperties()){
-			Property p = vertex.getRepresentative();
-			Set<Equivalences<Property>> setd1 = d1.getSuperProperties(p);
+		for(Equivalences<T> vertex: d1){
+			Set<Equivalences<T>> setd1 = d1.getSuper(vertex);
 			log.info("vertex {}", vertex);
 			log.debug("ancestors {} ", setd1);
-			Set<Equivalences<Property>> setd2 = d2.getSuperProperties(p);
+			Set<Equivalences<T>> setd2 = d2.getSuper(vertex);
 			log.debug("ancestors {} ", setd2);
-
-			if (!coincide(setd1, setd2))
-				return false;
-		}
-		for(Equivalences<BasicClassDescription> vertex: d1.getClasses()){
-			BasicClassDescription p = vertex.getRepresentative();
-			Set<Equivalences<BasicClassDescription>> setd1 = d1.getSuperClasses(p);
-			log.info("vertex {}", vertex);
-			log.debug("ancestors {} ", setd1);
-			Set<Equivalences<BasicClassDescription>> setd2 = d2.getSuperClasses(p);
-			log.debug("ancestors {} ", setd2);
-
 			if (!coincide(setd1, setd2))
 				return false;
 		}

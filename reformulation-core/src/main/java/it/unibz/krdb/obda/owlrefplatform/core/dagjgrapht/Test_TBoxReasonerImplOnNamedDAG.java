@@ -175,7 +175,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 			
 			Set<T> equivalences = new LinkedHashSet<T>();
 			for (T vertex : reasonerDAG.getVertex(v)) {
-				if (reasonerDAG.isIndexed(vertex)) 
+				if (reasonerDAG.isIndexed(reasonerDAG.getVertex(v))) 
 						equivalences.add(vertex);
 			}
 			if (!equivalences.isEmpty())
@@ -272,8 +272,8 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		}
 
 		@Override
-		public boolean isIndexed(T v) {
-			return false;
+		public boolean isIndexed(Equivalences<T> v) {
+			return reasonerDAG.getVertex(v.getRepresentative()).isIndexed();
 		}
 		
 	}

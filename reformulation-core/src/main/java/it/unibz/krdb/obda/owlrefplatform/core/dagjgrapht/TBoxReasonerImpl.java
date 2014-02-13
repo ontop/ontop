@@ -204,25 +204,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 
-	/**
-	 * Traverse the graph return the ancestors starting from the given node of
-	 * the dag
-	 * 
-	 * @param desc node we want to know the ancestors
-	 *
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-
-	@Override
-	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
-		return propertyDAG.getSuper(propertyDAG.getVertex(desc));
-	}
-	@Override
-	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
-		return classDAG.getSuper(classDAG.getVertex(desc));
-	}
 
 	
 	/**

@@ -101,25 +101,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	}
 
 
-	/**
-	 * Traverse the graph return the ancestors starting from the given node of
-	 * the dag
-	 * 
-	 * @param desc node we want to know the ancestors
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	@Override
-	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
-		return propertyDAG.getSuper(propertyDAG.getVertex(desc));
-	}
-
-	@Override
-	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
-		return classDAG.getSuper(classDAG.getVertex(desc));
-	}
-
 
 	/**
 	 * Return the equivalences starting from the given node of the dag
@@ -181,7 +162,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
 			Set<T> equivalences = new LinkedHashSet<T>();
 				for (T vertex : reasonerDAG.getVertex(desc)) {
-					if (reasonerDAG.isIndexed(vertex)) 
+					if (reasonerDAG.isIndexed(reasonerDAG.getVertex(desc))) 
 						equivalences.add(vertex);
 				}
 			if (!equivalences.isEmpty())
@@ -251,8 +232,8 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 		}
 
 		@Override
-		public boolean isIndexed(T v) {
-			return false;
+		public boolean isIndexed(Equivalences<T> v) {
+			return reasonerDAG.getVertex(v.getRepresentative()).isIndexed();
 		}
 		
 	}
