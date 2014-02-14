@@ -487,20 +487,20 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */			
-			private boolean checkforNamedVertexesOnly(Test_TBoxReasonerImplOnNamedDAG dag, TBoxReasonerImpl reasoner){
-				for(Equivalences<Property> node: dag.getProperties()) {
-					Property vertex = node.getRepresentative();
-					if(!reasoner.isNamed(vertex))
-						return false;
-				}
-				for(Equivalences<BasicClassDescription> node: dag.getClasses()) {
-					BasicClassDescription vertex = node.getRepresentative();
-					if(!reasoner.isNamed(vertex))
-						return false;
-				}
-				return true;
-			}
-
+	private boolean checkforNamedVertexesOnly(Test_TBoxReasonerImplOnNamedDAG dag, TBoxReasonerImpl reasoner){
+		for(Equivalences<Property> node: dag.getProperties()) {
+			Property vertex = node.getRepresentative();
+			if(!reasoner.isNamed(vertex))
+				return false;
 		}
+		for(Equivalences<BasicClassDescription> node: dag.getClasses()) {
+			BasicClassDescription vertex = node.getRepresentative();
+			if(!reasoner.isNamed(vertex))
+				return false;
+		}
+		return true;
+	}
+
+}
 
 
