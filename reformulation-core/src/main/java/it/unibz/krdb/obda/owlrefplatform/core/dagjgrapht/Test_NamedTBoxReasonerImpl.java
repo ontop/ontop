@@ -75,7 +75,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 			
 			for (Equivalences<T> e : reasonerDAG) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
-				if (!nodes.isEmpty())
+				if (nodes != null)
 					result.add(nodes);			
 			}
 			return result.iterator();
@@ -85,15 +85,11 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 		public Equivalences<T> getVertex(T desc) {
 
 			// either all elements of the equivalence set are there or none!
-			Set<T> equivalences = new LinkedHashSet<T>();
-			for (T vertex : reasonerDAG.getVertex(desc)) {
-				if (reasonerDAG.isIndexed(reasonerDAG.getVertex(desc))) 
-					equivalences.add(vertex);
-			}
-			if (!equivalences.isEmpty())
-				return new Equivalences<T>(equivalences, reasonerDAG.getVertex(desc).getRepresentative());
-			
-			return new Equivalences<T>(equivalences);
+			Equivalences<T> vertex = reasonerDAG.getVertex(desc);
+			if (vertex.isIndexed())
+				return vertex;
+			else
+				return null;
 		}
 
 		
@@ -106,7 +102,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 				
 				// get the child node and its equivalent nodes
 				Equivalences<T> namedEquivalences = getVertex(child);
-				if (!namedEquivalences.isEmpty())
+				if (namedEquivalences != null)
 					result.add(namedEquivalences);
 				else 
 					result.addAll(getDirectSub(e)); // recursive call if the child is not empty
@@ -120,7 +116,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 			
 			for (Equivalences<T> e : reasonerDAG.getSub(v)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
-				if (!nodes.isEmpty())
+				if (nodes != null)
 					result.add(nodes);			
 			}
 			return result;
@@ -135,7 +131,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 				
 				// get the child node and its equivalent nodes
 				Equivalences<T> namedEquivalences = getVertex(parent);
-				if (!namedEquivalences.isEmpty())
+				if (namedEquivalences != null)
 					result.add(namedEquivalences);
 				else 
 					result.addAll(getDirectSuper(e)); // recursive call if the parent is not named
@@ -149,7 +145,7 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
 			for (Equivalences<T> e : reasonerDAG.getSuper(v)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
-				if (!nodes.isEmpty())
+				if (nodes != null)
 					result.add(nodes);			
 			}
 			

@@ -89,23 +89,18 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 			for (T vertex : dag.vertexSet()) 
 				result.add(getVertex(vertex));
-
+			
 			return result.iterator();
 		}
 
 		@Override
-		public Equivalences<T> getVertex(T v) {
-			
-			// again, either all or none
-			Set<T> equivalences = new LinkedHashSet<T>();
-			for (T vertex : reasonerDAG.getVertex(v)) {
-				if (reasonerDAG.isIndexed(reasonerDAG.getVertex(v))) 
-						equivalences.add(vertex);
-			}
-			if (!equivalences.isEmpty())
-				return new Equivalences<T>(equivalences, reasonerDAG.getVertex(v).getRepresentative());
-			
-			return new Equivalences<T>(equivalences);
+		public Equivalences<T> getVertex(T v) {		
+			// either all or none
+			Equivalences<T> vertex = reasonerDAG.getVertex(v);
+			if (dag.containsVertex(vertex.getRepresentative()))
+				return vertex;
+			else
+				return null;
 		}
 
 		@Override
@@ -119,7 +114,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 				// get the child node and its equivalent nodes
 				Equivalences<T> namedEquivalences = getVertex(source);
-				if (!namedEquivalences.isEmpty())
+				if (namedEquivalences != null)
 					result.add(namedEquivalences);
 				else 
 					result.addAll(getDirectSub(source));
@@ -143,7 +138,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 				// add the node and its equivalent nodes
 				Equivalences<T> sources = getVertex(child);
-				if (!sources.isEmpty())
+				if (sources != null)
 					result.add(sources);
 			}
 			
@@ -162,7 +157,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 				// get the child node and its equivalent nodes
 				Equivalences<T> namedEquivalences = getVertex(target);
-				if (!namedEquivalences.isEmpty())
+				if (namedEquivalences != null)
 					result.add(namedEquivalences);
 				else 
 					result.addAll(getDirectSuper(target));
@@ -184,7 +179,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 				// add the node and its equivalent nodes
 				Equivalences<T> sources = getVertex(parent);
-				if (!sources.isEmpty())
+				if (sources != null)
 					result.add(sources);
 			}
 
