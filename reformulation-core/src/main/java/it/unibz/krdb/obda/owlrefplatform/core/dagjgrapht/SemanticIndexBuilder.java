@@ -154,9 +154,9 @@ public class SemanticIndexBuilder  {
 
 		Description node;
 		if (d instanceof Property)
-			node = reasoner.getRepresentativeFor((Property)d);
+			node = reasoner.getProperties().getVertex((Property)d).getRepresentative();
 		else
-			node = reasoner.getRepresentativeFor((BasicClassDescription)d);
+			node = reasoner.getClasses().getVertex((BasicClassDescription)d).getRepresentative();
 		
 		SemanticIndexRange range = ranges.get(node);
 		if (range == null)

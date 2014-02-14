@@ -122,7 +122,7 @@ public class SemanticIndexCache {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
 				Property c = ofac.createObjectProperty(name);
-				Property equivalent = (Property)reasonerDag.getRepresentativeFor(c);
+				Property equivalent = reasonerDag.getRepresentativeFor(c);
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				
@@ -132,7 +132,7 @@ public class SemanticIndexCache {
 				/* object property equivalent failed, we now look for data property equivalent */
 				
 				c = ofac.createDataProperty(name);
-				equivalent = (Property)reasonerDag.getRepresentativeFor(c);
+				equivalent = reasonerDag.getRepresentativeFor(c);
 				
 				index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				if (index1 == null) {

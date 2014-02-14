@@ -154,8 +154,8 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant(Property parent, Property child) {
 		
-		Property sp = (Property)sigmaChain.getRepresentativeFor(parent);
-		Property sc = (Property)sigmaChain.getRepresentativeFor(child);
+		Property sp = sigmaChain.getRepresentativeFor(parent);
+		Property sc = sigmaChain.getRepresentativeFor(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
@@ -169,7 +169,7 @@ public class SigmaTBoxOptimizer {
 		
 		
 		
-		Property tc = (Property)isaChain.getRepresentativeFor(child);
+		Property tc = isaChain.getRepresentativeFor(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
@@ -182,8 +182,8 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant(BasicClassDescription parent, BasicClassDescription child) {
 		
-		BasicClassDescription sp = (BasicClassDescription)sigmaChain.getRepresentativeFor(parent);
-		BasicClassDescription sc = (BasicClassDescription)sigmaChain.getRepresentativeFor(child);
+		BasicClassDescription sp = sigmaChain.getRepresentativeFor(parent);
+		BasicClassDescription sc = sigmaChain.getRepresentativeFor(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
@@ -197,7 +197,7 @@ public class SigmaTBoxOptimizer {
 		
 		
 		
-		BasicClassDescription tc = (BasicClassDescription)isaChain.getRepresentativeFor(child);
+		BasicClassDescription tc = isaChain.getRepresentativeFor(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;

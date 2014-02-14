@@ -689,7 +689,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Property propDesc = ofac.createProperty(propPred);
 
 					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
-						Property desc = (Property) reasonerDag.getRepresentativeFor(propDesc);
+						Property desc = reasonerDag.getRepresentativeFor(propDesc);
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -1173,7 +1173,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		Property desc = (Property) reasonerDag.getRepresentativeFor(property);
+		Property desc = reasonerDag.getRepresentativeFor(property);
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
 				return true;
@@ -1721,7 +1721,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		for (Predicate rolepred : ontology.getRoles()) {
 
-			Property node = (Property)reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
+			Property node = reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
 			// We only map named roles
 			if (node.isInverse()) 
 				continue;
@@ -1793,7 +1793,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 //		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
 		
 		for (BasicClassDescription node : reasonerDag.getClassNames()) {
-			if (!reasonerDag.getRepresentativeFor(node).equals(node))
+			if (!reasonerDag.getClasses().getVertex(node).getRepresentative().equals(node))
 				continue;
 
 			classNodesMaps.add((OClass)node);

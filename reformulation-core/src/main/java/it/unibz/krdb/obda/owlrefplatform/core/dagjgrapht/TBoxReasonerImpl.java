@@ -75,13 +75,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	public Description getRepresentativeFor(Property v) {
+	public Property getRepresentativeFor(Property v) {
 			Equivalences<Property> e = propertyDAG.getVertex(v);
 			if (e != null)
 				return e.getRepresentative();
 		return null;
 	}
-	public Description getRepresentativeFor(BasicClassDescription v) {
+	public BasicClassDescription getRepresentativeFor(BasicClassDescription v) {
 			Equivalences<BasicClassDescription> e = classDAG.getVertex(v);
 			if (e != null)
 				return e.getRepresentative();			
@@ -222,8 +222,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<Description> processedNodes = new HashSet<Description>();
 		
-		for (Equivalences<BasicClassDescription> n : classes) {
-			BasicClassDescription node = n.getRepresentative();
+		for (Equivalences<BasicClassDescription> existsNode : classes) {
+			BasicClassDescription node = existsNode.getRepresentative();
 			
 			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
 				continue;
@@ -232,35 +232,35 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			 * Adding a cycle between exists R and exists R- for each R.
 			 */
 
-			PropertySomeRestriction existsNode = (PropertySomeRestriction) node;
-			BasicClassDescription existsInvNode = (BasicClassDescription)tbox.getRepresentativeFor(
-						fac.createPropertySomeRestriction(existsNode.getPredicate(), !existsNode.isInverse()));
+			PropertySomeRestriction exists = (PropertySomeRestriction) node;
+			Equivalences<BasicClassDescription> existsInvNode = classes.getVertex(
+						fac.createPropertySomeRestriction(exists.getPredicate(), !exists.isInverse()));
 			
-			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(classes.getVertex(existsNode))) {
+			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(existsNode)) {
 				BasicClassDescription child = children.getRepresentative(); 
 				if (!child.equals(existsInvNode))
-					modifiedGraph.addEdge(child, existsInvNode);
+					modifiedGraph.addEdge(child, existsInvNode.getRepresentative());
 			}
-			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(classes.getVertex(existsInvNode))) {
+			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(existsInvNode)) {
 				BasicClassDescription child = children.getRepresentative(); 
 				if (!child.equals(existsNode))
-					modifiedGraph.addEdge(child, existsNode);
+					modifiedGraph.addEdge(child, existsNode.getRepresentative());
 			}
 
-			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(classes.getVertex(existsNode))) {
+			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(existsNode)) {
 				BasicClassDescription parent = parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
-					modifiedGraph.addEdge(existsInvNode, parent);
+					modifiedGraph.addEdge(existsInvNode.getRepresentative(), parent);
 			}
 
-			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(classes.getVertex(existsInvNode))) {
+			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(existsInvNode)) {
 				BasicClassDescription parent = parents.getRepresentative(); 
 				if (!parent.equals(existsInvNode))
-					modifiedGraph.addEdge(existsNode, parent);
+					modifiedGraph.addEdge(existsNode.getRepresentative(), parent);
 			}
 
-			processedNodes.add(existsNode);
-			processedNodes.add(existsInvNode);
+			processedNodes.add(existsNode.getRepresentative());
+			processedNodes.add(existsInvNode.getRepresentative());
 		}
 
 		/* Collapsing the cycles */
