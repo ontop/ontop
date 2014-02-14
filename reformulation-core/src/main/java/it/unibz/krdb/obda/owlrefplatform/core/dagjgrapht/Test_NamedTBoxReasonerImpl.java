@@ -9,7 +9,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 
 import java.util.Iterator;
@@ -17,68 +16,56 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Simulates the NamedDAG over TBoxReasonerImpl 
+ * Representation of the named part of the property and class DAGs  
+ *     based on the DAGs provided by a TBoxReasonerImpl
  * 
- * THIS CLASS IS FOR TESTS ONLY
- * 
+ * WARNING: THIS CLASS IS FOR TESTING ONLY 
  */
 
 public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
-	private EquivalencesNamedDAGImpl<Property> propertyDAG;
-	private EquivalencesNamedDAGImpl<BasicClassDescription> classDAG;
+	private EquivalencesDAG<Property> propertyDAG;
+	private EquivalencesDAG<BasicClassDescription> classDAG;
 
-	/**
-	 * Constructor using a DAG or a named DAG
-	 * @param dag DAG to be used for reasoning
-	 */
 	public Test_NamedTBoxReasonerImpl(TBoxReasonerImpl reasoner) {
-		this.propertyDAG = new EquivalencesNamedDAGImpl<Property>(reasoner.getProperties());
-		this.classDAG = new EquivalencesNamedDAGImpl<BasicClassDescription>(reasoner.getClasses());
+		this.propertyDAG = new EquivalencesDAGImpl<Property>(reasoner.getProperties());
+		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(reasoner.getClasses());
 	}
-
 
 
 	/**
-	 * Return the equivalences starting from the given node of the dag
+	 * Return the DAG of properties
 	 * 
-	 * @param desc node we want to know the ancestors
-	 *            
-	 * @return we return a set of description with equivalent nodes 
+	 * @return DAG 
 	 */
-
-	public Equivalences<Property> getEquivalences(Property desc) {
-		return propertyDAG.getVertex(desc);
-	}
-	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
-		return classDAG.getVertex(desc);
-	}
-	
-
-	/**
-	 * Return all the nodes in the DAG or graph
-	 * 
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-
 
 	@Override
 	public EquivalencesDAG<Property> getProperties() {
 		return propertyDAG;
 	}
+	
+	/**
+	 * Return the DAG of classes
+	 * 
+	 * @return DAG 
+	 */
 
 	@Override
 	public EquivalencesDAG<BasicClassDescription> getClasses() {
 		return classDAG;
 	}
 
-	public static final class EquivalencesNamedDAGImpl<T> implements EquivalencesDAG<T> {
+	/**
+	 * Reconstruction of the Named DAG (as EquivalncesDAG) from a DAG
+	 *
+	 * @param <T> Property or BasicClassDescription
+	 */
+	
+	public static final class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		private EquivalencesDAG<T> reasonerDAG;
 		
-		EquivalencesNamedDAGImpl(EquivalencesDAG<T> reasonerDAG) {
+		EquivalencesDAGImpl(EquivalencesDAG<T> reasonerDAG) {
 			this.reasonerDAG = reasonerDAG;
 		}
 		
@@ -97,11 +84,12 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 		@Override
 		public Equivalences<T> getVertex(T desc) {
 
+			// either all elements of the equivalence set are there or none!
 			Set<T> equivalences = new LinkedHashSet<T>();
-				for (T vertex : reasonerDAG.getVertex(desc)) {
-					if (reasonerDAG.isIndexed(reasonerDAG.getVertex(desc))) 
-						equivalences.add(vertex);
-				}
+			for (T vertex : reasonerDAG.getVertex(desc)) {
+				if (reasonerDAG.isIndexed(reasonerDAG.getVertex(desc))) 
+					equivalences.add(vertex);
+			}
 			if (!equivalences.isEmpty())
 				return new Equivalences<T>(equivalences, reasonerDAG.getVertex(desc).getRepresentative());
 			

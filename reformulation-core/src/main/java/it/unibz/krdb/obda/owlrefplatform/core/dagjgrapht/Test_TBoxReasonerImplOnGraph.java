@@ -29,10 +29,9 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 /**
- * Allows to reason over the TBox using a TBox graph
+ * Reasoning over the TBox using the ontology graph
  * 
- * WARNING: THIS CLASS IS ONLY FOR TESTING
- * 
+ * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
 
 public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
@@ -51,115 +50,34 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 		this.classDAG = new EquivalencesDAGImplOnGraph<BasicClassDescription>(classGraph);
 	}
 	
-//	public boolean isNamed0(Description vertex) {
-//		return property.contains(vertex) || namedClasses.contains(vertex);
-//	}
-	
 	/**
-	 * return the direct children starting from the given node of the dag
+	 * Return the DAG of properties
 	 * 
-	 * @param desc node that we want to know the direct children
-	 * @param named
-	 *            when it's true only the children that correspond to named
-	 *            classes and property are returned
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
+	 * @return DAG 
 	 */
 
-	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {
-		return propertyDAG.getDirectSub(propertyDAG.getVertex(desc));
-	}
-	
-	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSub(classDAG.getVertex(desc));
-	}
-	
-
-	/**
-	 * return the direct parents starting from the given node of the dag
-	 * 
-	 * @param desc node from which we want to know the direct parents
-	 * @param named
-	 *            when it's true only the parents that correspond to named
-	 *            classes or property are returned
-	 *            
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 * */
-	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
-		return propertyDAG.getDirectSuper(propertyDAG.getVertex(desc));
-	}
-	
-	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSuper(classDAG.getVertex(desc));
-	}
-	
-
-	/**
-	 * Traverse the graph return the descendants starting from the given node of
-	 * the dag
-	 * 
-	 * @param desc node we want to know the descendants
-	 * @param named
-	 *            when it's true only the descendants that are named classes or
-	 *            property are returned
-	 *@return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	
-	public Set<Equivalences<Property>> getSubProperties(Property desc) {
-		return propertyDAG.getSub(propertyDAG.getVertex(desc));
-	}
-	
-	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
-		return classDAG.getSub(classDAG.getVertex(desc));
-	}
-
-	
-	/**
-	 * Return the equivalences starting from the given node of the dag
-	 * 
-	 * @param desc node we want to know the ancestors
-
-	 * @param named
-	 *            when it's <code> true </code> only the equivalences that are named classes or
-	 *            property are returned
-	 *            
-	 * @return we return a set of description with equivalent nodes 
-	 */	
-	
-
-	public Equivalences<Property> getEquivalences(Property desc) {
-		return propertyDAG.getVertex(desc);
-	}
-	
-	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
-		return classDAG.getVertex(desc);
-	}
-	
-	/**
-	 * Return all the nodes in the DAG or graph
-	 * 
-	 * @param named when it's <code> true </code> only the named classes or
-	 *            property are returned 
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-
+	@Override
 	public EquivalencesDAG<Property> getProperties() {
 		return propertyDAG;
 	}
+	
+	/**
+	 * Return the DAG of classes
+	 * 
+	 * @return DAG 
+	 */
+	
+	@Override
 	public EquivalencesDAG<BasicClassDescription> getClasses() {
 		return classDAG;
 	}
 
-	
-	
-	
+	/**
+	 * Reconstruction of the DAG from the ontology graph
+	 *
+	 * @param <T> Property or BasicClassDescription
+	 */
+		
 	public static final class EquivalencesDAGImplOnGraph<T> implements EquivalencesDAG<T> {
 
 		private DefaultDirectedGraph<T,DefaultEdge> graph;
@@ -390,40 +308,40 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 			PropertySomeRestriction existsR = (PropertySomeRestriction) node;
 			PropertySomeRestriction existsRin = fac.createPropertySomeRestriction(existsR.getPredicate(),!existsR.isInverse());
 			
-			BasicClassDescription existsNode = node;
-			BasicClassDescription existsInvNode = existsRin;
+			Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);
+			Equivalences<BasicClassDescription> existsInvNode = classDAG.getVertex(existsRin);
 			
 			Set<Equivalences<BasicClassDescription>> childrenExist 
-					= new HashSet<Equivalences<BasicClassDescription>>(getDirectSubClasses(existsNode));
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsNode));
 			Set<Equivalences<BasicClassDescription>> childrenExistInv 
-					= new HashSet<Equivalences<BasicClassDescription>>(getDirectSubClasses(existsInvNode));
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsInvNode));
 
 			for (Equivalences<BasicClassDescription> children : childrenExist) {
 				for (BasicClassDescription child : children) 
-					classGraph.addEdge(child, existsInvNode);
+					classGraph.addEdge(child, existsRin);
 			}
 			for (Equivalences<BasicClassDescription> children : childrenExistInv) {
 				for (BasicClassDescription child : children) 
-					classGraph.addEdge(child, existsNode);
+					classGraph.addEdge(child, existsR);
 			}
 
 			Set<Equivalences<BasicClassDescription>> parentExist 
-					= new HashSet<Equivalences<BasicClassDescription>>(getDirectSuperClasses(existsNode));
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsNode));
 			Set<Equivalences<BasicClassDescription>> parentsExistInv 
-					= new HashSet<Equivalences<BasicClassDescription>>(getDirectSuperClasses(existsInvNode));
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsInvNode));
 
 			for (Equivalences<BasicClassDescription> parents : parentExist) {
 				for (BasicClassDescription parent : parents) 
-					classGraph.addEdge(existsInvNode, parent);
+					classGraph.addEdge(existsRin, parent);
 			}
 
 			for (Equivalences<BasicClassDescription> parents : parentsExistInv) {
 				for (BasicClassDescription parent : parents) 
-					classGraph.addEdge(existsNode, parent);
+					classGraph.addEdge(existsR, parent);
 			}
 
-			processedNodes.add(existsInvNode);
-			processedNodes.add(existsNode);
+			processedNodes.add(existsRin);
+			processedNodes.add(existsR);
 		}
 	}
 
@@ -440,6 +358,5 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 	}
 	public DefaultDirectedGraph<BasicClassDescription, DefaultEdge> getClassGraph() {
 		return classGraph;
-	}
-	
+	}	
 }

@@ -1,19 +1,13 @@
 package it.unibz.krdb.obda.obda.quest.dag;
 
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
-
 import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -43,11 +37,10 @@ public class S_NewGraphTest  extends TestCase{
 
 		log.info("Generating graph");
 		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
-		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(r);
 		
 		log.info("See information");
-		log.debug("properties {}", reasoner.getPropertyGraph());
-		log.debug("classes {}", reasoner.getClassGraph());
+		log.debug("properties {}", r.getPropertyGraph());
+		log.debug("classes {}", r.getClassGraph());
 //		
 		log.info("From graph to dag");
 		System.out.println(r);

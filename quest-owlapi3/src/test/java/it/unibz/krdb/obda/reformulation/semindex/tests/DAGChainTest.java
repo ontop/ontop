@@ -9,6 +9,8 @@
 
 package it.unibz.krdb.obda.reformulation.semindex.tests;
 
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -23,8 +25,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
-import org.jgrapht.graph.DefaultEdge;
-
 import junit.framework.TestCase;
 
 
@@ -35,6 +35,14 @@ public class DAGChainTest extends TestCase {
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
+	private static <T> int sizeOf(Set<Equivalences<T>> set) {
+		int size = 0;
+		for(Equivalences<T> e: set){
+			size += e.size();
+		}
+		return size;
+	}
+	
 	public void test_simple_isa() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
 
@@ -63,23 +71,11 @@ public class DAGChainTest extends TestCase {
 		
 		assertTrue(classes.getSub(ac0).contains(bc0));
 		assertTrue(classes.getSub(ac0).contains(cc0));
-		int numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(ac0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 3); // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(ac0)), 3); // getDescendants is reflexive
 
 		assertTrue(classes.getSub(bc0).contains(cc0));
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(bc0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 2);  // getDescendants is reflexive
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(cc0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 1);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(bc0)), 2);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(cc0)), 1);  // getDescendants is reflexive
 	}
 
 	public void test_exists_simple() {
@@ -99,10 +95,10 @@ public class DAGChainTest extends TestCase {
 		ontology.addRole(er.getPredicate());
 		ontology.addRole(ier.getPredicate());
 		
-		System.out.println(er);
-		System.out.println(ac);
-		System.out.println(cc);
-		System.out.println(ier);
+		//System.out.println(er);
+		//System.out.println(ac);
+		//System.out.println(cc);
+		//System.out.println(ier);
 
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
@@ -117,38 +113,28 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		Test_TBoxReasonerImplOnGraph reasoner= new Test_TBoxReasonerImplOnGraph(res0);
+		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(res0);
 		reasoner.convertIntoChainDAG();
 
+		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+
+		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
+		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
+		Equivalences<BasicClassDescription> er0 = classes.getVertex(er);
+		Equivalences<BasicClassDescription> ier0 = classes.getVertex(ier);
 		
 		
-		assertTrue(reasoner.getSubClasses(ac).contains(reasoner.getEquivalences(er)));
-		assertTrue(reasoner.getSubClasses(ac).contains(reasoner.getEquivalences(ier)));
-		assertTrue(reasoner.getSubClasses(ac).contains(reasoner.getEquivalences(cc)));
-		int numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: reasoner.getSubClasses(ac)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 4);  // getDescendants is reflexive
+		assertTrue(classes.getSub(ac0).contains(er0));
+		assertTrue(classes.getSub(ac0).contains(ier0));
+		assertTrue(classes.getSub(ac0).contains(cc0));
+		assertEquals(sizeOf(classes.getSub(ac0)), 4);  // getDescendants is reflexive
 
-		assertTrue(reasoner.getSubClasses(er).contains(reasoner.getEquivalences(cc)));
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: reasoner.getSubClasses(er)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 2);  // getDescendants is reflexive
+		assertTrue(classes.getSub(er0).contains(cc0));
+		assertEquals(sizeOf(classes.getSub(er0)), 2);  // getDescendants is reflexive
 
-		assertTrue(reasoner.getSubClasses(ier).contains(reasoner.getEquivalences(cc)));
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: reasoner.getSubClasses(ier)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 2);  // getDescendants is reflexive
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: reasoner.getSubClasses(cc)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 1);  // getDescendants is reflexive
+		assertTrue(classes.getSub(ier0).contains(cc0));
+		assertEquals(sizeOf(classes.getSub(ier0)), 2);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(cc0)), 1);  // getDescendants is reflexive
 	}
 
 	public void test_exists_complex() {
@@ -199,52 +185,24 @@ public class DAGChainTest extends TestCase {
 		assertTrue(classes.getSub(ac0).contains(ier0));
 		assertTrue(classes.getSub(ac0).contains(cc0));
 		assertTrue(classes.getSub(ac0).contains(bc0));
-		int numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(ac0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 5);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(ac0)), 5);  // getDescendants is reflexive
 
 		assertTrue(classes.getSub(dc0).contains(er0));
 		assertTrue(classes.getSub(dc0).contains(ier0));
 		assertTrue(classes.getSub(dc0).contains(cc0));
 		assertTrue(classes.getSub(dc0).contains(bc0));
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(dc0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 5);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(dc0)), 5);  // getDescendants is reflexive
 
 		assertTrue(classes.getSub(er0).contains(bc0));
 		assertTrue(classes.getSub(er0).contains(cc0));
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(er0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 3);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(er0)), 3);  // getDescendants is reflexive
 
 		assertTrue(classes.getSub(ier0).contains(bc0));
 		assertTrue(classes.getSub(ier0).contains(cc0));
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(ier0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 3);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(ier0)), 3);  // getDescendants is reflexive
 
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(bc0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 1);  // getDescendants is reflexive
-		numDescendants=0;
-		for(Equivalences<BasicClassDescription> equiDescendants: classes.getSub(cc0)){
-			numDescendants+=equiDescendants.size();
-		}
-		assertEquals(numDescendants, 1);  // getDescendants is reflexive
-
+		assertEquals(sizeOf(classes.getSub(bc0)), 1);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(cc0)), 1);  // getDescendants is reflexive
 	}
-
-	
-
 }
 
