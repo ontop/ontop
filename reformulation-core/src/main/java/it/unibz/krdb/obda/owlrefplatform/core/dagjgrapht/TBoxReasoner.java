@@ -20,9 +20,6 @@ import it.unibz.krdb.obda.ontology.Property;
  */
 public interface TBoxReasoner {
 	
-	public Equivalences<Property> getEquivalences(Property desc);
-	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc);
-	
 	public EquivalencesDAG<Property> getProperties();
 	public EquivalencesDAG<BasicClassDescription> getClasses();
 }

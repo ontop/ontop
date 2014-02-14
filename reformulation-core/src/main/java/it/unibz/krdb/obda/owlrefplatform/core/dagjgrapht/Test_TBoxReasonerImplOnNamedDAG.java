@@ -50,57 +50,6 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	}
 	
 
-	/**
-	 * Traverse the graph return the descendants starting from the given node of
-	 * the dag
-	 * 
-	 * @param desc node we want to know the descendants
-	 *
-	 *@return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	public Set<Equivalences<Property>> getSubProperties(Property desc) {
-		return propertyDAG.getSub(propertyDAG.getVertex(desc));
-	}
-	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
-		return classDAG.getSub(classDAG.getVertex(desc));
-	}
-
-	
-	/**
-	 * Traverse the graph return the ancestors starting from the given node of
-	 * the dag
-	 * 
-	 * @param desc node we want to know the ancestors
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-
-	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
-		return propertyDAG.getSuper(propertyDAG.getVertex(desc));
-	}
-	
-	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
-		return classDAG.getSuper(classDAG.getVertex(desc));
-	}
-
-
-	/**
-	 * Return the equivalences starting from the given node of the dag
-	 * 
-	 * @param desc node we want to know the ancestors
-	 *            
-	 * @return we return a set of description with equivalent nodes 
-	 */
-
-	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {	
-		return classDAG.getVertex(desc);
-	}
-	public Equivalences<Property> getEquivalences(Property desc) {
-		return propertyDAG.getVertex(desc);
-	}
 	
 	/**
 	 * Return all the nodes in the DAG or graph
