@@ -90,8 +90,10 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			log.info("First graph {}", reasoner.getPropertyGraph());
 			log.info("Second dag {}", reasoner);
 
-			assertTrue(testDescendants(graphReasoner, reasoner));
-			assertTrue(testDescendants(reasoner, graphReasoner));
+			assertTrue(testDescendants(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testDescendants(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testDescendants(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testDescendants(reasoner.getProperties(), graphReasoner.getProperties()));
 			assertTrue(testChildren(graphReasoner.getClasses(), reasoner.getClasses()));
 			assertTrue(testChildren(graphReasoner.getProperties(), reasoner.getProperties()));
 			assertTrue(testChildren(reasoner.getClasses(), graphReasoner.getClasses()));
@@ -126,27 +128,14 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		
 	}
 
-	private boolean testDescendants(TBoxReasoner d1, TBoxReasoner d2) {
+	private <T> boolean testDescendants(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 
-		for(Equivalences<Property> vertex: d1.getProperties()) {
-			Property p = vertex.getRepresentative();
-			Set<Equivalences<Property>> setd1 = d1.getSubProperties(p);
+		for(Equivalences<T> vertex: d1) {
+			Set<Equivalences<T>> setd1 = d1.getSub(vertex);
 			log.info("vertex {}", vertex);
 			log.debug("descendants {} ", setd1);
-			Set<Equivalences<Property>> setd2 = d2.getSubProperties(p);
+			Set<Equivalences<T>> setd2 = d2.getSub(vertex);
 			log.debug("descendants {} ", setd2);
-
-			if (!coincide(setd1, setd2))
-				return false;
-		}
-		for(Equivalences<BasicClassDescription> vertex: d1.getClasses()) {
-			BasicClassDescription p = vertex.getRepresentative();
-			Set<Equivalences<BasicClassDescription>> setd1 = d1.getSubClasses(p);
-			log.info("vertex {}", vertex);
-			log.debug("descendants {} ", setd1);
-			Set<Equivalences<BasicClassDescription>> setd2 = d2.getSubClasses(p);
-			log.debug("descendants {} ", setd2);
-
 			if (!coincide(setd1, setd2))
 				return false;
 		}

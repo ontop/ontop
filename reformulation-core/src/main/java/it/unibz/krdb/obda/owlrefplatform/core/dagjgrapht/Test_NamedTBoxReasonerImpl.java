@@ -38,27 +38,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 	}
 
 
-	/**
-	 * Traverse the graph return the descendants starting from the given node of
-	 * the dag
-	 * 
-	 * @param desc node we want to know the descendants
-	 *
-	 *@return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	@Override
-	public Set<Equivalences<Property>> getSubProperties(Property desc) {
-		return propertyDAG.getSub(propertyDAG.getVertex(desc));
-	}
-
-	@Override
-	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc) {
-		return classDAG.getSub(classDAG.getVertex(desc));
-	}
-
-
 
 	/**
 	 * Return the equivalences starting from the given node of the dag

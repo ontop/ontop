@@ -12,6 +12,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -20,6 +21,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import junit.framework.TestCase;
@@ -50,15 +52,16 @@ public class SigmaTest extends TestCase {
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
 		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
         TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
+        EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
 
-        assertTrue(sigma.getSubClasses(ac).contains(sigma.getEquivalences(er)));
+        assertTrue(classes.getSub(classes.getVertex(ac)).contains(sigma.getEquivalences(er)));
 
      // Roman: was 1, which, I think, is wrong: A has two subclasses, ER and C (now 3 because it's reflexive)
-        assertEquals(3, sigma.getSubClasses(ac).size());   // getDescendants is reflexive
+        assertEquals(3, classes.getSub(classes.getVertex(ac)).size());   // getDescendants is reflexive
 
-        assertEquals(1, sigma.getSubClasses(er).size());  // getDescendants is reflexive
+        assertEquals(1, classes.getSub(classes.getVertex(er)).size());  // getDescendants is reflexive
 
-        assertEquals(1, sigma.getSubClasses(cc).size());  // getDescendants is reflexive
+        assertEquals(1, classes.getSub(classes.getVertex(cc)).size());  // getDescendants is reflexive
 
     }
 }

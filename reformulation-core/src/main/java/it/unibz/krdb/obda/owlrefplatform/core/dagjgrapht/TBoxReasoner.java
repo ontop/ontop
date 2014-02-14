@@ -12,8 +12,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
 
-import java.util.Set;
-
 
 /**
  *  This is the interface for the class TBoxReasoner where we are able to retrieve all the connection built in our DAG 
@@ -22,14 +20,6 @@ import java.util.Set;
  */
 public interface TBoxReasoner {
 	
-	/**
-	 * Reflexive and transitive closure of the sub-description relation
-	 * @param desc: a class or a property
-	 * @return equivalence classes for all sub-descriptions (including desc)
-	 */
-	public Set<Equivalences<Property>> getSubProperties(Property desc);
-	public Set<Equivalences<BasicClassDescription>> getSubClasses(BasicClassDescription desc);
-
 	public Equivalences<Property> getEquivalences(Property desc);
 	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc);
 	

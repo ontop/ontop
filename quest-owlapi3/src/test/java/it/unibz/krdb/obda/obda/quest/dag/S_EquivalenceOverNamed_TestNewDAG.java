@@ -92,8 +92,10 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			log.info("Second dag {}", namedDag2);
 			Test_NamedTBoxReasonerImpl dag2 = new Test_NamedTBoxReasonerImpl(reasoner);
 
-			assertTrue(testDescendants(dag2, namedDag2, reasoner));
-			assertTrue(testDescendants(namedDag2, dag2, reasoner));
+			assertTrue(testDescendants(dag2.getClasses(), namedDag2.getClasses()));
+			assertTrue(testDescendants(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testDescendants(namedDag2.getClasses(), dag2.getClasses()));
+			assertTrue(testDescendants(namedDag2.getProperties(), dag2.getProperties()));
 			assertTrue(testChildren(dag2.getClasses(), namedDag2.getClasses()));
 			assertTrue(testChildren(dag2.getProperties(), namedDag2.getProperties()));
 			assertTrue(testChildren(namedDag2.getClasses(), dag2.getClasses()));
@@ -131,33 +133,17 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		return set1.equals(set2);		
 	}
 	
-	private boolean testDescendants(TBoxReasoner d1, TBoxReasoner d2, TBoxReasonerImpl reasoner){
+	private <T> boolean testDescendants(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 		
-		for(Equivalences<Property> node : d1.getProperties()) {
-			Property vertex = node.getRepresentative();
-			if(reasoner.isNamed(vertex)) {
-				Set<Equivalences<Property>> setd1 = d1.getSubProperties(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("descendants {} ", setd1);
-				Set<Equivalences<Property>> setd2 = d2.getSubProperties(vertex);
-				log.debug("descendants {} ", setd2);
-				if (!coincide(setd1, setd2))
-					return false;
-			}
+		for(Equivalences<T> node : d1) {
+			Set<Equivalences<T>> setd1 = d1.getSub(node);
+			log.info("vertex {}", node);
+			log.debug("descendants {} ", setd1);
+			Set<Equivalences<T>> setd2 = d2.getSub(node);
+			log.debug("descendants {} ", setd2);
+			if (!coincide(setd1, setd2))
+				return false;
 		}
-		for(Equivalences<BasicClassDescription> node : d1.getClasses()) {
-			BasicClassDescription vertex = node.getRepresentative();
-			if(reasoner.isNamed(vertex)) {
-				Set<Equivalences<BasicClassDescription>> setd1 = d1.getSubClasses(vertex);
-				log.info("vertex {}", vertex);
-				log.debug("descendants {} ", setd1);
-				Set<Equivalences<BasicClassDescription>> setd2 = d2.getSubClasses(vertex);
-				log.debug("descendants {} ", setd2);
-				if (!coincide(setd1, setd2))
-					return false;
-			}
-		}
-
 		return true;
 	}
 

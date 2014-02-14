@@ -385,7 +385,7 @@ public class TMappingProcessor implements Serializable {
 			}
 
 
-			for (Equivalences<Property> descendants : reasoner.getSubProperties(currentProperty)) {
+			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(reasoner.getProperties().getVertex(currentProperty))) {
 				for(Property childproperty: descendants){
 
 				/*
@@ -483,7 +483,7 @@ public class TMappingProcessor implements Serializable {
 				mappingIndex.put(currentPredicate, currentNodeMappings);
 			}
 
-			for (Equivalences<BasicClassDescription> descendants : reasoner.getSubClasses(currentProperty)) {
+			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(reasoner.getClasses().getVertex(currentProperty))) {
 				for(BasicClassDescription childDescription: descendants){
 				
 					

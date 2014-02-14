@@ -174,8 +174,8 @@ public class SigmaTBoxOptimizer {
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<Property>> scChildren = sigmaChain.getSubProperties(sc);
-		Set<Equivalences<Property>> tcChildren = isaChain.getSubProperties(tc);
+		Set<Equivalences<Property>> scChildren = sigmaChain.getProperties().getSub(sigmaChain.getProperties().getVertex(sc));
+		Set<Equivalences<Property>> tcChildren = isaChain.getProperties().getSub(isaChain.getProperties().getVertex(tc));
 
 		return scChildren.containsAll(tcChildren);
 	}
@@ -202,8 +202,8 @@ public class SigmaTBoxOptimizer {
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getSubClasses(sc);
-		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getSubClasses(tc);
+		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getClasses().getSub(sigmaChain.getClasses().getVertex(sc));
+		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(isaChain.getClasses().getVertex(tc));
 
 		return scChildren.containsAll(tcChildren);
 	}
