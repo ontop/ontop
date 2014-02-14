@@ -1715,43 +1715,38 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-		// try {
-		// GraphGenerator.dumpISA(dag,"sidag");
-		// } catch (IOException e) {
-		// // e.printStackTrace();
-		// }
 
 		Set<Property> roleNodes = new HashSet<Property>();
-		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
+//		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
-		Set<Predicate> roles = ontology.getRoles();
-		for (Predicate rolepred : roles) {
+		for (Predicate rolepred : ontology.getRoles()) {
 
 			Property node = (Property)reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
 			// We only map named roles
-			if (!(node instanceof Property)
-					|| ((Property) node).isInverse()) {
+			if (node.isInverse()) 
 				continue;
-			}
+			
 			roleNodes.add(node);
-
+/*
+ 			CODE PRODEUCES A STRICTURE (roleInverseMaps) THAT IS NEVER USED
+ 
 			List<Property> roleInverseChildren = roleInverseMaps.get(node);
 			if (roleInverseChildren == null) {
 				roleInverseChildren = new LinkedList<Property>();
 				roleInverseMaps.put(node, roleInverseChildren);
 			}
 
-			/*
-			 * collecting the top most inverse children, we do a bredth first
-			 * traversal, stopping a branch when we find an inverse child.
-			 * 
-			 * Collecting the top most allows us to avoid redundancy elimination
-			 */
+			
+			//  collecting the top most inverse children, we do a bredth first
+			// traversal, stopping a branch when we find an inverse child.
+			// 
+			// Collecting the top most allows us to avoid redundancy elimination
+			//
 			EquivalencesDAG<Property> properties = reasonerDag.getProperties();
 			
 			Queue<Equivalences<Property>> childrenQueue = new LinkedList<Equivalences<Property>>();
 			childrenQueue.addAll(properties.getDirectSub(properties.getVertex(node)));
-			childrenQueue.add(reasonerDag.getProperties().getVertex(node));
+			childrenQueue.add(properties.getVertex(node));
 
 
 			while (!childrenQueue.isEmpty()) {
@@ -1759,28 +1754,25 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				Property child = children.getRepresentative();
 				if(child.equals(node))
 					continue;
-				if ((child instanceof Property)
-						&& ((Property) child).isInverse()) {
+				
+				if (child.isInverse()) 
 					roleInverseChildren.add(child);
-				} else {
-					childrenQueue.addAll((properties.getDirectSub(children)));
-				}
+				else 
+					childrenQueue.addAll(properties.getDirectSub(children));
 			}
 
-			/* Removing redundant nodes */
+			// Removing redundant nodes 
 
-			HashSet<Description> inverseRedundants = new HashSet<Description>();
-			for (Description inverseNode : roleInverseChildren) {
-				Property role = ((Property) inverseNode);
-				for (Description possibleRedundantNode : roleInverseChildren) {
-					Property possibleRedundantRole = ((Property) possibleRedundantNode);
-					if (properties.getSub(properties.getVertex(role))
-							.contains(possibleRedundantRole))
+			HashSet<Property> inverseRedundants = new HashSet<Property>();
+			for (Property inverseNode : roleInverseChildren) {
+				for (Property possibleRedundantNode : roleInverseChildren) {
+					if (properties.getSub(properties.getVertex(inverseNode))
+							.contains(possibleRedundantNode))
 						inverseRedundants.add(possibleRedundantNode);
 				}
 			}
 			roleInverseChildren.removeAll(inverseRedundants);
-
+*/
 		}
 
 		/*
@@ -1795,73 +1787,55 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		// TODO this part can be optimized if we know some existing dependencies
 		// (e.g., coming from given mappings)
 
-		Set<Description> classNodesMaps = new HashSet<Description>();
-		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
+		Set<OClass> classNodesMaps = new HashSet<OClass>();
+//		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();
 		
-		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
+//		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
 		
 		for (BasicClassDescription node : reasonerDag.getClassNames()) {
 			if (!reasonerDag.getRepresentativeFor(node).equals(node))
 				continue;
 
-			classNodesMaps.add(node);
-
-			Set<Description> existChildren = classExistsMaps.get(node);
-			if (existChildren == null) {
-				
-				existChildren = new HashSet<Description>();
+			classNodesMaps.add((OClass)node);
+/*
+ 	
+ 			THIS CODE PRODUCES A STRUCTURE (existChildren) THAT IS NEVER USED
+ 	
+			Set<PropertySomeRestriction> existChildren = classExistsMaps.get(node);
+			if (existChildren == null) {			
+				existChildren = new HashSet<PropertySomeRestriction>();
 				classExistsMaps.put(node, existChildren);
 			}
 
-			/* Collecting Exists R children */
-			//consider also the equivalent of the node
-			for (Description child : reasonerDag.getClasses().getVertex(node)) {
+			// collecting Exists R children
+			for (BasicClassDescription child : reasonerDag.getClasses().getVertex(node)) 		
+				if (child instanceof PropertySomeRestrictionImpl && !child.equals(node)) 
+					existChildren.add((PropertySomeRestriction)child);
 				
-				if (child instanceof PropertySomeRestrictionImpl& !(child.equals(node))) {
-					existChildren.add(child);
-				}
 				
-			}
-			for (Equivalences<BasicClassDescription> children : classes.getSub(classes.getVertex(node))) {
-				for (Description child:children){
+			for (Equivalences<BasicClassDescription> children : classes.getSub(classes.getVertex(node))) 
+				for (BasicClassDescription child : children)
+					if (child instanceof PropertySomeRestrictionImpl) 
+						existChildren.add((PropertySomeRestriction)child);
+				
 
-				if (child instanceof PropertySomeRestrictionImpl) {
-					existChildren.add(child);
-				}
-				}
-			}
+			
+			 // Cleaning exists children (removing any exists R implied by the role hierarchy)
+			Set<PropertySomeRestriction> redundantNodes = new HashSet<PropertySomeRestriction>();
+			for (PropertySomeRestriction cES : existChildren) {
+				Property rS = ofac.createProperty(cES.getPredicate(), cES.isInverse());
+				Equivalences<Property> vS = reasonerDag.getProperties().getVertex(rS);
+				Set<Equivalences<Property>> subS = reasonerDag.getProperties().getSub(vS);
 
-			/*
-			 * Cleaning exists children (removing any exists R implied by the
-			 * role hierarchy )
-			 */
-			// Set<DAGNode> existChildren = classExistsMaps.get(node);
-			Set<Description> redundantNodes = new HashSet<Description>();
-			for (Description existsnode : existChildren) {
-				/* Here we have ES */
-				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode;
-				Property role = ofac.createProperty(existsDesc.getPredicate(),
-						existsDesc.isInverse());
-				//Description roleNode = reasonerDag.getRepresentativeFor(role);
-
-				for (Description possiblyRedundantNode : existChildren) {
-					/* Here we have ER */
-					PropertySomeRestriction existsDesc2 = (PropertySomeRestriction) possiblyRedundantNode;
-					Property role2 = ofac
-							.createProperty(existsDesc2.getPredicate(),
-									existsDesc2.isInverse());
-					//Description roleNode2 = reasonerDag.getRepresentativeFor(role2);
-
-					for(Equivalences<Property> descendants: reasonerDag.getProperties().getSub(reasonerDag.getProperties().getVertex(role))) {
-						if (descendants.contains(role2))
-						/*
-						 * The DAG implies that R ISA S, so we remove ER
-						 */
-						redundantNodes.add(possiblyRedundantNode);
-					}
+				for (PropertySomeRestriction cER : existChildren) {
+					Property rR = ofac.createProperty(cER.getPredicate(), cER.isInverse());
+					Equivalences<Property> vR = reasonerDag.getProperties().getVertex(rR);
+					if (!vS.equals(vR) && subS.contains(vR))
+						redundantNodes.add(cER); // DAG implies that R ISA S, so we remove ER
 				}
 			}
 			existChildren.removeAll(redundantNodes);
+*/
 		}
 
 		/*
@@ -1880,10 +1854,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
 
-		for (Description roleNode : roleNodes) {
-
-			// Get the description of the role node, i.e., a Property object.
-			Property property = (Property) roleNode;
+		for (Property property : roleNodes) {
 
 			// Get the property predicate
 			Predicate role = property.getPredicate();
@@ -2068,10 +2039,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		
 
-		for (Description classNode : classNodesMaps) {
+		for (OClass classNode : classNodesMaps) {
 
-			Predicate classuri = ((OClass) classNode)
-					.getPredicate();
+			Predicate classuri = classNode.getPredicate();
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 
@@ -2081,7 +2051,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
 			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
-
 			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 			
 			/*
