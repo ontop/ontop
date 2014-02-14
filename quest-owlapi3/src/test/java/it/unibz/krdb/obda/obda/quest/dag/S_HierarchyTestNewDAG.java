@@ -112,12 +112,12 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	private boolean checkforNamedVertexesOnly(Test_TBoxReasonerImplOnNamedDAG dag, TBoxReasonerImpl reasoner){
 		for(Equivalences<Property> node: dag.getProperties()) {
 			Property vertex = node.getRepresentative();
-			if(!reasoner.isNamed(vertex))
+			if(!reasoner.getProperties().getVertex(vertex).isIndexed())
 				return false;
 		}
 		for(Equivalences<BasicClassDescription> node: dag.getClasses()) {
 			BasicClassDescription vertex = node.getRepresentative();
-			if(!reasoner.isNamed(vertex))
+			if(!reasoner.getClasses().getVertex(vertex).isIndexed())
 				return false;
 		}
 		return true;

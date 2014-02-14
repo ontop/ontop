@@ -9,8 +9,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -18,8 +16,6 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -37,12 +33,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final EquivalencesDAGImpl<Property> propertyDAG;
 	private final EquivalencesDAGImpl<BasicClassDescription> classDAG;
 	
-	private Set<OClass> classNames;
-	private Set<Property> propertyNames;
 	
-
-	
-
 	public TBoxReasonerImpl(Ontology onto) {
 		propertyGraph = OntologyGraph.getPropertyGraph(onto);
 		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
@@ -75,22 +66,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	
-
-	
-	public boolean isNamed(Property node) {
-		return propertyDAG.getVertex(node).isIndexed();
-	}
-	public boolean isNamed(BasicClassDescription node) {
-		return classDAG.getVertex(node).isIndexed();
-	}
-
-//	public boolean isNamed0(Description node) {
-//		return getClassNames().contains(node) || getPropertyNames().contains(node);
-//	}
-	
-	
-	
+		
 	
 	/**
 	 * Return all the nodes in the DAG or graph
@@ -139,6 +115,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 //	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
 //		
@@ -174,7 +159,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-		HashSet<Description> processedNodes = new HashSet<Description>();
+		HashSet<BasicClassDescription> processedNodes = new HashSet<BasicClassDescription>();
 		
 		for (Equivalences<BasicClassDescription> existsNode : classes) {
 			BasicClassDescription node = existsNode.getRepresentative();
