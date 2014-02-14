@@ -39,7 +39,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * @param dag DAG to be used for reasoning
 	 */
 	public Test_TBoxReasonerImplOnNamedDAG(TBoxReasonerImpl reasoner) {
-		this.dag = NamedDAG.getNamedDAG(reasoner);
+		this.dag = new NamedDAG(reasoner);
 		
 		this.propertyDAG = new EquivalencesDAGImplOnNamedDAG<Property>(dag.getPropertyDag(), reasoner.getProperties());
 		this.classDAG = new EquivalencesDAGImplOnNamedDAG<BasicClassDescription>(dag.getClassDag(), reasoner.getClasses());		
@@ -49,38 +49,6 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		return dag.getPropertyDag().edgeSet().size() + dag.getClassDag().edgeSet().size();
 	}
 	
-	/**
-	 * return the direct children starting from the given node of the dag
-	 * 
-	 * @param desc node that we want to know the direct children
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 */
-	public Set<Equivalences<Property>> getDirectSubProperties(Property desc) {		
-		return propertyDAG.getDirectSub(propertyDAG.getVertex(desc));
-	}
-	public Set<Equivalences<BasicClassDescription>> getDirectSubClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSub(classDAG.getVertex(desc));
-	}
-
-
-	/**
-	 * return the direct parents starting from the given node of the dag
-	 * 
-	 * @param desc node from which we want to know the direct parents
-	 *            
-	 * @return we return a set of set of description to distinguish between
-	 *         different nodes and equivalent nodes. equivalent nodes will be in
-	 *         the same set of description
-	 * */
-	public Set<Equivalences<Property>> getDirectSuperProperties(Property desc) {
-		return propertyDAG.getDirectSuper(propertyDAG.getVertex(desc));
-	}
-	public Set<Equivalences<BasicClassDescription>> getDirectSuperClasses(BasicClassDescription desc) {
-		return classDAG.getDirectSuper(classDAG.getVertex(desc));
-
-	}
 
 	/**
 	 * Traverse the graph return the descendants starting from the given node of

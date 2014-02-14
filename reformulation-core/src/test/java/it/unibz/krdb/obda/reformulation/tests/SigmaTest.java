@@ -18,9 +18,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
@@ -44,8 +41,8 @@ public class SigmaTest extends TestCase {
         ontology.addConcept(cc.getPredicate());
         ontology.addRole(er.getPredicate());
 
-        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, er));
+        ontology.addAssertion(descFactory.createSubClassAxiom(er, ac));
+        ontology.addAssertion(descFactory.createSubClassAxiom(cc, er));
 
         
        

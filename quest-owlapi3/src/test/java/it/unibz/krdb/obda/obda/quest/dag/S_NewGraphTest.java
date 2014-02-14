@@ -70,7 +70,7 @@ public class S_NewGraphTest  extends TestCase{
 //		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
 //		}
 		log.info("Get named dag");
-		NamedDAG namedDAG = NamedDAG.getNamedDAG(r);
+		NamedDAG namedDAG = new NamedDAG(r);
 		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");

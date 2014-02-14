@@ -109,7 +109,7 @@ public class SemanticIndexBuilder  {
 	public SemanticIndexBuilder(TBoxReasonerImpl reasoner)  {
 		this.reasoner = reasoner;
 		
-		namedDAG = NamedDAG.getNamedDAG(reasoner);
+		namedDAG = new NamedDAG(reasoner);
 		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
 		DirectedGraph<Description, DefaultEdge> reversed = namedDAG.getReversedDag();

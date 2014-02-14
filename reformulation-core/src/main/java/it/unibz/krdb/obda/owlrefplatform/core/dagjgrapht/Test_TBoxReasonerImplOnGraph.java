@@ -118,13 +118,6 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 		return classDAG.getSub(classDAG.getVertex(desc));
 	}
 
-	public Set<Equivalences<Property>> getSuperProperties(Property desc) {
-		return propertyDAG.getSuper(propertyDAG.getVertex(desc));
-	}
-
-	public Set<Equivalences<BasicClassDescription>> getSuperClasses(BasicClassDescription desc) {
-		return classDAG.getSuper(classDAG.getVertex(desc));
-	}
 	
 	/**
 	 * Return the equivalences starting from the given node of the dag
@@ -164,6 +157,9 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 		return classDAG;
 	}
 
+	
+	
+	
 	public static final class EquivalencesDAGImplOnGraph<T> implements EquivalencesDAG<T> {
 
 		private DefaultDirectedGraph<T,DefaultEdge> graph;

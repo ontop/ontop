@@ -33,10 +33,9 @@ public class NamedDAG  {
 	private final SimpleDirectedGraph <Property,DefaultEdge> propertyDAG;
 	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
 	
-	// constructor is accessible within the class only
-	private NamedDAG(SimpleDirectedGraph<Property,DefaultEdge> propertyDAG, SimpleDirectedGraph<BasicClassDescription,DefaultEdge> classDAG) {
-		this.propertyDAG = propertyDAG;
-		this.classDAG = classDAG;
+	public NamedDAG(TBoxReasonerImpl reasoner) {			
+		propertyDAG = getNamedDAG(reasoner.getProperties());
+		classDAG = getNamedDAG(reasoner.getClasses());
 	}
 	
 	@Override
@@ -44,18 +43,6 @@ public class NamedDAG  {
 		return propertyDAG.toString() + classDAG.toString();
 	}
 	
-	// the real working method (used in the SemanticIndexEngineImple)
-	public DirectedGraph<Property, DefaultEdge> getReversedPropertyDag() {
-		DirectedGraph<Property, DefaultEdge> reversed =
-				new EdgeReversedGraph<Property, DefaultEdge>(propertyDAG); // WOULD IT NOT BE BETTER TO CACHE?
-		return reversed;
-	}
-	public DirectedGraph<BasicClassDescription, DefaultEdge> getReversedClassDag() {
-		DirectedGraph<BasicClassDescription, DefaultEdge> reversed =
-				new EdgeReversedGraph<BasicClassDescription, DefaultEdge>(classDAG); // WOULD IT NOT BE BETTER TO CACHE?
-		return reversed;
-	}
-
 	
 	
 	@Deprecated // USED ONLY IN TESTS (3 calls)
@@ -115,14 +102,6 @@ public class NamedDAG  {
 		return namedDAG;
 	}
 	
-	public static NamedDAG getNamedDAG(TBoxReasonerImpl reasoner) {
-		
-		SimpleDirectedGraph<Property,DefaultEdge>  propertyDAG = getNamedDAG(reasoner.getProperties());
-		SimpleDirectedGraph<BasicClassDescription,DefaultEdge>  classDAG = getNamedDAG(reasoner.getClasses());
-						
-		NamedDAG dagImpl = new NamedDAG(propertyDAG, classDAG);
-		return dagImpl;
-	}
 
 	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
 		SimpleDirectedGraph <Description,DefaultEdge>  dag 
