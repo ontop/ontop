@@ -150,12 +150,6 @@ public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 			}
 			
 			return result;
-		}
-
-		@Override
-		public boolean isIndexed(Equivalences<T> v) {
-			return reasonerDAG.getVertex(v.getRepresentative()).isIndexed();
-		}
-		
+		}		
 	}
 }

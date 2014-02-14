@@ -15,11 +15,22 @@ import it.unibz.krdb.obda.ontology.Property;
 
 /**
  *  This is the interface for the class TBoxReasoner where we are able to retrieve all the connection built in our DAG 
- * 
- *
  */
 public interface TBoxReasoner {
 	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
 	public EquivalencesDAG<Property> getProperties();
+	
+	/**
+	 * Return the DAG of classes
+	 * 
+	 * @return DAG 
+	 */
+
 	public EquivalencesDAG<BasicClassDescription> getClasses();
 }

@@ -274,12 +274,6 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
 		}
-
-		@Override
-		public boolean isIndexed(Equivalences<T> v) {
-			return true;
-		}
-		
 	}
 	
 	

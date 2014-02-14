@@ -24,6 +24,4 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 	 * @return equivalence sets for all super-descriptions (including v)
 	 */
 	Set<Equivalences<T>> getSuper(Equivalences<T> v);
-	
-	boolean isIndexed(Equivalences<T> v);
 }
