@@ -688,7 +688,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					if (!reasonerDag.isCanonicalRepresentative(propDesc)) {
+					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
 						Property desc = (Property) reasonerDag.getRepresentativeFor(propDesc);
 						if (desc.isInverse()) {
 							String tmp = uri1;
@@ -1173,11 +1173,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		if (!reasonerDag.isCanonicalRepresentative(property)) {
-			Property desc = (Property) reasonerDag.getRepresentativeFor(property);
-			if (desc.isInverse()) {
+		Property desc = (Property) reasonerDag.getRepresentativeFor(property);
+		if (!property.equals(desc)) {
+			if (desc.isInverse()) 
 				return true;
-			}
 		}
 		return false; // representative is never an inverse
 	}
@@ -1802,7 +1801,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
 		
 		for (BasicClassDescription node : reasonerDag.getClassNames()) {
-			if (!reasonerDag.isCanonicalRepresentative(node))
+			if (!reasonerDag.getRepresentativeFor(node).equals(node))
 				continue;
 
 			classNodesMaps.add(node);

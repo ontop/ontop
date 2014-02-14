@@ -89,17 +89,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	public boolean isCanonicalRepresentative(Property v) {
-		//return (replacements.get(v) == null);
-		Equivalences<Property> e = propertyDAG.getVertex(v);
-		return e.getRepresentative().equals(v);
-	}
-	public boolean isCanonicalRepresentative(BasicClassDescription v) {
-		//return (replacements.get(v) == null);
-		Equivalences<BasicClassDescription> e = classDAG.getVertex(v);
-		return e.getRepresentative().equals(v);
-	}
-
 	
 	
 
