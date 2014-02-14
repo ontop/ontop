@@ -79,7 +79,7 @@ public class TMappingProcessor implements Serializable {
 	 * @return A map from a predicate to the list of mappings that have that
 	 *         predicate in the head atom.
 	 */
-	private Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
+	private static Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
 		Map<Predicate, Set<CQIE>> mappingIndex = new HashMap<Predicate, Set<CQIE>>();
 
 		for (CQIE mapping : mappings.getRules()) {
@@ -149,7 +149,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param newmapping
 	 *            The new mapping for A/P
 	 */
-	public void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
+	public static void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
 		List<Function> strippedNewConditions = new LinkedList<Function>();
 		CQIE strippedNewMapping = getStrippedMapping(newmapping, strippedNewConditions);
 		Ontology sigma = null;
@@ -236,7 +236,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param conditions
 	 * @return
 	 */
-	private Function mergeConditions(List<Function> conditions) {
+	private static Function mergeConditions(List<Function> conditions) {
 		if (conditions.size() == 1)
 			return conditions.get(0);
 		Function atom0 = conditions.remove(0);
@@ -267,7 +267,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param strippedConditionsHolder
 	 * @return
 	 */
-	private CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
+	private static CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
 		strippedConditionsHolder.clear();
 		Function head = (Function)mapping.getHead().clone();
 		List<Function> body = mapping.getBody();
@@ -369,25 +369,16 @@ public class TMappingProcessor implements Serializable {
 		 * that these are already processed. 
 		 */
 
-		for (Property currentProperty : reasoner.getPropertyNames()) {
-			/* setting up the queue for the next iteration */
+		for (Equivalences<Property> propertySet : reasoner.getProperties()) {
 
-			/* we only create mappings for named properties and not considering equivalences*/
-			if (!reasoner.isCanonicalRepresentative(currentProperty)) 
-				continue;
-			
+			Property current = propertySet.getRepresentative();
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = currentProperty.getPredicate();
-			Set<CQIE> currentNodeMappings = mappingIndex.get(currentPredicate);	
-			if (currentNodeMappings == null) {
-				currentNodeMappings = new LinkedHashSet<CQIE>();
-				mappingIndex.put(currentPredicate, currentNodeMappings);
-			}
+			Predicate currentPredicate = current.getPredicate();
+			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
-
-			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(reasoner.getProperties().getVertex(currentProperty))) {
-				for(Property childproperty: descendants) {
+			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(propertySet)) {
+				for(Property childproperty : descendants) {
 
 					/*
 					 * adding the mappings of the children as own mappings, the new
@@ -397,10 +388,9 @@ public class TMappingProcessor implements Serializable {
 					 */
 					List<CQIE> childMappings = originalMappings.getRules(childproperty.getPredicate());
 
-					boolean requiresInverse = (currentProperty.isInverse() != childproperty.isInverse());
+					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
 
 					for (CQIE childmapping : childMappings) {
-						CQIE newmapping = null;
 						Function newMappingHead = null;
 						Function oldMappingHead = childmapping.getHead();
 						if (!requiresInverse) {
@@ -413,51 +403,32 @@ public class TMappingProcessor implements Serializable {
 							Term term1 = oldMappingHead.getTerms().get(0);
 							newMappingHead = fac.getFunction(currentPredicate, term0, term1);
 						}
-						newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-
-						if (optimize)
-							mergeMappingsWithCQC(currentNodeMappings, newmapping);
-						else 
-							currentNodeMappings.add(newmapping);
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody());
 					}
 				}
 			}
 
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getProperties().getVertex(currentProperty)) {
-				if(equiv.equals(currentProperty))
+			for (Property equivProperty : propertySet) {
+				if (equivProperty.equals(current))
 					continue;
 
-				Property equivProperty = (Property) equiv;
 				// if (equivProperty.isInverse())
 				// continue;
-				Predicate p = ((Property) equiv).getPredicate();
-				Set<CQIE> equivalentPropertyMappings = mappingIndex.get(p);
-				if (equivalentPropertyMappings == null) {
-					equivalentPropertyMappings = new LinkedHashSet<CQIE>();
-					mappingIndex.put(p, equivalentPropertyMappings);
-				}
+				Predicate p = equivProperty.getPredicate();
+				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
 				for (CQIE currentNodeMapping : currentNodeMappings) {
 
-					if (equivProperty.isInverse() == currentProperty.isInverse()) {
+					if (equivProperty.isInverse() == current.isInverse()) {
 						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-
-						if (optimize)
-							mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
-						else 
-							equivalentPropertyMappings.add(newmapping);
+						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
 					} 
 					else {
 						Term term0 = currentNodeMapping.getHead().getTerms().get(1);
 						Term term1 = currentNodeMapping.getHead().getTerms().get(0);
 						Function newhead = fac.getFunction(p, term0, term1);
-						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-						if (optimize)
-							mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
-						else 
-							equivalentPropertyMappings.add(newmapping);					
+						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
 					}
 				}
 			}
@@ -477,11 +448,7 @@ public class TMappingProcessor implements Serializable {
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
-			Set<CQIE> currentNodeMappings = mappingIndex.get(currentPredicate);
-			if (currentNodeMappings == null) {
-				currentNodeMappings = new LinkedHashSet<CQIE>();
-				mappingIndex.put(currentPredicate, currentNodeMappings);
-			}
+			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
 				for (BasicClassDescription childDescription : descendants) {
@@ -510,7 +477,6 @@ public class TMappingProcessor implements Serializable {
 					List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);
 
 					for (CQIE childmapping : desendantMappings) {
-						CQIE newmapping = null;
 						Function newMappingHead = null;
 						Function oldMappingHead = childmapping.getHead();
 
@@ -523,12 +489,7 @@ public class TMappingProcessor implements Serializable {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
 						}
-						newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-						
-						if (optimize)
-							mergeMappingsWithCQC(currentNodeMappings, newmapping);
-						else
-							currentNodeMappings.add(newmapping);
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody());
 					}
 				}
 			}
@@ -541,21 +502,11 @@ public class TMappingProcessor implements Serializable {
 					continue;
 				
 				Predicate p = ((OClass) equiv).getPredicate();
-				Set<CQIE> equivalentClassMappings = mappingIndex.get(p);
-
-				if (equivalentClassMappings == null) {
-					equivalentClassMappings = new LinkedHashSet<CQIE>();
-					mappingIndex.put(p, equivalentClassMappings);
-				}
+				Set<CQIE> equivalentClassMappings = getMappings(mappingIndex, p);
 
 				for (CQIE currentNodeMapping : currentNodeMappings) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-					CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-					
-					if (optimize)
-						mergeMappingsWithCQC(equivalentClassMappings, newmapping);
-					else
-						equivalentClassMappings.add(newmapping);				
+					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody());
 				}
 			}
 		}
@@ -568,6 +519,27 @@ public class TMappingProcessor implements Serializable {
 		return tmappingsProgram;
 	}
 
+	
+	private static Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
+		
+		Set<CQIE> currentMappings = mappingIndex.get(current);	
+		if (currentMappings == null) {
+			currentMappings = new LinkedHashSet<CQIE>();
+			mappingIndex.put(current, currentMappings);
+		}
+		return currentMappings;
+	}
+
+	
+	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {	
+		
+		CQIE newmapping = fac.getCQIE(head, body);				
+		if (optimize)
+			mergeMappingsWithCQC(mappings, newmapping);
+		else
+			mappings.add(newmapping);					
+	}
+	
 	private void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
 			Set<CQIE> similarMappings = mappingIndex.get(p);
@@ -586,21 +558,4 @@ public class TMappingProcessor implements Serializable {
 			mappingIndex.put(p, result);
 		}
 	}
-
-/*	
-	private List<Description> getLeafs(Collection<Description> nodes) {
-		LinkedList<Description> leafs = new LinkedList<Description>();
-		for (Description node : nodes) {
-			if (node instanceof Property) {
-				if (reasoner.getDirectSubProperties((Property)node).isEmpty())
-					leafs.add(node);
-			}
-			else {
-				if (reasoner.getDirectSubClasses((BasicClassDescription)node).isEmpty())
-					leafs.add(node);				
-			}
-		}
-		return leafs;
-	}
-*/
 }
