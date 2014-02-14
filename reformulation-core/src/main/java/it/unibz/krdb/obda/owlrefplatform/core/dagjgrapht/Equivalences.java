@@ -52,10 +52,6 @@ public class Equivalences<T> implements Iterable<T> {
 		return members.size();
 	}
 	
-	public boolean isEmpty() {
-		return members.isEmpty();
-	}
-	
 	public boolean contains(T v) {
 		return members.contains(v);
 	}

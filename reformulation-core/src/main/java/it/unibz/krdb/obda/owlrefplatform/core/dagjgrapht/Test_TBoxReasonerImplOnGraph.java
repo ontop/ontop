@@ -174,8 +174,8 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 							}
 						} */
 
-					if (!equivalences.isEmpty())
-						result.add(equivalences);
+					//if (!equivalences.isEmpty())
+					result.add(equivalences);
 				}
 			}
 		
@@ -242,8 +242,8 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 							}
 
 						} */
-					if (!equivalences.isEmpty())
-						result.add(equivalences);
+					//if (!equivalences.isEmpty())
+					result.add(equivalences);
 				}
 			}
 
