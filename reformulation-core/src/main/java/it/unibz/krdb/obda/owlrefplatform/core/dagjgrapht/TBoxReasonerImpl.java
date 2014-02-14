@@ -75,53 +75,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	public Property getRepresentativeFor(Property v) {
-			Equivalences<Property> e = propertyDAG.getVertex(v);
-			if (e != null)
-				return e.getRepresentative();
-		return null;
-	}
-	public BasicClassDescription getRepresentativeFor(BasicClassDescription v) {
-			Equivalences<BasicClassDescription> e = classDAG.getVertex(v);
-			if (e != null)
-				return e.getRepresentative();			
-		return null;
-	}
 	
-	
-	
-	
-
-	/**
-	 * Allows to have all named roles in the DAG even the equivalent named roles
-	 * @return  set of all property (not inverse) in the DAG
-	 */
-	public Set<Property> getPropertyNames() {
-		if (propertyNames == null) {
-			propertyNames = new LinkedHashSet<Property> ();
-			for (Equivalences<Property> v: propertyDAG.vertexSet()) 
-				for (Property r : v) 
-					if (!r.isInverse())
-						propertyNames.add(r);
-		}
-		return propertyNames;
-	}
-
-	/**
-	 * Allows to have all named classes in the DAG even the equivalent named classes
-	 * @return  set of all named concepts in the DAG
-	 */
-	
-	public Set<OClass> getClassNames() {
-		if (classNames == null) {
-			 classNames = new LinkedHashSet<OClass> ();
-			 for (Equivalences<BasicClassDescription> v: classDAG.vertexSet())
-				for (BasicClassDescription e : v)
-					if (e instanceof OClass)
-						classNames.add((OClass)e);
-		}
-		return classNames;
-	}
 
 	
 	public boolean isNamed(Property node) {

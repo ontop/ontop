@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -38,7 +37,6 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
-import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -689,7 +687,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Property propDesc = ofac.createProperty(propPred);
 
 					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
-						Property desc = reasonerDag.getRepresentativeFor(propDesc);
+						Property desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -1173,7 +1171,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		Property desc = reasonerDag.getRepresentativeFor(property);
+		Property desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
 				return true;
@@ -1721,7 +1719,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		for (Predicate rolepred : ontology.getRoles()) {
 
-			Property node = reasonerDag.getRepresentativeFor(ofac.createProperty(rolepred));
+			Property node = reasonerDag.getProperties().getVertex(ofac.createProperty(rolepred)).getRepresentative();
 			// We only map named roles
 			if (node.isInverse()) 
 				continue;
@@ -1788,14 +1786,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		// (e.g., coming from given mappings)
 
 		Set<OClass> classNodesMaps = new HashSet<OClass>();
-//		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();
+//		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();		
+		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
 		
-//		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
-		
-		for (BasicClassDescription node : reasonerDag.getClassNames()) {
-			if (!reasonerDag.getClasses().getVertex(node).getRepresentative().equals(node))
+		for (Equivalences<BasicClassDescription> set : classes) {
+			
+			BasicClassDescription node = set.getRepresentative();
+			
+			if (!(node instanceof OClass))
 				continue;
-
+						
 			classNodesMaps.add((OClass)node);
 /*
  	

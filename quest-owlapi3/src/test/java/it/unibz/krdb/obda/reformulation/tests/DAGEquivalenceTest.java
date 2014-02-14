@@ -11,8 +11,10 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
@@ -190,7 +192,9 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(1, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		Description d = dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "A2"));
+		EquivalencesDAG<Property> properties = dag.getProperties();
+		
+		Property d = properties.getVertex(ofac.createObjectProperty(testURI + "A2")).getRepresentative();
 		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A1",true)));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
@@ -207,8 +211,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "C2"));
-		assertTrue(d.equals(dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "C1",true))));
+		d = properties.getVertex(ofac.createObjectProperty(testURI + "C2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "C1",true)).getRepresentative()));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "C3"));
@@ -225,8 +229,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(2, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "B2"));
-		assertTrue(d.equals(dag.getRepresentativeFor(ofac.createObjectProperty(testURI + "B3",true))));
+		d = properties.getVertex(ofac.createObjectProperty(testURI + "B2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "B3",true)).getRepresentative()));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "B3"));

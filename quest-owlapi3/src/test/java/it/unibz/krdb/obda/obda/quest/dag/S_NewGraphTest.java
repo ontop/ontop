@@ -67,8 +67,8 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");
-		System.out.println(r.getClassNames());
-		System.out.println(r.getPropertyNames());
+		System.out.println(r.getClasses());
+		System.out.println(r.getProperties());
 		System.out.println(namedDAG);
 		
 //		log.info("See relations named DAG");

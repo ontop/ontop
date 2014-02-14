@@ -154,56 +154,54 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant(Property parent, Property child) {
 		
-		Property sp = sigmaChain.getRepresentativeFor(parent);
-		Property sc = sigmaChain.getRepresentativeFor(child);
+		Equivalences<Property> sp = sigmaChain.getProperties().getVertex(parent);
+		Equivalences<Property> sc = sigmaChain.getProperties().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<Property>> spChildren =  sigmaChain.getProperties().getDirectSub(sigmaChain.getProperties().getVertex(sp));
-		Equivalences<Property> scEquivalent = sigmaChain.getProperties().getVertex(sc);
+		Set<Equivalences<Property>> spChildren =  sigmaChain.getProperties().getDirectSub(sp);
 		
-		if (!spChildren.contains(scEquivalent))
+		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Property tc = isaChain.getRepresentativeFor(child);
+		Equivalences<Property> tc = isaChain.getProperties().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<Property>> scChildren = sigmaChain.getProperties().getSub(sigmaChain.getProperties().getVertex(sc));
-		Set<Equivalences<Property>> tcChildren = isaChain.getProperties().getSub(isaChain.getProperties().getVertex(tc));
+		Set<Equivalences<Property>> scChildren = sigmaChain.getProperties().getSub(sc);
+		Set<Equivalences<Property>> tcChildren = isaChain.getProperties().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
 	
 	private boolean check_directly_redundant(BasicClassDescription parent, BasicClassDescription child) {
 		
-		BasicClassDescription sp = sigmaChain.getRepresentativeFor(parent);
-		BasicClassDescription sc = sigmaChain.getRepresentativeFor(child);
+		Equivalences<BasicClassDescription> sp = sigmaChain.getClasses().getVertex(parent);
+		Equivalences<BasicClassDescription> sc = sigmaChain.getClasses().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sigmaChain.getClasses().getVertex(sp));
-		Equivalences<BasicClassDescription> scEquivalent = sigmaChain.getClasses().getVertex(sc);
+		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
 		
-		if (!spChildren.contains(scEquivalent))
+		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		BasicClassDescription tc = isaChain.getRepresentativeFor(child);
+		Equivalences<BasicClassDescription> tc = isaChain.getClasses().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getClasses().getSub(sigmaChain.getClasses().getVertex(sc));
-		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(isaChain.getClasses().getVertex(tc));
+		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getClasses().getSub(sc);
+		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
