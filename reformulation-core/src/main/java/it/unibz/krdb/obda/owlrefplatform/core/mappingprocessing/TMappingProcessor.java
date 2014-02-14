@@ -426,7 +426,7 @@ public class TMappingProcessor implements Serializable {
 			}
 
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getEquivalences(currentProperty)) {
+			for (Description equiv : reasoner.getProperties().getVertex(currentProperty)) {
 				if(equiv.equals(currentProperty))
 					continue;
 
@@ -600,7 +600,7 @@ public class TMappingProcessor implements Serializable {
 
 
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getEquivalences(currentProperty)) {
+			for (Description equiv : reasoner.getClasses().getVertex(currentProperty)) {
 
 				if (!(equiv instanceof OClass) || equiv.equals(currentProperty))
 					continue;

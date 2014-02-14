@@ -147,23 +147,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 //	}
 	
 	
-
-
-	
-	/**
-	 * Return the equivalences starting from the given node of the dag
-	 * 
-	 * @param desc node we want to know the ancestors
-	 *            
-	 * @return we return a set of description with equivalent nodes 
-	 */
-
-	public Equivalences<Property> getEquivalences(Property desc) {
-		return propertyDAG.getVertex(desc);
-	}
-	public Equivalences<BasicClassDescription> getEquivalences(BasicClassDescription desc) {
-		return classDAG.getVertex(desc);
-	}
 	
 	
 	/**

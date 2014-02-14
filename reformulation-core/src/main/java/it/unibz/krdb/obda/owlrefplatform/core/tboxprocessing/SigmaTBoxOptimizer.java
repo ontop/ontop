@@ -162,7 +162,7 @@ public class SigmaTBoxOptimizer {
 			return false;
 
 		Set<Equivalences<Property>> spChildren =  sigmaChain.getProperties().getDirectSub(sigmaChain.getProperties().getVertex(sp));
-		Equivalences<Property> scEquivalent = sigmaChain.getEquivalences(sc);
+		Equivalences<Property> scEquivalent = sigmaChain.getProperties().getVertex(sc);
 		
 		if (!spChildren.contains(scEquivalent))
 			return false;
@@ -190,7 +190,7 @@ public class SigmaTBoxOptimizer {
 			return false;
 
 		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sigmaChain.getClasses().getVertex(sp));
-		Equivalences<BasicClassDescription> scEquivalent = sigmaChain.getEquivalences(sc);
+		Equivalences<BasicClassDescription> scEquivalent = sigmaChain.getClasses().getVertex(sc);
 		
 		if (!spChildren.contains(scEquivalent))
 			return false;

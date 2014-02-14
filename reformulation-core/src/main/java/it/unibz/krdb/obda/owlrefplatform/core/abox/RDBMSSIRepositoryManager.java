@@ -1752,7 +1752,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			
 			Queue<Equivalences<Property>> childrenQueue = new LinkedList<Equivalences<Property>>();
 			childrenQueue.addAll(properties.getDirectSub(properties.getVertex(node)));
-			childrenQueue.add(reasonerDag.getEquivalences(node));
+			childrenQueue.add(reasonerDag.getProperties().getVertex(node));
 
 
 			while (!childrenQueue.isEmpty()) {
@@ -1816,7 +1816,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			/* Collecting Exists R children */
 			//consider also the equivalent of the node
-			for (Description child : reasonerDag.getEquivalences(node)) {
+			for (Description child : reasonerDag.getClasses().getVertex(node)) {
 				
 				if (child instanceof PropertySomeRestrictionImpl& !(child.equals(node))) {
 					existChildren.add(child);
