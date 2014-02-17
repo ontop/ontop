@@ -16,9 +16,15 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -123,88 +129,64 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
+	// ---------------------------------------------------------------------------------
 	
 	
+	// lexicographical comparison of property names (a property is before its inverse) 
+	private static final Comparator<Property> propertyComparator = new Comparator<Property>() {
+		@Override
+		public int compare(Property o1, Property o2) {
+			int compared = o1.getPredicate().getName().compareTo(o2.getPredicate().getName()); 
+			if (compared == 0) {
+				if (o1.isInverse() == o2.isInverse())
+					return 0;
+				else if (o2.isInverse())
+					return -1;
+				else 
+					return 1;
+			}
+			return compared;
+		}
+	}; 
 	
 
 	public static void choosePropertyRepresentatives(EquivalencesDAGImpl<Property> dag) {
 		
-		Deque<Equivalences<Property>> asymmetric = new LinkedList<Equivalences<Property>>();
 		
-		for (Equivalences<Property> equivalences : dag.vertexSet()) {
-
-			// RULE 0: IF IT HAS BEEN SET, DO NOTHING
-			if (equivalences.getRepresentative() != null)
+		for (Equivalences<Property> set : dag.vertexSet()) {
+			
+			// ski if has already been done 
+			if (set.getRepresentative() != null)
 				continue;
-			
-			Property first = equivalences.iterator().next();
-						
-			// RULE 1: IF THE EQUIVALENCES IS OF SIZE 1, 
-			//            SET THE REPRESENTATIVE AND MAKE THE NAMED ONE INDEXED 
-			if (equivalences.size() == 1) {
-				equivalences.setRepresentative(first);
-				if (!first.isInverse())
-					equivalences.setIndexed();
-			}
-			else {
-			// RULE 2: IF THE EQUIVALENCES DOES NOT CONTAIN A SYMMETRIC PROPERTY, DEAL LATER	
-				Equivalences<Property> inverseEquivalenceSet = getInverse(dag, equivalences);
-				if (!inverseEquivalenceSet.contains(first)) {
-					assert (equivalences != inverseEquivalenceSet);
-					asymmetric.add(equivalences);
-				}
-				// RULE 3: OTHERWISE, IT IS ALL SYMMETIC PROPERTIES ONLY, 
-				//  CHOOSE ONE AS A REP AND MAKE IT INDEXED
-				else {
-					assert (equivalences == inverseEquivalenceSet);
-					equivalences.setRepresentative(getNamedRepresentative(equivalences));
-					equivalences.setIndexed();
-				}							
-			}
-		}
-	
-		while (!asymmetric.isEmpty()) {
-			Equivalences<Property> c = asymmetric.pollFirst();
-			if (c.getRepresentative() != null) 
-				continue;
-						
-			boolean invertedRepRequired = false;
-			Set<Equivalences<Property>> component = getRoleComponent(dag, c);
-			// find a maximal property (non-deterministic!!)
-			for (Equivalences<Property> equivalences : component) 
-				if (component.containsAll(dag.getDirectSub(equivalences))) {
-					Property p = getNamedRepresentative(equivalences);
-					if (p == null) {
-						invertedRepRequired = true;
-						break;
-					}
-					Property invRep = getNamedRepresentative(getInverse(dag, equivalences));
-					if (invRep != null && invRep.getPredicate().getName().compareTo(p.getPredicate().getName()) < 0) {
-						//System.out.println(invRep.getPredicate().getName() + " COMPARED TO " + p.getPredicate().getName());
-						invertedRepRequired = true;
-						break;
-					}
-				}
-			
-			if (invertedRepRequired) 
-				component = getRoleComponent(dag, getInverse(dag, c));		
-			
-			for (Equivalences<Property> equivalences : component) {
-				Property rep = getNamedRepresentative(equivalences);
-				if (rep == null) 
-					rep = equivalences.iterator().next(); // again, non-deterministic
 				
-				equivalences.setRepresentative(rep);
-				equivalences.setIndexed();
-
-				Property inverse = fac.createProperty(rep.getPredicate(), !rep.isInverse());
-				Equivalences<Property> inverseEquivalences = dag.getVertex(inverse);
-				inverseEquivalences.setRepresentative(inverse);
+			Property rep = Collections.min(set.getMembers(), propertyComparator);	
+			Property repInv = fac.createProperty(rep.getPredicate(), !rep.isInverse());
+			
+			Equivalences<Property> setInv = dag.getVertex(repInv);
+			
+			if (rep.isInverse()) {
+				repInv = Collections.min(setInv.getMembers(), propertyComparator);	
+				rep = fac.createProperty(repInv.getPredicate(), !repInv.isInverse());	
+				
+				setInv.setIndexed();							
+			}
+			else
+				set.setIndexed();
+			
+			set.setRepresentative(rep);
+			// System.out.println("SET REP: " + set);
+			if (!set.contains(repInv)) {
+				// if not symmetric 
+				// (each set either consists of symmetric properties 
+				//        or none of the properties in the set is symmetric)
+				setInv.setRepresentative(repInv);
+				//System.out.println("SET REP: " + setInv);
 			}
 		}
 		
 		
-	/*	
+		
+/*		
 		for (Equivalences<Property> equivalenceClass : dag.vertexSet()) {
 				System.out.println(" " + equivalenceClass);
 				if (equivalenceClass.getRepresentative() == null)
@@ -219,75 +201,17 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 		
 		System.out.println("RESULT: " + dag);
-	*/
+*/	
 	}	
 	
-	
-	private static Equivalences<Property> getInverse(EquivalencesDAG<Property> dag, Equivalences<Property> node) {
-		Property property = node.iterator().next();
-		Property inverse = fac.createProperty(property.getPredicate(), !property.isInverse());
-		return dag.getVertex(inverse);		
-	}
-	
-	/**
-	 * get the connected component for a given equivalence set
-	 * 		the vertex traversal does not go trough vertices with already selected representatives
-	 *      (in particular, through sets of symmetric properties)
-	 *   
-	 * @param dag
-	 * @param node
-	 * @param symmetric
-	 * @return
-	 */
-	
-	private static Set<Equivalences<Property>> getRoleComponent(EquivalencesDAG<Property> dag, Equivalences<Property> node)		{
 		
-		Set<Equivalences<Property>> set = new HashSet<Equivalences<Property>>();
-		
-		Deque<Equivalences<Property>> queue = new LinkedList<Equivalences<Property>>();
-		queue.add(node);
-		set.add(node);
-
-		while (!queue.isEmpty()) {
-			Equivalences<Property> eq = queue.pollFirst();
-			for (Equivalences<Property> t : dag.getDirectSub(eq)) {
-				if (t.getRepresentative() == null && !set.contains(t)) {
-					set.add(t);
-					queue.add(t);
-				}
-			}
-			for (Equivalences<Property> s : dag.getDirectSuper(eq)) {
-				if (s.getRepresentative() == null && !set.contains(s)) {
-					set.add(s);
-					queue.add(s);
-				}
-			}
-		}	
-		return set;
-	}
-	
-
-	
-	/**
-	 * get the first (in lexicographical order) named property in the equivalence class 
-	 * 
-	 * @param properties
-	 * @return
-	 */
-
-	private static Property getNamedRepresentative(Equivalences<Property> properties) {
-		Property representative = null;
-		for (Property rep : properties) 
-			if (!rep.isInverse()) {
-				if (representative == null || rep.getPredicate().getName().compareTo(representative.getPredicate().getName()) < 0)
-					representative = rep;
-			}
-		return representative;
-	}
-
-	
-
-	
+	// lexicographical comparison of class names 
+	private static final Comparator<OClass> classComparator = new Comparator<OClass>() {
+		@Override
+		public int compare(OClass o1, OClass o2) {
+			return o1.getPredicate().getName().compareTo(o2.getPredicate().getName());
+		}
+	}; 
 	
 	
 	
@@ -301,19 +225,21 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 			else {
 				// find a named class as a representative 
-				// TODO: find the minimal rep for the lexicographical order -- otherwise not unique 
+				OClass namedRepresentative = null;
 				for (BasicClassDescription e : equivalenceSet) 
 					if (e instanceof OClass) {
-						representative = e;
-						break;
+						if (namedRepresentative == null || classComparator.compare((OClass)e, namedRepresentative) < 0)
+							namedRepresentative = (OClass)e;
 					}
-				
-				if (representative == null) {
+		
+				if (namedRepresentative == null) {
 					PropertySomeRestriction first = (PropertySomeRestriction)equivalenceSet.iterator().next();
 					Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
-					Property propRep = (Property) propertyDAG.getVertex(prop).getRepresentative();
+					Property propRep = propertyDAG.getVertex(prop).getRepresentative();
 					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
 				}
+				else
+					representative = namedRepresentative;
 			}
 
 			equivalenceSet.setRepresentative(representative);
