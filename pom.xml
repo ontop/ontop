@@ -161,7 +161,7 @@
 					<execution>
 						<id>attach-sources</id>
 						<goals>
-							<goal>jark</goal>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
