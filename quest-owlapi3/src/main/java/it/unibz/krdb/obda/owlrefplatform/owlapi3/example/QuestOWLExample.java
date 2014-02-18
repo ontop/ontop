@@ -44,7 +44,10 @@ public class QuestOWLExample {
 	
 	/*
 	 * Use the sample database using H2 from
-	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
+	 * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
+	 * 
+	 * Please use the pre-bundled H2 server from the above link
+	 * 
 	 */
 	final String owlfile = "src/main/resources/example/exampleBooks.owl";
 	final String obdafile = "src/main/resources/example/exampleBooks.obda";
