@@ -193,6 +193,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -292,9 +305,9 @@
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
-    		<groupId>com.github.jsqlparser</groupId>
-    		<artifactId>jsqlparser</artifactId>
-    		<version>0.8.8</version>
+    			<groupId>com.github.jsqlparser</groupId>
+    			<artifactId>jsqlparser</artifactId>
+    			<version>0.8.8</version>
 			</dependency>
 
 			<!-- OWL API -->
