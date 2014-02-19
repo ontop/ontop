@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlapi3.bootstrapping;
  * #%L
  * ontop-obdalib-owlapi3
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,13 @@ public abstract class AbstractDBMetadata
 	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
 		DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size());
+		this.model =  engine.extractMappings(model, source);
+		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
+	}
+	
+	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
+		this.source = source;	
+		DirectMappingEngine engine = new DirectMappingEngine(metadata, baseuri, model.getMappings(source.getSourceID()).size());
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}

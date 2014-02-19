@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
  * #%L
  * ontop-quest-owlapi3
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,10 @@ public class QuestOWLExample {
 	
 	/*
 	 * Use the sample database using H2 from
-	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
+	 * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
+	 * 
+	 * Please use the pre-bundled H2 server from the above link
+	 * 
 	 */
 	final String owlfile = "src/main/resources/example/exampleBooks.owl";
 	final String obdafile = "src/main/resources/example/exampleBooks.obda";

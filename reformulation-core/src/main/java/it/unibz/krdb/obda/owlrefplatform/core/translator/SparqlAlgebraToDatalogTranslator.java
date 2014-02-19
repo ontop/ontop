@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1236,9 +1236,11 @@ public class SparqlAlgebraToDatalogTranslator {
 							type.toString(), COL_TYPE.OBJECT));
 			}
 		} else if (v instanceof URIImpl) {
-			constantFunction = ofac.getFunction(ofac
-					.getUriTemplatePredicate(1), ofac.getConstantLiteral(
-							((URIImpl)v).stringValue(), COL_TYPE.OBJECT));
+			constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
+			if (constantFunction.getArity() == 1)
+				constantFunction = ofac.getFunction(ofac
+						.getUriTemplatePredicate(1), ofac.getConstantLiteral(
+								((URIImpl)v).stringValue(), COL_TYPE.OBJECT));
 			
 		} 
 		

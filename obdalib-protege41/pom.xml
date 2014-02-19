@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.10.0</version>
+		<version>1.11.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -60,11 +60,6 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-owlapi3</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -78,11 +73,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-reformulation-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-sesame</artifactId>
@@ -246,7 +237,10 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-util</artifactId>
 		</dependency>
-
+		<dependency>
+	   		<groupId>com.github.jsqlparser</groupId>
+	   		<artifactId>jsqlparser</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.utils;
  * #%L
  * ontop-obdalib-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,16 @@ package it.unibz.krdb.obda.utils;
  * limitations under the License.
  * #L%
  */
-
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-
+ 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.parser.SQL99Lexer;
-import it.unibz.krdb.obda.parser.SQL99Parser;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.api.QueryTree;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 /**
- * Contains the target query and query tree (parsed source part, sql) of a mapping
+ * Contains the target query and parsed source part, sql of a mapping
  * 
  * This is in a separate class, such that the parsing can be done before metadata extraction,
  * but independently of mapping analysis.
@@ -44,24 +38,24 @@ import it.unibz.krdb.sql.api.QueryTree;
  */
 public class ParsedMapping {
 
-	QueryTree sourceQueryTree;
+	VisitedQuery sourceQueryParsed;
 	OBDAMappingAxiom axiom;
 	
 	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryTranslator translator){
 		this.axiom = axiom;
 		OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
-		// Construct the SQL query tree from the source query
-		QueryTree queryTree = translator.constructQueryTreeNoView(sourceQuery.toString());
-		this.sourceQueryTree = queryTree;
+		// Construct the SQL parsed query from the source query
+		VisitedQuery queryParsed = translator.constructParserNoView(sourceQuery.toString());
+		this.sourceQueryParsed = queryParsed;
 	}
 	
 	/**
-	 * This returns the querytree constructed from the source query
-	 * @return
+	 * This returns the parsed query constructed from the source query
+	 * @return VisitedQuery the parsed query
 	 */
-	public QueryTree getSourceQueryTree(){
-		return this.sourceQueryTree;
+	public VisitedQuery getSourceQueryParsed(){
+		return this.sourceQueryParsed;
 	}
 	
 	

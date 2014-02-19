@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.utils;
  * #%L
  * ontop-test
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,10 @@ public class MappingAnalyzerTest extends TestCase {
 		assertNotNull(dp);
 		System.out.println(dp.toString());
 	}
+	public void test18() throws Exception{
+		runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)", ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+	}
+
 	
 	public void testAnalysis_1() throws Exception {
 		runAnalysis(
@@ -180,4 +184,10 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
+	
+	public void test17() throws Exception{
+		runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'", ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+	}
+	
+	
 }

@@ -30,7 +30,7 @@
 :char rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <char.rq> ] ;
     mf:result <char.ttl> ;
@@ -40,7 +40,7 @@
 :char-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <char-graph.rq> ] ;
     mf:result <char.ttl> ;
@@ -50,7 +50,7 @@
 :varchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar.rq> ] ;
     mf:result <varchar.ttl> ;
@@ -60,7 +60,7 @@
 :varchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar-graph.rq> ] ;
     mf:result <varchar.ttl> ;
@@ -70,7 +70,7 @@
 :text rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <text.rq> ] ;
     mf:result <text.ttl> ;
@@ -80,7 +80,7 @@
 :text-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <text-graph.rq> ] ;
     mf:result <text.ttl> ;
@@ -90,7 +90,7 @@
 :longtext rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: LONGTEXT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <longtext.rq> ] ;
     mf:result <longtext.ttl> ;
@@ -100,7 +100,7 @@
 :longtext-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: LONGTEXT-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <longtext-graph.rq> ] ;
     mf:result <longtext.ttl> ;
@@ -110,7 +110,7 @@
 :mediumtext rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: MEDIUMTEXT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <mediumtext.rq> ] ;
     mf:result <mediumtext.ttl> ;
@@ -120,7 +120,7 @@
 :mediumtext-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: MEDIUMTEXT-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <mediumtext-graph.rq> ] ;
     mf:result <mediumtext.ttl> ;
@@ -130,7 +130,7 @@
 :tinytext rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TINYTEXT" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <tinytext.rq> ] ;
     mf:result <tinytext.ttl> ;
@@ -140,7 +140,7 @@
 :tinytext-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TINYTEXT-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <tinytext-graph.rq> ] ;
     mf:result <tinytext.ttl> ;
@@ -150,7 +150,7 @@
 :set rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SET" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <set.rq> ] ;
     mf:result <set.ttl> ;
@@ -160,7 +160,7 @@
 :set-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SET-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <set-graph.rq> ] ;
     mf:result <set.ttl> ;
@@ -170,7 +170,7 @@
 :enum rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: ENUM" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <enum.rq> ] ;
     mf:result <enum.ttl> ;
@@ -180,7 +180,7 @@
 :enum-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: ENUM-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <enum-graph.rq> ] ;
     mf:result <enum.ttl> ;

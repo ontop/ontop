@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.model.impl;
  * #%L
  * ontop-obdalib-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,6 +243,8 @@ public class OBDAVocabulary {
 	public static final String SPARQL_LANG_URI = "lang";
 
 	public static final String SPARQL_REGEX_URI = "regex";
+	
+	public static final String SPARQL_LIKE_URI = "like";
 
 	/* SPARQL Algebra predicate */
 
@@ -278,4 +280,7 @@ public class OBDAVocabulary {
 
 	public static final Predicate SPARQL_REGEX = new BooleanOperationPredicateImpl(
 			SPARQL_REGEX_URI, 3);
+	
+	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
+			SPARQL_LIKE_URI, 2);
 }

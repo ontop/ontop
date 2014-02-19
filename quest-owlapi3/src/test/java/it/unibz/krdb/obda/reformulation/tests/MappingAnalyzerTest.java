@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #%L
  * ontop-quest-owlapi3
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,7 +213,7 @@ public class MappingAnalyzerTest extends TestCase {
 		try {
 			runTests();
 		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
+			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
 		}
 	}
 	
@@ -223,7 +223,7 @@ public class MappingAnalyzerTest extends TestCase {
 		try {
 			runTests();
 		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
+			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
 		}
 	}
 	
@@ -233,7 +233,7 @@ public class MappingAnalyzerTest extends TestCase {
 		try {
 			runTests();
 		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
+			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were alias map to two different values
 		}
 	}
 	
@@ -253,7 +253,7 @@ public class MappingAnalyzerTest extends TestCase {
 		try {
 			runTests();
 		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
+			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were name map to two different values
 		}
 	}
 	

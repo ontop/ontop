@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #%L
  * ontop-quest-owlapi3
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,9 +84,9 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 
-	final String testCase = "twr";
+	final String testCase = "twr-predicate";
 	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
-	final String obdafile = "src/test/resources/test/treewitness" + testCase + ".obda";
+	final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
 
 	/* These are the distinct tuples that we know each query returns */

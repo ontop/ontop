@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * #%L
  * ontop-obdalib-sesame
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
+ */
+
+/**
+ * @author timea bagosi
+ * Class responsible of parsing R2RML mappings from file or from an RDF graph
  */
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -57,10 +62,18 @@ public class R2RMLManager {
 	
 	private R2RMLParser r2rmlParser;
 	
+	/**
+	 * Constructor to start parsing R2RML mappings from file.
+	 * @param file - the full path of the file
+	 */
 	public R2RMLManager(String file) {
 		this(new File(file));
 	}
 	
+	/**
+	 * Constructor to start parsing R2RML mappings from file.
+	 * @param file - the File object
+	 */
 	public R2RMLManager(File file) {
 		try {
 			r2rmlParser = new R2RMLParser();
@@ -76,12 +89,20 @@ public class R2RMLManager {
 		}
 	}
 	
+	/**
+	 * Constructor to start the parser from an RDF graph
+	 * @param graph - the sesame graph containing mappings
+	 */
 	public R2RMLManager(Graph graph){
 		myGraph = graph;
 		r2rmlParser = new R2RMLParser();
 		
 	}
 	
+	/**
+	 * Get the graph of mappings
+	 * @return the Graph object containing the mappings
+	 */
 	public Graph getGraph() {
 		Iterator<Statement> it = myGraph.iterator();
 		while (it.hasNext())
@@ -92,6 +113,8 @@ public class R2RMLManager {
 	/**
 	 * This method return the list of mappings from the Graph main method to be
 	 * called, assembles everything
+	 * @param myGraph - the graph structure containing mappings
+	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the graph
 	 */
 	public ArrayList<OBDAMappingAxiom> getMappings(Graph myGraph) {
 
@@ -123,8 +146,11 @@ public class R2RMLManager {
 		return mappings;
 	}
 	
-	/*
-	 * method to get an OBDAMappingAxiom from a Resource node in the given Graph
+	/**
+	 * Method to get an OBDAMappingAxiom from a Resource node in the given Graph
+	 * @param myGraph - the graph containing mappings
+	 * @param subj - the Resource node of one mapping
+	 * @return OBDAMappingAxiom - the mapping axiom read from the graph
 	 */
 	private OBDAMappingAxiom getMapping(Graph myGraph, Resource subj) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(myGraph, subj);
@@ -135,8 +161,11 @@ public class R2RMLManager {
 		return mapping;
 	}
 	
-	/*
-	 * method to get the join OBDAMappingAxioms from a Resource node in the given Graph
+	/**
+	 * Method to get the join OBDAMappingAxioms from a Resource node in the given Graph
+	 * @param myGraph - the Graph structure containing mappings
+	 * @param tripleMap - the Resource node of a mapping
+	 * @return List<OBDAMappingAxiom> - the list of join mappings read from the given node
 	 */
 	private List<OBDAMappingAxiom> getJoinMappings(Graph myGraph, Resource tripleMap) throws Exception {
 		String sourceQuery = "";
@@ -181,6 +210,8 @@ public class R2RMLManager {
 					terms.add(joinSubject1);
 					terms.add(joinSubject2);
 				} else {
+					//TODO replace this workaround
+					//have to introduce alias as Child and as Parent 
 					sourceQuery = "SELECT * FROM ("+sourceQuery1 + ") as CHILD, (" + sourceQuery2 + ") as PARENT " +
 							"WHERE CHILD." + childCol + " = PARENT." + parentCol;
 					terms.add(joinSubject1Child);
@@ -212,8 +243,10 @@ public class R2RMLManager {
 		return null;
 	}
 		
-	/*
+	/**
 	 * construct head of mapping q(variables) from the body
+	 * @param body - the body of the mapping
+	 * @return Function - the head of the mapping
 	 */
 	private Function getHeadAtom(List<Function> body) {
 		Set<Variable> vars = new HashSet<Variable>();
@@ -226,8 +259,11 @@ public class R2RMLManager {
 		return head;
 	}
 	
-	/*
+	/**
 	 * method to get the body atoms of the mapping from a given Resource node in the Graph
+	 * @param myGraph - the rdf graph containing mappings
+	 * @param subj - the Resource node of the specific mapping
+	 * @return List<Function> - the body of the mapping constructed from the graph
 	 */
 	private List<Function> getMappingTripleAtoms(Graph myGraph, Resource subj) throws Exception {
 		//the body to return

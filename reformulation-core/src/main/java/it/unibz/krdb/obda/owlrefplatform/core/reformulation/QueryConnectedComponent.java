@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,8 +209,8 @@ public class QueryConnectedComponent {
 		
 		for (Function a: cqie.getBody()) {
 			Predicate p = a.getFunctionSymbol();
-			if (p.isDataPredicate()) {
-			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate
+			if (p.isDataPredicate() && !p.isTriplePredicate()) { // if DL predicates 
+			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate (throws NullPointerException)
 				Term t0 = a.getTerm(0);				
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms
@@ -268,17 +268,17 @@ public class QueryConnectedComponent {
 	/**
 	 * boolean isDenenerate() 
 	 * 
-	 * @return true if the component is degenerate (has no proper edges with two distinct NewLiterals)
+	 * @return true if the component is degenerate (has no proper edges with two distinct terms)
 	 */
 	
 	public boolean isDegenerate() {
-		return edges.isEmpty() && nonDLAtoms.isEmpty();
+		return edges.isEmpty(); // && nonDLAtoms.isEmpty();
 	}
 	
 	/**
-	 * boolean hasNoFreeNewLiterals()
+	 * boolean hasNoFreeTerms()
 	 * 
-	 * @return true if all NewLiterals of the connected component are existentially quantified variables
+	 * @return true if all terms of the connected component are existentially quantified variables
 	 */
 	
 	public boolean hasNoFreeTerms() {
@@ -296,7 +296,7 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * List<NewLiteral> getVariables()
+	 * List<Term> getVariables()
 	 * 
 	 * @return the list of variables in the connected components
 	 */
@@ -316,7 +316,7 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * List<NewLiteral> getFreeVariables()
+	 * List<Term> getFreeVariables()
 	 * 
 	 * @return the list of free variables in the connected component
 	 */
@@ -332,7 +332,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Loop: class representing loops of connected components
 	 * 
-	 * a loop is characterized by a NewLiteral and a set of atoms involving only that NewLiteral
+	 * a loop is characterized by a Term and a set of atoms involving only that Term
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -383,7 +383,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Edge: class representing edges of connected components
 	 * 
-	 * an edge is characterized by a pair of NewLiterals and a set of atoms involving only those NewLiterals
+	 * an edge is characterized by a pair of Terms and a set of atoms involving only those Terms
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -434,7 +434,7 @@ public class QueryConnectedComponent {
 	}
 	
 	/**
-	 * TermPair: a simple abstraction of *unordered* pair of NewLiterals (i.e., {t1, t2} and {t2, t1} are equal)
+	 * TermPair: a simple abstraction of *unordered* pair of Terms (i.e., {t1, t2} and {t2, t1} are equal)
 	 * 
 	 * @author Roman Kontchakov
 	 *

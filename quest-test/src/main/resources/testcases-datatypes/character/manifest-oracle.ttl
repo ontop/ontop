@@ -28,7 +28,7 @@
 :char rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <char.rq> ] ;
     mf:result <char.ttl> ;
@@ -38,7 +38,7 @@
 :char-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <char-graph.rq> ] ;
     mf:result <char.ttl> ;
@@ -48,7 +48,7 @@
 :varchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar.rq> ] ;
     mf:result <varchar.ttl> ;
@@ -58,7 +58,7 @@
 :varchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar-graph.rq> ] ;
     mf:result <varchar.ttl> ;
@@ -68,7 +68,7 @@
 :character rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHARACTER" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <character.rq> ] ;
     mf:result <character.ttl> ;
@@ -78,7 +78,7 @@
 :character-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHARACTER-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <character-graph.rq> ] ;
     mf:result <character.ttl> ;
@@ -88,7 +88,7 @@
 :nchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NCHAR" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <nchar.rq> ] ;
     mf:result <nchar.ttl> ;
@@ -98,7 +98,7 @@
 :nchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NCHAR-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <nchar-graph.rq> ] ;
     mf:result <nchar.ttl> ;
@@ -108,7 +108,7 @@
 :ncharvarying rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NCHAR VARYING" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <ncharvarying.rq> ] ;
     mf:result <ncharvarying.ttl> ;
@@ -118,7 +118,7 @@
 :ncharvarying-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NCHAR VARYING-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <ncharvarying-graph.rq> ] ;
     mf:result <ncharvarying.ttl> ;
@@ -128,7 +128,7 @@
 :varchar2 rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR2" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar2.rq> ] ;
     mf:result <varchar2.ttl> ;
@@ -138,7 +138,7 @@
 :varchar2-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR2-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <varchar2-graph.rq> ] ;
     mf:result <varchar2.ttl> ;
@@ -148,7 +148,7 @@
 :nvarchar2 rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NVARCHAR2" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <nvarchar2.rq> ] ;
     mf:result <nvarchar2.ttl> ;
@@ -158,7 +158,7 @@
 :nvarchar2-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NVARCHAR2-GRAPH" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <nvarchar2-graph.rq> ] ;
     mf:result <nvarchar2.ttl> ;

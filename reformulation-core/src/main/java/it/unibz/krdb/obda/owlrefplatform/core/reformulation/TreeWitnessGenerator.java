@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,9 @@ public class TreeWitnessGenerator {
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
 
+		if (concepts.isEmpty())
+			return concepts;
+		
 		if (concepts.size() == 1 && concepts.iterator().next() instanceof OClass)
 			return concepts;
 		

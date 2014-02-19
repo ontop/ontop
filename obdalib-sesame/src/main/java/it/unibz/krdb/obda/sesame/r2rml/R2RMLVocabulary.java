@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * #%L
  * ontop-obdalib-sesame
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package it.unibz.krdb.obda.sesame.r2rml;
  * limitations under the License.
  * #L%
  */
-
+/**
+ * @author timea bagosi
+ * Class to represent R2RML standard vocabulary
+ */
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;

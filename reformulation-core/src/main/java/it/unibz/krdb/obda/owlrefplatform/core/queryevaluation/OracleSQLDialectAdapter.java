@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,5 +49,24 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 			return "CAST(" + value + " AS " + strType + ")";
 		}
 		throw new RuntimeException("Unsupported SQL type");
+	}
+	
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		String flags = "";
+		if(caseinSensitive)
+			flags += "i";
+		else
+			flags += "c";
+		if (multiLine)
+			flags += "m";
+		if(dotAllMode)
+			flags += "n";
+		
+		String sql = " REGEXP_LIKE " + "( " + columnname + " , '" + pattern + "' , '" + flags  + "' )";
+		return sql;
 	}
 }
