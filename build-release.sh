@@ -49,8 +49,8 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.10
-export REVISION=1-SNAPSHOT
+export VERSION=1.11
+export REVISION=0
 
 
 # Start building the packages
