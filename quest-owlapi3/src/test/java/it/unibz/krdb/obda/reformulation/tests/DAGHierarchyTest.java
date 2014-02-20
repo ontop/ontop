@@ -29,6 +29,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
+
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;

@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
 
 
+
 /**
  *  This is the interface for the class TBoxReasoner where we are able to retrieve all the connection built in our DAG 
  */

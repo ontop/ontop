@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
  */
 
 
+
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;

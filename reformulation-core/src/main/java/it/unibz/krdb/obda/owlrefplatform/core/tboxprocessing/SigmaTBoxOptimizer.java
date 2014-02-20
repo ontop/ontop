@@ -19,8 +19,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * limitations under the License.
  * #L%
  */
-import it.unibz.krdb.obda.model.Predicate;
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
