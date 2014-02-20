@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.10.0-SNAPSHOT</version>
+		<version>1.11.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -61,11 +60,6 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-owlapi3</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -79,11 +73,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-reformulation-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-sesame</artifactId>
@@ -123,7 +113,11 @@
   			<groupId>net.sf.jgrapht</groupId>
   			<artifactId>jgrapht</artifactId>
 		</dependency>
-			
+		
+		<dependency>
+			<groupId>jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+		</dependency>
 
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
@@ -243,7 +237,10 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-util</artifactId>
 		</dependency>
-
+		<dependency>
+	   		<groupId>com.github.jsqlparser</groupId>
+	   		<artifactId>jsqlparser</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.sql;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BNode;
@@ -76,6 +88,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String ADD_OPERATOR = "%s + %s";
 	private static final String SUBSTRACT_OPERATOR = "%s - %s";
 	private static final String MULTIPLY_OPERATOR = "%s * %s";
+	
+	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
 	private static final String INDENT = "    ";
 
@@ -330,17 +344,25 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else {
 			if (functionSymbol == OBDAVocabulary.SPARQL_REGEX) {
 				boolean caseinSensitive = false;
+				boolean multiLine = false;
+				boolean dotAllMode = false;
 				if (atom.getArity() == 3) {
 					if (atom.getTerm(2).toString().contains("i")) {
 						caseinSensitive = true;
-					} 
+					}
+					if (atom.getTerm(2).toString().contains("m")) {
+						multiLine = true;
+					}
+					if (atom.getTerm(2).toString().contains("s")) {
+						dotAllMode = true;
+					}
 				}
 				Term p1 = atom.getTerm(0);
 				Term p2 = atom.getTerm(1);
 				
 				String column = getSQLString(p1, index, false);
 				String pattern = getSQLString(p2, index, false);
-				return sqladapter.sqlRegex(column, pattern, caseinSensitive);
+				return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 			} else {
 				throw new RuntimeException("The builtin function "
 						+ functionSymbol.toString() + " is not supported yet!");
@@ -1293,6 +1315,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_NOT_NULL_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.IS_TRUE)) {
 			operator = IS_TRUE_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
+			operator = LIKE_OPERATOR;
 		} else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}

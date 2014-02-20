@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
@@ -163,25 +175,25 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ "ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE)";
 
 	public static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VAL VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
+			+ "\"URI\" INTEGER  NOT NULL, " + "VAL VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VALUE BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VAL TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VALUE BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+			+ "\"URI\" INTEGER NOT NULL, " + "VAL BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 
 /**
@@ -207,19 +219,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)";
 
 	public static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
-			+ " (URI, VALUE, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
+			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
 	public static final String attribute_table_string_insert = "INSERT INTO " + attribute_table_string
-			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table_integer
-			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table_decimal
-			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_double_insert = "INSERT INTO " + attribute_table_double
-			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table_datetime
-			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean
-			+ " (URI, VALUE, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 
 /**
  *  Indexes
@@ -278,19 +290,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ " (IDX)";
 
 	public static final String indexattribute_literal3 = "CREATE INDEX " + attribute_literal_index + "3" + " ON " + attribute_table_literal
-			+ " (VALUE)";
+			+ " (VAL)";
 	public static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table_string
-			+ " (VALUE)";
+			+ " (VAL)";
 	public static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table_integer
-			+ " (VALUE)";
+			+ " (VAL)";
 	public static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table_decimal
-			+ " (VALUE)";
+			+ " (VAL)";
 	public static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table_double
-			+ " (VALUE)";
+			+ " (VAL)";
 	public static final String indexattribute_datetime3 = "CREATE INDEX " + attribute_datetime_index + "3" + " ON "
-			+ attribute_table_datetime + " (VALUE)";
+			+ attribute_table_datetime + " (VAL)";
 	public static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table_boolean
-			+ " (VALUE)";
+			+ " (VAL)";
 
 /**
  *  DROP indexes	
@@ -347,15 +359,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String select_mapping_role_inverse = "SELECT \"URI2\" as X, \"URI1\" as Y FROM " + role_table;
 
-	public static final String select_mapping_attribute_literal = "SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM "
+	public static final String select_mapping_attribute_literal = "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM "
 			+ attribute_table_literal;
 
-	public static final String select_mapping_attribute_string = "SELECT \"URI\" as X, VALUE as Y FROM " + attribute_table_string;
-	public static final String select_mapping_attribute_integer = "SELECT \"URI\" as X, VALUE as Y FROM " + attribute_table_integer;
-	public static final String select_mapping_attribute_decimal = "SELECT \"URI\" as X, VALUE as Y FROM " + attribute_table_decimal;
-	public static final String select_mapping_attribute_double = "SELECT \"URI\" as X, VALUE as Y FROM " + attribute_table_double;
-	public static final String select_mapping_attribute_datetime = "SELECT \"URI\" as X, VALUE as Y FROM " + attribute_table_datetime;
-	public static final String select_mapping_attribute_boolean = "SELECT \"URI\" as X, VALUE as Y FROM " + attribute_table_boolean;
+	public static final String select_mapping_attribute_string = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_string;
+	public static final String select_mapping_attribute_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_integer;
+	public static final String select_mapping_attribute_decimal = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_decimal;
+	public static final String select_mapping_attribute_double = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_double;
+	public static final String select_mapping_attribute_datetime = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_datetime;
+	public static final String select_mapping_attribute_boolean = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_boolean;
 
 	public static final String whereSingleCondition = "IDX = %d";
 

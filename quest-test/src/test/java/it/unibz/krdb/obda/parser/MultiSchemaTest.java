@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.parser;
+
+/*
+ * #%L
+ * ontop-test
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -20,21 +32,11 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
 
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -82,7 +84,7 @@ public class MultiSchemaTest extends TestCase {
 	
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
@@ -150,6 +152,23 @@ public class MultiSchemaTest extends TestCase {
 		runTests(query);
 	}
 	
+	/**
+	 * Test use of three aliases to same table, and a reference to the second
+	 * @throws Exception
+	 */
+	public void testMultiSchemaAlias2() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :View2}";
+		runTests(query);
+	}
+	
+	/**
+	 * Test alias together with wrong case for table
+	 * @throws Exception
+	 */
+	public void testMultiSchemaCapitalAlias() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Something}";
+		runTests(query);
+	}
 	
 	/**
 	 * Test use of views

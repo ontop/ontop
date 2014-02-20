@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.core;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -104,11 +116,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private Map<Integer, String> uriMap = null;;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
-	protected int maxPoolSize = 10;
+	protected int maxPoolSize = 20;
 	protected int startPoolSize = 2;
 	protected boolean removeAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
-	protected boolean keepAlive = false;
+	protected boolean keepAlive = true;
 
 	/***
 	 * Internal components
@@ -215,7 +227,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/*
 	 * The following are caches to queries that Quest has seen in the past. They
-	 * are used by the statementts
+	 * are used by the statements
 	 */
 
 	Map<String, String> querycache = new ConcurrentHashMap<String, String>();
@@ -265,7 +277,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 *            . The TBox must not be null, even if its empty. At least, the
 	 *            TBox must define all the vocabulary of the system.
 	 * @param mappings
-	 *            . The mappings of the system. The vocabuarly of the mappings
+	 *            . The mappings of the system. The vocabulary of the mappings
 	 *            must be subset or equal to the vocabulary of the ontology.
 	 * @param config
 	 *            . The configuration parameters for quest. See
@@ -682,13 +694,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				} else {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
-					MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(sourceId));
+					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
 					// This call should be used if the ParsedMappings 
 					// are reused for the parsing below
 					mParser.addViewDefs(metadata);
 				}
 			}
+			
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
@@ -730,9 +743,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
-			//MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
+//			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
-			unfoldingProgram = analyzer.constructDatalogProgram();
+ 			unfoldingProgram = analyzer.constructDatalogProgram();
 
 			/***
 			 * T-Mappings and Fact mappings

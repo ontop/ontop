@@ -1,5 +1,25 @@
 package it.unibz.krdb.obda.reformulation.owlapi3;
 
+/*
+ * #%L
+ * ontop-quest-owlapi3
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ClassAssertion;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataProperty;
@@ -20,6 +40,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Liter
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import junit.framework.TestCase;
 
@@ -39,7 +60,7 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 public class InconsistencyCheckingTest extends TestCase{
 
-	private OWLReasoner reasoner;
+	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
@@ -78,14 +99,14 @@ public class InconsistencyCheckingTest extends TestCase{
 
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
 		questOWLFactory.setPreferenceHolder(p);
-		reasoner = questOWLFactory.createReasoner(ontology);
+		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
 	}
 	
 	@Test
 	public void testInitialConsistency() {
 		//initially the ontology is consistent
 		startReasoner();
-		assertTrue(reasoner.isConsistent());
+		assertTrue(reasoner.isQuestConsistent());
 	}
 	
 	@Test
@@ -98,7 +119,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -113,7 +134,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -128,7 +149,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -143,7 +164,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -158,7 +179,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 	} 

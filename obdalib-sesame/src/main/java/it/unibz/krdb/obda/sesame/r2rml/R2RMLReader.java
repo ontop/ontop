@@ -1,27 +1,39 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.sesame.r2rml;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-
-import org.openrdf.model.Graph;
-
+/*
+ * #%L
+ * ontop-obdalib-sesame
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+/**
+ * @author timea bagosi
+ * Class responsible to construct an OBDA model from an R2RML mapping file or graph.
+ */
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+
+import org.openrdf.model.Graph;
 
 public class R2RMLReader {
 	
@@ -59,6 +71,11 @@ public class R2RMLReader {
 		this.obdaModel = model;
 	}
 		
+	/**
+	 * the method that gives the obda model based on the given graph
+	 * @param sourceUri - the uri of the datasource of the model
+	 * @return the read obda model
+	 */
 	public OBDAModel readModel(URI sourceUri){
 		try {
 			//add to the model the mappings retrieved from the manager
@@ -69,6 +86,10 @@ public class R2RMLReader {
 		return obdaModel;
 	}
 	
+	/**
+	 * method to read the mappings from the graph
+	 * @return list of obdaMappingAxioms
+	 */
 	public ArrayList<OBDAMappingAxiom> readMappings(){
 		return manager.getMappings(graph);
 	}

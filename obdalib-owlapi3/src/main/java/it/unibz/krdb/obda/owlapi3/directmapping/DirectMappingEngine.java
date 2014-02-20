@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlapi3.directmapping;
+
+/*
+ * #%L
+ * ontop-obdalib-owlapi3
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.CQIE;
@@ -60,7 +72,8 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 public class DirectMappingEngine {
 	
-	private JDBCConnectionManager conMan;
+	private JDBCConnectionManager conMan = null;
+	private DBMetadata metadata = null;
 	private String baseuri;
 	private int mapidx = 1;
 	
@@ -70,6 +83,11 @@ public class DirectMappingEngine {
 		mapidx = mapnr + 1;
 	}
 	
+	public DirectMappingEngine(DBMetadata metadata, String baseUri, int mapnr){
+		this.metadata = metadata;
+		baseuri = baseUri;
+		mapidx = mapnr + 1;
+	}
 	
 	
 	/*
@@ -109,9 +127,13 @@ public class DirectMappingEngine {
 		}
 		
 		//For each data source, enrich into the ontology
-		for(int i=0;i<sourcelist.size();i++){
-			oe.enrichOntology(conMan.getMetaData(sourcelist.get(i)), ontology);
-		}
+		if (metadata == null) {
+			for (int i = 0; i < sourcelist.size(); i++) {
+				oe.enrichOntology(conMan.getMetaData(sourcelist.get(i)),
+						ontology);
+			}
+		} else
+			oe.enrichOntology(this.metadata, ontology);
 	}
 	
 	
@@ -228,13 +250,23 @@ public class DirectMappingEngine {
 	 * @param table : the datadefinition from which mappings are extraced
 	 * @param source : datasource that the table may refer to, such as foreign keys
 	 * 
-	 *  @return a new OBDAMappingAxiom 
+	 *  @return a List of OBDAMappingAxiom-s
 	 * @throws Exception 
 	 */
 	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
 		return getMapping(table,conMan.getMetaData(source),baseuri);
 	}
 	
+
+	/***
+	 * generate a mapping axiom from a table of a database
+	 * 
+	 * @param table : the datadefinition from which mappings are extraced
+	 * @param metadata : the metadata of the database required
+	 * @param baseUri : the base uri needed for direct mapping axiom
+	 * 
+	 *  @return a List of OBDAMappingAxiom-s
+	 */
 	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 		DirectMappingAxiom dma=null;

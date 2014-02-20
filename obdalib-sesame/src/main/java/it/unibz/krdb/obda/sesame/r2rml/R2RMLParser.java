@@ -1,20 +1,36 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.sesame.r2rml;
 
+/*
+ * #%L
+ * ontop-obdalib-sesame
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+/**
+ * @author timea bagosi
+ * The R2RML parser class that breaks down the responsibility of parsing by case
+ */
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -29,7 +45,6 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -50,6 +65,9 @@ public class R2RMLParser {
 	String subjectString = "";
 	String objectString = "";
 
+	/**
+	 * empty constructor 
+	 */
 	public R2RMLParser() {
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
@@ -57,8 +75,10 @@ public class R2RMLParser {
 		fac = OBDADataFactoryImpl.getInstance();
 	}
 	
-	/*
+	/**
 	 * method to get the Resource nodes (TripleMaps) from the given Graph
+	 * @param myGraph - the Graph to process
+	 * @return Set<Resource> - the Resource nodes of triples map (root node)
 	 */
 	public Set<Resource> getMappingNodes(Graph myGraph)
 	{
@@ -75,8 +95,11 @@ public class R2RMLParser {
 	}
 		
 
-	/*
-	 * method to return an sql string from a given Resource node in the Graph
+	/**
+	 * Method to return an sql string from a given Resource node in the Graph
+	 * @param myGraph - the Graph of mappings
+	 * @param subj - the Resource node to process
+	 * @return String - sql query parsed
 	 */
 	public String getSQLQuery(Graph myGraph, Resource subj) {
 		// System.out.println(subj.toString());
@@ -130,6 +153,12 @@ public class R2RMLParser {
 		return "";
 	}
 	
+	/**
+	 * Get sql query string from sqlquery definition
+	 * @param myGraph - the Graph of mappings
+	 * @param object - the Resource node containing the actual sql query 
+	 * @return String of sql query
+	 */
 	private String getSQLQueryString(Graph myGraph, Resource object) {
 		
 		// search for sqlQuery declarations
@@ -145,6 +174,12 @@ public class R2RMLParser {
 		return "";
 	}
 	
+	/**
+	 * Get sql table name from node with tableName definition
+	 * @param myGraph - the Graph of mappings
+	 * @param object - the Resource node containing the table name
+	 * @return String of table name
+	 */
 	private String getSQLTableName(Graph myGraph, Resource object){
 		
 		//look for tableName declaration
@@ -157,6 +192,12 @@ public class R2RMLParser {
 		return "";
 	}
 
+	/**
+	 * get class predicates after processing one triples map, 
+	 * called by manager iteratively 
+	 * to introduce class predicates
+	 * @return List of class predicates
+	 */
 	public List<Predicate> getClassPredicates() {
 		 List<Predicate> classes = new ArrayList<Predicate>();
 		 for (Predicate p: classPredicates)
@@ -165,6 +206,12 @@ public class R2RMLParser {
 		 return classes;
 	}
 
+	/**
+	 * List to process predicate objects
+	 * @param myGraph - the Graph of mappings
+	 * @param subj - the Resource node to process
+	 * @return set of Resource nodes that are predicate objects 
+	 */
 	public Set<Resource> getPredicateObjects(Graph myGraph, Resource subj) {
 		// process PREDICATEOBJECTs
 		Set<Resource> predobjs = new HashSet<Resource>();
@@ -176,11 +223,26 @@ public class R2RMLParser {
 		return predobjs;
 	}
 	
+	/**
+	 * get the subject atom as a term
+	 * @param myGraph - the Graph of mappings
+	 * @param subj - the Resource node to process
+	 * @return the term
+	 * @throws Exception
+	 */
 	public Term getSubjectAtom(Graph myGraph, Resource subj)
 			throws Exception {
 		return getSubjectAtom(myGraph, subj, "");
 	}
 	
+	/**
+	 * get subject atom of join condition mapping
+	 * @param myGraph - the Graph of mappings
+	 * @param subj - the Resource node to process
+	 * @param joinCond - CHILD_ or PARENT_ prefix
+	 * @return the subject Term
+	 * @throws Exception
+	 */
 	public Term getSubjectAtom(Graph myGraph, Resource subj, String joinCond)
 			throws Exception {
 		Term subjectAtom = null;
@@ -244,6 +306,13 @@ public class R2RMLParser {
 
 	}
 
+	/**
+	 * Get the predicates present in the body
+	 * @param myGraph - the Graph of mappings
+	 * @param object - the Resource node to process
+	 * @return the list of predicates
+	 * @throws Exception
+	 */
 	public List<Predicate> getBodyPredicates(Graph myGraph, Resource object)
 			throws Exception {
 
@@ -266,6 +335,13 @@ public class R2RMLParser {
 		return bodyPredicates;
 	}
 	
+	/**
+	 * get the uri predicates in the body
+	 * @param myGraph - the Graph of mappings
+	 * @param object - the Resource node to process
+	 * @return list of function, the predicate atoms
+	 * @throws Exception
+	 */
 	public List<Function> getBodyURIPredicates(Graph myGraph, Resource object)
 			throws Exception {
 		List<Function> predicateAtoms = new ArrayList<Function>();
@@ -314,11 +390,26 @@ public class R2RMLParser {
 
 	}
 	
+	/**
+	 * get the object atom
+	 * @param myGraph - the graph of mappings
+	 * @param objectt - the Resource node to process
+	 * @return the object term
+	 * @throws Exception
+	 */
 	public Term getObjectAtom(Graph myGraph, Resource objectt)
 			throws Exception {
 		return getObjectAtom(myGraph, objectt, "");
 	}
 	
+	/**
+	 * get the object atom of a join condition triples map
+	 * @param myGraph - the graph of mappings
+	 * @param objectt - the Resource node to process
+	 * @param joinCond - the string CHILD_ or PARENT_
+	 * @return the object atom as a term
+	 * @throws Exception
+	 */
 	public Term getObjectAtom(Graph myGraph, Resource objectt, String joinCond)
 			throws Exception {
 		Term objectAtom = null;
@@ -413,6 +504,11 @@ public class R2RMLParser {
 	}
 	
 	
+	/**
+	 * get constant object of an object
+	 * @param objectString - the string of object
+	 * @return the object term
+	 */
 	private Term getConstantObject(String objectString) {
 		if (objectString.startsWith("http:"))
 			return getURIFunction(objectString);
@@ -425,6 +521,11 @@ public class R2RMLParser {
 		}
 	}
 
+	/**
+	 * get a term object from a string
+	 * @param string - representing the object
+	 * @return the Term explicitly typed 
+	 */
 	private Term getExplicitTypedObject(String string) {
 		
 		Term typedObject = null;
@@ -445,6 +546,12 @@ public class R2RMLParser {
 		return typedObject;
 	}
 
+	/**
+	 * Get the list of triples maps that contain joins
+	 * @param myGraph - the graph of mappings
+	 * @param termMap - the Resource node of term maps
+	 * @return the lis of Resource nodes containing joins
+	 */
 	public List<Resource> getJoinNodes(Graph myGraph, Resource termMap)
 	{
 		List<Resource> joinPredObjNodes = new ArrayList<Resource>();
@@ -470,6 +577,12 @@ public class R2RMLParser {
 		return joinPredObjNodes;
 	}
 
+	/**
+	 * get a typed atom of a specific type
+	 * @param type - iri, blanknode or literal
+	 * @param string - the atom as string
+	 * @return the contructed Function atom
+	 */
 	private Function getTermTypeAtom(String type, String string) {
 		
 		if (type.contentEquals(R2RMLVocabulary.iri.stringValue())) {
@@ -492,7 +605,6 @@ public class R2RMLParser {
 	}
 	
 	private Function getURIFunction(String string) {
-		
 		return getTypedFunction(string, 1);
 	}
 
@@ -500,6 +612,13 @@ public class R2RMLParser {
 		return getTypedFunction(parsedString, type, "");
 	}
 	
+	/**
+	 * get a typed atom 
+	 * @param parsedString - the content of atom
+	 * @param type - 0=constant uri, 1=uri or iri, 2=bnode, 3=literal
+	 * @param joinCond - CHILD_ or PARENT_ prefix for variables
+	 * @return the constructed Function atom
+	 */
 	public Function getTypedFunction(String parsedString, int type, String joinCond) {
 
 		List<Term> terms = new ArrayList<Term>();
@@ -570,6 +689,12 @@ public class R2RMLParser {
 
 	}
 
+	/**
+	 * method that trims a string of all its double apostrophes
+	 * from beginning and end
+	 * @param string - to be trimmed
+	 * @return the string without any quotes
+	 */
 	private String trim(String string) {
 		
 		while (string.startsWith("\"") && string.endsWith("\"")) {
@@ -579,6 +704,12 @@ public class R2RMLParser {
 		return string;
 	}
 	
+	/**
+	 * method to trim a string of its leading or trailing quotes
+	 * but one
+	 * @param string - to be trimmed
+	 * @return the string left with one leading and trailing quote
+	 */
 	private String trimTo1(String string) {
 		
 		while (string.startsWith("\"\"") && string.endsWith("\"\"")) {
@@ -588,6 +719,12 @@ public class R2RMLParser {
 		return string;
 	}
 
+	/**
+	 * method to find the triplesmap node referenced in a parent join condition
+	 * @param myGraph - the graph of mappings
+	 * @param predobjNode - the pred obj node containing the join condition
+	 * @return the Resource node refferred to in the condition
+	 */
 	public Resource getReferencedTripleMap(Graph myGraph, Resource predobjNode) {
 	
 		// process OBJECTMAP
@@ -604,6 +741,12 @@ public class R2RMLParser {
 		return null;
 	}
 
+	/**
+	 * method to get the child column in a join condition
+	 * @param myGraph - the graph of mappings
+	 * @param predobjNode - the pred obj node containing the join condition
+	 * @return the child column condition as a string
+	 */
 	public String getChildColumn(Graph myGraph, Resource predobjNode) {
 		
 		// process OBJECTMAP
@@ -626,6 +769,12 @@ public class R2RMLParser {
 		return null;
 	}
 
+	/**
+	 * method to get the parent column in a join condition
+	 * @param myGraph - the graph of mappings
+	 * @param predobjNode - the pred obj node containing the join condition
+	 * @return the parent column condition as a string
+	 */
 	public String getParentColumn(Graph myGraph, Resource predobjNode) {
 		// process OBJECTMAP
 		iterator = myGraph.match(predobjNode, R2RMLVocabulary.objectMap, null);

@@ -11,6 +11,6 @@ driverClass	      org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	M:0
-target      :{id1} a :A ; :Q :{id3} ; :V {table3.value} .
-source      SELECT table1.id as id1, table3.id as id3, table3.value FROM table1, table2, table3
+target      :{id1} a :A ; :Q :{id3} ; :V {table3.val} .
+source      SELECT "table1"."id" as "id1", "table3"."id" as "id3", "table3"."val" FROM "table1", "table2", "table3"
 ]]

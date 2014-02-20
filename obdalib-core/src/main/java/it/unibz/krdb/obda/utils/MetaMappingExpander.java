@@ -1,5 +1,25 @@
 package it.unibz.krdb.obda.utils;
 
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+ 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
@@ -11,22 +31,14 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.api.AndOperator;
-import it.unibz.krdb.sql.api.ComparisonPredicate;
-import it.unibz.krdb.sql.api.DerivedColumn;
-import it.unibz.krdb.sql.api.IValueExpression;
-import it.unibz.krdb.sql.api.Projection;
-import it.unibz.krdb.sql.api.QueryTree;
-import it.unibz.krdb.sql.api.RelationalAlgebra;
-import it.unibz.krdb.sql.api.Selection;
-import it.unibz.krdb.sql.api.StringLiteral;
+import it.unibz.krdb.sql.api.ProjectionJSQL;
+import it.unibz.krdb.sql.api.SelectionJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -35,6 +47,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,18 +133,24 @@ public class MetaMappingExpander {
 				if (varsInTemplate.isEmpty()){
 					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 				}
-			
 				
 				// Construct the SQL query tree from the source query
-				QueryTree sourceQueryTree = translator.contructQueryTree(sourceQuery.toString());
+				VisitedQuery sourceQueryParsed = translator.constructParser(sourceQuery.toString());
 				
-				Projection distinctParamsProjection = new Projection();
+				ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
 				
-				distinctParamsProjection.setType(Projection.SELECT_DISTINCT);
+				distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
 				
-				ArrayList<DerivedColumn> columnList = sourceQueryTree.getProjection().getColumnList();
 				
-				List<DerivedColumn> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
+				ArrayList<SelectExpressionItem> columnList = null;
+				try {
+					columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
+				} catch (JSQLParserException e2) {
+					
+					e2.printStackTrace();
+				}
+				
+				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 				
 				distinctParamsProjection.addAll(columnsForTemplate);
 				
@@ -132,12 +158,19 @@ public class MetaMappingExpander {
 				 * The query for params is almost the same with the original source query, except that
 				 * we only need to distinct project the columns needed for the template expansion 
 				 */
-				RelationalAlgebra ra = sourceQueryTree.value().clone();
-				ra.setProjection(distinctParamsProjection);
 				
-				QueryTree distinctQueryTree = new QueryTree(ra, sourceQueryTree.left(), sourceQueryTree.right());
+				VisitedQuery distinctParsedQuery = null;
+				try {
+					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement());
+					
+				} catch (JSQLParserException e1) {
+					
+					e1.printStackTrace();
+				}
+
+				distinctParsedQuery.setProjection(distinctParamsProjection);
 				
-				String distinctParamsSQL = distinctQueryTree.toString();
+				String distinctParamsSQL = distinctParsedQuery.toString();
 				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
 				
 				
@@ -157,7 +190,7 @@ public class MetaMappingExpander {
 					e.printStackTrace();
 				}
 				
-				List<DerivedColumn> columnsForValues = new ArrayList<DerivedColumn>(columnList);
+				List<SelectExpressionItem>  columnsForValues = new ArrayList<SelectExpressionItem>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
 				
 				String id = mapping.getId();
@@ -165,7 +198,7 @@ public class MetaMappingExpander {
 				for(List<String> params : paramsForClassTemplate) {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
-							bodyAtom, sourceQueryTree, columnsForTemplate,
+							bodyAtom, sourceQueryParsed, columnsForTemplate,
 							columnsForValues, params, arity);
 										
 					expandedMappings.add(newMapping);	
@@ -208,16 +241,16 @@ public class MetaMappingExpander {
 	 * 
 	 * @param targetQuery
 	 * @param bodyAtom
-	 * @param sourceQueryTree
+	 * @param sourceParsedQuery
 	 * @param columnsForTemplate
 	 * @param columnsForValues
 	 * @param params
 	 * @return
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
-			Function bodyAtom, QueryTree sourceQueryTree,
-			List<DerivedColumn> columnsForTemplate,
-			List<DerivedColumn> columnsForValues,
+			Function bodyAtom, VisitedQuery sourceParsedQuery,
+			List<SelectExpressionItem> columnsForTemplate,
+			List<SelectExpressionItem> columnsForValues,
 			List<String> params, int arity) {
 		
 		/*
@@ -234,52 +267,70 @@ public class MetaMappingExpander {
 		/*
 		 * new Selection 
 		 */
-		Selection selection = sourceQueryTree.getSelection();
-		Selection newSelection;
+		SelectionJSQL selection = null;
+		try {
+			selection = sourceParsedQuery.getSelection();
+			
+		} catch (JSQLParserException e1) {
+			
+			e1.printStackTrace();
+		}
+		SelectionJSQL newSelection;
+		
 		if(selection != null){
-			newSelection = selection.clone();
+			newSelection = selection;
 		} else {
-			newSelection = new Selection();
+			newSelection = new SelectionJSQL();
 		}
 		
-		try {
-			int j = 0;
-			
-			for(DerivedColumn column : columnsForTemplate){
-				IValueExpression columnRefExpression = column.getValueExpression();
+			int j=0;
+			for(SelectExpressionItem column : columnsForTemplate){
 				
-				StringLiteral clsStringLiteral = new StringLiteral(params.get(j));
-				//if(j != 0){
-				//if (newSelection.conditionSize() > 0){
-				if(newSelection.getRawConditions().size() > 0){
-					newSelection.addOperator(new AndOperator());
+				Expression columnRefExpression = column.getExpression();
+				
+				StringValue clsStringValue = new StringValue("'"+params.get(j)+"'");
+				
+				//we are considering only equivalences
+				BinaryExpression condition = new EqualsTo();
+				condition.setLeftExpression(columnRefExpression);
+				condition.setRightExpression(clsStringValue);
+				
+
+				if(newSelection.getRawConditions()!=null){
+					BinaryExpression andOperator = new AndExpression(newSelection.getRawConditions(), condition);
+					newSelection.addCondition(andOperator);
 				}
-				ComparisonPredicate condition = new ComparisonPredicate(columnRefExpression, clsStringLiteral, ComparisonPredicate.Operator.EQ);
+				else
 				newSelection.addCondition(condition);
-				j++;
-				
+				j++;	
 			}
 			
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+			
 		
 		/*
 		 * new Projection
 		 */
-		Projection newProjection = new Projection();
+		ProjectionJSQL newProjection = new ProjectionJSQL();
 		newProjection.addAll(columnsForValues);
 		
 		/*
-		 * new algebra for the source query
+		 * new statement for the source query
+		 * we create a new statement with the changed projection and selection
 		 */
-		RelationalAlgebra ra = sourceQueryTree.value().clone();
-		ra.setSelection(newSelection);
-		ra.setProjection(newProjection);
+		
+		VisitedQuery newSourceParsedQuery = null;
+		try {
+			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement());
+			newSourceParsedQuery.setProjection(newProjection);
+			newSourceParsedQuery.setSelection(newSelection);
+			
+		} catch (JSQLParserException e) {
+			
+			e.printStackTrace();
+		}
 		
 		
-		QueryTree newSourceQueryTree = new QueryTree(ra, sourceQueryTree.left(), sourceQueryTree.right());
-		String newSourceQuerySQL = newSourceQueryTree.toString();
+		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
 		OBDARDBMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, newTargetQuery);
@@ -293,15 +344,19 @@ public class MetaMappingExpander {
 	 * @param columnList
 	 * @return
 	 */
-	private List<DerivedColumn> getColumnsForTemplate(List<Variable> varsInTemplate,
-			ArrayList<DerivedColumn> columnList) {
-		List<DerivedColumn> columnsForTemplate = new ArrayList<DerivedColumn>();
+	private List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
+			ArrayList<SelectExpressionItem> columnList) {
+		List<SelectExpressionItem> columnsForTemplate = new ArrayList<SelectExpressionItem>();
 
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
-			for (DerivedColumn column : columnList) {
-				if ((column.hasAlias() && column.getAlias().equals(var.getName())) //
-						|| (!column.hasAlias() && column.getName().equals(var.getName()))) {
+			for (SelectExpressionItem column : columnList) {
+				String expression=column.getExpression().toString();
+//				if(expression.contains("\"")) //remove the quotes when present to compare with var
+//					expression= expression.substring(1, expression.length()-1);
+									
+				if ((column.getAlias()==null && expression.equals(var.getName())) ||
+						(column.getAlias()!=null && column.getAlias().equals(var.getName()))) {
 					columnsForTemplate.add(column);
 					found = true;
 					break;
@@ -399,7 +454,7 @@ public class MetaMappingExpander {
 		} else if (arity == 2){
 			uriTermForPredicate = (Function) atom.getTerm(1);	
 		} else {
-			throw new IllegalArgumentException("The parameter airty should be 1 or 2");
+			throw new IllegalArgumentException("The parameter arity should be 1 or 2");
 		}
 		return uriTermForPredicate;
 	}

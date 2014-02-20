@@ -26,7 +26,7 @@ target		:Land-{ALIAS} a :Land .
 source		select COUNTRIES.COUNTRY_NAME ALIAS FROM HR.COUNTRIES
 
 mappingId	LandQuote
-target		:LandQuote-{COUNTRY_NAME} a :LandQuote . 
+target		:LandQuote-{countryNameAlias} a :LandQuote . 
 source		select "COUNTRIES".COUNTRY_NAME countryNameAlias FROM HR.COUNTRIES
 
 mappingId	CountryEgypt
@@ -47,10 +47,20 @@ source		select to_char(REGION_ID) as RID FROM HR.REGIONS
 
 mappingId	NewCountry
 target		:NewCountry-{NAME} a :NewCountry . 
-source		select t1.owner NAME from all_tables t1, all_tables t2, ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = t2.owner and t1.owner = ALL_VIEWS.OWNER
+source		select t1.owner NAME from "SYS"."ALL_TABLES" t1, SYS.ALL_TABLES t2, SYS.ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = t2.owner and t1.owner = ALL_VIEWS.OWNER
 
 mappingId	View
 target		:View-{name} a :View . 
-source		select t1.table_name name from all_tables t1, all_tables t2, all_views where t1.owner = all_views.owner
+source		select t1.table_name NAME from SYS.ALL_TABLES t1, sys.all_tables t2, SYS.ALL_VIEWS where t1.owner = all_views.owner
+
+mappingId	TwoViews
+target		:View2-{NAME}-{name3} a :View2 . 
+source		select t2.table_name NAME, t3.table_name name3 from SYS.ALL_TABLES t1, sys.all_tables t2, sys.all_tables t3, SYS.ALL_VIEWS where t2.owner = all_views.owner and t3.owner = all_views.owner
+
+mappingId	Something
+target		:Something-{NAME} a :Something . 
+source		select AT.table_name as NAME from sys.all_tables AT
+
+
 ]]
 

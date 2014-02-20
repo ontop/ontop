@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
+
+/*
+ * #%L
+ * ontop-quest-owlapi3
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -20,7 +32,6 @@ import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
-import it.unibz.krdb.obda.ontology.impl.DisjointClassAxiomImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -134,6 +145,8 @@ public class QuestOWL extends OWLReasonerBase {
 	private boolean prepared = false;
 
 	private boolean questready = false;
+	
+	private Axiom inconsistent = null;
 
 	// / holds the error that quest had when initializing
 	private String errorMessage = "";
@@ -485,7 +498,16 @@ public class QuestOWL extends OWLReasonerBase {
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+	public boolean isConsistent(){
+		return true;
+	}
+	
+	//info to return which axiom was inconsistent during the check
+	public Axiom getInconsistentAxiom() {
+		return inconsistent;
+	}
+	
+	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
 		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
 	
@@ -521,7 +543,12 @@ public class QuestOWL extends OWLReasonerBase {
 					String value = trs.getConstant(0).getValue();
 					boolean b = Boolean.parseBoolean(value);
 					isConsistent = !b;
+					if (!isConsistent) {
+						inconsistent = dda;
+					}
+					trs.close();
 				}
+				
 			} catch (OBDAException e) {
 				e.printStackTrace();
 			}
@@ -555,6 +582,10 @@ public class QuestOWL extends OWLReasonerBase {
 					String value = trs.getConstant(0).getValue();
 					boolean b = Boolean.parseBoolean(value);
 					isConsistent = !b;
+					if (!isConsistent) {
+						inconsistent = pfa;
+					}
+					trs.close();
 				}
 			} catch (OBDAException e) {
 				e.printStackTrace();

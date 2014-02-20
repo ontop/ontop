@@ -1,12 +1,24 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.utils;
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
@@ -168,4 +180,23 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
+
+	public void testAnalysis_21() throws Exception {
+		runAnalysis(
+				"select id, first_name, last_name from Student where last_name like '%lli'",
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
+	}
+//	public void testAnalysis_17() throws Exception {
+//		runAnalysis(
+	//RENAME STUDENT.ID TO STUDENT.STUDENT_ID SO THE COLUMN NAMES ARE THE SAME
+//				"select Student.student_id as StudentId from Student JOIN Enrollment USING (student_id) ",
+//				":S_{StudentId} a :Student .");
+//	}
+	
+	public void testAnalysis_18() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where year> 2010 ",
+				":S_{StudentId} a :Student .");
+	}
+
 }
