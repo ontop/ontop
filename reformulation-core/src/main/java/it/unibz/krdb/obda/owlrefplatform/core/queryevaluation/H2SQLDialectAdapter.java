@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,4 +41,21 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
+	
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		// embedded options: 
+		
+		String pflags = "(?";
+		if (multiLine)
+			pflags += "m"; // equivalent of Pattern.MULTILINE
+		if (dotAllMode)
+			pflags += "s"; // equivalent of Pattern.DOTALL
+		pflags +=")";
+		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
+	}
+	
 }

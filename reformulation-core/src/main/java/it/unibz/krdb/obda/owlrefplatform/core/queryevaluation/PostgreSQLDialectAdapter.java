@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,5 +53,26 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 			throw new RuntimeException("Unsupported SQL type");
 		}
 		return "CAST(" + value + " AS " + strType + ")";
+	}
+	
+	/**
+	 * Based on documentation of postgres 9.1 at 
+	 * http://www.postgresql.org/docs/9.3/static/functions-matching.html
+	 */
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		//An ARE can begin with embedded options: a sequence (?n)  specifies options affecting the rest of the RE. 
+		//n is newline-sensitive matching
+		String flags = "";
+		if (multiLine)
+			flags = "(?w)"; //partial newline-sensitive matching
+		else
+		if(dotAllMode)
+			flags = "(?p)"; //inverse partial newline-sensitive matching
+		
+		return columnname + " ~" + ((caseinSensitive)? "* " : " ") + "'"+ ((multiLine && dotAllMode)? "(?n)" : flags) + pattern + "'";
 	}
 }

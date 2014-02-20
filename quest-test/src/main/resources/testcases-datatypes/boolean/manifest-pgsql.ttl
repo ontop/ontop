@@ -15,7 +15,7 @@
 :boolean rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BOOLEAN" ;
     obdat:approval obdat:Approved ;
-    obdat:approvedBy <-ontop- Team> ;
+    obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <boolean.rq> ] ;
     mf:result <boolean.ttl> ;

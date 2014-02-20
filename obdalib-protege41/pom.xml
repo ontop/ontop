@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.10.1-SNAPSHOT</version>
+		<version>1.11.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -60,11 +60,6 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-owlapi3</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -78,11 +73,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-reformulation-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-sesame</artifactId>

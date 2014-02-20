@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,11 +116,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private Map<Integer, String> uriMap = null;;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
-	protected int maxPoolSize = 10;
+	protected int maxPoolSize = 20;
 	protected int startPoolSize = 2;
 	protected boolean removeAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
-	protected boolean keepAlive = false;
+	protected boolean keepAlive = true;
 
 	/***
 	 * Internal components

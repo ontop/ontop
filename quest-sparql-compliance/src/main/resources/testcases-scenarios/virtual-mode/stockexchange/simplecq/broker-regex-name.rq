@@ -1,0 +1,1 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>SELECT DISTINCT ?x WHERE { 	?x a :StockBroker. 	?x :firstName ?name. 	FILTER regex (?name, 'xxJ[ano]*')}

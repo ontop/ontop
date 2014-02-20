@@ -10,7 +10,7 @@
 		<dependencySet>
 			<outputDirectory></outputDirectory>
 			<excludes>
-				<exclude>inf.unibz.it.obda*</exclude>
+				<exclude>it.unibz.inf.ontop*</exclude>
 				<exclude>antlr*</exclude>
 				<exclude>log4j*</exclude>
 				<exclude>org.log4j*</exclude>
