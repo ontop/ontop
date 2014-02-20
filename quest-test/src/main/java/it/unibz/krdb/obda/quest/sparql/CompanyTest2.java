@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class CompanyTest extends TestCase {
+public class CompanyTest2 extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -164,13 +164,11 @@ public class CompanyTest extends TestCase {
 		
 		String queryEx =  "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
 				+ "{  ?v ?w  ?x } ";
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT ?y?z WHERE"
-				+ "{ ?c a :Company . Filter (?c=:A) OPTIONAL  {  ?x :companyName ?c .  ?x :depName ?y .  FILTER (?y = :HR) OPTIONAL{?z :depId ?x }}}";
-		
-		String query2 = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
-				+ "{ :A a :Company .  OPTIONAL  {  ?x :companyName :A .  ?x :depName :HR .  OPTIONAL{?z :depId ?x }}}";
-		
-		
+//		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
+//				+ "{ :A a :Company .  OPTIONAL  {  ?x :companyName :A .  ?x :depName :HR .  OPTIONAL{?z :depId ?x }}}";
+		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
+				+ "{ ?x a :Company .  OPTIONAL  {?w :companyName ?x .  ?w :depName :HR .  OPTIONAL{?z :depId ?x }}}";	
+			
 		
 		
 		//String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT ?y?z WHERE"
@@ -199,10 +197,8 @@ public class CompanyTest extends TestCase {
 //
 //				}
 			assertTrue(rs2.nextRow());
-			OWLObject ind1 = rs2.getOWLNamedIndividual("y");
 			OWLObject ind2 = rs2.getOWLNamedIndividual("z");
 			
-			assertEquals("<http://it.unibz.krdb/obda/test/company#HR>", ind1.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 			
 			assertFalse(rs2.nextRow());
