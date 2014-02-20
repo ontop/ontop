@@ -21,11 +21,14 @@ package it.unibz.krdb.obda.obda.quest.dag;
  */
 
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -99,457 +102,134 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			GraphImpl graph1= S_InputOWL.createGraph(fileInput);
+			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			Test_TBoxReasonerImplOnGraph graphReasoner = new Test_TBoxReasonerImplOnGraph(reasoner);
 
-			//transform in a dag
-			DAGBuilderImpl transform= new DAGBuilderImpl(graph1);
-			DAGImpl dag2= (DAGImpl) transform.getDAG();
+			
 			log.debug("Input number {}", i+1 );
-			log.info("First graph {}", graph1);
-			log.info("Second dag {}", dag2);
+			log.info("First graph {}", reasoner.getClassGraph());
+			log.info("First graph {}", reasoner.getPropertyGraph());
+			log.info("Second dag {}", reasoner);
 
-			assertTrue(testDescendants(graph1,dag2,false));
-			assertTrue(testDescendants(dag2,graph1,false));
-			assertTrue(testChildren(graph1,dag2,false));
-			assertTrue(testChildren(dag2, graph1,false));
-			assertTrue(testAncestors(graph1,dag2,false));
-			assertTrue(testAncestors(dag2,graph1,false));
-			assertTrue(testParents(graph1,dag2,false));
-			assertTrue(testParents(dag2, graph1,false));
-			assertTrue(checkVertexReduction(graph1, dag2));
-			assertTrue(checkEdgeReduction(graph1, dag2));
-
+			assertTrue(testDescendants(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testDescendants(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testDescendants(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testDescendants(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testChildren(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testChildren(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testChildren(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testChildren(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testAncestors(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testAncestors(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testAncestors(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testAncestors(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testParents(graphReasoner.getClasses(), reasoner.getClasses()));
+			assertTrue(testParents(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testParents(reasoner.getClasses(), graphReasoner.getClasses()));
+			assertTrue(testParents(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(checkVertexReduction(graphReasoner, reasoner));
+			assertTrue(checkEdgeReduction(graphReasoner, reasoner));
 
 		}
 
 	}
-
-	private boolean testDescendants(GraphImpl d1, DAGImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
-		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
-
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-
-					setd1	=reasonerd1.getDescendants(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("descendants {} ", setd1);
-
-					setd2	=reasonerd2.getDescendants(vertex, named);
-
-					log.debug("descendants {} ", setd2);
-
-
-
-				}
-			}
-			else{
-				setd1	=reasonerd1.getDescendants(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("descendants {} ", setd1);
-				setd2	=reasonerd2.getDescendants(vertex, named);
-				log.debug("descendants {} ", setd2);
-
-
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd1.iterator();
-			while (it1.hasNext()) {
-				set1.addAll(it1.next());	
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd2.iterator();
-			while (it2.hasNext()) {
-				set2.addAll(it2.next());	
-			}
-			result=set1.equals(set2);
-
-
-			if(!result)
-				break;
+	
+	private static <T> boolean coincide(Set<Equivalences<T>> setd1, Set<Equivalences<T>> setd2) {
+		Set<T> set2 = new HashSet<T>();
+		Iterator<Equivalences<T>> it1 =setd2.iterator();
+		while (it1.hasNext()) {
+			set2.addAll(it1.next().getMembers());	
 		}
-
-		return result;
-
+		Set<T> set1 = new HashSet<T>();
+		Iterator<Equivalences<T>> it2 =setd1.iterator();
+		while (it2.hasNext()) {
+			set1.addAll(it2.next().getMembers());	
+		}
+		return set2.equals(set1);
+		
 	}
 
-	private boolean testDescendants( DAGImpl d1, GraphImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = null;
-		Set<Set<Description>> setd2 = null;
+	private <T> boolean testDescendants(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					setd1	=reasonerd1.getDescendants(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("descendants {} ", setd1);
-					setd2	=reasonerd2.getDescendants(vertex, named);
-					log.debug("descendants {} ", setd2);
-				}
-			}
-			else{
-				setd1	=reasonerd1.getDescendants(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("descendants {} ", setd1);
-
-
-				setd2	=reasonerd2.getDescendants(vertex, named);
-				log.debug("descendants {} ", setd2);
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd2.iterator();
-			while (it1.hasNext()) {
-				set2.addAll(it1.next());	
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd1.iterator();
-			while (it2.hasNext()) {
-				set1.addAll(it2.next());	
-			}
-			result=set2.equals(set1);
-
-
-
-			if(!result)
-				break;
+		for(Equivalences<T> vertex: d1) {
+			Set<Equivalences<T>> setd1 = d1.getSub(vertex);
+			log.info("vertex {}", vertex);
+			log.debug("descendants {} ", setd1);
+			Set<Equivalences<T>> setd2 = d2.getSub(vertex);
+			log.debug("descendants {} ", setd2);
+			if (!coincide(setd1, setd2))
+				return false;
 		}
-
-		return result;
-
+		return true;
 	}
 
-	private boolean testChildren(GraphImpl d1, DAGImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
-		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
-
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-
-					setd1	=reasonerd1.getDirectChildren(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("children {} ", setd1);
-
-					setd2	=reasonerd2.getDirectChildren(vertex, named);
-					log.debug("children {} ", setd2);
-
-
-				}
-			}
-			else{
-				setd1	=reasonerd1.getDirectChildren(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("children {} ", setd1);
-
-				setd2	=reasonerd2.getDirectChildren(vertex, named);
-				log.debug("children {} ", setd2);
-
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd1.iterator();
-			while (it1.hasNext()) {
-				set1.addAll(it1.next());	
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd2.iterator();
-			while (it2.hasNext()) {
-				set2.addAll(it2.next());	
-			}
-			result=set1.equals(set2);
-
-
-			if(!result)
-				break;
+		
+	private <T> boolean testChildren(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
+		
+		for(Equivalences<T> vertex: d1) {
+			Set<Equivalences<T>> setd1 = d1.getDirectSub(vertex);
+			log.info("vertex {}", vertex);
+			log.debug("children {} ", setd1);
+			Set<Equivalences<T>> setd2 = d2.getDirectSub(vertex);
+			log.debug("children {} ", setd2);
+			if (!coincide(setd1, setd2))
+				return false;
 		}
-
-		return result;
-
+		return true;
 	}
 
-	private boolean testChildren( DAGImpl d1, GraphImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = null;
-		Set<Set<Description>> setd2 = null;
 
-		for(Description vertex: d1.vertexSet()){
-			if(named){
+	private <T> boolean testAncestors(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					setd1	=reasonerd1.getDirectChildren(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("children {} ", setd1);
-					setd2	=reasonerd2.getDirectChildren(vertex, named);
-					log.debug("children {} ", setd2);
-				}
-			}
-			else{
-				setd1	=reasonerd1.getDirectChildren(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("children {} ", setd1);
-				setd2	=reasonerd2.getDirectChildren(vertex, named);
-				log.debug("children {} ", setd2);
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd2.iterator();
-			while (it1.hasNext()) {
-				set2.addAll(it1.next());	
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd1.iterator();
-			while (it2.hasNext()) {
-				set1.addAll(it2.next());	
-			}
-			result=set2.equals(set1);
-
-
-
-			if(!result)
-				break;
+		for(Equivalences<T> vertex: d1){
+			Set<Equivalences<T>> setd1 = d1.getSuper(vertex);
+			log.info("vertex {}", vertex);
+			log.debug("ancestors {} ", setd1);
+			Set<Equivalences<T>> setd2 = d2.getSuper(vertex);
+			log.debug("ancestors {} ", setd2);
+			if (!coincide(setd1, setd2))
+				return false;
 		}
-
-		return result;
-
+		return true;
 	}
 
-	private boolean testAncestors(GraphImpl d1, DAGImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
-		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
 
-		for(Description vertex: d1.vertexSet()){
-			if(named){
+	private <T> boolean testParents(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
+		
+		for(Equivalences<T> vertex: d1){
+			Set<Equivalences<T>> setd1 = d1.getDirectSuper(vertex);
+			log.info("vertex {}", vertex);
+			log.debug("children {} ", setd1);
+			Set<Equivalences<T>> setd2 = d2.getDirectSuper(vertex);
+			log.debug("children {} ", setd2);
 
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-
-					setd1	=reasonerd1.getAncestors(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("ancestors {} ", setd1);
-
-					setd2	=reasonerd2.getAncestors(vertex, named);
-
-					log.debug("ancestors {} ", setd2);
-
-
-
-				}
-			}
-			else{
-				setd1	=reasonerd1.getAncestors(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("ancestors {} ", setd1);
-
-				setd2	=reasonerd2.getAncestors(vertex, named);
-
-				log.debug("ancestors {} ", setd2);
-
-
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd1.iterator();
-			while (it1.hasNext()) {
-				set1.addAll(it1.next());	
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd2.iterator();
-			while (it2.hasNext()) {
-				set2.addAll(it2.next());	
-			}
-			result=set1.equals(set2);
-
-
-			if(!result)
-				break;
+			if (!coincide(setd1, setd2))
+				return false;
 		}
-
-		return result;
-
+		return true;
 	}
 
-	private boolean testAncestors( DAGImpl d1, GraphImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = null;
-		Set<Set<Description>> setd2 = null;
 
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					setd1	=reasonerd1.getAncestors(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("ancestors {} ", setd1);
-					setd2	=reasonerd2.getAncestors(vertex, named);
-					log.debug("ancestors {} ", setd2);
-				}
-			}
-			else{
-				setd1	=reasonerd1.getAncestors(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("ancestors {} ", setd1);
-
-
-				setd2	=reasonerd2.getAncestors(vertex, named);
-				log.debug("ancestors {} ", setd2);
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd2.iterator();
-			while (it1.hasNext()) {
-				set2.addAll(it1.next());	
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd1.iterator();
-			while (it2.hasNext()) {
-				set1.addAll(it2.next());	
-			}
-			result=set2.equals(set1);
-
-
-
-			if(!result)
-				break;
-		}
-
-		return result;
-
-	}
-
-	private boolean testParents(GraphImpl d1, DAGImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = new HashSet<Set<Description>>();
-		Set<Set<Description>> setd2 = new HashSet<Set<Description>>();
-
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-
-					setd1	=reasonerd1.getDirectParents(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("parents {} ", setd1);
-
-					setd2	=reasonerd2.getDirectParents(vertex, named);
-					log.debug("parents {} ", setd2);
-
-
-				}
-			}
-			else{
-				setd1	=reasonerd1.getDirectParents(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("parents {} ", setd1);
-
-				setd2	=reasonerd2.getDirectParents(vertex, named);
-				log.debug("parents {} ", setd2);
-
-
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd1.iterator();
-			while (it1.hasNext()) {
-				set1.addAll(it1.next());	
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd2.iterator();
-			while (it2.hasNext()) {
-				set2.addAll(it2.next());	
-			}
-			result=set1.equals(set2);
-
-
-			if(!result)
-				break;
-		}
-
-		return result;
-
-	}
-
-	private boolean testParents( DAGImpl d1, GraphImpl d2, boolean named){
-		boolean result = false;
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(d1);
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-		Set<Set<Description>> setd1 = null;
-		Set<Set<Description>> setd2 = null;
-
-		for(Description vertex: d1.vertexSet()){
-			if(named){
-
-				if(d1.getRoles().contains(vertex)| d1.getClasses().contains(vertex)){
-					setd1	=reasonerd1.getDirectParents(vertex, named);
-					log.info("vertex {}", vertex);
-					log.debug("parents {} ", setd1);
-					setd2	=reasonerd2.getDirectParents(vertex, named);
-					log.debug("parents {} ", setd2);
-				}
-			}
-			else{
-				setd1	=reasonerd1.getDirectParents(vertex, named);
-				log.info("vertex {}", vertex);
-				log.debug("parents {} ", setd1);
-				setd2	=reasonerd2.getDirectParents(vertex, named);
-				log.debug("parents {} ", setd2);
-			}
-			Set<Description> set2 = new HashSet<Description>();
-			Iterator<Set<Description>> it1 =setd2.iterator();
-			while (it1.hasNext()) {
-				set2.addAll(it1.next());	
-			}
-			Set<Description> set1 = new HashSet<Description>();
-			Iterator<Set<Description>> it2 =setd1.iterator();
-			while (it2.hasNext()) {
-				set1.addAll(it2.next());	
-			}
-			result=set2.equals(set1);
-
-
-
-			if(!result)
-				break;
-		}
-
-		return result;
-
-	}
-
-	private boolean checkVertexReduction(GraphImpl d1, DAGImpl d2){
+	private boolean checkVertexReduction(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
 
 		//number of vertexes in the graph
-		int numberVertexesD1= d1.vertexSet().size();
+		int numberVertexesD1= reasonerd1.vertexSetSize();
 		//number of vertexes in the dag
-		int numberVertexesD2 = d2.vertexSet().size();
+		int numberVertexesD2 = d2.vertexSetSize();
 
 		//number of vertexes in the equivalent mapping
 		int numberEquivalents=0;
 
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-
-		Set<Set<Description>> nodesd2= reasonerd2.getNodes(false);
 		Set<Description> set2 = new HashSet<Description>();
-		Iterator<Set<Description>> it1 =nodesd2.iterator();
-		while (it1.hasNext()) {
-			Set<Description> equivalents=it1.next();
+		
+		for (Equivalences<Property> equivalents : d2.getProperties()) {
 			numberEquivalents += equivalents.size()-1;
-			set2.addAll(equivalents);	
+			set2.addAll(equivalents.getMembers());	
+		}
+		
+		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses()) {
+			numberEquivalents += equivalents.size()-1;
+			set2.addAll(equivalents.getMembers());				
 		}
 
 		log.info("vertex dag {}", numberVertexesD2);
@@ -559,27 +239,25 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	}
 
-	private boolean checkEdgeReduction(GraphImpl d1, DAGImpl d2){
+	private boolean checkEdgeReduction(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
 		//number of edges in the graph
-		int numberEdgesD1= d1.edgeSet().size();
+		int numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.edgeSet().size();
+		int numberEdgesD2 = d2.edgeSetSize();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
 
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-
-		Set<Set<Description>> nodesd2= reasonerd2.getNodes(false);
-		Iterator<Set<Description>> it1 =nodesd2.iterator();
-		while (it1.hasNext()) {
-			Set<Description> equivalents=it1.next();
-
+		for (Equivalences<Property> equivalents : d2.getProperties())
 			//two nodes have two edges, three nodes have three edges...
-			if(equivalents.size()>=2){
+			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
-			}
-		}
+		
+		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses())
+			//two nodes have two edges, three nodes have three edges...
+			if(equivalents.size() >= 2)
+				numberEquivalents += equivalents.size();
+			
 
 		log.info("edges graph {}", numberEdgesD1);
 		log.info("edges dag {}", numberEdgesD2);
