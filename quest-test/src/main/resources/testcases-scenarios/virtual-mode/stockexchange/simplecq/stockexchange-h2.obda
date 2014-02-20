@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl
+connectionUrl	jdbc:h2:mem:questrepository
 username	fish
 password	fish
 driverClass	org.h2.Driver

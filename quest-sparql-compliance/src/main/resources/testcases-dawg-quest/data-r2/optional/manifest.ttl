@@ -11,7 +11,7 @@
     (
      #:dawg-optional-001 
      #:dawg-optional-002 
-     :dawg-union-001 
+     #:dawg-union-001 
      :dawg-optional-complex-1
      #:dawg-optional-complex-2 # WON'T FIX: graph
      #:dawg-optional-complex-3 # WON'T FIX: graph

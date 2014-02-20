@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.model;
  * #%L
  * ontop-obdalib-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,8 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionIsNotNull(Term term);
 
 	public Function getLANGMATCHESFunction(Term term1, Term term2);
+	
+	public Function getFunctionLike(Term term1, Term term2);
 
 	/*
 	 * Numerical arithmethic functions

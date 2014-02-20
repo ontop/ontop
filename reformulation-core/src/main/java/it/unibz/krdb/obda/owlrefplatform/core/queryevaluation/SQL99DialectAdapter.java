@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,9 +77,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
+		// TODO: This should depend on whether the column name was quoted in the original sql query
 		return String.format("%s.\"%s\"", tablename, columnname);
 	}
 
+	
 	@Override
 /*	public String sqlTableName(String tablename, String viewname) {
 		return String.format("\"%s\" %s", tablename, viewname);
@@ -93,7 +95,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlQuote(String name) {
+		//TODO: This should depend on quotes in the sql in the mappings
 		return String.format("\"%s\"", name);
+//		return name;
 	}
 
 	@Override
@@ -131,10 +135,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 																// enclosing
 																// quotes
+		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
 					+ pattern.toLowerCase() + "%'";

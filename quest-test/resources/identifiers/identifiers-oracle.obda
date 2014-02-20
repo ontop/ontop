@@ -17,13 +17,17 @@ mappingId	Countries2
 target		:Country2-{COL} a :Country2 . 
 source		select country_name COL FROM HR.countries
 
-mappingId	WeirdTableName
-target		:Country3-{Name} a :Country3 . 
-source		select "Name" from "Test"
+mappingId	Countries3
+target		:Country3-{COL} a :Country3 . 
+source		select 'Country Name' COL FROM dual
 
-mappingId	wEIRDtABLEnAME
-target		:Country4-{nAME} a :Country4 . 
-source		select "nAME" from "tEST"
+mappingId	Countries4
+target		:Country4-{col} a :Country4 . 
+source		select To_Char(country_name) "col" FROM HR.countries
+
+mappingId	Countries5
+target		:Country5-{COL} a :Country5 . 
+source		select To_Char(country_name) col FROM HR.countries
 
 
 ]]

@@ -4,7 +4,7 @@ package inf.unibz.ontop.sesame.tests.general;
  * #%L
  * ontop-quest-sesame
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class SesameVirtualTest extends TestCase {
 			         result.close();
 			      }
 			      
-			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
+			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
 			      GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 			      GraphQueryResult gresult = graphQuery.evaluate();
 			      while(gresult.hasNext())

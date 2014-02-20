@@ -1,0 +1,33 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:mysql://10.7.20.39/datatypes
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+
+mappingId	Countries
+target		:Country-{type_char} a :Country . 
+source		select `type_char` from Characters
+
+mappingId	Countries2
+target		:Country2-{LETTER} a :Country2 . 
+source		select substr(type_char, 1) as `LETTER` from Characters
+
+mappingId	Countries3
+target		:Country3-{LETTER} a :Country3 . 
+source		select type_char as `LETTER` from Characters
+
+mappingId	Countries4
+target		:Country4-{type_char} a :Country4 . 
+source		select type_char from `Characters`
+
+mappingId	Countries5
+target		:Country5-{type_char} a :Country5 . 
+source		select substr(type_text, 1), `type_char` from Characters
+]]
+

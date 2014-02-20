@@ -10,8 +10,9 @@ Licensing terms
 --------------------
 The -ontop- framework is available under the Apache License, Version 2.0
 
-All documentation is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike-3.0]
-(http://creativecommons.org/licenses/by-nc-sa/3.0/) license.
+All documentation is licensed under the 
+[Creative Commons](http://creativecommons.org/licenses/by/4.0/)
+(attribute)  license.
 
 
 Compiling, packing, testing, etc.
@@ -39,6 +40,8 @@ Blog: http://ontop-obda.blogspot.it/
 Source Code: https://github.com/ontop/ontop
 
 Issue Tracker: https://github.com/ontop/ontop/issues
+
+Wiki: https://github.com/ontop/ontop/wiki
 
 
 

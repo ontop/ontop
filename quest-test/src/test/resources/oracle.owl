@@ -58,6 +58,11 @@
         <Class IRI="#View"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#View2"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Something"/>
+    </Declaration>    <Declaration>
         <ObjectProperty IRI="#countryIsInRegion"/>
     </Declaration>
 </Ontology>

@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #%L
  * ontop-reformulation-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,5 +63,5 @@ public interface SQLDialectAdapter {
 	 */
 	public String sqlCast(String value, int type);
 	
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive);
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
 }

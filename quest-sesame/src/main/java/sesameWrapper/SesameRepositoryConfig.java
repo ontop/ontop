@@ -4,7 +4,7 @@ package sesameWrapper;
  * #%L
  * ontop-quest-sesame
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         if (owlfile == null || owlfile.isEmpty()){
         	throw new RepositoryConfigException("No Owl file specified for repository creation!");
         }
-        if (quest_type.contentEquals("quest-virtual"))
+        if (quest_type.contentEquals("ontop-virtual"))
         		if (obdafile ==null || obdafile.contentEquals("obdafile") ){
         	throw new RepositoryConfigException("No OBDA file specified for repository creation!");
         }

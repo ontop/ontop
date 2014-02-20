@@ -1,15 +1,29 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.sql.api;
 
-import java.io.Serializable;
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
+import java.io.Serializable;
+import java.util.regex.Pattern;
+
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 
 
@@ -24,7 +38,8 @@ public class TableJSQL implements Serializable{
 	private String schema;
 	private String tableName;
 	private String name;
-	private String alias;
+	private String aliasName;
+	private Alias alias;
 	
 	
 	
@@ -78,7 +93,7 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && (schema.startsWith("\"") || schema.startsWith("'")))
+		if(schema!=null && VisitedQuery.pQuotes.matcher(schema).matches())
 			this.schema = schema.substring(1, schema.length()-1);
 		else
 			this.schema = schema;
@@ -106,7 +121,7 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if((tableName.startsWith("\"") || tableName.startsWith("'")))
+		if(VisitedQuery.pQuotes.matcher(tableName).matches())
 		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
 			quotedTable = true;
@@ -138,15 +153,26 @@ public class TableJSQL implements Serializable{
 	}
 	
 
-	public void setAlias(String alias) {
+	public void setAlias(Alias alias) {
 		if (alias == null) {
 			return;
 		}
 		this.alias = alias;
+		this.aliasName = alias.getName();
 	}
 
-	public String getAlias() {
+	public void setAliasName(String alias) {
+		this.aliasName = alias;
+		if (alias != null)
+			this.alias.setName(alias);
+	}
+	
+	public Alias getAlias() {
 		return alias;
+	}
+	
+	public String getAliasName() { 
+		return this.aliasName;
 	}
 	
 	/**

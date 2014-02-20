@@ -4,7 +4,7 @@ package it.unibz.krdb.sql;
  * #%L
  * ontop-obdalib-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public class JDBCConnectionManager {
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
 			metadata = getOracleMetaData(md, conn, tables);
-		} else if (md.getDatabaseProductName().contains("DB2")) {
+		} else if (md.getDatabaseProductName().contains("DB2")|| md.getDatabaseProductName().contains("H2")) {
 			// If the database engine is IBM DB2
 			metadata = getOtherMetaData(md, conn, tables, JDBC_UPPERCASE);
 		}  else if (md.getDatabaseProductName().contains("PostgreSQL")) {

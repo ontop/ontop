@@ -112,5 +112,9 @@ source		select "ID", "STAGE" from "T_SCLC" WHERE STAGE='limited'
 mappingId	stageex-2
 target		:db2/neoplasm/{ID} :hasStage :stages/extensive . 
 source		select "ID", "STAGE" from T_SCLC WHERE STAGE='extensive'
+
+mappingId	stageiii-like
+target		:db2/neoplasm/{ID} :hasStage :stages/limi . 
+source		select "ID", "STAGE" from "T_SCLC" WHERE STAGE LIKE 'limi%'
 ]]
 

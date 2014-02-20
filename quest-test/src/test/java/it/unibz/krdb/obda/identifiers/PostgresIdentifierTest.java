@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.identifiers;
  * #%L
  * ontop-test
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,33 @@ public class PostgresIdentifierTest extends TestCase {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runTests(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
+	}
+	
+	public void testUppercaseAlias() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
+	}
+
+
+	/**
+	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
+	 * @throws Exception
+	 */
+	public void testUppercaseUnquotedView() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+	}
+
+	/**
+	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
+	 * @throws Exception
+	 */
+	public void testUppercaseQuotedView() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
+		String val = runTests(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
 	}
 
 			

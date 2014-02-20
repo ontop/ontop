@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.utils;
  * #%L
  * ontop-obdalib-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,12 @@ import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.VisitedQuery;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+
+import net.sf.jsqlparser.JSQLParserException;
 
 
 
@@ -45,9 +49,9 @@ public class MappingParser {
 	private ArrayList<ParsedMapping> parsedMappings;
 	private ArrayList<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public MappingParser(ArrayList<OBDAMappingAxiom> mappingList){
+	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingList) throws SQLException{
 		this.mappingList = mappingList;
-		this.translator = new SQLQueryTranslator();
+		this.translator = new SQLQueryTranslator(conn);
 		this.parsedMappings = this.parseMappings();
 	}
 	
@@ -56,8 +60,9 @@ public class MappingParser {
 	 * Called by getOracleMetaData
 	 * 
 	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
+	 * @throws JSQLParserException 
 	 */
-	public ArrayList<RelationJSQL> getRealTables(){
+	public ArrayList<RelationJSQL> getRealTables() throws JSQLParserException{
 		if(this.realTables == null){
 			ArrayList<RelationJSQL> _realTables = this.getTables();
 			ArrayList<RelationJSQL> removeThese = new ArrayList<RelationJSQL>();
@@ -86,7 +91,7 @@ public class MappingParser {
 		return parsedMappings;
 	}
 	
-	public ArrayList<RelationJSQL> getTables(){
+	public ArrayList<RelationJSQL> getTables() throws JSQLParserException{
 		ArrayList<RelationJSQL> tables = new ArrayList<RelationJSQL>();
 		for(ParsedMapping pm : parsedMappings){
 			VisitedQuery query = pm.getSourceQueryParsed();

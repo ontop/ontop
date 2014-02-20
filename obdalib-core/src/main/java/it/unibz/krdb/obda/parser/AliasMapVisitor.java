@@ -1,12 +1,26 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.parser;
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.util.HashMap;
 
@@ -62,6 +76,7 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -139,11 +154,16 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		if (selectExpr.getAlias() != null) {
+		if ( selectExpr.getAlias() != null) {
+			String alias = selectExpr.getAlias().getName();
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
-			aliasMap.put(e.toString().toLowerCase(), selectExpr.getAlias());
-	
+			//remove alias quotes if present
+			if(VisitedQuery.pQuotes.matcher(alias).matches()){
+				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
+			}
+			else
+				aliasMap.put(e.toString().toLowerCase(), alias);
 		}
 	}
 	@Override
@@ -327,11 +347,12 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	}
 
 	/*
-	 * Remove the quotes in the alias if present. Each alias has a distinct column (non-Javadoc)
+	 * We do not modify the column we are only interested if the alias is present. Each alias has a distinct column (non-Javadoc)
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
 	 */
 	@Override
 	public void visit(Column tableColumn) {
+
 		if(tableColumn.getColumnName().contains("\""))
 			tableColumn.setColumnName(tableColumn.getColumnName().substring(1, tableColumn.getColumnName().length()-1));
 		
@@ -435,6 +456,12 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

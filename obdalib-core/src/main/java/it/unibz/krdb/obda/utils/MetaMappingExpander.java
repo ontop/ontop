@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.utils;
  * #%L
  * ontop-obdalib-core
  * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
-import it.unibz.krdb.sql.api.VisitedQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -352,10 +352,9 @@ public class MetaMappingExpander {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
 				String expression=column.getExpression().toString();
-				if(expression.contains("\"")) //remove the quotes when present to compare with var
-					expression= expression.substring(1, expression.length()-1);
-					
-				
+//				if(expression.contains("\"")) //remove the quotes when present to compare with var
+//					expression= expression.substring(1, expression.length()-1);
+									
 				if ((column.getAlias()==null && expression.equals(var.getName())) ||
 						(column.getAlias()!=null && column.getAlias().equals(var.getName()))) {
 					columnsForTemplate.add(column);

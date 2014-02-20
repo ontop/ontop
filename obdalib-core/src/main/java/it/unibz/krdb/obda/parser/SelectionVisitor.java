@@ -1,17 +1,31 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 
 package it.unibz.krdb.obda.parser;
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
 import it.unibz.krdb.sql.api.SelectionJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -51,21 +65,30 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.FromItemVisitor;
+import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.ValuesList;
 import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
@@ -73,7 +96,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
  * 
  * 
  */
-public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
+public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
 	
 //	ArrayList<SelectionJSQL> selections; // add if we want to consider the UNION case
 	SelectionJSQL selection;
@@ -124,6 +147,8 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 		 * First check if we are setting a new selection. Add the expression contained in the SelectionJSQL
 		 * in the WHERE clause.
 		 */
+		//FROM (subselect) -> process
+		//plainSelect.getFromItem().accept(this);
 		
 		if(setSel){
 			plainSelect.setWhere(selection.getRawConditions());
@@ -297,8 +322,9 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 
 	@Override
 	public void visit(Between between) {
-		//we do not support BETWEEN
-		
+		between.getLeftExpression().accept(this);
+		between.getBetweenExpressionStart().accept(this);
+		between.getBetweenExpressionEnd().accept(this);
 	}
 
 	/*
@@ -337,7 +363,24 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(InExpression inExpression) {
-		
+
+		//Expression e = inExpression.getLeftExpression();
+		ItemsList e1 = inExpression.getLeftItemsList();
+		if (e1 instanceof SubSelect){
+			((SubSelect)e1).accept((ExpressionVisitor)this);
+		}
+		else if (e1 instanceof ExpressionList) {
+			for (Expression expr : ((ExpressionList)e1).getExpressions()) {
+				expr.accept(this);
+			}
+		}
+		else if (e1 instanceof MultiExpressionList) {
+			for (ExpressionList exp : ((MultiExpressionList)e1).getExprList()){
+				for (Expression expr : ((ExpressionList)exp).getExpressions()) {
+					expr.accept(this);
+				}
+			}
+		}
 	}
 
 	/*
@@ -397,10 +440,19 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	
 	@Override
 	public void visit(Column tableColumn) {
+		Table table= tableColumn.getTable();
+		if(table.getName()!=null){
+			
+			TableJSQL fixTable = new TableJSQL(table);
+			table.setAlias(fixTable.getAlias());
+			table.setName(fixTable.getTableName());
+			table.setSchemaName(fixTable.getSchema());
+		
+		}
 		String columnName= tableColumn.getColumnName();
-		if(columnName.startsWith("\"") || columnName.startsWith("'"))
+		if(VisitedQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
-	
+		
 	}
 
 	/*
@@ -409,7 +461,17 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 	 */
 	@Override
 	public void visit(SubSelect subSelect) {
-		subSelect.getSelectBody().accept(this);
+		if (subSelect.getSelectBody() instanceof PlainSelect) {
+			
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
+			
+			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
+				notSupported = true;
+			} else {
+				subSelBody.accept(this);
+			}
+		} else
+			notSupported = true;
 		
 	}
 
@@ -574,6 +636,35 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor {
 			right.accept(this);
 		}
 		
+	}
+
+	@Override
+	public void visit(Table tableName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SubJoin subjoin) {
+		// TODO Auto-generated method stub
+		notSupported = true;
+	}
+
+	@Override
+	public void visit(LateralSubSelect lateralSubSelect) {
+		// TODO Auto-generated method stub
+		notSupported = true;
+	}
+
+	@Override
+	public void visit(ValuesList valuesList) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
+		notSupported = true;
 	}
 
 }
