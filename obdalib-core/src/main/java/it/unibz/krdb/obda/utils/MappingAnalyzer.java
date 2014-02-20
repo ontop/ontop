@@ -122,12 +122,18 @@ public class MappingAnalyzer {
 				ArrayList<Function> atoms = new ArrayList<Function>();
 				for (RelationJSQL table : tableList) {
 					// Construct the URI from the table name
-					String tableName = table.getGivenName();
-					String predicateName = tableName;
+					//String tableName = table.getGivenName();
+					String tableName = table.getTableName();
+					//String predicateName = tableName;
+					String predicateName = table.getTableName();
 
 					// Construct the predicate using the table name
-					int arity = dbMetaData.getDefinition(tableName)
-							.countAttribute();
+//					int arity = dbMetaData.getDefinition(tableName)
+//							.countAttribute();
+					
+					int arity = dbMetaData.getDefinition(predicateName)
+						.countAttribute();
+					
 					Predicate predicate = dfac.getPredicate(predicateName,
 							arity);
 
@@ -517,7 +523,8 @@ public class MappingAnalyzer {
 				int index = i + offset;
 				
 				// simple attribute name
-				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
+				//String columnName = dbMetaData.getAttributeName(tableGivenName, i);
+				String columnName = dbMetaData.getAttributeName(tableName, i);
 				
 				lookupTable.add(columnName, index);
 				
@@ -555,7 +562,8 @@ public class MappingAnalyzer {
 				
 				
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
+				//String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
+				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
 				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the alias name, if any
@@ -565,7 +573,8 @@ public class MappingAnalyzer {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias!=null) {
-					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
+					//String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
+					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);		
 						String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
 						if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
