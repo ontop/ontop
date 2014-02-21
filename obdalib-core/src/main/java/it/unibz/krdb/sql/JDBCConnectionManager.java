@@ -369,8 +369,8 @@ public class JDBCConnectionManager {
 			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
-			//TableDefinition td = new TableDefinition(tableGivenName);
-			TableDefinition td = new TableDefinition(tblName);
+			TableDefinition td = new TableDefinition(tableGivenName);
+//			TableDefinition td = new TableDefinition(tblName);
 
 			try {
 				rsColumns = md.getColumns(null, tableSchema, tblName, null);
@@ -659,8 +659,8 @@ public class JDBCConnectionManager {
 					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
-					//TableDefinition td = new TableDefinition(tableGivenName);
-					TableDefinition td = new TableDefinition(tblName);
+					TableDefinition td = new TableDefinition(tableGivenName);
+//					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 			
 					for (int pos = 1; rsColumns.next(); pos++) {
