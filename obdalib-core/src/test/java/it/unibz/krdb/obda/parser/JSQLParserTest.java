@@ -27,10 +27,10 @@ import net.sf.jsqlparser.JSQLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ParserTest extends TestCase {
-	final static Logger log = LoggerFactory.getLogger(ParserTest.class);
+public class JSQLParserTest extends TestCase {
+	final static Logger log = LoggerFactory.getLogger(JSQLParserTest.class);
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_1_1_1() {
 		final boolean result = parseJSQL("SELECT * FROM student");
 		printJSQL("test_1_1_1", result);
@@ -38,7 +38,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_1_1_2() {
 		final boolean result = parseJSQL("SELECT student.* FROM student");
 		printJSQL("test_1_1_2", result);
@@ -112,11 +112,11 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT SQL, ADDED EXCEPTION IN JSQL for Function
+	
 	public void test_1_5_extra_3() {
 		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
 		printJSQL("test_1_5_extra_3", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -127,7 +127,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_1_6_1() {
 		final boolean result = parseJSQL("SELECT undergraduate.* FROM student as undergraduate");
 		printJSQL("test_1_6_1", result);
@@ -252,7 +252,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_2_11() {
 		final boolean result = parseJSQL("SELECT id, name FROM student WHERE class IN (7, 8, 9)");
 		printJSQL("test_2_11", result);
@@ -260,7 +260,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_2_12() {
 		final boolean result = parseJSQL("SELECT id, name, grade FROM student WHERE name IN ('John', 'Jack', 'Clara')");
 		printJSQL("test_2_12", result);
@@ -268,63 +268,63 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+	
 	public void test_3_1() {
 		final boolean result = parseJSQL("SELECT MAX(score) FROM grade");
 		printJSQL("test_3_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+	
 	public void test_3_2() {
 		final boolean result = parseJSQL("SELECT MIN(score) FROM grade");
 		printJSQL("test_3_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+
 	public void test_3_3() {
 		final boolean result = parseJSQL("SELECT AVG(score) FROM grade");
 		printJSQL("test_3_3", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+
 	public void test_3_4() {
 		final boolean result = parseJSQL("SELECT SUM(amount) FROM tax");
 		printJSQL("test_3_4", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+	
 	public void test_3_5() {
 		final boolean result = parseJSQL("SELECT COUNT(*) FROM student");
 		printJSQL("test_3_5", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+
 	public void test_3_6() {
 		final boolean result = parseJSQL("SELECT COUNT(id) FROM student");
 		printJSQL("test_3_6", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+	
 	public void test_3_7() {
 		final boolean result = parseJSQL("SELECT EVERY(id) FROM student");
 		printJSQL("test_3_7", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT BY BOTH
+	// NO SUPPORT BY JSQL Parser
 	public void test_3_8() {
 		final boolean result = parseJSQL("SELECT ANY(id) FROM student");
 		printJSQL("test_3_8", result);
@@ -332,17 +332,17 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for ANY
+	
 	public void test_3_8_1() {
 		// ANY AND SOME are the same
 		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)");
 		printJSQL("test_3_8_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT BY BOTH
+	// NO SUPPORT BY JSQL
 	public void test_3_9() {
 		final boolean result = parseJSQL("SELECT SOME(id) FROM student");
 		printJSQL("test_3_9", result);
@@ -350,29 +350,29 @@ public class ParserTest extends TestCase {
 
 	}
 
-//	ADDED EXCEPTION IN JSQL for ANY
+
 	public void test_3_9_1() {
 		// ANY AND SOME are the same 
 		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)");
 		printJSQL("test_3_9_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+
 	public void test_4_1() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality");
 		printJSQL("test_4_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL, ADDED EXCEPTION IN JSQL for Function
+	
 	public void test_4_2() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
 		printJSQL("test_4_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -383,12 +383,12 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for ALL
+	
 	public void test_4_4() {
 		final boolean result = parseJSQL("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
 				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)");
 		printJSQL("test_4_4", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -468,22 +468,22 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_5_9() {
 		final boolean result = parseJSQL("SELECT id, name, score FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
 		printJSQL("test_5_9", result);
 		assertTrue(result);
 	}
 
-	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for subqueries with WHERE conditions
+	
 	public void test_5_10() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t2.score FROM (SELECT id, name FROM student WHERE student.name='John') AS t1 JOIN grade as t2 ON t1.id=t2.st_id");
 		printJSQL("test_5_10", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_5_11() {
 		final boolean result = parseJSQL("SELECT id, name, score FROM student JOIN grade USING (id)");
 		printJSQL("test_5_11", result);
@@ -491,7 +491,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL
+	
 	public void test_6_1() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t2.grade FROM (SELECT id, name FROM student) t1, (SELECT st_id, grade FROM grade) t2 WHERE t1.id=t2.sid");
 		printJSQL("test_6_1", result);
@@ -499,76 +499,76 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for subqueries with joins
+	
 	public void test_6_2() {
 		final boolean result = parseJSQL("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1");
 		printJSQL("test_6_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL  ADDED EXCEPTION IN JSQL for subqueries with joins
+	
 	public void test_6_3() {
 		final boolean result = parseJSQL("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1 WHERE t1.score>=25");
 		printJSQL("test_6_3", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for concat
+	
 	public void test_7_1() {
 		final boolean result = parseJSQL("SELECT ('ID-' || student.id) as sid FROM student");
 		printJSQL("test_7_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for operation
+	
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
+	//don't work over union
 	public void test_8_1() {
 		final boolean result = parseJSQL("SELECT name FROM student UNION ALL SELECT name FROM erasmus");
 		printJSQL("test_8_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
+	//don't work over union
 	public void test_8_2() {
 		final boolean result = parseJSQL("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax");
 		printJSQL("test_8_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
+	//don't work over union
 	public void test_8_3() {
 		final boolean result = parseJSQL("SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20");
 		printJSQL("test_8_3", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
+	
 	public void test_8_4() {
 		final boolean result = parseJSQL("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus");
 		printJSQL("test_8_4", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
+	
 	public void test_8_5() {
 		final boolean result = parseJSQL("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id "
 				+ "UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
 		printJSQL("test_8_5", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -655,6 +655,15 @@ public class ParserTest extends TestCase {
 		assertTrue(result);
 
 	}
+	
+	public void test_13() {
+		final boolean result = parseJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+				+ "FROM people \"QpeopleVIEW0\" "
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+		printJSQL("test_12", result);
+		assertTrue(result);
+
+	}
 
 	private String queryText;
 
@@ -665,7 +674,7 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new VisitedQuery(input,true);
+			queryP = new VisitedQuery(input,false);
 		} catch (Exception e) {
 
 			return false;
@@ -690,9 +699,15 @@ public class ParserTest extends TestCase {
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
 				System.out.println("  GroupBy: " + queryP.getGroupByClause());
+				System.out.println("  SubSelect: "
+						+ (queryP.getSubSelectSet().isEmpty() ? "--" : queryP
+								.getSubSelectSet()));
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinCondition().isEmpty() ? "--" : queryP
 								.getJoinCondition()));
+				System.out.println("  Columns: "
+						+ (queryP.getColumns().isEmpty() ? "--" : queryP
+								.getColumns()));
 			} catch (Exception e) {
 
 				e.printStackTrace();
