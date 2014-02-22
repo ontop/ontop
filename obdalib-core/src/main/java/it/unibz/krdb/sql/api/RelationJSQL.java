@@ -41,12 +41,14 @@ public class RelationJSQL implements Serializable, Cloneable  {
 		return table.getSchema();
 	}
 	
-	public String getName() {
-		return table.getName();
-	}
 	
 	public String getTableName() {
 		return table.getTableName();
+	}
+	
+	public String getGivenSchema() {
+		return table.getGivenSchema();
+		
 	}
 	
 	public String getGivenName() {
@@ -66,6 +68,12 @@ public class RelationJSQL implements Serializable, Cloneable  {
 		return table.isSchemaQuoted();
 	}
 	
+	public String getFullName(){
+		if(table.getSchema()!=null)
+		return table.getSchema()+"."+table.getTableName();
+		else return table.getTableName();
+	}
+	
 	@Override
 	public String toString() {
 		return table.toString();
@@ -79,7 +87,7 @@ public class RelationJSQL implements Serializable, Cloneable  {
 	@Override
 	public boolean equals(Object r){
 		if(r instanceof RelationJSQL)
-			return this.table.getGivenName().equals(((RelationJSQL)r).table.getGivenName());
+			return this.getFullName().equals(((RelationJSQL)r).getFullName());
 		return false;
 	}
 }

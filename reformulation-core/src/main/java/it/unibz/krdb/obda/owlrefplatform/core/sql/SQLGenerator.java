@@ -1860,7 +1860,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				viewNames.put(atom, simpleTableViewName);
 			}
 			dataTableCount += 1;
-			tableNames.put(atom, tableName);
+			viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
+			tableNames.put(atom, def.getName());
+
 			dataDefinitions.put(atom, def);
 			
 			indexVariables(atom);

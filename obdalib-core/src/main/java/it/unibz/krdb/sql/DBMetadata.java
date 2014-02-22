@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 /**
@@ -59,6 +60,7 @@ public class DBMetadata implements Serializable {
 	private boolean storesMixedCaseIdentifiers = true;
 	private boolean storesUpperCaseQuotedIdentifiers = false;
 	private boolean storesUpperCaseIdentifiers = false;
+	private static Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");;
 
 	/**
 	 * Constructs a blank metadata. Use only for testing purpose.
@@ -90,13 +92,17 @@ public class DBMetadata implements Serializable {
 			setDriverName(md.getDriverName());
 			setDatabaseProductName(md.getDatabaseProductName());
 			setStoresLowerCaseIdentifier(md.storesLowerCaseIdentifiers());
-			setStoresLowerCaseQuotedIdentifiers(md.storesLowerCaseQuotedIdentifiers());
+			setStoresLowerCaseQuotedIdentifiers(md
+					.storesLowerCaseQuotedIdentifiers());
 			setStoresMixedCaseIdentifiers(md.storesMixedCaseIdentifiers());
-			setStoresMixedCaseQuotedIdentifiers(md.storesMixedCaseQuotedIdentifiers());
+			setStoresMixedCaseQuotedIdentifiers(md
+					.storesMixedCaseQuotedIdentifiers());
 			setStoresUpperCaseIdentifiers(md.storesUpperCaseIdentifiers());
-			setStoresUpperCaseQuotedIdentifiers(md.storesUpperCaseQuotedIdentifiers());
+			setStoresUpperCaseQuotedIdentifiers(md
+					.storesUpperCaseQuotedIdentifiers());
 		} catch (SQLException e) {
-			throw new RuntimeException("Failed on importing database metadata!\n" + e.getMessage());
+			throw new RuntimeException(
+					"Failed on importing database metadata!\n" + e.getMessage());
 		}
 	}
 
@@ -108,7 +114,27 @@ public class DBMetadata implements Serializable {
 	 *            {@link ViewDefinition} object.
 	 */
 	public void add(DataDefinition value) {
-		schema.put(value.getName(), value);
+		String name= value.getName();
+		//name without quotes
+		if(pQuotes.matcher(name).matches())
+			schema.put(name.substring(1,name.length()-1), value);
+		
+		else{
+			String[] names= name.split("\\."); //consider the case of schema.table
+			if (names.length==2){
+				String schemaName= names[0];
+				String tableName= names[1];
+					if(VisitedQuery.pQuotes.matcher(schemaName).matches())
+						schemaName= schemaName.substring(1,schemaName.length()-1);
+					if(VisitedQuery.pQuotes.matcher(tableName).matches())
+						tableName= tableName.substring(1,tableName.length()-1);
+				schema.put(schemaName+"."+tableName, value);
+			}
+				else
+					schema.put(name, value);
+		}
+				
+		
 	}
 
 	/**
@@ -136,16 +162,19 @@ public class DBMetadata implements Serializable {
 			def = schema.get(name.toLowerCase());
 		if (def == null)
 			def = schema.get(name.toUpperCase());
+//		if (def == null)
+//			def = schema.get(name.substring(1, name.length()-1));
 		return def;
 	}
-	
+
 	/**
-	 * Retrieves the relation list (table and view definition) form the metadata.
+	 * Retrieves the relation list (table and view definition) form the
+	 * metadata.
 	 */
 	public List<DataDefinition> getRelationList() {
 		return new ArrayList<DataDefinition>(schema.values());
 	}
-	
+
 	/**
 	 * Retrieves the table list form the metadata.
 	 */
@@ -176,10 +205,10 @@ public class DBMetadata implements Serializable {
 		}
 		return dd.getAttributeName(pos);
 	}
-	
+
 	/**
-	 * Returns the attribute position in the database metadata given the table name
-	 * and the attribute name.
+	 * Returns the attribute position in the database metadata given the table
+	 * name and the attribute name.
 	 * 
 	 * @param tableName
 	 *            Can be a table name or a view name.
@@ -196,12 +225,13 @@ public class DBMetadata implements Serializable {
 	}
 
 	/**
-	 * Returns the attribute position in the database metadata given only the attribute
-	 * name. The method will search to all tables in the schema and can throw ambiguous
-	 * name exception if more than one table use the same name.
+	 * Returns the attribute position in the database metadata given only the
+	 * attribute name. The method will search to all tables in the schema and
+	 * can throw ambiguous name exception if more than one table use the same
+	 * name.
 	 * 
 	 * @param attributeName
-	 * 			The target attribute name.
+	 *            The target attribute name.
 	 * @return Returns the index position or -1 if attribute name can't be found
 	 */
 	public int getAttributeIndex(String attributeName) {
@@ -214,7 +244,9 @@ public class DBMetadata implements Serializable {
 					index = pos;
 				} else {
 					// Found a same name
-					throw new RuntimeException(String.format("The column name \"%s\" is ambiguous.", attributeName));
+					throw new RuntimeException(String.format(
+							"The column name \"%s\" is ambiguous.",
+							attributeName));
 				}
 			}
 		}
@@ -232,24 +264,27 @@ public class DBMetadata implements Serializable {
 	 * @return
 	 */
 	public String getFullQualifiedAttributeName(String name, int pos) {
-		String value = String.format("%s.%s", name, getAttributeName(name, pos));
+		
+		String value = String
+				.format("%s.%s", name, getAttributeName(name, pos));
 		return value;
 	}
-	
+
 	/**
-	 * Returns the attribute full-qualified name using the table/view ALIAS name.
-	 * [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the method will
-	 * use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME]. 
+	 * Returns the attribute full-qualified name using the table/view ALIAS
+	 * name. [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the
+	 * method will use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME].
 	 * 
 	 * @param name
 	 *            Can be a table name or a view name.
 	 * @param alias
-	 * 			  The table or view alias name.
+	 *            The table or view alias name.
 	 * @param pos
 	 *            The index position.
 	 * @return
 	 */
-	public String getFullQualifiedAttributeName(String name, String alias, int pos) {
+	public String getFullQualifiedAttributeName(String name, String alias,
+			int pos) {
 		if (alias != null && !alias.isEmpty()) {
 			return String.format("%s.%s", alias, getAttributeName(name, pos));
 		} else {
@@ -281,7 +316,8 @@ public class DBMetadata implements Serializable {
 		return storesLowerCaseIdentifiers;
 	}
 
-	public void setStoresLowerCaseQuotedIdentifiers(boolean storesLowerCaseQuotedIdentifiers) {
+	public void setStoresLowerCaseQuotedIdentifiers(
+			boolean storesLowerCaseQuotedIdentifiers) {
 		this.storesLowerCaseQuotedIdentifiers = storesLowerCaseQuotedIdentifiers;
 	}
 
@@ -289,7 +325,8 @@ public class DBMetadata implements Serializable {
 		return storesLowerCaseQuotedIdentifiers;
 	}
 
-	public void setStoresMixedCaseQuotedIdentifiers(boolean storesMixedCaseQuotedIdentifiers) {
+	public void setStoresMixedCaseQuotedIdentifiers(
+			boolean storesMixedCaseQuotedIdentifiers) {
 		this.storesMixedCaseQuotedIdentifiers = storesMixedCaseQuotedIdentifiers;
 	}
 
@@ -305,7 +342,8 @@ public class DBMetadata implements Serializable {
 		return storesMixedCaseIdentifiers;
 	}
 
-	public void setStoresUpperCaseQuotedIdentifiers(boolean storesUpperCaseQuotedIdentifiers) {
+	public void setStoresUpperCaseQuotedIdentifiers(
+			boolean storesUpperCaseQuotedIdentifiers) {
 		this.storesUpperCaseQuotedIdentifiers = storesUpperCaseQuotedIdentifiers;
 	}
 
@@ -335,14 +373,15 @@ public class DBMetadata implements Serializable {
 
 	/***
 	 * Generates a map for each predicate in the body of the rules in 'program'
-	 * that contains the Primary Key data for the predicates obtained from the info in 
-	 * the metadata.
+	 * that contains the Primary Key data for the predicates obtained from the
+	 * info in the metadata.
 	 * 
 	 * @param metadata
 	 * @param pkeys
 	 * @param program
 	 */
-	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata, DatalogProgram program) {
+	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
+			DatalogProgram program) {
 		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
 		for (CQIE mapping : program.getRules()) {
 			for (Function newatom : mapping.getBody()) {
@@ -350,7 +389,8 @@ public class DBMetadata implements Serializable {
 				if (newAtomPredicate instanceof BooleanOperationPredicate) {
 					continue;
 				}
-				// TODO Check this: somehow the new atom name is "Join" instead of table name.
+				// TODO Check this: somehow the new atom name is "Join" instead
+				// of table name.
 				String newAtomName = newAtomPredicate.toString();
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
