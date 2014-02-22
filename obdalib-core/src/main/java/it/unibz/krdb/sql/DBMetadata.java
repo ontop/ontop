@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.VisitedQuery;
 
@@ -425,12 +426,11 @@ public class DBMetadata implements Serializable {
 
 		VisitedQuery visitedQuery = null;
 		List<String> columns = null;
-		try {
-			visitedQuery = new VisitedQuery(sqlString);
-			columns = visitedQuery.getColumns();
-		} catch (JSQLParserException e) {
-			e.printStackTrace();
-		}
+		SQLQueryTranslator translator = new SQLQueryTranslator();
+		visitedQuery = translator.constructParserNoView(sqlString);
+		
+		//visitedQuery = new VisitedQuery(sqlString);
+		columns = visitedQuery.getColumns();
 
 		ViewDefinition vd = new ViewDefinition(name);
 		vd.setSQL(sqlString);
