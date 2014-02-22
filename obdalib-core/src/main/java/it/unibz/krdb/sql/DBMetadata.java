@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class DBMetadata implements Serializable {
 
@@ -52,6 +53,7 @@ public class DBMetadata implements Serializable {
 	private boolean storesMixedCaseIdentifiers = true;
 	private boolean storesUpperCaseQuotedIdentifiers = false;
 	private boolean storesUpperCaseIdentifiers = false;
+	private static Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");;
 
 	/**
 	 * Constructs a blank metadata. Use only for testing purpose.
@@ -107,7 +109,7 @@ public class DBMetadata implements Serializable {
 	public void add(DataDefinition value) {
 		String name= value.getName();
 		//name without quotes
-		if(VisitedQuery.pQuotes.matcher(name).matches())
+		if(pQuotes.matcher(name).matches())
 			schema.put(name.substring(1,name.length()-1), value);
 		
 		else{
