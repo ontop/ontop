@@ -1,11 +1,3 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 /*
@@ -29,13 +21,12 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  */
 
 
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 
 import java.util.HashSet;
 import java.util.List;
@@ -48,25 +39,19 @@ public class DAGTest extends TestCase {
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	private void test_dag_index_nodes(String testname) throws Exception {
-		DAG res = helper.load_dag(testname);
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(res);
+		TBoxReasonerImpl reasoner = helper.load_dag(testname);
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
-		Set<Description> classes= new HashSet<Description>();
-		for(Description node:((DAGImpl)res).vertexSet()){
-			if(node instanceof ClassDescription){
-				for(Description c: reasoner.getEquivalences(node, false) )
+		Set<BasicClassDescription> classes= new HashSet<BasicClassDescription>();
+		for(Equivalences<BasicClassDescription> node : reasoner.getClasses()) {
+			for(BasicClassDescription c: node)
 				classes.add(c);
-			}
 		}
 		
-		Set<Description> roles= new HashSet<Description>();
-		for(Description node:((DAGImpl)res).vertexSet()){
-			if(node instanceof Property){
-				for(Description r: reasoner.getEquivalences(node, false) )
-					roles.add(r);
-				}
-			
+		Set<Property> roles= new HashSet<Property>();
+		for(Equivalences<Property> node : reasoner.getProperties()) {
+			for(Property r: node)
+				roles.add(r);
 		}
 		
 		System.out.println(roles);

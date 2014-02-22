@@ -333,7 +333,7 @@
 						<Implementation-Version>${project.version}</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.9</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Build-Number>0</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>

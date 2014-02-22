@@ -1,11 +1,3 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano
- * This source code is available under the terms of the Affero General Public
- * License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 /*
@@ -37,9 +29,10 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+
+
 
 
 
@@ -117,11 +110,10 @@ public class SemanticIndexHelper {
 
     }
 
-    public DAG load_dag(String ontoname) throws Exception {
+    public TBoxReasonerImpl load_dag(String ontoname) throws Exception {
 
-    	TBoxReasonerImpl reasoner=new TBoxReasonerImpl(load_onto(ontoname),false);
-        return reasoner.getDAG();
-
+    	return new TBoxReasonerImpl(load_onto(ontoname));
+        //return DAGBuilder.getDAG(load_onto(ontoname));
     }
 
     public List<List<Description>> get_results(String resname) {

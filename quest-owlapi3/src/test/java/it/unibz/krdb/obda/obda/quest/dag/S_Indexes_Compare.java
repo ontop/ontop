@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.obda.quest.dag;
  */
 
 
+
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -31,9 +33,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -72,19 +73,18 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		DAGImpl dag= S_InputOWL.createDAG(fileInput);
+		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph
-		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
-		DAGImpl namedDag= transform.getDAG();
+		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
 		
 		log.debug("Input number {}", i+1 );
-		log.info("named graph {}", namedDag);
+		log.info("named graph {}", engine.getNamedDAG());
 		
 		
-		testIndexes(namedDag);
+		testIndexes(engine, engine.getNamedDAG());
 
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
@@ -99,12 +99,12 @@ public void testIndexes() throws Exception{
 			pureIsa.index();
 			 DAGOperations.buildDescendants(pureIsa);
 		        DAGOperations.buildAncestors(pureIsa);
-		 testOldIndexes(pureIsa, namedDag);
+		 testOldIndexes(pureIsa, engine);
 		
 	}
 }
 
-private void testOldIndexes(DAG d1, DAGImpl d2){
+private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	
 	
 	
@@ -132,32 +132,34 @@ private void testOldIndexes(DAG d1, DAGImpl d2){
 	
 	
 }
-private boolean testIndexes( DAGImpl dag){
-	TBoxReasonerImpl reasoner= new TBoxReasonerImpl(dag);
+private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
 	boolean result=false;
 	
 	
-	//create semantic index
-	SemanticIndexEngineImpl engine= new SemanticIndexEngineImpl(reasoner);
-	Map<Description, Integer> indexes=engine.getIndexes();
-	Map<Description, SemanticIndexRange> ranges=engine.getIntervals();
-	
 	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: dag.vertexSet()){
-		int index= indexes.get(vertex);
-		for(Description parent: Graphs.successorListOf(dag, vertex)){
-			result=ranges.get(parent).contained(new SemanticIndexRange(index,index));
-			
-			if(result)
-				break;
+	for(Description vertex: engine.getIndexed()) { // .getNamedDAG().vertexSet()
+		int index= engine.getIndex(vertex);
+		log.info("vertex {} index {}", vertex, index);
+		if (vertex instanceof Property) {
+			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				if(result)
+					break;
+			}
 		}
-		
+		else {
+			for(Description parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				if(result)
+					break;
+			}
+			
+		}	
 		if(!result)
 			break;
 	}
 	
-	log.info("indexes {}", indexes);
-	log.info("ranges {}", ranges);
+	//log.info("ranges {}", ranges);
 	
 	
 	return result;

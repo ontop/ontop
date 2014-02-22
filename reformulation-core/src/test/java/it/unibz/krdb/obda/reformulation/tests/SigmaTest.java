@@ -24,16 +24,15 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -54,22 +53,24 @@ public class SigmaTest extends TestCase {
         ontology.addConcept(cc.getPredicate());
         ontology.addRole(er.getPredicate());
 
-        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, er));
+        ontology.addAssertion(descFactory.createSubClassAxiom(er, ac));
+        ontology.addAssertion(descFactory.createSubClassAxiom(cc, er));
 
         
        
-        Ontology ontologySigma =  TBoxReasonerImpl.getSigma(ontology);
-        TBoxReasonerImpl sigma= new TBoxReasonerImpl(ontologySigma, false);
-        DAGImpl res= sigma.getDAG();
+		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
+		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+        TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
+        EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
 
-        assertTrue(sigma.getDescendants(ac, false).contains(sigma.getEquivalences(er, false)));
+        assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 
-        assertEquals(1, sigma.getDescendants(ac, false).size());
+     // Roman: was 1, which, I think, is wrong: A has two subclasses, ER and C (now 3 because it's reflexive)
+        assertEquals(3, classes.getSub(classes.getVertex(ac)).size());   // getDescendants is reflexive
 
-        assertEquals(0, sigma.getDescendants(er, false).size());
+        assertEquals(1, classes.getSub(classes.getVertex(er)).size());  // getDescendants is reflexive
 
-        assertEquals(0, sigma.getDescendants(cc, false).size());
+        assertEquals(1, classes.getSub(classes.getVertex(cc)).size());  // getDescendants is reflexive
 
     }
 }
