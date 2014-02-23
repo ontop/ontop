@@ -1888,6 +1888,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * ans10(t2_2,t1_2) :- people(t1_2,t2_2,t3_2,t4_2,t5_2,t6_2)
 	 * </p>
 	 * 
+	 * 
+	 * TODO: Now it only handles atoms that have the same template, it will fail with things like
+	 * Ans(URI(... x))
+	 * Ans(Null)
+	 * or when the template has more than 1 variable, for instance
+	 * Ans(URI("http://...",x,y))
+	 * Solve!
 	 * @param sourceRule
 	 * @return
 	 */
