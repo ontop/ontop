@@ -1805,8 +1805,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				Collection<CQIE> ruleCollection = ruleIndexByBody.get(buPredicate);
 
 				//The rules DEFINING pred
-				Collection<CQIE> workingRules = ruleIndex.get(buPredicate);
-
+				List<CQIE> workingRules = (List<CQIE>) ruleIndex.get(buPredicate);
+				
 
 				cloneRules(fatherCollection, ruleCollection);
 
@@ -1823,8 +1823,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					//the terms where buPredicate should appear
 					List<Function> currentTerms = fatherRule.getBody();
 
-					
-					for (CQIE sourceRule:workingRules){
+					int listsize = workingRules.size();
+					for (int i=0; i<listsize; i++){ 
+					//(CQIE sourceRule:workingRules){
+						
+						CQIE sourceRule = workingRules.get(i);
+						
 						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone());
 
 
@@ -1842,6 +1846,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 * Each of the new queries could still require more steps of
 							 * evaluation, so we decrease the index.
 							 */
+							
+							//Here we remove the types, if possible, of the source query
+							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone());
+							
+							//Now we update the indexes for the source query
+							List<CQIE> newSourceRuleList= new LinkedList<CQIE>();
+							newSourceRuleList.add(newsourceRule);
+							int srcIdx=workingList.indexOf(sourceRule);
+							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
+							updateIndexesinTypes(workingList,srcIdx,depGraph,newSourceRuleList, srchead,sourceRule);
+							
+							//Update the indexes for the source query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
 							updateIndexesinTypes(workingList,fatherIdx,depGraph,result, fathead,fatherRule);
 							
@@ -1859,6 +1875,68 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 
+	
+	
+
+	/**
+	 * This method will remove the types in the head of the source query. For instance, if the rules is
+	 * <p>
+	 * ans10(http://www.w3.org/2000/01/rdf-schema#Literal(t2_2),URI("http://www.example.org/test#{}",t1_2)) :- people(t1_2,t2_2,t3_2,t4_2,t5_2,t6_2)
+	 * </p>
+	 * it returns
+	 * <p>
+	 * ans10(t2_2,t1_2) :- people(t1_2,t2_2,t3_2,t4_2,t5_2,t6_2)
+	 * </p>
+	 * 
+	 * @param sourceRule
+	 * @return
+	 */
+	private static CQIE computeSourceRuleNoTypes(	CQIE sourceRule){
+
+		Function sourceHead=sourceRule.getHead();
+
+		int oldArity = sourceHead.getArity();
+
+
+		//Removing the type form the sourceHead
+		List<Term> typedArguments= sourceHead.getTerms();
+		List<Term> untypedArguments= new LinkedList<Term>();
+
+		for (Term t: typedArguments){
+			if (t instanceof Function){
+				//if it is a function, we add the inner variables and values
+				List<Term>  functionArguments = ((Function) t).getTerms();
+				Predicate functionSymbol = ((Function) t).getFunctionSymbol();
+				boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
+				if (isURI){
+					//I need to remove the URI part and add the rest, usually the variables
+					functionArguments.remove(0);
+				}
+				untypedArguments.addAll(functionArguments);
+			}else if(t instanceof Variable){
+				untypedArguments.add(t);
+			}else if (t instanceof Constant){
+				untypedArguments.add(t);
+			}
+
+		}
+
+		//updating the rule!!
+		sourceHead.updateTerms(untypedArguments);
+		int newArity = sourceHead.getArity();
+		sourceRule.updateHead(sourceHead);
+
+
+
+		if (oldArity!= newArity){
+			//update bodies!!
+		}
+		return sourceRule;
+	}
+
+	
+	
+	
 	
 	/**
 	 * Given the terms in the father rule, it will iterate over the term trying to find an atom fo unify with the head of the source rule.
@@ -1890,7 +1968,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
-						result.add(addTypes(sourceHead,focus,fatherRule));
+						result.add(addTypes(sourceHead,sourceRule,focus,fatherRule));
 						break;
 					} else{
 						continue;
@@ -1918,20 +1996,23 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * uses this atom to update the head of fatherRule
 	 * 
 	 * @param sourceHead
+	 * @param sourceRule 
 	 * @param targetAtom 
 	 * @param fatherRule
 	 * @return
 	 */
-	private static CQIE addTypes(Function sourceHead, Function targetAtom, CQIE fatherRule) {
+	private static CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule) {
 
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		mgu = Unifier.getMGU(sourceHead, targetAtom);
 		
+		
 		if (mgu == null) {
 			return null;
 		}else{
 			Function newHead = (Function) fatherRule.getHead();
+			
 			Unifier.applyUnifier(newHead, mgu, false);
 			fatherRule.updateHead(newHead);
 			return fatherRule;

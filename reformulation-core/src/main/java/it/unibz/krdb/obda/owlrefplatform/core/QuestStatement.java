@@ -491,6 +491,12 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Pushing types...");
 		List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding);
 		
+		
+		for (CQIE rule: newTypedRules){
+			System.out.println(rule);
+		}
+		
+		
 		//TODO: can we avoid using this intermediate variable???
 		unfolding.removeAllRules();
 		unfolding.appendRule(newTypedRules);
@@ -505,7 +511,7 @@ public class QuestStatement implements OBDAStatement {
 
 		
 		
-		log.debug("Partial evaluation ended.");
+		log.debug("\n Partial evaluation ended.");
 
 		return unfolding;
 	}
