@@ -127,7 +127,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	
 	
 	private Map<String, Integer> uriRefIds;
+	
 	private Multimap<Predicate, CQIE> ruleIndex ;
+	
 //	private List<Function> ansViews = new LinkedList<Function>(); 
 	/*
 	 * The map of predicates to the canonical atoms.
@@ -136,7 +138,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * 
 	 * For instance : ans5 -> ans5(rdf:Literal(name), URI(":{}", id), xsd:integer(salary))
 	 */
-	private Map<Predicate, Term> predicateCanonicalAtoms;
+	//private Map<Predicate, Term> predicateCanonicalAtoms;
 	
 	private Map<Predicate,String> sqlAnsViewMap;
 	
@@ -186,10 +188,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		//queryProgram = DatalogNormalizer.normalizeDatalogProgram(queryProgram);
 
-		generatePredicateCanonicalAtomsMap(queryProgram);
+		//generatePredicateCanonicalAtomsMap(queryProgram);
 		
 		normalizeProgram(queryProgram);
-		
 		
 		
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
@@ -250,84 +251,84 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * 
 	 * @param queryProgram
 	 */
-	private void generatePredicateCanonicalAtomsMap(DatalogProgram queryProgram) {
-		
-		predicateCanonicalAtoms = Maps.newHashMap();
-		
-		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-		
-		Set<Predicate> finishedPredicates = Sets.newHashSet();
-		
-		for(CQIE rule : queryProgram.getRules() ){
-			Queue<Term> queue = new LinkedList<Term>(rule.getBody());
-			
-			while (!queue.isEmpty()) {
-				Term qHead = queue.poll();
-				if (qHead instanceof Function) {
-					Function func = (Function) qHead;
-
-					if (func.isBooleanFunction() || func.isArithmeticFunction()
-							|| func.isDataTypeFunction()
-							|| func.isAlgebraFunction()) {
-						queue.addAll(func.getTerms());
-					} else if (func.isDataFunction()) {
-						
-						Predicate predicate = func.getFunctionSymbol();
-						
-						if(finishedPredicates.contains(predicate))
-							continue;
-						
-						List<CQIE> dependents = queryProgram.getRules(predicate);
-						
-						if(dependents.isEmpty()){
-							/*
-							 * don't care extentional predicates 
-							 */
-							continue;
-						}
-						
-						List<Term> canonicalTerms = Lists.newArrayList();
-						int arity = predicate.getArity();
-						for(int i = 0; i < arity; i++){
-							Term term = func.getTerm(i);
-							
-							if(isTyped(term)){
-								canonicalTerms.add(term);
-								continue;
-							}
-							
-							for(CQIE r : dependents){
-								term = r.getHead().getTerm(i);
-								if(isTyped(term)){
-									canonicalTerms.add(term);
-									break;
-								}
-							}
-							
-							/*
-							 * FIXME: when no matched term found
-							 */
-							
-						}
-						
-						/*
-						 * TODO: put meaningful variable names
-						 */
-						
-						predicateCanonicalAtoms.put(predicate, factory.getFunction(predicate, canonicalTerms));
-						
-						finishedPredicates.add(predicate);
-						
-					}
-				} else /* !(queueHead instanceof Function) */{
-					// NO-OP
-				}
-			}
-
-			
-		}
-		
-	}
+//	private void generatePredicateCanonicalAtomsMap(DatalogProgram queryProgram) {
+//		
+//		predicateCanonicalAtoms = Maps.newHashMap();
+//		
+//		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
+//		
+//		Set<Predicate> finishedPredicates = Sets.newHashSet();
+//		
+//		for(CQIE rule : queryProgram.getRules() ){
+//			Queue<Term> queue = new LinkedList<Term>(rule.getBody());
+//			
+//			while (!queue.isEmpty()) {
+//				Term qHead = queue.poll();
+//				if (qHead instanceof Function) {
+//					Function func = (Function) qHead;
+//
+//					if (func.isBooleanFunction() || func.isArithmeticFunction()
+//							|| func.isDataTypeFunction()
+//							|| func.isAlgebraFunction()) {
+//						queue.addAll(func.getTerms());
+//					} else if (func.isDataFunction()) {
+//						
+//						Predicate predicate = func.getFunctionSymbol();
+//						
+//						if(finishedPredicates.contains(predicate))
+//							continue;
+//						
+//						List<CQIE> dependents = queryProgram.getRules(predicate);
+//						
+//						if(dependents.isEmpty()){
+//							/*
+//							 * don't care extentional predicates 
+//							 */
+//							continue;
+//						}
+//						
+//						List<Term> canonicalTerms = Lists.newArrayList();
+//						int arity = predicate.getArity();
+//						for(int i = 0; i < arity; i++){
+//							Term term = func.getTerm(i);
+//							
+//							if(isTyped(term)){
+//								canonicalTerms.add(term);
+//								continue;
+//							}
+//							
+//							for(CQIE r : dependents){
+//								term = r.getHead().getTerm(i);
+//								if(isTyped(term)){
+//									canonicalTerms.add(term);
+//									break;
+//								}
+//							}
+//							
+//							/*
+//							 * FIXME: when no matched term found
+//							 */
+//							
+//						}
+//						
+//						/*
+//						 * TODO: put meaningful variable names
+//						 */
+//						
+//						predicateCanonicalAtoms.put(predicate, factory.getFunction(predicate, canonicalTerms));
+//						
+//						finishedPredicates.add(predicate);
+//						
+//					}
+//				} else /* !(queueHead instanceof Function) */{
+//					// NO-OP
+//				}
+//			}
+//
+//			
+//		}
+//		
+//	}
 
 	private boolean isTyped(Term term) {
 		return !(term instanceof Variable) && !(term instanceof ValueConstant);
@@ -1116,33 +1117,37 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 			String typeColumn;
 			String mainColumn;
-			if(!isAns1){
-				typeColumn = getTypeColumnForSELECT(ht, varName);
-				 mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
-			} else {
-				
-				if(ht instanceof Variable){
-					/* 
-					 * In case of Variable, we wrap the variable with a proper URI or datatype
-					 */
-					Function atom = QueryUtils.findOneAtomInRuleBody(query, (Variable) ht);
-					int j = atom.getTerms().indexOf(ht);
-					Term canonicalAtom = predicateCanonicalAtoms.get(atom.getFunctionSymbol());
-					Term tt = ((Function)canonicalAtom).getTerm(j );
-					Predicate predicate = ((Function)tt).getFunctionSymbol();
-				
-					OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-					Function f = factory.getFunction(predicate, ht);
-					typeColumn = getTypeColumnForSELECT(f,  varName);
-					mainColumn = getMainColumnForSELECT(f, signature, hpos, varName, index, isAns1);
-					
-					
-					
-				} else {
-					typeColumn = getTypeColumnForSELECT(ht, varName);
-					mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
-				}
-			}
+//			if(!isAns1){
+//				typeColumn = getTypeColumnForSELECT(ht, varName);
+//				 mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
+//			} else {
+//				
+//				if(ht instanceof Variable){
+//					/* 
+//					 * In case of Variable, we wrap the variable with a proper URI or datatype
+//					 */
+//					Function atom = QueryUtils.findOneAtomInRuleBody(query, (Variable) ht);
+//					int j = atom.getTerms().indexOf(ht);
+//					Term canonicalAtom = predicateCanonicalAtoms.get(atom.getFunctionSymbol());
+//					Term tt = ((Function)canonicalAtom).getTerm(j );
+//					Predicate predicate = ((Function)tt).getFunctionSymbol();
+//				
+//					OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
+//					Function f = factory.getFunction(predicate, ht);
+//					typeColumn = getTypeColumnForSELECT(f,  varName);
+//					mainColumn = getMainColumnForSELECT(f, signature, hpos, varName, index, isAns1);
+//					
+//					
+//					
+//				} else {
+//					typeColumn = getTypeColumnForSELECT(ht, varName);
+//					mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
+//				}
+//			}
+			
+			typeColumn = getTypeColumnForSELECT(ht, varName);
+			mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
+			
 			String langColumn = getLangColumnForSELECT(ht, varName,	index);
 			//String mainColumn = getMainColumnForSELECT(ht, varName, index, isAns1);
 
@@ -1322,6 +1327,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
 			 */
+			//TODO: DO NOT use magic numbers, extract them to constants
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
 				return (String.format(typeStr, 9, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
@@ -1347,7 +1353,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable){
 			//TODO guohui this is a hacky solution
-			return (String.format(typeStr, 0, varName));
+			return (String.format(typeStr, -1, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
@@ -1856,11 +1862,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			} else{
 				
-				String simpleTableViewName = String.format(VIEW_NAME, tableName,dataTableCount);
+				String simpleTableViewName = String.format(VIEW_NAME, tableName, String.valueOf(dataTableCount));
 				viewNames.put(atom, simpleTableViewName);
 			}
 			dataTableCount += 1;
-			viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
+			//viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
 			tableNames.put(atom, def.getName());
 
 			dataDefinitions.put(atom, def);

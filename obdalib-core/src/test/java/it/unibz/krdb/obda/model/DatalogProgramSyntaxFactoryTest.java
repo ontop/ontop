@@ -23,9 +23,10 @@ public class DatalogProgramSyntaxFactoryTest {
 		Predicate ans5 = predicate("ans5", 4);
 		Predicate people = predicate("people", 6);
 
+		//@formatter:off
 		DatalogProgram program = program(
 				// r1
-				rule(//
+				rule(
 				    func(ans1, uri(constant("http://www.example.org/test#{}"), var("t1_4")), rdfsLiteral(var("t2_2")),
 				    		rdfsLiteral(var("t5_3")), rdfsLiteral(var("t6_4"))),
 					leftJoin(
@@ -34,12 +35,13 @@ public class DatalogProgramSyntaxFactoryTest {
 						eq(var("pf1"), var("p5")))
 				),
 				// r2
-				rule(//
+				rule(
 				    func(ans4, uri(constant("http://www.example.org/test#{}"), var("t1_1"))), //
 					func(people, var("t1_1"), var("t2_1"), var("t3_1"), var("t4_1"), var("t5_1"), var("t6_1")), //
-					isNotNull(var("t1_1"))//
+					isNotNull(var("t1_1"))
 				)
 		);
+		//@formatter:on
 
 		System.out.println(program);
 
