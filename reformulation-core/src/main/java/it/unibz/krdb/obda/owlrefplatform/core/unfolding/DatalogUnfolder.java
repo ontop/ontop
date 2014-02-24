@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -1817,7 +1818,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					
 					
 					int fatherIdx=workingList.indexOf(fatherRule);
-					Stack<Integer> termidx = new Stack<Integer>();
 					List<CQIE> result = new LinkedList<CQIE>();
 					
 					//the terms where buPredicate should appear
@@ -1857,7 +1857,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
 							updateIndexesinTypes(workingList,srcIdx,depGraph,newSourceRuleList, srchead,sourceRule);
 							
-							//Update the indexes for the source query
+							//Update the indexes for the t query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
 							updateIndexesinTypes(workingList,fatherIdx,depGraph,result, fathead,fatherRule);
 							
@@ -1888,6 +1888,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * ans10(t2_2,t1_2) :- people(t1_2,t2_2,t3_2,t4_2,t5_2,t6_2)
 	 * </p>
 	 * 
+	 * 
+	 * TODO: Now it only handles atoms that have the same template, it will fail with things like
+	 * Ans(URI(... x))
+	 * Ans(Null)
+	 * or when the template has more than 1 variable, for instance
+	 * Ans(URI("http://...",x,y))
+	 * Solve!
 	 * @param sourceRule
 	 * @return
 	 */
@@ -1903,21 +1910,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Term> untypedArguments= new LinkedList<Term>();
 
 		for (Term t: typedArguments){
-			if (t instanceof Function){
-				//if it is a function, we add the inner variables and values
-				List<Term>  functionArguments = ((Function) t).getTerms();
-				Predicate functionSymbol = ((Function) t).getFunctionSymbol();
-				boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-				if (isURI){
-					//I need to remove the URI part and add the rest, usually the variables
-					functionArguments.remove(0);
-				}
-				untypedArguments.addAll(functionArguments);
-			}else if(t instanceof Variable){
-				untypedArguments.add(t);
-			}else if (t instanceof Constant){
-				untypedArguments.add(t);
-			}
+			getUntypedArgumentFromTerm(untypedArguments, t);
 
 		}
 
@@ -1932,6 +1925,30 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			//update bodies!!
 		}
 		return sourceRule;
+	}
+
+	/**
+	 * Takes a Term of the form Type(x) and returns the list [x]
+	 * @param untypedArguments
+	 * @param t
+	 */
+	private static void getUntypedArgumentFromTerm(List<Term> untypedArguments,
+			Term t) {
+		if (t instanceof Function){
+			//if it is a function, we add the inner variables and values
+			List<Term>  functionArguments = ((Function) t).getTerms();
+			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
+			boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
+			if (isURI){
+				//I need to remove the URI part and add the rest, usually the variables
+				functionArguments.remove(0);
+			}
+			untypedArguments.addAll(functionArguments);
+		}else if(t instanceof Variable){
+			untypedArguments.add(t);
+		}else if (t instanceof Constant){
+			untypedArguments.add(t);
+		}
 	}
 
 	
@@ -2005,18 +2022,82 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
-		mgu = Unifier.getMGU(sourceHead, targetAtom);
+		boolean oneWayMGU = true;
+		mgu = Unifier.getMGU(sourceHead, targetAtom,oneWayMGU);
 		
 		
 		if (mgu == null) {
 			return null;
 		}else{
+			Iterator vars = mgu.entrySet().iterator();
+			while (vars.hasNext()) {
+				Map.Entry<Variable, Term> pairs = (Map.Entry<Variable, Term>)vars.next();
+
+				Variable key = pairs.getKey();
+				Term value = pairs.getValue();
+
+				if (value instanceof Function){
+					//TODO: this HAS TO CHANGE!!! Since here we assume there is only 1 variable!!!
+
+					Set<Variable> varset =  value.getReferencedVariables();
+					Variable mvar;
+					if (!varset.isEmpty()){
+						mvar = varset.iterator().next();
+						Map<Variable, Term> minimgu = new HashMap<Variable,Term>();
+						minimgu.put(mvar, key);
+						Unifier.applyUnifier((Function)value, minimgu, false);
+					}
+				}
+
+			}
+
+			/*		//Generate the MGU for the body
+			Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
+			generateMGUforBody(mgu, bodymgu);*/
+
+
+			//applying unifers in head and body*/
+
+			//updating the rule head
+			/*			List<Function> newbody =  fatherRule.getBody();
+
+			 * 			Unifier.applyUnifier(newbody, bodymgu);
+			 **/
+
+			//updating the rule body
 			Function newHead = (Function) fatherRule.getHead();
-			
-			Unifier.applyUnifier(newHead, mgu, false);
+			Unifier.applySelectiveUnifier(newHead, mgu);
 			fatherRule.updateHead(newHead);
+
+
+			
+	
 			return fatherRule;
 		}
+	}
+
+	/**
+	 * Takes the MGU used for the head, and removes the types, leaves the variables
+	 * @param mgu
+	 * @param bodymgu
+	 */
+	private static void generateMGUforBody(Map<Variable, Term> mgu,
+			Map<Variable, Term> bodymgu) {
+		Iterator vars = mgu.entrySet().iterator();
+		  while (vars.hasNext()) {
+		        Map.Entry<Variable, Term> pairs = (Map.Entry<Variable, Term>)vars.next();
+		        
+		        Variable key = pairs.getKey();
+		        Term value = pairs.getValue();
+
+		        List<Term> untypedArguments=new LinkedList<Term>();
+				getUntypedArgumentFromTerm(untypedArguments, value);
+				
+				//TODO: this HAS TO CHANGE!!! Since here we assume there is only 1 variable!!!
+				Term untypedValue = untypedArguments.get(0);
+				bodymgu.put(key, untypedValue);
+		        
+		  }
 	}
 	
 	

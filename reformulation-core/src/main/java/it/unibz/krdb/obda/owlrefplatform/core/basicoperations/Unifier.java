@@ -48,9 +48,12 @@ import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /***
  * A Class that provides general utilities related to unification, of terms and
@@ -254,6 +257,47 @@ public class Unifier {
 	
 	
 	
+	
+	/**
+	 * This method differs from the previous one in that, if the term is URI(p), and we have the replacement
+	 * p=URI(p) then we remove that unification.
+	 * 
+	 * @param term
+	 * @param unifier
+	 * @param isEquality
+	 */
+	public static void applySelectiveUnifier(Function term,
+			Map<Variable, Term> unifier) {
+		List<Term> subTerms = term.getTerms();
+		
+		//cloning the keys of the unifer
+		Set<Variable> keys = unifier.keySet();
+		Set<Variable> keysCopy = new HashSet<Variable>();
+		Iterator vars = keys.iterator();
+		while (vars.hasNext()) {
+			keysCopy.add((Variable)vars.next());
+		}
+		
+		
+		//Removing duplicates
+		vars = keysCopy.iterator();
+		while (vars.hasNext()) {
+			Variable key =  (Variable)vars.next();
+			Term value = unifier.get(key);
+			if (subTerms.contains(value)){
+				unifier.remove(key);
+			}
+		}
+		
+		
+		applyUnifier(subTerms, term, unifier, false);
+	}
+	
+
+	
+	
+	
+	
 	/**
 	 * 
 	 * @param terms
@@ -281,6 +325,12 @@ public class Unifier {
 		}
 	}
 
+	
+	
+	public static Map<Variable, Term> getMGU(Function first,
+			Function second) {
+		return getMGU(first,second,false);
+	}
 	/***
 	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports
 	 * atoms with terms: Variable, URIConstant, ValueLiteral, ObjectVariableImpl
@@ -292,7 +342,7 @@ public class Unifier {
 	 * @return
 	 */
 	public static Map<Variable, Term> getMGU(Function first,
-			Function second) {
+			Function second , boolean oneWayMGU) {
 
 		/*
 		 * Basic case, predicates are different or their arity is different,
@@ -372,7 +422,8 @@ public class Unifier {
 					if (currentInnerTerm2 != null)
 						innerterm2 = currentInnerTerm2;
 
-					Substitution s = getSubstitution(innerterm1, innerterm2);
+					Substitution s= getSubstitution(innerterm1, innerterm2);
+					
 					if (s == null) {
 						return null;
 					}
@@ -386,9 +437,13 @@ public class Unifier {
 				/*
 				 * the normal case
 				 */
-
-				Substitution s = getSubstitution(term1, term2);
-
+				Substitution s = null;
+				if(!oneWayMGU){
+					s= getSubstitution(term1, term2);
+				}else{
+					 s = getOneWaySubstitution(term1, term2);
+				}
+				
 				if (s == null) {
 					return null;
 				}
@@ -527,6 +582,84 @@ public class Unifier {
 		throw new RuntimeException("Unsupported unification case: " + term1
 				+ " " + term2);
 	}
+	
+	
+	
+	
+	/**
+	 * This method differs from the method above in that, the previous finds a subtitutions f
+	 * such that f(t1)=f(t2) and this one finds an f such that f(t1)=t2
+	 * @param term1
+	 * @param term2
+	 * @return
+	 */
+	public static Substitution getOneWaySubstitution(Term term1,
+			Term term2) {
+
+		if (!(term1 instanceof VariableImpl)
+				&& !(term2 instanceof VariableImpl)) {
+			/*
+			 * none is a variable, impossible to unify unless the two terms are
+			 * equal, in which case there the substitution is empty
+			 */
+			if (isEqual(term1, term2))
+				return new NeutralSubstitution();
+			else
+				return null;
+		}
+
+		/* Arranging the terms so that the first is always a variable */
+		Term t1 = null;
+		Term t2 = null;
+
+		if (term1 instanceof VariableImpl) {
+			t1 = term1;
+			t2 = term2;
+		} else {
+			t1 = term2;
+			t2 = term1;
+		}
+
+		/*
+		 * Undistinguished variables do not need a substitution, the unifier
+		 * knows about this
+		 */
+		if ((t1 instanceof AnonymousVariable || t2 instanceof AnonymousVariable)) {
+			return new NeutralSubstitution();
+		}
+
+		if (t2 instanceof VariableImpl) {
+			if (isEqual(t1, t2)) {
+				return new NeutralSubstitution();
+			} else {
+				return new Substitution(t1, t2);
+			}
+		} else if (t2 instanceof ValueConstant) {
+			return new Substitution(t1, t2);
+		} else if (t2 instanceof URIConstantImpl) {
+			return new Substitution(t1, t2);
+		} else if (t2 instanceof FunctionalTermImpl) {
+			return new Substitution(t1, t2);
+		}
+		/* This should never happen */
+		throw new RuntimeException("Unsupported unification case: " + term1
+				+ " " + term2);
+	}
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	/***
 	 * A equality calculation based on the strings that identify the terms.
