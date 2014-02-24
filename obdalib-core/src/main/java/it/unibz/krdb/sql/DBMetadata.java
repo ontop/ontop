@@ -100,34 +100,36 @@ public class DBMetadata implements Serializable {
 	}
 
 	/**
-	 * Inserts a new data definition to this meta data object.
+	 * Inserts a new data definition to this meta data object. The name is
+	 * inserted without quotes so it can be used for the mapping, while the
+	 * value that is used also for the generated SQL conserves the quotes
 	 * 
 	 * @param value
 	 *            The data definition. It can be a {@link TableDefinition} or a
 	 *            {@link ViewDefinition} object.
 	 */
 	public void add(DataDefinition value) {
-		String name= value.getName();
-		//name without quotes
-		if(pQuotes.matcher(name).matches())
-			schema.put(name.substring(1,name.length()-1), value);
-		
-		else{
-			String[] names= name.split("\\."); //consider the case of schema.table
-			if (names.length==2){
-				String schemaName= names[0];
-				String tableName= names[1];
-					if(VisitedQuery.pQuotes.matcher(schemaName).matches())
-						schemaName= schemaName.substring(1,schemaName.length()-1);
-					if(VisitedQuery.pQuotes.matcher(tableName).matches())
-						tableName= tableName.substring(1,tableName.length()-1);
-				schema.put(schemaName+"."+tableName, value);
-			}
-				else
-					schema.put(name, value);
+		String name = value.getName();
+		// name without quotes
+		if (pQuotes.matcher(name).matches())
+			schema.put(name.substring(1, name.length() - 1), value);
+
+		else {
+			String[] names = name.split("\\."); // consider the case of
+												// schema.table
+			if (names.length == 2) {
+				String schemaName = names[0];
+				String tableName = names[1];
+				if (VisitedQuery.pQuotes.matcher(schemaName).matches())
+					schemaName = schemaName.substring(1,
+							schemaName.length() - 1);
+				if (VisitedQuery.pQuotes.matcher(tableName).matches())
+					tableName = tableName.substring(1, tableName.length() - 1);
+				schema.put(schemaName + "." + tableName, value);
+			} else
+				schema.put(name, value);
 		}
-				
-		
+
 	}
 
 	/**
@@ -155,8 +157,8 @@ public class DBMetadata implements Serializable {
 			def = schema.get(name.toLowerCase());
 		if (def == null)
 			def = schema.get(name.toUpperCase());
-//		if (def == null)
-//			def = schema.get(name.substring(1, name.length()-1));
+		// if (def == null)
+		// def = schema.get(name.substring(1, name.length()-1));
 		return def;
 	}
 
@@ -257,7 +259,7 @@ public class DBMetadata implements Serializable {
 	 * @return
 	 */
 	public String getFullQualifiedAttributeName(String name, int pos) {
-		
+
 		String value = String
 				.format("%s.%s", name, getAttributeName(name, pos));
 		return value;
