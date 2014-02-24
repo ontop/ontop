@@ -22,28 +22,26 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 /***
  * An optimizer that will eliminate equivalences implied by the ontology,
  * simplifying the vocabulary of the ontology. This allows to reduce the number
- * of inferences implied by the onotlogy and eliminating redundancy. The output
+ * of inferences implied by the ontology and eliminating redundancy. The output
  * is two components: a "equivalence map" that functional mapping from class
  * (property) expression to class (property) that can be used to retrieve the
  * class (property) of the optimized ontology that should be used instead of one
@@ -57,15 +55,67 @@ import java.util.Set;
  */
 public class EquivalenceTBoxOptimizer {
 
-	private Ontology optimalTBox = null;
-	private Map<Predicate, Description> equivalenceMap;
-	private Ontology tbox;
+	private Ontology optimizedTBox = null;
+	private Map<Predicate, Description> equivalenceMap  = null;
+	private TBoxReasonerImpl reasoner;
+	private Set<Predicate> originalVocabulary;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	public EquivalenceTBoxOptimizer(Ontology tbox) {
-		this.tbox = tbox;
-		equivalenceMap = new HashMap<Predicate, Description>();
+		originalVocabulary = tbox.getVocabulary();
+		reasoner = new TBoxReasonerImpl(tbox);
+	}
+
+	/**
+	 * the EquivalenceMap maps predicates to the representatives of their equivalence class (in TBox)
+	 * 
+	 * it contains 
+	 * 		- an entry for each property name other than the representative of an equivalence class 
+	 * 				(or its inverse)
+	 * 		- an entry for each class name other than the representative of its equivalence class
+	 */
+	
+	public Map<Predicate, Description> getEquivalenceMap() {
+		
+		if (equivalenceMap == null) {
+			equivalenceMap = new HashMap<Predicate, Description>();
+
+			for(Equivalences<Property> nodes : reasoner.getProperties()) {
+				Property prop = nodes.getRepresentative();
+				
+				for (Property equiProp : nodes) {
+					if (equiProp.equals(prop)) 
+						continue;
+
+					Property inverseProp = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
+					if (equiProp.equals(inverseProp))
+						continue;         // no map entry if the property coincides with its inverse
+
+					// if the property is different from its inverse, an entry is created 
+					// (taking the inverses into account)
+					if (equiProp.isInverse()) 
+						equivalenceMap.put(equiProp.getPredicate(), inverseProp);
+					else 
+						equivalenceMap.put(equiProp.getPredicate(), prop);
+				}
+			}
+			
+			for(Equivalences<BasicClassDescription> nodes : reasoner.getClasses()) {
+				BasicClassDescription node = nodes.getRepresentative();
+				for (BasicClassDescription equivalent : nodes) {
+					if (equivalent.equals(node)) 
+						continue;
+
+					if (equivalent instanceof OClass) {
+						// an entry is created for a named class
+						OClass equiClass = (OClass) equivalent;
+						equivalenceMap.put(equiClass.getPredicate(), node);
+					}
+				}
+			}			
+		}
+		return equivalenceMap;
 	}
 
 	/***
@@ -78,434 +128,54 @@ public class EquivalenceTBoxOptimizer {
 	 * its equivalent. Note that the equivalent of a class can only be another
 	 * class, an the equivalent of a property can be another property, or the
 	 * inverse of a property.
-	 * 
-	 *
 	 */
-	public void optimize() {
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(tbox, false);
-		DAGImpl impliedDAG = reasoner.getDAG();
-
-//		try {
-//			GraphGenerator.dumpISA(impliedDAG, "input");
-//		} catch (IOException e) {
-////			e.printStackTrace();
-//		}
-
-		/*
-		 * Processing all properties
-		 */
-		// Collection<Predicate> removedProperties = new HashSet<Predicate>();
-
-		Collection<Description> props = new HashSet<Description>(impliedDAG.vertexSet());
-		HashSet<Property> removedNodes = new HashSet<Property>();
-
-		for (Description desc : props) {
-			if (!(desc instanceof Property))
-				continue;
-
-			if (removedNodes.contains((Property) desc))
-				continue;
-
-//			Description rep=impliedDAG.getReplacements().get(desc); //check that the node is still the representative node
-//			if(rep!=null)
-//				desc=rep;
-			Property prop = (Property) desc;	
-			
-		/*
-		 * Clearing the equivalences of the domain and ranges of the cycle's
-		 * head
-		 */
-		
-		Description propNodeDomain =ofac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
-
-		Description propNodeRange = ofac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
-		
-		if (impliedDAG.containsVertex(propNodeDomain) & impliedDAG.getMapEquivalences().get(propNodeDomain)!=null )
-			impliedDAG.getMapEquivalences().remove(propNodeDomain);
-		if (impliedDAG.containsVertex(propNodeRange) & impliedDAG.getMapEquivalences().get(propNodeRange)!=null )
-			impliedDAG.getMapEquivalences().remove(propNodeRange);
-		
-
-			Collection<Description> equivalents = reasoner.getEquivalences(prop, false);
-			if(equivalents.size()>1)
-			for (Description equivalent : equivalents) {
-				if (removedNodes.contains(equivalent)|| equivalent.equals(prop)) {
-					
-					continue;
-				}
-
-				/*
-				 * each of the equivalents is redundant, we need to deal with
-				 * them and with their inverses!
-				 */
-
-				Property equiProp = (Property) equivalent;
-				Property inverseProp = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
-				if(equiProp.equals(inverseProp))
-					continue;
-
-				if (equiProp.isInverse()) {
-					/*
-					 * We need to invert the equivalent and the good property
-					 */			
-					
-					equivalenceMap.put(equiProp.getPredicate(), inverseProp);
-				} else {
-					equivalenceMap.put(equiProp.getPredicate(), prop);
-				}
-
-				
-				/*
-				 * Dealing with the inverses
-				 * 
-				 * We need to get the inverse node of the redundant one and
-				 * remove it, replacing pointers to the node of the inverse
-				 * current non redundant predicate
-				 */
-
-				Description nonredundandPropNodeInv = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
-
-				Description redundandEquivPropNodeInv = 
-						ofac.createProperty(equiProp.getPredicate(), !equiProp.isInverse());
-				
-
-				if (impliedDAG.containsVertex(redundandEquivPropNodeInv)) {
-					impliedDAG.addVertex(nonredundandPropNodeInv); //choose the representative inverse
-					
-//					for (Description child : redundandEquivPropNodeInv.getChildren()) {
-					for (Set<Description> children : reasoner.getDirectChildren(redundandEquivPropNodeInv, false)) {
-//						for(Description child:children){
-						Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getReplacements().get(firstChild);
-							if(child==null)
-								child=firstChild;
-							impliedDAG.removeAllEdges(child, redundandEquivPropNodeInv);
-							impliedDAG.addEdge(child, nonredundandPropNodeInv);
-						
-					}
-
-					for (Set<Description> parents : reasoner.getDirectParents(redundandEquivPropNodeInv, false)) {
-//						for(Description parent:parents){
-							Description firstParent=parents.iterator().next();
-							Description parent= impliedDAG.getReplacements().get(firstParent);
-							if(parent==null)
-								parent=firstParent;
-							impliedDAG.removeAllEdges(parent, redundandEquivPropNodeInv);
-							impliedDAG.addEdge(nonredundandPropNodeInv, parent);
-						
-					}
-					
-					
-					
-					impliedDAG.removeVertex(redundandEquivPropNodeInv);
-					
-					removedNodes.add((Property) redundandEquivPropNodeInv);
-					
-					//assign the new representative to the equivalent nodes
-					for(Description equivInverse: impliedDAG.getMapEquivalences().get(nonredundandPropNodeInv)){
-						if(equivInverse.equals(nonredundandPropNodeInv)){
-							impliedDAG.getReplacements().remove(nonredundandPropNodeInv);
-							continue;
-						}
-						impliedDAG.getReplacements().put(equivInverse, nonredundandPropNodeInv);
-					}
-					
-					impliedDAG.getMapEquivalences().remove(redundandEquivPropNodeInv);
-
-					
-//					removedNodes.add((Property) redundandEquivPropNodeInv);
-//					impliedDAG.removeVertex(redundandEquivPropNodeInv);
-				}
-
-				removedNodes.add((Property) equivalent);
-
-				
-				
-				impliedDAG.removeVertex(equivalent);
-
-			}
-			// We clear all equivalents!
-			
-
-			impliedDAG.getMapEquivalences().remove(prop);
-
-		}
-
-		/*
-		 * Replacing any \exists R for \exists S, in case R was replaced by S
-		 * due to an equivalence
-		 */
-
-		for (Property prop : removedNodes) {
-			if (prop.isInverse())
-				continue;
-			Predicate redundantProp = prop.getPredicate();
-			Property equivalent = (Property) equivalenceMap.get(redundantProp);
-
-			/* first for the domain */
-			Description directRedundantNode = ofac.getPropertySomeRestriction(redundantProp, false);
-			boolean containsNodeDomain=  impliedDAG.containsVertex(directRedundantNode);
-			if (containsNodeDomain) {
-				Description equivalentNode = ofac.getPropertySomeRestriction(equivalent.getPredicate(),
-						equivalent.isInverse());
-				impliedDAG.addVertex(equivalentNode); 
-				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null)
-				{
-					Set<Description> equivalences = impliedDAG.getMapEquivalences().get(equivalentNode);
-					equivalences.remove(directRedundantNode);
-					
-					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
-				}
-
-				
-					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode, false)) {
-						Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getReplacements().get(firstChild);
-							if(child==null)
-								child=firstChild;
-						if (!reasoner.getDirectChildren(equivalentNode, false).contains(child)) {
-							impliedDAG.addEdge(child, equivalentNode);
-						}
-						
-					}
-
-					for (Set<Description> parents : reasoner.getDirectParents(directRedundantNode,false)) {
-						Description firstParent=parents.iterator().next();
-						Description parent= impliedDAG.getReplacements().get(firstParent);
-						if(parent==null)
-							parent=firstParent;
-						if (!reasoner.getDirectParents(equivalentNode,false).contains(parent)) {
-							impliedDAG.addEdge(equivalentNode, parent);
-						}
-						
-					}
-				
-				
-				
-				
-				for(Description equivInverse: impliedDAG.getMapEquivalences().get(directRedundantNode)){
-					if(equivInverse.equals(equivalentNode)){
-							impliedDAG.getReplacements().remove(equivalentNode);
-						continue;
-					}
-					impliedDAG.getReplacements().put(equivInverse,equivalentNode);
-					
-				}
-				impliedDAG.getReplacements().remove(directRedundantNode);
-				impliedDAG.removeVertex(directRedundantNode);
-								
-
-//				equivalentNode.getDescendants().remove(directRedundantNode);
-			}
-
-			/* Now for the range */
-
-			directRedundantNode = ofac.getPropertySomeRestriction(redundantProp, true);
-			boolean  containsNodeRange = impliedDAG.containsVertex(directRedundantNode);
-			if (containsNodeRange) {
-				Description equivalentNode = ofac.getPropertySomeRestriction(equivalent.getPredicate(),
-						!equivalent.isInverse());
-				impliedDAG.addVertex(equivalentNode);
-				
-				if(impliedDAG.getMapEquivalences().get(equivalentNode)!= null){
-					Set<Description> equivalences = impliedDAG.getMapEquivalences().get(equivalentNode);
-					equivalences.remove(directRedundantNode);
-					
-					impliedDAG.getMapEquivalences().put(equivalentNode, equivalences);
-				}
-				
-
-				
-					for (Set<Description> children : reasoner.getDirectChildren(directRedundantNode, false)) {
-					Description firstChild=children.iterator().next();
-						Description child= impliedDAG.getReplacements().get(firstChild);
-						if(child==null)
-							child=firstChild;
-						if (!reasoner.getDirectChildren(equivalentNode, false).contains(child)) {
-							impliedDAG.addEdge(child, equivalentNode);
-						}
-						
-					}
-
-					for (Set<Description> parents : reasoner.getDirectParents(directRedundantNode,false)) {
-						Description firstParent=parents.iterator().next();
-						Description parent= impliedDAG.getReplacements().get(firstParent);
-						if(parent==null)
-							parent=firstParent;
-						if (!reasoner.getDirectParents(equivalentNode,false).contains(parent)) {
-							impliedDAG.addEdge(equivalentNode, parent);
-						}
-						
-					}
-				
-		
-
-				
-				for(Description equivInverse: impliedDAG.getMapEquivalences().get(directRedundantNode)){
-					if(equivInverse.equals(equivalentNode)){
-						impliedDAG.getReplacements().remove(equivalentNode);
-						continue;}
-					impliedDAG.getReplacements().put(equivInverse, equivalentNode);
-				}
-				impliedDAG.getReplacements().remove(directRedundantNode);
-				impliedDAG.removeVertex(directRedundantNode);
-
-//				equivalentNode.getDescendants().remove(directRedundantNode);
-			}
-		}
-		
-	
-		/*
-		 * Processing all classes
-		 */
-		Collection<OClass> classNodes = impliedDAG.getClasses();
-		for (OClass classNode : classNodes) {
-			if(impliedDAG.getReplacements().containsKey(classNode))
-				continue;
-			OClass classDescription = (OClass) classNode;
-
-			Collection<Description> redundantClasses = new LinkedList<Description>();
-			Collection<Description> replacements = new HashSet<Description>();
-
-			for (Description equivalentNode : reasoner.getEquivalences(classNode, false)) {
-				if(equivalentNode.equals(classNode))
-					continue;
-				Description descEquivalent = equivalentNode;
-				if (descEquivalent instanceof OClass) {
-					/*
-					 * Its a named class, we need to remove it
-					 */
-					OClass equiClass = (OClass) descEquivalent;
-					equivalenceMap.put(equiClass.getPredicate(), classDescription);
-					redundantClasses.add(equivalentNode);
-				} else {
-
-					/*
-					 * Its an \exists R, we need to make sure that it references
-					 * to the proper vocabulary
-					 */
-					PropertySomeRestriction existsR = (PropertySomeRestriction) descEquivalent;
-					Property prop = ofac.createProperty(existsR.getPredicate());
-					Property equiProp = (Property) equivalenceMap.get(prop);
-					if (equiProp == null)
-						continue;
-
-					/*
-					 * This \exists R indeed referes to a property that was
-					 * removed in the previous step and replace for some other
-					 * property S. we need to eliminate the \exists R, and add
-					 * an \exists S
-					 */
-					PropertySomeRestriction replacement = ofac.createPropertySomeRestriction(equiProp.getPredicate(), equiProp.isInverse());
-					redundantClasses.add(equivalentNode);
-
-					replacements.add(replacement);
-				}
-			}
-
-			if(impliedDAG.getMapEquivalences().get(classNode)!=null)
-			{
-				Set<Description> equivalences = impliedDAG.getMapEquivalences().get(classNode);
-				equivalences.removeAll(redundantClasses);
-				impliedDAG.getMapEquivalences().put(classNode, equivalences);
-			}
-			
-
-			
-			for (Description replacement : replacements){
-				
-				Set<Description> equivalences = impliedDAG.getMapEquivalences().get(classNode);
-				equivalences.add(replacement);
-				impliedDAG.getMapEquivalences().put(classNode, equivalences);
-				impliedDAG.getReplacements().put(replacement, classNode);
-			}
-
-		}
-
-//		try {
-//			GraphGenerator.dumpISA(impliedDAG, "output");
-//		} catch (IOException e) {
-////			e.printStackTrace();
-//		}
-		/*
-		 * Done with the simplificatino of the vocabulary, now we create the
-		 * optimized ontology
-		 */
-
-		optimalTBox = ofac.createOntology();
-		
-
-		for(Description node:impliedDAG.vertexSet()){
-			for (Set<Description> descendants: reasoner.getDescendants(node, false)){
-					Description firstDescendant=descendants.iterator().next();
-					Description descendant= impliedDAG.getReplacements().get(firstDescendant);
-					if(descendant==null)
-						descendant=firstDescendant;
-					Axiom axiom = null;
-					if(!descendant.equals(node)){
-					/*
-					 * Creating subClassOf or subPropertyOf axioms
-					 */
-					if (descendant instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) descendant, (ClassDescription) node
-								);
-					} else {
-;
-						axiom = ofac
-								.createSubPropertyAxiom((Property) descendant, (Property) node);
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					}
-				
-				
-			}
-			for(Description equivalent:reasoner.getEquivalences(node, false)){
-				if(!equivalent.equals(node)){
-					Axiom axiom = null;
-					if (node instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent);
-						
-					} else {
-						
-						axiom = ofac.createSubPropertyAxiom((Property) node, (Property) equivalent);
-						
-
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					
-					if (equivalent instanceof ClassDescription) {
-						axiom = ofac.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node);
-						
-					} else{
-						axiom = ofac.createSubPropertyAxiom((Property) equivalent, (Property) node);
-						
-					}
-					optimalTBox.addEntities(axiom.getReferencedEntities());
-					optimalTBox.addAssertion(axiom);
-					}
-				}
-			
-			
-		}
-
-		//
-		/*
-		 * Last, we add references to all the vocabulary of the previous TBox
-		 */
-		Set<Predicate> extraVocabulary = new HashSet<Predicate>();
-		extraVocabulary.addAll(tbox.getVocabulary());
-		extraVocabulary.removeAll(equivalenceMap.keySet());
-		optimalTBox.addEntities(extraVocabulary);
-
-	}
 
 	public Ontology getOptimalTBox() {
-		return this.optimalTBox;
-	}
+		
+		if (optimizedTBox == null) {
+			
+			optimizedTBox = ofac.createOntology();
+			getEquivalenceMap();
+			
+			TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 
-	public Map<Predicate, Description> getEquivalenceMap() {
-		return this.equivalenceMap;
+				@Override
+				public void onInclusion(Property sub, Property sup) {
+					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
+					if (!isInMap(sub) && !isInMap(sup)) {
+						Axiom axiom = ofac.createSubPropertyAxiom(sub, sup);
+						optimizedTBox.addEntities(axiom.getReferencedEntities());
+						optimizedTBox.addAssertion(axiom);	
+					}
+				}
+
+				@Override
+				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
+					if (!isInMap(sub) && !isInMap(sup)) {
+						Axiom axiom = ofac.createSubClassAxiom(sub, sup);
+						optimizedTBox.addEntities(axiom.getReferencedEntities());
+						optimizedTBox.addAssertion(axiom);	
+					}
+				}
+				
+				public boolean isInMap(Description desc) {
+					Predicate pred = VocabularyExtractor.getPredicate(desc);				
+					return ((pred != null) && equivalenceMap.containsKey(pred));			
+				}
+			});
+
+			// Last, add references to all the vocabulary of the original TBox
+			
+			Set<Predicate> extraVocabulary = new HashSet<Predicate>();
+			extraVocabulary.addAll(originalVocabulary);
+			extraVocabulary.removeAll(equivalenceMap.keySet());
+			optimizedTBox.addEntities(extraVocabulary);
+		}
+		
+		return optimizedTBox;
+	}
+	
+	public void optimize() {
 	}
 }

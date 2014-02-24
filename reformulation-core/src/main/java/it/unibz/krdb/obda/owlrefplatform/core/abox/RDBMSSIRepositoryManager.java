@@ -36,11 +36,11 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -49,18 +49,14 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
-import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
-import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -381,16 +377,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private Map<String, Integer> classIndexes = new HashMap<String, Integer>();
-
-	private Map<String, Integer> roleIndexes = new HashMap<String, Integer>();
-
-	private Map<Description, Description> equivalentIndex = new HashMap<Description, Description>();
-
-	private Map<String, List<Interval>> classIntervals = new HashMap<String, List<Interval>>();
-
-	private Map<String, List<Interval>> roleIntervals = new HashMap<String, List<Interval>>();
-
 	// Semantic Index URI reference structures
 	private HashMap<String, Integer> uriIds = new HashMap<String, Integer> (100000);
 	private HashMap <Integer, String> uriMap2 = new HashMap<Integer, String> (100000);
@@ -399,25 +385,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private Properties config;
 
-	private DAG dag;
+	private TBoxReasonerImpl reasonerDag;
 
-	 private DAG pureIsa;
-
-	private TBoxReasoner reasonerDag;
-	
-	private TBoxReasoner reasonerIsa;
-	
-	private SemanticIndexEngine engine;
+	private SemanticIndexCache cacheSI;
 	
 	private Ontology aboxDependencies;
 
 	private Ontology ontology;
 
 	private boolean isIndexed;
-
-	final static int CLASS_TYPE = 1;
-
-	final static int ROLE_TYPE = 2;
 
 	private static final boolean mergeUniions = false;
 
@@ -466,9 +442,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.config = config;
 	}
 
-	public DAG getDAG() {
-		return dag;
-	}
+//	public DAGImpl getDAG() {
+//		return dag;
+//	}
 
 	@Override
 	public void setTBox(Ontology ontology) {
@@ -486,72 +462,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Collecting relevant nodes for each role. For a Role P, the relevant
 		 * nodes are, the DAGNode for P, and the top most inverse children of P
 		 */
-
-		reasonerDag = new TBoxReasonerImpl(ontology,false);
 		
-		dag=reasonerDag.getDAG();
+		reasonerDag = new TBoxReasonerImpl(ontology);
 		
+		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
+				
+		cacheSI = new SemanticIndexCache(reasonerDag);
 		
-		//build the namedDag (or pureIsa)
-		NamedDAGBuilderImpl transform = new NamedDAGBuilderImpl(dag);
-		
-		pureIsa = transform.getDAG();
-		
-		reasonerIsa = new TBoxReasonerImpl(pureIsa);
-
-		aboxDependencies =  reasonerDag.getSigmaOntology();
-		
-
-		//create the indexes
-		engine= new SemanticIndexEngineImpl(reasonerIsa);
-		
-
-
-
-		/***
-		 * Copying the equivalences that might bet lost from the translation
-		 */
-		Map<Description,Description> isaEquivalences =pureIsa.getReplacements();
-		for (Description d : dag.getReplacements().keySet()) {
-			isaEquivalences.put(d, dag.getReplacements().get(d));
-			equivalentIndex.put(d, dag.getReplacements().get(d));
-		}
-		pureIsa.setReplacements(isaEquivalences);
-		
-		/*
-		 * Creating cache of semantic indexes and ranges
-		 */
-		Set<Description> descriptions = ((DAGImpl)pureIsa).vertexSet();
-		for (Description description : descriptions) {
-			if (description instanceof OClass) {
-
-				OClass cdesc = (OClass) description;
-				int idx = engine.getIndex(description);
-				List<Interval> intervals = engine.getIntervals(description);
-
-				String iri = cdesc.getPredicate().getName();
-				classIndexes.put(iri, idx);
-				classIntervals.put(iri, intervals);
-
-			} else if (description instanceof PropertyImpl) {
-				PropertyImpl cdesc = (PropertyImpl) description;
-
-				if (cdesc.isInverse()) {
-					/* Inverses don't get indexes or intervals */
-					continue;
-				}
-
-
-				int idx = engine.getIndex(description);
-
-				List<Interval> intervals = engine.getIntervals(description);
-
-				String iri = cdesc.getPredicate().getName();
-				roleIndexes.put(iri, idx);
-				roleIntervals.put(iri, intervals);
-
-			} 
-		}
 
 		// try {
 		// GraphGenerator.dumpISA(dag, "no-cycles");
@@ -720,7 +637,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					// dfac.getDataPropertyPredicate(prop);
 					// Property propDesc = ofac.createProperty(propPred);
 
-					int idx = getIndex(attributeABoxAssertion.getPredicate().getName(), 2);
+					int idx = cacheSI.getIndex(attributeABoxAssertion.getPredicate(), 2);
 					// Description node = pureIsa.getNode(propDesc);
 					//int idx = engine.getIndex(node);
 
@@ -781,9 +698,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
 					Property propDesc = ofac.createProperty(propPred);
 
-					if (dag.getReplacements().containsKey(propDesc)) {
-						Property desc = (Property) dag.getReplacements()
-								.get(propDesc);
+					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
+						Property desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -797,7 +713,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					//Description node = pureIsa.getNode(propDesc);
 					//int idx = engine.getIndex(node);
 
-					int idx = getIndex(roleABoxAssertion.getPredicate().getName(), 2);
+					int idx = cacheSI.getIndex(roleABoxAssertion.getPredicate(), 2);
 
 					out.append(String.format(role_insert_str, getQuotedString(uri1), getQuotedString(uri2), idx, c1isBNode, c2isBNode));
 
@@ -819,7 +735,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// Predicate clsPred = classAssertion.getConcept();
 				// ClassDescription clsDesc = ofac.createClass(clsPred);
 				//
-				int idx = getIndex(classAssertion.getPredicate().getName(), 1);
+				int idx = cacheSI.getIndex(classAssertion.getPredicate(), 1);
 
 				//Description node = pureIsa.getNode(clsDesc);
 				//int idx = engine.getIndex(node);
@@ -831,71 +747,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.flush();
 	}
 
-	/***
-	 * Returns the index (semantic index) for a class or property. The String
-	 * identifies a class if ype = 1, identifies a property if type = 2.
-	 * 
-	 * @param name
-	 * @param i
-	 * @return
-	 */
-	private int getIndex(String name, int type) {
-		if (type == 1) {
-			Integer index = classIndexes.get(name);
-		
-			if (index == null) {
-				/* direct name is not indexed, maybe there is an equivalent */
-				OClass c = (OClass)ofac.createClass(name);
-				OClass equivalent = (OClass)equivalentIndex.get(c);
-				return classIndexes.get(equivalent.getPredicate().getName());
-			}
-					
-			return index;
-		} else if (type == 2) {
-			Integer index = roleIndexes.get(name);
-			
-			if (index == null) {
-				/* direct name is not indexed, maybe there is an equivalent, we need to test
-				 * with object properties and data properties */
-				Property c = ofac.createObjectProperty(name);
-				Property equivalent = (Property)equivalentIndex.get(c);
-				
-				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
-				
-				if (index1 != null)
-					return index1;
-				
-				/* object property equivalent failed, we now look for data property equivalent */
-				
-				c = ofac.createDataProperty(name);
-				equivalent = (Property)equivalentIndex.get(c);
-				
-				index1 = roleIndexes.get(equivalent.getPredicate().getName());
-				return index1;
-			}
-			
-			return index;
-				
-		}
-		throw new RuntimeException("Could not find index for: String =  " + name + " type = " + type);
-	}
-
-	/***
-	 * Returns the intervals (semantic index) for a class or property. The String
-	 * identifies a class if type = 1, identifies a property if type = 2.
-	 * 
-	 * @param name
-	 * @param i
-	 * @return
-	 */
-	private List<Interval> getIntervals(String name, int type) {
-		if (type == 1) {
-			return classIntervals.get(name);
-		} else if (type == 2) {
-			return roleIntervals.get(name);
-		}
-		throw new RuntimeException("Could not find semantic index intervals for: String =  " + name + " type = " + type);
-	}
 
 	@Override
 	public void createDBSchema(Connection conn, boolean dropExisting) throws SQLException {
@@ -1069,9 +920,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				 */
 				int index = 0;
 				if (ax instanceof ClassAssertion) {
-					index = getIndex(ax.getPredicate().getName(), 1);
+					index = cacheSI.getIndex(ax.getPredicate(), 1);
 				} else {
-					index = getIndex(ax.getPredicate().getName(), 2);
+					index = cacheSI.getIndex(ax.getPredicate(), 2);
 				}
 				SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
 				nonEmptyEntityRecord.add(record);
@@ -1172,7 +1023,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			
 			boolean c1isBNode = subject instanceof BNode;
 
-			int idx = getAttributeIndex(predicate);
+			int idx = cacheSI.getIndex(predicate, 2);
 
 			// The insertion is based on the datatype from TBox
 			String value = object.getValue();
@@ -1293,7 +1144,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			uriidStm.addBatch();			
 
 			classStm.setInt(1, uri_id);
-			int conceptIndex = getConceptIndex(concept);
+			int conceptIndex = cacheSI.getIndex(concept, 1);
 			classStm.setInt(2, conceptIndex);
 			classStm.setBoolean(3, c1isBNode);
 			classStm.addBatch();
@@ -1332,28 +1183,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(Predicate role) {
 		Property property = ofac.createProperty(role);
-		if (dag.getReplacements().containsKey(property)) {
-			Property desc = (Property) dag.getReplacements().get(property);
-			if (desc.isInverse()) {
+		Property desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
+		if (!property.equals(desc)) {
+			if (desc.isInverse()) 
 				return true;
-			}
 		}
-		return false;
-	}
-
-	private int getConceptIndex(Predicate concept) {
-		return getIndex(concept.getName(), 1);
-		/* Integer idxc = indexes.get(concept);
-		if (idxc == null) {
-			ClassDescription description = ofac.createClass(concept);
-			Description node = pureIsa.getNode(description);
-			if (node == null) {
-				log.error("Found class without node: " + concept);
-			}
-			idxc = new Integer(engine.getIndex(node));
-			indexes.put(concept, idxc);
-		}
-		return idxc.intValue(); */
+		return false; // representative is never an inverse
 	}
 
 	/***
@@ -1653,11 +1488,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		// emptynessIndexes.put(hash1, false);
 	// } 
 
-	private int getAttributeIndex(Predicate attribute) {
-		return getIndex(attribute.getName(), 2);
-		
-	}
-
 	private String getBooleanString(String value) {
 		if (value.equalsIgnoreCase("t") || value.equals("1")) {
 			return "true";
@@ -1771,11 +1601,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
-		Description roleNode = dag.getNode(role);
-		Set<Set<Description>> ancestors = reasonerDag.getAncestors(roleNode, false);
+		Equivalences<BasicClassDescription> roleNode = reasonerDag.getClasses().getVertex(role);
+		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getClasses().getSuper(roleNode);
 
-		for (Set<Description> node : ancestors) {
-			for(Description desc: node)
+		for (Equivalences<BasicClassDescription> node : ancestors) {
+			for(BasicClassDescription desc: node)
 			{
 				if (desc instanceof DataType) {
 					DataType datatype = (DataType) desc;
@@ -1792,16 +1622,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public Ontology getABoxDependencies() {
 		return aboxDependencies;
 	}
-
+	
 	@Override
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
-		classIndexes.clear();
-		classIntervals.clear();
-		roleIndexes.clear();
-		roleIntervals.clear();
-
+		cacheSI.clear();
+		
 		nonEmptyEntityRecord.clear();
 
 
@@ -1815,14 +1642,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			String iri = string;
 			int idx = res.getInt(2);
 			int type = res.getInt(3);
-			if (type == 1) {
-				classIndexes.put(iri, idx);
-			} else if (type == 2) {
-				roleIndexes.put(iri, idx);
-			} else {
-				throw new RuntimeException("Error loading semantic index map. String type was " + type
-						+ ". Expected 1 for class or 2 for property.");
-			}
+			cacheSI.setIndex(iri, type, idx);
 		}
 		res.close();
 
@@ -1864,14 +1684,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				 * we switched URI or type, time to store the collected
 				 * intervals and clear the set
 				 */
-				if (previousType == 1) {
-					classIntervals.put(previousString, currentSet);
-				} else if (previousType == 2) {
-					roleIntervals.put(previousString, currentSet);
-				} else {
-					throw new RuntimeException("Error loading semantic index intervals. String type was " + previousType
-							+ ". Expected 1 for class or 2 for property.");
-				}
+				cacheSI.setIntervals(previousString, previousType, currentSet);
 
 				currentSet = new LinkedList<Interval>();
 				previousStringStr = iristr;
@@ -1883,14 +1696,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		}
 
-		if (previousType == 1) {
-			classIntervals.put(previousString, currentSet);
-		} else if (previousType == 2) {
-			roleIntervals.put(previousString, currentSet);
-		} else {
-			throw new RuntimeException("Error loading semantic index intervals. String type was " + previousType
-					+ ". Expected 1 for class or 2 for property.");
-		}
+		cacheSI.setIntervals(previousString, previousType, currentSet);
 
 		res.close();
 
@@ -1919,73 +1725,64 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-		// try {
-		// GraphGenerator.dumpISA(dag,"sidag");
-		// } catch (IOException e) {
-		// // e.printStackTrace();
-		// }
 
-		Set<Description> roleNodes = new HashSet<Description>();
-		Map<Description, List<Description>> roleInverseMaps = new HashMap<Description, List<Description>>();
+		Set<Property> roleNodes = new HashSet<Property>();
+//		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
-		Set<Predicate> roles = ontology.getRoles();
-		for (Predicate rolepred : roles) {
+		for (Predicate rolepred : ontology.getRoles()) {
 
-			Description node = dag.getNode(ofac.createProperty(rolepred));
+			Property node = reasonerDag.getProperties().getVertex(ofac.createProperty(rolepred)).getRepresentative();
 			// We only map named roles
-			if (!(node instanceof Property)
-					|| ((Property) node).isInverse()) {
+			if (node.isInverse()) 
 				continue;
-			}
+			
 			roleNodes.add(node);
-
-			List<Description> roleInverseChildren = roleInverseMaps.get(node);
+/*
+ 			CODE PRODEUCES A STRICTURE (roleInverseMaps) THAT IS NEVER USED
+ 
+			List<Property> roleInverseChildren = roleInverseMaps.get(node);
 			if (roleInverseChildren == null) {
-				roleInverseChildren = new LinkedList<Description>();
+				roleInverseChildren = new LinkedList<Property>();
 				roleInverseMaps.put(node, roleInverseChildren);
 			}
 
-			/*
-			 * collecting the top most inverse children, we do a bredth first
-			 * traversal, stopping a branch when we find an inverse child.
-			 * 
-			 * Collecting the top most allows us to avoid redundancy elimination
-			 */
-			Queue<Set<Description>> childrenQueue = new LinkedList<Set<Description>>();
-			childrenQueue.addAll(reasonerDag.getDirectChildren(node, false));
-			childrenQueue.add(reasonerDag.getEquivalences(node, false));
+			
+			//  collecting the top most inverse children, we do a bredth first
+			// traversal, stopping a branch when we find an inverse child.
+			// 
+			// Collecting the top most allows us to avoid redundancy elimination
+			//
+			EquivalencesDAG<Property> properties = reasonerDag.getProperties();
+			
+			Queue<Equivalences<Property>> childrenQueue = new LinkedList<Equivalences<Property>>();
+			childrenQueue.addAll(properties.getDirectSub(properties.getVertex(node)));
+			childrenQueue.add(properties.getVertex(node));
 
 
 			while (!childrenQueue.isEmpty()) {
-				Set<Description> children = childrenQueue.poll();
-				Description firstChild=children.iterator().next();
-				Description child=dag.getReplacements().get(firstChild);
-				if(child==null)
-					child=firstChild;
+				Equivalences<Property> children = childrenQueue.poll();
+				Property child = children.getRepresentative();
 				if(child.equals(node))
 					continue;
-				if ((child instanceof Property)
-						&& ((Property) child).isInverse()) {
+				
+				if (child.isInverse()) 
 					roleInverseChildren.add(child);
-				} else {
-					childrenQueue.addAll((reasonerDag.getDirectChildren(child, false)));
-				}
+				else 
+					childrenQueue.addAll(properties.getDirectSub(children));
 			}
 
-			/* Removing redundant nodes */
+			// Removing redundant nodes 
 
-			HashSet<Description> inverseRedundants = new HashSet<Description>();
-			for (Description inverseNode : roleInverseChildren) {
-				Property role = ((Property) inverseNode);
-				for (Description possibleRedundantNode : roleInverseChildren) {
-					Property possibleRedundantRole = ((Property) possibleRedundantNode);
-					if (reasonerDag.getDescendants(role, false)
-							.contains(possibleRedundantRole))
+			HashSet<Property> inverseRedundants = new HashSet<Property>();
+			for (Property inverseNode : roleInverseChildren) {
+				for (Property possibleRedundantNode : roleInverseChildren) {
+					if (properties.getSub(properties.getVertex(inverseNode))
+							.contains(possibleRedundantNode))
 						inverseRedundants.add(possibleRedundantNode);
 				}
 			}
 			roleInverseChildren.removeAll(inverseRedundants);
-
+*/
 		}
 
 		/*
@@ -2000,73 +1797,57 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		// TODO this part can be optimized if we know some existing dependencies
 		// (e.g., coming from given mappings)
 
-		Set<Description> classNodesMaps = new HashSet<Description>();
-		Map<Description, Set<Description>> classExistsMaps = new HashMap<Description, Set<Description>>();
+		Set<OClass> classNodesMaps = new HashSet<OClass>();
+//		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();		
+		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
 		
-		for (Description node : dag.getClasses()) {
-			if(dag.getReplacements().containsKey(node))
-
-
+		for (Equivalences<BasicClassDescription> set : classes) {
+			
+			BasicClassDescription node = set.getRepresentative();
+			
+			if (!(node instanceof OClass))
 				continue;
-
-			classNodesMaps.add(node);
-
-			Set<Description> existChildren = classExistsMaps.get(node);
-			if (existChildren == null) {
-				
-				existChildren = new HashSet<Description>();
+						
+			classNodesMaps.add((OClass)node);
+/*
+ 	
+ 			THIS CODE PRODUCES A STRUCTURE (existChildren) THAT IS NEVER USED
+ 	
+			Set<PropertySomeRestriction> existChildren = classExistsMaps.get(node);
+			if (existChildren == null) {			
+				existChildren = new HashSet<PropertySomeRestriction>();
 				classExistsMaps.put(node, existChildren);
 			}
 
-			/* Collecting Exists R children */
-			//consider also the equivalent of the node
-			for (Description child : reasonerDag.getEquivalences(node, false)) {
+			// collecting Exists R children
+			for (BasicClassDescription child : reasonerDag.getClasses().getVertex(node)) 		
+				if (child instanceof PropertySomeRestrictionImpl && !child.equals(node)) 
+					existChildren.add((PropertySomeRestriction)child);
 				
-				if (child instanceof PropertySomeRestrictionImpl& !(child.equals(node))) {
-					existChildren.add(child);
-				}
 				
-			}
-			for (Set<Description> children : reasonerDag.getDescendants(node, false)) {
-				for (Description child:children){
+			for (Equivalences<BasicClassDescription> children : classes.getSub(classes.getVertex(node))) 
+				for (BasicClassDescription child : children)
+					if (child instanceof PropertySomeRestrictionImpl) 
+						existChildren.add((PropertySomeRestriction)child);
+				
 
-				if (child instanceof PropertySomeRestrictionImpl) {
-					existChildren.add(child);
-				}
-				}
-			}
+			
+			 // Cleaning exists children (removing any exists R implied by the role hierarchy)
+			Set<PropertySomeRestriction> redundantNodes = new HashSet<PropertySomeRestriction>();
+			for (PropertySomeRestriction cES : existChildren) {
+				Property rS = ofac.createProperty(cES.getPredicate(), cES.isInverse());
+				Equivalences<Property> vS = reasonerDag.getProperties().getVertex(rS);
+				Set<Equivalences<Property>> subS = reasonerDag.getProperties().getSub(vS);
 
-			/*
-			 * Cleaning exists children (removing any exists R implied by the
-			 * role hierarchy )
-			 */
-			// Set<DAGNode> existChildren = classExistsMaps.get(node);
-			Set<Description> redundantNodes = new HashSet<Description>();
-			for (Description existsnode : existChildren) {
-				/* Here we have ES */
-				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode;
-				Property role = ofac.createProperty(existsDesc.getPredicate(),
-						existsDesc.isInverse());
-				Description roleNode = dag.getNode(role);
-
-				for (Description possiblyRedundantNode : existChildren) {
-					/* Here we have ER */
-					PropertySomeRestriction existsDesc2 = (PropertySomeRestriction) possiblyRedundantNode;
-					Property role2 = ofac
-							.createProperty(existsDesc2.getPredicate(),
-									existsDesc2.isInverse());
-					Description roleNode2 = dag.getNode(role2);
-
-					for(Set<Description> descendants: reasonerDag.getDescendants(roleNode, false)){
-						if(descendants.contains(roleNode2))
-						/*
-						 * The DAG implies that R ISA S, so we remove ER
-						 */
-						redundantNodes.add(possiblyRedundantNode);
-					}
+				for (PropertySomeRestriction cER : existChildren) {
+					Property rR = ofac.createProperty(cER.getPredicate(), cER.isInverse());
+					Equivalences<Property> vR = reasonerDag.getProperties().getVertex(rR);
+					if (!vS.equals(vR) && subS.contains(vR))
+						redundantNodes.add(cER); // DAG implies that R ISA S, so we remove ER
 				}
 			}
 			existChildren.removeAll(redundantNodes);
+*/
 		}
 
 		/*
@@ -2085,10 +1866,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
 
-		for (Description roleNode : roleNodes) {
-
-			// Get the description of the role node, i.e., a Property object.
-			Property property = (Property) roleNode;
+		for (Property property : roleNodes) {
 
 			// Get the property predicate
 			Predicate role = property.getPredicate();
@@ -2273,10 +2051,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		
 
-		for (Description classNode : classNodesMaps) {
+		for (OClass classNode : classNodesMaps) {
 
-			Predicate classuri = ((OClass) classNode)
-					.getPredicate();
+			Predicate classuri = classNode.getPredicate();
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 
@@ -2286,7 +2063,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
 			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
-
 			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 			
 			/*
@@ -2323,7 +2099,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			
 
 
-			List<Interval> intervals = getIntervals(classuri.getName(), 1);
+			List<Interval> intervals = cacheSI.getIntervals(classuri.getName(), 1);
 			if (intervals == null) {
 				log.warn("Found URI with no mappings, the ontology might not match the respository. Ill URI: {}", classuri.getName());
 				continue;
@@ -2451,7 +2227,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			table = SITable.DPROPStri;
 
 		boolean empty = true;
-		List<Interval> intervals = getIntervals(iri, classPredicate);
+		List<Interval> intervals = cacheSI.getIntervals(iri, classPredicate);
 
 		for (Interval interval : intervals) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
@@ -2613,7 +2389,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = getIntervals(predicate.getName(), 2);
+		List<Interval> intervals = cacheSI.getIntervals(predicate.getName(), 2);
 		if (intervals == null)
 			throw new OBDAException("Could not create mapping for predicate: " + predicate.getName()
 					+ ". Couldn not find semantic index intervals for the predicate.");
@@ -3250,18 +3026,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			/* inserting index data for classes and roles */
 
-			for (String concept : classIndexes.keySet()) {
+			for (String concept : cacheSI.getIndexKeys(SemanticIndexCache.CLASS_TYPE)) {
 				stm.setString(1, concept.toString());
-				stm.setInt(2, classIndexes.get(concept));
-				stm.setInt(3, CLASS_TYPE);
+				stm.setInt(2, cacheSI.getIndex(concept, SemanticIndexCache.CLASS_TYPE));
+				stm.setInt(3, SemanticIndexCache.CLASS_TYPE);
 				stm.addBatch();
 			}
 			stm.executeBatch();
 
-			for (String role : roleIndexes.keySet()) {
+			for (String role : cacheSI.getIndexKeys(SemanticIndexCache.ROLE_TYPE)) {
 				stm.setString(1, role.toString());
-				stm.setInt(2, roleIndexes.get(role));
-				stm.setInt(3, ROLE_TYPE);
+				stm.setInt(2, cacheSI.getIndex(role, SemanticIndexCache.ROLE_TYPE));
+				stm.setInt(3, SemanticIndexCache.ROLE_TYPE);
 				stm.addBatch();
 			}
 			stm.executeBatch();
@@ -3273,23 +3049,23 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 */
 
 			stm = conn.prepareStatement(insert_interval_query);
-			for (String concept : classIntervals.keySet()) {
-				for (Interval it : classIntervals.get(concept)) {
+			for (String concept : cacheSI.getIntervalsKeys(SemanticIndexCache.CLASS_TYPE)) {
+				for (Interval it : cacheSI.getIntervals(concept, SemanticIndexCache.CLASS_TYPE)) {
 					stm.setString(1, concept.toString());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
-					stm.setInt(4, CLASS_TYPE);
+					stm.setInt(4, SemanticIndexCache.CLASS_TYPE);
 					stm.addBatch();
 				}
 			}
 			stm.executeBatch();
 
-			for (String role : roleIntervals.keySet()) {
-				for (Interval it : roleIntervals.get(role)) {
+			for (String role : cacheSI.getIntervalsKeys(SemanticIndexCache.ROLE_TYPE)) {
+				for (Interval it : cacheSI.getIntervals(role, SemanticIndexCache.ROLE_TYPE)) {
 					stm.setString(1, role.toString());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
-					stm.setInt(4, ROLE_TYPE);
+					stm.setInt(4, SemanticIndexCache.ROLE_TYPE);
 					stm.addBatch();
 				}
 			}
