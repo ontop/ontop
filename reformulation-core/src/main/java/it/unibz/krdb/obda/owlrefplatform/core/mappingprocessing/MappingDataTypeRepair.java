@@ -137,8 +137,8 @@ public class MappingDataTypeRepair {
 		Object[] o = list.get(0);
 		Function atom = (Function) o[0];
 		Integer pos = (Integer) o[1];
-
-		Predicate functionSymbol = atom.getPredicate();
+		
+		Predicate functionSymbol = atom.getFunctionSymbol();
 		String tableName = functionSymbol.toString();
 		DataDefinition tableMetadata = metadata.getDefinition(tableName);
 

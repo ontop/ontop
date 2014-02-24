@@ -1404,7 +1404,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			dataTableCount += 1;
 			viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
-			tableNames.put(atom, tableName);
+			tableNames.put(atom, def.getName());
 			dataDefinitions.put(atom, def);
 			
 			indexVariables(atom);
