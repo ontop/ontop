@@ -304,7 +304,7 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 	}
-
+ 
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
 	 * uri or var logic Returns the result set for the given query
