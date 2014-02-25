@@ -73,12 +73,17 @@ public class LeftJoinTestVirtual extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
-		String username = "sa";
-		String password = "";
+		//String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
+		//String username = "sa";
+		//String password = "";
+
+		
+		String url = "jdbc:mysql://obdalin3:3306/optional_test";
+		String username = "fish";
+		String password = "fish";
 
 		fac = OBDADataFactoryImpl.getInstance();
-
+/*
 		conn = DriverManager.getConnection(url, username, password);
 		log.debug("Creating in-memory DB and inserting data!");
 		Statement st = conn.createStatement();
@@ -94,7 +99,7 @@ public class LeftJoinTestVirtual extends TestCase {
 		st.executeUpdate(bf.toString());
 		conn.commit();
 		log.debug("Data loaded!");
-
+*/
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));

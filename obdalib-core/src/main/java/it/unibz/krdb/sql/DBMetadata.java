@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -429,8 +430,15 @@ public class DBMetadata implements Serializable {
 		SQLQueryTranslator translator = new SQLQueryTranslator();
 		visitedQuery = translator.constructParserNoView(sqlString);
 		
-		//visitedQuery = new VisitedQuery(sqlString);
 		columns = visitedQuery.getColumns();
+
+		return createViewDefinition(name, sqlString, columns);
+	}
+
+	public ViewDefinition createViewDefinition(String name, String sqlString,
+			Collection<String> columns) {
+
+		
 
 		ViewDefinition vd = new ViewDefinition(name);
 		vd.setSQL(sqlString);
@@ -443,7 +451,5 @@ public class DBMetadata implements Serializable {
 
 		return vd;
 	}
-
-
 
 }
