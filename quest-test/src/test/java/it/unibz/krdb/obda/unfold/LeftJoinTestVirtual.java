@@ -235,8 +235,10 @@ public class LeftJoinTestVirtual extends TestCase {
 		while (rs.nextRow()) {
 			count++;
 			for (int i = 1; i <= rs.getColumCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
+				String varName = rs.getSignature().get(i-1);
+				System.out.print(varName);
+				//System.out.print("=" + rs.getOWLObject(i));
+				System.out.print("=" + rs.getOWLObject(varName));
 				System.out.print(" ");
 			}
 			System.out.println();
