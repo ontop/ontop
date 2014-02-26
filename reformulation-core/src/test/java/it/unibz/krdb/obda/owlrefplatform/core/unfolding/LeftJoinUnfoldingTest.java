@@ -29,11 +29,18 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.util.ArrayList;
 
+import org.junit.Ignore;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 import junit.framework.TestCase;
 
-public class LeftJoinUnfoldingTest extends TestCase {
+public class LeftJoinUnfoldingTest{
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
+	@Ignore
 	public void testUnfoldingWithMultipleSuccessfulResolutions() {
 
 		// query rule
@@ -80,6 +87,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		assertTrue(result.getRules().get(0).getBody().size() == 1);
 	}
 
+	@Ignore
 	public void testUnfoldingWithMultipleSuccessfulResolutionsAndMultipleUnfoldableAtomsBeforeAndAfterLeftJoin() {
 
 		// query rule
@@ -133,6 +141,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		assertTrue(result.getRules().get(1).getBody().size() == 4);
 	}
 
+	@Ignore
 	public void testUnfoldingWithNoSuccessfulResolutions() {
 		// query rule q(x,y) :- LF(A(x), R(x,y)
 		
@@ -179,6 +188,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		assertTrue(result.getRules().get(0).getBody().size() == 1);
 	}
 
+	@Ignore
 	public void testUnfoldingWithOneSuccessfulResolutions() {
 			// query rule q(x,y) :- LF(A(x), R(x,y)
 			

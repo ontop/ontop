@@ -130,18 +130,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private Multimap<Predicate, CQIE> ruleIndex;
 
-	// private List<Function> ansViews = new LinkedList<Function>();
-	/*
-	 * The map of predicates to the canonical atoms.
-	 * 
-	 * In the canoical atoms, all the variables are in a function of URI
-	 * template or datatype
-	 * 
-	 * For instance : ans5 -> ans5(rdf:Literal(name), URI(":{}", id),
-	 * xsd:integer(salary))
-	 */
-	// private Map<Predicate, Term> predicateCanonicalAtoms;
-
 	private Map<Predicate, String> sqlAnsViewMap;
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
@@ -187,14 +175,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	@Override
 	public String generateSourceQuery(DatalogProgram queryProgram, List<String> signature) throws OBDAException {
 
-		/*
-		 * normalize the program before generating the SQL
-		 */
-		// queryProgram =
-		// DatalogNormalizer.normalizeDatalogProgram(queryProgram);
-
-		// generatePredicateCanonicalAtomsMap(queryProgram);
-
 		normalizeProgram(queryProgram);
 
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
@@ -239,101 +219,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * Generates the map of predicates to their canonical atoms.
-	 * 
-	 * In the canonical atoms, all the variables are in a function of URI
-	 * template or datatype
-	 * 
-	 * For instance : ans5 -> ans5(rdf:Literal(name), URI(":{}", id),
-	 * xsd:integer(salary))
-	 * 
-	 * 
-	 * @param queryProgram
-	 */
-	// private void generatePredicateCanonicalAtomsMap(DatalogProgram
-	// queryProgram) {
-	//
-	// predicateCanonicalAtoms = Maps.newHashMap();
-	//
-	// OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-	//
-	// Set<Predicate> finishedPredicates = Sets.newHashSet();
-	//
-	// for(CQIE rule : queryProgram.getRules() ){
-	// Queue<Term> queue = new LinkedList<Term>(rule.getBody());
-	//
-	// while (!queue.isEmpty()) {
-	// Term qHead = queue.poll();
-	// if (qHead instanceof Function) {
-	// Function func = (Function) qHead;
-	//
-	// if (func.isBooleanFunction() || func.isArithmeticFunction()
-	// || func.isDataTypeFunction()
-	// || func.isAlgebraFunction()) {
-	// queue.addAll(func.getTerms());
-	// } else if (func.isDataFunction()) {
-	//
-	// Predicate predicate = func.getFunctionSymbol();
-	//
-	// if(finishedPredicates.contains(predicate))
-	// continue;
-	//
-	// List<CQIE> dependents = queryProgram.getRules(predicate);
-	//
-	// if(dependents.isEmpty()){
-	// /*
-	// * don't care extentional predicates
-	// */
-	// continue;
-	// }
-	//
-	// List<Term> canonicalTerms = Lists.newArrayList();
-	// int arity = predicate.getArity();
-	// for(int i = 0; i < arity; i++){
-	// Term term = func.getTerm(i);
-	//
-	// if(isTyped(term)){
-	// canonicalTerms.add(term);
-	// continue;
-	// }
-	//
-	// for(CQIE r : dependents){
-	// term = r.getHead().getTerm(i);
-	// if(isTyped(term)){
-	// canonicalTerms.add(term);
-	// break;
-	// }
-	// }
-	//
-	// /*
-	// * FIXME: when no matched term found
-	// */
-	//
-	// }
-	//
-	// /*
-	// * TODO: put meaningful variable names
-	// */
-	//
-	// predicateCanonicalAtoms.put(predicate, factory.getFunction(predicate,
-	// canonicalTerms));
-	//
-	// finishedPredicates.add(predicate);
-	//
-	// }
-	// } else /* !(queueHead instanceof Function) */{
-	// // NO-OP
-	// }
-	// }
-	//
-	//
-	// }
-	//
-	// }
-
 	private boolean isTyped(Term term) {
 		return !(term instanceof Variable) && !(term instanceof ValueConstant);
 	}
@@ -366,8 +251,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *            This is a arbitrary Datalog Program. In this program ans
 	 *            predicates will be translated to Views.
 	 * 
-	 *            NOTE (xiao): actually current implementation only handles
-	 *            Datalog programs that have a tree-like dependency graph
 	 * 
 	 * @param signature
 	 *            The Select variables in the SPARQL query
@@ -480,10 +363,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature, boolean isAns1) throws OBDAException
 	{
-		// for (CQIE cq : query.getRules()) {
-
-		// normalizeRule(cq);
-
 		QueryAliasIndex index = new QueryAliasIndex(cq);
 
 		boolean innerdistincts = false;
@@ -942,6 +821,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		// if (processShared)
 
 		// guohui: After normalization, do we have shared variables?
+		// TODO: should we remove this ??
 		LinkedHashSet<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(atoms,
 				index, processShared);
 		equalityConditions.addAll(conditionsSharedVariablesAndConstants);
