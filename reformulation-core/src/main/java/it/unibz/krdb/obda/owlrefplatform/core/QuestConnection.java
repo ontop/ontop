@@ -51,9 +51,6 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public void close() throws OBDAException {
 		try {
-			//isClosed = true;
-			//System.out.println("Closing Connection:" + this.conn.toString());
-			//this.conn.close();
 			questinstance.releaseSQLPoolConnection(conn);		
 		} catch (Exception e) {
 			throw new OBDAException(e);
@@ -64,11 +61,10 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public QuestStatement createStatement() throws OBDAException {
 		try {
-			//System.out.println("Creating Statement...");
-			//conn = questinstance.getSQLPoolConnection();
-			//System.out.println("Pool Connection:" + conn.toString());
-			//isClosed = false;
-			// create statement
+			if (conn.isClosed()) {
+				// Sometimes it gets dropped, reconnect
+				conn = questinstance.getSQLPoolConnection();
+			}
 			QuestStatement st = new QuestStatement(this.questinstance, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 							java.sql.ResultSet.CONCUR_READ_ONLY));
@@ -80,45 +76,7 @@ public class QuestConnection implements OBDAConnection {
 			throw obdaException;
 		}
 	}
-
-	
-	
-//	@Override
-//	public QuestStatement createStatement() throws OBDAException {
-//		//System.out.println("Creating Statement...");
-//		try {
-//			QuestStatement st = new QuestStatement(this.questinstance,
-//						this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-//								java.sql.ResultSet.CONCUR_READ_ONLY));
-//				return st;
-//		} catch (SQLException e) {
-//			
-//			System.out.println("Error creating the statement: " + e.getMessage());
-//			// statement was closed, connection broken, recreate
-//			try {
-//				if (conn.isClosed()) {
-//					//recreate sql connection
-//					conn = questinstance.getSQLPoolConnection();
-//					//isClosed = false;
-//					//create statement again once
-//					QuestStatement st = new QuestStatement(this.questinstance,
-//							this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-//									java.sql.ResultSet.CONCUR_READ_ONLY));
-//					return st;
-//				} else {
-//					OBDAException obdaException = new OBDAException(e.getMessage());
-//					obdaException.setStackTrace(e.getStackTrace());
-//					throw obdaException;
-//				}
-//			} catch (SQLException e1) {
-//				OBDAException obdaException = new OBDAException(e1.getMessage());
-//				obdaException.setStackTrace(e1.getStackTrace());
-//				throw obdaException;
-//			}
-//		}
-//
-//	}
-
+		
 	@Override
 	public void commit() throws OBDAException {
 		try {
