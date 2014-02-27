@@ -545,6 +545,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+			List<Predicate> predicatesMightGotEmpty = new LinkedList<Predicate>();
 
 			boolean includeMappings=true;
 			boolean keepLooping=true;
@@ -593,6 +594,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
 						} else{
 							System.out.println("Empty:"+pred);
+							predicatesMightGotEmpty.add(preFather);
 							keepLooping = updateNullIndexes(depGraph, pred, preFather,  fatherRule,  workingList);
 						}
 					} //end for father collection
@@ -606,11 +608,161 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				}while(keepLooping);
 			}
 			
-			
+			List<Predicate> touchedPredicates = new LinkedList<Predicate>();
+			while (!predicatesMightGotEmpty.isEmpty()){
+				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, depGraph, predicatesMightGotEmpty, touchedPredicates);
+			}
 
 			// I add to the working list all the rules touched by the unfolder!
-			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
-				Predicate pred = extensionalPredicates.get(predIdx);
+			addNewRules2WorkingListFromBodyAtoms(workingList, depGraph,	extensionalPredicates);
+			addNewRules2WorkingListFromHeadAtoms(workingList, depGraph,	touchedPredicates);
+			System.out.println(workingList);
+
+		}
+
+		/**
+		 * It search for the empty predicates that got empty during the unfolding of the existencional 
+		 * predicates, and either generate the right rule for the LJ, or delete de rules. 
+		 * Returns the predicates that have been deleted.
+		 * 
+		 * @param workingList
+		 * @param depGraph
+		 * @param predicatesMightGotEmpty
+		 * @param touchedPredicates 
+		 */
+		private 	List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
+				DatalogDependencyGraphGenerator depGraph,
+				List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates) {
+			//TODO: this is not optimal. The best would be that the generateNullBinding takes care of this
+			
+			//This loop is to update the ans rules that could be affected by the elimination of
+			//some rule in the bottom part of the problem because of the lack of mappings for instance.
+			
+			//in the next variable we keep the head of the rules that we delete
+			List<Predicate> deletedPredicates = new LinkedList<Predicate>();
+			
+			for (Predicate predEmpty : predicatesMightGotEmpty ) {
+
+				Collection<CQIE> predRules = ruleIndex.get(predEmpty);
+
+				//if it is not empty I do nothing
+				if (predRules.isEmpty()){
+					
+					Collection<CQIE> ruleCollection = ruleIndexByBody.get(predEmpty);
+
+					List<CQIE> fatherCollection = new LinkedList<CQIE>();
+					cloneRules(fatherCollection, ruleCollection);
+
+					for (CQIE fatherRule:  fatherCollection) {
+						
+						List<Function>currentTerms = fatherRule.getBody();
+						
+						
+						//I have to find the stack pointing to the atom
+						Stack<Integer> termidx = new Stack<Integer>();
+
+						boolean isLeftJoinSecondArgument[] = {false};
+						
+						termidx = getStackfromPredicate(predEmpty,currentTerms, termidx, false, isLeftJoinSecondArgument);
+						
+						Predicate fatherpred = fatherRule.getHead().getFunctionSymbol();
+					
+						//if it is the second argument of a LJ, it add the null bindings and produce the new rule
+						if (isLeftJoinSecondArgument[0]){
+							CQIE newrule = generateNullBindingsForLeftJoin(fatherRule,termidx);
+							List<CQIE> result = new LinkedList<CQIE>();
+							System.out.println(newrule);
+							result.add(newrule);
+							updateIndexes(depGraph, predEmpty, fatherpred, result, fatherRule,  workingList);
+							touchedPredicates.add(fatherpred);
+						} else{
+							//here I remove fatherRule, since it is either a join, or it is the first argument of the LJ
+							System.out.println("deleting"+fatherpred);
+							
+							updateNullIndexes(depGraph, predEmpty, fatherpred,  fatherRule,  workingList);
+							deletedPredicates.add(fatherpred);
+							
+						}
+					}
+				}
+
+
+			}//end for
+			return deletedPredicates;
+		}
+
+		/**
+		 * This Method will search in the rule trying to find  where predEmpty is, and return the stack
+		 * 
+		 * @param predEmpty 
+		 * @param currentTerms
+		 * @param termidx 
+		 * @return
+		 */
+		private Stack<Integer> getStackfromPredicate(Predicate predEmpty, List<Function> currentTerms, Stack<Integer> termidx, boolean parentIsLeftJoin, boolean[] isLeftJoinSecondArgument) {
+			int nonBooleanAtomCounter = 0;
+
+
+			for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
+				Function focusedLiteral=currentTerms.get(atomIdx);
+
+				if (focusedLiteral.isBooleanFunction() || focusedLiteral.isArithmeticFunction() || focusedLiteral.isDataTypeFunction()) {
+					continue;
+
+				} else if (focusedLiteral.isAlgebraFunction()) {
+					nonBooleanAtomCounter += 1;
+					/*
+					 * These may contain data atoms that need to be unfolded, we
+					 * need to recursively unfold each term.
+					 */
+
+					Predicate predicate = focusedLiteral.getFunctionSymbol();
+					boolean focusedAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+
+
+
+					List<Function> mylist = new LinkedList<Function>();
+					//TODO: Try to remove this!!!!
+					for (Term t:focusedLiteral.getTerms()){
+						mylist.add((Function) t);
+					}
+					termidx.push(atomIdx);
+					termidx  = getStackfromPredicate(predEmpty, mylist, termidx, focusedAtomIsLeftJoin, isLeftJoinSecondArgument );
+
+			     } else if (focusedLiteral.isDataFunction()) {
+	                    nonBooleanAtomCounter += 1;
+
+	                    /*
+	                     * This is a data atom, it should be unfolded with the usual
+	                     * resolution algorithm.
+	                     */
+						
+	                    Predicate pred = focusedLiteral.getFunctionSymbol();
+	                    
+	                    if (pred.equals(predEmpty)) {
+		                     isLeftJoinSecondArgument[0] = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
+		 					termidx.push(atomIdx);
+
+		         			return termidx;
+
+	                    }
+				}//end if
+				
+			}//end for
+			return termidx;
+		}
+
+		/**
+		 * I add to the working list all the rules touched by the unfolder w.r.t. mappings
+		 * @param workingList
+		 * @param depGraph
+		 * @param predicatesToAdd
+		 */
+		private void addNewRules2WorkingListFromBodyAtoms(List<CQIE> workingList,
+				DatalogDependencyGraphGenerator depGraph,
+				List<Predicate> predicatesToAdd) {
+			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
+				Predicate pred = predicatesToAdd.get(predIdx);
 				Predicate preFather =  depGraph.getFatherPredicate(pred);
 
 				Collection<CQIE> rulesToAdd= ruleIndex.get(preFather);
@@ -622,9 +774,44 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				}
 
 			}
-			
-
 		}
+
+		/**
+		 * I add to the working list all the rules touched by the unfolder w.r.t. mappings
+		 * @param workingList
+		 * @param depGraph
+		 * @param predicatesToAdd
+		 */
+		private void addNewRules2WorkingListFromHeadAtoms(List<CQIE> workingList,
+				DatalogDependencyGraphGenerator depGraph,
+				List<Predicate> predicatesToAdd) {
+			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
+				Predicate pred = predicatesToAdd.get(predIdx);
+
+				Collection<CQIE> rulesToAdd= ruleIndex.get(pred);
+
+				for (CQIE resultingRule: rulesToAdd){
+					if (!workingList.contains(resultingRule)){
+						workingList.add(resultingRule);
+					}
+				}
+
+			}
+		}
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		/**
 		 * This method will update the indexes when the result of unfolding fatherRule is null.
 		 * 
@@ -886,7 +1073,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!isSecondAtomInLeftJoin)
 					return null;
 				else {
-					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusedAtom, rule, termidx);
+					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin( rule, termidx);
 					
 					result = Lists.newArrayList(newRuleWithNullBindings);
 					
@@ -917,7 +1104,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!isSecondAtomInLeftJoin)
 					return null;
 				else {
-					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusedAtom, rule, termidx);
+					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin( rule, termidx);
 //					result = new LinkedList<CQIE>();
 //					result.add(newRuleWithNullBindings);
 					result = Lists.newArrayList(newRuleWithNullBindings);
@@ -1147,7 +1334,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                             return null;
                     	}else{
                     		termidx.pop();
-        					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin(focusedLiteral, rule, termidx);
+                    		log.debug("Empty evaluation - Data Function {}", focusedLiteral);
+        					CQIE newRuleWithNullBindings = generateNullBindingsForLeftJoin( rule, termidx);
         					result = new LinkedList<CQIE>();
         					result.add(newRuleWithNullBindings);
         					return result;
@@ -1394,9 +1582,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return result;
 	}
 
-	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
+	/**
+	 * This will generate a new rule when the second argument of the LJ is empty.
+	 * 
+	 */
+	private CQIE generateNullBindingsForLeftJoin(CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
-		log.debug("Empty evaluation - Data Function {}", focusLiteral);
 
 		CQIE freshRule = originalRuleWithLeftJoin.clone();
 		// List<Function> body = freshRule.getBody();
