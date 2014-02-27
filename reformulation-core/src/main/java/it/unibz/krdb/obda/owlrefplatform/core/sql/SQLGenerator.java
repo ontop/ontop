@@ -463,14 +463,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
 
-		int headVarCount = 0;
+		int headArity = 0;
 
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
+			headArity = cqHead.getArity();
+			
 			List<String> varContainer = QueryUtils.getVariableNamesInAtom(cqHead);
-
-			headVarCount = varContainer.size();
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer, isAns1);
@@ -488,10 +488,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		// String viewname = "Q" + pred + "View";
 		/* Creates the View itself */
 
-		List<String> columns = Lists.newArrayListWithExpectedSize(3 * headVarCount);
+		List<String> columns = Lists.newArrayListWithExpectedSize(3 * headArity);
 
 		// Hard coded variable names
-		for (int i = 0; i < headVarCount; i++) {
+		for (int i = 0; i < headArity; i++) {
 			columns.add("v" + i + "QuestType");
 			columns.add("v" + i + "lang");
 			columns.add("v" + i);
@@ -1014,7 +1014,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String varName;
 			
 			/*
-			 * When isAns1==1, we need to use the <code>signature</code>
+			 * When isAns1 is true, we need to use the <code>signature</code>
 			 * for the varName
 			 */
 			if (isAns1) {

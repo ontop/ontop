@@ -216,16 +216,12 @@ public class LeftJoinTestVirtual extends TestCase {
 			//executeQueryAssertResults(query_multi4, st, 4);
 			//executeQueryAssertResults(query_multi5, st, 4);
 			//executeQueryAssertResults(query_multi6, st, 4);
-			executeQueryAssertResults(query_multi7, st, 4);
+			//executeQueryAssertResults(query_multi7, st, 4);
 
 			//executeQueryAssertResults(query1, st, 3);
 			executeQueryAssertResults(query2, st, 4);
 //			executeQueryAssertResults(query3, st, 4);
-<<<<<<< HEAD
-			//executeQueryAssertResults(query4, st, 4);
-=======
 //			executeQueryAssertResults(query4, st, 4);
->>>>>>> branch 'feature/leftjoin' of https://github.com/ontop/ontop.git
 //			executeQueryAssertResults(query5, st, 4);
 //			executeQueryAssertResults(query6, st, 6);
 //			executeQueryAssertResults(query7, st, 4);
