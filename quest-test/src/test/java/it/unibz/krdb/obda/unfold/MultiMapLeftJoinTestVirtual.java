@@ -137,7 +137,7 @@ public class MultiMapLeftJoinTestVirtual extends TestCase {
 		//@formatter.on
 		
 		try {
-			executeQueryAssertResults(query_multi1, st, 4);
+			executeQueryAssertResults(query_multi1, st, 5);
 
 			
 		} catch (Exception e) {

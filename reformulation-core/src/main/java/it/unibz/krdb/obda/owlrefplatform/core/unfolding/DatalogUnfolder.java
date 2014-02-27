@@ -1969,6 +1969,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		List<CQIE> fatherCollection = new LinkedList<CQIE>();
+		List<CQIE> predCollection = new LinkedList<CQIE>();
+
 		Multimap<Predicate, CQIE> ruleIndex;
 		Multimap<Predicate, CQIE> ruleIndexByBody;
 
@@ -1991,16 +1993,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
-				fatherCollection.clear();
 
 				//The rules USING pred
-				Collection<CQIE> ruleCollection = ruleIndexByBody.get(buPredicate);
+				Collection<CQIE> rulesUsingPred = ruleIndexByBody.get(buPredicate);
 
 				//The rules DEFINING pred
-				List<CQIE> workingRules = (List<CQIE>) ruleIndex.get(buPredicate);
+				List<CQIE> rulesDefiningPred = (List<CQIE>) ruleIndex.get(buPredicate);
 				
-
-				cloneRules(fatherCollection, ruleCollection);
+				//cloning to avoid clashes
+				fatherCollection.clear();
+				predCollection.clear();
+				cloneRules(predCollection, rulesDefiningPred);
+				cloneRules(fatherCollection, rulesUsingPred);
 
 				//We unfold every rule of the father atom that contains pred
 				for (CQIE fatherRule : fatherCollection) {
@@ -2014,16 +2018,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					//the terms where buPredicate should appear
 					List<Function> currentTerms = fatherRule.getBody();
 
-					int listsize = workingRules.size();
-					for (int i=0; i<listsize; i++){ 
+					int listsize = rulesDefiningPred.size();
+					
+					//Here I iterate over the rules defining pred
+					for (int i=0; i<listsize; i++){  
 					//(CQIE sourceRule:workingRules){
 						
-						CQIE sourceRule = workingRules.get(i);
+						CQIE sourceRule = predCollection.get(i);
 						
 						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone());
 
 
-						if (result == null && fails==workingRules.size()) {
+						if (result == null && fails==rulesDefiningPred.size()) {
 							//This means The rule cannot be unified, and therefore can be deleted
 							
 							//TODO: CHECK WHAT HAPPENS AFTER THIS!!!!!! !   !
