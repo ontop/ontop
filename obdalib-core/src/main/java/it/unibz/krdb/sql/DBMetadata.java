@@ -422,8 +422,7 @@ public class DBMetadata implements Serializable {
 	 * 			It is true if the SQL comes from translating an ans predicate
 	 * @return
 	 */
-	public ViewDefinition createViewDefinition(String name, String sqlString,
-			boolean isAnsPredicate) {
+	public ViewDefinition createViewDefinition(String name, String sqlString) {
 
 		VisitedQuery visitedQuery = null;
 		List<String> columns = null;

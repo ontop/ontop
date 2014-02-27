@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate;
@@ -39,7 +38,6 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -63,18 +61,15 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 /**
  * This class generates a SQL string from the datalog program coming from the
@@ -219,11 +214,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
-	private boolean isTyped(Term term) {
-		return !(term instanceof Variable) && !(term instanceof ValueConstant);
-	}
-
-	private boolean hasSelectDistinctStatement(DatalogProgram query) {
+		private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;
 		if (query.getQueryModifiers().hasModifiers()) {
 			toReturn = query.getQueryModifiers().isDistinct();
@@ -499,6 +490,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		List<String> columns = Lists.newArrayListWithExpectedSize(3 * headVarCount);
 
+		// Hard coded variable names
 		for (int i = 0; i < headVarCount; i++) {
 			columns.add("v" + i + "QuestType");
 			columns.add("v" + i + "lang");
@@ -1018,61 +1010,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 
+			
+			String varName;
+			
 			/*
-			 * When isAns1==1, we may need the use the <code>signature</code>
+			 * When isAns1==1, we need to use the <code>signature</code>
 			 * for the varName
 			 */
-			String varName = "v" + hpos;
-
-			/*
-			 * For simplicity, we assume there is only one variable in the term
-			 * ht.
-			 * 
-			 * TODO: handle the general case
-			 */
-
-			String typeColumn;
-			String mainColumn;
-			// if(!isAns1){
-			// typeColumn = getTypeColumnForSELECT(ht, varName);
-			// mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName,
-			// index, isAns1);
-			// } else {
-			//
-			// if(ht instanceof Variable){
-			// /*
-			// * In case of Variable, we wrap the variable with a proper URI or
-			// datatype
-			// */
-			// Function atom = QueryUtils.findOneAtomInRuleBody(query,
-			// (Variable) ht);
-			// int j = atom.getTerms().indexOf(ht);
-			// Term canonicalAtom =
-			// predicateCanonicalAtoms.get(atom.getFunctionSymbol());
-			// Term tt = ((Function)canonicalAtom).getTerm(j );
-			// Predicate predicate = ((Function)tt).getFunctionSymbol();
-			//
-			// OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-			// Function f = factory.getFunction(predicate, ht);
-			// typeColumn = getTypeColumnForSELECT(f, varName);
-			// mainColumn = getMainColumnForSELECT(f, signature, hpos, varName,
-			// index, isAns1);
-			//
-			//
-			//
-			// } else {
-			// typeColumn = getTypeColumnForSELECT(ht, varName);
-			// mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName,
-			// index, isAns1);
-			// }
-			// }
-
-			typeColumn = getTypeColumnForSELECT(ht, varName);
-			mainColumn = getMainColumnForSELECT(ht, signature, hpos, varName, index, isAns1);
-
+			if (isAns1) {
+				varName = signature.get(hpos);
+			} else{
+				varName = "v" + hpos;
+			}
+	
+			String typeColumn = getTypeColumnForSELECT(ht, varName);
+			String mainColumn = getMainColumnForSELECT(ht, varName, index);
 			String langColumn = getLangColumnForSELECT(ht, varName, index);
-			// String mainColumn = getMainColumnForSELECT(ht, varName, index,
-			// isAns1);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -1088,8 +1041,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return sb.toString();
 	}
 
-	private String getMainColumnForSELECT(Term ht,
-			List<String> signature, int hpos, String varName, QueryAliasIndex index, boolean isAns1) {
+	private String getMainColumnForSELECT(Term ht, String varName, QueryAliasIndex index) {
 
 		String mainColumn = null;
 
@@ -1099,8 +1051,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = jdbcutil.getSQLLexicalForm(uc.getURI().toString());
 		} else if (ht instanceof Variable) {
-			// TODO: guohui
-			// Hacky
 			Variable termVar = (Variable) ht;
 			mainColumn = getSQLString(termVar, index, false);
 
@@ -1141,26 +1091,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
 
-				if (isAns1) {
 					/*
 					 * New template based URI building functions
 					 */
 					mainColumn = getSQLStringForTemplateFunction(ov, index);
-				} else {
-					/*
-					 * TODO: Handle the case of multiple variables
-					 */
 
-					Variable termVar;
-
-					if (ov.getFunctionSymbol().getArity() == 1) {
-						termVar = (Variable) ov.getTerm(0);
-					} else {
-						termVar = (Variable) ov.getTerm(1);
-					}
-					mainColumn = getSQLString(termVar, index, false);
-
-				}
 
 			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
 				/*
@@ -1185,16 +1120,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
-		String format;
-		String varNameAns1;
-		if (isAns1) {
-			varNameAns1 = signature.get(hpos);
-			format = String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varNameAns1));
-
-		} else {
-			format = String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varName));
-
-		}
+		String format = String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(varName));
 
 		return format;
 	}
@@ -1274,7 +1200,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (ht == OBDAVocabulary.NULL) {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable) {
-			// TODO guohui this is a hacky solution
+			// TODO Here we do not have a proper type. Check if is there problem with "-1"
 			return (String.format(typeStr, -1, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
@@ -1306,6 +1232,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				literalValue = ((ValueConstant) t).getValue();
 			}
 			Predicate pred = ov.getFunctionSymbol();
+
+			// @formatter.off
 			String replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
 					"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
 			String replace2 = ",' ', '%20')," +
@@ -1327,7 +1255,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 					"'+', '%2B'), " +
 					"'''', '%22'), " +
 					"'/', '%2F')";
-
+			// @formatter.on
+			
 			String template = trim(literalValue);
 			String[] split = template.split("[{][}]");
 
@@ -1486,14 +1415,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Determines if it is a unary function.
 	 */
 	private boolean isUnary(Function fun) {
-		return (fun.getArity() == 1) ? true : false;
+		return fun.getArity() == 1;
 	}
 
 	/**
 	 * Determines if it is a binary function.
 	 */
 	private boolean isBinary(Function fun) {
-		return (fun.getArity() == 2) ? true : false;
+		return fun.getArity() == 2;
 	}
 
 	/**
@@ -1731,7 +1660,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Map<Function, DataDefinition> dataDefinitions = new HashMap<Function, DataDefinition>();
 		// Map<Variable, LinkedHashSet<String>> columnReferences = new
 		// HashMap<Variable, LinkedHashSet<String>>();
-		Multimap<Variable, String> columnReferences = ArrayListMultimap.create();
+		Multimap<Variable, String> columnReferences = HashMultimap.create();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
