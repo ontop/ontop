@@ -133,18 +133,23 @@ public class SubDescription {
 	 * @param onto
 	 * @throws SQLException
 	 */
-	public static void storeData(Connection connection, Ontology onto)
-			throws SQLException {
+	public static void storeData(Connection connection, Ontology onto) throws SQLException {
 
 		conn=connection;
 		Statement stmt = null;
 
 		// Obtain the statement object for query execution
-		stmt = conn.createStatement();
 		
-		stmt.executeUpdate("CREATE TABLE IF NOT EXISTS subrelation (description VARCHAR(500) NOT NULL, subdescription VARCHAR(500) NOT NULL)");
 		
-		stmt.close();
+		try {
+			stmt = conn.createStatement();
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS subrelation (description VARCHAR(500) NOT NULL, subdescription VARCHAR(500) NOT NULL)");
+			stmt.close();
+		} catch (SQLException e) {
+			System.out.println("Problem creating the internal table to store subrelations "+ e.getMessage());
+		}
+		
+		
 
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(onto);
 		
@@ -168,7 +173,7 @@ public class SubDescription {
 	public static Connection storeDataH2( Ontology onto)
 			throws SQLException {
 
-		Connection conn= DriverManager.getConnection("jdbc:h2:mem:subrelation","sa", "");
+	    conn= DriverManager.getConnection("jdbc:h2:mem:subrelation","sa", "");
 //		conn= DriverManager.getConnection("jdbc:h2:~/test","sa", "");
 		
 		Statement stmt = null;

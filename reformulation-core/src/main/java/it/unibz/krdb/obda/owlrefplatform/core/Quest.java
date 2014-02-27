@@ -212,6 +212,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean bObtainFromMappings = true;
 
 	private boolean obtainFullMetadata = false;
+	
+	private boolean entailmentSPARQL = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -448,6 +450,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		obtainFullMetadata = Boolean.valueOf((String) preferences
 				.get(QuestPreferences.OBTAIN_FULL_METADATA));
+		entailmentSPARQL = Boolean.valueOf((String) preferences
+				.get(QuestPreferences.ENTAILMENTS_SPARQL));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -774,9 +778,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 
 			// SubDescription.storeData(localConnection, reformulationOntology);
-			SubDescription.storeDataH2(reformulationOntology).close();
+			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
 			SubDescription.dropTable();
-
+			
+			//temporary closing the connection because it is not used elsewhere
+			connH2.close();
+			
+			
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
