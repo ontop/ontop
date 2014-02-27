@@ -252,6 +252,12 @@ public class OBDAVocabulary {
 	public static final String SPARQL_REGEX_URI = "regex";
 	
 	public static final String SPARQL_LIKE_URI = "like";
+	
+	public static final String SPARQL_COUNT_URI = "Count";
+	
+	public static final String SPARQL_AVG_URI = "Avg";
+	
+	public static final String SPARQL_SUM_URI = "Sum";
 
 	/* SPARQL Algebra predicate */
 
@@ -290,4 +296,11 @@ public class OBDAVocabulary {
 	
 	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
 			SPARQL_LIKE_URI, 2);
+	
+	public static final Predicate SPARQL_COUNT = new NonBooleanOperationPredicateImpl(
+			SPARQL_COUNT_URI);
+	public static final Predicate SPARQL_AVG = new NonBooleanOperationPredicateImpl(
+			SPARQL_AVG_URI);
+	public static final Predicate SPARQL_SUM = new NonBooleanOperationPredicateImpl(
+			SPARQL_SUM_URI);
 }

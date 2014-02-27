@@ -58,16 +58,20 @@ import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.And;
+import org.openrdf.query.algebra.Avg;
 import org.openrdf.query.algebra.BinaryTupleOperator;
 import org.openrdf.query.algebra.BinaryValueOperator;
 import org.openrdf.query.algebra.Bound;
 import org.openrdf.query.algebra.Compare;
 import org.openrdf.query.algebra.Compare.CompareOp;
+import org.openrdf.query.algebra.Count;
 import org.openrdf.query.algebra.Datatype;
 import org.openrdf.query.algebra.Distinct;
 import org.openrdf.query.algebra.Extension;
 import org.openrdf.query.algebra.ExtensionElem;
 import org.openrdf.query.algebra.Filter;
+import org.openrdf.query.algebra.Group;
+import org.openrdf.query.algebra.GroupElem;
 import org.openrdf.query.algebra.IsBNode;
 import org.openrdf.query.algebra.IsLiteral;
 import org.openrdf.query.algebra.IsURI;
@@ -89,6 +93,7 @@ import org.openrdf.query.algebra.SameTerm;
 import org.openrdf.query.algebra.Slice;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Str;
+import org.openrdf.query.algebra.Sum;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UnaryTupleOperator;
 import org.openrdf.query.algebra.UnaryValueOperator;
@@ -205,7 +210,11 @@ public class SparqlAlgebraToDatalogTranslator {
 			// Add ORDER BY modifier, if any
 			Order order = (Order) te;
 			translate(vars, order, pr, i, varcount);
-
+		
+		} else if (te instanceof Group) { 
+			Group gr = (Group) te;
+			translate(vars, gr, pr, i, varcount);
+			
 		} else if (te instanceof Filter) {
 			Filter filter = (Filter) te;
 			translate(vars, filter, pr, i, varcount);
@@ -233,7 +242,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		} else if (te instanceof Extension) { 
 			Extension extend = (Extension) te;
 			translate(vars, extend, pr, i, varcount);
-			
+		
 		} else {
 			try {
 				throw new QueryEvaluationException("Operation not supported: "
@@ -250,17 +259,21 @@ public class SparqlAlgebraToDatalogTranslator {
 		TupleExpr subte = extend.getArg();
 		List<ExtensionElem> elements = extend.getElements();
 		Set<Variable> atom2VarsSet = null;
+
+		List<Term> atom2VarsList = new LinkedList<Term>();
+		List<Term> atom1VarsList = new LinkedList<Term>();
+
+		
 		for (ExtensionElem el: elements) {
 			Variable var = null;
 			
 			String name = el.getName();
 			ValueExpr vexp = el.getExpr();
-			var = ofac.getVariable(name);
-			
+
+			var = ofac.getVariable(name);			
 			Term term = getBooleanTerm(vexp);
 
 			Set<Variable> atom1VarsSet = getVariables(subte);
-			List<Term> atom1VarsList = new LinkedList<Term>();
 			atom1VarsList.addAll(atom1VarsSet);
 			atom1VarsList.add(var);
 			Collections.sort(atom1VarsList, comparator);
@@ -271,7 +284,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
 		
 			atom2VarsSet = getVariables(subte);
-			List<Term> atom2VarsList = new LinkedList<Term>();
+			
 			atom2VarsList.addAll(atom2VarsSet);
 			Collections.sort(atom2VarsList, comparator);
 			Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
@@ -285,60 +298,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		 * Translating the rest
 		 */
 	
-		{
+		
 			List<Variable> vars1 = new LinkedList<Variable>();
-			for (Term var1 : atom2VarsSet)
+			for (Term var1 : atom2VarsList)
 				vars1.add((Variable) var1);
 			translate(vars1, subte, pr, 2 * i, varcount);
-		}
+		
 	}		    
-//		    VarExprList extendExpr = extend.getVarExprList();
-//		    Map<Var, Expr> varmap = extendExpr.getExprs();
-//		    Variable var = null;
-//		    Expr exp = null;
-//		    
-//		    for (Var v: varmap.keySet()){
-//		      String name = v.getVarName();
-//		      var = ofac.getVariable(name);
-//		      exp = varmap.get(v);
-//		    }
-//		    
-//		    Term term = getTermFromExpression(exp);
-//		    
-//		    Set<Variable> atom1VarsSet = getVariables(subop);
-//		    List<Term> atom1VarsList = new LinkedList<Term>();
-//		    atom1VarsList.addAll(atom1VarsSet);
-//		    atom1VarsList.add(var);
-//		    Collections.sort(atom1VarsList, comparator);
-//		    int indexOfvar = atom1VarsList.indexOf(var);
-//		    atom1VarsList.set(indexOfvar,term);
-//		    Predicate leftAtomPred = ofac.getPredicate("ans" + (i),
-//		        atom1VarsList.size());
-//		    Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
-//		
-//		    
-//		    Set<Variable> atom2VarsSet = getVariables(subop);
-//		    List<Term> atom2VarsList = new LinkedList<Term>();
-//		    atom2VarsList.addAll(atom2VarsSet);
-//		    Collections.sort(atom2VarsList, comparator);
-//		    Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
-//		        atom2VarsList.size());
-//		    Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
-//		    
-//		    
-//		    
-//		    CQIE newrule = ofac.getCQIE(head, rightAtom);
-//		    pr.appendRule(newrule);
-//		    
-//		    /*
-//		     * Translating the rest
-//		     */
-//		    {
-//		      List<Variable> vars1 = new LinkedList<Variable>();
-//		      for (Term var1 : atom2VarsSet)
-//		        vars1.add((Variable) var1);
-//		      translate(vars1, subop, pr, 2 * i, varcount);
-//		    }
 
 	
 	private void translate(List<Variable> vars, Union union,
@@ -636,6 +602,18 @@ public class SparqlAlgebraToDatalogTranslator {
 			pr.getQueryModifiers().addOrderCondition(var, direction);
 		}
 		te = order.getArg(); // narrow down the query
+		translate(vars, te, pr, i, varcount);
+	}
+	
+	private void translate(List<Variable> vars, Group group,
+			DatalogProgram pr, long i, int[] varcount) {
+		TupleExpr te;
+		Set <String> bindings = group.getGroupBindingNames();
+		for (String b : bindings) {
+			Variable var = ofac.getVariable(b);
+			pr.getQueryModifiers().addGroupCondition(var);
+		}
+		te = group.getArg(); // narrow down the query
 		translate(vars, te, pr, i, varcount);
 	}
 
@@ -1280,6 +1258,13 @@ public class SparqlAlgebraToDatalogTranslator {
 						OBDAVocabulary.SPARQL_LANG,
 						getVariableTerm((Var) arg));
 			}
+		} else if (expr instanceof Count) {
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_COUNT, getBooleanTerm( expr.getArg()));
+		} else if (expr instanceof Avg) {
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
+		} else if (expr instanceof Sum) {
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
+		
 		} else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");

@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  */
 
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.sql.Types;
 import java.util.List;
@@ -119,6 +120,21 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 				sql += " DESC";
 			}
 			needComma = true;
+		}
+		return sql;
+	}
+	
+	@Override
+	public String sqlGroupBy(List<Variable> groupby, String viewname) {
+		String sql = "GROUP BY ";
+		boolean needComma = false;
+		for (Variable v : groupby) {
+			if (needComma) {
+				sql += ", ";
+			}
+			//sql += sqlQualifiedColumn(viewname, v.getName());
+			sql += String.format("\"%s\"", v.getName());
+		needComma = true;
 		}
 		return sql;
 	}

@@ -121,6 +121,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
 
+	private boolean havingCond = false;
+	private String havingStr = "";
+
 	private Map<String, Integer> uriRefIds;
 
 	private Multimap<Predicate, CQIE> ruleIndex;
@@ -193,7 +196,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 					ruleIndexByBodyPredicate, predicatesInBottomUp, extensionalPredicates);
 
 			String modifier = "";
+
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
+
+//			List<Variable> groupby = query.getQueryModifiers().getGroupConditions();
+//			if (!groupby.isEmpty()) {
+//				subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " + havingStr + "\n";
+//			}
+//			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
+
 			if (!conditions.isEmpty()) {
 				modifier += sqladapter.sqlOrderBy(conditions, outerViewName) + "\n";
 			}
@@ -202,6 +213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (limit != -1 || offset != -1) {
 				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
 			}
+
 			String sql = "SELECT *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
@@ -513,8 +525,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function innerAtomAsFunction = (Function) innerAtom;
 			if (innerAtomAsFunction.isBooleanFunction()) {
 				String condition = getSQLCondition(innerAtomAsFunction, index);
+
 				conditions.add(condition);
 			} else if (innerAtomAsFunction.isDataTypeFunction()) {
+
+//				if (!havingCond) { 
+//					conditions.add(condition);
+//				} else {
+//					havingStr = condition;
+//					havingCond = false;
+//				}
+			}else if (innerAtomAsFunction.isDataTypeFunction()) {
+
 				String condition = getSQLString(innerAtom, index, false);
 				conditions.add(condition);
 			}
@@ -576,6 +598,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				Term right = atom.getTerm(1);
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
+				if (havingCond) {
+					//havingCond = false;
+					return String.format("HAVING (" + expressionFormat + ")", leftOp, rightOp);
+				}
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
 
 				// TODO: do this more efficient !!!!
@@ -1102,7 +1128,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * New template based BNODE building functions
 				 */
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
+			
+			// Aggregates
+			} else if (functionString.equals("Count")) {
+				mainColumn = "COUNT(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+			
+			} else if (functionString.equals("Sum")) {
+					mainColumn = "SUM(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+			
+			} else if (functionString.equals("Avg")) {
+				mainColumn = "AVG(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+						
 			} else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
@@ -1175,7 +1211,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
 			 */
+
 			// TODO: DO NOT use magic numbers, extract them to constants
+
+//			if (functionString.equals("Count")) {
+//				return (String.format(typeStr, 4, signature.get(hpos)));
+//			}
+//			if (functionString.equals("Sum")) {
+//				return (String.format(typeStr, 5, signature.get(hpos)));
+//			}
+//			if (functionString.equals("Avg")) {
+//				return (String.format(typeStr, 5, signature.get(hpos)));
+//			}
+			
+
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
 				return (String.format(typeStr, 9, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
@@ -1560,6 +1609,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
+				havingCond = true;
+				return "COUNT(" + columnName + ")";
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_AVG_URI)) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
+				havingCond = true;
+				return "AVG(" + columnName + ")";
+			}else if (functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
+				havingCond = true;
+				return "SUM(" + columnName + ")";
 			}
 		}
 
