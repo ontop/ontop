@@ -145,6 +145,16 @@ public class LeftJoinTestVirtual extends TestCase {
 				+ "      ?p :nick1 ?nick1 "
 				+ "      OPTIONAL {?p :nick2 ?nick2} } } }";
 		
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "  ?p a :Person . "
+				+ "  OPTIONAL {"
+				+ "    ?p :name ?name . "
+				+ "    OPTIONAL {"
+				+ "      ?p :nick1 ?nick1 "
+				+ "      OPTIONAL {?p :nick2 ?nick2. FILTER (?nick2 = 'alice2')} } } }";
+		
 		
 		String query1 = "PREFIX : <http://www.example.org/test#> "
 				+ "SELECT DISTINCT * WHERE "
@@ -205,7 +215,8 @@ public class LeftJoinTestVirtual extends TestCase {
 			//executeQueryAssertResults(query_multi3, st, 4);
 			//executeQueryAssertResults(query_multi4, st, 4);
 			//executeQueryAssertResults(query_multi5, st, 4);
-			executeQueryAssertResults(query_multi6, st, 4);
+			//executeQueryAssertResults(query_multi6, st, 4);
+			executeQueryAssertResults(query_multi7, st, 4);
 
 			//executeQueryAssertResults(query1, st, 3);
 			//executeQueryAssertResults(query2, st, 4);
