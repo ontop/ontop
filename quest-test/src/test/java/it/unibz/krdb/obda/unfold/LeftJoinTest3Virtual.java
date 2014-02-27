@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * SQL
  * @author Minda, Guohui, mrezk
  */
-public class MultiMapLeftJoinTestVirtual extends TestCase {
+public class LeftJoinTest3Virtual extends TestCase {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -69,7 +69,7 @@ public class MultiMapLeftJoinTestVirtual extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person2.obda";
+	final String obdafile = "src/test/resources/person3.obda";
 
 	@Override
 	public void setUp() throws Exception {
