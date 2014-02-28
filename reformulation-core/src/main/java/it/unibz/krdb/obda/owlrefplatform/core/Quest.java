@@ -37,7 +37,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -50,9 +49,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
@@ -93,7 +89,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -467,6 +462,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		log.debug("Optimize equivalences: {}", bOptimizeEquivalences);
 		log.debug("Optimize TBox: {}", bOptimizeTBoxSigma);
 		log.debug("ABox mode: {}", aboxMode);
+		log.debug("SPARQL Entailment: {}", entailmentSPARQL);
 		if (!aboxMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
 			log.debug("Schema configuration: {}", aboxSchemaType);
@@ -777,13 +773,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				}
 			}
 
-			// SubDescription.storeData(localConnection, reformulationOntology);
-			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
+			/*
+			 * Create a databaase to store informationa bout subclasses and subproperty
+			 */
+			
+			if(entailmentSPARQL){
+			SubDescription.storeData(localConnection, reformulationOntology);
+//			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
 			SubDescription.dropTable();
 			
 			//temporary closing the connection because it is not used elsewhere
-			connH2.close();
-			
+//			connH2.close();
+			}
 			
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource

@@ -52,20 +52,29 @@ public class SubDescription {
 				BasicClassDescription classItem = iteq.next();
 				log.debug("New class member: " + classItem);
 
+//				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
+//						.getDirectSub(eqv).iterator();
+				
+//				if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
-						.getDirectSub(eqv).iterator();
+						.getSub(eqv).iterator();
 				while (classesIt.hasNext()) {
 					Equivalences<BasicClassDescription> eqq = classesIt.next();
 					Iterator<BasicClassDescription> itcl = eqq.getMembers()
 							.iterator();
+					
 					while (itcl.hasNext()) {
-
-						log.debug("Insert class: " + classItem);
-						BasicClassDescription subClassItem = itcl.next();
-						log.debug("SubClass member: " + subClassItem);
-						insertStm.setString(1, classItem.toString());
-						insertStm.setString(2, subClassItem.toString());
-						insertStm.executeUpdate();
+						
+						BasicClassDescription subClassItem =itcl.next();
+						//added not to consider sub of the same node 
+						if(!subClassItem.equals(classItem)){
+							
+							log.debug("Insert class: " + classItem);
+							log.debug("SubClass member: " + subClassItem);
+							insertStm.setString(1, classItem.toString());
+							insertStm.setString(2, subClassItem.toString());
+							insertStm.executeUpdate();
+					}
 
 					}
 				}
@@ -101,21 +110,32 @@ public class SubDescription {
 				log.debug("New property member: " + propertyItem);
 				
 
-				Iterator<Equivalences<Property>> classesIt = dag
+				Iterator<Equivalences<Property>> propertyIt = dag
 						.getDirectSub(eqv).iterator();
-				while (classesIt.hasNext()) {
+				
+				//if we want all combinations 
+//				Iterator<Equivalences<Property>> propertyIt = dag
+//						.getSub(eqv).iterator();
+				
+				while (propertyIt.hasNext()) {
 					
-					Equivalences<Property> eqq = classesIt.next();
+					Equivalences<Property> eqq = propertyIt.next();
 					Iterator<Property> itcl = eqq.getMembers().iterator();
 					
 					while (itcl.hasNext()) {
 
-						log.debug("Insert property: " + propertyItem);
+						
 						Property subPropertyItem = itcl.next();
-						log.debug("SubProperty member: " + subPropertyItem);
-						insertStm.setString(1, propertyItem.toString());
-						insertStm.setString(2, subPropertyItem.toString());
-						insertStm.executeUpdate();
+						//added not to consider sub of the same node 
+						
+						if(!subPropertyItem.equals(propertyItem))
+						{
+							log.debug("Insert property: " + propertyItem);
+							log.debug("SubProperty member: " + subPropertyItem);
+							insertStm.setString(1, propertyItem.toString());
+							insertStm.setString(2, subPropertyItem.toString());
+							insertStm.executeUpdate();
+						}
 
 						
 					}
@@ -156,20 +176,20 @@ public class SubDescription {
 		conn.setAutoCommit(false);
 		
 		addSubclassesFromOntology(conn, reasoner);
-		addSubrolesFromOntology(conn,reasoner);
+//		addSubrolesFromOntology(conn,reasoner);
 		
 		conn.setAutoCommit(true);
 
 	}
-	
-	/**
+	//TODO remove this part
+	/**ONLY FOR TEST
 	 * Store the information about subclasses and subroles in an H2 database in memory.
 	 * Creates a new table subrelation that contains the description (class or property) and the subdescription (subproperty and subclass)
 	 * @param conn
 	 * @param onto
 	 * @throws SQLException
 	 */
-	
+	@Deprecated
 	public static Connection storeDataH2( Ontology onto)
 			throws SQLException {
 

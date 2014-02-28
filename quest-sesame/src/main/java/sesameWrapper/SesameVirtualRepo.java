@@ -76,6 +76,18 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		createRepo(name, tbox, mappings, metadata, prop);
 	}
 	
+	//TODO change this method to handle sparql entailments
+	//added method to handle sparql entailments
+	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting, boolean entailments) throws Exception {
+		super();
+		QuestPreferences pref= getPreferencesFromSettings(existential, rewriting);
+		if(entailments)
+			pref.setCurrentValueOf(QuestPreferences.ENTAILMENTS_SPARQL, QuestConstants.TRUE);
+		else
+			pref.setCurrentValueOf(QuestPreferences.ENTAILMENTS_SPARQL, QuestConstants.FALSE);
+		createRepo(name, tboxFile, obdaFile, pref );
+	}
+
 	/**
 	 * Generate QuestPreferences from a config file
 	 * @param configFileName - the path to the config file
