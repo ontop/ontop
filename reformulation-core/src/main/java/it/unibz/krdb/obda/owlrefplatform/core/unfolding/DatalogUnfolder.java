@@ -97,6 +97,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private Multimap<Predicate, CQIE> ruleIndex;
 	private Multimap<Predicate, CQIE> ruleIndexByBody;
+	
+	private DatalogDependencyGraphGenerator depGraph;
 
 	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
 	
@@ -391,7 +393,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 		
 			
-			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
+			depGraph = new DatalogDependencyGraphGenerator(workingList);
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
@@ -541,8 +543,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				System.out.println(rule);
 			}
 			log.debug("Generating Dependency Graph!");
-			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
-
+			 depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 			List<Predicate> predicatesMightGotEmpty = new LinkedList<Predicate>();
@@ -584,18 +585,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						
 						
 						if (partialEvaluation != null){
-							System.out.println("Result");
+							System.out.print("Result: ");
 							for (CQIE rule: partialEvaluation){
 								System.out.println(rule);
 							}
 						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
-							keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
+							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
 						} else{
-							System.out.println("Empty:"+pred);
+							System.out.println("Empty: "+pred);
 							predicatesMightGotEmpty.add(preFather);
-							keepLooping = updateNullIndexes(depGraph, pred, preFather,  fatherRule,  workingList);
+							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
 						}
 					} //end for father collection
 					
@@ -610,12 +611,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 			List<Predicate> touchedPredicates = new LinkedList<Predicate>();
 			while (!predicatesMightGotEmpty.isEmpty()){
-				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, depGraph, predicatesMightGotEmpty, touchedPredicates);
+				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates);
 			}
 
 			// I add to the working list all the rules touched by the unfolder!
-			addNewRules2WorkingListFromBodyAtoms(workingList, depGraph,	extensionalPredicates);
-			addNewRules2WorkingListFromHeadAtoms(workingList, depGraph,	touchedPredicates);
+			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
+			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
 			System.out.println(workingList);
 
 		}
@@ -630,9 +631,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param predicatesMightGotEmpty
 		 * @param touchedPredicates 
 		 */
-		private 	List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
-				DatalogDependencyGraphGenerator depGraph,
-				List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates) {
+		private List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
+				 		List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates) {
 			//TODO: this is not optimal. The best would be that the generateNullBinding takes care of this
 			
 			//This loop is to update the ans rules that could be affected by the elimination of
@@ -673,13 +673,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							List<CQIE> result = new LinkedList<CQIE>();
 							System.out.println(newrule);
 							result.add(newrule);
-							updateIndexes(depGraph, predEmpty, fatherpred, result, fatherRule,  workingList);
+							updateIndexes(predEmpty, fatherpred, result, fatherRule,  workingList);
 							touchedPredicates.add(fatherpred);
 						} else{
 							//here I remove fatherRule, since it is either a join, or it is the first argument of the LJ
 							System.out.println("deleting"+fatherpred);
 							
-							updateNullIndexes(depGraph, predEmpty, fatherpred,  fatherRule,  workingList);
+							updateNullIndexes( predEmpty, fatherpred,  fatherRule,  workingList);
 							deletedPredicates.add(fatherpred);
 							
 						}
@@ -759,8 +759,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param predicatesToAdd
 		 */
 		private void addNewRules2WorkingListFromBodyAtoms(List<CQIE> workingList,
-				DatalogDependencyGraphGenerator depGraph,
-				List<Predicate> predicatesToAdd) {
+								List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 				Predicate preFather =  depGraph.getFatherPredicate(pred);
@@ -783,8 +782,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param predicatesToAdd
 		 */
 		private void addNewRules2WorkingListFromHeadAtoms(List<CQIE> workingList,
-				DatalogDependencyGraphGenerator depGraph,
-				List<Predicate> predicatesToAdd) {
+							List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 
@@ -822,7 +820,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param workingList
 		 * @return
 		 */
-		private boolean updateNullIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
+		private boolean updateNullIndexes(Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
 			
 			
 			depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
@@ -875,7 +873,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @param workingList
 		 * @return
 		 */
-		private boolean updateIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred,
+		private boolean updateIndexes(Predicate pred,
 				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
 			//boolean hasPred = false;
 			
@@ -1905,47 +1903,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return null;
 	}
 
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	//TODO: should it be static???
 
@@ -1966,20 +1923,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		
 		//TODO: We are generating this too many times!!! simplify!!!
 		log.debug("Generating Dependency Graph!");
-		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
+		//depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		List<CQIE> fatherCollection = new LinkedList<CQIE>();
 		List<CQIE> predCollection = new LinkedList<CQIE>();
-
-		Multimap<Predicate, CQIE> ruleIndex;
-		Multimap<Predicate, CQIE> ruleIndexByBody;
 
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 
 		ruleIndex = depGraph.getRuleIndex();
 		ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
-
 
 
 		for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
@@ -2052,11 +2005,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							newSourceRuleList.add(newsourceRule);
 							int srcIdx=workingList.indexOf(sourceRule);
 							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,srcIdx,depGraph,newSourceRuleList, srchead,sourceRule);
+							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
 							
 							//Update the indexes for the t query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,fatherIdx,depGraph,result, fathead,fatherRule);
+							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
 							
 							continue;
 						}
@@ -2095,7 +2048,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param sourceRule
 	 * @return
 	 */
-	private static CQIE computeSourceRuleNoTypes(	CQIE sourceRule){
+	private static CQIE computeSourceRuleNoTypes(CQIE sourceRule){
 
 		Function sourceHead=sourceRule.getHead();
 
@@ -2161,7 +2114,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	
 	
-	private static List<CQIE> computeRuleExtendedTypes(	List currentTerms,
+	private static List<CQIE> computeRuleExtendedTypes(List currentTerms,
 			CQIE sourceRule, CQIE fatherRule) {
 
 
@@ -2220,15 +2173,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		boolean oneWayMGU = true;
-		mgu = Unifier.getMGU(sourceHead, targetAtom,oneWayMGU);
+		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU);
 		
 		
 		if (mgu == null) {
 			return null;
 		}else{
-			Iterator vars = mgu.entrySet().iterator();
+			Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
 			while (vars.hasNext()) {
-				Map.Entry<Variable, Term> pairs = (Map.Entry<Variable, Term>)vars.next();
+				Map.Entry<Variable, Term> pairs = vars.next();
 
 				Variable key = pairs.getKey();
 				Term value = pairs.getValue();
@@ -2238,12 +2191,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 					Set<Variable> varset =  value.getReferencedVariables();
 					Variable mvar;
+					Iterator<Variable> iterator = varset.iterator();
 					if (!varset.isEmpty()){
-						mvar = varset.iterator().next();
+						mvar = iterator.next();
+						if (varset.size() == 1) {
 						Map<Variable, Term> minimgu = new HashMap<Variable,Term>();
 						minimgu.put(mvar, key);
 						Unifier.applyUnifier((Function)value, minimgu, false);
+						} else {
+							//TODO: introduce new vars in head and body atoms
+						}
 					}
+				} else {
+					
 				}
 
 			}
@@ -2311,7 +2271,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param preFather
 	 * @param fatherRule
 	 */
-	private static void updateIndexesinTypes(	List<CQIE> workingList, int fatherIdx, DatalogDependencyGraphGenerator depGraph,List<CQIE> result, 
+	private  void updateIndexesinTypes(List<CQIE> workingList, int fatherIdx, List<CQIE> result, 
 			Predicate preFather, CQIE fatherRule)
 	{
 		workingList.remove(fatherIdx);
