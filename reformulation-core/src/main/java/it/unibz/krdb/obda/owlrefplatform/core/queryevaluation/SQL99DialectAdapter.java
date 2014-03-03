@@ -162,4 +162,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		}
 		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
+
+	@Override
+	public String sqlRegex(String columnname, String pattern,
+			boolean caseinSensitive) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
