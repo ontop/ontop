@@ -1,7 +1,18 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -15,7 +26,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +41,7 @@ public class SubDescription {
 	private final static String insert_subrelation = "INSERT INTO subrelation (description, subdescription) VALUES(?, ?)";
 	private static Logger log = LoggerFactory.getLogger(SubDescription.class);
 	private static Connection conn;
+	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Add subclasses in the database using the DAG.
@@ -34,8 +51,7 @@ public class SubDescription {
 	 * @throws SQLException
 	 */
 	
-	private static void addSubclassesFromOntology(Connection conn,
-			TBoxReasoner reasoner) throws SQLException {
+	private static void addSubclassesFromOntology(Connection conn, TBoxReasoner reasoner) throws SQLException {
 		// statement for the inserts
 		PreparedStatement insertStm = conn.prepareStatement(insert_subrelation);
 
@@ -226,6 +242,47 @@ public class SubDescription {
 		
 		stmt.close();
 	}
+	
+	
+	/**
+	 * create the mappings for subclass
+	 * @param mappings 
+	 */
+			
+	public static OBDAMappingAxiom addMapping(ArrayList<OBDAMappingAxiom> mappings){
+		
+			OBDAMappingAxiom mapping ;
+//				CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+//				List<Function> body = targetQuery.getBody();
+			Function head = null ;
+			//To construct the head,
+			List<Term> terms = new ArrayList<Term>();
+			
+//			for(int i=0;i<table.countAttribute();i++){
+//					headTerms.add(df.getVariable(table.getAttributeName(i+1)));
+//				}
+			terms.add(dfac.getVariable("description"));
+			terms.add(dfac.getVariable("subdescription"));
+			Predicate headPredicate = dfac.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", terms.size());
+			head = dfac.getFunction(headPredicate, terms);
+				
+			List<Function> body = new LinkedList<Function>();
+			Predicate subSelect = dfac.getObjectPropertyPredicate(OBDAVocabulary.RDFS_SUBCLASS_URI);
+			Function atom = dfac.getFunction(subSelect, terms);
+			body.add(atom);
+			
+
+//				
+			CQIE newTargetQuery = dfac.getCQIE(head, body);
+			mapping =dfac.getRDBMSMappingAxiom("id","SELECT description, subdescription FROM subrelation", newTargetQuery);
+			
+			mappings.add(mapping);
+			
+			return mapping;
+		
+	}
+		
+	
 
 
 }

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.sublclass;
+package it.unibz.krdb.obda.subclass;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;

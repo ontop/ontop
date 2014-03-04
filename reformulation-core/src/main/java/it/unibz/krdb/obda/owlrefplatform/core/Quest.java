@@ -780,7 +780,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if(entailmentSPARQL){
 			SubDescription.storeData(localConnection, reformulationOntology);
 //			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
-			SubDescription.dropTable();
+			SubDescription.addMapping(unfoldingOBDAModel.getMappings(sourceId));
+//			SubDescription.dropTable();
 			
 			//temporary closing the connection because it is not used elsewhere
 //			connH2.close();
