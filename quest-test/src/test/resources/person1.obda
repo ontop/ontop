@@ -10,7 +10,7 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-1006f0dbb06844d59f019373151efbb9
-target		:{id} a :Person ; :name {firstname} ; :age {age} ; :mbox {mbox}; :nick1 {nick1};  :nick2 {nick2} . 
+target		:{id}/{firstname} a :Person ; :name {firstname} ; :age {age} ; :mbox {mbox}; :nick1 {nick1};  :nick2 {nick2} . 
 source		select "id", "firstname", "age", "mbox", "nick1", "nick2" from "people"
 ]]
 

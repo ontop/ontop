@@ -44,7 +44,6 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2193,25 +2192,43 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					Variable mvar;
 					Iterator<Variable> iterator = varset.iterator();
 					if (!varset.isEmpty()){
+						Map<Variable, Term> minimgu = new HashMap<Variable,Term>();
 						mvar = iterator.next();
 						if (varset.size() == 1) {
-						Map<Variable, Term> minimgu = new HashMap<Variable,Term>();
-						minimgu.put(mvar, key);
-						Unifier.applyUnifier((Function)value, minimgu, false);
+							minimgu.put(mvar, key);
+							Unifier.applyUnifier((Function)value, minimgu, false);
 						} else {
 							//TODO: introduce new vars in head and body atoms
+							System.out.println("Multiple vars in Function: "+ varset.toString());
+							//if targetAtom is the only one in the father rule that contains key
+							List<Function> fatherBody = fatherRule.getBody();
+							for (Function fatherAtom : fatherBody)
+								if (fatherAtom.getReferencedVariables().contains(mvar))
+									break;
+							minimgu.put(mvar, key);
+							Unifier.applyUnifier((Function)value, minimgu, false);
+							while(iterator.hasNext()){
+								mvar = iterator.next();
+								fatherBody = fatherRule.getBody();
+								Function newTarget = (Function)targetAtom.clone();
+								newTarget.getTerms().add(mvar);
+								
+								fatherBody.remove(targetAtom);
+								fatherBody.add(newTarget);
+							    
+							}
 						}
 					}
 				} else {
-					
+					System.out.println("value: "+value.toString());
 				}
 
 			}
 
-			/*		//Generate the MGU for the body
-			Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
-			generateMGUforBody(mgu, bodymgu);*/
-
+			//Generate the MGU for the body
+			/*Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
+			generateMGUforBody(mgu, bodymgu);
+*/
 
 			//applying unifers in head and body*/
 
@@ -2240,9 +2257,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	private static void generateMGUforBody(Map<Variable, Term> mgu,
 			Map<Variable, Term> bodymgu) {
-		Iterator vars = mgu.entrySet().iterator();
+		Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
 		  while (vars.hasNext()) {
-		        Map.Entry<Variable, Term> pairs = (Map.Entry<Variable, Term>)vars.next();
+		        Map.Entry<Variable, Term> pairs = vars.next();
 		        
 		        Variable key = pairs.getKey();
 		        Term value = pairs.getValue();
