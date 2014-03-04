@@ -81,6 +81,8 @@ import org.openrdf.query.algebra.LangMatches;
 import org.openrdf.query.algebra.LeftJoin;
 import org.openrdf.query.algebra.MathExpr;
 import org.openrdf.query.algebra.MathExpr.MathOp;
+import org.openrdf.query.algebra.Max;
+import org.openrdf.query.algebra.Min;
 import org.openrdf.query.algebra.Not;
 import org.openrdf.query.algebra.Or;
 import org.openrdf.query.algebra.Order;
@@ -1264,8 +1266,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
 		} else if (expr instanceof Sum) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
-		
-		} else {
+		} else if (expr instanceof Min) {
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MIN, getBooleanTerm( expr.getArg()));
+		} else if (expr instanceof Max) {
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MAX, getBooleanTerm( expr.getArg()));
+		}
+		else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");
 		}

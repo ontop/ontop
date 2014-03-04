@@ -258,6 +258,10 @@ public class OBDAVocabulary {
 	public static final String SPARQL_AVG_URI = "Avg";
 	
 	public static final String SPARQL_SUM_URI = "Sum";
+	
+	public static final String SPARQL_MIN_URI = "Min";
+	
+	public static final String SPARQL_MAX_URI = "Max";
 
 	/* SPARQL Algebra predicate */
 
@@ -303,4 +307,9 @@ public class OBDAVocabulary {
 			SPARQL_AVG_URI);
 	public static final Predicate SPARQL_SUM = new NonBooleanOperationPredicateImpl(
 			SPARQL_SUM_URI);
+	public static final Predicate SPARQL_MIN = new NonBooleanOperationPredicateImpl(
+			SPARQL_MIN_URI);
+	public static final Predicate SPARQL_MAX = new NonBooleanOperationPredicateImpl(
+			SPARQL_MAX_URI);
+	
 }

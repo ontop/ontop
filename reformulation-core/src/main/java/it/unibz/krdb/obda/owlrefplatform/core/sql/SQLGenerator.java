@@ -199,7 +199,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
 
-//			List<Variable> groupby = query.getQueryModifiers().getGroupConditions();
+			List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
 //			if (!groupby.isEmpty()) {
 //				subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " + havingStr + "\n";
 //			}
@@ -1214,16 +1214,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			// TODO: DO NOT use magic numbers, extract them to constants
 
-//			if (functionString.equals("Count")) {
-//				return (String.format(typeStr, 4, signature.get(hpos)));
-//			}
-//			if (functionString.equals("Sum")) {
-//				return (String.format(typeStr, 5, signature.get(hpos)));
-//			}
-//			if (functionString.equals("Avg")) {
-//				return (String.format(typeStr, 5, signature.get(hpos)));
-//			}
-			
+			if (functionString.equals("Count")) {
+				return (String.format(typeStr, 4, varName));
+			}
+			if (functionString.equals("Sum")) {
+				return (String.format(typeStr, 5, varName));
+			}
+			if (functionString.equals("Avg")) {
+				return (String.format(typeStr, 5, varName));
+			}
+			if (functionString.equals("Min")) {
+				return (String.format(typeStr, 5, varName));
+			}
+			if (functionString.equals("Max")) {
+				return (String.format(typeStr, 5, varName));
+			}
 
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
 				return (String.format(typeStr, 9, varName));

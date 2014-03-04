@@ -168,13 +168,13 @@ public class AggregatesTest extends TestCase {
 	//		executeQueryAssertResults(query2_2, st, 1);
 //			executeQueryAssertResults(query1, st, 10);
 //			executeQueryAssertResults(query1_1, st, 4);
-			executeQueryAssertResults(query2, st, 1);
+//			executeQueryAssertResults(query2, st, 1);
 //			executeQueryAssertResults(query2_1, st, 1);
 //			executeQueryAssertResults(query2_2, st, 1);
 			
-			//executeQueryAssertResults(query3, st, 1);
+			executeQueryAssertResults(query3, st, 1);
 			//executeQueryAssertResults(query4, st, 1);
-			//executeQueryAssertResults(query5, st, 4);
+//			executeQueryAssertResults(query5, st, 4);
 			//executeQueryAssertResults(query6, st, 7);
 		} catch (Exception e) {
 			throw e;
