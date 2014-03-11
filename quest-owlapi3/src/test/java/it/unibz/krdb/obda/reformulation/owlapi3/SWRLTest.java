@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.reformulation.owlapi3;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.SWRLTranslator;
 
 import java.io.File;
 import java.util.HashSet;
@@ -82,9 +83,13 @@ public class SWRLTest extends TestCase {
 	}
 	
 	@Test
-	public void testAddRules() {
+	public void testVisitor() throws Exception {
 		
-//		fac.getSWRLRule(body, head);
+		SWRLTranslator trans= new SWRLTranslator(owlontology);
+		trans.getDatalog();
+		
+		
+
 		
 	}
 
