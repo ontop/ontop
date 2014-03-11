@@ -9,82 +9,8 @@
    rdfs:label "Combined tests" ;
    mf:entries
    (
-      :test_190a
-      :test_191a
-      :test_192a
-      :test_193a
-      :test_194a
-      :test_195a
-      :test_196a
-      :test_197a
-      :test_198a
-      :test_30a
-      :test_30b
-      :test_30c
-      :test_30d
-      :test_30e
-      :test_30f
-      :test_30g
-      :test_30h
-      :test_30i
-      :test_30j
-      :test_30k
-      :test_30l
-      :test_30m
-      :test_30n
-      :test_45a
-      :test_45b
-      :test_45c
-      :test_45d
-      :test_45e
-      :test_45f
-      :test_45g
-      :test_46a
-      :test_46b
-      :test_46c
-      :test_501a
-      :test_502a
-      :test_503a
-      :test_504a
-      :test_505a
-      :test_510
-      :test_511
-      :test_512
-#      :test_513
-      :test_87a
-      :test_87b
-      :test_87c
-      :test_87d
       :test_87e
-      :test_87f
-      :test_87g
-      :test_87h
-      :test_87i
-      :test_87j
-      :test_87k
-      :test_87l
-      :test_88a
-      :test_88b
-      :test_88c
-      :test_88d
-      :test_88e
-      :test_88f
-      :test_88g
-      :test_88h
-      :test_89a
-      :test_89b
-      :test_89c
-      :test_89d
-      :test_89e
-      :test_89f
-      :test_89g
-      :test_89h
-      :test_90a
-      :test_90b
-      :test_90c
-      :test_90d
-      :test_90e
-      :test_90f
+
 
    ) .
 

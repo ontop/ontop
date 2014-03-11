@@ -468,7 +468,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
-			headArity = cqHead.getArity();
+			//FIXME: the arity of the predicate might be wrong, should be fixed in the unfolder
+			//headArity = cqHead.getArity();
+			headArity = cqHead.getTerms().size();
 			
 			List<String> varContainer = QueryUtils.getVariableNamesInAtom(cqHead);
 
