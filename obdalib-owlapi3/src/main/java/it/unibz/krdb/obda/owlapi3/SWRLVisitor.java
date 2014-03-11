@@ -1,11 +1,13 @@
 package it.unibz.krdb.obda.owlapi3;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -47,41 +49,65 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	Function function;
 	Variable var;
 	List<Term> terms;
+	Predicate predicate;
+	Set<CQIE> facts;
 	
 	public SWRLVisitor(){
 		fac=  OBDADataFactoryImpl.getInstance();
 		
 	}
 	
-	public CQIE createDatalog(SWRLRule rule) throws Exception{
+	
+	public DatalogProgram createDatalog(OWLOntology onto) throws Exception{
 		head=null;
 		body= new LinkedList<Function>();
-//		rule.accept(this);
+
+		
 		//transform SWRL head in Function
-		getHead(rule.getHead());
+//		getHead(rule.getHead());
+//		
+//		//transform SWRL body in list Function
+//		getBody(rule.getBody());
 		
-		//transform SWRL body in list Function
-		getBody(rule.getBody());
+		facts.add(fac.getCQIE(head, body));
 		
-		return fac.getCQIE(head, body);
+		return fac.getDatalogProgram(facts);
 		
 	}
 	
-	private void getHead(Set<SWRLAtom> atoms) throws Exception{
+	public DatalogProgram createDatalog(SWRLRule rule) throws Exception{
+		head=null;
+		body= new LinkedList<Function>();
+		facts = new HashSet<CQIE>();
+
+		for(SWRLAtom a: rule.getHead()){
+		//transform SWRL head in Function
+		getHead(a);
 		
-		if(atoms.size()>1){
-			throw new Exception("SWRL function with more than one atom");
+		//transform SWRL body in list Function
+		getBody(rule.getBody());
 		}
-		atoms.iterator().next().accept(this);
+		
+		facts.add(fac.getCQIE(head, body));
+		
+		return fac.getDatalogProgram(facts);
+		
+	}
+	
+	private void getHead(SWRLAtom atoms) {
+		
+		atoms.accept(this);
 		head=function;
 		
 		
 	}
 	
 	private void getBody(Set<SWRLAtom> atoms){
+		if(body.isEmpty()){ //do not execute again if the body has already been assigned
 		for(SWRLAtom a : atoms){
 			a.accept(this);
 			body.add(function);
+		}
 		}
 		
 	}
@@ -95,7 +121,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	@Override
 	public void visit(SWRLClassAtom node) {
 		//get predicate for datalog
-		Predicate predicate=fac.getClassPredicate(node.getPredicate().toString());
+		Predicate predicate=fac.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
 		
 		terms = new ArrayList<Term>();
 		//get terms for datalog
@@ -109,13 +135,13 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 
 	@Override
 	public void visit(SWRLDataRangeAtom node) {
-		// TODO Auto-generated method stub
-		
+//		throw new Exception("Data Range Not Supported");
 	}
 
 	@Override
 	public void visit(SWRLObjectPropertyAtom node) {
-		Predicate predicate=fac.getObjectPropertyPredicate(node.getPredicate().toString());
+		
+		predicate=fac.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
 		
 		terms = new ArrayList<Term>();
 		//get terms for datalog
@@ -130,7 +156,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	@Override
 	public void visit(SWRLDataPropertyAtom node) {
 		//get predicate for datalog
-		Predicate predicate=fac.getDataPropertyPredicate(node.getPredicate().toString());
+		 predicate=fac.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
 				
 		terms = new ArrayList<Term>();
 				//get terms for datalog
@@ -157,10 +183,8 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 
 	@Override
 	public void visit(SWRLIndividualArgument node) {
-		OWLIndividual individual= node.getIndividual();
+	
 		
-//		fac.getConstantLiteral(value, type)
-		terms.add(fac.getConstantLiteral(individual.toStringID()));
 		
 	}
 
@@ -176,6 +200,15 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		else
 			terms.add(fac.getConstantFalse());
 	}
+	else 
+		if(literal.hasLang()){
+			fac.getConstantLiteral(literal.getLiteral(), literal.getLang());
+		}
+		else
+			
+			fac.getConstantLiteral(literal.getLiteral());
+	
+	
 	}
 
 	@Override

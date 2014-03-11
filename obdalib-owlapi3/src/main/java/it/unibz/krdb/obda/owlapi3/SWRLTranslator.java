@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
 
 import org.openrdf.model.vocabulary.OWL;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -22,6 +23,7 @@ public class SWRLTranslator {
 
 	
 	private Set<CQIE> facts =  new HashSet<CQIE>();
+	DatalogProgram program;
 			
 	public SWRLTranslator(OWLOntology ontology) throws Exception{
 		
@@ -35,19 +37,20 @@ public class SWRLTranslator {
 				
 				SWRLRule rule =(SWRLRule) a;
 				
-				CQIE fact =visitor.createDatalog(rule);
+				DatalogProgram fact =visitor.createDatalog(rule);
 				
 				System.out.println(fact);
+				program = fact;
 				
-				facts.add(fact);
+				
 			}
 		}
 		
 		
 	}
 	
-	public Set<CQIE> getDatalog(){
-		return facts;
+	public DatalogProgram getDatalog(){
+		return program;
 		
 	}
 }
