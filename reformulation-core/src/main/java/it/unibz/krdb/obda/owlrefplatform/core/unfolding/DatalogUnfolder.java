@@ -2203,18 +2203,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							//if targetAtom is the only one in the father rule that contains key
 							List<Function> fatherBody = fatherRule.getBody();
 							for (Function fatherAtom : fatherBody)
-								if (fatherAtom.getReferencedVariables().contains(mvar))
+								if (!fatherAtom.equals(targetAtom) && fatherAtom.getReferencedVariables().contains(mvar))
 									break;
 							minimgu.put(mvar, key);
 							Unifier.applyUnifier((Function)value, minimgu, false);
+							OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 							while(iterator.hasNext()){
 								mvar = iterator.next();
 								fatherBody = fatherRule.getBody();
 								Function newTarget = (Function)targetAtom.clone();
 								newTarget.getTerms().add(mvar);
-								
+								Predicate oldPredicate = targetAtom.getFunctionSymbol();
+								Predicate newPredicate = dfac.getPredicate(oldPredicate.getName(), oldPredicate.getArity()+1);
+								Function nt = dfac.getFunction(newPredicate, newTarget.getTerms());
 								fatherBody.remove(targetAtom);
-								fatherBody.add(newTarget);
+								fatherBody.add(nt);
 							    
 							}
 						}
