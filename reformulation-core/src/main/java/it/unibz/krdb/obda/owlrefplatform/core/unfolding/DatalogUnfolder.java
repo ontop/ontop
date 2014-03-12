@@ -434,14 +434,29 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						Stack<Integer> termidx = new Stack<Integer>();
 
 						List<Term> fatherTerms = getBodyTerms(fatherRule);
+
+						//This is to search for aggregates in the head of the
+						//father rule and stop unfolding.
+						boolean hasAggregates = false;
+						hasAggregates = detectAggregatesHead(fatherRule);
 						
+						
+
 						/*
 						 * This we compute the partial evaluation. The variable parentIsLeftJoin is false because here we do not process 
 						 * the atom itself, but we delegate this task to computePartialEvaluation. Inside that method we check if the atom
 						 * is a leftjoin, in case that it is an algebra atom.
 						 */
 						boolean parentIsLeftJoin = false;
-						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,includingMappings);
+						
+						List<CQIE> result = new LinkedList<CQIE>();
+						if (!hasAggregates){
+							 result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,includingMappings);
+						}else{
+							// result is the empty list
+							//TODO: This can be optmised I think. Here we could still unfold atoms in the body that are not 
+							//affected by the aggregate
+						}
 						
 						if (result == null) {
 							/*
@@ -507,6 +522,35 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			} // end for over the ordered predicates
 			return rcount[1];
 		}
+
+/**
+ * This is a helper method to find aggregate functions in the head of the rule.
+ * 
+ * @param fatherRule
+ * @return
+ */
+private boolean detectAggregatesHead(CQIE fatherRule) {
+	boolean hasAggregates = false;
+	Function fatherHead = fatherRule.getHead();
+	
+	List<Term> headArgs = fatherHead.getTerms();
+	for (Term arg: headArgs) {
+		if (arg instanceof Function){
+			Predicate func = ((Function) arg).getFunctionSymbol();
+			boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+				(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+				(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+				(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+				(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+			if (isAnAggregate){
+				//This rule has aggregates so we should 
+				//not unfold the aggregated predicate
+				hasAggregates = true;
+			}
+		}
+	}
+	return hasAggregates;
+}
 
 		/**
 		 * Clones the rules in ruleCollection into fatherCollection
