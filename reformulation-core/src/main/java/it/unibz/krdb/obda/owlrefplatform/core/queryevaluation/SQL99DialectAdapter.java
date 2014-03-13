@@ -83,9 +83,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	
 	@Override
-/*	public String sqlTableName(String tablename, String viewname) {
-		return String.format("\"%s\" %s", tablename, viewname);
-	}*/
+//	public String sqlTableName(String tablename, String viewname) {
+//		return String.format("\"%s\" %s", tablename, viewname);
+//	}
 	
 	/*Now we use the table name given by the user, 
 	  and we assume that it includes the quotes if needed*/

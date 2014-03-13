@@ -207,6 +207,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		/*
 		 * Here we found a column
 		 */
+		if(selectExpr.getAlias()!=null)
 		this.columns.add(selectExpr.getAlias().getName());
 	}
 
