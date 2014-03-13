@@ -31,13 +31,14 @@ public class SWRLTest extends TestCase {
 	
 	private OWLOntology owlontology;
 	OWLDataFactory fac;
-	Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
+	Logger log = LoggerFactory.getLogger(SWRLTest.class);
 	ArrayList<String> input= new ArrayList<String>();
 	
 	public void setUp() {
 			
 		input.add("src/test/resources/test/swrl/exampleSWRL.owl");
 		input.add("src/test/resources/test/swrl/complex_example.owl");
+		input.add("src/test/resources/test/swrl/propertyExample.owl");
 
 		
 	}
@@ -126,6 +127,29 @@ public class SWRLTest extends TestCase {
 		log.info(trans.getDatalog().toString());
 		List<CQIE> rules= trans.getDatalog().getRules();
 		assertEquals(5,rules.size());
+		
+		for(CQIE rule: rules){
+			log.info(rule.toString());
+			assertNotNull(rule.getHead());
+			assertNotNull(rule.getBody());
+		}
+		
+		
+		
+
+		
+	}
+	
+public void testVisitorPropertyExample() throws Exception {
+		
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		owlontology = man.loadOntologyFromOntologyDocument(new File(input.get(2)));	
+		fac = man.getOWLDataFactory();
+		
+		SWRLAPITranslator trans= new SWRLAPITranslator(owlontology);
+		log.info(trans.getDatalog().toString());
+		List<CQIE> rules= trans.getDatalog().getRules();
+		assertEquals(2,rules.size());
 		
 		for(CQIE rule: rules){
 			log.info(rule.toString());
