@@ -1,0 +1,49 @@
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(swrlb:=<http://www.w3.org/2003/11/swrlb#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(var:=<urn:swrl#>)
+Prefix(:=<http://acrab.ics.muni.cz/ontologies/swrl_tutorial.owl#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(my:=<urn:makub:builtIn#>)
+
+Ontology(<http://acrab.ics.muni.cz/ontologies/swrl_tutorial.owl>
+Declaration(Class(:Person))
+Declaration(ObjectProperty(:hasChild))
+Declaration(Class(:Parent))
+Declaration(Class(:Adult))
+SubClassOf(:Adult :Person)
+SubClassOf(:Parent :Person)
+Declaration(DataProperty(:bornOnDate))
+Declaration(DataProperty(:bornInYear))
+Declaration(DataProperty(:hasAge))
+Declaration(DataProperty(:hasDriverAge))
+FunctionalDataProperty(:hasAge)
+
+Declaration(NamedIndividual(:Martin))
+ClassAssertion(:Person :Martin)
+DataPropertyAssertion(:bornOnDate :Martin "1972-10-02"^^xsd:date)
+
+Declaration(NamedIndividual(:Lenka))
+ClassAssertion(:Person :Lenka)
+DataPropertyAssertion(:bornOnDate :Lenka "1975-11-10"^^xsd:date)
+
+Declaration(NamedIndividual(:Ivan))
+ClassAssertion(:Person :Ivan)
+DataPropertyAssertion(:bornOnDate :Ivan "2006-04-14"^^xsd:date)
+
+ObjectPropertyAssertion(:hasChild :Martin :Ivan)
+ObjectPropertyAssertion(:hasChild :Lenka :Ivan)
+
+DLSafeRule(Annotation(rdfs:comment "Rule with class expression") Body(ClassAtom(ObjectMinCardinality(1 :hasChild :Person) Variable(var:x)) ClassAtom(:Person Variable(var:x)))Head(ClassAtom(:Parent Variable(var:x))))
+
+DLSafeRule(Annotation(rdfs:comment "Rule computing bornInYear from bornOnDate") Body(ClassAtom(:Person Variable(var:p)) DataPropertyAtom(:bornOnDate Variable(var:p) Variable(var:date)) DataRangeAtom(xsd:date Variable(var:date)) BuiltInAtom(swrlb:date Variable(var:date) Variable(var:year) Variable(var:month) Variable(var:day) Variable(var:timezone))  )Head(DataPropertyAtom(:bornInYear Variable(var:p) Variable(var:year))))
+
+DLSafeRule(Annotation(rdfs:comment "Rule computing hasAge from bornInYear") Body(ClassAtom(:Person Variable(var:p)) DataPropertyAtom(:bornInYear Variable(var:p) Variable(var:year)) BuiltInAtom(my:thisYear Variable(var:nowyear)) BuiltInAtom(swrlb:subtract Variable(var:age) Variable(var:nowyear) Variable(var:year))) Head(DataPropertyAtom(:hasAge Variable(var:p) Variable(var:age))))
+
+DLSafeRule(Annotation(rdfs:comment "Rule with core builtin swrlb:greaterThan") Body(ClassAtom(:Person Variable(var:p)) DataPropertyAtom(:hasAge Variable(var:p) Variable(var:age)) BuiltInAtom(swrlb:greaterThan Variable(var:age) "18"^^xsd:integer ))Head(ClassAtom(:Adult Variable(var:p))))
+
+DLSafeRule(Annotation(rdfs:comment "Rule with data range restriction") Body(ClassAtom(:Person Variable(var:p)) DataPropertyAtom(:hasAge Variable(var:p) Variable(var:age)) DataRangeAtom(DatatypeRestriction(xsd:integer xsd:minInclusive "18"^^xsd:integer xsd:maxInclusive "65"^^xsd:integer) Variable(var:age)) )Head(DataPropertyAtom(:hasDriverAge Variable(var:p) "true"^^xsd:boolean)))
+
+)
