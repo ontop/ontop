@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -51,46 +52,46 @@ public class SubDescription {
 	 * @throws SQLException
 	 */
 	
-	private static void addSubclassesFromOntology(Connection conn, TBoxReasoner reasoner) throws SQLException {
+	private static void addSubclassesFromOntology(Connection conn,TBoxReasoner reasoner) throws SQLException {
 		// statement for the inserts
 		PreparedStatement insertStm = conn.prepareStatement(insert_subrelation);
 
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
 		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
-		
+
 		while (it.hasNext()) {
 			Equivalences<BasicClassDescription> eqv = it.next();
 
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
-			
+
 			while (iteq.hasNext()) {
 
 				BasicClassDescription classItem = iteq.next();
 				log.debug("New class member: " + classItem);
 
-//				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
-//						.getDirectSub(eqv).iterator();
-				
-//				if we want to add all subrelations not only the direct one
+				// Iterator<Equivalences<BasicClassDescription>> classesIt = dag
+				// .getDirectSub(eqv).iterator();
+
+				// if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
 						.getSub(eqv).iterator();
 				while (classesIt.hasNext()) {
 					Equivalences<BasicClassDescription> eqq = classesIt.next();
 					Iterator<BasicClassDescription> itcl = eqq.getMembers()
 							.iterator();
-					
+
 					while (itcl.hasNext()) {
-						
-						BasicClassDescription subClassItem =itcl.next();
-						//added not to consider sub of the same node 
-						if(!subClassItem.equals(classItem)){
-							
+
+						BasicClassDescription subClassItem = itcl.next();
+						// added not to consider sub of the same node
+						if (!subClassItem.equals(classItem)) {
+
 							log.debug("Insert class: " + classItem);
 							log.debug("SubClass member: " + subClassItem);
 							insertStm.setString(1, classItem.toString());
 							insertStm.setString(2, subClassItem.toString());
 							insertStm.executeUpdate();
-					}
+						}
 
 					}
 				}
@@ -114,38 +115,35 @@ public class SubDescription {
 
 		EquivalencesDAG<Property> dag = reasoner.getProperties();
 		Iterator<Equivalences<Property>> it = dag.iterator();
-		
+
 		while (it.hasNext()) {
 			Equivalences<Property> eqv = it.next();
 
 			Iterator<Property> iteq = eqv.getMembers().iterator();
-			
+
 			while (iteq.hasNext()) {
 
 				Property propertyItem = iteq.next();
 				log.debug("New property member: " + propertyItem);
-				
 
-				Iterator<Equivalences<Property>> propertyIt = dag
-						.getDirectSub(eqv).iterator();
-				
-				//if we want all combinations 
-//				Iterator<Equivalences<Property>> propertyIt = dag
-//						.getSub(eqv).iterator();
-				
+				Iterator<Equivalences<Property>> propertyIt = dag.getDirectSub(
+						eqv).iterator();
+
+				// if we want all combinations
+				// Iterator<Equivalences<Property>> propertyIt = dag
+				// .getSub(eqv).iterator();
+
 				while (propertyIt.hasNext()) {
-					
+
 					Equivalences<Property> eqq = propertyIt.next();
 					Iterator<Property> itcl = eqq.getMembers().iterator();
-					
+
 					while (itcl.hasNext()) {
 
-						
 						Property subPropertyItem = itcl.next();
-						//added not to consider sub of the same node 
-						
-						if(!subPropertyItem.equals(propertyItem))
-						{
+						// added not to consider sub of the same node
+
+						if (!subPropertyItem.equals(propertyItem)) {
 							log.debug("Insert property: " + propertyItem);
 							log.debug("SubProperty member: " + subPropertyItem);
 							insertStm.setString(1, propertyItem.toString());
@@ -153,7 +151,6 @@ public class SubDescription {
 							insertStm.executeUpdate();
 						}
 
-						
 					}
 				}
 			}
@@ -197,6 +194,8 @@ public class SubDescription {
 		conn.setAutoCommit(true);
 
 	}
+	
+	
 	//TODO remove this part
 	/**ONLY FOR TEST
 	 * Store the information about subclasses and subroles in an H2 database in memory.
@@ -206,8 +205,7 @@ public class SubDescription {
 	 * @throws SQLException
 	 */
 	@Deprecated
-	public static Connection storeDataH2( Ontology onto)
-			throws SQLException {
+	public static Connection storeDataH2( Ontology onto) throws SQLException {
 
 	    conn= DriverManager.getConnection("jdbc:h2:mem:subrelation","sa", "");
 //		conn= DriverManager.getConnection("jdbc:h2:~/test","sa", "");
@@ -281,6 +279,12 @@ public class SubDescription {
 			return mapping;
 		
 	}
+	
+//	public static DatalogProgram createDatalog(Ontology onto){
+//		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(onto);
+//		return  dfac.getDatalogProgram(rules);
+//		
+//	}
 		
 	
 
