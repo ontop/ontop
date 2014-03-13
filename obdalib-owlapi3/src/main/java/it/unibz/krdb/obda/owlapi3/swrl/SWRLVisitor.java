@@ -255,8 +255,6 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		notSupported=true;
 		errors.add(node.toString());
 		
-		System.out.println("******"+node.getPredicate());
-		
 		
 	}
 
