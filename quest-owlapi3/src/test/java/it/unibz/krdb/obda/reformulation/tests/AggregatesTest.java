@@ -40,6 +40,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -65,7 +66,7 @@ public class AggregatesTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
-	final String obdafile = "src/test/resources/test/stockexchange-h2-unittest.obda";
+	final String obdafile = "src/test/resources/test/stockexchange-mysql-unittest.obda";
 
 	@Override
 	public void setUp() throws Exception {
@@ -73,17 +74,20 @@ public class AggregatesTest extends TestCase {
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
+		String driver = "com.mysql.jdbc.Driver";
+		String url = "jdbc:mysql://10.7.20.39/stockexchange";
+		String username = "fish";
+		String password = "fish";
 
+		//?sessionVariables=sql_mode='ANSI'
+		
 		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
+		conn.setAutoCommit(true);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-mysql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -91,9 +95,13 @@ public class AggregatesTest extends TestCase {
 			bf.append(line + "\n");
 			line = in.readLine();
 		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		String[] sqls = bf.toString().split(";");
+		for (String st_sql: sqls) {
+			st.addBatch(st_sql);
+		}
+		//st.executeBatch();
+		//st.executeUpdate(bf.toString());
+		//conn.commit();
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -110,7 +118,7 @@ public class AggregatesTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		try {
-			dropTables();
+		//	dropTables();
 			conn.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
@@ -121,7 +129,7 @@ public class AggregatesTest extends TestCase {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-mysql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -156,7 +164,6 @@ public class AggregatesTest extends TestCase {
 		// COUNT
 		String query2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		String query2_1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
-		String query2_2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x HAVING (COUNT(?value) > 0)";
 		
 		String query3 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (AVG(?value) AS ?vavg) WHERE {?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
 		String query4 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
@@ -164,18 +171,29 @@ public class AggregatesTest extends TestCase {
 		String query5 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?value ?date WHERE {?x a :Transaction. ?x :amountOfTransaction ?value OPTIONAL {?x :transactionDate ?date} } GROUP BY ?x ?value ?date";
 		
 		String query6 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?value ?broker WHERE {{?x a :Transaction. ?x :amountOfTransaction ?value } UNION {?x :isExecutedBy ?broker} } GROUP BY ?value ?broker";
+
+		
+		
+		
+		String query2_2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x (COUNT(?value) AS ?count) " +
+				"WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } " +
+				"GROUP BY ?x HAVING (?value > 0)";
+
 		try {
-	//		executeQueryAssertResults(query2_2, st, 1);
-//			executeQueryAssertResults(query1, st, 10);
-//			executeQueryAssertResults(query1_1, st, 4);
-//			executeQueryAssertResults(query2, st, 1);
-//			executeQueryAssertResults(query2_1, st, 1);
-//			executeQueryAssertResults(query2_2, st, 1);
-			
+			/*
+			executeQueryAssertResults(query1, st, 10);
+			executeQueryAssertResults(query1_1, st, 4);
+			executeQueryAssertResults(query4, st, 1);
+			executeQueryAssertResults(query2, st, 1);
+			executeQueryAssertResults(query6, st, 7);
+			executeQueryAssertResults(query5, st, 4);
 			executeQueryAssertResults(query3, st, 1);
-			//executeQueryAssertResults(query4, st, 1);
-//			executeQueryAssertResults(query5, st, 4);
-			//executeQueryAssertResults(query6, st, 7);
+			executeQueryAssertResults(query2_1, st, 1);
+			*/
+				
+			executeQueryAssertResults(query2_2, st, 1);
+
 		} catch (Exception e) {
 			throw e;
 		} finally {

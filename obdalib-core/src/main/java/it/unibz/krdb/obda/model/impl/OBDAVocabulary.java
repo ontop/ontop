@@ -263,6 +263,8 @@ public class OBDAVocabulary {
 	
 	public static final String SPARQL_MAX_URI = "Max";
 
+	public static final String SPARQL_GROUP_URI = "Group";
+
 	/* SPARQL Algebra predicate */
 
 	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl(
@@ -271,6 +273,11 @@ public class OBDAVocabulary {
 	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl(
 			SPARQL_LEFTJOIN_URI, COL_TYPE.STRING);
 
+	
+	public static final Predicate SPARQL_GROUP = new AlgebraOperatorPredicateImpl(
+			SPARQL_GROUP_URI, COL_TYPE.STRING);
+
+	
 	public static final Predicate SPARQL_IS_LITERAL = new BooleanOperationPredicateImpl(
 			SPARQL_IS_LITERAL_URI);
 
@@ -311,5 +318,7 @@ public class OBDAVocabulary {
 			SPARQL_MIN_URI);
 	public static final Predicate SPARQL_MAX = new NonBooleanOperationPredicateImpl(
 			SPARQL_MAX_URI);
+	
+
 	
 }

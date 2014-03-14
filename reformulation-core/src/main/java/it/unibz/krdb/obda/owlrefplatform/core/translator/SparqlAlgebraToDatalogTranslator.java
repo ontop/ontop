@@ -302,10 +302,13 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 		
 			List<Variable> vars1 = new LinkedList<Variable>();
-			for (Term var1 : atom2VarsList)
-				vars1.add((Variable) var1);
-			translate(vars1, subte, pr, 2 * i, varcount);
-		
+			if (!atom2VarsList.isEmpty()){
+				for (Term var1 : atom2VarsList)
+					vars1.add((Variable) var1);
+				translate(vars1, subte, pr, 2 * i, varcount);
+			} else{
+				translate(vars, subte, pr, 2 * i, varcount);
+			}
 	}		    
 
 	
@@ -609,7 +612,42 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	private void translate(List<Variable> vars, Group group,
 			DatalogProgram pr, long i, int[] varcount) {
+
 		TupleExpr te;
+		te = group.getArg(); // narrow down the query
+
+		Set <String> bindings = group.getGroupBindingNames();
+		
+		//Set<Variable> remainingVars= getVariables(te);
+		
+		//Construction the aggregate Atom
+		String nextVar = bindings.iterator().next();
+		Variable groupvar = (Variable) ofac.getVariable(nextVar);
+		Function aggregateAtom = ofac.getFunction(OBDAVocabulary.SPARQL_GROUP,groupvar );
+
+		//Construction the head of the new rule
+		Predicate predicate = ofac.getPredicate("ans" + (i), vars.size());
+		List<Term> termVars = new LinkedList<Term>();
+		termVars.addAll(vars);
+		Function head = ofac.getFunction(predicate, termVars);
+
+		//Construction the body of the new rule that encode the rest of the tree
+		Predicate pbody;
+		Function bodyAtom;
+		pbody = ofac.getPredicate("ans" + (i * 2), vars.size());
+		bodyAtom = ofac.getFunction(pbody, termVars);
+
+		//Constructing the list
+		LinkedList<Function> body = new LinkedList<Function>();
+		body.add(bodyAtom);
+		body.add(aggregateAtom);
+
+		//Constructing the rule itself
+		CQIE cq = ofac.getCQIE(head, body);
+		pr.appendRule(cq);
+
+		
+		/*
 		Set <String> bindings = group.getGroupBindingNames();
 		for (String b : bindings) {
 			Variable var = ofac.getVariable(b);
@@ -617,6 +655,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		te = group.getArg(); // narrow down the query
 		translate(vars, te, pr, i, varcount);
+		*/
+		
+		//iterating
+		
+		translate(vars, te, pr, i*2, varcount);
+		
+		
 	}
 
 	public void translate(List<Variable> var, Filter filter, DatalogProgram pr,
@@ -1270,7 +1315,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MIN, getBooleanTerm( expr.getArg()));
 		} else if (expr instanceof Max) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MAX, getBooleanTerm( expr.getArg()));
-		}
+		} 
 		else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");
