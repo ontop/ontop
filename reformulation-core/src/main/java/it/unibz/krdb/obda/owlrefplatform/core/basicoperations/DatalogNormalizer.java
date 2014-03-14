@@ -501,9 +501,9 @@ public class DatalogNormalizer {
 							//eqGoOutside.remove(eq);
 						}
 					}
-				}
-				
-				else{
+				}else if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_GROUP){
+					continue;
+				}else{
 					eqGoOutside.addAll(pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false));
 				}
 
