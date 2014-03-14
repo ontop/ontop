@@ -438,7 +438,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						//This is to search for aggregates in the head of the
 						//father rule and stop unfolding.
 						boolean hasAggregates = false;
-						hasAggregates = detectAggregatesHead(fatherRule);
+						hasAggregates = detectAggregatesHead(workingRules);
 						
 						
 
@@ -526,26 +526,30 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 /**
  * This is a helper method to find aggregate functions in the head of the rule.
  * 
- * @param fatherRule
+ * @param workingRules
  * @return
  */
-private boolean detectAggregatesHead(CQIE fatherRule) {
+private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	boolean hasAggregates = false;
-	Function fatherHead = fatherRule.getHead();
-	
-	List<Term> headArgs = fatherHead.getTerms();
-	for (Term arg: headArgs) {
-		if (arg instanceof Function){
-			Predicate func = ((Function) arg).getFunctionSymbol();
-			boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-				(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-				(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-				(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-				(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-			if (isAnAggregate){
-				//This rule has aggregates so we should 
-				//not unfold the aggregated predicate
-				hasAggregates = true;
+
+	for (CQIE rule: workingRules){
+		Function fatherHead = rule.getHead();
+
+		List<Term> headArgs = fatherHead.getTerms();
+		for (Term arg: headArgs) {
+			if (arg instanceof Function){
+				Predicate func = ((Function) arg).getFunctionSymbol();
+				boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+						(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+						(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+						(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+						(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+				if (isAnAggregate){
+					//This rule has aggregates so we should 
+					//not unfold the aggregated predicate
+					hasAggregates = true;
+					break;
+				}
 			}
 		}
 	}
@@ -2171,14 +2175,21 @@ private boolean detectAggregatesHead(CQIE fatherRule) {
 			Term t) {
 		if (t instanceof Function){
 			//if it is a function, we add the inner variables and values
-			List<Term>  functionArguments = ((Function) t).getTerms();
-			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
-			boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-			if (isURI){
-				//I need to remove the URI part and add the rest, usually the variables
-				functionArguments.remove(0);
+			
+			Predicate functionSymbol = ((Function)t).getFunctionSymbol();
+			boolean isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+			if (! isAggFunc){
+				List<Term>  functionArguments = ((Function) t).getTerms();
+				functionSymbol = ((Function) t).getFunctionSymbol();
+				boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
+				if (isURI){
+					//I need to remove the URI part and add the rest, usually the variables
+					functionArguments.remove(0);
+				}
+				untypedArguments.addAll(functionArguments);
+			}else{
+				untypedArguments.add(t);
 			}
-			untypedArguments.addAll(functionArguments);
 		}else if(t instanceof Variable){
 			untypedArguments.add(t);
 		}else if (t instanceof Constant){

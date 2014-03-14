@@ -50,6 +50,7 @@ import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -192,7 +193,7 @@ public class AggregatesTest extends TestCase {
 			executeQueryAssertResults(query2_1, st, 1);
 			*/
 				
-			executeQueryAssertResults(query2_2, st, 1);
+			executeQueryAssertResults(query2_2, st, 3);
 
 		} catch (Exception e) {
 			throw e;
@@ -224,9 +225,13 @@ public class AggregatesTest extends TestCase {
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
-			for (int i = 1; i <= rs.getColumCount(); i++) {
+			int columCount = rs.getColumCount();
+			for (int i = 1; i <= columCount; i++) {
 				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
+				OWLIndividual ho = rs.getOWLIndividual(rs.getSignature().get(i-1));
+
+				System.out.println(ho);
+				//System.out.print("=" + rs.getOWLObject(i));
 				System.out.print(" ");
 			}
 			System.out.println();
