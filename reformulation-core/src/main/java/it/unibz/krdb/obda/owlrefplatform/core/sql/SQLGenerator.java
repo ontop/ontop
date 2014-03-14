@@ -200,10 +200,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
 
 			List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
-//			if (!groupby.isEmpty()) {
-//				subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " + havingStr + "\n";
-//			}
-//			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
+			// if (!groupby.isEmpty()) {
+			// subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " +
+			// havingStr + "\n";
+			// }
+			// List<OrderCondition> conditions =
+			// query.getQueryModifiers().getSortConditions();
 
 			if (!conditions.isEmpty()) {
 				modifier += sqladapter.sqlOrderBy(conditions, outerViewName) + "\n";
@@ -226,7 +228,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
-		private boolean hasSelectDistinctStatement(DatalogProgram query) {
+	private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;
 		if (query.getQueryModifiers().hasModifiers()) {
 			toReturn = query.getQueryModifiers().isDistinct();
@@ -378,9 +380,35 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String FROM = getFROM(cq.getBody(), index);
 		String WHERE = getWHERE(cq.getBody(), index);
 		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1);
+		String GROUP = getGroupBy(cq.getBody(), index);
 
-		String querystr = SELECT + FROM + WHERE;
+		String querystr = SELECT + FROM + WHERE + GROUP;
 		return querystr;
+	}
+
+	private String getGroupBy(List<Function> body, QueryAliasIndex index) {
+		StringBuilder result = new StringBuilder();
+
+		List<Variable> varsInGroupBy = Lists.newArrayList();
+		for (Function atom : body) {
+			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)) {
+				varsInGroupBy.addAll(QueryUtils.getVariablesInAtom(atom));
+			}
+		}
+		
+		List<String> groupReferences = Lists.newArrayList();
+		
+		for(Variable var : varsInGroupBy) {
+			Collection<String> references = index.columnReferences.get(var);
+			groupReferences.addAll(references);
+		}
+		
+		if(!groupReferences.isEmpty()) {
+			result.append(" GROUP BY " );
+			Joiner.on(" , ").appendTo(result, groupReferences);
+		}
+
+		return result.toString();
 	}
 
 	/**
@@ -529,13 +557,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 				conditions.add(condition);
 			} else if (innerAtomAsFunction.isDataTypeFunction()) {
 
-//				if (!havingCond) { 
-//					conditions.add(condition);
-//				} else {
-//					havingStr = condition;
-//					havingCond = false;
-//				}
-			}else if (innerAtomAsFunction.isDataTypeFunction()) {
+				// if (!havingCond) {
+				// conditions.add(condition);
+				// } else {
+				// havingStr = condition;
+				// havingCond = false;
+				// }
+			} else if (innerAtomAsFunction.isDataTypeFunction()) {
 
 				String condition = getSQLString(innerAtom, index, false);
 				conditions.add(condition);
@@ -599,7 +627,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
 				if (havingCond) {
-					//havingCond = false;
+					// havingCond = false;
 					return String.format("HAVING (" + expressionFormat + ")", leftOp, rightOp);
 				}
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
@@ -807,6 +835,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return tableDefinitions;
 			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 				return getTableDefinitions(innerTerms, index, false, true, indent + INDENT);
+			} else if (predicate == OBDAVocabulary.SPARQL_GROUP) {
+				return "";
 			}
 		}
 
@@ -1036,19 +1066,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 
-			
 			String varName;
-			
+
 			/*
-			 * When isAns1==1, we need to use the <code>signature</code>
-			 * for the varName
+			 * When isAns1==1, we need to use the <code>signature</code> for the
+			 * varName
 			 */
 			if (isAns1) {
 				varName = signature.get(hpos);
-			} else{
+			} else {
 				varName = "v" + hpos;
 			}
-	
+
 			String typeColumn = getTypeColumnForSELECT(ht, varName);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index);
 			String langColumn = getLangColumnForSELECT(ht, varName, index);
@@ -1117,28 +1146,27 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
 
-					/*
-					 * New template based URI building functions
-					 */
-					mainColumn = getSQLStringForTemplateFunction(ov, index);
-
+				/*
+				 * New template based URI building functions
+				 */
+				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
 				/*
 				 * New template based BNODE building functions
 				 */
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
-			
-			// Aggregates
+
+				// Aggregates
 			} else if (functionString.equals("Count")) {
 				mainColumn = "COUNT(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
-			
+
 			} else if (functionString.equals("Sum")) {
-					mainColumn = "SUM(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
-			
+				mainColumn = "SUM(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+
 			} else if (functionString.equals("Avg")) {
 				mainColumn = "AVG(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
-						
+
 			} else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
@@ -1254,7 +1282,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (ht == OBDAVocabulary.NULL) {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable) {
-			// TODO Here we do not have a proper type. Check if is there problem with "-1"
+			// TODO Here we do not have a proper type. Check if is there problem
+			// with "-1"
 			return (String.format(typeStr, -1, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
@@ -1310,7 +1339,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					"'''', '%22'), " +
 					"'/', '%2F')";
 			// @formatter.on
-			
+
 			String template = trim(literalValue);
 			String[] split = template.split("[{][}]");
 
@@ -1622,7 +1651,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				havingCond = true;
 				return "AVG(" + columnName + ")";
-			}else if (functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) {
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				havingCond = true;
 				return "SUM(" + columnName + ")";
