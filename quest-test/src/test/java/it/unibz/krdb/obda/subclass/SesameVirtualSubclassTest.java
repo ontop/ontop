@@ -62,7 +62,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 			
 			///query repo
 			 try {
-			      String queryString = "select * where {?x ?z ?y }";
+			      String queryString = "select * where {?x rdfs:subClassOf ?y }";
 			      		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
 			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 			      TupleQueryResult result = tupleQuery.evaluate();
@@ -76,15 +76,6 @@ public class SesameVirtualSubclassTest extends TestCase {
 			      }
 			      finally {
 			         result.close();
-			      }
-			      
-			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
-			      GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
-			      GraphQueryResult gresult = graphQuery.evaluate();
-			      while(gresult.hasNext())
-			      {
-			    	  Statement s = gresult.next();
-			    	  System.out.println(s.toString());
 			      }
 			      
 				  System.out.println("Closing...");
