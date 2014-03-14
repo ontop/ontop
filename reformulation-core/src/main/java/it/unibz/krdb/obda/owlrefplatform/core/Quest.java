@@ -43,6 +43,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SubDescriptionToFactRule;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
@@ -778,15 +779,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Create a databaase to store informationa bout subclasses and subproperty
 			 */
 			
-			if(entailmentSPARQL){
-			SubDescription.storeData(localConnection, reformulationOntology);
-//			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
-//			SubDescription.addMapping(unfoldingOBDAModel.getMappings(sourceId));
-//			SubDescription.dropTable();
-			
-			//temporary closing the connection because it is not used elsewhere
-//			connH2.close();
-			}
+//			if(entailmentSPARQL){
+//			SubDescription.storeData(localConnection, reformulationOntology);
+////			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
+////			SubDescription.addMapping(unfoldingOBDAModel.getMappings(sourceId));
+////			SubDescription.dropTable();
+//			
+//			//temporary closing the connection because it is not used elsewhere
+////			connH2.close();
+//			}
 			
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
@@ -859,6 +860,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				ABoxToFactRuleConverter.addFacts(
 						inputTBox.getABox().iterator(), unfoldingProgram,
 						equivalenceMaps);
+				
+				SubDescriptionToFactRule.addFacts(unfoldingProgram, reformulationOntology);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,
 						unfoldingProgram, sigma, true);
