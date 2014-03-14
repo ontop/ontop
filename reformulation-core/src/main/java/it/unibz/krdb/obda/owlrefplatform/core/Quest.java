@@ -67,7 +67,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SubDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
@@ -447,8 +446,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		obtainFullMetadata = Boolean.valueOf((String) preferences
 				.get(QuestPreferences.OBTAIN_FULL_METADATA));
-		entailmentSPARQL = Boolean.valueOf((String) preferences
-				.get(QuestPreferences.ENTAILMENTS_SPARQL));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -778,16 +775,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Create a databaase to store informationa bout subclasses and subproperty
 			 */
-			
-//			if(entailmentSPARQL){
-//			SubDescription.storeData(localConnection, reformulationOntology);
-////			Connection connH2= SubDescription.storeDataH2(reformulationOntology);
-////			SubDescription.addMapping(unfoldingOBDAModel.getMappings(sourceId));
-////			SubDescription.dropTable();
-//			
-//			//temporary closing the connection because it is not used elsewhere
-////			connH2.close();
-//			}
 			
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource

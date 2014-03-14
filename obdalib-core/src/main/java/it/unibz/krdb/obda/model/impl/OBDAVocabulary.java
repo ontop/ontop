@@ -127,6 +127,8 @@ public class OBDAVocabulary {
 	/*	Object type predicate URI*/
 	
 	public static final String RDFS_SUBCLASS_URI = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+	
+	public static final String RDFS_SUBPROPERTY_URI = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
 
 	/* Data type predicate URIs */
 
@@ -181,9 +183,11 @@ public class OBDAVocabulary {
 	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
 			XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE };
 	
-	/* Object property */
+	/* Object predicates */
 	
 	public static final Predicate RDFS_SUBCLASS = new PredicateImpl(RDFS_SUBCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate RDFS_SUBPROPERTY = new PredicateImpl(RDFS_SUBPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 
 	/* Common namespaces and prefixes */
 

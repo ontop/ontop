@@ -54,7 +54,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 			String owlfile = "src/test/resources/subclass/exampleBooks.owl";
 			String obdafile = "src/test/resources/subclass/exampleBooks.obda";
 
-			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness", true);
+			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
 	
 			repo.initialize();
 			

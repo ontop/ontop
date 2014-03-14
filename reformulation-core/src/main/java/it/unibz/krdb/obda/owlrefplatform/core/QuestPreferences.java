@@ -49,8 +49,6 @@ public class QuestPreferences extends Properties {
 	
 	public static final String  OBTAIN_FULL_METADATA 	= "OBTAIN_FULL_METADATA";
 	
-	public static final String  ENTAILMENTS_SPARQL 		= "entailments_sparql";
-	
 	public static final String  REWRITE 	= "rewrite";
 	
 	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
@@ -164,7 +162,6 @@ public class QuestPreferences extends Properties {
 		keys.add(OBTAIN_FROM_MAPPINGS);
 		keys.add(OPTIMIZE_EQUIVALENCES);
 		keys.add(OPTIMIZE_TBOX_SIGMA);
-		keys.add(ENTAILMENTS_SPARQL);
 //		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;

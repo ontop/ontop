@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -46,13 +47,14 @@ public class SubDescriptionToFactRule {
 	 * @throws SQLException
 	 */
 	
+	
 	private static void addSubclassesFromOntology(DatalogProgram p, TBoxReasoner reasoner) {
 
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
 		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
 
 		while (it.hasNext()) {
-			
+
 			Equivalences<BasicClassDescription> eqv = it.next();
 
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
@@ -62,15 +64,12 @@ public class SubDescriptionToFactRule {
 				BasicClassDescription classItem = iteq.next();
 				log.debug("New class member: " + classItem);
 
-//				 Iterator<Equivalences<BasicClassDescription>> classesIt = dag
-//				 .getDirectSub(eqv).iterator();
-
 				// if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
 						.getSub(eqv).iterator();
-				
+
 				while (classesIt.hasNext()) {
-					
+
 					Equivalences<BasicClassDescription> eqq = classesIt.next();
 					Iterator<BasicClassDescription> itcl = eqq.getMembers()
 							.iterator();
@@ -78,37 +77,39 @@ public class SubDescriptionToFactRule {
 					while (itcl.hasNext()) {
 
 						BasicClassDescription subClassItem = itcl.next();
-						
-						// added not to consider sub equal to the current same node
-						if (!subClassItem.equals(classItem)) {
+
+						// added not to consider sub equal to the current same
+						// node
+						if ((classItem instanceof OClass) && (subClassItem instanceof OClass) && !subClassItem.equals(classItem)) {
 
 							log.debug("Insert class: " + classItem);
 							log.debug("SubClass member: " + subClassItem);
-							
+
 							List<Term> terms = new ArrayList<Term>();
-													
-							Predicate subClassOf = factory.getObjectPropertyPredicate(OBDAVocabulary.RDFS_SUBCLASS_URI);
-//							Predicate classPredicate = factory.getClassPredicate(classItem.toString());
-//							Predicate subclassPredicate = factory.getClassPredicate(subClassItem.toString());
-							
-							
-							terms.add(factory.getConstantLiteral(subClassItem.toString()));
-							terms.add(factory.getConstantLiteral(classItem.toString()));
-				
+
+							Predicate subClassOf = OBDAVocabulary.RDFS_SUBCLASS;
+							//add class predicate
+//							terms.add(factory.getFunction(factory.getClassPredicate(subClassItem.toString()), factory.getVariable("t1")));
+//							terms.add(factory.getFunction(factory.getClassPredicate(classItem.toString()), factory.getVariable("t1")));
+							//add constant literal
+//							terms.add(factory.getConstantLiteral(subClassItem.toString()));
+//							terms.add(factory.getConstantLiteral(classItem.toString()));
+							//add URI
+							terms.add(factory.getConstantURI(subClassItem.toString()));
+							terms.add(factory.getConstantURI(classItem.toString()));
+
 							Function head = factory.getFunction(subClassOf, terms);
-							
+
 							System.out.println(head);
-							
-							
-							p.appendRule(factory.getCQIE(head, new LinkedList<Function>()));
-							
-							
+
+							p.appendRule(factory.getCQIE(head));
+
 						}
 
 					}
 				}
 			}
-			
+
 		}
 
 	}
