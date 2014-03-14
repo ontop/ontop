@@ -307,7 +307,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					vars1.add((Variable) var1);
 				translate(vars1, subte, pr, 2 * i, varcount);
 			} else{
-				translate(vars, subte, pr, 2 * i, varcount);
+				translate(vars, subte, pr, i , varcount);
 			}
 	}		    
 

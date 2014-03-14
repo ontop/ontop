@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -151,7 +152,9 @@ public class QueryVocabularyValidator implements Serializable {
 			 * Calling recursively for nested expressions
 			 */
 			if (atom.isAlgebraFunction()) {
-				replaceEquivalences(atom.getTerms());
+				if (!atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)){
+					replaceEquivalences(atom.getTerms());
+				}
 				continue;
 			}
 			
