@@ -539,16 +539,24 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		for (Term arg: headArgs) {
 			if (arg instanceof Function){
 				Predicate func = ((Function) arg).getFunctionSymbol();
-				boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-						(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-				if (isAnAggregate){
-					//This rule has aggregates so we should 
-					//not unfold the aggregated predicate
-					hasAggregates = true;
-					break;
+
+				if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
+					Term intArg = ((Function) arg).getTerm(0);
+					if (intArg instanceof Function){
+						func = ((Function) intArg).getFunctionSymbol();
+						boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+								(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+								(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+								(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+								(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+						if (isAnAggregate){
+							//This rule has aggregates so we should 
+							//not unfold the aggregated predicate
+							hasAggregates = true;
+							break;
+						}
+					}
+
 				}
 			}
 		}
@@ -2173,11 +2181,19 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	 */
 	private static void getUntypedArgumentFromTerm(List<Term> untypedArguments,
 			Term t) {
+		boolean isAggFunc = false;
 		if (t instanceof Function){
 			//if it is a function, we add the inner variables and values
-			
+
 			Predicate functionSymbol = ((Function)t).getFunctionSymbol();
-			boolean isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+			if (functionSymbol.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
+				Term intArg = ((Function) t).getTerm(0);
+				if (intArg instanceof Function){
+					functionSymbol = ((Function) intArg).getFunctionSymbol();
+					isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+
+				}
+			}
 			if (! isAggFunc){
 				List<Term>  functionArguments = ((Function) t).getTerms();
 				functionSymbol = ((Function) t).getFunctionSymbol();
@@ -2187,7 +2203,9 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 					functionArguments.remove(0);
 				}
 				untypedArguments.addAll(functionArguments);
+				
 			}else{
+				//It is an aggregate!!!
 				untypedArguments.add(t);
 			}
 		}else if(t instanceof Variable){

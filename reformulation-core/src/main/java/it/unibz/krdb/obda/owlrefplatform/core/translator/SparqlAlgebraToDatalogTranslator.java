@@ -1306,7 +1306,9 @@ public class SparqlAlgebraToDatalogTranslator {
 						getVariableTerm((Var) arg));
 			}
 		} else if (expr instanceof Count) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_COUNT, getBooleanTerm( expr.getArg()));
+			Function function = ofac.getFunction(OBDAVocabulary.SPARQL_COUNT, getBooleanTerm( expr.getArg()));
+			builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateInteger(),function);
+
 		} else if (expr instanceof Avg) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
 		} else if (expr instanceof Sum) {

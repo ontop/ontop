@@ -617,13 +617,23 @@ public class Unifier {
 			t2 = term2;
 		} else if (term1 instanceof Function) {
 			Predicate functionSymbol = ((Function)term1).getFunctionSymbol();
-			boolean isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+			boolean isAggFunc = false;
+			
+			if (functionSymbol.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
+				Term intArg = ((Function) term1).getTerm(0);
+				if (intArg instanceof Function){
+					functionSymbol = ((Function) intArg).getFunctionSymbol();
+					isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+
+				}
+			}
+				
 			if (! isAggFunc){
 				t1 = term2;
 				t2 = term1;
 			}else{
 				t1 = term2;
-				t2 = term2;
+				t2 = ofac.getFunction(	ofac.getDataTypePredicateInteger(),term2);
 			}
 			
 		} else {
