@@ -143,7 +143,7 @@ public class AggregatesTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p, String query, int expectedvalue) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -158,51 +158,40 @@ public class AggregatesTest extends TestCase {
 		QuestOWLStatement st = conn.createStatement();
 
 		//test queries
-		String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT * WHERE {?x a :Stock }";
+		
+		
+		
+		try {
+		
+			
+
+			
+			executeQueryAssertResults(query, st, expectedvalue);
+			
+			/*
+			 * String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT * WHERE {?x a :Stock }";
 		String query1_1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (?value AS ?new) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		
 		// COUNT
-		String query2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		String query2_1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
 		
-		String query3 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (AVG(?value) AS ?vavg) WHERE {?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
-		String query4 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		
-		String query5 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?value ?date WHERE {?x a :Transaction. ?x :amountOfTransaction ?value OPTIONAL {?x :transactionDate ?date} } GROUP BY ?x ?value ?date";
-		
-		String query6 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?value ?broker WHERE {{?x a :Transaction. ?x :amountOfTransaction ?value } UNION {?x :isExecutedBy ?broker} } GROUP BY ?value ?broker";
+		String query6 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?value ?broker WHERE {{?x a :Transaction. ?x :amountOfTransaction ?value } UNION {?x :isExecutedBy ?broker} } "; // GROUP BY ?value  ?broker
 
 		
-		
-		
-		String query2_2 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
-				"SELECT ?x (COUNT(?value) AS ?count) " +
-				"WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } " +
-				"GROUP BY ?x HAVING (?value > 0)";
-
-		try {
-			/*
-			executeQueryAssertResults(query1, st, 10);
-			executeQueryAssertResults(query1_1, st, 4);
-			executeQueryAssertResults(query4, st, 1);
-			executeQueryAssertResults(query2, st, 1);
+		executeQueryAssertResults(query1, st, 10);
 			executeQueryAssertResults(query6, st, 7);
-			executeQueryAssertResults(query5, st, 4);
-			executeQueryAssertResults(query3, st, 1);
-			executeQueryAssertResults(query2_1, st, 1);
-			*/
-				
-			executeQueryAssertResults(query2_2, st, 3);
+			executeQueryAssertResults(query1_1, st, 4);
+		
 
+			 * 
+			 */
+			
+			
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
 			conn.close();
+			st.close();
 			reasoner.dispose();
 		}
 	}
@@ -246,14 +235,77 @@ public class AggregatesTest extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 
-	public void testAggr() throws Exception {
+	public void testAggrCount() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 
-		runTests(p);
+		runTests(p,query,1);
 	}
+
+
+	public void testAggrCount2() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
+
+		runTests(p,query,1);
+
+	}
+	
+	
+	
+	public void testAggrCount3() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x (COUNT(?value) AS ?count) " +
+				"WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } " +
+				"GROUP BY ?x HAVING (?value > 0)";
+
+		runTests(p,query,3);
+
+	}
+	
+
+	
+	
+	public void testAggrAVG() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (AVG(?value) AS ?vavg) WHERE {?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
+
+		runTests(p,query,1);
+
+	}
+	
+	public void testAggrSUM() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
+
+		runTests(p,query,1);
+
+	}
+	
+
+	
+	
+
 	
 }

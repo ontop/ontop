@@ -621,33 +621,34 @@ public class SparqlAlgebraToDatalogTranslator {
 		//Set<Variable> remainingVars= getVariables(te);
 		
 		//Construction the aggregate Atom
-		String nextVar = bindings.iterator().next();
-		Variable groupvar = (Variable) ofac.getVariable(nextVar);
-		Function aggregateAtom = ofac.getFunction(OBDAVocabulary.SPARQL_GROUP,groupvar );
+		if (!bindings.isEmpty()){
+			String nextVar = bindings.iterator().next();
+			Variable groupvar = (Variable) ofac.getVariable(nextVar);
+			Function aggregateAtom = ofac.getFunction(OBDAVocabulary.SPARQL_GROUP,groupvar );
 
-		//Construction the head of the new rule
-		Predicate predicate = ofac.getPredicate("ans" + (i), vars.size());
-		List<Term> termVars = new LinkedList<Term>();
-		termVars.addAll(vars);
-		Function head = ofac.getFunction(predicate, termVars);
+			//Construction the head of the new rule
+			Predicate predicate = ofac.getPredicate("ans" + (i), vars.size());
+			List<Term> termVars = new LinkedList<Term>();
+			termVars.addAll(vars);
+			Function head = ofac.getFunction(predicate, termVars);
 
-		//Construction the body of the new rule that encode the rest of the tree
-		Predicate pbody;
-		Function bodyAtom;
-		pbody = ofac.getPredicate("ans" + (i * 2), vars.size());
-		bodyAtom = ofac.getFunction(pbody, termVars);
+			//Construction the body of the new rule that encode the rest of the tree
+			Predicate pbody;
+			Function bodyAtom;
+			pbody = ofac.getPredicate("ans" + (i * 2), vars.size());
+			bodyAtom = ofac.getFunction(pbody, termVars);
 
-		//Constructing the list
-		LinkedList<Function> body = new LinkedList<Function>();
-		body.add(bodyAtom);
-		body.add(aggregateAtom);
+			//Constructing the list
+			LinkedList<Function> body = new LinkedList<Function>();
+			body.add(bodyAtom);
+			body.add(aggregateAtom);
 
-		//Constructing the rule itself
-		CQIE cq = ofac.getCQIE(head, body);
-		pr.appendRule(cq);
+			//Constructing the rule itself
+			CQIE cq = ofac.getCQIE(head, body);
+			pr.appendRule(cq);
 
-		
-		/*
+
+			/*
 		Set <String> bindings = group.getGroupBindingNames();
 		for (String b : bindings) {
 			Variable var = ofac.getVariable(b);
@@ -655,11 +656,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		te = group.getArg(); // narrow down the query
 		translate(vars, te, pr, i, varcount);
-		*/
-		
-		//iterating
-		
-		translate(vars, te, pr, i*2, varcount);
+			 */
+
+			//iterating
+			translate(vars, te, pr, i*2, varcount);
+		}else{
+			translate(vars, te, pr, i, varcount);
+		}
 		
 		
 	}
