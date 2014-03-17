@@ -165,6 +165,11 @@ public class AggregatesTest extends TestCase {
 		
 			
 
+			//TODO: Groupby using more than 1 variable
+			//TODO: Add tests for the rest of the aggregates!!
+			
+			
+			
 			
 			executeQueryAssertResults(query, st, expectedvalue);
 			
