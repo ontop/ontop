@@ -167,7 +167,7 @@ public class AggregatesTest extends TestCase {
 
 			//TODO: Groupby using more than 1 variable
 			//TODO: Add tests for the rest of the aggregates!!
-			
+			//TODO: Add value test.... check if the answer is correct, not just rows
 			
 			
 			
