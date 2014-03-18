@@ -137,11 +137,11 @@ public class SubDescriptionToFactRule {
 //				log.debug("New property member: " + propertyItem);
 
 				// if we want to add all subrelations not only the direct one
-				Iterator<Equivalences<Property>> classesIt = dag.getSub(eqv).iterator();
+				Iterator<Equivalences<Property>> propertiesIt = dag.getSub(eqv).iterator();
 
-				while (classesIt.hasNext()) {
+				while (propertiesIt.hasNext()) {
 
-					Equivalences<Property> eqq = classesIt.next();
+					Equivalences<Property> eqq = propertiesIt.next();
 					Iterator<Property> itcl = eqq.getMembers()
 							.iterator();
 

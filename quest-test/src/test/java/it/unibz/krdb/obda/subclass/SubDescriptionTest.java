@@ -94,7 +94,7 @@ public class SubDescriptionTest extends TestCase {
 			while (rs.nextRow()) {
 				OWLIndividual xsub = rs.getOWLIndividual("x");
 				OWLIndividual y = rs.getOWLIndividual("y");
-				retval = xsub.toString() + " subClassOf " + y.toString();
+				retval = xsub.toString() + " subOf " + y.toString();
 				log.info(retval);
 			}
 
@@ -152,7 +152,7 @@ public class SubDescriptionTest extends TestCase {
 	}
 	
 	public void testOneSubProperty() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subPropertyOf :hasAddress }";
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subPropertyOf <http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1> }";
 		QuestOWLStatement st = conn.createStatement();
 		String retval;
 		try {
@@ -161,7 +161,7 @@ public class SubDescriptionTest extends TestCase {
 			assertTrue (rs.nextRow());
 			OWLIndividual y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#test1>",retval);
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>",retval);
 			log.info(retval);
 			
 
