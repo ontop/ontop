@@ -63,7 +63,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 			///query repo
 			 try {
 			      String queryString = "select * where {?x rdfs:subClassOf ?y }";
-			      		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
+			      		
 			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 			      TupleQueryResult result = tupleQuery.evaluate();
 			      try {

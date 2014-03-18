@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class SubDescriptionToFactRule {
 	
-	private static Logger log = LoggerFactory.getLogger(ABoxToFactRuleConverter.class); 
+	private static Logger log = LoggerFactory.getLogger(SubDescriptionToFactRule.class); 
 
 	private static OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 	
@@ -56,13 +56,13 @@ public class SubDescriptionToFactRule {
 		while (it.hasNext()) {
 
 			Equivalences<BasicClassDescription> eqv = it.next();
-
+			
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
 
 			while (iteq.hasNext()) {
 
 				BasicClassDescription classItem = iteq.next();
-				log.debug("New class member: " + classItem);
+					
 
 				// if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
@@ -82,6 +82,7 @@ public class SubDescriptionToFactRule {
 						// node
 						if ((classItem instanceof OClass) && (subClassItem instanceof OClass) && !subClassItem.equals(classItem)) {
 
+									
 							log.debug("Insert class: " + classItem);
 							log.debug("SubClass member: " + subClassItem);
 
@@ -90,12 +91,13 @@ public class SubDescriptionToFactRule {
 							Predicate subClassOf = OBDAVocabulary.RDFS_SUBCLASS;
 
 							//add URI
-							terms.add(factory.getConstantURI(subClassItem.toString()));
-							terms.add(factory.getConstantURI(classItem.toString()));
+							terms.add(factory.getUriTemplate(factory.getConstantLiteral(subClassItem.toString())));
+							terms.add(factory.getUriTemplate(factory.getConstantLiteral(classItem.toString())));
+
 
 							Function head = factory.getFunction(subClassOf, terms);
 
-							log.debug("head" + head);
+//							log.debug("head: " + head);
 
 							p.appendRule(factory.getCQIE(head));
 
@@ -132,7 +134,7 @@ public class SubDescriptionToFactRule {
 			while (iteq.hasNext()) {
 
 				Property propertyItem = iteq.next();
-				log.debug("New property member: " + propertyItem);
+//				log.debug("New property member: " + propertyItem);
 
 				// if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<Property>> classesIt = dag.getSub(eqv).iterator();
@@ -149,9 +151,9 @@ public class SubDescriptionToFactRule {
 
 						// added not to consider sub equal to the current same
 						// node
-						if ((!propertyItem.isInverse()) && !subPropertyItem.equals(propertyItem)) {
+						if ((!propertyItem.isInverse()) && (!subPropertyItem.isInverse()) && !subPropertyItem.equals(propertyItem)) {
 
-							log.debug("Insert cproperty: " + propertyItem);
+							log.debug("Insert property: " + propertyItem);
 							log.debug("SubProperty member: " + subPropertyItem);
 
 							List<Term> terms = new ArrayList<Term>();
@@ -159,8 +161,9 @@ public class SubDescriptionToFactRule {
 							Predicate subPropertyOf = OBDAVocabulary.RDFS_SUBPROPERTY;
 
 							//add URI terms
-							terms.add(factory.getConstantURI(subPropertyItem.toString()));
-							terms.add(factory.getConstantURI(propertyItem.toString()));
+							terms.add(factory.getUriTemplate(factory.getConstantLiteral(subPropertyItem.toString())));
+							terms.add(factory.getUriTemplate(factory.getConstantLiteral(propertyItem.toString())));
+
 
 							Function head = factory.getFunction(subPropertyOf, terms);
 

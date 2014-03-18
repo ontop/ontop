@@ -43,8 +43,8 @@ public class ABoxSesameMaterializerExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	final String inputFile = "src/main/resources/example/exampleBooks.obda";
-	final String outputFile = "src/main/resources/example/exampleBooks.n3";
+	final String inputFile = "src/test/resources/example/exampleBooks.obda";
+	final String outputFile = "src/test/resources/example/exampleBooks.n3";
 	
 	public void generateTriples() throws Exception {
 
