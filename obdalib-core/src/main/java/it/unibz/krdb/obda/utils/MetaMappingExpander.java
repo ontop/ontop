@@ -487,6 +487,43 @@ public class MetaMappingExpander {
 		
 	}
 	
+	public ArrayList<Predicate>  processMultiplePredicates() {
+		ArrayList<Predicate> predList = new ArrayList<Predicate>();
+		for(int k=0; k<expandedMappings.size(); k++){
+			OBDAMappingAxiom mapping = expandedMappings.get(k);
+			CQIE target = (CQIE) mapping.getTargetQuery();
+			List<Function> tbody = target.getBody();
+			for (int i=0; i<tbody.size();i++){
+				Function atom = tbody.get(i);
+				if (atom.isDataFunction()) {
+					Predicate lookFor = atom.getFunctionSymbol();
+					boolean found = false;
+					for(int l=0; l<expandedMappings.size(); l++){
+						if (found)
+							break;
+						if (l!=k) {
+							OBDAMappingAxiom mapng = expandedMappings.get(l);
+							CQIE tgt = (CQIE) mapng.getTargetQuery();
+							List<Function> tbd = tgt.getBody();
+							for (int j=0; j<tbd.size();j++){
+								if (tbd.get(j).getFunctionSymbol().equals(lookFor))
+								{
+									if (!predList.contains(lookFor)) {
+										predList.add(lookFor);
+									}
+									found = true;
+									break;
+								}
+								
+							}
+						}
+					}
+				}
+			}
+		}
+		return predList;
+	}
+	
 	
 
 }

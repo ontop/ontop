@@ -503,14 +503,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
 
-		int headVarCount = 0;
+		int headArity = 0;
 
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
+			//FIXME: the arity of the predicate might be wrong, should be fixed in the unfolder
+			//headArity = cqHead.getArity();
+			headArity = cqHead.getTerms().size();
+			
 			List<String> varContainer = QueryUtils.getVariableNamesInAtom(cqHead);
-
-			headVarCount = varContainer.size();
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer, isAns1);
@@ -528,10 +530,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		// String viewname = "Q" + pred + "View";
 		/* Creates the View itself */
 
-		List<String> columns = Lists.newArrayListWithExpectedSize(3 * headVarCount);
+		List<String> columns = Lists.newArrayListWithExpectedSize(3 * headArity);
 
 		// Hard coded variable names
-		for (int i = 0; i < headVarCount; i++) {
+		for (int i = 0; i < headArity; i++) {
 			columns.add("v" + i + "QuestType");
 			columns.add("v" + i + "lang");
 			columns.add("v" + i);
@@ -1069,8 +1071,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String varName;
 
 			/*
+<<<<<<< HEAD
 			 * When isAns1==1, we need to use the <code>signature</code> for the
 			 * varName
+=======
+			 * When isAns1 is true, we need to use the <code>signature</code>
+			 * for the varName
+>>>>>>> feature/leftjoin
 			 */
 			if (isAns1) {
 				varName = signature.get(hpos);
@@ -1282,8 +1289,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (ht == OBDAVocabulary.NULL) {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable) {
-			// TODO Here we do not have a proper type. Check if is there problem
-			// with "-1"
 			return (String.format(typeStr, -1, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());

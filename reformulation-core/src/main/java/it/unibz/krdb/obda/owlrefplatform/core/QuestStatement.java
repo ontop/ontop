@@ -440,7 +440,7 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Translated query: \n{}", program);
 
 			//TODO: cant we use here QuestInstance???
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
 			
 			//removeNonAnswerQueries(program);
 
@@ -471,10 +471,10 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-			
+		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder;
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true);
+		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true);
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		//removeNonAnswerQueries(unfolding);
@@ -489,7 +489,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-		List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding);
+		List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
 		
 		
 		for (CQIE rule: newTypedRules){

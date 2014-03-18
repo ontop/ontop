@@ -44,7 +44,6 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,6 +86,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	//private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
 	private final List<CQIE> emptyList = ImmutableList.of();
 	
+	private ArrayList<Predicate> multPredList;
+	
 	private enum UnfoldingMode {
 		UCQ, DATALOG
 	};
@@ -97,6 +98,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private Multimap<Predicate, CQIE> ruleIndex;
 	private Multimap<Predicate, CQIE> ruleIndexByBody;
+	
+	private DatalogDependencyGraphGenerator depGraph;
 
 	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
 	
@@ -120,12 +123,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
+		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>(), new ArrayList<Predicate>());
 	}
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
+		this(unfoldingProgram, primaryKeys, new ArrayList<Predicate>());
+	}
+		
+	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys, ArrayList<Predicate> multPredList) {
 		this.primaryKeys = primaryKeys;
 		this.unfoldingProgram = unfoldingProgram;
+		this.multPredList = multPredList;
 
 		/*
 		 * Creating a local index for the rules according to their predicate
@@ -391,7 +399,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			
 		
 			
-			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
+			depGraph = new DatalogDependencyGraphGenerator(workingList);
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
@@ -597,8 +605,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 				System.out.println(rule);
 			}
 			log.debug("Generating Dependency Graph!");
-			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
-
+			 depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 			List<Predicate> predicatesMightGotEmpty = new LinkedList<Predicate>();
@@ -640,18 +647,18 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 						
 						
 						if (partialEvaluation != null){
-							System.out.println("Result");
+							System.out.print("Result: ");
 							for (CQIE rule: partialEvaluation){
 								System.out.println(rule);
 							}
 						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
-							keepLooping = updateIndexes(depGraph, pred, preFather, result, fatherRule,  workingList);
+							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
 						} else{
-							System.out.println("Empty:"+pred);
+							System.out.println("Empty: "+pred);
 							predicatesMightGotEmpty.add(preFather);
-							keepLooping = updateNullIndexes(depGraph, pred, preFather,  fatherRule,  workingList);
+							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
 						}
 					} //end for father collection
 					
@@ -666,12 +673,12 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 			
 			List<Predicate> touchedPredicates = new LinkedList<Predicate>();
 			while (!predicatesMightGotEmpty.isEmpty()){
-				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, depGraph, predicatesMightGotEmpty, touchedPredicates);
+				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates);
 			}
 
 			// I add to the working list all the rules touched by the unfolder!
-			addNewRules2WorkingListFromBodyAtoms(workingList, depGraph,	extensionalPredicates);
-			addNewRules2WorkingListFromHeadAtoms(workingList, depGraph,	touchedPredicates);
+			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
+			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
 			System.out.println(workingList);
 
 		}
@@ -686,9 +693,8 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 * @param predicatesMightGotEmpty
 		 * @param touchedPredicates 
 		 */
-		private 	List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
-				DatalogDependencyGraphGenerator depGraph,
-				List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates) {
+		private List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
+				 		List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates) {
 			//TODO: this is not optimal. The best would be that the generateNullBinding takes care of this
 			
 			//This loop is to update the ans rules that could be affected by the elimination of
@@ -729,13 +735,13 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 							List<CQIE> result = new LinkedList<CQIE>();
 							System.out.println(newrule);
 							result.add(newrule);
-							updateIndexes(depGraph, predEmpty, fatherpred, result, fatherRule,  workingList);
+							updateIndexes(predEmpty, fatherpred, result, fatherRule,  workingList);
 							touchedPredicates.add(fatherpred);
 						} else{
 							//here I remove fatherRule, since it is either a join, or it is the first argument of the LJ
 							System.out.println("deleting"+fatherpred);
 							
-							updateNullIndexes(depGraph, predEmpty, fatherpred,  fatherRule,  workingList);
+							updateNullIndexes( predEmpty, fatherpred,  fatherRule,  workingList);
 							deletedPredicates.add(fatherpred);
 							
 						}
@@ -815,8 +821,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 * @param predicatesToAdd
 		 */
 		private void addNewRules2WorkingListFromBodyAtoms(List<CQIE> workingList,
-				DatalogDependencyGraphGenerator depGraph,
-				List<Predicate> predicatesToAdd) {
+								List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 				Predicate preFather =  depGraph.getFatherPredicate(pred);
@@ -839,8 +844,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 * @param predicatesToAdd
 		 */
 		private void addNewRules2WorkingListFromHeadAtoms(List<CQIE> workingList,
-				DatalogDependencyGraphGenerator depGraph,
-				List<Predicate> predicatesToAdd) {
+							List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 
@@ -878,7 +882,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 * @param workingList
 		 * @return
 		 */
-		private boolean updateNullIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
+		private boolean updateNullIndexes(Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
 			
 			
 			depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
@@ -931,7 +935,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 * @param workingList
 		 * @return
 		 */
-		private boolean updateIndexes(DatalogDependencyGraphGenerator depGraph, Predicate pred,
+		private boolean updateIndexes(Predicate pred,
 				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
 			//boolean hasPred = false;
 			
@@ -954,6 +958,15 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 				depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
 				depGraph.updateRuleIndexByBodyPredicate(newquery);
 
+				
+				//Update MultipleTemplateList
+				
+				if (multPredList.contains(pred))
+				{
+					multPredList.remove(pred);
+					multPredList.add(newquery.getHead().getFunctionSymbol());
+					
+				}
 				
 				
 /*				for (Term termPredicate: bodyTerms){
@@ -1961,47 +1974,6 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		return null;
 	}
 
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	//TODO: should it be static???
 
@@ -2014,26 +1986,21 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
  * 
  * @param unfolding
  */
-	public  List<CQIE> pushTypes(DatalogProgram unfolding) {
-
+	public  List<CQIE> pushTypes(DatalogProgram unfolding, ArrayList<Predicate> multPredList) {
+		
 		List<CQIE> workingList = new LinkedList<CQIE>();
 		
 		cloneRules(workingList, unfolding.getRules());
 		
 		//TODO: We are generating this too many times!!! simplify!!!
 		log.debug("Generating Dependency Graph!");
-		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
+		//depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		List<CQIE> fatherCollection = new LinkedList<CQIE>();
-		Multimap<Predicate, CQIE> ruleIndex;
-		Multimap<Predicate, CQIE> ruleIndexByBody;
+		List<CQIE> predCollection = new LinkedList<CQIE>();
 
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
-
-		ruleIndex = depGraph.getRuleIndex();
-		ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
-
 
 
 		for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
@@ -2041,22 +2008,24 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
 			//get the father predicate
 
-			if (!extensionalPredicates.contains(buPredicate)) {// it is a defined  predicate, like ans2,3.. etc
+			if (!extensionalPredicates.contains(buPredicate) && !multPredList.contains(buPredicate)) {// it is a defined  predicate, like ans2,3.. etc
 
 				//get all the indexes we need
 				ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
-				fatherCollection.clear();
 
 				//The rules USING pred
-				Collection<CQIE> ruleCollection = ruleIndexByBody.get(buPredicate);
+				Collection<CQIE> rulesUsingPred = ruleIndexByBody.get(buPredicate);
 
 				//The rules DEFINING pred
-				List<CQIE> workingRules = (List<CQIE>) ruleIndex.get(buPredicate);
+				List<CQIE> rulesDefiningPred = (List<CQIE>) ruleIndex.get(buPredicate);
 				
-
-				cloneRules(fatherCollection, ruleCollection);
+				//cloning to avoid clashes
+				fatherCollection.clear();
+				predCollection.clear();
+				cloneRules(predCollection, rulesDefiningPred);
+				cloneRules(fatherCollection, rulesUsingPred);
 
 				//We unfold every rule of the father atom that contains pred
 				for (CQIE fatherRule : fatherCollection) {
@@ -2070,16 +2039,18 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 					//the terms where buPredicate should appear
 					List<Function> currentTerms = fatherRule.getBody();
 
-					int listsize = workingRules.size();
-					for (int i=0; i<listsize; i++){ 
+					int listsize = rulesDefiningPred.size();
+					
+					//Here I iterate over the rules defining pred
+					for (int i=0; i<listsize; i++){  
 					//(CQIE sourceRule:workingRules){
 						
-						CQIE sourceRule = workingRules.get(i);
+						CQIE sourceRule = predCollection.get(i);
 						
 						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone());
 
 
-						if (result == null && fails==workingRules.size()) {
+						if (result == null && fails==rulesDefiningPred.size()) {
 							//This means The rule cannot be unified, and therefore can be deleted
 							
 							//TODO: CHECK WHAT HAPPENS AFTER THIS!!!!!! !   !
@@ -2102,11 +2073,13 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 							newSourceRuleList.add(newsourceRule);
 							int srcIdx=workingList.indexOf(sourceRule);
 							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,srcIdx,depGraph,newSourceRuleList, srchead,sourceRule);
+							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
 							
 							//Update the indexes for the t query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,fatherIdx,depGraph,result, fathead,fatherRule);
+							
+							//TODO!
+							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
 							
 							continue;
 						}
@@ -2145,7 +2118,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	 * @param sourceRule
 	 * @return
 	 */
-	private static CQIE computeSourceRuleNoTypes(	CQIE sourceRule){
+	private static CQIE computeSourceRuleNoTypes(CQIE sourceRule){
 
 		Function sourceHead=sourceRule.getHead();
 
@@ -2228,7 +2201,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	 */
 	
 	
-	private static List<CQIE> computeRuleExtendedTypes(	List currentTerms,
+	private static List<CQIE> computeRuleExtendedTypes(List currentTerms,
 			CQIE sourceRule, CQIE fatherRule) {
 
 
@@ -2287,15 +2260,15 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		boolean oneWayMGU = true;
-		mgu = Unifier.getMGU(sourceHead, targetAtom,oneWayMGU);
+		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU);
 		
 		
 		if (mgu == null) {
 			return null;
 		}else{
-			Iterator vars = mgu.entrySet().iterator();
+			Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
 			while (vars.hasNext()) {
-				Map.Entry<Variable, Term> pairs = (Map.Entry<Variable, Term>)vars.next();
+				Map.Entry<Variable, Term> pairs = vars.next();
 
 				Variable key = pairs.getKey();
 				Term value = pairs.getValue();
@@ -2305,20 +2278,48 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 
 					Set<Variable> varset =  value.getReferencedVariables();
 					Variable mvar;
+					Iterator<Variable> iterator = varset.iterator();
 					if (!varset.isEmpty()){
-						mvar = varset.iterator().next();
 						Map<Variable, Term> minimgu = new HashMap<Variable,Term>();
-						minimgu.put(mvar, key);
-						Unifier.applyUnifier((Function)value, minimgu, false);
+						mvar = iterator.next();
+						if (varset.size() == 1) {
+							minimgu.put(mvar, key);
+							Unifier.applyUnifier((Function)value, minimgu, false);
+						} else {
+							//TODO: introduce new vars in head and body atoms
+							System.out.println("Multiple vars in Function: "+ varset.toString());
+							//if targetAtom is the only one in the father rule that contains key
+							List<Function> fatherBody = fatherRule.getBody();
+							for (Function fatherAtom : fatherBody)
+								if (!fatherAtom.equals(targetAtom) && fatherAtom.getReferencedVariables().contains(mvar))
+									break;
+							minimgu.put(mvar, key);
+							Unifier.applyUnifier((Function)value, minimgu, false);
+							OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+							while(iterator.hasNext()){
+								mvar = iterator.next();
+								fatherBody = fatherRule.getBody();
+								Function newTarget = (Function)targetAtom.clone();
+								newTarget.getTerms().add(mvar);
+								Predicate oldPredicate = targetAtom.getFunctionSymbol();
+								Predicate newPredicate = dfac.getPredicate(oldPredicate.getName(), oldPredicate.getArity()+1);
+								Function nt = dfac.getFunction(newPredicate, newTarget.getTerms());
+								fatherBody.remove(targetAtom);
+								fatherBody.add(nt);
+							    
+							}
+						}
 					}
+				} else {
+					System.out.println("value: "+value.toString());
 				}
 
 			}
 
-			/*		//Generate the MGU for the body
-			Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
-			generateMGUforBody(mgu, bodymgu);*/
-
+			//Generate the MGU for the body
+			/*Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
+			generateMGUforBody(mgu, bodymgu);
+*/
 
 			//applying unifers in head and body*/
 
@@ -2347,9 +2348,9 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	 */
 	private static void generateMGUforBody(Map<Variable, Term> mgu,
 			Map<Variable, Term> bodymgu) {
-		Iterator vars = mgu.entrySet().iterator();
+		Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
 		  while (vars.hasNext()) {
-		        Map.Entry<Variable, Term> pairs = (Map.Entry<Variable, Term>)vars.next();
+		        Map.Entry<Variable, Term> pairs = vars.next();
 		        
 		        Variable key = pairs.getKey();
 		        Term value = pairs.getValue();
@@ -2378,7 +2379,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	 * @param preFather
 	 * @param fatherRule
 	 */
-	private static void updateIndexesinTypes(	List<CQIE> workingList, int fatherIdx, DatalogDependencyGraphGenerator depGraph,List<CQIE> result, 
+	private  void updateIndexesinTypes(List<CQIE> workingList, int fatherIdx, List<CQIE> result, 
 			Predicate preFather, CQIE fatherRule)
 	{
 		workingList.remove(fatherIdx);
@@ -2408,11 +2409,11 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 			} //end if
 		}// end for result
 	}
-	
 
-	
-	
-	
+	public ArrayList<Predicate> getMultiplePredList() {
+		return multPredList;
+	}
+
 
 	
 				

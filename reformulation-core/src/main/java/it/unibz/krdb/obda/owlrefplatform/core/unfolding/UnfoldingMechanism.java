@@ -24,9 +24,9 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +66,6 @@ public interface UnfoldingMechanism extends Serializable {
 			throws OBDAException;
 
 	//TODO: Check if this should be here!!
-	public List<CQIE> pushTypes(DatalogProgram unfolding);
+	public List<CQIE> pushTypes(DatalogProgram unfolding, ArrayList<Predicate> multPredList);
 
 }
