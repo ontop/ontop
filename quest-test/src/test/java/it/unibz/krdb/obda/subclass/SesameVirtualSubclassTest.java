@@ -19,6 +19,11 @@ package it.unibz.krdb.obda.subclass;
  * limitations under the License.
  * #L%
  */
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+
+import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -53,9 +58,12 @@ public class SesameVirtualSubclassTest extends TestCase {
 			
 			String owlfile = "src/test/resources/subclass/exampleBooks.owl";
 			String obdafile = "src/test/resources/subclass/exampleBooks.obda";
+			File f = new File("src/test/resources/subclass/subDescription.properties");
+			String pref ="file:"+f.getAbsolutePath();
+			
 
-			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
-	
+			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, pref);
+			
 			repo.initialize();
 			
 			con = repo.getConnection();
@@ -68,6 +76,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 			      TupleQueryResult result = tupleQuery.evaluate();
 			      try {
 			    	  List<String> bindings = result.getBindingNames();
+			    	  assertTrue(result.hasNext());
 			    	  while (result.hasNext()) {
 			    		   BindingSet bindingSet = result.next();
 			    		   for (String b : bindings)

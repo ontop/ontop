@@ -446,6 +446,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		obtainFullMetadata = Boolean.valueOf((String) preferences
 				.get(QuestPreferences.OBTAIN_FULL_METADATA));
+		entailmentSPARQL = Boolean.valueOf((String) preferences
+				.get(QuestPreferences.ENTAILMENTS_SPARQL));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -848,6 +850,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						inputTBox.getABox().iterator(), unfoldingProgram,
 						equivalenceMaps);
 				
+				if(entailmentSPARQL)
 				SubDescriptionToFactRule.addFacts(unfoldingProgram, reformulationOntology);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,

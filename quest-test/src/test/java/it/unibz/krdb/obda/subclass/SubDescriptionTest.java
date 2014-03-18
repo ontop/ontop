@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
-import java.sql.Connection;
 
 import junit.framework.TestCase;
 
@@ -59,6 +58,7 @@ public class SubDescriptionTest extends TestCase {
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+			p.setCurrentValueOf(QuestPreferences.ENTAILMENTS_SPARQL, QuestConstants.TRUE);
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
 			factory.setOBDAController(obdaModel);
@@ -88,15 +88,18 @@ public class SubDescriptionTest extends TestCase {
 	private void runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		String retval;
+		boolean result = false;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			
+
 			while (rs.nextRow()) {
+				result = true;
 				OWLIndividual xsub = rs.getOWLIndividual("x");
 				OWLIndividual y = rs.getOWLIndividual("y");
 				retval = xsub.toString() + " subOf " + y.toString();
 				log.info(retval);
 			}
+			assertTrue(result);
 
 		} catch (Exception e) {
 			throw e;
@@ -122,7 +125,7 @@ public class SubDescriptionTest extends TestCase {
 		runTests(query);
 
 	}
-	
+
 	public void testOneSubClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subClassOf :FinantialInstrument }";
 		QuestOWLStatement st = conn.createStatement();
@@ -130,12 +133,11 @@ public class SubDescriptionTest extends TestCase {
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 
-			assertTrue (rs.nextRow());
+			assertTrue(rs.nextRow());
 			OWLIndividual y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#Stock>",retval);
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#Stock>", retval);
 			log.info(retval);
-			
 
 		} catch (Exception e) {
 			throw e;
@@ -150,7 +152,7 @@ public class SubDescriptionTest extends TestCase {
 		}
 
 	}
-	
+
 	public void testOneSubProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subPropertyOf <http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1> }";
 		QuestOWLStatement st = conn.createStatement();
@@ -158,12 +160,11 @@ public class SubDescriptionTest extends TestCase {
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 
-			assertTrue (rs.nextRow());
+			assertTrue(rs.nextRow());
 			OWLIndividual y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>",retval);
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>", retval);
 			log.info(retval);
-			
 
 		} catch (Exception e) {
 			throw e;
@@ -178,6 +179,5 @@ public class SubDescriptionTest extends TestCase {
 		}
 
 	}
-	
-	
+
 }

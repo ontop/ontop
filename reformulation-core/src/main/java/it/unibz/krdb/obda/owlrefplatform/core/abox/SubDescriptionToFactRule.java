@@ -25,29 +25,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SubDescriptionToFactRule {
-	
-	private static Logger log = LoggerFactory.getLogger(SubDescriptionToFactRule.class); 
+
+	private static Logger log = LoggerFactory.getLogger(SubDescriptionToFactRule.class);
 
 	private static OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-	
-	
+
 	public static void addFacts(DatalogProgram p, Ontology onto) {
-		
+
 		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(onto);
 		addSubClassesFromOntology(p, reasoner);
-		addSubRolesFromOntology(p,reasoner);
-		
+		addSubRolesFromOntology(p, reasoner);
+
 	}
 
 	/**
-	 * Add subclasses in the database using the DAG.
-	 * All subclasses are inserted considering also equivalences
+	 * Add subclasses in the database using the DAG. All subclasses are inserted
+	 * considering also equivalences
+	 * 
 	 * @param conn
 	 * @param reasoner
 	 * @throws SQLException
 	 */
-	
-	
+
 	private static void addSubClassesFromOntology(DatalogProgram p, TBoxReasoner reasoner) {
 
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
@@ -56,13 +55,12 @@ public class SubDescriptionToFactRule {
 		while (it.hasNext()) {
 
 			Equivalences<BasicClassDescription> eqv = it.next();
-			
+
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
 
 			while (iteq.hasNext()) {
 
 				BasicClassDescription classItem = iteq.next();
-					
 
 				// if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<BasicClassDescription>> classesIt = dag
@@ -82,7 +80,6 @@ public class SubDescriptionToFactRule {
 						// node
 						if ((classItem instanceof OClass) && (subClassItem instanceof OClass) && !subClassItem.equals(classItem)) {
 
-									
 							log.debug("Insert class: " + classItem);
 							log.debug("SubClass member: " + subClassItem);
 
@@ -90,14 +87,13 @@ public class SubDescriptionToFactRule {
 
 							Predicate subClassOf = OBDAVocabulary.RDFS_SUBCLASS;
 
-							//add URI
+							// add URI
 							terms.add(factory.getUriTemplate(factory.getConstantLiteral(subClassItem.toString())));
 							terms.add(factory.getUriTemplate(factory.getConstantLiteral(classItem.toString())));
 
-
 							Function head = factory.getFunction(subClassOf, terms);
 
-//							log.debug("head: " + head);
+							// log.debug("head: " + head);
 
 							p.appendRule(factory.getCQIE(head));
 
@@ -110,16 +106,16 @@ public class SubDescriptionToFactRule {
 		}
 
 	}
-	
+
 	/**
-	 * Add subroles in the database using the DAG.
-	 * All subroles are inserted considering also equivalences
+	 * Add subroles in the database using the DAG. All subroles are inserted
+	 * considering also equivalences
+	 * 
 	 * @param conn
 	 * @param reasoner
 	 * @throws SQLException
 	 */
-	
-	
+
 	private static void addSubRolesFromOntology(DatalogProgram p, TBoxReasoner reasoner) {
 
 		EquivalencesDAG<Property> dag = reasoner.getProperties();
@@ -134,7 +130,7 @@ public class SubDescriptionToFactRule {
 			while (iteq.hasNext()) {
 
 				Property propertyItem = iteq.next();
-//				log.debug("New property member: " + propertyItem);
+				// log.debug("New property member: " + propertyItem);
 
 				// if we want to add all subrelations not only the direct one
 				Iterator<Equivalences<Property>> propertiesIt = dag.getSub(eqv).iterator();
@@ -160,14 +156,13 @@ public class SubDescriptionToFactRule {
 
 							Predicate subPropertyOf = OBDAVocabulary.RDFS_SUBPROPERTY;
 
-							//add URI terms
+							// add URI terms
 							terms.add(factory.getUriTemplate(factory.getConstantLiteral(subPropertyItem.toString())));
 							terms.add(factory.getUriTemplate(factory.getConstantLiteral(propertyItem.toString())));
 
-
 							Function head = factory.getFunction(subPropertyOf, terms);
 
-							log.debug("head "+ head);
+							log.debug("head " + head);
 
 							p.appendRule(factory.getCQIE(head));
 
@@ -181,4 +176,3 @@ public class SubDescriptionToFactRule {
 
 	}
 }
-
