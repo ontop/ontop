@@ -86,6 +86,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	//private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
 	private final List<CQIE> emptyList = ImmutableList.of();
 	
+	private ArrayList<Predicate> multPredList;
+	
 	private enum UnfoldingMode {
 		UCQ, DATALOG
 	};
@@ -121,12 +123,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
+		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>(), new ArrayList<Predicate>());
 	}
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
+		this(unfoldingProgram, primaryKeys, new ArrayList<Predicate>());
+	}
+		
+	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys, ArrayList<Predicate> multPredList) {
 		this.primaryKeys = primaryKeys;
 		this.unfoldingProgram = unfoldingProgram;
+		this.multPredList = multPredList;
 
 		/*
 		 * Creating a local index for the rules according to their predicate
@@ -895,6 +902,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
 				depGraph.updateRuleIndexByBodyPredicate(newquery);
 
+				
+				//Update MultipleTemplateList
+				
+				if (multPredList.contains(pred))
+				{
+					multPredList.remove(pred);
+					multPredList.add(newquery.getHead().getFunctionSymbol());
+					
+				}
 				
 				
 /*				for (Term termPredicate: bodyTerms){
@@ -1914,8 +1930,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
  * 
  * @param unfolding
  */
-	public  List<CQIE> pushTypes(DatalogProgram unfolding) {
-
+	public  List<CQIE> pushTypes(DatalogProgram unfolding, ArrayList<Predicate> multPredList) {
+		
 		List<CQIE> workingList = new LinkedList<CQIE>();
 		
 		cloneRules(workingList, unfolding.getRules());
@@ -1930,16 +1946,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 
-		ruleIndex = depGraph.getRuleIndex();
-		ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
-
 
 		for (int predIdx = 0; predIdx < predicatesInBottomUp.size() -1; predIdx++) {
 
 			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
 			//get the father predicate
 
-			if (!extensionalPredicates.contains(buPredicate)) {// it is a defined  predicate, like ans2,3.. etc
+			if (!extensionalPredicates.contains(buPredicate) && !multPredList.contains(buPredicate)) {// it is a defined  predicate, like ans2,3.. etc
 
 				//get all the indexes we need
 				ruleIndex = depGraph.getRuleIndex();
@@ -2008,6 +2021,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							
 							//Update the indexes for the t query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
+							
+							//TODO!
 							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
 							
 							continue;
@@ -2321,11 +2336,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			} //end if
 		}// end for result
 	}
-	
 
-	
-	
-	
+	public ArrayList<Predicate> getMultiplePredList() {
+		return multPredList;
+	}
+
 
 	
 				

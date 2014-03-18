@@ -180,6 +180,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * queries into Functions, used by the SPARQL translator.
 	 */
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+	
+	/*
+	 * The list of predicates that are defined in multiple mappings
+	 */
+	protected ArrayList<Predicate> multiplePredIdx = new ArrayList<Predicate>();
 
 	final HashSet<String> templateStrings = new HashSet<String>();
 
@@ -740,6 +745,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
+			multiplePredIdx = metaMappingExpander.processMultiplePredicates();
 			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
@@ -815,7 +821,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
 
 			/***
 			 * Setting up the TBox we will use for the reformulation
@@ -904,7 +910,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
 
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 

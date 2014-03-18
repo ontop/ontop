@@ -14,7 +14,7 @@ target		:{id} a :Person ; :name {firstname} ; :age {age} ; :mbox {mbox}; :nick1 
 source		select "id", "firstname", "age", "mbox", "nick1", "nick2" from "people"
 
 mappingId	map-nick1
-target		:{id} a :Person ; :nick {nick1} . 
+target		:{id}/{id} a :Person ; :nick {nick1} . 
 source		select "id",  "nick1" from "people"
 
 mappingId	map-nick2
