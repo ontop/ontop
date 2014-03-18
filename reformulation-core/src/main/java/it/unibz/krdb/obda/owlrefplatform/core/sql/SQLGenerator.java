@@ -1203,7 +1203,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable) {
 			// TODO Here we do not have a proper type. Check if is there problem with "-1"
-			return (String.format(typeStr, -1, varName));
+			return (String.format(typeStr, 1, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 

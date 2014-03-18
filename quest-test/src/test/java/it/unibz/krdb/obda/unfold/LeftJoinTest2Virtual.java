@@ -137,7 +137,7 @@ public class LeftJoinTest2Virtual extends TestCase {
 		//@formatter.on
 		
 		try {
-			executeQueryAssertResults(query_multi1, st, 5);
+			executeQueryAssertResults(query_multi1, st, 4);
 
 			
 		} catch (Exception e) {
