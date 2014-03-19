@@ -556,12 +556,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				isSemanticIdx = true;
 				if (inmemory) {
-					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
-							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
-					String username = "sa";
-					String password = "";
-
+//					String driver = "org.h2.Driver";
+//					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
+//							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+//					String username = "sa";
+//					String password = "";
+					String driver = "com.mysql.jdbc.Driver";
+					String url = "jdbc:mysql://10.7.20.39/inmemory?relaxAutoCommit=true";
+					String username = "test";
+					String password = "ontop2014";
+					
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
