@@ -1290,7 +1290,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (ht == OBDAVocabulary.NULL) {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable) {
-			return (String.format(typeStr, -1, varName));
+			return (String.format(typeStr, 1, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
