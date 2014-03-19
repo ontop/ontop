@@ -850,6 +850,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						inputTBox.getABox().iterator(), unfoldingProgram,
 						equivalenceMaps);
 				
+				/*
+				 * Adding facts about rdfs:subClassOf and rdfs:subPropertyOf in datalogProgram
+				 */
 				if(entailmentSPARQL)
 				SubDescriptionToFactRule.addFacts(unfoldingProgram, inputTBox);
 
