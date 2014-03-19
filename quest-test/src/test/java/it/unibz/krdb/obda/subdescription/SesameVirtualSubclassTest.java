@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.subclass;
+package it.unibz.krdb.obda.subdescription;
 
 /*
  * #%L

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.subclass;
+package it.unibz.krdb.obda.subdescription;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -26,7 +26,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SubDescriptionTest extends TestCase {
+public class SubDescriptionStockTest extends TestCase {
 
 	private OBDADataFactory fac;
 
