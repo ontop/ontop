@@ -97,7 +97,7 @@ public class SubDescriptionStockTest extends TestCase {
 				OWLIndividual xsub = rs.getOWLIndividual("x");
 				OWLIndividual y = rs.getOWLIndividual("y");
 				retval = xsub.toString() + " subOf " + y.toString();
-				log.info(retval);
+				System.out.println(retval);
 			}
 			assertTrue(result);
 

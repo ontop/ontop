@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -24,6 +25,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class add facts to the datalog program regarding rdfs:subClassOf and rdfs:subPropertyOf
+ * It is possible to activate or deactivate this feature in Quest changing the preferences of
+ *  QuestPreferences.ENTAILMENTS_SPARQL
+ *
+ */
 public class SubDescriptionToFactRule {
 
 	private static Logger log = LoggerFactory.getLogger(SubDescriptionToFactRule.class);

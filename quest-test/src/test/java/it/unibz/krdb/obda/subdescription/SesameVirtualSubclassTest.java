@@ -19,21 +19,13 @@ package it.unibz.krdb.obda.subdescription;
  * limitations under the License.
  * #L%
  */
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-
 import java.io.File;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.openrdf.model.Statement;
-import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -42,145 +34,126 @@ import org.openrdf.repository.RepositoryConnection;
 
 import sesameWrapper.SesameVirtualRepo;
 
-
 public class SesameVirtualSubclassTest extends TestCase {
 
-	
-	
 	public void testSubClasses() throws Exception
 	{
-		
-		
-		//create a sesame repository
+
+		// create a sesame repository
 		RepositoryConnection con = null;
 		Repository repo = null;
-		
+
 		try {
-			
-			
+
 			String owlfile = "src/test/resources/subclass/exampleBooks.owl";
 			String obdafile = "src/test/resources/subclass/exampleBooks.obda";
 			File f = new File("src/test/resources/subclass/subDescription.properties");
-			String pref ="file:"+f.getAbsolutePath();
-			
+			String pref = "file:" + f.getAbsolutePath();
 
 			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, pref);
-			
+
 			repo.initialize();
-			
+
 			con = repo.getConnection();
-			
-			///query repo
-			 try {
-			      String queryString = "select * where {?x rdfs:subClassOf ?y }";
-			      		
-			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-			      TupleQueryResult result = tupleQuery.evaluate();
-			      try {
-			    	  List<String> bindings = result.getBindingNames();
-			    	  assertTrue(result.hasNext());
-			    	  int countResult=0;
-			    	  while (result.hasNext()) {
-			    		   BindingSet bindingSet = result.next();
-			    		   for (String b : bindings)
-			    			   System.out.println(bindingSet.getBinding(b));
-			    		   countResult++;
-			    	  }
-			    	  assertEquals(countResult, 7);
-			      }
-			      finally {
-			         result.close();
-			      }
-			      
-				  System.out.println("Closing...");
-				 
-			     con.close();
-			    	  
-			   }
-			 catch(Exception e)
-			 {
-				 e.printStackTrace();
-			 }
-			
-			
-			
+
+			// /query repo
+			try {
+				String queryString = "select * where {?x rdfs:subClassOf ?y }";
+
+				TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+				TupleQueryResult result = tupleQuery.evaluate();
+				try {
+					List<String> bindings = result.getBindingNames();
+					assertTrue(result.hasNext());
+					int countResult = 0;
+					while (result.hasNext()) {
+						BindingSet bindingSet = result.next();
+						for (String b : bindings)
+							System.out.println(bindingSet.getBinding(b));
+						countResult++;
+					}
+					assertEquals(countResult, 7);
+				} finally {
+					result.close();
+				}
+
+				System.out.println("Closing...");
+
+				con.close();
+
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		
-	
-	System.out.println("Done.");	
-	}
-	
-	public void testOneSubClass(){
-		
-		//create a sesame repository
-				RepositoryConnection con = null;
-				Repository repo = null;
-				
-				try {
-					
-					
-					String owlfile = "src/test/resources/subclass/exampleBooks.owl";
-					String obdafile = "src/test/resources/subclass/exampleBooks.obda";
-					File f = new File("src/test/resources/subclass/subDescription.properties");
-					String pref ="file:"+f.getAbsolutePath();
-					
 
-					repo = new SesameVirtualRepo("my_name", owlfile, obdafile, pref);
-					
-					repo.initialize();
-					
-					con = repo.getConnection();
-					
-					///query repo
-					 try {
-					      String queryString = "select * where {?x rdfs:subClassOf <http://meraka/moss/exampleBooks.owl#Edition> }";
-					      		
-					      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-					      TupleQueryResult result = tupleQuery.evaluate();
-					      List<String> valuesResult = new LinkedList<String>();
-					      try {
-					    	  List<String> bindings = result.getBindingNames();
-					    	  assertTrue(result.hasNext());
-					    	  int countResult=0;
-					    	  while (result.hasNext()) {
-					    		  
-					    		   BindingSet bindingSet = result.next();
-					    		   for (String b : bindings){
-					    			   System.out.println(bindingSet.getBinding(b));
-					    			   valuesResult.add(bindingSet.getBinding(b).getValue().stringValue());
-					    		   }
-					    		  countResult++;
-					    	  }
-					    	  
-					    	  assertEquals(countResult, 2);
-					    	  assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(0));
-					    	  assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(1));
-					      }
-					      finally {
-					         result.close();
-					      }
-					      
-						  System.out.println("Closing...");
-						 
-					     con.close();
-					    	  
-					   }
-					 catch(Exception e)
-					 {
-						 e.printStackTrace();
-					 }
-					
-					
-					
-				} catch (Exception e1) {
-					e1.printStackTrace();
+		System.out.println("Done.");
+	}
+
+	public void testOneSubClass() {
+
+		// create a sesame repository
+		RepositoryConnection con = null;
+		Repository repo = null;
+
+		try {
+
+			String owlfile = "src/test/resources/subclass/exampleBooks.owl";
+			String obdafile = "src/test/resources/subclass/exampleBooks.obda";
+			File f = new File("src/test/resources/subclass/subDescription.properties");
+			String pref = "file:" + f.getAbsolutePath();
+
+			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, pref);
+
+			repo.initialize();
+
+			con = repo.getConnection();
+
+			// /query repo
+			try {
+				String queryString = "select * where {?x rdfs:subClassOf <http://meraka/moss/exampleBooks.owl#Edition> }";
+
+				TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+				TupleQueryResult result = tupleQuery.evaluate();
+				List<String> valuesResult = new LinkedList<String>();
+				try {
+					List<String> bindings = result.getBindingNames();
+					assertTrue(result.hasNext());
+					int countResult = 0;
+					while (result.hasNext()) {
+
+						BindingSet bindingSet = result.next();
+						for (String b : bindings) {
+							System.out.println(bindingSet.getBinding(b));
+							valuesResult.add(bindingSet.getBinding(b).getValue().stringValue());
+						}
+						countResult++;
+					}
+
+					assertEquals(countResult, 2);
+					assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(0));
+					assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(1));
+				} finally {
+					result.close();
 				}
-				
-			
-			System.out.println("Done.");
+
+				System.out.println("Closing...");
+
+				con.close();
+
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+
+		System.out.println("Done.");
 	}
 
 }
-

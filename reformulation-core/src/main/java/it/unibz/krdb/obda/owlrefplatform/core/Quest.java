@@ -851,7 +851,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						equivalenceMaps);
 				
 				if(entailmentSPARQL)
-				SubDescriptionToFactRule.addFacts(unfoldingProgram, reformulationOntology);
+				SubDescriptionToFactRule.addFacts(unfoldingProgram, inputTBox);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,
 						unfoldingProgram, sigma, true);

@@ -198,7 +198,7 @@ public class SubDescriptionVirtualTest extends TestCase {
 		
 		log.info("Find subProperty");
 		List<OWLIndividual> individualsProperty=runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }");
-		assertEquals(22, individualsProperty.size());
+		assertEquals(30, individualsProperty.size());
 		
 		log.info("Find subClass");
 		List<OWLIndividual> individualsClass= runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subClassOf ?y }");
