@@ -11,32 +11,32 @@
     mf:entries
     ( 
     :agg01
-    :agg02
-    :agg03
-    :agg04
-    :agg05
-    :agg06
-    :agg07
-    :agg08
-    :agg08b
-    :agg09
-    :agg10
-    :agg11
-    :agg12
-    :agg-groupconcat-01
-    :agg-groupconcat-02
-    :agg-groupconcat-03
-    :agg-sum-01
-    :agg-sum-02
-    :agg-avg-01
-    :agg-avg-02
-    :agg-min-01
-    :agg-min-02
-    :agg-max-01
-    :agg-max-02
-    :agg-sample-01 
-    :agg-err-01
-    :agg-err-02
+    #:agg02
+    #:agg03
+    #:agg04
+    #:agg05
+    #:agg06
+    #:agg07
+    #:agg08
+    #:agg08b
+    #:agg09
+    #:agg10
+    #:agg11
+    #:agg12
+    #:agg-groupconcat-01
+    #:agg-groupconcat-02
+    #:agg-groupconcat-03
+    #:agg-sum-01
+    #:agg-sum-02
+    #:agg-avg-01
+    #:agg-avg-02
+    #:agg-min-01
+    #:agg-min-02
+    #:agg-max-01
+    #:agg-max-02
+    #:agg-sample-01 
+    #:agg-err-01
+    #:agg-err-02
 ) .
 
 

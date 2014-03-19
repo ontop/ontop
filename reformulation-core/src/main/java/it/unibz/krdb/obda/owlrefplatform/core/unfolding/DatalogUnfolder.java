@@ -2171,12 +2171,15 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 				List<Term>  functionArguments = ((Function) t).getTerms();
 				functionSymbol = ((Function) t).getFunctionSymbol();
 				boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-				if (isURI){
+				if (isURI && functionArguments.size()>1){
 					//I need to remove the URI part and add the rest, usually the variables
 					functionArguments.remove(0);
+					untypedArguments.addAll(functionArguments);
+				}else if (isURI  && functionArguments.size()==1) {
+					untypedArguments.add(t);
+				} else{
+					untypedArguments.addAll(functionArguments);
 				}
-				untypedArguments.addAll(functionArguments);
-				
 			}else{
 				//It is an aggregate!!!
 				untypedArguments.add(t);

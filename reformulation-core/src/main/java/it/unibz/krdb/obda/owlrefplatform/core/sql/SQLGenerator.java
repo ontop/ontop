@@ -1071,13 +1071,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String varName;
 
 			/*
-<<<<<<< HEAD
-			 * When isAns1==1, we need to use the <code>signature</code> for the
-			 * varName
-=======
 			 * When isAns1 is true, we need to use the <code>signature</code>
 			 * for the varName
->>>>>>> feature/leftjoin
 			 */
 			if (isAns1) {
 				varName = signature.get(hpos);
@@ -1173,6 +1168,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			} else if (functionString.equals("Avg")) {
 				mainColumn = "AVG(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+
+			} else if (functionString.equals("Min")) {
+			mainColumn = "MIN(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+
+			} else if (functionString.equals("Max")) {
+				mainColumn = "MAX(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
 
 			} else {
 				throw new IllegalArgumentException(
@@ -1650,15 +1651,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			} else if (functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
-				havingCond = true;
+				//havingCond = true;
 				return "COUNT(" + columnName + ")";
 			} else if (functionName.equals(OBDAVocabulary.SPARQL_AVG_URI)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
-				havingCond = true;
+				//havingCond = true;
 				return "AVG(" + columnName + ")";
 			} else if (functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
-				havingCond = true;
+				//havingCond = true;
 				return "SUM(" + columnName + ")";
 			}
 		}
