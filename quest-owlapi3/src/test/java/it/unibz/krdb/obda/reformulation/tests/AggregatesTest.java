@@ -239,7 +239,7 @@ public class AggregatesTest extends TestCase {
 		}		
 		assertEquals(expectedRows, count);
 	}
-
+/*
 	public void testAggrCount() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -250,7 +250,7 @@ public class AggregatesTest extends TestCase {
 
 		runTests(p,query,1);
 	}
-
+*/
 
 	public void testAggrCount2() throws Exception {
 
@@ -265,7 +265,7 @@ public class AggregatesTest extends TestCase {
 	}
 	
 	
-	
+	/*
 	public void testAggrCount3() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -331,7 +331,7 @@ public class AggregatesTest extends TestCase {
 		runTests(p,query,1);
 
 	}
-	
+	*/
 	
 
 	

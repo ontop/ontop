@@ -541,31 +541,42 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	boolean hasAggregates = false;
 
 	for (CQIE rule: workingRules){
-		Function fatherHead = rule.getHead();
+		hasAggregates = detectAggregateinSingleRule( rule);
+	}
+	return hasAggregates;
+}
 
-		List<Term> headArgs = fatherHead.getTerms();
-		for (Term arg: headArgs) {
-			if (arg instanceof Function){
-				Predicate func = ((Function) arg).getFunctionSymbol();
+/**
+ * @param hasAggregates
+ * @param rule
+ * @return
+ */
+private boolean detectAggregateinSingleRule( CQIE rule) {
+	Function fatherHead = rule.getHead();
+	boolean hasAggregates = false;
+	
+	List<Term> headArgs = fatherHead.getTerms();
+	for (Term arg: headArgs) {
+		if (arg instanceof Function){
+			Predicate func = ((Function) arg).getFunctionSymbol();
 
-				if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
-					Term intArg = ((Function) arg).getTerm(0);
-					if (intArg instanceof Function){
-						func = ((Function) intArg).getFunctionSymbol();
-						boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-								(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-								(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-								(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-								(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-						if (isAnAggregate){
-							//This rule has aggregates so we should 
-							//not unfold the aggregated predicate
-							hasAggregates = true;
-							break;
-						}
+			if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
+				Term intArg = ((Function) arg).getTerm(0);
+				if (intArg instanceof Function){
+					func = ((Function) intArg).getFunctionSymbol();
+					boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+							(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+							(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+							(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+							(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+					if (isAnAggregate){
+						//This rule has aggregates so we should 
+						//not unfold the aggregated predicate
+						hasAggregates = true;
+						break;
 					}
-
 				}
+
 			}
 		}
 	}
@@ -637,23 +648,26 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 					
 					cloneRules(fatherCollection, ruleCollection);
 					
+					boolean parentIsLeftJoin = false;
+					
 					for (CQIE fatherRule:  fatherCollection) {
 						List<Term> ruleTerms = getBodyTerms(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 						
 						//here we perform the partial evaluation
-						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, false, includeMappings);
+						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, parentIsLeftJoin,  includeMappings);
 						
 						
 						
 						if (partialEvaluation != null){
-							System.out.print("Result: ");
+							System.out.print("Result: \n");
 							for (CQIE rule: partialEvaluation){
 								System.out.println(rule);
 							}
 						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
+			
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
 						} else{
 							System.out.println("Empty: "+pred);
@@ -665,7 +679,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 					
 				if (result.isEmpty() )
 				{
-					keepLooping = false;
+					keepLooping = parentIsLeftJoin;
 				}
 					
 				}while(keepLooping);
@@ -828,6 +842,14 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 
 				Collection<CQIE> rulesToAdd= ruleIndex.get(preFather);
 
+				Collection<CQIE> rulesToAdd2= ruleIndex.get(pred);
+
+				for (CQIE resultingRule: rulesToAdd2){
+					if (!workingList.contains(resultingRule)){
+						workingList.add(resultingRule);
+					}
+				}
+				
 				for (CQIE resultingRule: rulesToAdd){
 					if (!workingList.contains(resultingRule)){
 						workingList.add(resultingRule);
@@ -940,57 +962,51 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 			//boolean hasPred = false;
 			
 			for (CQIE newquery : result) {
-				//Update the ruleIndex
-				depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
-				depGraph.addRuleToRuleIndex(preFather, newquery);
+				Predicate ruleHead = newquery.getHead().getPredicate();
+				boolean sameHeadFromFather = ruleHead.equals(preFather);
+				if (!fatherRule.equals(newquery) && sameHeadFromFather){
+					//Update the ruleIndex
+					depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
+					depGraph.addRuleToRuleIndex(preFather, newquery);
 
-				//Delete the rules from workingList that have been touched
-				if (workingList.contains(fatherRule)){
-					workingList.remove(fatherRule);
-				}
-
-
-
-				//List<Term> bodyTerms = getBodyTerms(newquery);
-
-				//Update the bodyIndex
-				
-				depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
-				depGraph.updateRuleIndexByBodyPredicate(newquery);
-
-				
-				//Update MultipleTemplateList
-				
-				if (multPredList.contains(pred))
-				{
-					multPredList.remove(pred);
-					multPredList.add(newquery.getHead().getFunctionSymbol());
-					
-				}
-				
-				
-/*				for (Term termPredicate: bodyTerms){
-					if (termPredicate instanceof Function){
-						Predicate mypred = ((Function) termPredicate).getFunctionSymbol(); 
-						if (extensionalPredicates.contains(mypred)){
-							depGraph.removeRuleFromBodyIndex(mypred, fatherRule);
-							depGraph.addRuleToBodyIndex(mypred, newquery);
-
-						}
-						
-						if (mypred.equals(pred)){
-							hasPred=true;
-						}
+					//Delete the rules from workingList that have been touched
+					if (workingList.contains(fatherRule) && !result.contains(fatherRule)){
+						workingList.remove(fatherRule);
 					}
-				} //end for terms in rule
-			*/
+
+
+
+					//List<Term> bodyTerms = getBodyTerms(newquery);
+
+					//Update the bodyIndex
+
+					depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
+					depGraph.updateRuleIndexByBodyPredicate(newquery);
+
+
+					//Update MultipleTemplateList
+
+					if (multPredList.contains(pred))
+					{
+						multPredList.remove(pred);
+						multPredList.add(newquery.getHead().getFunctionSymbol());
+
+					}
+	
+				} else if (!sameHeadFromFather){
+					depGraph.addRuleToRuleIndex(ruleHead, newquery);
+					depGraph.updateRuleIndexByBodyPredicate(newquery);
+				}
+
+				
+
+				//TODO: check what happens here when the concept has several mappings and it appears several times in the rule
 			} // end for queries in result
-			
-			
-			
-			//TODO: check what happens here when the concept has several mappings and it appears several times in the rule
-			
 			//Determine if there is a need to keep unfolding pred
+
+			
+			
+			
 			if (ruleIndexByBody.get(pred).isEmpty()){
 				return false; //I finish with pred I can move on
 			}else if (result.contains(fatherRule)){ 
@@ -1073,6 +1089,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 *            The number of resolution attemts done globaly, needed to spawn
 		 *            fresh variables.
 		 * @param includingMappings 
+		 * @param parentIsAggr 
 		 * @param atomindx
 		 *            The location of the focustAtom in the currentlist
 		 * @return <ul>
@@ -1086,7 +1103,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 		 * @see Unifier
 		 */	
 	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
-				boolean isSecondAtomInLeftJoin, boolean includingMappings) {
+				boolean isSecondAtomInLeftJoin, boolean includingMappings, boolean parentIsAggr) {
 
 			if (!focusedAtom.isDataFunction())
 				throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
@@ -1149,16 +1166,22 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 //					result = new LinkedList<CQIE>();
 //					result.add(newRuleWithNullBindings);
 				}
-			} else if (hasOneMapping || !isSecondAtomInLeftJoin){
-				
-				//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
-				result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
-			} else if (!hasOneMapping && isSecondAtomInLeftJoin) {
-				// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and
-				result = Lists.newArrayListWithExpectedSize(1 + rulesDefiningTheAtom.size() + 1);
-				//result = new LinkedList<CQIE>();
-				result.add(rule);
-				result.addAll(rulesDefiningTheAtom);
+			} else {
+				boolean freeToFlatten = !isSecondAtomInLeftJoin && !parentIsAggr;
+				if (hasOneMapping || freeToFlatten){
+					
+					//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+					result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+				} else {
+					boolean noUnfoldingNeededAddMappings = isSecondAtomInLeftJoin || parentIsAggr;
+					if (!hasOneMapping && noUnfoldingNeededAddMappings) {
+						// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and
+						result = Lists.newArrayListWithExpectedSize(1 + rulesDefiningTheAtom.size() + 1);
+						//result = new LinkedList<CQIE>();
+						result.add(rule);
+						result.addAll(rulesDefiningTheAtom);
+					}
+				}
 			}
 			
 			
@@ -1359,6 +1382,7 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	 * @param termidx
 	 * 			a stack used to track the depth first searching (DFS) 
 	 * @param includingMappings 
+	 * @param parentIsAggr 
 	 * @return
 	 */
 
@@ -1424,10 +1448,15 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
                     boolean isLeftJoinSecondArgument = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
                     List<CQIE> result = null;
                     Predicate pred = focusedLiteral.getFunctionSymbol();
+                    boolean parentIsAggr = false;
                     
+                    //Here we check if the head has an aggregate, if it does, it should not be distributed over the union of mappings
                     if (pred.equals(resolvPred)) {
+                    	if (includingMappings){
+                    		parentIsAggr= detectAggregateinSingleRule(rule);
+                    	}
                     	result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
-                    			isLeftJoinSecondArgument, includingMappings);
+                    			isLeftJoinSecondArgument, includingMappings, parentIsAggr);
                     	if (result == null)
                     		return null;
 
