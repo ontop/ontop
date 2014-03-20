@@ -506,13 +506,20 @@ public class MetaMappingExpander {
 							CQIE tgt = (CQIE) mapng.getTargetQuery();
 							List<Function> tbd = tgt.getBody();
 							for (int j=0; j<tbd.size();j++){
-								if (tbd.get(j).getFunctionSymbol().equals(lookFor))
+								Function targetAtom = tbd.get(j);
+								if (targetAtom.getFunctionSymbol().equals(lookFor))
 								{
-									if (!predList.contains(lookFor)) {
-										predList.add(lookFor);
+									if (atom.getArity() == targetAtom.getArity()){
+										for (int p=0;p<atom.getArity();p++){
+											if (!atom.getTerm(p).equals(targetAtom.getTerm(j)))
+													if (!predList.contains(lookFor)) {
+														predList.add(lookFor);
+														found = true;
+														break;
+													}
+										}	
+									
 									}
-									found = true;
-									break;
 								}
 								
 							}
