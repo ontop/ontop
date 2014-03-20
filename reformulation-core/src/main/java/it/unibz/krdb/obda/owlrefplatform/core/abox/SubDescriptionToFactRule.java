@@ -39,7 +39,7 @@ public class SubDescriptionToFactRule {
 
 	public static void addFacts(DatalogProgram p, Ontology onto) {
 
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(onto);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(onto);
 		addSubClassesFromOntology(p, reasoner);
 		addSubRolesFromOntology(p, reasoner);
 
@@ -85,7 +85,7 @@ public class SubDescriptionToFactRule {
 
 						// added not to consider sub equal to the current same
 						// node
-						if ((classItem instanceof OClass) && (subClassItem instanceof OClass) && !subClassItem.equals(classItem)) {
+						if ((classItem instanceof OClass) && (subClassItem instanceof OClass)) {
 
 							log.debug("Insert class: " + classItem);
 							log.debug("SubClass member: " + subClassItem);
@@ -154,7 +154,7 @@ public class SubDescriptionToFactRule {
 
 						// added not to consider sub equal to the current same
 						// node
-						if ((!propertyItem.isInverse()) && (!subPropertyItem.isInverse()) && !subPropertyItem.equals(propertyItem)) {
+						if ((!propertyItem.isInverse()) && (!subPropertyItem.isInverse()) ) {
 
 							log.debug("Insert property: " + propertyItem);
 							log.debug("SubProperty member: " + subPropertyItem);

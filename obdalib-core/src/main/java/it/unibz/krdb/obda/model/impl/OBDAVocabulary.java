@@ -124,11 +124,22 @@ public class OBDAVocabulary {
 			strIS_TRUE, 1);
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-	/*	subclass and subproperty predicate URI*/
+	/*	sparql entailment predicate URI*/
 	
 	public static final String RDFS_SUBCLASS_URI = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
 	
 	public static final String RDFS_SUBPROPERTY_URI = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
+	
+	public static final String RDFS_DOMAIN_URI = "http://www.w3.org/2000/01/rdf-schema#domain";
+	
+	public static final String RDFS_RANGE_URI = "http://www.w3.org/2000/01/rdf-schema#range";
+	
+	public static final String OWL_INVERSE_URI = "http://www.w3.org/2002/07/owl#inverseOf";
+	
+	public static final String OWL_EQUIVALENT_URI = "http://www.w3.org/2002/07/owl#equivalentClass";
+	
+	public static final String OWL_DISJOINT_URI = "http://www.w3.org/2002/07/owl#disjointWith";
+	
 
 	/* Data type predicate URIs */
 
@@ -183,11 +194,23 @@ public class OBDAVocabulary {
 	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
 			XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE };
 	
-	/* property predicates */
+	/* For SPARQL entailments*/
 	
 	public static final Predicate RDFS_SUBCLASS = new PredicateImpl(RDFS_SUBCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	
 	public static final Predicate RDFS_SUBPROPERTY = new PredicateImpl(RDFS_SUBPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate RDFS_DOMAIN = new PredicateImpl(RDFS_DOMAIN_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate RDFS_RANGE = new PredicateImpl(RDFS_RANGE_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate OWL_INVERSE = new PredicateImpl(OWL_INVERSE_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate OWL_EQUIVALENT = new PredicateImpl(OWL_EQUIVALENT_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate OWL_DISJOINT = new PredicateImpl(OWL_DISJOINT_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	
 
 	/* Common namespaces and prefixes */
 

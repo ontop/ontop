@@ -58,7 +58,7 @@ public class SubDescriptionStockTest extends TestCase {
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-			p.setCurrentValueOf(QuestPreferences.ENTAILMENTS_SPARQL, QuestConstants.TRUE);
+			p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, QuestConstants.TRUE);
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
 			factory.setOBDAController(obdaModel);

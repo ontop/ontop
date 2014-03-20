@@ -209,7 +209,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private boolean obtainFullMetadata = false;
 	
-	private boolean entailmentSPARQL = false;
+	private boolean sparqlOwlEntailment = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -446,8 +446,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		obtainFullMetadata = Boolean.valueOf((String) preferences
 				.get(QuestPreferences.OBTAIN_FULL_METADATA));
-		entailmentSPARQL = Boolean.valueOf((String) preferences
-				.get(QuestPreferences.ENTAILMENTS_SPARQL));
+		sparqlOwlEntailment = Boolean.valueOf((String) preferences
+				.get(QuestPreferences.SPARQL_OWL_ENTAILMENT));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -463,7 +463,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		log.debug("Optimize equivalences: {}", bOptimizeEquivalences);
 		log.debug("Optimize TBox: {}", bOptimizeTBoxSigma);
 		log.debug("ABox mode: {}", aboxMode);
-		log.debug("SPARQL Entailment: {}", entailmentSPARQL);
+		log.debug("SPARQL Entailment: {}", sparqlOwlEntailment);
 		if (!aboxMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
 			log.debug("Schema configuration: {}", aboxSchemaType);
@@ -853,7 +853,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/*
 				 * Adding facts about rdfs:subClassOf and rdfs:subPropertyOf in datalogProgram
 				 */
-				if(entailmentSPARQL)
+				if(sparqlOwlEntailment)
 				SubDescriptionToFactRule.addFacts(unfoldingProgram, inputTBox);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,
