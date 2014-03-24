@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class SubDescriptionVirtualTest extends TestCase {
+public class EquivalenceVirtualTest extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -169,7 +169,7 @@ public class SubDescriptionVirtualTest extends TestCase {
 			{
 				OWLIndividual ind1 = rs.getOWLIndividual("x");
 				OWLIndividual ind2 = rs.getOWLIndividual("y");
-				System.out.println(ind1 + " sub " + ind2);
+				System.out.println(ind1 + " equivalent to " + ind2);
 				individuals.add(ind1);
 				individuals.add(ind2);
 			}
@@ -196,24 +196,8 @@ public class SubDescriptionVirtualTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
 		
-		log.info("Find subProperty");
-		List<OWLIndividual> individualsProperty=runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }");
-		assertEquals(44, individualsProperty.size());
-		
-		log.info("Find subClass");
-		List<OWLIndividual> individualsClass= runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subClassOf ?y }");
-		
-		assertEquals(10, individualsClass.size());
-		assertEquals(individualsClass.get(0).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman");
-		assertEquals(individualsClass.get(1).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person");
-		assertEquals(individualsClass.get(2).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
-		assertEquals(individualsClass.get(3).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
-		assertEquals(individualsClass.get(8).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
-		assertEquals(individualsClass.get(9).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person");
-		
 		log.info("Find equivalences");
 		List<OWLIndividual> individualsEquivClass= runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:equivalenceClass ?y }");
-		assertEquals(0, individualsEquivClass.size());
 	}
 
 	

@@ -26,7 +26,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SubDescriptionStockTest extends TestCase {
+public class EquivalencesStockTest extends TestCase {
 
 	private OBDADataFactory fac;
 
@@ -96,7 +96,7 @@ public class SubDescriptionStockTest extends TestCase {
 				result = true;
 				OWLIndividual xsub = rs.getOWLIndividual("x");
 				OWLIndividual y = rs.getOWLIndividual("y");
-				retval = xsub.toString() + " subOf " + y.toString();
+				retval = xsub.toString() + " equivalent to" + y.toString();
 				System.out.println(retval);
 			}
 			assertTrue(result);
@@ -114,71 +114,46 @@ public class SubDescriptionStockTest extends TestCase {
 		}
 	}
 
-	public void testSubClass() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subClassOf ?y }";
+	public void testEquivalenceClass() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentClass ?y }";
 		runTests(query);
 
 	}
 
-	public void testSubProperty() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subPropertyOf ?y }";
-		runTests(query);
+
+	public void testOneEquivalenceClass() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y owl:equivalentClass :Dealer }";
+		QuestOWLStatement st = conn.createStatement();
+		String retval;
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+
+			assertTrue(rs.nextRow());
+			OWLIndividual y = rs.getOWLIndividual("y");
+			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#Trader>", retval);
+			log.info(retval);
+			
+			assertTrue(rs.nextRow());
+			y = rs.getOWLIndividual("y");
+			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#StockTrader>", retval);
+			log.info(retval);
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+			}
+			conn.close();
+			reasoner.dispose();
+		}
 
 	}
+
 	
-
-	public void testOneSubClass() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subClassOf :FinantialInstrument }";
-		QuestOWLStatement st = conn.createStatement();
-		String retval;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-
-			assertTrue(rs.nextRow());
-			OWLIndividual y = rs.getOWLIndividual("y");
-			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#Stock>", retval);
-			log.info(retval);
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-
-	}
-
-	public void testOneSubProperty() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subPropertyOf <http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1> }";
-		QuestOWLStatement st = conn.createStatement();
-		String retval;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-
-			assertTrue(rs.nextRow());
-			OWLIndividual y = rs.getOWLIndividual("y");
-			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>", retval);
-			log.info(retval);
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-
-	}
 
 }
