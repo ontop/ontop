@@ -64,12 +64,6 @@ public class VisitedQuery implements Serializable {
 	private ProjectionJSQL projection;
 	private AggregationJSQL groupByClause;
 
-	/**
-	 * Constructs an empty query.
-	 */
-	public VisitedQuery() {
-		super();
-	}
 
 	/**
 	 * Parse a query given as a String
