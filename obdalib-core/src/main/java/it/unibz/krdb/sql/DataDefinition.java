@@ -71,7 +71,32 @@ public abstract class DataDefinition implements Serializable {
 		}
 		return list;
 	}
-
+	
+	/**
+	 * Used to get the key of an attribute, so it can be get or set with the {@link #getAttribute(int) getAttribute} or {@link #setAttribute(int, Attribute) setAttribute}
+	 * 
+	 * @param The name of an attribute, correctly spelled and cased.
+	 * @return The key in the hashmap
+	 */
+	public int getAttributeKey(String attributeName) {
+        for (int idx : attributes.keySet()) {
+            if (attributes.get(idx).hasName(attributeName)) {
+                return idx;
+            }
+        }
+        return -1;
+    }
+	
+	/**
+	 * Returns the position of the attribute in the .values of the underlying hashmap (Or -1)
+	 * Note that this is not necessarily compatible with the argument {@link #getAttribute(int) getAttribute} and {@link #setAttribute(int, Attribute) setAttribute}
+	 * For that purpose, {@link #getAttributeKey(String) getAttributeKey} above should be used instead
+	 * 
+	 * 
+	 * @param attributeName The name of an attribute, correctly spelled and cased. 
+	 * @return If there is an attribute, return its position in the values() list, otherwise -1
+	 */
+	@Deprecated
 	public int getAttributePosition(String attributeName) {
 		int index = 0;
 		for (Attribute value : attributes.values()) {
