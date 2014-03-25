@@ -449,11 +449,15 @@ public class Unifier {
 					Predicate functionSymbol = firstAtom.getFunctionSymbol();
 					if (multPredList.containsKey(functionSymbol) ){ // it is a problematic predicate regarding templates
 						if (multPredList.get(functionSymbol).contains(termidx)){ //the term is the problematic one
-						s = getOneWaySubstitution(term1, term2,true);
+							s = getOneWaySubstitution(term1, term2,true);
 						} else{
 							s = getOneWaySubstitution(term1, term2,false);	
 						}
 					}
+					else{
+							s = getOneWaySubstitution(term1, term2,false);	
+					}
+					
 					 
 				}
 				
