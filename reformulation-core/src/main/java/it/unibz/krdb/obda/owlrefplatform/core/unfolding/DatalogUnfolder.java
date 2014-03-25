@@ -916,7 +916,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				multPredList.removeAll(pred);
 				//if the problematic term was in the head
 				if (newIdx>-1){
-					multPredList.put(pred,newIdx);
+					multPredList.put(preFather,newIdx);
 				}
 	
 			}			
@@ -2078,7 +2078,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param sourceRule
 	 * @return
 	 */
-	private static CQIE computeSourceRuleNoTypes(CQIE sourceRule){
+	private  CQIE computeSourceRuleNoTypes(CQIE sourceRule){
 
 		Function sourceHead=sourceRule.getHead();
 
@@ -2089,9 +2089,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Term> typedArguments= sourceHead.getTerms();
 		List<Term> untypedArguments= new LinkedList<Term>();
 
+		boolean isProblemTemplate = false;
+		
+		if (multPredList.containsKey(sourceHead.getFunctionSymbol())){
+			isProblemTemplate = true;
+		}
 		for (Term t: typedArguments){
-			getUntypedArgumentFromTerm(untypedArguments, t);
-
+			getUntypedArgumentFromTerm(untypedArguments, t,isProblemTemplate);
 		}
 
 		//updating the rule!!
@@ -2111,10 +2115,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * Takes a Term of the form Type(x) and returns the list [x]
 	 * @param untypedArguments
 	 * @param t
+	 * @param isProblemTemplate 
 	 */
-	private static void getUntypedArgumentFromTerm(List<Term> untypedArguments,
-			Term t) {
-		if (t instanceof Function){
+	private  void getUntypedArgumentFromTerm(List<Term> untypedArguments,
+			Term t, boolean isProblemTemplate) {
+		if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
 			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
@@ -2124,6 +2129,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				functionArguments.remove(0);
 			}
 			untypedArguments.addAll(functionArguments);
+		}else if (t instanceof Function && isProblemTemplate){ // if it is a problematic term we leave it as it is
+			untypedArguments.add(t);
 		}else if(t instanceof Variable){
 			untypedArguments.add(t);
 		}else if (t instanceof Constant){
@@ -2144,7 +2151,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	
 	
-	private static List<CQIE> computeRuleExtendedTypes(List currentTerms,
+	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
 			CQIE sourceRule, CQIE fatherRule) {
 
 
@@ -2199,12 +2206,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param fatherRule
 	 * @return
 	 */
-	private static CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule) {
+	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule) {
 
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		boolean oneWayMGU = true;
-		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU);
+		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU, multPredList);
 		
 		
 		
@@ -2219,7 +2226,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				Term value = pairs.getValue();
 
 				if (value instanceof Function){
-					//TODO: this HAS TO CHANGE!!! Since here we assume there is only 1 variable!!!
 
 					Set<Variable> varset =  value.getReferencedVariables();
 					Variable mvar;
@@ -2261,19 +2267,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			}
 
-			//Generate the MGU for the body
-			/*Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
-			generateMGUforBody(mgu, bodymgu);
-*/
-
-			//applying unifers in head and body*/
-
-			//updating the rule head
-			/*			List<Function> newbody =  fatherRule.getBody();
-
-			 * 			Unifier.applyUnifier(newbody, bodymgu);
-			 **/
-
 			//updating the rule body
 			Function newHead = (Function) fatherRule.getHead();
 			Unifier.applySelectiveUnifier(newHead, mgu);
@@ -2286,29 +2279,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 	}
 
-	/**
-	 * Takes the MGU used for the head, and removes the types, leaves the variables
-	 * @param mgu
-	 * @param bodymgu
-	 */
-	private static void generateMGUforBody(Map<Variable, Term> mgu,
-			Map<Variable, Term> bodymgu) {
-		Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
-		  while (vars.hasNext()) {
-		        Map.Entry<Variable, Term> pairs = vars.next();
-		        
-		        Variable key = pairs.getKey();
-		        Term value = pairs.getValue();
 
-		        List<Term> untypedArguments=new LinkedList<Term>();
-				getUntypedArgumentFromTerm(untypedArguments, value);
-				
-				//TODO: this HAS TO CHANGE!!! Since here we assume there is only 1 variable!!!
-				Term untypedValue = untypedArguments.get(0);
-				bodymgu.put(key, untypedValue);
-		        
-		  }
-	}
 	
 	
 	

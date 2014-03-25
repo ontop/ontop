@@ -55,6 +55,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 /***
  * A Class that provides general utilities related to unification, of terms and
  * atoms.
@@ -329,7 +332,9 @@ public class Unifier {
 	
 	public static Map<Variable, Term> getMGU(Function first,
 			Function second) {
-		return getMGU(first,second,false);
+		Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
+
+		return getMGU(first,second,false,emptyMulti);
 	}
 	/***
 	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports
@@ -342,7 +347,7 @@ public class Unifier {
 	 * @return
 	 */
 	public static Map<Variable, Term> getMGU(Function first,
-			Function second , boolean oneWayMGU) {
+			Function second , boolean oneWayMGU, Multimap<Predicate,Integer> multPredList) {
 
 		/*
 		 * Basic case, predicates are different or their arity is different,
@@ -441,7 +446,15 @@ public class Unifier {
 				if(!oneWayMGU){
 					s= getSubstitution(term1, term2);
 				}else{
-					 s = getOneWaySubstitution(term1, term2);
+					Predicate functionSymbol = firstAtom.getFunctionSymbol();
+					if (multPredList.containsKey(functionSymbol) ){ // it is a problematic predicate regarding templates
+						if (multPredList.get(functionSymbol).contains(termidx)){ //the term is the problematic one
+						s = getOneWaySubstitution(term1, term2,true);
+						} else{
+							s = getOneWaySubstitution(term1, term2,false);	
+						}
+					}
+					 
 				}
 				
 				if (s == null) {
@@ -591,11 +604,15 @@ public class Unifier {
 	 * such that f(t1)=f(t2) and this one finds an f such that f(t1)=t2
 	 * @param term1
 	 * @param term2
+	 * @param problemTerm 
 	 * @return
 	 */
 	public static Substitution getOneWaySubstitution(Term term1,
-			Term term2) {
+			Term term2, boolean problemTerm) {
 
+		if (problemTerm){
+			return new NeutralSubstitution();
+		}
 		if (!(term1 instanceof VariableImpl)
 				&& !(term2 instanceof VariableImpl)) {
 			/*
