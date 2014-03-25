@@ -74,7 +74,11 @@ import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.ViewKeyReader;
+import it.unibz.krdb.sql.api.Attribute;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -703,6 +707,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				}
 			}
 			
+			//Adds keys from the text file
+			
+			ViewKeyReader.addViewKeys(metadata, "../view_keys.lst");
+			// Prints all primary keys
+			System.out.println("\n====== Primary keys ==========");
+			List<TableDefinition> table_list = metadata.getTableList();
+			for(TableDefinition dd : table_list){
+				System.out.print("\n" + dd.getName() + ":");
+				for(Attribute attr : dd.getPrimaryKeys() ){
+					System.out.print(attr.getName() + ",");
+				}
+			}
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
