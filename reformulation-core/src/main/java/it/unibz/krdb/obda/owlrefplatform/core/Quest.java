@@ -103,6 +103,9 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 //import com.hp.hpl.jena.query.Query;
 
 public class Quest implements Serializable, RepositoryChangedListener {
@@ -184,7 +187,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/*
 	 * The list of predicates that are defined in multiple mappings
 	 */
-	protected ArrayList<Predicate> multiplePredIdx = new ArrayList<Predicate>();
+	protected Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 
 	final HashSet<String> templateStrings = new HashSet<String>();
 
@@ -745,7 +748,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
-			multiplePredIdx = metaMappingExpander.processMultiplePredicates();
 			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
@@ -753,6 +755,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
 
+
+ 			
+ 			
 			/***
 			 * T-Mappings and Fact mappings
 			 */
@@ -821,7 +826,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
+
 			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
+			
+			multiplePredIdx = unfolder.processMultipleTemplatePredicates(unfoldingProgram);
+			
+			
+			
+			
+			
+			
+			
+			
+			
 
 			/***
 			 * Setting up the TBox we will use for the reformulation
