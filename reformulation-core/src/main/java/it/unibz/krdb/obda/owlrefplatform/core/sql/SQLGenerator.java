@@ -116,8 +116,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final DBMetadata metadata;
 	private final JDBCUtility jdbcutil;
 	private final SQLDialectAdapter sqladapter;
+    private final String QUEST_TYPE = "QuestType";
 
-	private boolean isDistinct = false;
+    private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
 
@@ -129,7 +130,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
-	/**
+    /**
 	 * This method is in charge of generating the SQL query from a Datalog
 	 * program
 	 * 
@@ -494,7 +495,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		// Hard coded variable names
 		for (int i = 0; i < headArity; i++) {
-			columns.add("v" + i + "QuestType");
+			columns.add("v" + i + QUEST_TYPE);
 			columns.add("v" + i + "lang");
 			columns.add("v" + i);
 		}
@@ -1025,7 +1026,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				varName = "v" + hpos;
 			}
 	
-			String typeColumn = getTypeColumnForSELECT(ht, varName);
+			String typeColumn = getTypeColumnForSELECT(ht, varName, index);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index);
 			String langColumn = getLangColumnForSELECT(ht, varName, index);
 
@@ -1164,7 +1165,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
-	private String getTypeColumnForSELECT(Term ht, String varName) {
+	private String getTypeColumnForSELECT(Term ht, String varName, QueryAliasIndex index) {
 
 		String typeStr = "%s AS \"%sQuestType\"";
 
@@ -1203,7 +1204,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return (String.format(typeStr, 0, varName));
 		} else if (ht instanceof Variable) {
 			// TODO Here we do not have a proper type. Check if is there problem with "-1"
-			return (String.format(typeStr, 1, varName));
+			//return (String.format(typeStr, -1, varName));
+            Variable var = (Variable) ht;
+            Collection<String> posList = index.getColumnReferences(var);
+            if (posList == null || posList.size() == 0) {
+                throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
+            }
+            String tableColumn = posList.iterator().next();
+            String tableColumnType;
+            int length = tableColumn.length();
+            if(tableColumn.charAt(length-1) == '\'' || tableColumn.charAt(length-1) == '\"' || tableColumn.charAt(length-1) == '`'){
+                tableColumnType = tableColumn.substring(0, length-1) + QUEST_TYPE +  tableColumn.charAt(length-1);
+            } else {
+                tableColumnType = tableColumn + QUEST_TYPE;
+            }
+            return (String.format(typeStr, tableColumnType, varName));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
