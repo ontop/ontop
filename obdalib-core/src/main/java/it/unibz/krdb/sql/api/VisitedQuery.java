@@ -55,7 +55,7 @@ public class VisitedQuery implements Serializable {
 
 	private Select select; // the parsed query
 
-	public static Pattern pQuotes;
+	public static Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
 	private ArrayList<RelationJSQL> tableSet;
 	private ArrayList<SelectJSQL> selectsSet;
 	private HashMap<String, String> aliasMap;
@@ -85,7 +85,6 @@ public class VisitedQuery implements Serializable {
 		 * pattern used to remove quotes from the beginning and the end of
 		 * columns
 		 */
-		pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
 
 		query = queryString;
 
