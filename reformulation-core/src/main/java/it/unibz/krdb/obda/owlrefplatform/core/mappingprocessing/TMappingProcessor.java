@@ -46,6 +46,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -430,8 +431,12 @@ public class TMappingProcessor implements Serializable {
 				Predicate p = equivProperty.getPredicate();
 				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>();
 				for (CQIE currentNodeMapping : currentNodeMappings) {
-
+					mappingList.add(currentNodeMapping);
+				}
+				for(CQIE currentNodeMapping : mappingList){
+					
 					if (equivProperty.isInverse() == current.isInverse()) {
 						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
 						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
