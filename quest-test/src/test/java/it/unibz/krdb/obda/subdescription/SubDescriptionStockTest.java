@@ -85,7 +85,7 @@ public class SubDescriptionStockTest extends TestCase {
 		reasoner.dispose();
 	}
 
-	private void runTests(String query) throws Exception {
+	private void runTests(String query, String function) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		String retval;
 		boolean result = false;
@@ -96,7 +96,7 @@ public class SubDescriptionStockTest extends TestCase {
 				result = true;
 				OWLIndividual xsub = rs.getOWLIndividual("x");
 				OWLIndividual y = rs.getOWLIndividual("y");
-				retval = xsub.toString() + " subOf " + y.toString();
+				retval = xsub.toString() + " "+function+" " + y.toString();
 				System.out.println(retval);
 			}
 			assertTrue(result);
@@ -116,13 +116,13 @@ public class SubDescriptionStockTest extends TestCase {
 
 	public void testSubClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subClassOf ?y }";
-		runTests(query);
+		runTests(query, "rdfs:subClassOf");
 
 	}
 
 	public void testSubProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subPropertyOf ?y }";
-		runTests(query);
+		runTests(query, "rdfs:subPropertyOf");
 
 	}
 	
@@ -178,6 +178,12 @@ public class SubDescriptionStockTest extends TestCase {
 			conn.close();
 			reasoner.dispose();
 		}
+
+	}
+	
+	public void testEquivalentClass() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentClass ?y }";
+		runTests(query, "owl:equivalentClass" );
 
 	}
 

@@ -33,11 +33,11 @@ public class TestVirtualScenarioSuite extends TestSuite {
 
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite("Scenario Tests for Quest in Virtual mode");
-		suite.addTest(MysqlVirtualScenarioTest.suite());
-		suite.addTest(PgsqlVirtualScenarioTest.suite());
-		suite.addTest(MssqlVirtualScenarioTest.suite());
+//		suite.addTest(MysqlVirtualScenarioTest.suite());
+//		suite.addTest(PgsqlVirtualScenarioTest.suite());
+//		suite.addTest(MssqlVirtualScenarioTest.suite());
 		suite.addTest(OracleVirtualScenarioTest.suite());
-		suite.addTest(Db2VirtualScenarioTest.suite());
+//		suite.addTest(Db2VirtualScenarioTest.suite());
 		return suite;
 	}
 }

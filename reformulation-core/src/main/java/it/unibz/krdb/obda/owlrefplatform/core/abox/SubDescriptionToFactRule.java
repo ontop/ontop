@@ -34,90 +34,90 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class add facts to the datalog program regarding rdfs:subClassOf and rdfs:subPropertyOf
- * It is possible to activate or deactivate this feature in Quest changing the preferences of
- *  QuestPreferences.ENTAILMENTS_SPARQL
- *
+ * This class add facts to the datalog program regarding rdfs:subClassOf and
+ * rdfs:subPropertyOf It is possible to activate or deactivate this feature in
+ * Quest changing the preferences of QuestPreferences.ENTAILMENTS_SPARQL
+ * 
  */
 public class SubDescriptionToFactRule {
 
 	private static Logger log = LoggerFactory.getLogger(SubDescriptionToFactRule.class);
 
 	private static OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-	
+
 	private static DatalogProgram program;
-	
-	
 
 	public static void addFacts(DatalogProgram p, Ontology onto, Map<Predicate, Description> equivalenceMaps) {
-		
-		program=p;
-		
+
+		program = p;
+
 		TBoxReasoner reasoner = new TBoxReasonerImpl(onto);
 		addSubClassesFromOntology(reasoner);
 		addSubRolesFromOntology(reasoner);
 		addEquivalences(equivalenceMaps);
 
-	/*	Alternative traversing the graph is not considering the case in which the node is equal to itself
-	 * 
-		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-
-			@Override
-			public void onInclusion(Property sub, Property sup) {
-				
-			
-			if ((!sub.isInverse()) && (!sup.isInverse()) ) 
-				createFact(sub,sup, OBDAVocabulary.RDFS_SUBPROPERTY);
-				
-			}
-
-			@Override
-			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-				
-				
-				if ((sub instanceof OClass) && (sup instanceof OClass)) 
-					createFact(sub,sup, OBDAVocabulary.RDFS_SUBCLASS);
-			}
-			
-			public void createFact(Description sub, Description sup, Predicate subPropertyOf ){
-				
-				
-				List<Term> terms = new ArrayList<Term>();
-
-				// add URI terms
-				terms.add(factory.getUriTemplate(factory.getConstantLiteral(sub.toString())));
-				terms.add(factory.getUriTemplate(factory.getConstantLiteral(sup.toString())));
-
-				Function head = factory.getFunction(subPropertyOf, terms);
-
-				log.debug("head " + head);
-
-				p.appendRule(factory.getCQIE(head));	
-			}
-			
-			
-		});*/
+		/*
+		 * Alternative traversing the graph is not considering the case in which
+		 * the node is equal to itself
+		 * 
+		 * TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
+		 * 
+		 * @Override public void onInclusion(Property sub, Property sup) {
+		 * 
+		 * 
+		 * if ((!sub.isInverse()) && (!sup.isInverse()) ) createFact(sub,sup,
+		 * OBDAVocabulary.RDFS_SUBPROPERTY);
+		 * 
+		 * }
+		 * 
+		 * @Override public void onInclusion(BasicClassDescription sub,
+		 * BasicClassDescription sup) {
+		 * 
+		 * 
+		 * if ((sub instanceof OClass) && (sup instanceof OClass))
+		 * createFact(sub,sup, OBDAVocabulary.RDFS_SUBCLASS); }
+		 * 
+		 * public void createFact(Description sub, Description sup, Predicate
+		 * subPropertyOf ){
+		 * 
+		 * 
+		 * List<Term> terms = new ArrayList<Term>();
+		 * 
+		 * // add URI terms
+		 * terms.add(factory.getUriTemplate(factory.getConstantLiteral
+		 * (sub.toString())));
+		 * terms.add(factory.getUriTemplate(factory.getConstantLiteral
+		 * (sup.toString())));
+		 * 
+		 * Function head = factory.getFunction(subPropertyOf, terms);
+		 * 
+		 * log.debug("head " + head);
+		 * 
+		 * p.appendRule(factory.getCQIE(head)); }
+		 * 
+		 * 
+		 * });
+		 */
 	}
 
-	
 	private static void addEquivalences(Map<Predicate, Description> equivalenceMaps) {
-		Iterator<Entry<Predicate, Description>> itEquivalences= equivalenceMaps.entrySet().iterator();
+		Iterator<Entry<Predicate, Description>> itEquivalences = equivalenceMaps.entrySet().iterator();
 		Predicate equivalentClass = OBDAVocabulary.OWL_EQUIVALENT;
-		
-		while(itEquivalences.hasNext()){
-			
-			Entry<Predicate, Description> map = itEquivalences.next(); 
-			
-			Predicate key=map.getKey();
-			Description value= map.getValue();
-			
-			if ((key.isClass()) && (value instanceof OClass)) {
-				
+
+		while (itEquivalences.hasNext()) {
+
+			Entry<Predicate, Description> map = itEquivalences.next();
+
+			Predicate key = map.getKey();
+			Description value = map.getValue();
+
+			if (key.isClass()) {
+
 				addNodesRule(key.getName(), value.toString(), equivalentClass);
-		
+
 			}
 		}
-		
+
 	}
 
 	/**
@@ -157,9 +157,9 @@ public class SubDescriptionToFactRule {
 					while (itcl.hasNext()) {
 
 						BasicClassDescription subClassItem = itcl.next();
-						
+
 						addBlankNodesRule(classItem, subClassItem, subClassOf);
-						
+
 						log.debug("Insert class: " + classItem);
 						log.debug("SubClass member: " + subClassItem);
 
@@ -170,8 +170,6 @@ public class SubDescriptionToFactRule {
 		}
 
 	}
-
-	
 
 	/**
 	 * Add subroles in the database using the DAG. All subroles are inserted
@@ -214,12 +212,11 @@ public class SubDescriptionToFactRule {
 
 						// added not to consider sub equal to the current same
 						// node
-						if ((!propertyItem.isInverse()) && (!subPropertyItem.isInverse()) ) {
+						if ((!propertyItem.isInverse()) && (!subPropertyItem.isInverse())) {
 							log.debug("Insert property: " + propertyItem);
 							log.debug("SubProperty member: " + subPropertyItem);
 
 							addNodesRule(subPropertyItem.toString(), propertyItem.toString(), subPropertyOf);
-
 
 						}
 
@@ -230,16 +227,16 @@ public class SubDescriptionToFactRule {
 		}
 
 	}
-	
+
 	/**
 	 * Create a fact given two nodes (transformed in URI) and a predicate
+	 * 
 	 * @param description1
 	 * @param description2
 	 * @param function
 	 */
-	
-	
-	public static void addNodesRule(String description1, String description2, Predicate function){
+
+	public static void addNodesRule(String description1, String description2, Predicate function) {
 
 		List<Term> terms = new ArrayList<Term>();
 
@@ -252,27 +249,25 @@ public class SubDescriptionToFactRule {
 		log.debug("head: " + head);
 
 		program.appendRule(factory.getCQIE(head));
-		
-		
+
 	}
-	
+
 	/**
-	 * Create a fact given two blank nodes  and a predicate
+	 * Create a fact given two blank nodes and a predicate
+	 * 
 	 * @param description1
 	 * @param description2
 	 * @param function
 	 */
-	
-	
-	public static void addBlankNodesRule(BasicClassDescription description1, BasicClassDescription description2, Predicate function){
 
-	
+	public static void addBlankNodesRule(BasicClassDescription description1, BasicClassDescription description2, Predicate function) {
+
 		List<Term> terms = new ArrayList<Term>();
 
 		if (description1 instanceof OClass)
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
-		
+
 		else if (description1 instanceof PropertySomeRestriction) {
 			// add blank node
 			terms.add(factory.getFunction(factory.getBNodeTemplatePredicate(1), factory.getConstantBNode(description1.toString())));
@@ -281,18 +276,18 @@ public class SubDescriptionToFactRule {
 		if (description2 instanceof OClass)
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
-		
+
 		else if (description2 instanceof PropertySomeRestriction) {
-			
+
 			// add blank node
 			terms.add(factory.getFunction(factory.getBNodeTemplatePredicate(1), factory.getConstantBNode(description2.toString())));
 		}
-		
-		if (terms.size()==2){					
+
+		if (terms.size() == 2) {
 			Function head = factory.getFunction(function, terms);
 			program.appendRule(factory.getCQIE(head));
 		}
-		
+
 	}
-	
+
 }
