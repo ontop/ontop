@@ -2108,13 +2108,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<Term> typedArguments= sourceHead.getTerms();
 		List<Term> untypedArguments= new LinkedList<Term>();
 
-		boolean isProblemTemplate = false;
+		int termIdx = 0;
 		
-		if (multPredList.containsKey(sourceHead.getFunctionSymbol())){
-			isProblemTemplate = true;
-		}
 		for (Term t: typedArguments){
-			getUntypedArgumentFromTerm(untypedArguments, t,isProblemTemplate, termsToExclude);
+			boolean isProblemTemplate = false;
+			
+			Predicate functionSymbol = sourceHead.getFunctionSymbol();
+			if (multPredList.containsKey(functionSymbol)){
+				if (multPredList.get(functionSymbol).contains(termIdx)){
+					isProblemTemplate = true;
+				}
+			}
+			untypedArguments.addAll(getUntypedArgumentFromTerm( t,termIdx,isProblemTemplate,termsToExclude));
+			termIdx++;
 		}
 
 		//updating the rule!!
@@ -2134,11 +2140,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * Takes a Term of the form Type(x) and returns the list [x]
 	 * @param untypedArguments
 	 * @param t
+	 * @param termIdx 
 	 * @param isProblemTemplate 
 	 */
-	private  void getUntypedArgumentFromTerm(List<Term> untypedArguments,
-			Term t, boolean isProblemTemplate, List<Term> termsToExclude) {
+	private  List<Term>  getUntypedArgumentFromTerm(
+			Term t, int termIdx, boolean isProblemTemplate, List<Term> termsToExclude) {
 		
+	
+		List<Term> untypedArguments = new LinkedList<Term>();
 		if (termsToExclude.contains(t)){
 			isProblemTemplate = true;
 		}
@@ -2160,6 +2169,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}else if (t instanceof Constant){
 			untypedArguments.add(t);
 		}
+		return untypedArguments;
 	}
 
 	
