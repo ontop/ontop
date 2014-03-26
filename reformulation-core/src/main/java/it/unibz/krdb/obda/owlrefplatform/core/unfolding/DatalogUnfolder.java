@@ -53,6 +53,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -983,7 +984,23 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					
 					
 					
-					
+		/**
+		 * Returns the list functions inside the functions atoms 
+		 * @param rule
+		 * @return
+		 */
+		private List<Function> getAtomFunctions(Function func) {
+
+			List<Term> currentTerms = func.getTerms();
+			List<Function> tempList = new LinkedList<Function>();
+
+			for (Term a : currentTerms) {
+				if (a instanceof Function){
+					tempList.add((Function)a);
+				}
+			}
+			return tempList;
+		}			
 					
 					
 				
@@ -2007,7 +2024,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						
 						CQIE sourceRule = predCollection.get(i);
 						
-						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone());
+						//Later when we compute the new source rule, we will not eliminate the types from the terms in this list
+						List<Term> termsToExclude = new LinkedList<Term>();
+						
+						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude);
 
 
 						if (result == null && fails==rulesDefiningPred.size()) {
@@ -2026,7 +2046,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 */
 							
 							//Here we remove the types, if possible, of the source query
-							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone());
+							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
 							
 							//Now we update the indexes for the source query
 							List<CQIE> newSourceRuleList= new LinkedList<CQIE>();
@@ -2035,10 +2055,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
 							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
 							
-							//Update the indexes for the t query
+							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
-							
-							//TODO!
 							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
 							
 							continue;
@@ -2076,9 +2094,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * Ans(URI("http://...",x,y))
 	 * Solve!
 	 * @param sourceRule
+	 * @param termsToExclude 
 	 * @return
 	 */
-	private  CQIE computeSourceRuleNoTypes(CQIE sourceRule){
+	private  CQIE computeSourceRuleNoTypes(CQIE sourceRule, List<Term> termsToExclude){
 
 		Function sourceHead=sourceRule.getHead();
 
@@ -2095,7 +2114,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			isProblemTemplate = true;
 		}
 		for (Term t: typedArguments){
-			getUntypedArgumentFromTerm(untypedArguments, t,isProblemTemplate);
+			getUntypedArgumentFromTerm(untypedArguments, t,isProblemTemplate, termsToExclude);
 		}
 
 		//updating the rule!!
@@ -2118,7 +2137,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param isProblemTemplate 
 	 */
 	private  void getUntypedArgumentFromTerm(List<Term> untypedArguments,
-			Term t, boolean isProblemTemplate) {
+			Term t, boolean isProblemTemplate, List<Term> termsToExclude) {
+		
+		if (termsToExclude.contains(t)){
+			isProblemTemplate = true;
+		}
+		
 		if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
@@ -2142,6 +2166,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 	
 	
+	
+	
 	/**
 	 * Given the terms in the father rule, it will iterate over the term trying to find an atom fo unify with the head of the source rule.
 	 * @param currentTerms
@@ -2152,7 +2178,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 	
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
-			CQIE sourceRule, CQIE fatherRule) {
+			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude) {
 
 
 			Function sourceHead = sourceRule.getHead();
@@ -2167,12 +2193,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
-					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule));
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
-						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule);
+						
+						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule,termsToExclude);
 						result.add(addTypes);
 						break;
 					} else{
@@ -2206,7 +2233,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param fatherRule
 	 * @return
 	 */
-	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule) {
+	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule, List<Term> exclude) {
 
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
@@ -2218,7 +2245,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (mgu == null) {
 			return null;
 		}else{
-			Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
+			
+			Set<Entry<Variable, Term>> entrySet = mgu.entrySet();
+			
+			Set<Entry<Variable, Term>> entrySetClone = new HashSet<Entry<Variable, Term>>();
+			for (Entry<Variable, Term> a: entrySet){
+				entrySetClone.add(a);
+			}
+			
+			Iterator<Map.Entry<Variable, Term>> vars = entrySetClone.iterator();
 			while (vars.hasNext()) {
 				Map.Entry<Variable, Term> pairs = vars.next();
 
@@ -2237,30 +2272,46 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							minimgu.put(mvar, key);
 							Unifier.applyUnifier((Function)value, minimgu, false);
 						} else {
-							//TODO: introduce new vars in head and body atoms
-							System.out.println("Multiple vars in Function: "+ varset.toString());
-							//if targetAtom is the only one in the father rule that contains key
+							//TODO: Complete this!!!
+							
+							
+							/*
+							 * When we do this we have to take into account this case. See test case LeftJoinTest1Virtual Test2
+							 * ans5(nick1,nick2,nick22,p) :- LeftJoin(ans10(nick1,p),ans11(nick2,nick22,p))
+							   ans4(http://www.w3.org/2000/01/rdf-schema#Literal(t2_1),URI("http://www.example.org/test#{}/{}",t1_1,t2_1)) :- people(t1_1,t2_1,t3_1,t4_1,t5_1,t6_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1)
+							   ans10(http://www.w3.org/2000/01/rdf-schema#Literal(t5_3),URI("http://www.example.org/test#{}/{}",t1_3,t2_3)) :- people(t1_3,t2_3,t3_3,t4_3,t5_3,t6_3), IS_NOT_NULL(t1_3), IS_NOT_NULL(t2_3), IS_NOT_NULL(t5_3)
+							   ans11(http://www.w3.org/2000/01/rdf-schema#Literal(t6_4),"null",URI("http://www.example.org/test#{}/{}",t1_4,t2_4)) :- people(t1_4,t2_4,t3_4,t4_4,t5_4,t6_4), IS_NOT_NULL(t1_4), IS_NOT_NULL(t2_4), IS_NOT_NULL(t6_4)
+							 	
+							 	In this case we need to take care of that join in p !!, most of the code is dont so...
+							 */
+							
+							System.out.println("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
+							mgu.remove(key);
+							exclude.add(value);
+						/*	//if targetAtom is the only one in the father rule that contains key
 							List<Function> fatherBody = fatherRule.getBody();
-							for (Function fatherAtom : fatherBody)
-								if (!fatherAtom.equals(targetAtom) && fatherAtom.getReferencedVariables().contains(mvar))
-									break;
+						
+							
 							minimgu.put(mvar, key);
 							Unifier.applyUnifier((Function)value, minimgu, false);
 							OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+							
 							while(iterator.hasNext()){
 								mvar = iterator.next();
-								fatherBody = fatherRule.getBody();
+								
 								Function newTarget = (Function)targetAtom.clone();
 								newTarget.getTerms().add(mvar);
+							
 								Predicate oldPredicate = targetAtom.getFunctionSymbol();
 								Predicate newPredicate = dfac.getPredicate(oldPredicate.getName(), oldPredicate.getArity()+1);
+								
 								Function nt = dfac.getFunction(newPredicate, newTarget.getTerms());
-								fatherBody.remove(targetAtom);
-								fatherBody.add(nt);
-							    
-							}
+								
+								replaceAtomInBody(targetAtom, fatherBody, nt);
+								
+							}*/
 						}
-					}
+					} 
 				} else {
 					System.out.println("value: "+value.toString());
 				}
@@ -2279,11 +2330,54 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 	}
 
+	/**
+	 * @param targetAtom
+	 * @param fatherBody
+	 * @param nt
+	 */
+	private void replaceAtomInBody(Function targetAtom,
+			List<Function> fatherBody, Function newAtom) {
+		for (Function func: fatherBody){
+			
+		if (func.isBooleanFunction() || func.isArithmeticFunction() || func.isDataTypeFunction()) {
+               
+                  continue;
+          } else if (func.isAlgebraFunction()) {
+        	  replaceAtomInFunction(func,targetAtom, func.getTerms() ,newAtom); 
+          } else if (func.isDataFunction()) {
+        	  	if (func.getFunctionSymbol().equals(targetAtom.getFunctionSymbol())){
+        	  		fatherBody.remove(targetAtom);
+        	  		fatherBody.add(newAtom);
+        	  	}
+		}
+	}
+	}
 
 	
 	
 	
 	
+
+	private void replaceAtomInFunction(Function Originalfunc, Function targetAtom,
+			List<Term> list, Function newAtom) {
+		for (Term func: list){
+			if (func instanceof Function){
+				Function funcfunc = (Function) func;
+				if (funcfunc.isBooleanFunction() || funcfunc.isArithmeticFunction() || funcfunc.isDataTypeFunction()) {
+					continue;
+				} else if (funcfunc.isAlgebraFunction()) {
+					replaceAtomInFunction(funcfunc,targetAtom, funcfunc.getTerms() ,newAtom); 
+				} else if (funcfunc.isDataFunction()) {
+					if (funcfunc.getFunctionSymbol().equals(targetAtom.getFunctionSymbol())){
+						Originalfunc.getTerms().remove(targetAtom);
+						Originalfunc.getTerms().add(newAtom);
+						break;
+					}
+				}
+			}
+		}
+		
+	}
 
 	/**
 	 * Since we have new rules, we need to update all the index as usual.
@@ -2439,12 +2533,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						//it has different templates regarding the uri
 						if (t1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
 							Term string1 = t1.getTerm(0);
-							Term string2 = t1.getTerm(0);
+							Term string2 = t2.getTerm(0);
 							if (!string1.equals(string2)){
 								templateProblem = true;
 							}
 						}
-
+						
+					
 						if (templateProblem){
 								if (!multPredList.containsEntry(focusPred,p)) {
 									multPredList.put(focusPred,p);

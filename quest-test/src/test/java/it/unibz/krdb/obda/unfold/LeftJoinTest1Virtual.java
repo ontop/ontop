@@ -170,7 +170,7 @@ public class LeftJoinTest1Virtual{
 		assertEquals(expectedRows, count);
 	}
 
-	//@Test
+	@Test
 	public void testLeftJoin1() throws Exception {
 
 		String query2 = "PREFIX : <http://www.example.org/test#> "
@@ -196,10 +196,10 @@ public class LeftJoinTest1Virtual{
 				+ "     {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
 		
 		QuestPreferences p = new QuestPreferences();
-		runTests(p,query6,6);
+		runTests(p,query6,4);
 	}
 
-	
+	@Test
 	public void testLeftJoin3() throws Exception {
 		
 		String query5 = "PREFIX : <http://www.example.org/test#> "
@@ -212,7 +212,7 @@ public class LeftJoinTest1Virtual{
 		QuestPreferences p = new QuestPreferences();
 		runTests(p,query5,4);
 	}
-
+	@Test
 	public void testLeftJoin4() throws Exception {
 		String query4 = "PREFIX : <http://www.example.org/test#> "
 				+ "SELECT DISTINCT * "
@@ -228,7 +228,7 @@ public class LeftJoinTest1Virtual{
 	}	
 	
 	
-	
+	@Test
 	public void testLeftJoin5() throws Exception {
 		String query3 = "PREFIX : <http://www.example.org/test#> "
 				+ "SELECT DISTINCT * "
@@ -241,7 +241,7 @@ public class LeftJoinTest1Virtual{
 		runTests(p,query3,4);
 	}	
 	
-	
+	@Test
 	public void testLeftJoin6() throws Exception {
 		
 		String query7 = "PREFIX : <http://www.example.org/test#> "
@@ -257,7 +257,7 @@ public class LeftJoinTest1Virtual{
 		runTests(p,query7,4);
 	}	
 	
-
+	@Test
 	public void testLeftJoin7() throws Exception {
 		
 		String query1 = "PREFIX : <http://www.example.org/test#> "
@@ -270,7 +270,7 @@ public class LeftJoinTest1Virtual{
 
 
 	
-
+	@Test
 	public void testLeftJoin8() throws Exception {
 		
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> "
@@ -288,7 +288,7 @@ public class LeftJoinTest1Virtual{
 		runTests(p,query_multi7,4);
 	}	
 
-
+	@Test
 	public void testLeftJoin9() throws Exception {
 		
 		String query_multi6 = "PREFIX : <http://www.example.org/test#> "
@@ -310,7 +310,7 @@ public class LeftJoinTest1Virtual{
 
 
 
-
+	@Test
 	public void testLeftJoin10() throws Exception {
 		
 		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE "
@@ -319,6 +319,8 @@ public class LeftJoinTest1Virtual{
 		QuestPreferences p = new QuestPreferences();
 		runTests(p,query_multi,4);
 	}	
+	
+	@Test
 	public void testLeftJoin11() throws Exception {
 		
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
@@ -327,6 +329,7 @@ public class LeftJoinTest1Virtual{
 		runTests(p,query_multi1,4);
 	}		
 	
+	@Test
 	public void testLeftJoin12() throws Exception {
 		
 		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
@@ -335,6 +338,7 @@ public class LeftJoinTest1Virtual{
 		runTests(p,query_multi2,4);
 	}		
 	
+	@Test
 	public void testLeftJoin13() throws Exception {
 		
 		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
@@ -342,7 +346,7 @@ public class LeftJoinTest1Virtual{
 		QuestPreferences p = new QuestPreferences();
 		runTests(p,query_multi3,4);
 	}		
-	
+	@Test
 	public void testLeftJoin14() throws Exception {
 		
 
@@ -351,7 +355,7 @@ public class LeftJoinTest1Virtual{
 		QuestPreferences p = new QuestPreferences();
 		runTests(p,query_multi4,4);
 	}		
-	
+	@Test
 	public void testLeftJoin15() throws Exception {
 		
 
