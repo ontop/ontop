@@ -8,7 +8,7 @@
     </encoder>
   </appender>
 
-  <root level="DEBUG">
+  <root level="debug">
     <appender-ref ref="STDOUT" />"quest-test/src/test/resources/logback-test.xml"
   </root>
 </configuration>

@@ -46,6 +46,10 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -59,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * SQL
  * @author Minda, Guohui, mrezk
  */
-public class LeftJoinTest1Virtual extends TestCase {
+public class LeftJoinTest1Virtual{
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -71,7 +75,7 @@ public class LeftJoinTest1Virtual extends TestCase {
 	final String owlfile = "src/test/resources/person.owl";
 	final String obdafile = "src/test/resources/person1.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		//String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
 		//String username = "sa";
@@ -166,6 +170,7 @@ public class LeftJoinTest1Virtual extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 
+	//@Test
 	public void testLeftJoin1() throws Exception {
 
 		String query2 = "PREFIX : <http://www.example.org/test#> "
@@ -177,6 +182,8 @@ public class LeftJoinTest1Virtual extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		runTests(p,query2,4);
 	}
+	
+	@Test
 	public void testLeftJoin2() throws Exception {
 		
 		String query6 = "PREFIX : <http://www.example.org/test#> "
