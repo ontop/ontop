@@ -30,12 +30,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * variables ie. A(#1,#2)
  */
 
+import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
@@ -451,11 +453,10 @@ public class Unifier {
 	 * @param term2
 	 * @return
 	 */
-	public static Substitution getSubstitution(Term term1,
-			Term term2) {
+	public static Substitution getSubstitution(Term term1,Term term2) {
 
-		if (!(term1 instanceof VariableImpl)
-				&& !(term2 instanceof VariableImpl)) {
+		if (!(term1 instanceof Variable)
+				&& !(term2 instanceof Variable)) {
 			/*
 			 * none is a variable, impossible to unify unless the two terms are
 			 * equal, in which case there the substitution is empty
@@ -470,7 +471,7 @@ public class Unifier {
 		Term t1 = null;
 		Term t2 = null;
 
-		if (term1 instanceof VariableImpl) {
+		if (term1 instanceof Variable) {
 			t1 = term1;
 			t2 = term2;
 		} else {
@@ -486,7 +487,7 @@ public class Unifier {
 			return new NeutralSubstitution();
 		}
 
-		if (t2 instanceof VariableImpl) {
+		if (t2 instanceof Variable) {
 			if (isEqual(t1, t2)) {
 				return new NeutralSubstitution();
 			} else {
@@ -494,9 +495,12 @@ public class Unifier {
 			}
 		} else if (t2 instanceof ValueConstant) {
 			return new Substitution(t1, t2);
-		} else if (t2 instanceof URIConstantImpl) {
+		} else if (t2 instanceof URIConstant) {
 			return new Substitution(t1, t2);
-		} else if (t2 instanceof FunctionalTermImpl) {
+		} else if (t2 instanceof BNode) {
+			return new Substitution(t1, t2);
+		}
+		else if (t2 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
 			if (fterm.containsTerm(t1))
 				return null;

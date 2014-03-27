@@ -762,7 +762,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		String mainTemplate = "%s AS %s";
 
-		if (ht instanceof URIConstant) {
+		if (ht instanceof BNode) {
+			mainColumn = jdbcutil.getSQLLexicalForm(((BNode) ht).getName());
+		} else if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = jdbcutil.getSQLLexicalForm(uc.getURI().toString());
 		} else if (ht == OBDAVocabulary.NULL) {
@@ -814,7 +816,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
-			} else {
+			} 
+			else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -907,6 +910,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (ht == OBDAVocabulary.NULL) {
 			return (String.format(typeStr, 0, signature.get(hpos)));
 		}
+			else if (ht instanceof BNode){
+			return (String.format(typeStr, 2, signature.get(hpos)));
+		}
+			
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
 	}

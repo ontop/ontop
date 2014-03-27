@@ -200,8 +200,8 @@ public class SubDescriptionVirtualTest extends TestCase {
 		List<OWLIndividual> individualsProperty=runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
 		assertEquals(48, individualsProperty.size());
 		
-//		log.info("Find subClass");
-//		List<OWLIndividual> individualsClass= runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
+		log.info("Find subClass");
+		List<OWLIndividual> individualsClass= runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
 //		
 //		assertEquals(10, individualsClass.size());
 //		assertEquals(individualsClass.get(0).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman");

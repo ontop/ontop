@@ -158,7 +158,9 @@ public class SubDescriptionToFactRule {
 
 						BasicClassDescription subClassItem = itcl.next();
 
-						addBlankNodesRule(classItem, subClassItem, subClassOf);
+						addBlankNodesRule( subClassItem, classItem, subClassOf);
+						
+						
 
 						log.debug("Insert class: " + classItem);
 						log.debug("SubClass member: " + subClassItem);
@@ -270,7 +272,7 @@ public class SubDescriptionToFactRule {
 
 		else if (description1 instanceof PropertySomeRestriction) {
 			// add blank node
-			terms.add(factory.getFunction(factory.getBNodeTemplatePredicate(1), factory.getConstantBNode(description1.toString())));
+			terms.add(factory.getConstantBNode(description1.toString()));
 		}
 
 		if (description2 instanceof OClass)
@@ -280,7 +282,7 @@ public class SubDescriptionToFactRule {
 		else if (description2 instanceof PropertySomeRestriction) {
 
 			// add blank node
-			terms.add(factory.getFunction(factory.getBNodeTemplatePredicate(1), factory.getConstantBNode(description2.toString())));
+			terms.add( factory.getConstantBNode(description2.toString()));
 		}
 
 		if (terms.size() == 2) {
