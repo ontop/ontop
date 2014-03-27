@@ -1624,8 +1624,109 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			result.add(partialEvalution);
 		}// end for candidate matches
+		
+		
+		if (result.size()<=1){
+			return result;
+		}else if (result.size()>1){ // THIS case is to check weather we cannot push this type
+			boolean templateProblem = false;
+
+			CQIE firstRule = (CQIE) result.get(0);
+			Function newfocusAtom= firstRule.getHead();
+			Predicate focusPred = newfocusAtom.getFunctionSymbol();
+			
+			for (int i=1; i<result.size(); i++){
+				Function pickedAtom = null;
+				CQIE tgt = (CQIE) result.get(i);
+				pickedAtom=  tgt.getHead();
+				
+				//TODO: is this if needed??
+				boolean found = false;
+					for (int p=0;p<newfocusAtom.getArity();p++){
+						
+						Term t1 = newfocusAtom.getTerm(p);
+						Term t2 = pickedAtom.getTerm(p);
+
+
+						if ((t1 instanceof Function) && (t2 instanceof  Function )){
+
+							templateProblem = checkFunctionTemplates(
+									templateProblem, t1, t2);
+						}else if ((t1 instanceof Variable) && (t2 instanceof  Variable )){
+							continue;
+						}else if ((t1 instanceof Constant) && (t2 instanceof  Constant )){
+							continue;
+						}else if ((t1 instanceof Function) && (t2 instanceof  Constant )){
+							templateProblem = true;
+						}else if ((t1 instanceof Constant ) && (t2 instanceof  Function )){
+							templateProblem = true;
+						}else if ((t1 instanceof Variable) && (t2 instanceof  Constant )){ // TODO: Maybe these 2 are too strict !!
+							templateProblem = true;
+						}else if ((t1 instanceof Constant ) && (t2 instanceof  Variable )){
+							templateProblem = true;
+						}
+						
+						
+						if (templateProblem){
+							if (!multPredList.containsEntry(focusPred,p)) {
+								multPredList.put(focusPred,p);
+								found = true;
+								
+							}
+						}
+					}//end for terms	
+				
+			
+				
+			}//end for rules
+		}
+		
+		
 
 		return result;
+	}
+
+	/**
+	 * @param templateProblem
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	private boolean checkFunctionTemplates(boolean templateProblem, Term t1,
+			Term t2) {
+		Function funct1 = (Function) t1;
+		Function funct2 = (Function) t2;
+		
+		//it has different types
+		if (!funct1.getFunctionSymbol().equals(funct2.getFunctionSymbol())){
+			templateProblem = true;
+		}
+
+		//it has different templates regarding the variable
+
+
+		//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
+		//See Test COmplex Optional Semantics
+
+		//int arity = t1.getArity();
+		int arity = funct1.getTerms().size();
+
+		//						int arity2 = t2.getArity();
+		int arity2 = funct2.getTerms().size();
+
+		if (arity !=  arity2){
+			templateProblem = true;
+		}
+
+		//it has different templates regarding the uri
+		if (funct1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
+			Term string1 = funct1.getTerm(0);
+			Term string2 = funct2.getTerm(0);
+			if (!string1.equals(string2)){
+				templateProblem = true;
+			}
+		}
+		return templateProblem;
 	}
 
 	/**
@@ -1971,8 +2072,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		
 		//TODO: We are generating this too many times!!! simplify!!!
 		log.debug("Generating Dependency Graph!");
-		//depGraph = new DatalogDependencyGraphGenerator(workingList);
+		depGraph = new DatalogDependencyGraphGenerator(workingList);
 
+		
 		List<CQIE> fatherCollection = new LinkedList<CQIE>();
 		List<CQIE> predCollection = new LinkedList<CQIE>();
 
@@ -2155,9 +2257,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
+			int arity = ((Function) t).getArity();
 			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
 			boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-			if (isURI){
+			if (isURI && arity >1){
 				//I need to remove the URI part and add the rest, usually the variables
 				functionArguments.remove(0);
 			}
@@ -2536,7 +2639,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						}
 						
 						//it has different templates regarding the variable
-						if (t1.getArity() !=  t2.getArity()){
+						
+						
+						//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
+						//See Test COmplex Optional Semantics
+						
+						//int arity = t1.getArity();
+						int arity = t1.getTerms().size();
+						
+//						int arity2 = t2.getArity();
+						int arity2 = t2.getTerms().size();
+
+						if (arity !=  arity2){
 							templateProblem = true;
 						}
 						

@@ -440,6 +440,11 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Translated query: \n{}", program);
 
 			//TODO: cant we use here QuestInstance???
+			
+			if (questInstance.isSemIdx()==true){
+				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
+			}
+			
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
 			
 			//removeNonAnswerQueries(program);
