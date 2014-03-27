@@ -68,6 +68,10 @@ public class RelationJSQL implements Serializable, Cloneable  {
 		return table.isSchemaQuoted();
 	}
 	
+	/**
+	 * It returns the complete name schema.tableName
+	 * @return
+	 */
 	public String getFullName(){
 		if(table.getSchema()!=null)
 		return table.getSchema()+"."+table.getTableName();
