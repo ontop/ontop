@@ -559,9 +559,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				isSemanticIdx = true;
 				if (inmemory) {
-					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
-							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+					String driver = "org.hsqldb.jdbcDriver";
+					String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis();
+							
 					String username = "sa";
 					String password = "";
 
