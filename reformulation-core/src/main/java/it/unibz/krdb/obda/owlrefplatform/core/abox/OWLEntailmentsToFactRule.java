@@ -36,12 +36,12 @@ import org.slf4j.LoggerFactory;
 /**
  * This class add facts to the datalog program regarding rdfs:subClassOf and
  * rdfs:subPropertyOf It is possible to activate or deactivate this feature in
- * Quest changing the preferences of QuestPreferences.ENTAILMENTS_SPARQL
+ * Quest changing the preferences of QuestPreferences.SPARQL_OWL_ENTAILMENT
  * 
  */
-public class SubDescriptionToFactRule {
+public class OWLEntailmentsToFactRule {
 
-	private static Logger log = LoggerFactory.getLogger(SubDescriptionToFactRule.class);
+	private static Logger log = LoggerFactory.getLogger(OWLEntailmentsToFactRule.class);
 
 	private static OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 
@@ -55,52 +55,15 @@ public class SubDescriptionToFactRule {
 		addSubClassesFromOntology(reasoner);
 		addSubRolesFromOntology(reasoner);
 		addEquivalences(equivalenceMaps);
+		addRangeFromOntology(reasoner);
 
-		/*
-		 * Alternative traversing the graph is not considering the case in which
-		 * the node is equal to itself
-		 * 
-		 * TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-		 * 
-		 * @Override public void onInclusion(Property sub, Property sup) {
-		 * 
-		 * 
-		 * if ((!sub.isInverse()) && (!sup.isInverse()) ) createFact(sub,sup,
-		 * OBDAVocabulary.RDFS_SUBPROPERTY);
-		 * 
-		 * }
-		 * 
-		 * @Override public void onInclusion(BasicClassDescription sub,
-		 * BasicClassDescription sup) {
-		 * 
-		 * 
-		 * if ((sub instanceof OClass) && (sup instanceof OClass))
-		 * createFact(sub,sup, OBDAVocabulary.RDFS_SUBCLASS); }
-		 * 
-		 * public void createFact(Description sub, Description sup, Predicate
-		 * subPropertyOf ){
-		 * 
-		 * 
-		 * List<Term> terms = new ArrayList<Term>();
-		 * 
-		 * // add URI terms
-		 * terms.add(factory.getUriTemplate(factory.getConstantLiteral
-		 * (sub.toString())));
-		 * terms.add(factory.getUriTemplate(factory.getConstantLiteral
-		 * (sup.toString())));
-		 * 
-		 * Function head = factory.getFunction(subPropertyOf, terms);
-		 * 
-		 * log.debug("head " + head);
-		 * 
-		 * p.appendRule(factory.getCQIE(head)); }
-		 * 
-		 * 
-		 * });
-		 */
+		
+//		
+		 
 	}
 
 	private static void addEquivalences(Map<Predicate, Description> equivalenceMaps) {
+		
 		Iterator<Entry<Predicate, Description>> itEquivalences = equivalenceMaps.entrySet().iterator();
 		Predicate equivalentClass = OBDAVocabulary.OWL_EQUIVALENT;
 
@@ -229,6 +192,48 @@ public class SubDescriptionToFactRule {
 		}
 
 	}
+	
+	private static void addRangeFromOntology(TBoxReasoner reasoner) {
+
+		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
+		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
+
+		while (it.hasNext()) {
+
+			Equivalences<BasicClassDescription> eqv = it.next();
+
+			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
+
+			while (iteq.hasNext()) {
+
+				BasicClassDescription classItem = iteq.next();
+
+				// if we want to add all subrelations not only the direct one
+				Iterator<Equivalences<BasicClassDescription>> classesIt = dag.getSub(eqv).iterator();
+
+				while (classesIt.hasNext()) {
+
+					Equivalences<BasicClassDescription> eqq = classesIt.next();
+					Iterator<BasicClassDescription> itcl = eqq.getMembers()
+							.iterator();
+
+					while (itcl.hasNext()) {
+
+						BasicClassDescription subClassItem = itcl.next();
+
+						addRangeOrDomainRule(subClassItem, classItem);
+									
+
+						log.debug("Insert class: " + classItem);
+						log.debug("SubClass member: " + subClassItem);
+
+					}
+
+				}
+			}
+		}
+
+	}
 
 	/**
 	 * Create a fact given two nodes (transformed in URI) and a predicate
@@ -291,5 +296,37 @@ public class SubDescriptionToFactRule {
 		}
 
 	}
+	
+	public static void addRangeOrDomainRule(BasicClassDescription description1, BasicClassDescription description2) {
+
+		List<Term> terms = new ArrayList<Term>();
+
+		if (description1 instanceof PropertySomeRestriction && description2 instanceof OClass) {
+			// get the property related to the existential
+			Predicate property1 = ((PropertySomeRestriction) description1).getPredicate();
+
+			if (((PropertySomeRestriction) description1).isInverse())
+			{
+				terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
+				terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
+				Function head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
+				program.appendRule(factory.getCQIE(head));
+
+			}
+			else
+			{
+				terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
+				terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
+				Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
+				program.appendRule(factory.getCQIE(head));
+			}
+		}
+		
+
+	}
+	
+	
+	
+	
 
 }

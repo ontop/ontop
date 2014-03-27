@@ -41,9 +41,9 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.OWLEntailmentsToFactRule;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SubDescriptionToFactRule;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
@@ -854,7 +854,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Adding facts about rdfs:subClassOf and rdfs:subPropertyOf in datalogProgram
 				 */
 				if(sparqlOwlEntailment)
-				SubDescriptionToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
+					OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,
 						unfoldingProgram, sigma, true);

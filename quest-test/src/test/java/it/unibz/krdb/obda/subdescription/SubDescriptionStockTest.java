@@ -186,5 +186,17 @@ public class SubDescriptionStockTest extends TestCase {
 		runTests(query, "owl:equivalentClass" );
 
 	}
+	
+	public void testRange() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:range ?y }";
+		runTests(query, "rdfs:range" );
+
+	}
+	
+	public void testDomain() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:domain ?y }";
+		runTests(query, "rdfs:domain" );
+
+	}
 
 }

@@ -72,7 +72,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 							System.out.println(bindingSet.getBinding(b));
 						countResult++;
 					}
-					assertEquals(countResult, 7);
+					assertEquals(62, countResult);
 				} finally {
 					result.close();
 				}
@@ -133,10 +133,10 @@ public class SesameVirtualSubclassTest extends TestCase {
 						countResult++;
 					}
 
-					assertEquals(countResult, 2);
-//					assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(0));
-//					assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(1));
-//					assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(2));
+					assertEquals(countResult, 8);
+					assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(2));
+					assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(7));
+					assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(6));
 				} finally {
 					result.close();
 				}
