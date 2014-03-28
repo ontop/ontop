@@ -78,7 +78,7 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.TEIID;
 		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
 			driver = Driver.SQLSERVER;
-		} else if (className.equals("org.hsqldb.jdbcDriver")) {
+		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
 			driver = Driver.HSQL; 
 		} 
 		else {
@@ -221,6 +221,7 @@ public class JDBCUtility implements Serializable {
 			case PGSQL:
 			case DB2:
 			case TEIID:
+			case HSQL:
 				sql = "TRUE";
 				break;
 			case ORACLE:
@@ -237,6 +238,7 @@ public class JDBCUtility implements Serializable {
 			case PGSQL:
 			case DB2:
 			case TEIID:
+			case HSQL:
 				sql = "FALSE";
 				break;
 			case ORACLE:
