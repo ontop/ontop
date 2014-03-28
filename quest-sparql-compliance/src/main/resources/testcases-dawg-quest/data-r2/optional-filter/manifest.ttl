@@ -10,11 +10,11 @@
     mf:entries
     (
 	:dawg-optional-filter-001 
-	#:dawg-optional-filter-002 
-	#:dawg-optional-filter-003 
-	#:dawg-optional-filter-004 
-	#:dawg-optional-filter-005-simplified 
-	#:dawg-optional-filter-005-not-simplified
+	:dawg-optional-filter-002 
+	:dawg-optional-filter-003 
+	:dawg-optional-filter-004 
+	:dawg-optional-filter-005-simplified 
+	:dawg-optional-filter-005-not-simplified
 	).
 
 :dawg-optional-filter-001 a mf:QueryEvaluationTest ;
