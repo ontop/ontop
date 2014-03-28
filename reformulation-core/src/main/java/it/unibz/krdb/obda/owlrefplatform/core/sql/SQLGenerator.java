@@ -1743,13 +1743,29 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.NEQ)) {
 			operator = NEQ_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.GT)) {
-			operator = GT_OPERATOR;
+			if (sqladapter instanceof HSQLSQLDialectAdapter){
+				operator = "(cast (ltrim(%s) as INTEGER)) > %s";
+			}else{
+				operator = GT_OPERATOR;
+			}
 		} else if (functionSymbol.equals(OBDAVocabulary.GTE)) {
-			operator = GTE_OPERATOR;
+			if (sqladapter instanceof HSQLSQLDialectAdapter){
+				operator = "(cast (ltrim(%s) as INTEGER)) >= %s";
+			}else{
+				operator = GTE_OPERATOR;
+			}
 		} else if (functionSymbol.equals(OBDAVocabulary.LT)) {
-			operator = LT_OPERATOR;
+			if (sqladapter instanceof HSQLSQLDialectAdapter){
+				operator = "(cast (ltrim(%s) as INTEGER)) < %s";
+			}else{
+				operator = LT_OPERATOR;
+			}
 		} else if (functionSymbol.equals(OBDAVocabulary.LTE)) {
-			operator = LTE_OPERATOR;
+			if (sqladapter instanceof HSQLSQLDialectAdapter){
+				operator = "(cast (ltrim(%s) as INTEGER)) <= %s";
+			}else{
+				operator = LTE_OPERATOR;
+			}
 		} else if (functionSymbol.equals(OBDAVocabulary.AND)) {
 			operator = AND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.OR)) {
