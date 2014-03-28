@@ -75,8 +75,12 @@ public class SubDescriptionVirtualTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/subclass/test-hierarchy-extended.owl";
-	final String obdafile = "src/test/resources/subclass/test-hierarchy-extended.obda";
+//	final String owlfile = "src/test/resources/subclass/test-hierarchy.owl";
+//	final String obdafile = "src/test/resources/subclass/test-hierarchy.obda";
+	final String owlfile = "src/test/resources/subclass/test-hierarchy2.owl";
+	final String obdafile = "src/test/resources/subclass/test-hierarchy2.obda";
+//	final String owlfile = "src/test/resources/subclass/test-hierarchy-extended.owl";
+//	final String obdafile = "src/test/resources/subclass/test-hierarchy-extended.obda";
 
 	@Override
 	public void setUp() throws Exception {
@@ -189,12 +193,12 @@ public class SubDescriptionVirtualTest extends TestCase {
 	}
 
 	public void testViEqSig() throws Exception {
-
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+		
 		
 		log.info("Find subProperty");
 		List<OWLIndividual> individualsProperty=runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
@@ -211,11 +215,21 @@ public class SubDescriptionVirtualTest extends TestCase {
 //		assertEquals(individualsClass.get(8).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
 //		assertEquals(individualsClass.get(9).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person");
 		
+		
+	}
+	
+	public void testEquivalences() throws Exception{
+		
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+		
 		log.info("Find equivalences");
 		List<OWLIndividual> individualsEquivClass= runTests(p, "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
 		assertEquals(4, individualsEquivClass.size());
 	}
-
 	
 
 }

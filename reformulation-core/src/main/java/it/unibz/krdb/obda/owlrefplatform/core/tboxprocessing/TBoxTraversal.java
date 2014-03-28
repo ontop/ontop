@@ -23,7 +23,7 @@ public class TBoxTraversal {
 					listener.onInclusion(descendant, node);
 			}
 			for (Property equivalent : nodes) {
-				if (equalityNodes || !equivalent.equals(node)) {
+				if (!equivalent.equals(node)) {
 					listener.onInclusion(node, equivalent);					
 					listener.onInclusion(equivalent, node);
 				}
@@ -40,7 +40,7 @@ public class TBoxTraversal {
 					listener.onInclusion(descendant, node);
 			}
 			for (BasicClassDescription equivalent : nodes) {
-				if (equalityNodes || !equivalent.equals(node)) {
+				if (!equivalent.equals(node)) {
 					listener.onInclusion(node, equivalent);					
 					listener.onInclusion(equivalent, node);
 				}

@@ -52,55 +52,12 @@ public class OWLEntailmentsToFactRule {
 		program = p;
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(onto);
-//		addSubClassesFromOntology(reasoner);
-//		addSubRolesFromOntology(reasoner);
+		addSubClassesFromOntology(reasoner);
+		addSubRolesFromOntology(reasoner);
 		addEquivalences(equivalenceMaps);
 		addRangeFromOntology(reasoner);
 
-		 TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-			  
-			  @Override public void onInclusion(Property sub, Property sup) {
-			 
-			  
-			  if ((!sub.isInverse()) && (!sup.isInverse()) ) {
-//				  createFact(sub,sup, OBDAVocabulary.RDFS_SUBPROPERTY);
-				  addNodesRule(sub.toString(), sup.toString(), OBDAVocabulary.RDFS_SUBPROPERTY);
-				 
-			  }
-			  
-			  }
-			  
-			  @Override public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-			  
-			  
-//			  if ((sub instanceof OClass) && (sup instanceof OClass))
-//			  createFact(sub,sup, OBDAVocabulary.RDFS_SUBCLASS); }
-				  addBlankNodesRule(sub, sup, OBDAVocabulary.RDFS_SUBCLASS);
-				 
-			  }
-			  
-//			  public void createFact(Description sub, Description sup, Predicate
-//			  subPropertyOf ){
-//			  
-//			  
-//			  List<Term> terms = new ArrayList<Term>();
-//			  
-//			  // add URI terms
-//			  terms.add(factory.getUriTemplate(factory.getConstantLiteral
-//			  (sub.toString())));
-//			  terms.add(factory.getUriTemplate(factory.getConstantLiteral
-//			  (sup.toString())));
-//			  
-//			  Function head = factory.getFunction(subPropertyOf, terms);
-//			  
-//			  log.debug("head " + head);
-//			  
-//			  p.appendRule(factory.getCQIE(head)); }
-//			  
-//			  
-			  }, true);
 		
-//		
 		 
 	}
 
@@ -118,7 +75,10 @@ public class OWLEntailmentsToFactRule {
 
 			if (key.isClass()) {
 
+				addNodesRule(key.getName(), key.getName(), equivalentClass);
+				addNodesRule(value.toString(), value.toString(), equivalentClass);
 				addNodesRule(key.getName(), value.toString(), equivalentClass);
+				addNodesRule(value.toString(), key.getName(), equivalentClass);
 
 			}
 		}

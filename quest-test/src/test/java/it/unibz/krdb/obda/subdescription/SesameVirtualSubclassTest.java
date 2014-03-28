@@ -36,12 +36,13 @@ import sesameWrapper.SesameVirtualRepo;
 
 public class SesameVirtualSubclassTest extends TestCase {
 
-	public void testSubClasses() throws Exception
-	{
+	// create a sesame repository
+	RepositoryConnection con = null;
+	Repository repo = null;
+	
+	@Override
+	public void setUp(){
 
-		// create a sesame repository
-		RepositoryConnection con = null;
-		Repository repo = null;
 
 		try {
 
@@ -56,105 +57,132 @@ public class SesameVirtualSubclassTest extends TestCase {
 
 			con = repo.getConnection();
 
-			// /query repo
-			try {
-				String queryString = "select * where {?x rdfs:subClassOf ?y }";
-
-				TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-				TupleQueryResult result = tupleQuery.evaluate();
-				try {
-					List<String> bindings = result.getBindingNames();
-					assertTrue(result.hasNext());
-					int countResult = 0;
-					while (result.hasNext()) {
-						BindingSet bindingSet = result.next();
-						for (String b : bindings)
-							System.out.println(bindingSet.getBinding(b));
-						countResult++;
-					}
-					assertEquals(62, countResult);
-				} finally {
-					result.close();
-				}
-
-				System.out.println("Closing...");
-
-				con.close();
-
-			} catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+
+	}
+	
+	
+	public void testSubClasses() throws Exception
+	{
+
+
+		// /query repo
+		try {
+			String queryString = "select * where {?x rdfs:subClassOf ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(62, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
 
 		System.out.println("Done.");
 	}
 
 	public void testOneSubClass() {
 
-		// create a sesame repository
-		RepositoryConnection con = null;
-		Repository repo = null;
 
+		// /query repo
 		try {
+			String queryString = "select * where {?x rdfs:subClassOf <http://meraka/moss/exampleBooks.owl#Edition> }";
 
-			String owlfile = "src/test/resources/subclass/exampleBooks.owl";
-			String obdafile = "src/test/resources/subclass/exampleBooks.obda";
-			File f = new File("src/test/resources/subclass/subDescription.properties");
-			String pref = "file:" + f.getAbsolutePath();
-
-			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, pref);
-
-			repo.initialize();
-
-			con = repo.getConnection();
-
-			// /query repo
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			List<String> valuesResult = new LinkedList<String>();
 			try {
-				String queryString = "select * where {?x rdfs:subClassOf <http://meraka/moss/exampleBooks.owl#Edition> }";
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
 
-				TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-				TupleQueryResult result = tupleQuery.evaluate();
-				List<String> valuesResult = new LinkedList<String>();
-				try {
-					List<String> bindings = result.getBindingNames();
-					assertTrue(result.hasNext());
-					int countResult = 0;
-					while (result.hasNext()) {
-
-						BindingSet bindingSet = result.next();
-						for (String b : bindings) {
-							System.out.println(bindingSet.getBinding(b));
-							valuesResult.add(bindingSet.getBinding(b).getValue().stringValue());
-						}
-						countResult++;
+					BindingSet bindingSet = result.next();
+					for (String b : bindings) {
+						System.out.println(bindingSet.getBinding(b));
+						valuesResult.add(bindingSet.getBinding(b).getValue().stringValue());
 					}
-
-					assertEquals(countResult, 8);
-					assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(2));
-					assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(7));
-					assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(6));
-				} finally {
-					result.close();
+					countResult++;
 				}
 
-				System.out.println("Closing...");
-
-				con.close();
-
-			} catch (Exception e)
-			{
-				e.printStackTrace();
+				assertEquals(countResult, 8);
+				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(2));
+				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(7));
+				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(6));
+			} finally {
+				result.close();
 			}
 
-		} catch (Exception e1) {
-			e1.printStackTrace();
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 
 		System.out.println("Done.");
+	}
+	
+	public void testEquivalences(){
+		
+
+		// /query repo
+		try {
+			String queryString = "select * where {?x owl:equivalentClass ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+		
 	}
 
 }
