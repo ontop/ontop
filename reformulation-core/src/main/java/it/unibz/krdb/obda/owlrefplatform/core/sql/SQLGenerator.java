@@ -1578,7 +1578,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 						|| ct.getType() == COL_TYPE.LITERAL) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
-						return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+						return String.valueOf(id);
 				}
 			}
 			return jdbcutil.getSQLLexicalForm(ct);
