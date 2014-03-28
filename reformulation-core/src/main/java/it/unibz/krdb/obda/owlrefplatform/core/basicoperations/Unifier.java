@@ -334,7 +334,8 @@ public class Unifier {
 			Function second) {
 		Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
 
-		return getMGU(first,second,false,emptyMulti);
+		Map<Variable, Term> mgu = getMGU(first,second,false,emptyMulti);
+		return mgu;
 	}
 	/***
 	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports

@@ -263,14 +263,14 @@ public class QuestStatement implements OBDAStatement {
 
 						set = sqlstatement.executeQuery(sql);
 
-						// }
-						// catch(SQLException e)
-						// {
-						//
+					
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
 							tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+							
+				
+
 
 						} else if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);

@@ -565,7 +565,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				isSemanticIdx = true;
 				if (inmemory) {
 
-					String driver = "org.hsqldb.jdbcDriver";
+					String driver = "org.hsqldb.jdbc.JDBCDriver";
 					String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis();
 							
 
