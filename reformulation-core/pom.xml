@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< HEAD
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -60,11 +61,63 @@
 			<type>jar</type>
 		</dependency>
 		
+=======
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>obdalib-parent</artifactId>
+		<groupId>inf.unibz.it.obda</groupId>
+		<version>1.8</version>
+	</parent>
+	<artifactId>reformulation-core</artifactId>
+	<name>quest-core</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-core</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<!-- <version>4.8.2</version> -->
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.2.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<type>jar</type>
+		</dependency>
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
+<<<<<<< HEAD
 
 			
 		<dependency>
@@ -73,6 +126,34 @@
 		</dependency>     
 	</dependencies>
 	
+=======
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgrapht</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<version>7.0.37</version>
+		</dependency>     
+	</dependencies>
+	
+	<repositories>
+		<repository>
+		  <releases>
+                <enabled>true</enabled>
+            </releases>
+			<id>bonecp-repo</id>
+			<name>BoneCP Repository</name>
+			<url>http://jolbox.com/bonecp/downloads/maven</url>
+		</repository>
+	</repositories>
+	
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -83,9 +164,14 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
+<<<<<<< HEAD
 					
 					<source>1.7</source>
 					<target>1.7</target>
+=======
+					<source>1.6</source>
+					<target>1.6</target>
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 					<excludes>
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
@@ -101,7 +187,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+<<<<<<< HEAD
 					
+=======
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 					<forkMode>pertest</forkMode>
 					<excludes>
 						<exclude>**/MappingToRuleTester.java</exclude>

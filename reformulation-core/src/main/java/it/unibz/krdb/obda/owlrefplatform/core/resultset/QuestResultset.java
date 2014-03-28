@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
+<<<<<<< HEAD
 /*
  * #%L
  * ontop-reformulation-core
@@ -20,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
+=======
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -151,15 +154,28 @@ public class QuestResultset implements TupleResultSet {
 						try {
 							Integer id = Integer.parseInt(realValue);
 							realValue = this.uriMap.get(id);
+<<<<<<< HEAD
+=======
+
+							
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
 							 * we leave realValue as is.
 							 */
 						}
+<<<<<<< HEAD
 					}
 
 					result = fac.getConstantURI(realValue);
+=======
+						// here we should check if it is HSQL and trim, but since its already semantic index then most of the time it is HSQL
+						realValue = realValue.trim();
+					}
+
+					result = fac.getURIConstant(realValue);
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 
 				} else if (type == COL_TYPE.BNODE) {
 					String rawLabel = set.getString(column);
@@ -169,7 +185,11 @@ public class QuestResultset implements TupleResultSet {
 						bnodeCounter += 1;
 						bnodeMap.put(rawLabel, scopedLabel);
 					}
+<<<<<<< HEAD
 					result = fac.getConstantBNode(scopedLabel);
+=======
+					result = fac.getBNodeConstant(scopedLabel);
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 				} else {
 					/*
 					 * The constant is a literal, we need to find if its
@@ -180,22 +200,35 @@ public class QuestResultset implements TupleResultSet {
 						String value = set.getString(column);
 						String language = set.getString(column - 1);
 						if (language == null || language.trim().equals("")) {
+<<<<<<< HEAD
 							result = fac.getConstantLiteral(value);
 						} else {
 							result = fac.getConstantLiteral(value, language);
+=======
+							result = fac.getValueConstant(value);
+						} else {
+							result = fac.getValueConstant(value, language);
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 						}
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
 						if (value) {
+<<<<<<< HEAD
 							result = fac.getConstantLiteral("true", type);
 						} else {
 							result = fac.getConstantLiteral("false", type);
+=======
+							result = fac.getValueConstant("true", type);
+						} else {
+							result = fac.getValueConstant("false", type);
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 						}
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation
 
 						String s = formatter.format(d);
+<<<<<<< HEAD
 						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
@@ -203,6 +236,15 @@ public class QuestResultset implements TupleResultSet {
 						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 					} else {
 						result = fac.getConstantLiteral(realValue, type);
+=======
+						result = fac.getValueConstant(s, type);
+
+					} else if (type == COL_TYPE.DATETIME) {
+						Timestamp value = set.getTimestamp(column);
+						result = fac.getValueConstant(value.toString().replace(' ', 'T'), type);
+					} else {
+						result = fac.getValueConstant(realValue, type);
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 					}
 				}
 			}
@@ -326,4 +368,8 @@ public class QuestResultset implements TupleResultSet {
 	// result = getConstant(name);
 	// return (BNode) result;
 	// }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175

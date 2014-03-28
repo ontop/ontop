@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
+<<<<<<< HEAD
 /*
  * #%L
  * ontop-reformulation-core
@@ -20,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+=======
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -46,7 +49,11 @@ public class JDBCUtility implements Serializable {
 	private static final long serialVersionUID = 5218570087742414646L;
 
 	private enum Driver {
+<<<<<<< HEAD
 		PGSQL, MYSQL, H2, DB2, ORACLE, SQLSERVER, TEIID, HSQL
+=======
+		PGSQL, MYSQL, H2, HSQL, DB2, ORACLE, SQLSERVER, TEIID
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 	}
 
 	private Driver driver = null;
@@ -70,6 +77,11 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.MYSQL;
 		} else if (className.equals("org.h2.Driver")) {
 			driver = Driver.H2;
+<<<<<<< HEAD
+=======
+		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+			driver = Driver.HSQL;
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			driver = Driver.DB2;
 		} else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
@@ -78,10 +90,14 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.TEIID;
 		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
 			driver = Driver.SQLSERVER;
+<<<<<<< HEAD
 		} else if (className.equals("org.hsqldb.jdbcDriver")) {
 			driver = Driver.HSQL; 
 		} 
 		else {
+=======
+		} else {
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
 			log.warn("WARNING: Contact the authors for further support.");
 			throw new Exception("The specified JDBC driver '" + className + "' is not supported by Quest. Verify you are using a supported DB and the correct JDBC driver string. For more information see: https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibPluginJDBC");
@@ -132,7 +148,11 @@ public class JDBCUtility implements Serializable {
 		String sql = null;
 		if (constant.getType() == COL_TYPE.BNODE || constant.getType() == COL_TYPE.LITERAL || constant.getType() == COL_TYPE.OBJECT
 				|| constant.getType() == COL_TYPE.STRING) {
+<<<<<<< HEAD
 				sql = "'" + constant.getValue() + "'";
+=======
+			sql = "'" + constant.getValue() + "'";
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 		} else if (constant.getType() == COL_TYPE.BOOLEAN) {
 			sql = getSQLLexicalFormBoolean(constant);
 		} else if (constant.getType() == COL_TYPE.DATETIME) {
@@ -166,7 +186,11 @@ public class JDBCUtility implements Serializable {
 		String datetime = rdfliteral.getValue().replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');
 		int zlocation = datetime.indexOf('Z');
+<<<<<<< HEAD
 		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+=======
+		int minuslocation = datetime.indexOf('-');
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 		int pluslocation = datetime.indexOf('+');
 		StringBuilder bf = new StringBuilder(datetime);
 		if (zlocation != -1) {
@@ -190,7 +214,11 @@ public class JDBCUtility implements Serializable {
 			}
 			bf.replace(dotlocation, endlocation, "");
 		}
+<<<<<<< HEAD
 		if ((driver == Driver.H2 
+=======
+		if ((driver == Driver.H2 || driver == Driver.HSQL
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 				|| driver == Driver.SQLSERVER
 				|| driver == Driver.ORACLE 
 				|| driver == Driver.DB2) && bf.length() > 19) {
@@ -214,10 +242,18 @@ public class JDBCUtility implements Serializable {
 	public String getSQLLexicalFormBoolean(ValueConstant rdfliteral) {
 		String value = rdfliteral.getValue().toLowerCase();
 		String sql = null;
+<<<<<<< HEAD
 		if (value.equals("1") || value.equals("true") || value.equals("t")) {
 			switch (driver) {
 			case MYSQL:
 			case H2:
+=======
+		if (value.equals("1") || value.equals("true")) {
+			switch (driver) {
+			case MYSQL:
+			case H2:
+			case HSQL:
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 			case PGSQL:
 			case DB2:
 			case TEIID:
@@ -230,10 +266,18 @@ public class JDBCUtility implements Serializable {
 				sql = "'TRUE'";
 				break;
 			}
+<<<<<<< HEAD
 		} else if (value.equals("0") || value.equals("false") || value.equals("f")) {
 			switch (driver) {
 			case MYSQL:
 			case H2:
+=======
+		} else if (value.equals("0") || value.equals("false")) {
+			switch (driver) {
+			case MYSQL:
+			case H2:
+			case HSQL:
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 			case PGSQL:
 			case DB2:
 			case TEIID:
@@ -251,6 +295,7 @@ public class JDBCUtility implements Serializable {
 		}
 		return sql;
 	}
+<<<<<<< HEAD
 
 
 
@@ -261,4 +306,6 @@ public class JDBCUtility implements Serializable {
 	public String getDummyTable() {
 		return "(SELECT 1)";
 	}
+=======
+>>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
 }
