@@ -99,11 +99,11 @@ import java.util.regex.Pattern;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-<<<<<<< HEAD
+
 import org.openrdf.query.parser.ParsedQuery;
-=======
+
 import org.hsqldb.util.DatabaseManager;
->>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -563,22 +563,22 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				isSemanticIdx = true;
 				if (inmemory) {
-<<<<<<< HEAD
+
 					String driver = "org.hsqldb.jdbcDriver";
 					String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis();
 							
-=======
+
 //					String driver = "org.h2.Driver";
 //					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
 //					String username = "sa";
 //					String password = "";  
-					String driver = "org.hsqldb.jdbc.JDBCDriver";
-					String url = "jdbc:hsqldb:mem:questrepository:"+ System.currentTimeMillis() + ";shutdown=true;hsqldb.app_log=0;hsqldb.sql_log=0;hsqldb.log_data=false;sql.enforce_strict_size=false";
->>>>>>> 3083b6587b5627c25b386a225d183c7cbfae4175
+//					String driver = "org.hsqldb.jdbc.JDBCDriver";
+//					String url = "jdbc:hsqldb:mem:questrepository:"+ System.currentTimeMillis() + ";shutdown=true;hsqldb.app_log=0;hsqldb.sql_log=0;hsqldb.log_data=false;sql.enforce_strict_size=false";
+
 					String username = "sa";
 					String password = "";
 						
-					//DatabaseManager.threadedDBM();
+					
 
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);

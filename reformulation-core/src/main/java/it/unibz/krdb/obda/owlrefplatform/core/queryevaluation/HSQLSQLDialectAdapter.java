@@ -31,16 +31,17 @@ public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 		} else {
 			throw new RuntimeException("Unsupported SQL type");
 		}
-		return "CAST(" + value + " AS " + strType + ")";
+		//return "CAST(" + value + " AS " + strType + ")";
+		return value;
 	}
-	@Override
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
-		pattern = pattern.substring(1, pattern.length() - 1);
-		pattern = pattern.replace("\\", "");
-		if (caseinSensitive) {
-			return " LOWER(" + columnname + ") LIKE " + "'%"
-					+ pattern.toLowerCase() + "%'" + " escape '\\'";
-		}
-		return columnname + " LIKE " + "'%" + pattern + "%'" + " escape '\\'";
-	}
+//	@Override
+//	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
+//		pattern = pattern.substring(1, pattern.length() - 1);
+//		pattern = pattern.replace("\\", "");
+//		if (caseinSensitive) {
+//			return " LOWER(" + columnname + ") LIKE " + "'%"
+//					+ pattern.toLowerCase() + "%'" + " escape '\\'";
+//		}
+//		return columnname + " LIKE " + "'%" + pattern + "%'" + " escape '\\'";
+//	}
 }

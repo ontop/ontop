@@ -43,7 +43,7 @@ public class SQLAdapterFactory {
 			return new TeiidSQLDialectAdapter();
 		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
 			return new SQLServerSQLDialectAdapter();
-		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+		} else if (className.equals("org.hsqldb.jdbcDriver")) {
 			return new HSQLSQLDialectAdapter();
 		}
 
