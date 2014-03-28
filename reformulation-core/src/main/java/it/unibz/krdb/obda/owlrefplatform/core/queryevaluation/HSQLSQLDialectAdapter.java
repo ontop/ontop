@@ -31,8 +31,8 @@ public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 		} else {
 			throw new RuntimeException("Unsupported SQL type");
 		}
-		//return "CAST(" + value + " AS " + strType + ")";
-		return value;
+		return "CAST(" + value + " AS " + strType + ")";
+		//return value;
 	}
 //	@Override
 //	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
