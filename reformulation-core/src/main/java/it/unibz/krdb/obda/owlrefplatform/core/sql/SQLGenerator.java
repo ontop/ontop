@@ -788,15 +788,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 			String conditions = getConditionsString(inneratoms, index, true,
 					indent);
 
-			if (conditions.length() > 0
-					&& tableDefinitionsString.lastIndexOf(")") != -1) {
-				int lastidx = tableDefinitionsString.lastIndexOf(")");
-				tableDefinitionsString.delete(lastidx,
-						tableDefinitionsString.length());
-				String ON_CLAUSE = String.format("ON\n%s\n " + indent + ")",
-						conditions);
-				tableDefinitionsString.append(ON_CLAUSE);
-			}
+//			if (conditions.length() > 0
+//					&& tableDefinitionsString.lastIndexOf(")") != -1) {
+//				int lastidx = tableDefinitionsString.lastIndexOf(")");
+//				tableDefinitionsString.delete(lastidx,
+//						tableDefinitionsString.length());
+//				String ON_CLAUSE = String.format("ON\n%s\n " + indent + ")",
+//						conditions);
+//				tableDefinitionsString.append(ON_CLAUSE);
+//			}
+			String ON_CLAUSE = String.format(" ON\n%s\n " + indent, conditions);
+			tableDefinitionsString.append(ON_CLAUSE);
 		}
 		return tableDefinitionsString.toString();
 	}
