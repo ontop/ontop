@@ -193,6 +193,40 @@ public class SubDescriptionStockTest extends TestCase {
 
 	}
 	
+	public void testOneRange() throws Exception {
+		
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:range <http://www.owl-ontologies.com/Ontology1207768242.owl#Person> }";
+		QuestOWLStatement st = conn.createStatement();
+		String retval;
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+
+			assertTrue(rs.nextRow());
+			OWLIndividual x = rs.getOWLIndividual("x");
+			retval = x.toString();
+
+			log.info(retval);
+			
+			while (rs.nextRow()) {
+				x = rs.getOWLIndividual("x");
+				retval = x.toString();
+				log.info(retval);
+			}
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+			}
+			conn.close();
+			reasoner.dispose();
+		}
+
+	}
+	
 	public void testDomain() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:domain ?y }";
 		runTests(query, "rdfs:domain" );
