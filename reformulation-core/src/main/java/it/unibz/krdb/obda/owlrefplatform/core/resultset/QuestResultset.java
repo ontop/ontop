@@ -140,7 +140,7 @@ public class QuestResultset implements TupleResultSet {
 		String realValue = "";
 
 		try {
-			realValue = set.getString(column);
+			realValue = set.getString(column).trim();
 			COL_TYPE type = getQuestType((byte) set.getInt(column - 2));
 
 			if (type == null || realValue == null) {
@@ -245,7 +245,8 @@ public class QuestResultset implements TupleResultSet {
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
 		Integer columnIndex = columnMap.get(name);
-		return getConstant(columnIndex);
+		Constant constant = getConstant(columnIndex);
+		return constant;
 	}
 
 	private COL_TYPE getQuestType(byte sqltype) {
