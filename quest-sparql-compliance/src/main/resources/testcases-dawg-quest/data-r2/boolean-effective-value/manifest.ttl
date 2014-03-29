@@ -8,7 +8,15 @@
 <>  rdf:type mf:Manifest ;
     rdfs:comment "Test of boolean expressions" ;
     mf:entries
-    ( :dawg-boolean-literal :dawg-bev-1 :dawg-bev-2 :dawg-bev-3 :dawg-bev-4 :dawg-bev-5 :dawg-bev-6 ) .
+    ( :dawg-boolean-literal 
+      :dawg-bev-1 
+      :dawg-bev-2 
+      :dawg-bev-3 
+      :dawg-bev-4 
+      :dawg-bev-5 #We CANT HANDLE THIS CASE RIGHT NOW!!! 
+      :dawg-bev-6 #We CANT HANDLE THIS CASE RIGHT NOW!!! 
+
+       ) .
 
 :dawg-boolean-literal a mf:QueryEvaluationTest ;
        mf:name    "Test literal 'true'" ;

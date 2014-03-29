@@ -64,7 +64,7 @@ public interface UnfoldingMechanism extends Serializable {
 	 * @return
 	 * @throws OBDAException
 	 */
-	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy,boolean includeMappings)
+	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy,boolean includeMappings, Multimap<Predicate, Integer> multiplePredIdx)
 			throws OBDAException;
 
 	//TODO: Check if this should be here!!
@@ -72,5 +72,7 @@ public interface UnfoldingMechanism extends Serializable {
 
 	public Multimap<Predicate,Integer>   processMultipleTemplatePredicates(
 			DatalogProgram unfoldingProgram);
+
+
 
 }

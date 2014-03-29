@@ -80,6 +80,9 @@ import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 //import com.hp.hpl.jena.query.Query;
 //import com.hp.hpl.jena.query.QueryFactory;
 //import com.hp.hpl.jena.sparql.syntax.Template;
@@ -441,16 +444,18 @@ public class QuestStatement implements OBDAStatement {
 
 			//TODO: cant we use here QuestInstance???
 			
-			if (questInstance.isSemIdx()==true){
-				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
-			}
+	
 			
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
 			
-			//removeNonAnswerQueries(program);
+			if (questInstance.isSemIdx()==true){
+				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
+			}
+			//Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
 
-			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false);
-
+			
+			
 			log.debug("Flattened query: \n{}", program);
 			
 			
@@ -479,7 +484,8 @@ public class QuestStatement implements OBDAStatement {
 		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder;
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
-		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true);
+		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,questInstance.multiplePredIdx);
+		
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		//removeNonAnswerQueries(unfolding);
