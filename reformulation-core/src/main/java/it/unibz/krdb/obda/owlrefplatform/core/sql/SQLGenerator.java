@@ -655,8 +655,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 				String column = getSQLString(p1, index, false);
 				String pattern = getSQLString(p2, index, false);
-				return sqladapter.sqlRegex(column, pattern, caseinSensitive,
+				String sqlRegex = sqladapter.sqlRegex(column, pattern, caseinSensitive,
 						multiLine, dotAllMode);
+				return sqlRegex;
 			} else {
 				throw new RuntimeException("The builtin function "
 						+ functionSymbol.toString() + " is not supported yet!");

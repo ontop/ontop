@@ -34,14 +34,24 @@ public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 		return "CAST(" + value + " AS " + strType + ")";
 		//return value;
 	}
-//	@Override
-//	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive) {
-//		pattern = pattern.substring(1, pattern.length() - 1);
-//		pattern = pattern.replace("\\", "");
-//		if (caseinSensitive) {
-//			return " LOWER(" + columnname + ") LIKE " + "'%"
-//					+ pattern.toLowerCase() + "%'" + " escape '\\'";
-//		}
-//		return columnname + " LIKE " + "'%" + pattern + "%'" + " escape '\\'";
-//	}
+
+	
+
+	@Override
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+		pattern = pattern.substring(1, pattern.length() - 1); // remove the
+																// enclosing
+																// quotes
+		// embedded options: 
+		String hsqlpat= pattern.replace("\\.", ".");
+		if (caseinSensitive){
+			columnname = "LCASE("+columnname+")";
+			hsqlpat= hsqlpat.toLowerCase();
+		}
+		
+		
+		String statement = columnname + " LIKE " + "'%" +  hsqlpat  + "%'";
+		return statement;
+	}
+	
 }
