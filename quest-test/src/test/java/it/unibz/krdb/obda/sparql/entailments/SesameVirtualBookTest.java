@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.subdescription;
+package it.unibz.krdb.obda.sparql.entailments;
 
 /*
  * #%L
@@ -34,7 +34,7 @@ import org.openrdf.repository.RepositoryConnection;
 
 import sesameWrapper.SesameVirtualRepo;
 
-public class SesameVirtualSubclassTest extends TestCase {
+public class SesameVirtualBookTest extends TestCase {
 
 	// create a sesame repository
 	RepositoryConnection con = null;
@@ -84,7 +84,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(62, countResult);
+				assertEquals(49, countResult);
 			} finally {
 				result.close();
 			}
@@ -127,10 +127,10 @@ public class SesameVirtualSubclassTest extends TestCase {
 					countResult++;
 				}
 
-				assertEquals(countResult, 8);
-				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(2));
-				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(7));
-				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(6));
+				assertEquals(7, countResult);
+				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(1));
+				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(6));
+				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(5));
 			} finally {
 				result.close();
 			}
@@ -166,6 +166,7 @@ public class SesameVirtualSubclassTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
+				assertEquals(24, countResult);
 			} finally {
 				result.close();
 			}

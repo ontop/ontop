@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,35 +53,43 @@ public class OWLEntailmentsToFactRule {
 		program = p;
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(onto);
-		addSubClassesFromOntology(reasoner);
+		addEntailmentsForClasses(reasoner);
 		addSubRolesFromOntology(reasoner);
-		addEquivalences(equivalenceMaps);
 		addRangeFromOntology(reasoner);
 
 		
 		 
 	}
 
-	private static void addEquivalences(Map<Predicate, Description> equivalenceMaps) {
+	private static void addEquivalences(Set<BasicClassDescription> equivalenceMaps) {
 		
-		Iterator<Entry<Predicate, Description>> itEquivalences = equivalenceMaps.entrySet().iterator();
+		Iterator<BasicClassDescription> itEquivalences = equivalenceMaps.iterator();
 		Predicate equivalentClass = OBDAVocabulary.OWL_EQUIVALENT;
-
+		
 		while (itEquivalences.hasNext()) {
 
-			Entry<Predicate, Description> map = itEquivalences.next();
+			BasicClassDescription node1 = itEquivalences.next();
+			Iterator<BasicClassDescription> itEquivalences2 = equivalenceMaps.iterator();
+			
+			while (itEquivalences2.hasNext()) {
 
-			Predicate key = map.getKey();
-			Description value = map.getValue();
-
-			if (key.isClass()) {
-
-				addNodesRule(key.getName(), key.getName(), equivalentClass);
-				addNodesRule(value.toString(), value.toString(), equivalentClass);
-				addNodesRule(key.getName(), value.toString(), equivalentClass);
-				addNodesRule(value.toString(), key.getName(), equivalentClass);
-
+				BasicClassDescription node2 = itEquivalences2.next();
+				addBlankNodesRule(node1, node2, equivalentClass);
 			}
+		
+				
+
+//			Predicate key = map.getKey();
+//			Description value = map.getValue();
+//
+//			if (key.isClass()) {
+//
+//				addNodesRule(key.getName(), key.getName(), equivalentClass);
+//				addNodesRule(value.toString(), value.toString(), equivalentClass);
+//				addNodesRule(key.getName(), value.toString(), equivalentClass);
+//				addNodesRule(value.toString(), key.getName(), equivalentClass);
+//
+//			}
 		}
 
 	}
@@ -94,17 +103,19 @@ public class OWLEntailmentsToFactRule {
 	 * @throws SQLException
 	 */
 
-	private static void addSubClassesFromOntology(TBoxReasoner reasoner) {
+	private static void addEntailmentsForClasses(TBoxReasoner reasoner) {
 
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
 		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
 		Predicate subClassOf = OBDAVocabulary.RDFS_SUBCLASS;
-
+		
 		while (it.hasNext()) {
 
 			Equivalences<BasicClassDescription> eqv = it.next();
 
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
+			
+			addEquivalences(eqv.getMembers());
 
 			while (iteq.hasNext()) {
 
@@ -277,7 +288,7 @@ public class OWLEntailmentsToFactRule {
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
 
-		else if (description1 instanceof PropertySomeRestriction) {
+		else if (description1 instanceof PropertySomeRestriction && !(((PropertySomeRestriction) description1).isInverse())) {
 			// add blank node
 			terms.add(factory.getConstantBNode(description1.toString()));
 		}
@@ -286,7 +297,7 @@ public class OWLEntailmentsToFactRule {
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
 
-		else if (description2 instanceof PropertySomeRestriction) {
+		else if (description2 instanceof PropertySomeRestriction && !(((PropertySomeRestriction) description2).isInverse())) {
 
 			// add blank node
 			terms.add( factory.getConstantBNode(description2.toString()));
