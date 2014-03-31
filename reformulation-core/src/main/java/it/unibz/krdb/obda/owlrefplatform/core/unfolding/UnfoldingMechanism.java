@@ -29,6 +29,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Multimap;
+
 /**
  * This interface should be implemented by any class which implements an
  * unfolding Mechanism which should be integrated into a technique wrapper
@@ -62,10 +64,15 @@ public interface UnfoldingMechanism extends Serializable {
 	 * @return
 	 * @throws OBDAException
 	 */
-	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy,boolean includeMappings)
+	public DatalogProgram unfold(DatalogProgram query, String targetPredicate, String strategy,boolean includeMappings, Multimap<Predicate, Integer> multiplePredIdx)
 			throws OBDAException;
 
 	//TODO: Check if this should be here!!
-	public List<CQIE> pushTypes(DatalogProgram unfolding, ArrayList<Predicate> multPredList);
+	public List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer>   multPredList);
+
+	public Multimap<Predicate,Integer>   processMultipleTemplatePredicates(
+			DatalogProgram unfoldingProgram);
+
+
 
 }

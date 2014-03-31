@@ -24,12 +24,16 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.util.ArrayList;
 
 import org.junit.Ignore;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -73,7 +77,9 @@ public class LeftJoinUnfoldingTest{
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true);
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true,multiplePredIdx);
 
 		System.out.println(result);
 
@@ -125,7 +131,9 @@ public class LeftJoinUnfoldingTest{
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true);
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true,multiplePredIdx);
 
 		System.out.println(result);
 
@@ -173,9 +181,10 @@ public class LeftJoinUnfoldingTest{
 		head = fac.getFunction(fac.getPredicate("R", 2), fac.getFunction(fac.getPredicate("g", 1), fac.getVariable("x")), fac.getVariable("y"));
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true);
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true, multiplePredIdx) ;
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);
@@ -222,7 +231,9 @@ public class LeftJoinUnfoldingTest{
 			p.appendRule(rule3);
 
 			DatalogUnfolder unfolder = new DatalogUnfolder(p);
-			DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true);
+			Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+
+			DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true, multiplePredIdx);
 
 			// Only one rule should be returned where y is null
 			System.out.println(result);
@@ -261,7 +272,9 @@ public class LeftJoinUnfoldingTest{
 		query.appendRule(rule1);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(query, "q",QuestConstants.TDOWN,true);
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+
+		DatalogProgram result = unfolder.unfold(query, "q",QuestConstants.TDOWN,true, multiplePredIdx);
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);

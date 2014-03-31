@@ -99,9 +99,16 @@ import java.util.regex.Pattern;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+
 import org.openrdf.query.parser.ParsedQuery;
+
+import org.hsqldb.util.DatabaseManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 //import com.hp.hpl.jena.query.Query;
 
@@ -118,7 +125,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// These can be changed in the properties file
 	protected int maxPoolSize = 20;
 	protected int startPoolSize = 2;
-	protected boolean removeAbandoned = false;
+	protected boolean removeAbandoned = true;
+	protected boolean logAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
 
@@ -184,7 +192,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/*
 	 * The list of predicates that are defined in multiple mappings
 	 */
-	protected ArrayList<Predicate> multiplePredIdx = new ArrayList<Predicate>();
+	protected Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 
 	final HashSet<String> templateStrings = new HashSet<String>();
 
@@ -556,12 +564,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				isSemanticIdx = true;
 				if (inmemory) {
+
+				//	String driver = "org.hsqldb.jdbc.JDBCDriver";
+				//	String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis()+";sql.syntax_mys=true";
+							
+
 					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
-							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+
+//					String driver = "org.hsqldb.jdbc.JDBCDriver";
+//					String url = "jdbc:hsqldb:mem:questrepository:"+ System.currentTimeMillis() + ";shutdown=true;hsqldb.app_log=0;hsqldb.sql_log=0;hsqldb.log_data=false;sql.enforce_strict_size=false";
+
 					String username = "sa";
 					String password = "";
-					
+
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
@@ -745,7 +761,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
-			multiplePredIdx = metaMappingExpander.processMultiplePredicates();
 			
 			
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
@@ -753,6 +768,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
 
+
+ 			
+ 			
 			/***
 			 * T-Mappings and Fact mappings
 			 */
@@ -821,7 +839,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
+
 			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
+			
+			if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
+				multiplePredIdx = unfolder.processMultipleTemplatePredicates(unfoldingProgram);
+			}
+			
+			
+			
+			
+			
+			
+			
+			
 
 			/***
 			 * Setting up the TBox we will use for the reformulation
@@ -1304,10 +1335,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		poolProperties.setMaxActive(maxPoolSize);
 		poolProperties.setMaxIdle(maxPoolSize);
 		poolProperties.setInitialSize(startPoolSize);
-		poolProperties.setMaxWait(10000);
+		poolProperties.setMaxWait(30000);
 		poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
 		poolProperties.setMinEvictableIdleTimeMillis(30000);
-		poolProperties.setLogAbandoned(removeAbandoned);
+		poolProperties.setLogAbandoned(logAbandoned);
 		poolProperties.setRemoveAbandoned(removeAbandoned);
 		poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
 				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");

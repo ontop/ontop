@@ -10,7 +10,7 @@
     mf:entries
     ( 
       :base-prefix-1
-      :base-prefix-2
+     :base-prefix-2
       :base-prefix-3
       :base-prefix-4
       :base-prefix-5
@@ -28,20 +28,20 @@
       :term-1
       :term-2
       :term-3
-      #:term-4 # ERROR
-      #:term-5 # ERROR
-      #:term-6 # ERROR
-      #:term-7 # ERROR
+    # #:term-4 # ERROR
+     # #:term-5 # ERROR
+     # #:term-6 # ERROR
+     # #:term-7 # ERROR
       :term-8
       :term-9
 
-      :var-1
-      :var-2
+       :var-1
+       :var-2
 
-      :bgp-no-match
-      :spoo-1
-
-      :prefix-name-1
+        :bgp-no-match
+       :spoo-1
+ 
+       :prefix-name-1
     ) .
 
 

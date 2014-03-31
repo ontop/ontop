@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
@@ -52,12 +53,14 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -86,7 +89,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	//private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
 	private final List<CQIE> emptyList = ImmutableList.of();
 	
-	private ArrayList<Predicate> multPredList;
 	
 	private enum UnfoldingMode {
 		UCQ, DATALOG
@@ -98,6 +100,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private Multimap<Predicate, CQIE> ruleIndex;
 	private Multimap<Predicate, CQIE> ruleIndexByBody;
+	private static Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
+	private Multimap<Predicate, Integer> multPredList;
+
 	
 	private DatalogDependencyGraphGenerator depGraph;
 
@@ -123,18 +128,24 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private HashSet<Predicate> allPredicates = new HashSet<Predicate>();
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>(), new ArrayList<Predicate>());
+		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>(), emptyMulti);
 	}
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
-		this(unfoldingProgram, primaryKeys, new ArrayList<Predicate>());
+		this(unfoldingProgram, primaryKeys, emptyMulti);
 	}
 		
-	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys, ArrayList<Predicate> multPredList) {
+	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys, Multimap<Predicate, Integer> multPredList) {
 		this.primaryKeys = primaryKeys;
 		this.unfoldingProgram = unfoldingProgram;
-		this.multPredList = multPredList;
-
+		
+		//TODO:remove this hack!!
+		if (multPredList.isEmpty()){
+			Multimap<Predicate, Integer> newemptyMulti= ArrayListMultimap.create();
+			this.multPredList = newemptyMulti;
+		}else{
+			this.multPredList = multPredList;
+		}
 		/*
 		 * Creating a local index for the rules according to their predicate
 		 */
@@ -190,13 +201,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * with respect to the program given when this unfolder was initialized. 
 	 * 
 	 */
-	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate, String strategy, boolean includeMappings) {
+	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate, String strategy, boolean includeMappings, Multimap<Predicate,Integer> multiplePredIdx) {
 		/*
 		 * Needed because the rewriter might generate query bodies like this
 		 * B(x,_), R(x,_), underscores reperesnt uniquie anonymous varaibles.
 		 * However, the SQL generator needs them to be explicitly unique.
 		 * replacing B(x,newvar1), R(x,newvar2)
 		 */
+		multPredList = multiplePredIdx;
+		
 		inputquery = QueryAnonymizer.deAnonymize(inputquery);
 
 		DatalogProgram partialEvaluation = flattenUCQ(inputquery, targetPredicate, strategy,  includeMappings);
@@ -478,6 +491,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 * This rule is already a partial evaluation
 							 */
 							continue;
+						}else if (result.size() >= 2) {
+							detectMissmatchArgumentType(result);
 						}
 						/*
 						 * One more step in the partial evaluation was computed, we
@@ -961,6 +976,37 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
 			//boolean hasPred = false;
 			
+			//Update MultipleTemplateList
+			if (multPredList.containsKey(pred))
+			{
+				Function head = fatherRule.getHead();
+				List<Function> ruleBody = fatherRule.getBody(); 
+				Function oldFun = getAtomFromBody(pred, ruleBody);
+				
+				int oldIdx = multPredList.get(pred).iterator().next();
+				Term t = oldFun.getTerm(oldIdx);
+				
+				//here I find the new index in the head
+				int newIdx = -1;
+				int count = 0;
+				for (Term nt: head.getTerms()){
+					if (t.equals(nt)){
+						newIdx = count;
+					}
+					count++;
+				}
+
+				multPredList.removeAll(pred);
+				//if the problematic term was in the head
+				if (newIdx>-1){
+					multPredList.put(preFather,newIdx);
+				}
+	
+			}			
+
+
+
+
 			for (CQIE newquery : result) {
 				Predicate ruleHead = newquery.getHead().getPredicate();
 				boolean sameHeadFromFather = ruleHead.equals(preFather);
@@ -974,39 +1020,21 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						workingList.remove(fatherRule);
 					}
 
-
-
 					//List<Term> bodyTerms = getBodyTerms(newquery);
-
 					//Update the bodyIndex
-
 					depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
 					depGraph.updateRuleIndexByBodyPredicate(newquery);
 
 
-					//Update MultipleTemplateList
-
-					if (multPredList.contains(pred))
-					{
-						multPredList.remove(pred);
-						multPredList.add(newquery.getHead().getFunctionSymbol());
-
-					}
-	
-				} else if (!sameHeadFromFather){
-					depGraph.addRuleToRuleIndex(ruleHead, newquery);
-					depGraph.updateRuleIndexByBodyPredicate(newquery);
 				}
 
-				
 
-				//TODO: check what happens here when the concept has several mappings and it appears several times in the rule
 			} // end for queries in result
 			//Determine if there is a need to keep unfolding pred
 
-			
-			
-			
+
+
+
 			if (ruleIndexByBody.get(pred).isEmpty()){
 				return false; //I finish with pred I can move on
 			}else if (result.contains(fatherRule)){ 
@@ -1014,11 +1042,11 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			}else{
 				return true; // keep doing the loop
 			}
-			
+
 		}
 
-		
-		
+
+
 		
 	
 
@@ -1039,7 +1067,23 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					
 					
 					
-					
+		/**
+		 * Returns the list functions inside the functions atoms 
+		 * @param rule
+		 * @return
+		 */
+		private List<Function> getAtomFunctions(Function func) {
+
+			List<Term> currentTerms = func.getTerms();
+			List<Function> tempList = new LinkedList<Function>();
+
+			for (Term a : currentTerms) {
+				if (a instanceof Function){
+					tempList.add((Function)a);
+				}
+			}
+			return tempList;
+		}			
 					
 					
 				
@@ -1676,8 +1720,109 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			result.add(partialEvalution);
 		}// end for candidate matches
+		
+		
+		if (result.size()<=1){
+			return result;
+		}else if (result.size()>1){ // THIS case is to check weather we cannot push this type
+			boolean templateProblem = false;
+
+			CQIE firstRule = (CQIE) result.get(0);
+			Function newfocusAtom= firstRule.getHead();
+			Predicate focusPred = newfocusAtom.getFunctionSymbol();
+			
+			for (int i=1; i<result.size(); i++){
+				Function pickedAtom = null;
+				CQIE tgt = (CQIE) result.get(i);
+				pickedAtom=  tgt.getHead();
+				
+				//TODO: is this if needed??
+				boolean found = false;
+					for (int p=0;p<newfocusAtom.getArity();p++){
+						
+						Term t1 = newfocusAtom.getTerm(p);
+						Term t2 = pickedAtom.getTerm(p);
+
+
+						if ((t1 instanceof Function) && (t2 instanceof  Function )){
+
+							templateProblem = checkFunctionTemplates(
+									templateProblem, t1, t2);
+						}else if ((t1 instanceof Variable) && (t2 instanceof  Variable )){
+							continue;
+						}else if ((t1 instanceof Constant) && (t2 instanceof  Constant )){
+							continue;
+						}else if ((t1 instanceof Function) && (t2 instanceof  Constant )){
+							templateProblem = true;
+						}else if ((t1 instanceof Constant ) && (t2 instanceof  Function )){
+							templateProblem = true;
+						}else if ((t1 instanceof Variable) && (t2 instanceof  Constant )){ // TODO: Maybe these 2 are too strict !!
+							templateProblem = true;
+						}else if ((t1 instanceof Constant ) && (t2 instanceof  Variable )){
+							templateProblem = true;
+						}
+						
+						
+						if (templateProblem){
+							if (!multPredList.containsEntry(focusPred,p)) {
+								multPredList.put(focusPred,p);
+								found = true;
+								
+							}
+						}
+					}//end for terms	
+				
+			
+				
+			}//end for rules
+		}
+		
+		
 
 		return result;
+	}
+
+	/**
+	 * @param templateProblem
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	private boolean checkFunctionTemplates(boolean templateProblem, Term t1,
+			Term t2) {
+		Function funct1 = (Function) t1;
+		Function funct2 = (Function) t2;
+		
+		//it has different types
+		if (!funct1.getFunctionSymbol().equals(funct2.getFunctionSymbol())){
+			templateProblem = true;
+		}
+
+		//it has different templates regarding the variable
+
+
+		//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
+		//See Test COmplex Optional Semantics
+
+		//int arity = t1.getArity();
+		int arity = funct1.getTerms().size();
+
+		//						int arity2 = t2.getArity();
+		int arity2 = funct2.getTerms().size();
+
+		if (arity !=  arity2){
+			templateProblem = true;
+		}
+
+		//it has different templates regarding the uri
+		if (funct1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
+			Term string1 = funct1.getTerm(0);
+			Term string2 = funct2.getTerm(0);
+			if (!string1.equals(string2)){
+				templateProblem = true;
+			}
+		}
+		return templateProblem;
 	}
 
 	/**
@@ -1999,7 +2144,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 */
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate)
 			throws OBDAException {
-		unfold(query,targetPredicate,QuestConstants.TDOWN, false);
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+		unfold(query,targetPredicate,QuestConstants.TDOWN, false,multiplePredIdx);
 		return null;
 	}
 
@@ -2015,7 +2161,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
  * 
  * @param unfolding
  */
-	public  List<CQIE> pushTypes(DatalogProgram unfolding, ArrayList<Predicate> multPredList) {
+	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multPredList) {
 		
 		List<CQIE> workingList = new LinkedList<CQIE>();
 		
@@ -2023,8 +2169,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 		//TODO: We are generating this too many times!!! simplify!!!
 		log.debug("Generating Dependency Graph!");
-		//depGraph = new DatalogDependencyGraphGenerator(workingList);
+		depGraph = new DatalogDependencyGraphGenerator(workingList);
 
+		
 		List<CQIE> fatherCollection = new LinkedList<CQIE>();
 		List<CQIE> predCollection = new LinkedList<CQIE>();
 
@@ -2037,7 +2184,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
 			//get the father predicate
 
-			if (!extensionalPredicates.contains(buPredicate) && !multPredList.contains(buPredicate)) {// it is a defined  predicate, like ans2,3.. etc
+			if (!extensionalPredicates.contains(buPredicate) ) {// it is a defined  predicate, like ans2,3.. etc
 
 				//get all the indexes we need
 				ruleIndex = depGraph.getRuleIndex();
@@ -2076,7 +2223,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						
 						CQIE sourceRule = predCollection.get(i);
 						
-						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone());
+						//Later when we compute the new source rule, we will not eliminate the types from the terms in this list
+						List<Term> termsToExclude = new LinkedList<Term>();
+						
+						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude);
 
 
 						if (result == null && fails==rulesDefiningPred.size()) {
@@ -2095,7 +2245,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							 */
 							
 							//Here we remove the types, if possible, of the source query
-							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone());
+							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
 							
 							//Now we update the indexes for the source query
 							List<CQIE> newSourceRuleList= new LinkedList<CQIE>();
@@ -2104,10 +2254,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
 							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
 							
-							//Update the indexes for the t query
+							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
-							
-							//TODO!
 							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
 							
 							continue;
@@ -2145,9 +2293,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * Ans(URI("http://...",x,y))
 	 * Solve!
 	 * @param sourceRule
+	 * @param termsToExclude 
 	 * @return
 	 */
-	private static CQIE computeSourceRuleNoTypes(CQIE sourceRule){
+	private  CQIE computeSourceRuleNoTypes(CQIE sourceRule, List<Term> termsToExclude){
 
 		Function sourceHead=sourceRule.getHead();
 
@@ -2158,9 +2307,19 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		List<Term> typedArguments= sourceHead.getTerms();
 		List<Term> untypedArguments= new LinkedList<Term>();
 
+		int termIdx = 0;
+		
 		for (Term t: typedArguments){
-			getUntypedArgumentFromTerm(untypedArguments, t);
-
+			boolean isProblemTemplate = false;
+			
+			Predicate functionSymbol = sourceHead.getFunctionSymbol();
+			if (multPredList.containsKey(functionSymbol)){
+				if (multPredList.get(functionSymbol).contains(termIdx)){
+					isProblemTemplate = true;
+				}
+			}
+			untypedArguments.addAll(getUntypedArgumentFromTerm( t,termIdx,isProblemTemplate,termsToExclude));
+			termIdx++;
 		}
 
 		//updating the rule!!
@@ -2180,46 +2339,41 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * Takes a Term of the form Type(x) and returns the list [x]
 	 * @param untypedArguments
 	 * @param t
+	 * @param termIdx 
+	 * @param isProblemTemplate 
 	 */
-	private static void getUntypedArgumentFromTerm(List<Term> untypedArguments,
-			Term t) {
-		boolean isAggFunc = false;
-		if (t instanceof Function){
+	private  List<Term>  getUntypedArgumentFromTerm(
+			Term t, int termIdx, boolean isProblemTemplate, List<Term> termsToExclude) {
+		
+	
+		List<Term> untypedArguments = new LinkedList<Term>();
+		if (termsToExclude.contains(t)){
+			isProblemTemplate = true;
+		}
+		
+		if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
-
-			Predicate functionSymbol = ((Function)t).getFunctionSymbol();
-			if (functionSymbol.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
-				Term intArg = ((Function) t).getTerm(0);
-				if (intArg instanceof Function){
-					functionSymbol = ((Function) intArg).getFunctionSymbol();
-					isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
-
-				}
+			List<Term>  functionArguments = ((Function) t).getTerms();
+			int arity = ((Function) t).getArity();
+			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
+			boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
+			if (isURI && arity >1){
+				//I need to remove the URI part and add the rest, usually the variables
+				functionArguments.remove(0);
 			}
-			if (! isAggFunc){
-				List<Term>  functionArguments = ((Function) t).getTerms();
-				functionSymbol = ((Function) t).getFunctionSymbol();
-				boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-				if (isURI && functionArguments.size()>1){
-					//I need to remove the URI part and add the rest, usually the variables
-					functionArguments.remove(0);
-					untypedArguments.addAll(functionArguments);
-				}else if (isURI  && functionArguments.size()==1) {
-					untypedArguments.add(t);
-				} else{
-					untypedArguments.addAll(functionArguments);
-				}
-			}else{
-				//It is an aggregate!!!
-				untypedArguments.add(t);
-			}
+			untypedArguments.addAll(functionArguments);
+		}else if (t instanceof Function && isProblemTemplate){ // if it is a problematic term we leave it as it is
+			untypedArguments.add(t);
 		}else if(t instanceof Variable){
 			untypedArguments.add(t);
 		}else if (t instanceof Constant){
 			untypedArguments.add(t);
 		}
+		return untypedArguments;
 	}
 
+	
+	
 	
 	
 	
@@ -2233,8 +2387,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 */
 	
 	
-	private static List<CQIE> computeRuleExtendedTypes(List currentTerms,
-			CQIE sourceRule, CQIE fatherRule) {
+	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
+			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude) {
 
 
 			Function sourceHead = sourceRule.getHead();
@@ -2249,12 +2403,14 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
-					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule));
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
-						result.add(addTypes(sourceHead,sourceRule,focus,fatherRule));
+						
+						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule,termsToExclude);
+						result.add(addTypes);
 						break;
 					} else{
 						continue;
@@ -2287,18 +2443,27 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param fatherRule
 	 * @return
 	 */
-	private static CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule) {
+	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule, List<Term> exclude) {
 
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		boolean oneWayMGU = true;
-		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU);
+		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU, multPredList);
+		
 		
 		
 		if (mgu == null) {
 			return null;
 		}else{
-			Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
+			
+			Set<Entry<Variable, Term>> entrySet = mgu.entrySet();
+			
+			Set<Entry<Variable, Term>> entrySetClone = new HashSet<Entry<Variable, Term>>();
+			for (Entry<Variable, Term> a: entrySet){
+				entrySetClone.add(a);
+			}
+			
+			Iterator<Map.Entry<Variable, Term>> vars = entrySetClone.iterator();
 			while (vars.hasNext()) {
 				Map.Entry<Variable, Term> pairs = vars.next();
 
@@ -2306,7 +2471,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				Term value = pairs.getValue();
 
 				if (value instanceof Function){
-					//TODO: this HAS TO CHANGE!!! Since here we assume there is only 1 variable!!!
 
 					Set<Variable> varset =  value.getReferencedVariables();
 					Variable mvar;
@@ -2318,48 +2482,51 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							minimgu.put(mvar, key);
 							Unifier.applyUnifier((Function)value, minimgu, false);
 						} else {
-							//TODO: introduce new vars in head and body atoms
-							System.out.println("Multiple vars in Function: "+ varset.toString());
-							//if targetAtom is the only one in the father rule that contains key
+							//TODO: Complete this!!!
+							
+							
+							/*
+							 * When we do this we have to take into account this case. See test case LeftJoinTest1Virtual Test2
+							 * ans5(nick1,nick2,nick22,p) :- LeftJoin(ans10(nick1,p),ans11(nick2,nick22,p))
+							   ans4(http://www.w3.org/2000/01/rdf-schema#Literal(t2_1),URI("http://www.example.org/test#{}/{}",t1_1,t2_1)) :- people(t1_1,t2_1,t3_1,t4_1,t5_1,t6_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1)
+							   ans10(http://www.w3.org/2000/01/rdf-schema#Literal(t5_3),URI("http://www.example.org/test#{}/{}",t1_3,t2_3)) :- people(t1_3,t2_3,t3_3,t4_3,t5_3,t6_3), IS_NOT_NULL(t1_3), IS_NOT_NULL(t2_3), IS_NOT_NULL(t5_3)
+							   ans11(http://www.w3.org/2000/01/rdf-schema#Literal(t6_4),"null",URI("http://www.example.org/test#{}/{}",t1_4,t2_4)) :- people(t1_4,t2_4,t3_4,t4_4,t5_4,t6_4), IS_NOT_NULL(t1_4), IS_NOT_NULL(t2_4), IS_NOT_NULL(t6_4)
+							 	
+							 	In this case we need to take care of that join in p !!, most of the code is dont so...
+							 */
+							
+							System.out.println("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
+							mgu.remove(key);
+							exclude.add(value);
+						/*	//if targetAtom is the only one in the father rule that contains key
 							List<Function> fatherBody = fatherRule.getBody();
-							for (Function fatherAtom : fatherBody)
-								if (!fatherAtom.equals(targetAtom) && fatherAtom.getReferencedVariables().contains(mvar))
-									break;
+						
+							
 							minimgu.put(mvar, key);
 							Unifier.applyUnifier((Function)value, minimgu, false);
 							OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+							
 							while(iterator.hasNext()){
 								mvar = iterator.next();
-								fatherBody = fatherRule.getBody();
+								
 								Function newTarget = (Function)targetAtom.clone();
 								newTarget.getTerms().add(mvar);
+							
 								Predicate oldPredicate = targetAtom.getFunctionSymbol();
 								Predicate newPredicate = dfac.getPredicate(oldPredicate.getName(), oldPredicate.getArity()+1);
+								
 								Function nt = dfac.getFunction(newPredicate, newTarget.getTerms());
-								fatherBody.remove(targetAtom);
-								fatherBody.add(nt);
-							    
-							}
+								
+								replaceAtomInBody(targetAtom, fatherBody, nt);
+								
+							}*/
 						}
-					}
+					} 
 				} else {
 					System.out.println("value: "+value.toString());
 				}
 
 			}
-
-			//Generate the MGU for the body
-			/*Map<Variable, Term> bodymgu = new HashMap<Variable,Term>();
-			generateMGUforBody(mgu, bodymgu);
-*/
-
-			//applying unifers in head and body*/
-
-			//updating the rule head
-			/*			List<Function> newbody =  fatherRule.getBody();
-
-			 * 			Unifier.applyUnifier(newbody, bodymgu);
-			 **/
 
 			//updating the rule body
 			Function newHead = (Function) fatherRule.getHead();
@@ -2374,32 +2541,53 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	}
 
 	/**
-	 * Takes the MGU used for the head, and removes the types, leaves the variables
-	 * @param mgu
-	 * @param bodymgu
+	 * @param targetAtom
+	 * @param fatherBody
+	 * @param nt
 	 */
-	private static void generateMGUforBody(Map<Variable, Term> mgu,
-			Map<Variable, Term> bodymgu) {
-		Iterator<Map.Entry<Variable, Term>> vars = mgu.entrySet().iterator();
-		  while (vars.hasNext()) {
-		        Map.Entry<Variable, Term> pairs = vars.next();
-		        
-		        Variable key = pairs.getKey();
-		        Term value = pairs.getValue();
-
-		        List<Term> untypedArguments=new LinkedList<Term>();
-				getUntypedArgumentFromTerm(untypedArguments, value);
-				
-				//TODO: this HAS TO CHANGE!!! Since here we assume there is only 1 variable!!!
-				Term untypedValue = untypedArguments.get(0);
-				bodymgu.put(key, untypedValue);
-		        
-		  }
+	private void replaceAtomInBody(Function targetAtom,
+			List<Function> fatherBody, Function newAtom) {
+		for (Function func: fatherBody){
+			
+		if (func.isBooleanFunction() || func.isArithmeticFunction() || func.isDataTypeFunction()) {
+               
+                  continue;
+          } else if (func.isAlgebraFunction()) {
+        	  replaceAtomInFunction(func,targetAtom, func.getTerms() ,newAtom); 
+          } else if (func.isDataFunction()) {
+        	  	if (func.getFunctionSymbol().equals(targetAtom.getFunctionSymbol())){
+        	  		fatherBody.remove(targetAtom);
+        	  		fatherBody.add(newAtom);
+        	  	}
+		}
 	}
+	}
+
 	
 	
 	
 	
+
+	private void replaceAtomInFunction(Function Originalfunc, Function targetAtom,
+			List<Term> list, Function newAtom) {
+		for (Term func: list){
+			if (func instanceof Function){
+				Function funcfunc = (Function) func;
+				if (funcfunc.isBooleanFunction() || funcfunc.isArithmeticFunction() || funcfunc.isDataTypeFunction()) {
+					continue;
+				} else if (funcfunc.isAlgebraFunction()) {
+					replaceAtomInFunction(funcfunc,targetAtom, funcfunc.getTerms() ,newAtom); 
+				} else if (funcfunc.isDataFunction()) {
+					if (funcfunc.getFunctionSymbol().equals(targetAtom.getFunctionSymbol())){
+						Originalfunc.getTerms().remove(targetAtom);
+						Originalfunc.getTerms().add(newAtom);
+						break;
+					}
+				}
+			}
+		}
+		
+	}
 
 	/**
 	 * Since we have new rules, we need to update all the index as usual.
@@ -2442,13 +2630,196 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		}// end for result
 	}
 
-	public ArrayList<Predicate> getMultiplePredList() {
+	public Multimap<Predicate,Integer> getMultiplePredList() {
+		
 		return multPredList;
 	}
 
 
 	
 				
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * This method returns the predicates that define two different templates
+	 */
+	public Multimap<Predicate,Integer>  processMultipleTemplatePredicates(DatalogProgram mappings) {
+		
+		
+		
+		 Multimap<Predicate, CQIE> ruleIndex;
+		 DatalogDependencyGraphGenerator depGraph;
+		 depGraph = new DatalogDependencyGraphGenerator(mappings);
+		 ruleIndex = depGraph.getRuleIndex();
+		 
+		
+		
+		Predicate triple = termFactory.getPredicate("triple", 3);
+		
+		Set<Predicate> keySet = ruleIndex.keySet();
+		//Not interested in triple predicates
+		keySet.remove(triple);
+
+		for(Predicate focusPred: keySet){
+			
+			List<CQIE> rules = (List<CQIE>) ruleIndex.get(focusPred);
+			
+			//if there is only one rule there cannot be two templates
+			if (rules.size()==1){
+				continue;
+			}
+			
+			//There is more than 1 rule, we need to see if it uses different templates
+			
+			
+			detectMissmatchArgumentType(rules);
+			
+		} //end for predicates
+		
+		return multPredList;
+
+	}
+
+	
+	/**
+	 * This is a helper method that takes a set of rules and calculate wich argument have different types
+	 * @param focusPred
+	 * @param rules
+	 */
+	private void detectMissmatchArgumentType(List<CQIE> rules) {
+		// I pick the pred atom in the body of the first rule
+		CQIE firstRule = (CQIE) rules.get(0);
+		Function focusAtom= firstRule.getHead();
+		Predicate focusPred = focusAtom.getPredicate();
+					
+		for (int i=1; i<rules.size(); i++){
+			Function pickedAtom = null;
+			CQIE tgt = (CQIE) rules.get(i);
+			pickedAtom=  tgt.getHead();
+
+			//TODO: is this if needed??
+			boolean found = false;
+			for (int p=0;p<focusAtom.getArity();p++){
+				boolean templateProblem = false;
+				Term term1 = focusAtom.getTerm(p);
+				Term term2 =  pickedAtom.getTerm(p);
+
+				if ((term1 instanceof Function ) &&  (term2 instanceof Function )){
+					Function t1 = (Function)term1;
+					Function t2 = (Function)term2;
+
+
+
+
+					//it has different types
+					if (!t1.getFunctionSymbol().equals(t2.getFunctionSymbol())){
+						templateProblem = true;
+					}
+
+					//it has different templates regarding the variable
+
+
+					//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
+					//See Test COmplex Optional Semantics
+
+					//int arity = t1.getArity();
+					int arity = t1.getTerms().size();
+
+					//						int arity2 = t2.getArity();
+					int arity2 = t2.getTerms().size();
+
+					if (arity !=  arity2){
+						templateProblem = true;
+					}
+
+					//it has different templates regarding the uri
+					if (t1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
+						Term string1 = t1.getTerm(0);
+						Term string2 = t2.getTerm(0);
+						if (!string1.equals(string2)){
+							templateProblem = true;
+						}
+					}
+				}
+				else if ((term1 instanceof Variable ) &&  (term2 instanceof Constant)){
+					templateProblem = true;
+				}else if ((term2 instanceof Variable ) &&  (term1 instanceof Constant)){
+					templateProblem = true;
+				}
+				
+				if (templateProblem){
+					if (!multPredList.containsEntry(focusPred,p)) {
+						multPredList.put(focusPred,p);
+						found = true;
+						break;
+					}
+				}
+			}//end for terms	
+
+
+
+			if (found ==true){
+				continue;
+			}
+		}//end for rules
+	}
+
+	/**
+	 * This is a helper method for processMultiplePredicates. 
+	 * It returns the atom of a given predicate in a body of a rule
+	 * @param bodyPred
+	 * @param ruleBody
+	 */
+	private Function getAtomFromBody(Predicate bodyPred, List<Function> ruleBody) {
+		Function focusAtom = null;
+		for (Function atom: ruleBody ){
+			if (atom.getFunctionSymbol().equals(bodyPred))
+			{
+				focusAtom = atom;
+			}
+		}
+		return focusAtom;
+	}
 	
 	
 	

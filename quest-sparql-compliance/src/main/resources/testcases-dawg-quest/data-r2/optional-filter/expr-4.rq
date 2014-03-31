@@ -5,6 +5,6 @@ WHERE
     { ?book dc:title ?title . 
       OPTIONAL
         { ?book x:price ?price . 
-          FILTER (?price < 15 && ?title = "TITLE 2") .
+          FILTER (?price < 15 && ?title = x:TITLE2) .
         } .
     }

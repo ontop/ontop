@@ -108,7 +108,8 @@ public class SesameTupleQuery implements TupleQuery {
 
 	private Binding createBinding(String bindingName, TupleResultSet set, Set<String> bindingnames) {
 		SesameBindingSet bset = new SesameBindingSet(set, bindingnames);
-		return bset.getBinding(bindingName);
+		Binding binding = bset.getBinding(bindingName);
+		return binding;
 	}
 
 	// needed by TupleQuery interface

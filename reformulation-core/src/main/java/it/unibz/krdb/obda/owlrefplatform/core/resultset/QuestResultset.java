@@ -150,7 +150,13 @@ public class QuestResultset implements TupleResultSet {
 		String realValue = "";
 
 		try {
-			realValue = set.getString(column);
+			String stringVal = set.getString(column);
+			if (stringVal != null){
+				realValue = stringVal.trim();
+			} else {
+				realValue = null;
+			}
+				
 			COL_TYPE type = getQuestType((byte) set.getInt(column - 2));
 
 			if (type == null || realValue == null) {
@@ -172,7 +178,7 @@ public class QuestResultset implements TupleResultSet {
 					result = fac.getConstantURI(realValue);
 
 				} else if (type == COL_TYPE.BNODE) {
-					String rawLabel = set.getString(column);
+					String rawLabel = stringVal;
 					String scopedLabel = this.bnodeMap.get(rawLabel);
 					if (scopedLabel == null) {
 						scopedLabel = "b" + bnodeCounter;
@@ -187,7 +193,7 @@ public class QuestResultset implements TupleResultSet {
 					 * properly.
 					 */
 					if (type == COL_TYPE.LITERAL) {
-						String value = set.getString(column);
+						String value = stringVal;
 						String language = set.getString(column - 1);
 						if (language == null || language.trim().equals("")) {
 							result = fac.getConstantLiteral(value);
@@ -255,7 +261,8 @@ public class QuestResultset implements TupleResultSet {
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
 		Integer columnIndex = columnMap.get(name);
-		return getConstant(columnIndex);
+		Constant constant = getConstant(columnIndex);
+		return constant;
 	}
 
 	private COL_TYPE getQuestType(byte sqltype) {

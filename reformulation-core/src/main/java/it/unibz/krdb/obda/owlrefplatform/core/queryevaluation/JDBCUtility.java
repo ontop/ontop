@@ -46,7 +46,7 @@ public class JDBCUtility implements Serializable {
 	private static final long serialVersionUID = 5218570087742414646L;
 
 	private enum Driver {
-		PGSQL, MYSQL, H2, DB2, ORACLE, SQLSERVER, TEIID
+		PGSQL, MYSQL, H2, DB2, ORACLE, SQLSERVER, TEIID, HSQL
 	}
 
 	private Driver driver = null;
@@ -78,7 +78,10 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.TEIID;
 		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
 			driver = Driver.SQLSERVER;
-		} else {
+		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+			driver = Driver.HSQL; 
+		} 
+		else {
 			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
 			log.warn("WARNING: Contact the authors for further support.");
 			throw new Exception("The specified JDBC driver '" + className + "' is not supported by Quest. Verify you are using a supported DB and the correct JDBC driver string. For more information see: https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibPluginJDBC");
@@ -218,6 +221,7 @@ public class JDBCUtility implements Serializable {
 			case PGSQL:
 			case DB2:
 			case TEIID:
+			case HSQL:
 				sql = "TRUE";
 				break;
 			case ORACLE:
@@ -234,6 +238,7 @@ public class JDBCUtility implements Serializable {
 			case PGSQL:
 			case DB2:
 			case TEIID:
+			case HSQL:
 				sql = "FALSE";
 				break;
 			case ORACLE:

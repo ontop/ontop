@@ -38,6 +38,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 import junit.framework.TestCase;
 
 public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
@@ -147,7 +150,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(query);
-		DatalogProgram output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true);
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+		DatalogProgram output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true,multiplePredIdx);
 		System.out.println("input " + input);
 
 		int atomcount = 0;
@@ -176,7 +180,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		query = fac.getCQIE(head, body);
 
 		input = fac.getDatalogProgram(query);
-		output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true);
+		output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true,multiplePredIdx);
 		System.out.println("input " + input);
 
 		atomcount = 0;

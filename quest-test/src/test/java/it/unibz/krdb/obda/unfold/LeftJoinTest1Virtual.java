@@ -46,6 +46,10 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -59,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * SQL
  * @author Minda, Guohui, mrezk
  */
-public class LeftJoinTest1Virtual extends TestCase {
+public class LeftJoinTest1Virtual{
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -71,7 +75,7 @@ public class LeftJoinTest1Virtual extends TestCase {
 	final String owlfile = "src/test/resources/person.owl";
 	final String obdafile = "src/test/resources/person1.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		//String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
 		//String username = "sa";
@@ -112,7 +116,7 @@ public class LeftJoinTest1Virtual extends TestCase {
 		
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(Properties p, String query, int expectedvalue) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -126,107 +130,15 @@ public class LeftJoinTest1Virtual extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		//@formatter.off
-		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE "
-				+ "{?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
-		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
-		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
-		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
-		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
-		String query_multi5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} } }";
-		
-		String query_multi6 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {"
-				+ "  ?p a :Person . "
-				+ "  OPTIONAL {"
-				+ "    ?p :name ?name . "
-				+ "    OPTIONAL {"
-				+ "      ?p :nick1 ?nick1 "
-				+ "      OPTIONAL {?p :nick2 ?nick2} } } }";
-		
-		String query_multi7 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {"
-				+ "  ?p a :Person . "
-				+ "  OPTIONAL {"
-				+ "    ?p :name ?name . "
-				+ "    OPTIONAL {"
-				+ "      ?p :nick1 ?nick1 "
-				+ "      OPTIONAL {?p :nick2 ?nick2. FILTER (?nick2 = 'alice2')} } } }";
-		
-		
-		String query1 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * WHERE "
-				+ "{?p a :Person . ?p :name ?name . ?p :age ?age }";
-
-		// fails now
-		String query2 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {?p a :Person . ?p :name ?name . "
-				+ "  OPTIONAL {?p :nick11 ?nick1} "
-				+ "  OPTIONAL {?p :nick22 ?nick2} }";
-		
-
-		String query3 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {"
-				+ "?p a :Person . ?p :name ?name . "
-				+ "		OPTIONAL {?p :nick11 ?nick1} }";
-		
-		
-		String query4 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {"
-				+ " ?p a :Person . ?p :name ?name . "
-				+ "  OPTIONAL {?p :nick1 ?nick1} "
-				+ "  OPTIONAL {?p :nick2 ?nick2} }";
-		
-		String query5 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {"
-				+ "  ?p a :Person . "
-				+ "  ?p :name ?name ."
-				+ "    OPTIONAL {?p :age ?age} }";
-		
-		String query6 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT * "
-				+ "WHERE {"
-				+ " ?p a :Person . ?p :name ?name ."
-				+ " OPTIONAL {"
-				+ "   ?p :nick1 ?nick1 "
-				+ "   OPTIONAL {"
-				+ "     {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
 	
-		String query7 = "PREFIX : <http://www.example.org/test#> "
-				+ "SELECT DISTINCT * "
-				+ "WHERE {"
-				+ "  ?p a :Person . "
-				+ "  ?p :name ?name ."
-				+ "  OPTIONAL {"
-				+ "    ?p :nick11 ?nick11 "
-				+ "    OPTIONAL { {?p :nick33 ?nick33 } UNION {?p :nick22 ?nick22} } } }";
-		//@formatter.on
+	
+	
+		
 		
 		try {
-//			executeQueryAssertResults(query_multi, st, 4);
-			//executeQueryAssertResults(query_multi1, st, 4);
-			//executeQueryAssertResults(query_multi2, st, 4);
-			//executeQueryAssertResults(query_multi3, st, 4);
-			//executeQueryAssertResults(query_multi4, st, 4);
-			//executeQueryAssertResults(query_multi5, st, 4);
-			//executeQueryAssertResults(query_multi6, st, 4);
-			//executeQueryAssertResults(query_multi7, st, 4);
 
-			//executeQueryAssertResults(query1, st, 3);
-			executeQueryAssertResults(query2, st, 4);
-//			executeQueryAssertResults(query3, st, 4);
-			//executeQueryAssertResults(query4, st, 4);
-//			executeQueryAssertResults(query5, st, 4);
-//			executeQueryAssertResults(query6, st, 6);
-//			executeQueryAssertResults(query7, st, 4);
+			executeQueryAssertResults(query, st, expectedvalue);
 
-			
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -258,10 +170,200 @@ public class LeftJoinTest1Virtual extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 
-	public void testLeftJoin() throws Exception {
+	@Test
+	public void testLeftJoin1() throws Exception {
+
+		String query2 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {?p a :Person . ?p :name ?name . "
+				+ "  OPTIONAL {?p :nick11 ?nick1} "
+				+ "  OPTIONAL {?p :nick22 ?nick2} }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query2,4);
+	}
+	
+	@Test
+	public void testLeftJoin2() throws Exception {
+		
+		String query6 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT * "
+				+ "WHERE {"
+				+ " ?p a :Person . ?p :name ?name ."
+				+ " OPTIONAL {"
+				+ "   ?p :nick1 ?nick1 "
+				+ "   OPTIONAL {"
+				+ "     {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query6,4);
+	}
+
+	@Test
+	public void testLeftJoin3() throws Exception {
+		
+		String query5 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "  ?p a :Person . "
+				+ "  ?p :name ?name ."
+				+ "    OPTIONAL {?p :age ?age} }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query5,4);
+	}
+	@Test
+	public void testLeftJoin4() throws Exception {
+		String query4 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ " ?p a :Person . ?p :name ?name . "
+				+ "  OPTIONAL {?p :nick1 ?nick1} "
+				+ "  OPTIONAL {?p :nick2 ?nick2} }";
+
+	
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query4,4);
+	}	
+	
+	
+	@Test
+	public void testLeftJoin5() throws Exception {
+		String query3 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "?p a :Person . ?p :name ?name . "
+				+ "		OPTIONAL {?p :nick11 ?nick1} }";
+		
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query3,4);
+	}	
+	
+	@Test
+	public void testLeftJoin6() throws Exception {
+		
+		String query7 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "  ?p a :Person . "
+				+ "  ?p :name ?name ."
+				+ "  OPTIONAL {"
+				+ "    ?p :nick11 ?nick11 "
+				+ "    OPTIONAL { {?p :nick33 ?nick33 } UNION {?p :nick22 ?nick22} } } }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query7,4);
+	}	
+	
+	@Test
+	public void testLeftJoin7() throws Exception {
+		
+		String query1 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * WHERE "
+				+ "{?p a :Person . ?p :name ?name . ?p :age ?age }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query1,3);
+	}	
+
+
+	
+	@Test
+	public void testLeftJoin8() throws Exception {
+		
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "  ?p a :Person . "
+				+ "  OPTIONAL {"
+				+ "    ?p :name ?name . "
+				+ "    OPTIONAL {"
+				+ "      ?p :nick1 ?nick1 "
+				+ "      OPTIONAL {?p :nick2 ?nick2. FILTER (?nick2 = 'alice2')} } } }";
+		
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi7,4);
+	}	
+
+	@Test
+	public void testLeftJoin9() throws Exception {
+		
+		String query_multi6 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "  ?p a :Person . "
+				+ "  OPTIONAL {"
+				+ "    ?p :name ?name . "
+				+ "    OPTIONAL {"
+				+ "      ?p :nick1 ?nick1 "
+				+ "      OPTIONAL {?p :nick2 ?nick2} } } }";
+		
+		
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi6,4);
+	}	
+
+
+
+
+	@Test
+	public void testLeftJoin10() throws Exception {
+		
+		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE "
+				+ "{?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi,4);
+	}	
+	
+	@Test
+	public void testLeftJoin11() throws Exception {
+		
+		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi1,4);
+	}		
+	
+	@Test
+	public void testLeftJoin12() throws Exception {
+		
+		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi2,4);
+	}		
+	
+	@Test
+	public void testLeftJoin13() throws Exception {
+		
+		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi3,4);
+	}		
+	@Test
+	public void testLeftJoin14() throws Exception {
+		
+
+		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
+		
+		QuestPreferences p = new QuestPreferences();
+		runTests(p,query_multi4,4);
+	}		
+	@Test
+	public void testLeftJoin15() throws Exception {
+		
+
+		String query_multi5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} } }";
 
 		QuestPreferences p = new QuestPreferences();
-		runTests(p);
-	}
+		runTests(p,query_multi5,4);
+	}	
+
 
 }
