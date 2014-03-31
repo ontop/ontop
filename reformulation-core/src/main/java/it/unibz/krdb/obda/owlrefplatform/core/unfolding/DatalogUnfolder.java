@@ -2071,6 +2071,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
  */
 	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multPredList) {
 		
+		if (!multPredList.isEmpty()){
+			return unfolding.getRules();
+		}
+		
+		
 		List<CQIE> workingList = new LinkedList<CQIE>();
 		
 		cloneRules(workingList, unfolding.getRules());
