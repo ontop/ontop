@@ -507,7 +507,9 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-		if(unfolder.getMultiplePredList().isEmpty()){ // CANT push types if I have multiple templates, see LeftJoin3Virtual.
+		
+		//TODO: optimise this????
+		if(unfolder.getMultiplePredList().isEmpty()){
 			List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
 
 			for (CQIE rule: newTypedRules){
@@ -518,7 +520,8 @@ public class QuestStatement implements OBDAStatement {
 			unfolding.removeAllRules();
 			unfolding.appendRule(newTypedRules);
 		} else{
-			System.out.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
+			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
+			System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
 		}
 		
 		
