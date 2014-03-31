@@ -99,6 +99,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
 import java.util.regex.Pattern;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -719,7 +720,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					System.out.print(attr.getName() + ",");
 				}
 			}
-		
+			// Prints all foreign keys
+			System.out.println("\n====== Foreign keys ==========");
+			for(TableDefinition dd : table_list){
+				System.out.print("\n" + dd.getName() + ":");
+				Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
+				for(String fkName  : fkeys.keySet() ){
+					System.out.print("(" + fkName + ":");
+					for(Attribute attr : fkeys.get(fkName)){
+						System.out.print(attr.getName() + ",");
+					}
+					System.out.print("),");
+				}
+			}
+
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
