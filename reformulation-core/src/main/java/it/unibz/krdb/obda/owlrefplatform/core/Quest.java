@@ -565,14 +565,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				isSemanticIdx = true;
 				if (inmemory) {
 
-					String driver = "org.hsqldb.jdbc.JDBCDriver";
-					String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis()+";sql.syntax_mys=true";
+				//	String driver = "org.hsqldb.jdbc.JDBCDriver";
+				//	String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis()+";sql.syntax_mys=true";
 							
 
-	//				String driver = "org.h2.Driver";
-		//			String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
-//					String username = "sa";
-//					String password = "";  
+					String driver = "org.h2.Driver";
+					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+
 //					String driver = "org.hsqldb.jdbc.JDBCDriver";
 //					String url = "jdbc:hsqldb:mem:questrepository:"+ System.currentTimeMillis() + ";shutdown=true;hsqldb.app_log=0;hsqldb.sql_log=0;hsqldb.log_data=false;sql.enforce_strict_size=false";
 
