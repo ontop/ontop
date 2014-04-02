@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
@@ -57,10 +58,69 @@ public class OWLEntailmentsToFactRule {
 		addEntailmentsForClasses(reasoner);
 		addSubRolesFromOntology(reasoner);
 		addRolesAndRangesFromClasses(reasoner);
+		addDisjointClasses(onto.getDisjointDescriptionAxioms());
+		
 
 
 		
 		 
+	}
+
+	private static void addDisjointClasses(Set<DisjointDescriptionAxiom> disjointDescriptionAxioms) {
+
+		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT;
+		for (DisjointDescriptionAxiom disjointElements : disjointDescriptionAxioms) {
+
+			for (Predicate description1 : disjointElements.getReferencedEntities()) {
+
+				for (Predicate description2 : disjointElements.getReferencedEntities()) {
+
+					if (!description1.equals(description2)) {
+
+//						List<Term> terms = new ArrayList<Term>();
+//
+//						// add URI terms
+//						terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.getName())));
+//						terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.getName())));
+//
+//						Function head = factory.getFunction(disjointClass, terms);
+//
+//						log.debug("head: " + head);
+//
+//						program.appendRule(factory.getCQIE(head));
+						
+						
+						List<Term> terms = new ArrayList<Term>();
+
+						if (description1.isClass())
+							// add URI terms
+							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
+
+						else {
+							// add blank node
+							terms.add(factory.getConstantBNode(description1.toString()));
+						}
+
+						if (description2.isClass())
+							// add URI terms
+							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
+
+						else {
+
+							// add blank node
+							terms.add( factory.getConstantBNode(description2.toString()));
+						}
+
+						if (terms.size() == 2) {
+							Function head = factory.getFunction(disjointClass, terms);
+							program.appendRule(factory.getCQIE(head));
+						}
+					}
+
+				}
+			}
+
+		}
 	}
 
 	private static void addEquivalences(Set<BasicClassDescription> equivalenceMaps) {
