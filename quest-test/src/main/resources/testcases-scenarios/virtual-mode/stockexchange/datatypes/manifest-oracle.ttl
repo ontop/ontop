@@ -14,7 +14,7 @@
       :integer-1 :integer-2 :integer-3
       :pos-integer-1 :pos-integer-2 :pos-integer-3
       :neg-integer-1 :neg-integer-2 :neg-integer-3
-      :decimal-1 :decimal-2 :decimal-3
+	  :decimal-1 :decimal-2 :decimal-3
       :pos-decimal-1 :pos-decimal-2 :pos-decimal-3
       :neg-decimal-1 :neg-decimal-2 :neg-decimal-3
       :double-1 :double-2 :double-3
@@ -185,8 +185,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <integer-2.rq> ] ;
-    mf:result <integer-2.ttl> ;
+            [ qt:query <decimal-2.rq> ] ;
+    mf:result <decimal-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-oracle.obda> .
     
@@ -195,8 +195,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <integer-3.rq> ] ;
-    mf:result <integer-3.ttl> ;
+            [ qt:query <decimal-3.rq> ] ;
+    mf:result <decimal-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-oracle.obda> .
     
