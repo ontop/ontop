@@ -185,5 +185,47 @@ public class SesameVirtualBookTest extends TestCase {
 		System.out.println("Done.");
 		
 	}
+	
+	public void testOneEquivalence() {
+
+
+		// /query repo
+		try {
+			String queryString = "select * where {?x owl:equivalentClass <http://meraka/moss/exampleBooks.owl#Edition> }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			List<String> valuesResult = new LinkedList<String>();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+
+					BindingSet bindingSet = result.next();
+					for (String b : bindings) {
+						System.out.println(bindingSet.getBinding(b));
+						valuesResult.add(bindingSet.getBinding(b).getValue().stringValue());
+					}
+					countResult++;
+				}
+
+				assertEquals(2, countResult);
+				
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		System.out.println("Done.");
+	}
 
 }

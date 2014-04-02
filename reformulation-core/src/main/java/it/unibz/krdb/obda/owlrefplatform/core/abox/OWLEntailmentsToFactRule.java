@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -55,7 +56,8 @@ public class OWLEntailmentsToFactRule {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(onto);
 		addEntailmentsForClasses(reasoner);
 		addSubRolesFromOntology(reasoner);
-		addRangeFromOntology(reasoner);
+		addRolesAndRangesFromClasses(reasoner);
+
 
 		
 		 
@@ -75,21 +77,9 @@ public class OWLEntailmentsToFactRule {
 
 				BasicClassDescription node2 = itEquivalences2.next();
 				addBlankNodesRule(node1, node2, equivalentClass);
+				addRangeOrDomainRule(node1, node2);
 			}
 		
-				
-
-//			Predicate key = map.getKey();
-//			Description value = map.getValue();
-//
-//			if (key.isClass()) {
-//
-//				addNodesRule(key.getName(), key.getName(), equivalentClass);
-//				addNodesRule(value.toString(), value.toString(), equivalentClass);
-//				addNodesRule(key.getName(), value.toString(), equivalentClass);
-//				addNodesRule(value.toString(), key.getName(), equivalentClass);
-//
-//			}
 		}
 
 	}
@@ -134,8 +124,7 @@ public class OWLEntailmentsToFactRule {
 
 						BasicClassDescription subClassItem = itcl.next();
 
-						addBlankNodesRule( subClassItem, classItem, subClassOf);
-						
+						addBlankNodesRule(subClassItem, classItem, subClassOf);
 						
 
 						log.debug("Insert class: " + classItem);
@@ -148,6 +137,8 @@ public class OWLEntailmentsToFactRule {
 		}
 
 	}
+	
+	
 
 	/**
 	 * Add subroles in the database using the DAG. All subroles are inserted
@@ -206,23 +197,26 @@ public class OWLEntailmentsToFactRule {
 
 	}
 	
-	private static void addRangeFromOntology(TBoxReasoner reasoner) {
+	
+	private static void addRolesAndRangesFromClasses(TBoxReasoner reasoner) {
 
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
 		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
-
+		
 		while (it.hasNext()) {
 
 			Equivalences<BasicClassDescription> eqv = it.next();
 
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
+			
 
-			while (iteq.hasNext()) {
+			if (eqv.size()==1) {
 
 				BasicClassDescription classItem = iteq.next();
 
+				
 				// if we want to add all subrelations not only the direct one
-				Iterator<Equivalences<BasicClassDescription>> classesIt = dag.getSub(eqv).iterator();
+				Iterator<Equivalences<BasicClassDescription>> classesIt = dag.getDirectSub(eqv).iterator();
 
 				while (classesIt.hasNext()) {
 
@@ -235,7 +229,7 @@ public class OWLEntailmentsToFactRule {
 						BasicClassDescription subClassItem = itcl.next();
 
 						addRangeOrDomainRule(subClassItem, classItem);
-									
+						
 
 						log.debug("Insert class: " + classItem);
 						log.debug("SubClass member: " + subClassItem);
@@ -247,6 +241,7 @@ public class OWLEntailmentsToFactRule {
 		}
 
 	}
+	
 
 	/**
 	 * Create a fact given two nodes (transformed in URI) and a predicate
@@ -310,31 +305,46 @@ public class OWLEntailmentsToFactRule {
 
 	}
 	
-	public static void addRangeOrDomainRule(BasicClassDescription description1, BasicClassDescription description2) {
+	
+	
+	/**
+	 * The domain of a property can be found looking at the subclass of property some description
+	 *  The range of a property can be found looking at the subclass of the inverse of property some description
+	 * @param subDescription is analyzed if it is a class
+	 * @param description is analyzed if it is a property some restriction
+	 */
+	
+	public static void addRangeOrDomainRule(BasicClassDescription subDescription, BasicClassDescription description) {
 
+		
 		List<Term> terms = new ArrayList<Term>();
 
-		if (description1 instanceof PropertySomeRestriction && description2 instanceof OClass) {
-			// get the property related to the existential
-			Predicate property1 = ((PropertySomeRestriction) description1).getPredicate();
 
-			if (((PropertySomeRestriction) description1).isInverse())
-			{
-				terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
-				terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
-				Function head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
-				program.appendRule(factory.getCQIE(head));
+			
+			if (subDescription instanceof PropertySomeRestriction && !(description instanceof PropertySomeRestriction )) {
+				// get the property related to the existential
+				Predicate property1 = ((PropertySomeRestriction) subDescription).getPredicate();
+				if(property1.toString().equals("http://www.owl-ontologies.com/Ontology1207768242.owl#belongsToCompany") || property1.toString().equals("http://www.owl-ontologies.com/Ontology1207768242.owl#hasStock"))
+					System.out.println("HERE");
+				
+				if (((PropertySomeRestriction) subDescription).isInverse())
+				{
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
+					Function head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
+					program.appendRule(factory.getCQIE(head));
 
+				}
+				else
+				{
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
+					Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
+					program.appendRule(factory.getCQIE(head));
+				}
 			}
-			else
-			{
-				terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
-				terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
-				Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
-				program.appendRule(factory.getCQIE(head));
-			}
-		}
-		
+			
+					
 
 	}
 	

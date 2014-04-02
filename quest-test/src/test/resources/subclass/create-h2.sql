@@ -2,7 +2,8 @@ CREATE TABLE people (
 	p_id INT,
 	PRIMARY KEY(p_id),
 	p_name VARCHAR(10),
-	sex VARCHAR(10)
+	sex VARCHAR(10),
+	ageInterval VARCHAR(10)
 );
 
 CREATE TABLE family (
@@ -14,10 +15,10 @@ CREATE TABLE family (
 );
 
 
-INSERT INTO people (p_id, p_name, sex)
-                 VALUES (1,   'Mark', 'M');
-INSERT INTO people (p_id, p_name, sex)
-                 VALUES (2,   'Amanda', 'F');
+INSERT INTO people (p_id, p_name, sex, ageInterval)
+                 VALUES (1,   'Mark', 'M', 'M');
+INSERT INTO people (p_id, p_name, sex, ageInterval)
+                 VALUES (2,   'Amanda', 'F', 'W');
 INSERT INTO family (f_id, p_id, relative, relation )
               VALUES (1,  1,   'John',  'S');
               

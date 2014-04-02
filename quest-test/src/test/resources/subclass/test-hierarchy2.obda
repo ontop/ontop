@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://obda.inf.unibz.it/sparql/test-hierarchy.owl#
+:		http://obda.inf.unibz.it/sparql/test-hierarchy.owl/
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xsd:		http://www.w3.org/2001/XMLSchema#
@@ -15,35 +15,47 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Person
-target		:{p_id} a :Person . 
+target		:person-{p_id} a :Person . 
 source		select p_id from people
 
-mappingId	Man
-target		:{p_id} a :Man . 
+mappingId	Male
+target		:person-{p_id} a :Male . 
 source		select p_id from people where sex='M'
 
+mappingId	Man
+target		:person-{p_id} a :Man . 
+source		select p_id from people where ageInterval='M'
+
 mappingId	Woman
-target		:{p_id} a :Woman . 
+target		:person-{p_id} a :Woman . 
+source		select p_id from people where ageInterval='W'
+
+mappingId	Female
+target		:person-{p_id} a :Female . 
 source		select p_id from people where sex='F'
 
+mappingId	Girl
+target		:person-{p_id} a :Girl . 
+source		select p_id from people where ageInterval='G'
+
 mappingId	isAffilatedTo
-target		:{f_id} :isRelatedTo :{relative} . 
+target		:person-{f_id} :isRelatedTo :person-{relative} . 
 source		select f_id, relative from family
 
 mappingId	isSibling
-target		:{f_id}  :isSibling :{relative} . 
+target		:person-{f_id}  :isSibling :person-{relative} . 
 source		select id, relative from family where relation = 'S'
 
 mappingId	isRelative
-target		:{f_id} :isSibling :{relative} . 
+target		:person-{f_id} :isSibling :person-{relative} . 
 source		select id, relative from family where relation = 'R'
 
 mappingId	isAncestor
-target		:{f_id} :isAncestor :{relative} . 
+target		:person-{f_id} :isAncestor :person-{relative} . 
 source		select f_id, relative from family where relation = 'G' 
 
 mappingId	isParent
-target		:{f_id} :isParent :{relative} . 
+target		:person-{f_id} :isParent :person-{relative} . 
 source		select f_id, relative from family where relation = 'P'
 
 ]]

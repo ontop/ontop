@@ -10,7 +10,7 @@
 ]>
 
 
-<rdf:RDF xmlns="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#"
+<rdf:RDF xmlns="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/"
      xml:base="http://obda.inf.unibz.it/sparql/test-hierarchy.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
@@ -32,54 +32,54 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isAncestor -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isAncestor -->
 
-    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isAncestor">
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelatedTo"/>
+    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isAncestor">
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelatedTo"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isGrandParent -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isGrandParent -->
 
-    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isGrandParent">
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isAncestor"/>
+    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isGrandParent">
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isAncestor"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isParent -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isParent -->
 
-    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isParent">
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isAncestor"/>
+    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isParent">
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isAncestor"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelatedTo -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelatedTo -->
 
-    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelatedTo">
-        <rdfs:domain rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man"/>
-        <rdfs:domain rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
+    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelatedTo">
+        <rdfs:domain rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Man"/>
+        <rdfs:domain rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
         <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelative -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelative -->
 
-    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelative">
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelatedTo"/>
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isSibling"/>
+    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelative">
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelatedTo"/>
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isSibling"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isSibling -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isSibling -->
 
-    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isSibling">
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelatedTo"/>
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#isRelative"/>
+    <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isSibling">
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelatedTo"/>
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/isRelative"/>
     </owl:ObjectProperty>
     
 
@@ -95,53 +95,53 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Female -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Female -->
 
-    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Female">
-        <owl:equivalentClass rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Girl"/>
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman"/>
+    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Female">
+        <owl:equivalentClass rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Girl"/>
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Woman"/>
     </owl:Class>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Girl -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Girl -->
 
-    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Girl">
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
+    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Girl">
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
     </owl:Class>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Male -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Male -->
 
-    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Male">
-        <owl:equivalentClass rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man"/>
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
+    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Male">
+        <owl:equivalentClass rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Man"/>
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
     </owl:Class>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Man -->
 
-    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man">
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
-        <owl:disjointWith rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman"/>
+    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Man">
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
+        <owl:disjointWith rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Woman"/>
     </owl:Class>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person -->
 
-    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
+    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
     
 
 
-    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman -->
+    <!-- http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Woman -->
 
-    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman">
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Female"/>
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person"/>
+    <owl:Class rdf:about="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Woman">
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Female"/>
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/sparql/test-hierarchy.owl/Person"/>
     </owl:Class>
 </rdf:RDF>
 

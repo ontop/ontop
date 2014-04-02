@@ -150,7 +150,7 @@ public class HierarchyVirtualTest extends TestCase {
 		conn.commit();
 	}
 
-	private List<OWLIndividual> runTests(Properties p, String query, String function) throws Exception {
+	private List<String> runTests(Properties p, String query, String function) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -163,7 +163,7 @@ public class HierarchyVirtualTest extends TestCase {
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
-		List<OWLIndividual> individuals = new LinkedList<OWLIndividual>();
+		List<String> individuals = new LinkedList<String>();
 
 		StringBuilder bf = new StringBuilder(query);
 		try {
@@ -173,9 +173,12 @@ public class HierarchyVirtualTest extends TestCase {
 			{
 				OWLIndividual ind1 = rs.getOWLIndividual("x");
 				OWLIndividual ind2 = rs.getOWLIndividual("y");
+				
 				System.out.println(ind1 + " "+ function + " "+ ind2);
-				individuals.add(ind1);
-				individuals.add(ind2);
+				individuals.add(ind1 + " "+ function + " "+ ind2);
+				
+				
+				
 			}
 			return individuals;
 
@@ -192,7 +195,51 @@ public class HierarchyVirtualTest extends TestCase {
 		}
 	}
 
-	public void testViEqSig() throws Exception {
+	private List<String> runSingleNamedIndividualTests(Properties p, String query, String function) throws Exception {
+
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+		factory.setOBDAController(obdaModel);
+
+		factory.setPreferenceHolder(p);
+
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+		// Now we are ready for querying
+		QuestOWLConnection conn = reasoner.getConnection();
+		QuestOWLStatement st = conn.createStatement();
+		List<String> individuals = new LinkedList<String>();
+
+		StringBuilder bf = new StringBuilder(query);
+		try {
+
+			QuestOWLResultSet rs = st.executeTuple(query);
+			while (rs.nextRow())
+			{
+				OWLIndividual ind2 = rs.getOWLIndividual("x");
+				
+				System.out.println( ind2);
+				if(ind2.isNamed())
+				individuals.add(ind2.toString());
+				
+				
+				
+			}
+			return individuals;
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+			}
+			conn.close();
+			reasoner.dispose();
+		}
+	}
+	public void testSubDescription() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
@@ -201,19 +248,21 @@ public class HierarchyVirtualTest extends TestCase {
 		
 		
 		log.info("Find subProperty");
-		List<OWLIndividual> individualsProperty=runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
-		assertEquals(48, individualsProperty.size());
+		List<String> individualsProperty=runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
+		assertEquals(22, individualsProperty.size());
+		
+		log.info("Find subProperty");
+		List<String> property=runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { :isSibling rdfs:subPropertyOf ?x }", "rdfs:subPropertyOf");
+		assertEquals(4, property.size());
 		
 		log.info("Find subClass");
-		List<OWLIndividual> individualsClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-//		
-//		assertEquals(10, individualsClass.size());
-//		assertEquals(individualsClass.get(0).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Woman");
-//		assertEquals(individualsClass.get(1).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person");
-//		assertEquals(individualsClass.get(2).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
-//		assertEquals(individualsClass.get(3).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
-//		assertEquals(individualsClass.get(8).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Man");
-//		assertEquals(individualsClass.get(9).toStringID(),"http://obda.inf.unibz.it/sparql/test-hierarchy.owl#Person");
+		List<String> individualsClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
+		assertEquals(59, individualsClass.size());
+		
+		log.info("Find subClass");
+		List<String> classes= runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subClassOf :Man }", "rdfs:subClassOf");
+		assertEquals(2, classes.size());
+
 		
 		
 	}
@@ -227,11 +276,11 @@ public class HierarchyVirtualTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
 		
 		log.info("Find equivalences");
-		List<OWLIndividual> individualsEquivClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
-		assertEquals(64, individualsEquivClass.size());
+		List<String> individualsEquivClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
+		assertEquals(23, individualsEquivClass.size());
 		
-		List<OWLIndividual> equivClass= runTests(p, " PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> select * where {?y owl:equivalentClass :Girl }", "owl:equivalentClass");
-		assertEquals(6, equivClass.size());
+		List<String> equivClass= runSingleNamedIndividualTests(p, "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> select * where {?x owl:equivalentClass :Girl }", "owl:equivalentClass");
+		assertEquals(3, equivClass.size());
 	}
 	
 
