@@ -316,5 +316,11 @@ public class EntailmentsStockTest extends TestCase {
 		runTests(query, "rdfs:domain" );
 
 	}
+	
+	public void testInverses() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:inverseOf ?y }";
+		runTests(query, "owl:inverseOf" );
+
+	}
 
 }

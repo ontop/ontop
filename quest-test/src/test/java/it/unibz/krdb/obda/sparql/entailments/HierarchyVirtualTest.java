@@ -283,6 +283,36 @@ public class HierarchyVirtualTest extends TestCase {
 		assertEquals(3, equivClass.size());
 	}
 	
+
+	public void testDomains() throws Exception{
+		
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+		
+		log.info("Find domain");
+		List<String> individualsDomainClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
+		
+		
+		
+	}
+	
+	public void testRanges() throws Exception{
+		
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+		
+		log.info("Find domain");
+		List<String> individualsRangeClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
+		
+		
+		
+	}
 	public void testDisjointClasses() throws Exception{
 		
 		QuestPreferences p = new QuestPreferences();
@@ -292,8 +322,8 @@ public class HierarchyVirtualTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
 		
 		log.info("Find disjoint classes");
-		List<String> individualsEquivClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
-		assertEquals(2, individualsEquivClass.size());
+		List<String> individualsDisjClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
+		assertEquals(2, individualsDisjClass.size());
 		
 		
 	}

@@ -227,5 +227,120 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
+	
+	public void testRanges(){
+		
+
+		// /query repo
+		try {
+			String queryString = "select * where {?x rdfs:range ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(8, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+		
+	}
+	
+	public void testDomains(){
+		
+
+		// /query repo
+		try {
+			String queryString = "select * where {?x rdfs:domain ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(2, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+		
+	}
+	
+	public void testDisjoints(){
+	
+		// /query repo
+		try {
+			String queryString = "select * where {?x owl:disjointWith ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(8, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+	}
 
 }
