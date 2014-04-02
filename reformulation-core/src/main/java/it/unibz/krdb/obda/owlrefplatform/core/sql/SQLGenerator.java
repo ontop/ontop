@@ -1382,9 +1382,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String[] splits = columnRef.split("\\.");
 
 				String quotedTable = splits[0];
+				String table = unquote(splits[0]);
 				String column = unquote(splits[1]);
 
-				DataDefinition definition = metadata.getDefinition(quotedTable);
+				DataDefinition definition = metadata.getDefinition(table);
 				/*
 				 * If the var is defined in a ViewDefinition, then there is a
 				 * column for the type and we just need to refer to that column
