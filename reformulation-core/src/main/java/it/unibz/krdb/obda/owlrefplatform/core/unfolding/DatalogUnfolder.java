@@ -1024,8 +1024,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					//Update the bodyIndex
 					depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
 					depGraph.updateRuleIndexByBodyPredicate(newquery);
-
-
+				} else if (depGraph.getExtensionalPredicates().contains(ruleHead)){ //it means I added mappings to the result !!
+					depGraph.addRuleToRuleIndex(pred, newquery);
 				}
 
 
@@ -1038,7 +1038,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			if (ruleIndexByBody.get(pred).isEmpty()){
 				return false; //I finish with pred I can move on
 			}else if (result.contains(fatherRule)){ 
-				return false; // otherwise it will loop for ever. I am in the case when a concept in the LJ has several mappings
+				return false; // otherwise it will loop for ever. I am in the case when a concept in the LJ has several mappings, or aggregates
 			}else{
 				return true; // keep doing the loop
 			}
