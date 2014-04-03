@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Description;
@@ -45,7 +45,7 @@ public class NTripleAssertionIteratorTest extends TestCase {
 		int datPropCount = 0;
 		
 		while (iterator.hasNext()) {
-			Assertion ass = iterator.next();
+			ABoxAssertion ass = iterator.next();
 			if (ass instanceof ClassAssertion) {
 				typeCount +=1;
 			} else if (ass instanceof DataPropertyAssertion) {

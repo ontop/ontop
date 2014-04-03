@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
  * An assertion for data properties, e.g., name(mariano,"Mariano Rodriguez").
  * Corresponds to RDF triple: :mariano :name "Mariano Rodriguez".
  */
-public interface DataPropertyAssertion extends Assertion {
+public interface DataPropertyAssertion extends ABoxAssertion {
 
 	public ObjectConstant getObject();
 

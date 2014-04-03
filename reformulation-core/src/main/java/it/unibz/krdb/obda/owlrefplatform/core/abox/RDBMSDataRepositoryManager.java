@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
 
@@ -80,7 +80,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 
 	public void getIndexDDL(OutputStream out) throws IOException;
 
-	public void getSQLInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
+	public void getSQLInserts(Iterator<ABoxAssertion> data, OutputStream out) throws IOException;
 
 	// public void getCSVInserts(Iterator<Assertion> data, OutputStream out)
 	// throws IOException;
@@ -133,7 +133,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int insertData(Connection conn, Iterator<Assertion> data, int commit, int batch) throws SQLException;
+	public int insertData(Connection conn, Iterator<ABoxAssertion> data, int commit, int batch) throws SQLException;
 
 	/***
 	 * Returns true if indexes are active in this repository.
@@ -181,6 +181,6 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 
 	void insertMetadata(Connection conn) throws SQLException;
 
-	public long loadWithFile(Connection conn, Iterator<Assertion> data) throws SQLException, IOException;
+	public long loadWithFile(Connection conn, Iterator<ABoxAssertion> data) throws SQLException, IOException;
 
 }

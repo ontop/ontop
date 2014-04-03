@@ -35,7 +35,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -586,7 +586,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
+	public void getSQLInserts(Iterator<ABoxAssertion> data, OutputStream outstream) throws IOException {
 
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
 
@@ -603,7 +603,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		String cls_insert_str = class_insert.replace("?", "%s");
 
 		while (data.hasNext()) {
-			Assertion ax = data.next();
+			ABoxAssertion ax = data.next();
 
 			if (ax instanceof BinaryAssertion) {
 
@@ -873,7 +873,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 @Override
 
-	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
+	public int insertData(Connection conn, Iterator<ABoxAssertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
 		// The precondition for the limit number must be greater or equal to
@@ -904,7 +904,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		int commitCount = 0;
 
 		while (data.hasNext()) {
-			Assertion ax = data.next();
+			ABoxAssertion ax = data.next();
 
 			try {
 
@@ -1000,7 +1000,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
 			PreparedStatement attributeStringStm, PreparedStatement attributeIntegerStm, PreparedStatement attributeDecimalStm,
 			PreparedStatement attributeDoubleStm, PreparedStatement attributeDateStm, PreparedStatement attributeBooleanStm,
-			InsertionMonitor monitor, Assertion ax) throws SQLException {
+			InsertionMonitor monitor, ABoxAssertion ax) throws SQLException {
 		int uri_id = 0;
 		int uri2_id = 0;
 //		boolean newUri = false;
@@ -3216,7 +3216,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public long loadWithFile(Connection conn, final Iterator<Assertion> data) throws SQLException, IOException {
+	public long loadWithFile(Connection conn, final Iterator<ABoxAssertion> data) throws SQLException, IOException {
 		//
 		// log.debug("Insert data into schemas using temporary files");
 		//

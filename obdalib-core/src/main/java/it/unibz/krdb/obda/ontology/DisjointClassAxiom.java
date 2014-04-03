@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-public interface DisjointClassAxiom extends DisjointDescriptionAxiom {
+public interface DisjointClassAxiom extends DisjointDescriptionAxiom, DisjointBasicClassAxiom {
 	
 	public OClass getFirst();
 	

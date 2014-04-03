@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 
 import java.util.List;
 
@@ -30,13 +30,13 @@ public interface GraphResultSet extends ResultSet {
 
 	public boolean hasNext() throws OBDAException;
 
-	public List<Assertion> next() throws OBDAException;
+	public List<ABoxAssertion> next() throws OBDAException;
 
 	public void close() throws OBDAException;
 
 	TupleResultSet getTupleResultSet();
 
-	void addNewResultSet(List<Assertion> result);
+	void addNewResultSet(List<ABoxAssertion> result);
 	
 	//Template getTemplate();
 	

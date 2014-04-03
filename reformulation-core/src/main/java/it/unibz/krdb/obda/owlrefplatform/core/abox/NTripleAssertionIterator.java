@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -44,7 +44,7 @@ import java.util.NoSuchElementException;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
 
-public class NTripleAssertionIterator implements Iterator<Assertion> {
+public class NTripleAssertionIterator implements Iterator<ABoxAssertion> {
 
 	private final Map<Predicate, Description> equivalenceMap;
 	private final URI fileURI;
@@ -78,8 +78,8 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 	 * 
 	 * @return
 	 */
-	private Assertion constructAssertion() {
-		Assertion assertion = null;
+	private ABoxAssertion constructAssertion() {
+		ABoxAssertion assertion = null;
 
 		Description replacementDescription = equivalenceMap.get(currentPredicate);
 
@@ -140,14 +140,14 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 	}
 
 	@Override
-	public Assertion next() {
+	public ABoxAssertion next() {
 
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
 		peeked = false;
 
-		Assertion assertion = constructAssertion();
+		ABoxAssertion assertion = constructAssertion();
 		return assertion;
 	}
 

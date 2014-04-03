@@ -31,7 +31,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.BufferedReader;
@@ -62,8 +62,8 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		for (ABoxAssertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 }catch(Exception e)
@@ -143,7 +143,7 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<Assertion> assertions = materializer.getAssertionList();
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
 		assertEquals(0, assertions.size());
 
 		int count = materializer.getTripleCount();
@@ -239,7 +239,7 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<Assertion> assertions = materializer.getAssertionList();
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
 		
 		conn.close();
 		
@@ -345,8 +345,8 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		for (ABoxAssertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 } catch(Exception e) {
@@ -412,8 +412,8 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		for (ABoxAssertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 } catch(Exception e) {
@@ -515,8 +515,8 @@ try{
 		
 		QuestMaterializer materializer = new QuestMaterializer(model);
 	
-		List<Assertion> assertions = materializer.getAssertionList();
-		for (Assertion a : assertions) {
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		for (ABoxAssertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 } catch(Exception e) {
@@ -622,7 +622,7 @@ try{
 		
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<Assertion> assertions = materializer.getAssertionList();
+		List<ABoxAssertion> assertions = materializer.getAssertionList();
 		int count = materializer.getTripleCount();
 		
 		assertEquals(0, count);

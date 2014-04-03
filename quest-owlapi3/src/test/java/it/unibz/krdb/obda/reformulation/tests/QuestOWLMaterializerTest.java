@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -124,12 +124,12 @@ public class QuestOWLMaterializerTest extends TestCase {
 			ModelIOManager man = new ModelIOManager(model);
 			man.load(f);
 			QuestMaterializer mat = new QuestMaterializer(model, prefs);
-			Iterator<Assertion> iterator = mat.getAssertionIterator();
+			Iterator<ABoxAssertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
 			while (iterator.hasNext()) {
-				Assertion assertion = iterator.next();
+				ABoxAssertion assertion = iterator.next();
 				if (assertion instanceof ClassAssertion) {
 					classAss++;
 				} else if (assertion instanceof DataPropertyAssertion) {
@@ -162,12 +162,12 @@ public class QuestOWLMaterializerTest extends TestCase {
 			System.out.println(onto.getAssertions());
 			
 			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
-			Iterator<Assertion> iterator = mat.getAssertionIterator();
+			Iterator<ABoxAssertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
 			while (iterator.hasNext()) {
-				Assertion assertion = iterator.next();
+				ABoxAssertion assertion = iterator.next();
 				if (assertion instanceof ClassAssertion) {
 					classAss++;
 				} else if (assertion instanceof DataPropertyAssertion) {

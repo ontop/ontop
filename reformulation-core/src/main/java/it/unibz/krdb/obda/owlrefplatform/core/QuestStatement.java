@@ -38,7 +38,7 @@ import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -995,7 +995,7 @@ public class QuestStatement implements OBDAStatement {
 	 *            new index will be created.
 	 * @throws SQLException
 	 */
-	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
+	public int insertData(Iterator<ABoxAssertion> data, boolean useFile, int commit, int batch) throws SQLException {
 		int result = -1;
 
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getEquivalenceMap());
@@ -1032,7 +1032,7 @@ public class QuestStatement implements OBDAStatement {
 	 * @param data
 	 * @throws SQLException
 	 */
-	public int insertData(Iterator<Assertion> data, int commit, int batch) throws SQLException {
+	public int insertData(Iterator<ABoxAssertion> data, int commit, int batch) throws SQLException {
 		return insertData(data, false, commit, batch);
 	}
 

@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.UnaryAssertion;
@@ -49,7 +49,7 @@ public class SesameStatement implements Statement {
 	private Resource context = null;
 	private ValueFactory fact = new ValueFactoryImpl();
 
-	public SesameStatement(Assertion assertion) {
+	public SesameStatement(ABoxAssertion assertion) {
 		
 		Constant subj;
 

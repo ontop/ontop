@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Description;
@@ -170,7 +170,7 @@ public class QuestOWLStatement {
 
 	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
 
-		Iterator<Assertion> aBoxIter = null;
+		Iterator<ABoxAssertion> aBoxIter = null;
 
 		if (owlFile.getName().toLowerCase().endsWith(".owl")) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -416,7 +416,7 @@ public class QuestOWLStatement {
 		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
 		if (resultSet != null) {
 			while (resultSet.hasNext()) {
-				for (Assertion assertion : resultSet.next()) {
+				for (ABoxAssertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
 						String subjectIRI = ((ClassAssertion) assertion).getObject().getValue();
 						String classIRI = ((ClassAssertion) assertion).getPredicate().toString();

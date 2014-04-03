@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.sesame;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Iterator;
@@ -39,10 +39,10 @@ import org.openrdf.model.Statement;
  * 
  */
 public class SesameStatementIterator implements Iterator<Statement> {
-	private Iterator<Assertion> iterator;	
+	private Iterator<ABoxAssertion> iterator;	
 	
 
-	public SesameStatementIterator(Iterator<Assertion> it) {
+	public SesameStatementIterator(Iterator<ABoxAssertion> it) {
 		this.iterator = it;
 	}
 
@@ -51,7 +51,7 @@ public class SesameStatementIterator implements Iterator<Statement> {
 	}
 
 	public Statement next() {
-		Assertion assertion = iterator.next();
+		ABoxAssertion assertion = iterator.next();
 		Statement individual = new SesameStatement(assertion);
 		return individual;
 	}

@@ -30,7 +30,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Description;
@@ -49,10 +49,10 @@ public class ABoxToFactRuleConverter {
 
 	private static OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 
-	public static void addFacts(Iterator<Assertion> assetions, DatalogProgram p, Map<Predicate, Description> equivalences) {
+	public static void addFacts(Iterator<ABoxAssertion> assetions, DatalogProgram p, Map<Predicate, Description> equivalences) {
 		int count = 0;
 		while (assetions.hasNext()) {
-			Assertion next = assetions.next();
+			ABoxAssertion next = assetions.next();
 			if (addFact(next, p, equivalences)) {
 				count++;
 			}
@@ -61,7 +61,7 @@ public class ABoxToFactRuleConverter {
 		
 	}
 
-	private static boolean addFact(Assertion assertion, DatalogProgram p, Map<Predicate, Description> equivalences) {
+	private static boolean addFact(ABoxAssertion assertion, DatalogProgram p, Map<Predicate, Description> equivalences) {
 		CQIE fact = getRule(assertion);
 		if (fact != null) {
 			p.appendRule(fact);
@@ -70,7 +70,7 @@ public class ABoxToFactRuleConverter {
 		return false;
 	}
 
-	private static CQIE getRule(Assertion assertion) {
+	private static CQIE getRule(ABoxAssertion assertion) {
 		Function head = null;
 		CQIE rule = null;
 		if (assertion instanceof ClassAssertion) {

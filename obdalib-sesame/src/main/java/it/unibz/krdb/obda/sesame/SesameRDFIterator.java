@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
@@ -44,7 +44,7 @@ import org.openrdf.model.Value;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 
-public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
+public class SesameRDFIterator extends RDFHandlerBase implements Iterator<ABoxAssertion> {
 	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -100,7 +100,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		}
 	}
 
-	public Assertion next() {
+	public ABoxAssertion next() {
 		Statement stmt = null;
 		if (fromIterator) {
 			stmt = iterator.next();
@@ -116,7 +116,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 				throw new NoSuchElementException();
 			}
 		}
-		Assertion assertion = constructAssertion(stmt);
+		ABoxAssertion assertion = constructAssertion(stmt);
 		return assertion;
 	}
 
@@ -127,7 +127,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	 * predicate is not type and the object is URI or BNode. Its a data property
 	 * if the predicate is not rdf:type and the object is a Literal.
 	 */
-	private Assertion constructAssertion(Statement st) {
+	private ABoxAssertion constructAssertion(Statement st) {
 		Resource currSubject = st.getSubject();
 		
 		ObjectConstant c = null;
@@ -161,7 +161,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		}
 		
 		// Create the assertion
-		Assertion assertion = null;
+		ABoxAssertion assertion = null;
 		if (currentPredicate.getArity() == 1) {
 			assertion = ofac.createClassAssertion(currentPredicate, c);
 		} else if (currentPredicate.getArity() == 2) {

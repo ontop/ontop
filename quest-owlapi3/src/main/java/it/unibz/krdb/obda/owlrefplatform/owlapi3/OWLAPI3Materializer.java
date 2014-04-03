@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 public class OWLAPI3Materializer {
 
-	private Iterator<Assertion> assertions = null;
+	private Iterator<ABoxAssertion> assertions = null;
 	private QuestMaterializer materializer;
 	
 	public OWLAPI3Materializer(OBDAModel model) throws Exception {

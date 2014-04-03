@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.ontology;
 
 import it.unibz.krdb.obda.model.Constant;
 
-public interface BinaryAssertion extends Assertion {
+public interface BinaryAssertion extends ABoxAssertion {
 	
 	public Constant getValue1();
 

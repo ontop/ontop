@@ -26,11 +26,12 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.DisjointBasicClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointDataPropertyAxiom;
 import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
@@ -91,6 +92,7 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
 import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
@@ -170,6 +172,8 @@ public class OWLAPI3Translator {
 			translation.addAssertions(aux.getAssertions());
 			translation.getABox().addAll(aux.getABox());
 			translation.getDisjointDescriptionAxioms().addAll(aux.getDisjointDescriptionAxioms());
+			translation.getDisjointBasicClassAxioms().addAll(aux.getDisjointBasicClassAxioms());
+			translation.getDisjointPropertyAxioms().addAll(aux.getDisjointPropertyAxioms());
 			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());
 		}
 		/* we translated successfully, now we append the new assertions */
@@ -483,19 +487,19 @@ public class OWLAPI3Translator {
 
 				} else if (axiom instanceof OWLDisjointClassesAxiom) {
 					OWLDisjointClassesAxiom aux = (OWLDisjointClassesAxiom) axiom;
-					for (OWLClassExpression disjClass : aux.getClassExpressionsAsList()) {
-						if (!(disjClass instanceof OWLClass))
-						throw new TranslationException("Invalid class expression in disjoint class axiom: "+disjClass.toString());
-					}
-					Set<OWLClass> disjointClasses = aux.getClassesInSignature();
-					Iterator<OWLClass> iter = disjointClasses.iterator();
+		
+					Set<OWLClassExpression> disjointClasses = aux.getClassExpressions();
+					Iterator<OWLClassExpression> iter = disjointClasses.iterator();
 					if (!iter.hasNext())
 						throw new TranslationException();
-					OClass c1 = ofac.createClass(iter.next().toStringID());
-					OClass c2 = ofac.createClass(iter.next().toStringID());
-					DisjointClassAxiom disj = ofac.createDisjointClassAxiom(c1, c2);
-					
-					dl_onto.addAssertion(disj);
+					BasicClassDescription c1 = getDisjointExpression(iter.next());
+					BasicClassDescription c2 = getDisjointExpression(iter.next());
+					if (c1 instanceof OClass && c2 instanceof OClass){
+						dl_onto.addAssertion(ofac.createDisjointClassAxiom((OClass)c1, (OClass)c2));
+					}
+					else{
+						dl_onto.addAssertion( ofac.createDisjointBasicClassAxiom(c1, c2));
+					}
 							
 				} else if (axiom instanceof OWLDisjointDataPropertiesAxiom) {
 					OWLDisjointDataPropertiesAxiom aux = (OWLDisjointDataPropertiesAxiom) axiom;
@@ -523,7 +527,7 @@ public class OWLAPI3Translator {
 				
 				
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
+					ABoxAssertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
 					if (translatedAxiom != null)
 						dl_onto.addAssertion(translatedAxiom);
 					
@@ -912,7 +916,7 @@ public class OWLAPI3Translator {
 
 	}
 
-	public Assertion translate(OWLIndividualAxiom axiom) {
+	public ABoxAssertion translate(OWLIndividualAxiom axiom) {
 		return translate(axiom, null);
 	}
 
@@ -938,7 +942,7 @@ public class OWLAPI3Translator {
 	 * @param equivalenceMap
 	 * @return
 	 */
-	public Assertion translate(OWLIndividualAxiom axiom, Map<Predicate, Description> equivalenceMap) {
+	public ABoxAssertion translate(OWLIndividualAxiom axiom, Map<Predicate, Description> equivalenceMap) {
 
 		if (axiom instanceof OWLClassAssertionAxiom) {
 
@@ -1123,4 +1127,86 @@ public class OWLAPI3Translator {
 	// return dfac.getDataTypePredicateLiteral();
 	// }
 	// }
+	
+	private BasicClassDescription getDisjointExpression(OWLClassExpression owlExpression) throws TranslationException {
+		BasicClassDescription cd = null;
+		if (owlExpression instanceof OWLClass) {
+			String uri = ((OWLClass) owlExpression).getIRI().toString();
+			Predicate p = dfac.getClassPredicate(uri);
+			cd = ofac.createClass(p);
+
+		} else if (owlExpression instanceof OWLDataMinCardinality) {
+			if (profile.order() < LanguageProfile.DLLITEA.order())
+				throw new TranslationException();
+			OWLDataMinCardinality rest = (OWLDataMinCardinality) owlExpression;
+			int cardinatlity = rest.getCardinality();
+			OWLDataRange range = rest.getFiller();
+			if (cardinatlity != 1 || range != null) {
+				throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+			}
+			String uri = (rest.getProperty().asOWLDataProperty().getIRI().toString());
+			Predicate attribute = dfac.getDataPropertyPredicate(uri);
+			cd = ofac.getPropertySomeRestriction(attribute, false);
+
+		} else if (owlExpression instanceof OWLObjectMinCardinality) {
+			if (profile.order() < LanguageProfile.DLLITEA.order())
+				throw new TranslationException();
+			OWLObjectMinCardinality rest = (OWLObjectMinCardinality) owlExpression;
+			int cardinatlity = rest.getCardinality();
+			OWLClassExpression filler = rest.getFiller();
+			if (cardinatlity != 1) {
+				throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+			}
+
+			if (!filler.isOWLThing()) {
+				throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+			}
+			OWLObjectPropertyExpression propExp = rest.getProperty();
+			String uri = propExp.getNamedProperty().getIRI().toString();
+			Predicate role = dfac.getObjectPropertyPredicate(uri);
+
+			if (propExp instanceof OWLObjectInverseOf) {
+				cd = ofac.getPropertySomeRestriction(role, true);
+			} else {
+				cd = ofac.getPropertySomeRestriction(role, false);
+			}
+
+		} else if (owlExpression instanceof OWLObjectSomeValuesFrom) {
+			if (profile.order() < LanguageProfile.OWL2QL.order())
+				throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+			OWLObjectSomeValuesFrom rest = (OWLObjectSomeValuesFrom) owlExpression;
+			OWLClassExpression filler = rest.getFiller();
+
+			if (!filler.isOWLThing()) {
+				throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+			}
+			OWLObjectPropertyExpression propExp = rest.getProperty();
+			String uri = propExp.getNamedProperty().getIRI().toString();
+			Predicate role = dfac.getObjectPropertyPredicate(uri);
+
+			if (propExp instanceof OWLObjectInverseOf) {
+				cd = ofac.getPropertySomeRestriction(role, true);
+			} else {
+				cd = ofac.getPropertySomeRestriction(role, false);
+			}
+		} else if (owlExpression instanceof OWLDataSomeValuesFrom) {
+			if (profile.order() < LanguageProfile.OWL2QL.order())
+				throw new TranslationException();
+			OWLDataSomeValuesFrom rest = (OWLDataSomeValuesFrom) owlExpression;
+			OWLDataRange filler = rest.getFiller();
+
+			if (!filler.isTopDatatype()) {
+				throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+			}
+			OWLDataProperty propExp = (OWLDataProperty) rest.getProperty();
+			String uri = propExp.getIRI().toString();
+			Predicate role = dfac.getDataPropertyPredicate(uri);
+			cd = ofac.getPropertySomeRestriction(role, false);
+		}
+
+		if (cd == null) {
+			throw new TranslationException("Invalid class expression in disjoint class axiom: "+owlExpression.toString());
+		}
+		return cd;
+	}
 }

@@ -26,13 +26,17 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.DisjointBasicClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointDataPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -176,7 +180,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2) {
+	public ABoxAssertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2) {
 		if (o2 instanceof ObjectConstant) {
 			return createObjectPropertyAssertion(attribute, o1, (ObjectConstant) o2);
 		}
@@ -198,6 +202,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(
 			Predicate p1, Predicate p2) {
 			return new DisjointObjectPropertyAxiomImpl(p1, p2);
+	}
+
+	@Override
+	public DisjointBasicClassAxiom createDisjointBasicClassAxiom(BasicClassDescription b1, BasicClassDescription b2) {
+		return new DisjointBasicClassAxiomImpl(b1, b2);
 	}
 
 }

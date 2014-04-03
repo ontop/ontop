@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -59,7 +59,7 @@ public class OWLAPI3IndividualTranslator {
 		dataFactory = new OWLDataFactoryImpl();
 	}
 
-	public OWLIndividualAxiom translate(Assertion assertion) {
+	public OWLIndividualAxiom translate(ABoxAssertion assertion) {
 
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;

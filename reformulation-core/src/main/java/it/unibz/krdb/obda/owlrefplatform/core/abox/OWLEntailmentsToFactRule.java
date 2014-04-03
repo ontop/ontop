@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.DisjointBasicClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -61,7 +62,7 @@ public class OWLEntailmentsToFactRule {
 		//add rdfs:subPropertyOf
 		addSubRolesFromOntology(reasoner);
 		//add owl:disjointWith
-		addDisjointClasses(onto.getDisjointDescriptionAxioms());
+		addDisjointClasses(onto.getDisjointBasicClassAxioms());
 		
 
 
@@ -388,14 +389,14 @@ public class OWLEntailmentsToFactRule {
 	
 	/**
 	 * From the given ontology add the facts for owl:disjointWith 
-	 * @param disjointDescriptionAxioms set of disjoint axiom with class and property some description
+	 * @param set set of disjoint axiom with class and property some description
 	 */
 
-	private static void addDisjointClasses(Set<DisjointDescriptionAxiom> disjointDescriptionAxioms) {
+	private static void addDisjointClasses(Set<DisjointBasicClassAxiom> set) {
 
 		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT;
 		
-		for (DisjointDescriptionAxiom disjointElements : disjointDescriptionAxioms) {
+		for (DisjointBasicClassAxiom disjointElements : set) {
 
 			for (Predicate description1 : disjointElements.getReferencedEntities()) {
 

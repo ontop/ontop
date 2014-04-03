@@ -21,7 +21,7 @@ package sesameWrapper;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 public class SesameMaterializer {
 	
-		private Iterator<Assertion> assertions = null;
+		private Iterator<ABoxAssertion> assertions = null;
 		private QuestMaterializer materializer;
 		
 		public SesameMaterializer(OBDAModel model) throws Exception {

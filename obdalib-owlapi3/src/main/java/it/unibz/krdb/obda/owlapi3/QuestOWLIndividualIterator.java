@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlapi3;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 
 import java.util.Iterator;
 
@@ -30,9 +30,9 @@ public class QuestOWLIndividualIterator  implements Iterator<OWLIndividualAxiom>
 
 	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
 	
-	private Iterator<Assertion> assertions = null;
+	private Iterator<ABoxAssertion> assertions = null;
 
-	public QuestOWLIndividualIterator(Iterator<Assertion> assertions) {
+	public QuestOWLIndividualIterator(Iterator<ABoxAssertion> assertions) {
 		this.assertions = assertions;
 	}
 	
@@ -43,7 +43,7 @@ public class QuestOWLIndividualIterator  implements Iterator<OWLIndividualAxiom>
 
 	@Override
 	public OWLIndividualAxiom next() {
-		Assertion assertion = assertions.next();
+		ABoxAssertion assertion = assertions.next();
 		OWLIndividualAxiom individual = translator.translate(assertion);
 		return individual;
 	}

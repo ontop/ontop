@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
@@ -64,18 +64,18 @@ public class QuestDBStatement implements OBDAStatement {
 		this.st = st;
 	}
 
-	public int add(Assertion data) throws SQLException {
+	public int add(ABoxAssertion data) throws SQLException {
 		return st.insertData(Collections.singleton(data).iterator(), false, -1, -1);
 	}
 
-	public int add(Iterator<Assertion> data) throws SQLException {
+	public int add(Iterator<ABoxAssertion> data) throws SQLException {
 		return st.insertData(data, false, -1, -1);
 	}
 
 	/***
 	 * As before, but using recreateIndexes = false.
 	 */
-	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
+	public int add(Iterator<ABoxAssertion> data, int commit, int batch) throws SQLException {
 		return st.insertData(data, false, commit, batch);
 	}
 
@@ -132,7 +132,7 @@ public class QuestDBStatement implements OBDAStatement {
 	/* Move to query time ? */
 	private int loadOBDAModel(URI uri, boolean useFile, int commit, int batch)
 			throws OBDAException {
-		Iterator<Assertion> assertionIter = null;
+		Iterator<ABoxAssertion> assertionIter = null;
 		QuestMaterializer materializer = null;
 		try {
 			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();

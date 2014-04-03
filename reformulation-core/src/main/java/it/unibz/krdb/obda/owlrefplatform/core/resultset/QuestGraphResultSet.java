@@ -32,7 +32,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.BNodeConstantImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -57,7 +57,7 @@ import org.openrdf.query.algebra.Var;
 
 public class QuestGraphResultSet implements GraphResultSet {
 
-	private List<List<Assertion>> results = new ArrayList<List<Assertion>>();
+	private List<List<ABoxAssertion>> results = new ArrayList<List<ABoxAssertion>>();
 
 	private TupleResultSet tupleResultSet;
 
@@ -100,7 +100,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 	
 	@Override
-	public void addNewResultSet(List<Assertion> result)
+	public void addNewResultSet(List<ABoxAssertion> result)
 	{
 		results.add(result);
 	}
@@ -120,9 +120,9 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * the only current result set.
 	 */
 	
-	private List<Assertion> processResults(TupleResultSet result,
+	private List<ABoxAssertion> processResults(TupleResultSet result,
 			SesameConstructTemplate template) throws OBDAException {
-		List<Assertion> tripleAssertions = new ArrayList<Assertion>();
+		List<ABoxAssertion> tripleAssertions = new ArrayList<ABoxAssertion>();
 		List<ProjectionElemList> peLists = template.getProjectionElemList();
 		
 		Extension ex = template.getExtension();
@@ -196,7 +196,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
 	@Override
-	public List<Assertion> next() throws OBDAException {
+	public List<ABoxAssertion> next() throws OBDAException {
 		//if we collect results, then remove and return the next one in the list
 		if (results.size() > 0) {
 			return results.remove(0);

@@ -22,11 +22,13 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.DisjointBasicClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -79,10 +81,14 @@ public class OntologyImpl implements Ontology {
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
 	
 	private Set<DisjointDescriptionAxiom> disjointAxioms = new HashSet<DisjointDescriptionAxiom>();
+	
+	private Set<DisjointBasicClassAxiom> disjointBasicClassAxioms = new HashSet<DisjointBasicClassAxiom>();
+	
+	private Set<DisjointPropertyAxiom> disjointPropertyAxioms = new HashSet<DisjointPropertyAxiom>();
 
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
 	
-	private Set<Assertion> aboxAssertions = new HashSet<Assertion>();
+	private Set<ABoxAssertion> aboxAssertions = new HashSet<ABoxAssertion>();
 
 	class ReservedPredicate extends HashSet<Predicate> {
 
@@ -167,11 +173,11 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addAssertion(Axiom assertion) {
-		if (originalassertions.contains(assertion)) {
+	public void addAssertion(Axiom axiom) {
+		if (originalassertions.contains(axiom)) {
 			return;
 		}
-		Set<Predicate> referencedEntities = assertion.getReferencedEntities();
+		Set<Predicate> referencedEntities = axiom.getReferencedEntities();
 		if (!referencesPredicates(referencedEntities)) {
 			IllegalArgumentException ex = new IllegalArgumentException("At least one of these predicates is unknown: "
 					+ referencedEntities.toString());
@@ -179,27 +185,34 @@ public class OntologyImpl implements Ontology {
 		}
 		isSaturated = false;
 
-		if (assertion instanceof SubDescriptionAxiom) {
-			SubDescriptionAxiom axiom = (SubDescriptionAxiom) assertion;
+		if (axiom instanceof SubDescriptionAxiom) {
+			SubDescriptionAxiom subDescAxiom = (SubDescriptionAxiom) axiom;
 			/*
 			 * We avoid redundant axioms
 			 */
-			if (axiom.getSub().equals(axiom.getSuper())) {
+			if (subDescAxiom.getSub().equals(subDescAxiom.getSuper())) {
 				return;
 			}
-			originalassertions.add(assertion);
-		} else if (assertion instanceof PropertyFunctionalAxiom) {
-			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
-		} else if (assertion instanceof DisjointDescriptionAxiom) {
-			disjointAxioms.add((DisjointDescriptionAxiom) assertion);
-		} else if (assertion instanceof Assertion) {
+			originalassertions.add(axiom);
+		} else if (axiom instanceof PropertyFunctionalAxiom) {
+			functionalAxioms.add((PropertyFunctionalAxiom) axiom);
+		} else if (axiom instanceof DisjointDescriptionAxiom) {
+			if(axiom instanceof DisjointBasicClassAxiom)
+				disjointBasicClassAxioms.add((DisjointBasicClassAxiom) axiom);
+			else if (axiom instanceof DisjointPropertyAxiom)
+				disjointPropertyAxioms.add((DisjointPropertyAxiom) axiom);
+			disjointAxioms.add((DisjointDescriptionAxiom) axiom);
+		} else if (axiom instanceof ABoxAssertion) {
 			/*ABox assertions */
-			aboxAssertions.add((Assertion)assertion);
+			aboxAssertions.add((ABoxAssertion)axiom);
+		} else {
+			System.err.println("ignoring axiom: " + axiom);
 		}
+		
 	}
 	
 	@Override 
-	public Set<Assertion> getABox() {
+	public Set<ABoxAssertion> getABox() {
 		return aboxAssertions;
 	}
 
@@ -216,6 +229,17 @@ public class OntologyImpl implements Ontology {
 	@Override 
 	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms() {
 		return disjointAxioms;
+	}
+	
+
+	@Override
+	public Set<DisjointPropertyAxiom> getDisjointPropertyAxioms() {
+		return disjointPropertyAxioms;
+	}
+
+	@Override
+	public Set<DisjointBasicClassAxiom> getDisjointBasicClassAxioms() {
+		return disjointBasicClassAxioms;
 	}
 
 	public String toString() {
@@ -551,4 +575,6 @@ public class OntologyImpl implements Ontology {
 			addRole(pred);
 		}
 	}
+
+	
 }

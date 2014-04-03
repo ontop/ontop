@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  */
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 
@@ -122,7 +122,7 @@ public class SemanticIndexRecord {
 	 * @param aboxAssertion
 	 * @return
 	 */
-	public static SemanticIndexRecord getRecord(Assertion assertion, int index) {
+	public static SemanticIndexRecord getRecord(ABoxAssertion assertion, int index) {
 		OBJType t1 = null;
 		OBJType t2 = OBJType.URI;
 		SITable table = null;

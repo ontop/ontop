@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Description;
@@ -37,14 +37,14 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import java.util.Iterator;
 import java.util.Map;
 
-public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
+public class EquivalentTriplePredicateIterator implements Iterator<ABoxAssertion> {
 
-	private Iterator<Assertion> originalIterator;
+	private Iterator<ABoxAssertion> originalIterator;
 	private Map<Predicate, Description> equivalenceMap;
 	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, Map<Predicate, Description> equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<ABoxAssertion> iterator, Map<Predicate, Description> equivalences) {
 		originalIterator = iterator;
 		equivalenceMap = equivalences;
 	}
@@ -55,8 +55,8 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	}
 
 	@Override
-	public Assertion next() {
-		Assertion assertion = originalIterator.next();
+	public ABoxAssertion next() {
+		ABoxAssertion assertion = originalIterator.next();
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			Predicate concept = ca.getConcept();

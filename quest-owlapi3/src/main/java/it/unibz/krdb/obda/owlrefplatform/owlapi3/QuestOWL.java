@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
 import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
@@ -304,7 +304,7 @@ public class QuestOWL extends OWLReasonerBase {
 						obdaModelForMaterialization.declarePredicate(p);
 					}
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
-					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
+					Iterator<ABoxAssertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();
 					log.debug("Inserted {} triples from the mappings.", count);

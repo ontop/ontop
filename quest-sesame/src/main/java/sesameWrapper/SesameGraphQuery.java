@@ -22,7 +22,7 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.sesame.SesameStatement;
@@ -111,7 +111,7 @@ public class SesameGraphQuery implements GraphQuery {
 		return true;
 	}
 
-	private Statement createStatement(Assertion assertion) {
+	private Statement createStatement(ABoxAssertion assertion) {
 
 		SesameStatement stm = new SesameStatement(assertion);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
@@ -131,8 +131,8 @@ public class SesameGraphQuery implements GraphQuery {
 			List<Statement> results = new LinkedList<Statement>();
 			if (res != null) {
 				while (res.hasNext()) {
-					List<Assertion> chunk = res.next();
-					for (Assertion as : chunk) {
+					List<ABoxAssertion> chunk = res.next();
+					for (ABoxAssertion as : chunk) {
 						Statement st = createStatement(as);
 						if (st!=null)
 							results.add(st);

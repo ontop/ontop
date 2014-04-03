@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlapi3;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Description;
 
 import java.util.Collection;
@@ -44,7 +44,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
+public class OWLAPI3ABoxIterator implements Iterator<ABoxAssertion> {
 
 	Iterator<OWLAxiom> owlaxiomiterator = null;
 	Iterator<OWLOntology> ontologies = null;
@@ -117,12 +117,12 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	}
 
 	@Override
-	public Assertion next() {
+	public ABoxAssertion next() {
 		while (true) {
 			try {
 				OWLIndividualAxiom next = nextInCurrentIterator();
 
-				Assertion ass = translator.translate(next, equivalenceMap);
+				ABoxAssertion ass = translator.translate(next, equivalenceMap);
 				if (ass == null)
 					throw new NoSuchElementException();
 				else

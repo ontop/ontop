@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -169,16 +169,16 @@ public class QuestMaterializer {
 	}
 
 
-	public Iterator<Assertion> getAssertionIterator() throws Exception {
+	public Iterator<ABoxAssertion> getAssertionIterator() throws Exception {
 		//return the inner class  iterator
 		iterator = new VirtualTripleIterator(questInstance, vocabulary.iterator());
 		return iterator;
 		
 	}
 
-	public List<Assertion> getAssertionList() throws Exception {
-		Iterator<Assertion> it = getAssertionIterator();
-		List<Assertion> assertions = new LinkedList<Assertion>();
+	public List<ABoxAssertion> getAssertionList() throws Exception {
+		Iterator<ABoxAssertion> it = getAssertionIterator();
+		List<ABoxAssertion> assertions = new LinkedList<ABoxAssertion>();
 		while (it.hasNext()) {
 			assertions.add(it.next());
 		}
@@ -215,7 +215,7 @@ public class QuestMaterializer {
 	 * predicate in each data source.
 	 * 
 	 */
-	private class VirtualTripleIterator implements Iterator<Assertion> {
+	private class VirtualTripleIterator implements Iterator<ABoxAssertion> {
 
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
@@ -297,7 +297,7 @@ public class QuestMaterializer {
 		}
 
 		@Override
-		public Assertion next() {
+		public ABoxAssertion next() {
 			try {
 				counter+=1;
 				if (read && hasNext)

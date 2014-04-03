@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 
-public interface ObjectPropertyAssertion extends Assertion {
+public interface ObjectPropertyAssertion extends ABoxAssertion {
 
 	public ObjectConstant getFirstObject();
 

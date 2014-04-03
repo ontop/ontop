@@ -30,7 +30,7 @@ import it.unibz.krdb.obda.model.Predicate;
  * These also correspond to rdf:type assertions, e.g., :mariano rdf:type
  * :Person.
  */
-public interface ClassAssertion extends Assertion {
+public interface ClassAssertion extends ABoxAssertion {
 
 	// TODO: Change the method name to getSubject() because it gets the subject of the class assertion.
 	public ObjectConstant getObject();
