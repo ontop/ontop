@@ -492,7 +492,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 */
 							continue;
 						}else if (result.size() >= 2) {
-							detectMissmatchArgumentType(result);
+							detectMissmatchArgumentType(result,false);
 						}
 						/*
 						 * One more step in the partial evaluation was computed, we
@@ -682,13 +682,19 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
-			
+							
+				
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
 						} else{
 							System.out.println("Empty: "+pred);
 							predicatesMightGotEmpty.add(preFather);
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
+						
 						}
+						if (result.size() >= 2) {
+							detectMissmatchArgumentType(result,false);
+						}
+		
 					} //end for father collection
 					
 					
@@ -2717,7 +2723,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			//There is more than 1 rule, we need to see if it uses different templates
 			
 			
-			detectMissmatchArgumentType(rules);
+			detectMissmatchArgumentType(rules,true);
 			
 		} //end for predicates
 		
@@ -2731,82 +2737,122 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param focusPred
 	 * @param rules
 	 */
-	private void detectMissmatchArgumentType(List<CQIE> rules) {
-		// I pick the pred atom in the body of the first rule
-		CQIE firstRule = (CQIE) rules.get(0);
-		Function focusAtom= firstRule.getHead();
-		Predicate focusPred = focusAtom.getPredicate();
-					
-		for (int i=1; i<rules.size(); i++){
-			Function pickedAtom = null;
-			CQIE tgt = (CQIE) rules.get(i);
-			pickedAtom=  tgt.getHead();
+	private void detectMissmatchArgumentType(List<CQIE> rules, boolean isComputingMappings ) {
 
-			//TODO: is this if needed??
-			boolean found = false;
-			for (int p=0;p<focusAtom.getArity();p++){
-				boolean templateProblem = false;
-				Term term1 = focusAtom.getTerm(p);
-				Term term2 =  pickedAtom.getTerm(p);
-
-				if ((term1 instanceof Function ) &&  (term2 instanceof Function )){
-					Function t1 = (Function)term1;
-					Function t2 = (Function)term2;
-
-
-
-
-					//it has different types
-					if (!t1.getFunctionSymbol().equals(t2.getFunctionSymbol())){
-						templateProblem = true;
-					}
-
-					//it has different templates regarding the variable
-
-
-					//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
-					//See Test COmplex Optional Semantics
-
-					//int arity = t1.getArity();
-					int arity = t1.getTerms().size();
-
-					//						int arity2 = t2.getArity();
-					int arity2 = t2.getTerms().size();
-
-					if (arity !=  arity2){
-						templateProblem = true;
-					}
-
-					//it has different templates regarding the uri
-					if (t1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
-						Term string1 = t1.getTerm(0);
-						Term string2 = t2.getTerm(0);
-						if (!string1.equals(string2)){
-							templateProblem = true;
-						}
-					}
+		List<Predicate> predList= new LinkedList<Predicate>();
+		
+		//I check all the different predicates in the head of each result. Usually it will be only 1
+		//TODO: This can be done more efficiently by having a flag that is true when I add mappings to the result
+		
+		if (!isComputingMappings){
+			for (CQIE rule: rules){
+				Function focusAtom= rule.getHead();
+				Predicate focusPred = focusAtom.getPredicate();
+				if (!predList.contains(focusPred)){
+					predList.add(focusPred);
 				}
-				else if ((term1 instanceof Variable ) &&  (term2 instanceof Constant)){
-					templateProblem = true;
-				}else if ((term2 instanceof Variable ) &&  (term1 instanceof Constant)){
-					templateProblem = true;
+			}
+		} else{
+			CQIE firstRule = (CQIE) rules.get(0);
+			Function focusAtom= firstRule.getHead();
+			Predicate focusPred = focusAtom.getPredicate();
+			predList.add(focusPred);
+		}
+		//TODO: Inefficeint !!!!! :( Fix!
+		
+		
+		for (Predicate pred: predList){
+			// I pick the pred atom in the body of the first rule
+			
+			List<CQIE> rulesubset =new LinkedList<CQIE>();
+			if (!isComputingMappings){
+				rulesubset = (List<CQIE> ) ruleIndex.get(pred);
+			}else{
+				rulesubset= rules;
+			}
+			
+			CQIE firstRule = (CQIE) rulesubset.get(0);
+			Function focusAtom= firstRule.getHead();
+			Predicate focusPred = focusAtom.getPredicate();
+		
+			for (int i=1; i<rules.size(); i++){
+				Function pickedAtom = null;
+				CQIE tgt = (CQIE) rules.get(i);
+				 pickedAtom= tgt.getHead();
+				Predicate focusPred2 = pickedAtom.getPredicate();
+				if (!focusPred2.equals(pred)){
+					continue;
 				}
 				
-				if (templateProblem){
-					if (!multPredList.containsEntry(focusPred,p)) {
-						multPredList.put(focusPred,p);
-						found = true;
-						break;
+				
+				
+
+				//TODO: is this if needed??
+				boolean found = false;
+				for (int p=0;p<focusAtom.getArity();p++){
+					boolean templateProblem = false;
+					Term term1 = focusAtom.getTerm(p);
+					Term term2 =  pickedAtom.getTerm(p);
+
+					if ((term1 instanceof Function ) &&  (term2 instanceof Function )){
+						Function t1 = (Function)term1;
+						Function t2 = (Function)term2;
+
+
+
+
+						//it has different types
+						if (!t1.getFunctionSymbol().equals(t2.getFunctionSymbol())){
+							templateProblem = true;
+						}
+
+						//it has different templates regarding the variable
+
+
+						//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
+						//See Test COmplex Optional Semantics
+
+						//int arity = t1.getArity();
+						int arity = t1.getTerms().size();
+
+						//						int arity2 = t2.getArity();
+						int arity2 = t2.getTerms().size();
+
+						if (arity !=  arity2){
+							templateProblem = true;
+						}
+
+						//it has different templates regarding the uri
+						if (t1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
+							Term string1 = t1.getTerm(0);
+							Term string2 = t2.getTerm(0);
+							if (!string1.equals(string2)){
+								templateProblem = true;
+							}
+						}
 					}
+					else if ((term1 instanceof Variable ) &&  (term2 instanceof Constant)){
+						templateProblem = true;
+					}else if ((term2 instanceof Variable ) &&  (term1 instanceof Constant)){
+						templateProblem = true;
+					}
+
+					if (templateProblem){
+						if (!multPredList.containsEntry(focusPred,p)) {
+							multPredList.put(focusPred,p);
+							found = true;
+							break;
+						}
+					}
+				}//end for terms	
+
+
+
+				if (found ==true){
+					continue;
 				}
-			}//end for terms	
-
-
-
-			if (found ==true){
-				continue;
-			}
-		}//end for rules
+			}//end for rules
+		}
 	}
 
 	/**
