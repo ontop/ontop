@@ -138,8 +138,9 @@ public class OBDAVocabulary {
 	
 	public static final String OWL_EQUIVALENT_URI = "http://www.w3.org/2002/07/owl#equivalentClass";
 	
-	public static final String OWL_DISJOINT_URI = "http://www.w3.org/2002/07/owl#disjointWith";
+	public static final String OWL_DISJOINTCLASS_URI = "http://www.w3.org/2002/07/owl#disjointWith";
 	
+	public static final String OWL_DISJOINTPROPERTY_URI = "http://www.w3.org/2002/07/owl#owl:propertyDisjointWith";
 
 	/* Data type predicate URIs */
 
@@ -208,9 +209,9 @@ public class OBDAVocabulary {
 	
 	public static final Predicate OWL_EQUIVALENT = new PredicateImpl(OWL_EQUIVALENT_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	
-	public static final Predicate OWL_DISJOINT = new PredicateImpl(OWL_DISJOINT_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_DISJOINT_CLASS = new PredicateImpl(OWL_DISJOINTCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	
-	
+	public static final Predicate OWL_DISJOINT_PROPERTY = new PredicateImpl(OWL_DISJOINTPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 
 	/* Common namespaces and prefixes */
 
