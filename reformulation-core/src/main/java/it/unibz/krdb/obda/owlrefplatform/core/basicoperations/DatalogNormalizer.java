@@ -445,6 +445,11 @@ public class DatalogNormalizer {
 	public static void addMinimalEqualityToLeftJoin(CQIE query) {
 		for (Function f : query.getBody()) {
 			if (f.isAlgebraFunction()) {
+				if (f.getFunctionSymbol().getName().equals("Group")) {
+					// Group by is algebra function
+					// TODO: See if there is more elegant solution
+					continue;
+				}
 				addMinimalEqualityToLeftJoin(f);
 			}
 		}
@@ -862,8 +867,13 @@ public class DatalogNormalizer {
 			Object l = currentLevelAtoms.get(focusBranch);
 
 			Function atom = (Function) l;
-			if (!(atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate))
+			if (!(atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate)){
 				continue;
+			}
+			if (atom.getFunctionSymbol().getName().equals("Group")){
+				continue;
+			}
+			
 			// System.out
 			// .println("======================== INTO ALGEBRA =====================");
 

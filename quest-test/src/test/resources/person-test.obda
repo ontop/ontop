@@ -1,0 +1,29 @@
+[PrefixDeclaration]
+:		http://www.example.org/test#
+
+[SourceDeclaration]
+sourceUri	person
+connectionUrl	jdbc:h2:mem:ljtest
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-1006f0dbb06844d59f019373151efbb9
+target		:{id} a :Person ; :name {firstname} ; :age {age} ; :mbox {mbox} ; :nick1 {nick1}  ; :nick2 {nick2} . 
+source		select id, firstname, age, mbox, nick1, nick2 from people
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dda1
+target		:{id} a :Person ; :salary {salary} . 
+source		select id, salary from salary1
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dda2
+target		:{id} a :Person ; :salary {salary} . 
+source		select id, salary from salary2
+
+mappingId	MAPID-4084a8e6ade54712badf59afa3c8dda3
+target		:{id} a :Person ; :city {city} . 
+source		select id, city from address
+
+]]
+

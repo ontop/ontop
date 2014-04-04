@@ -57,6 +57,7 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.algebra.AggregateOperator;
 import org.openrdf.query.algebra.And;
 import org.openrdf.query.algebra.Avg;
 import org.openrdf.query.algebra.BinaryTupleOperator;
@@ -89,6 +90,7 @@ import org.openrdf.query.algebra.Order;
 import org.openrdf.query.algebra.OrderElem;
 import org.openrdf.query.algebra.Projection;
 import org.openrdf.query.algebra.ProjectionElem;
+import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.Reduced;
 import org.openrdf.query.algebra.Regex;
 import org.openrdf.query.algebra.SameTerm;
@@ -275,8 +277,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			var = ofac.getVariable(name);			
 			Term term = getBooleanTerm(vexp);
 
-			Set<Variable> atom1VarsSet = getVariables(subte);
-			atom1VarsList.addAll(atom1VarsSet);
+			//Set<Variable> atom1VarsSet = getVariables(subte);
+			//atom1VarsList.addAll(atom1VarsSet);
 			atom1VarsList.add(var);
 			Collections.sort(atom1VarsList, comparator);
 			int indexOfvar = atom1VarsList.indexOf(var);
@@ -542,7 +544,15 @@ public class SparqlAlgebraToDatalogTranslator {
 			DatalogProgram pr, long i, int[] varcount) {
 
 		TupleExpr te = project.getArg();
-		Set<Variable> nestedVars = getVariables(te);
+		Set<Variable> nestedVars = null;
+		Set<Variable> bodyatomVarsSet = null;
+		if (te instanceof Extension) {
+			nestedVars = getBindVariables(((Extension)te).getElements());
+			bodyatomVarsSet = getBindVariables(((Extension)te).getElements());
+		} else {
+			nestedVars = getVariables(te);
+			bodyatomVarsSet = getVariables(te);
+		}
 
 		List<Term> projectedVariables = new LinkedList<Term>();
 		for (ProjectionElem var : project.getProjectionElemList().getElements()) {
@@ -556,7 +566,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		Predicate pbody = ofac.getPredicate("ans" + (i + 1), nestedVars.size());
 		;
 
-		Set<Variable> bodyatomVarsSet = getVariables(te);
 		List<Term> bodyatomVarsList = new LinkedList<Term>();
 		bodyatomVarsList.addAll(bodyatomVarsSet);
 		Collections.sort(bodyatomVarsList, comparator);
@@ -617,6 +626,14 @@ public class SparqlAlgebraToDatalogTranslator {
 		te = group.getArg(); // narrow down the query
 
 		Set <String> bindings = group.getGroupBindingNames();
+		
+//		List <GroupElem> gel = group.getGroupElements();
+//		
+//		for (GroupElem el: gel) {
+//			AggregateOperator op = el.getOperator();
+//			String name = el.getName();
+//			int ii = 0;
+//		}
 		
 		//Set<Variable> remainingVars= getVariables(te);
 		

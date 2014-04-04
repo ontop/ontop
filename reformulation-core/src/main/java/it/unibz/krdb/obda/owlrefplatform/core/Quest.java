@@ -565,9 +565,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				isSemanticIdx = true;
 				if (inmemory) {
 
-				//	String driver = "org.hsqldb.jdbc.JDBCDriver";
-				//	String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis()+";sql.syntax_mys=true";
-							
+//					String driver = "com.mysql.jdbc.Driver";
+//					String url = "jdbc:mysql://10.7.20.39/aggr_si?relaxAutoCommit=true";
+//					String username = "test";
+//					String password = "ontop2014";							
 
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";

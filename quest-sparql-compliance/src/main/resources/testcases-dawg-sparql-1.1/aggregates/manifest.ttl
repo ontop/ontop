@@ -10,8 +10,8 @@
     rdfs:label "Aggregates" ;
     mf:entries
     ( 
-    :agg01
-    #:agg02
+    #:agg01
+    :agg02
     #:agg03
     #:agg04
     #:agg05

@@ -870,6 +870,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			// These don't participate in the FROM clause
 			return "";
 		} else if (predicate instanceof AlgebraOperatorPredicate) {
+			if (predicate.getName().equals("Group")) {
+				return "";
+			}
 			List<Function> innerTerms = new LinkedList<Function>();
 			for (Term innerTerm : atom.getTerms()) {
 				innerTerms.add((Function) innerTerm);
