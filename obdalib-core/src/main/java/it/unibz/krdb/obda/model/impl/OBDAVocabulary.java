@@ -136,7 +136,9 @@ public class OBDAVocabulary {
 	
 	public static final String OWL_INVERSE_URI = "http://www.w3.org/2002/07/owl#inverseOf";
 	
-	public static final String OWL_EQUIVALENT_URI = "http://www.w3.org/2002/07/owl#equivalentClass";
+	public static final String OWL_EQUIVALENTCLASS_URI = "http://www.w3.org/2002/07/owl#equivalentClass";
+	
+	private static final String OWL_EQUIVALENTPROPERTY_URI = "http://www.w3.org/2002/07/owl#equivalentProperty";
 	
 	public static final String OWL_DISJOINTCLASS_URI = "http://www.w3.org/2002/07/owl#disjointWith";
 	
@@ -207,7 +209,9 @@ public class OBDAVocabulary {
 	
 	public static final Predicate OWL_INVERSE = new PredicateImpl(OWL_INVERSE_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	
-	public static final Predicate OWL_EQUIVALENT = new PredicateImpl(OWL_EQUIVALENT_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_EQUIVALENT_CLASS = new PredicateImpl(OWL_EQUIVALENTCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	
+	public static final Predicate OWL_EQUIVALENT_PROPERTY =  new PredicateImpl(OWL_EQUIVALENTPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	
 	public static final Predicate OWL_DISJOINT_CLASS = new PredicateImpl(OWL_DISJOINTCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	
@@ -318,4 +322,6 @@ public class OBDAVocabulary {
 	
 	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
 			SPARQL_LIKE_URI, 2);
+
+	
 }

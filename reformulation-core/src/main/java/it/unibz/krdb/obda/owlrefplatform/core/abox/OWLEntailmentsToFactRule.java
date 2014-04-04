@@ -104,7 +104,7 @@ public class OWLEntailmentsToFactRule {
 
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
 
-			getEquivalences(eqv.getMembers());
+			getEquivalencesClasses(eqv.getMembers());
 			
 
 			while (iteq.hasNext()) {
@@ -144,10 +144,10 @@ public class OWLEntailmentsToFactRule {
 	 *            properties some description)
 	 */
 
-	private static void getEquivalences(Set<BasicClassDescription> equivalenceMaps) {
+	private static void getEquivalencesClasses(Set<BasicClassDescription> equivalenceMaps) {
 
 		Iterator<BasicClassDescription> itEquivalences = equivalenceMaps.iterator();
-		Predicate equivalentClass = OBDAVocabulary.OWL_EQUIVALENT;
+		Predicate equivalentClass = OBDAVocabulary.OWL_EQUIVALENT_CLASS;
 
 		while (itEquivalences.hasNext()) {
 
@@ -369,7 +369,7 @@ public class OWLEntailmentsToFactRule {
 			
 			//add owl:inversesOf
 
-			addInverses(eqv.getMembers());
+			addInversesAndEquivalences(eqv.getMembers());
 
 			while (iteq.hasNext()) {
 
@@ -405,12 +405,15 @@ public class OWLEntailmentsToFactRule {
 
 	
 	/**
-	 * Add inverses of properties
+	 * Called by { @link #addEntailmentsForProperties(TBoxReasoner) }
+	 * Add inverses and equivalences of properties
 	 * @param members
 	 */
-	private static void addInverses(Set<Property> members) {
+	private static void addInversesAndEquivalences(Set<Property> members) {
 
 		Predicate inverseOf = OBDAVocabulary.OWL_INVERSE;
+		Predicate equivalent= OBDAVocabulary.OWL_EQUIVALENT_PROPERTY;
+		
 		Iterator<Property> properties = members.iterator();
 
 		while (properties.hasNext()) {
@@ -422,6 +425,9 @@ public class OWLEntailmentsToFactRule {
 				while (properties2.hasNext()) {
 					Property propertyItem2 = properties2.next();
 
+					if(!propertyItem2.isInverse()) {
+						addNodesRule(propertyItem.toString(), propertyItem2.toString(), equivalent);
+					}
 					if (!propertyItem.getPredicate().equals(propertyItem2.getPredicate()) && propertyItem2.isInverse()) {
 						Property inverse = ontoFactory.createProperty(propertyItem2.getPredicate(), false);
 						addNodesRule(propertyItem.toString(), inverse.toString(), inverseOf);
