@@ -75,12 +75,16 @@ public class HierarchyVirtualTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-//	final String owlfile = "src/test/resources/subclass/test-hierarchy.owl";
-//	final String obdafile = "src/test/resources/subclass/test-hierarchy.obda";
+	// final String owlfile = "src/test/resources/subclass/test-hierarchy.owl";
+	// final String obdafile =
+	// "src/test/resources/subclass/test-hierarchy.obda";
 	final String owlfile = "src/test/resources/subclass/test-hierarchy2.owl";
 	final String obdafile = "src/test/resources/subclass/test-hierarchy2.obda";
-//	final String owlfile = "src/test/resources/subclass/test-hierarchy-extended.owl";
-//	final String obdafile = "src/test/resources/subclass/test-hierarchy-extended.obda";
+
+	// final String owlfile =
+	// "src/test/resources/subclass/test-hierarchy-extended.owl";
+	// final String obdafile =
+	// "src/test/resources/subclass/test-hierarchy-extended.obda";
 
 	@Override
 	public void setUp() throws Exception {
@@ -173,12 +177,10 @@ public class HierarchyVirtualTest extends TestCase {
 			{
 				OWLIndividual ind1 = rs.getOWLIndividual("x");
 				OWLIndividual ind2 = rs.getOWLIndividual("y");
-				
-				System.out.println(ind1 + " "+ function + " "+ ind2);
-				individuals.add(ind1 + " "+ function + " "+ ind2);
-				
-				
-				
+
+				System.out.println(ind1 + " " + function + " " + ind2);
+				individuals.add(ind1 + " " + function + " " + ind2);
+
 			}
 			return individuals;
 
@@ -217,13 +219,11 @@ public class HierarchyVirtualTest extends TestCase {
 			while (rs.nextRow())
 			{
 				OWLIndividual ind2 = rs.getOWLIndividual("x");
-				
-				System.out.println( ind2);
-				if(ind2.isNamed())
-				individuals.add(ind2.toString());
-				
-				
-				
+
+				System.out.println(ind2);
+				if (ind2.isNamed())
+					individuals.add(ind2.toString());
+
 			}
 			return individuals;
 
@@ -239,94 +239,103 @@ public class HierarchyVirtualTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
+
 	public void testSubDescription() throws Exception {
+		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-		
-		
+
 		log.info("Find subProperty");
-		List<String> individualsProperty=runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
+		List<String> individualsProperty = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
 		assertEquals(22, individualsProperty.size());
-		
+
 		log.info("Find subProperty");
-		List<String> property=runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { :isSibling rdfs:subPropertyOf ?x }", "rdfs:subPropertyOf");
+		List<String> property = runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { :isSibling rdfs:subPropertyOf ?x }",
+				"rdfs:subPropertyOf");
 		assertEquals(4, property.size());
-		
+
 		log.info("Find subClass");
-		List<String> individualsClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
+		List<String> individualsClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
 		assertEquals(59, individualsClass.size());
-		
+
 		log.info("Find subClass");
-		List<String> classes= runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subClassOf :Man }", "rdfs:subClassOf");
+		List<String> classes = runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:subClassOf :Man }", "rdfs:subClassOf");
 		assertEquals(2, classes.size());
 
-		
-		
 	}
-	
-	public void testEquivalences() throws Exception{
-		
+
+	public void testEquivalences() throws Exception {
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-		
+
 		log.info("Find equivalences");
-		List<String> individualsEquivClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
+		List<String> individualsEquivClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
 		assertEquals(23, individualsEquivClass.size());
-		
-		List<String> equivClass= runSingleNamedIndividualTests(p, "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> select * where {?x owl:equivalentClass :Girl }", "owl:equivalentClass");
+
+		List<String> equivClass = runSingleNamedIndividualTests(p,
+				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> select * where {?x owl:equivalentClass :Girl }", "owl:equivalentClass");
 		assertEquals(3, equivClass.size());
 	}
-	
 
-	public void testDomains() throws Exception{
-		
+	public void testDomains() throws Exception {
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-		
+
 		log.info("Find domain");
-		List<String> individualsDomainClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		
-		
-		
+		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
+		assertEquals(2, individualsDomainClass.size());
 	}
-	
-	public void testRanges() throws Exception{
-		
+
+	public void testRanges() throws Exception {
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-		
-		log.info("Find domain");
-		List<String> individualsRangeClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
-		
-		
-		
+
+		log.info("Find range");
+		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
+		assertEquals(0, individualsRangeClass.size());
 	}
-	public void testDisjointClasses() throws Exception{
-		
+
+	public void testDisjointClasses() throws Exception {
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-		
+
 		log.info("Find disjoint classes");
-		List<String> individualsDisjClass= runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
+		List<String> individualsDisjClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
 		assertEquals(2, individualsDisjClass.size());
-		
-		
+
 	}
 	
+	public void testInverseOf() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+
+		log.info("Find inverse");
+		List<String> individualsInverse = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl/> SELECT * WHERE { ?x owl:inverseOf ?y }", "owl:inverseOf");
+		assertEquals(0, individualsInverse.size());
+
+	}
 
 }

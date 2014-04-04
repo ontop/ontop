@@ -68,7 +68,6 @@ public class SesameVirtualBookTest extends TestCase {
 	{
 
 
-		// /query repo
 		try {
 			String queryString = "select * where {?x rdfs:subClassOf ?y }";
 
@@ -106,7 +105,6 @@ public class SesameVirtualBookTest extends TestCase {
 	public void testOneSubClass() {
 
 
-		// /query repo
 		try {
 			String queryString = "select * where {?x rdfs:subClassOf <http://meraka/moss/exampleBooks.owl#Edition> }";
 
@@ -150,7 +148,7 @@ public class SesameVirtualBookTest extends TestCase {
 	public void testEquivalences(){
 		
 
-		// /query repo
+	
 		try {
 			String queryString = "select * where {?x owl:equivalentClass ?y }";
 
@@ -189,7 +187,7 @@ public class SesameVirtualBookTest extends TestCase {
 	public void testOneEquivalence() {
 
 
-		// /query repo
+		
 		try {
 			String queryString = "select * where {?x owl:equivalentClass <http://meraka/moss/exampleBooks.owl#Edition> }";
 
@@ -231,9 +229,48 @@ public class SesameVirtualBookTest extends TestCase {
 	public void testRanges(){
 		
 
-		// /query repo
+	
 		try {
 			String queryString = "select * where {?x rdfs:range ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(9, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+		
+	}
+	
+	public void testDomains(){
+		
+
+		
+		try {
+			String queryString = "select * where {?x rdfs:domain ?y }";
 
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 			TupleQueryResult result = tupleQuery.evaluate();
@@ -267,48 +304,9 @@ public class SesameVirtualBookTest extends TestCase {
 		
 	}
 	
-	public void testDomains(){
-		
-
-		// /query repo
-		try {
-			String queryString = "select * where {?x rdfs:domain ?y }";
-
-			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-			TupleQueryResult result = tupleQuery.evaluate();
-			try {
-				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
-				int countResult = 0;
-				while (result.hasNext()) {
-					BindingSet bindingSet = result.next();
-					for (String b : bindings)
-						System.out.println(bindingSet.getBinding(b));
-					countResult++;
-				}
-				assertEquals(2, countResult);
-			} finally {
-				result.close();
-			}
-
-			System.out.println("Closing...");
-
-			con.close();
-
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-
-
-		System.out.println("Done.");
-		
-	}
-	
 	public void testDisjoints(){
 	
-		// /query repo
+		
 		try {
 			String queryString = "select * where {?x owl:disjointWith ?y }";
 
@@ -342,5 +340,82 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
+	
+	
+	public void testInverseOf(){
+		
+	
+		try {
+			String queryString = "select * where {?x owl:inverseOf ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertFalse(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(0, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+	}
+	
+	public void testPropertyDisjoints(){
+		
+		
+		try {
+			String queryString = "select * where {?x owl:propertyDisjointWith ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertFalse(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(0, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+
+
+		System.out.println("Done.");
+	}
+	
+	
 
 }
