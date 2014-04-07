@@ -34,15 +34,22 @@ import org.openrdf.repository.RepositoryConnection;
 
 import sesameWrapper.SesameVirtualRepo;
 
+/**
+ * Test the ontology exampleBooks for sparql owl entailments.
+ * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass owl:equivalentProperty 
+ * owl:disjointWith owl:propertyDisjointWith rdfs:domain rdfs:range
+ * QuestPreferences has SPARQL_OWL_ENTAILMENT  set to true.
+ *
+ */
+		
 public class SesameVirtualBookTest extends TestCase {
 
-	// create a sesame repository
+	
 	RepositoryConnection con = null;
 	Repository repo = null;
-	
-	@Override
-	public void setUp(){
 
+	@Override
+	public void setUp() {
 
 		try {
 
@@ -62,11 +69,9 @@ public class SesameVirtualBookTest extends TestCase {
 		}
 
 	}
-	
-	
+
 	public void testSubClasses() throws Exception
 	{
-
 
 		try {
 			String queryString = "select * where {?x rdfs:subClassOf ?y }";
@@ -97,13 +102,10 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
 	}
 
 	public void testOneSubClass() {
-
 
 		try {
 			String queryString = "select * where {?x rdfs:subClassOf <http://meraka/moss/exampleBooks.owl#Edition> }";
@@ -144,11 +146,9 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-	
-	public void testEquivalences(){
-		
 
-	
+	public void testEquivalences() {
+
 		try {
 			String queryString = "select * where {?x owl:equivalentClass ?y }";
 
@@ -178,16 +178,12 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
-		
+
 	}
-	
+
 	public void testOneEquivalence() {
 
-
-		
 		try {
 			String queryString = "select * where {?x owl:equivalentClass <http://meraka/moss/exampleBooks.owl#Edition> }";
 
@@ -209,7 +205,7 @@ public class SesameVirtualBookTest extends TestCase {
 				}
 
 				assertEquals(2, countResult);
-				
+
 			} finally {
 				result.close();
 			}
@@ -225,11 +221,44 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-	
-	public void testRanges(){
-		
 
-	
+	public void testEquivalentProperties() {
+
+		try {
+			String queryString = "select * where {?x owl:equivalentProperty ?y }";
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
+			try {
+				List<String> bindings = result.getBindingNames();
+				assertTrue(result.hasNext());
+				int countResult = 0;
+				while (result.hasNext()) {
+					BindingSet bindingSet = result.next();
+					for (String b : bindings)
+						System.out.println(bindingSet.getBinding(b));
+					countResult++;
+				}
+				assertEquals(9, countResult);
+			} finally {
+				result.close();
+			}
+
+			System.out.println("Closing...");
+
+			con.close();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		System.out.println("Done.");
+
+	}
+
+	public void testRanges() {
+
 		try {
 			String queryString = "select * where {?x rdfs:range ?y }";
 
@@ -259,16 +288,12 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
-		
-	}
-	
-	public void testDomains(){
-		
 
-		
+	}
+
+	public void testDomains() {
+
 		try {
 			String queryString = "select * where {?x rdfs:domain ?y }";
 
@@ -298,15 +323,12 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
-		
+
 	}
-	
-	public void testDisjoints(){
-	
-		
+
+	public void testDisjoints() {
+
 		try {
 			String queryString = "select * where {?x owl:disjointWith ?y }";
 
@@ -336,15 +358,11 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
 	}
-	
-	
-	public void testInverseOf(){
-		
-	
+
+	public void testInverseOf() {
+
 		try {
 			String queryString = "select * where {?x owl:inverseOf ?y }";
 
@@ -374,14 +392,11 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
 	}
-	
-	public void testPropertyDisjoints(){
-		
-		
+
+	public void testPropertyDisjoints() {
+
 		try {
 			String queryString = "select * where {?x owl:propertyDisjointWith ?y }";
 
@@ -411,11 +426,7 @@ public class SesameVirtualBookTest extends TestCase {
 			e.printStackTrace();
 		}
 
-
-
 		System.out.println("Done.");
 	}
-	
-	
 
 }

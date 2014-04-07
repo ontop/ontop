@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.sparql.entailments;
+package it.unibz.krdb.obda.reformulation.tests;
 
 /*
  * #%L

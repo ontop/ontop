@@ -142,7 +142,7 @@ public class OBDAVocabulary {
 	
 	public static final String OWL_DISJOINTCLASS_URI = "http://www.w3.org/2002/07/owl#disjointWith";
 	
-	public static final String OWL_DISJOINTPROPERTY_URI = "http://www.w3.org/2002/07/owl#owl:propertyDisjointWith";
+	public static final String OWL_DISJOINTPROPERTY_URI = "http://www.w3.org/2002/07/owl#propertyDisjointWith";
 
 	/* Data type predicate URIs */
 

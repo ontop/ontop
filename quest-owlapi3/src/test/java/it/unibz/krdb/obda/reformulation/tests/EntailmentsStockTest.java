@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.sparql.entailments;
+package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;

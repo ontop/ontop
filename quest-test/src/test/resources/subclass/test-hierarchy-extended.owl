@@ -161,6 +161,10 @@
         <ObjectProperty IRI="#hasFlowers"/>
         <Class IRI="#Flower"/>
     </ObjectPropertyRange>
+    <DisjointObjectProperties>
+        <ObjectProperty IRI="#hasFlowers"/>
+        <ObjectProperty IRI="#isRelatedTo"/>
+    </DisjointObjectProperties>
     <DataPropertyRange>
         <DataProperty IRI="#hasBranches"/>
         <Datatype abbreviatedIRI="xsd:integer"/>

@@ -137,7 +137,7 @@ public class OWLEntailmentsToFactRule {
 
 	/**
 	 * Called by { @link #addEntailmentsForClasses(TBoxReasoner) } add the
-	 * owl:equivalentClass and rdfs:range/ rdfs:domain from the equivalenceMaps
+	 * owl:equivalentClass
 	 * 
 	 * @param equivalenceMaps
 	 *            set of equivalent descriptions (classes, data-properties and
@@ -300,9 +300,9 @@ public class OWLEntailmentsToFactRule {
 	 * subclass of the inverse of property some description
 	 * 
 	 * @param subDescription
-	 *            is analyzed if it is a class
-	 * @param description
 	 *            is analyzed if it is a property some restriction
+	 * @param description
+	 *            is analyzed if it is a class
 	 */
 
 	private static boolean addRangeOrDomainRule(BasicClassDescription subDescription, BasicClassDescription description, boolean equivalent) {
@@ -345,6 +345,7 @@ public class OWLEntailmentsToFactRule {
 		}
 
 	}
+
 
 	/**
 	 * Add subproperties and inverses in the database using the DAG. All subproperties are inserted
