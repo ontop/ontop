@@ -277,8 +277,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			var = ofac.getVariable(name);			
 			Term term = getBooleanTerm(vexp);
 
-			//Set<Variable> atom1VarsSet = getVariables(subte);
-			//atom1VarsList.addAll(atom1VarsSet);
+			Set<Variable> atom1VarsSet = getBindVariables(subte);
+			atom1VarsList.addAll(atom1VarsSet);
+			
 			atom1VarsList.add(var);
 			Collections.sort(atom1VarsList, comparator);
 			int indexOfvar = atom1VarsList.indexOf(var);
@@ -540,19 +541,53 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 	}
 
+//	private void translate(List<Variable> vars, Projection project,
+//			DatalogProgram pr, long i, int[] varcount) {
+//
+//		TupleExpr te = project.getArg();
+//		Set<Variable> nestedVars = null;
+//		Set<Variable> bodyatomVarsSet = null;
+//		if (te instanceof Extension) {
+//			nestedVars = getBindVariables(((Extension)te).getElements());
+//			bodyatomVarsSet = getBindVariables(((Extension)te).getElements());
+//		} else {
+//			nestedVars = getVariables(te);
+//			bodyatomVarsSet = getVariables(te);
+//		}
+//
+//		List<Term> projectedVariables = new LinkedList<Term>();
+//		for (ProjectionElem var : project.getProjectionElemList().getElements()) {
+//			projectedVariables.add(ofac.getVariable(var.getSourceName()));
+//		}
+//
+//		Predicate predicate = ofac.getPredicate("ans" + i,
+//				projectedVariables.size());
+//		Function head = ofac.getFunction(predicate, projectedVariables);
+//
+//		Predicate pbody = ofac.getPredicate("ans" + (i + 1), nestedVars.size());
+//		;
+//
+//		List<Term> bodyatomVarsList = new LinkedList<Term>();
+//		bodyatomVarsList.addAll(bodyatomVarsSet);
+//		Collections.sort(bodyatomVarsList, comparator);
+//
+//		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
+//		CQIE cq = ofac.getCQIE(head, bodyAtom);
+//		pr.appendRule(cq);
+//
+//		/* Continue the nested tree */
+//
+//		vars = new LinkedList<Variable>();
+//		for (Term var : bodyatomVarsList) {
+//			vars.add((Variable) var);
+//		}
+//		translate(vars, te, pr, i + 1, varcount);
+//	}
+	
 	private void translate(List<Variable> vars, Projection project,
 			DatalogProgram pr, long i, int[] varcount) {
 
 		TupleExpr te = project.getArg();
-		Set<Variable> nestedVars = null;
-		Set<Variable> bodyatomVarsSet = null;
-		if (te instanceof Extension) {
-			nestedVars = getBindVariables(((Extension)te).getElements());
-			bodyatomVarsSet = getBindVariables(((Extension)te).getElements());
-		} else {
-			nestedVars = getVariables(te);
-			bodyatomVarsSet = getVariables(te);
-		}
 
 		List<Term> projectedVariables = new LinkedList<Term>();
 		for (ProjectionElem var : project.getProjectionElemList().getElements()) {
@@ -563,11 +598,11 @@ public class SparqlAlgebraToDatalogTranslator {
 				projectedVariables.size());
 		Function head = ofac.getFunction(predicate, projectedVariables);
 
-		Predicate pbody = ofac.getPredicate("ans" + (i + 1), nestedVars.size());
+		Predicate pbody = ofac.getPredicate("ans" + (i + 1), projectedVariables.size());
 		;
 
 		List<Term> bodyatomVarsList = new LinkedList<Term>();
-		bodyatomVarsList.addAll(bodyatomVarsSet);
+		bodyatomVarsList.addAll(projectedVariables);
 		Collections.sort(bodyatomVarsList, comparator);
 
 		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
@@ -1069,6 +1104,15 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		return vars;
 	}
+	public Set<Variable> getBindVariables(TupleExpr te) {
+		Set<String> names = te.getAssuredBindingNames();
+		Set<Variable> vars = new HashSet<Variable>();
+		for (String name : names) {
+				Variable var = ofac.getVariable(name);
+				vars.add(var);
+			}
+		return vars;
+	}
 	
 	public Set<Variable> getBindVariables(List<ExtensionElem> elements) {
 		Set<Variable> vars = new HashSet<Variable>();
@@ -1326,9 +1370,14 @@ public class SparqlAlgebraToDatalogTranslator {
 						getVariableTerm((Var) arg));
 			}
 		} else if (expr instanceof Count) {
-			Function function = ofac.getFunction(OBDAVocabulary.SPARQL_COUNT, getBooleanTerm( expr.getArg()));
-			builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateInteger(),function);
-
+			if (expr.getArg() != null) {
+				Function function = ofac.getFunction(OBDAVocabulary.SPARQL_COUNT, getBooleanTerm( expr.getArg()));
+				builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateInteger(),function);
+			} else { // Its COUNT(*)
+				
+				Function function = ofac.getFunction(OBDAVocabulary.SPARQL_COUNT, ofac.getVariable("*"));
+				builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateInteger(),function);
+			}
 		} else if (expr instanceof Avg) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
 		} else if (expr instanceof Sum) {

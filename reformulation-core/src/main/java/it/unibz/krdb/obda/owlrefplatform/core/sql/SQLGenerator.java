@@ -1328,17 +1328,32 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (functionString.equals("Count")) {
 				return (String.format(typeStr, 4, varName));
 			}
+
+			
+			
 			if (functionString.equals("Sum")) {
-				return (String.format(typeStr, 5, varName));
+				//return (String.format(typeStr, 5, varName));
+				ov = (Function) ov.getTerm(0);
+				function = ov.getFunctionSymbol();
+				functionString = function.getName();
 			}
 			if (functionString.equals("Avg")) {
-				return (String.format(typeStr, 5, varName));
+				//return (String.format(typeStr, 5, varName));
+				ov = (Function) ov.getTerm(0);
+				function = ov.getFunctionSymbol();
+				functionString = function.getName();
 			}
 			if (functionString.equals("Min")) {
-				return (String.format(typeStr, 5, varName));
+				//return (String.format(typeStr, 5, varName));
+				ov = (Function) ov.getTerm(0);
+				function = ov.getFunctionSymbol();
+				functionString = function.getName();
 			}
 			if (functionString.equals("Max")) {
-				return (String.format(typeStr, 5, varName));
+				//return (String.format(typeStr, 5, varName));
+				ov = (Function) ov.getTerm(0);
+				function = ov.getFunctionSymbol();
+				functionString = function.getName();
 			}
 
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
@@ -1572,6 +1587,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return true;
 			} else {
 				if (isUnary(function)) {
+					if (functionSymbol.getName().equals("Count")) {
+						return false;
+					}
 					/*
 					 * Update the term with the parent term's first parameter.
 					 * Note: this method is confusing :(
@@ -1787,6 +1805,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
 			} else if (functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) {
+				if (term1.toString().equals("*")) {
+					return "COUNT(*)";
+				}
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "COUNT(" + columnName + ")";
