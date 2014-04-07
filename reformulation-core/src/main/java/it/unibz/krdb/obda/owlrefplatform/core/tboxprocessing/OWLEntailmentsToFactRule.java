@@ -70,7 +70,7 @@ public class OWLEntailmentsToFactRule {
 		// add owl:inverseOf, rdfs:subPropertyOf
 		addEntailmentsForProperties(reasoner);
 		
-		// add owl:disjointWith
+		// add owl:equivalentProperty, owl:disjointWith
 		addDisjointClasses(onto.getDisjointBasicClassAxioms());
 		
 		// add owl:propertyDisjointWith
@@ -169,9 +169,11 @@ public class OWLEntailmentsToFactRule {
 	/**
 	 * Add ranges and domains. 
 	 * The domain is given by the direct named superclass, the range is given by the direct named subclass of a property some description.
-	 * It iterates through the graph. It first search between the equivalent nodes and then it search for the direct superclass or subclass.
+	 * It iterates through the graph.
+	 * It first search between the equivalent nodes if they are present, then it search for the direct superclass or subclass.
 	 * @param reasoner
 	 */
+	
 	private static void addRangesAndDomainsFromClasses(TBoxReasoner reasoner) {
 
 		boolean foundRange;

@@ -851,7 +851,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						equivalenceMaps);
 				
 				/*
-				 * Adding facts about rdfs:subClassOf and rdfs:subPropertyOf in datalogProgram
+				 * Adding facts about sparql owl entailments in datalogProgram
+				 * rdfs:subclass rdfs:subproperty owl:inverseof owl:equivalentclass
+				 * owl:equivalentProperty owl:disjointWith owl:propertyDisjointWith rdfs:domain rdfs:range
 				 */
 				if(sparqlOwlEntailment)
 					OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox);
