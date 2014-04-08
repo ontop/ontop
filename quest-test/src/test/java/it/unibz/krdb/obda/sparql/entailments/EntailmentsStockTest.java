@@ -129,14 +129,14 @@ public class EntailmentsStockTest extends TestCase {
 	public void testSubClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subClassOf ?y }";
 		int numbersub = runTests(query, "rdfs:subClassOf");
-		assertEquals(344, numbersub);
+		assertEquals(546, numbersub);
 
 	}
 
 	public void testSubProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subPropertyOf ?y }";
 		int numbersub = runTests(query, "rdfs:subPropertyOf");
-		assertEquals(45, numbersub);
+		assertEquals(130, numbersub);
 	}
 
 	public void testOneSubClass() throws Exception {
@@ -180,8 +180,27 @@ public class EntailmentsStockTest extends TestCase {
 			assertTrue(rs.nextRow());
 			OWLIndividual y = rs.getOWLIndividual("y");
 			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#test1^->", retval);
+			log.info(retval);
+			
+			assertTrue(rs.nextRow());
+			y = rs.getOWLIndividual("y");
+			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#test2^->", retval);
+			log.info(retval);
+			
+			assertTrue(rs.nextRow());
+			y = rs.getOWLIndividual("y");
+			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1>", retval);
+			log.info(retval);
+			
+			assertTrue(rs.nextRow());
+			y = rs.getOWLIndividual("y");
+			retval = y.toString();
 			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>", retval);
 			log.info(retval);
+			
 
 		} catch (Exception e) {
 			throw e;
@@ -200,7 +219,7 @@ public class EntailmentsStockTest extends TestCase {
 	public void testEquivalentClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentClass ?y }";
 		int equivalent = runTests(query, "owl:equivalentClass");
-		assertEquals(210, equivalent);
+		assertEquals(323, equivalent);
 
 	}
 
@@ -281,14 +300,14 @@ public class EntailmentsStockTest extends TestCase {
 	public void testEquivalentProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentProperty ?y }";
 		int equivalent = runTests(query, "owl:equivalentProperty");
-		assertEquals(39, equivalent);
+		assertEquals(106, equivalent);
 
 	}
 
 	public void testRange() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:range ?y }";
 		int range = runTests(query, "rdfs:range");
-		assertEquals(35, range);
+		assertEquals(69, range);
 
 	}
 
@@ -329,7 +348,7 @@ public class EntailmentsStockTest extends TestCase {
 	public void testDomain() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:domain ?y }";
 		int domain = runTests(query, "rdfs:domain");
-		assertEquals(34, domain);
+		assertEquals(69, domain);
 
 	}
 
@@ -366,7 +385,7 @@ public class EntailmentsStockTest extends TestCase {
 	public void testInverses() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:inverseOf ?y }";
 		int inverse = runTests(query, "owl:inverseOf");
-		assertEquals(14, inverse);
+		assertEquals(106, inverse);
 
 	}
 
@@ -380,6 +399,12 @@ public class EntailmentsStockTest extends TestCase {
 
 			assertTrue(rs.nextRow());
 			OWLIndividual x = rs.getOWLIndividual("x");
+			retval = x.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#hasStock^->", retval);
+			log.info(retval);
+			
+			assertTrue(rs.nextRow());
+			x = rs.getOWLIndividual("x");
 			retval = x.toString();
 			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#belongsToCompany>", retval);
 			log.info(retval);

@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
@@ -856,7 +857,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * owl:equivalentProperty owl:disjointWith owl:propertyDisjointWith rdfs:domain rdfs:range
 				 */
 				if(sparqlOwlEntailment)
-					OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox);
+					OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,
 						unfoldingProgram, sigma, true);

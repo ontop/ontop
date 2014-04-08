@@ -88,7 +88,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(49, countResult);
+				assertEquals(62, countResult);
 			} finally {
 				result.close();
 			}
@@ -127,7 +127,7 @@ public class SesameVirtualBookTest extends TestCase {
 					countResult++;
 				}
 
-				assertEquals(7, countResult);
+				assertEquals(8, countResult);
 				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(1));
 				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(6));
 				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(5));
@@ -164,7 +164,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(24, countResult);
+				assertEquals(33, countResult);
 			} finally {
 				result.close();
 			}
@@ -239,7 +239,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(9, countResult);
+				assertEquals(18, countResult);
 			} finally {
 				result.close();
 			}
@@ -274,7 +274,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(9, countResult);
+				assertEquals(17, countResult);
 			} finally {
 				result.close();
 			}
@@ -309,7 +309,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(8, countResult);
+				assertEquals(17, countResult);
 			} finally {
 				result.close();
 			}
@@ -370,7 +370,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertFalse(result.hasNext());
+				assertTrue(result.hasNext());
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -378,7 +378,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(0, countResult);
+				assertEquals(18, countResult);
 			} finally {
 				result.close();
 			}
