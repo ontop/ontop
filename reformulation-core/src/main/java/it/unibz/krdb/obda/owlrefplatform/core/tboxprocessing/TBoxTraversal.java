@@ -7,11 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public class TBoxTraversal {
 	
-	static boolean equalityNodes=false;
-	
-	public static void traverse(TBoxReasoner reasoner, TBoxTraverseListener listener, boolean... equality) {
-		if(equality.length==1)
-			equalityNodes= equality[0]; 
+	public static void traverse(TBoxReasoner reasoner, TBoxTraverseListener listener) {
 		
 		for (Equivalences<Property> nodes : reasoner.getProperties()) {
 			Property node = nodes.getRepresentative();
@@ -19,7 +15,7 @@ public class TBoxTraversal {
 			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(nodes)) {
 				Property descendant = descendants.getRepresentative();
 
-				if (equalityNodes || !descendant.equals(node) )  // exclude trivial inclusions
+				if (!descendant.equals(node))  // exclude trivial inclusions
 					listener.onInclusion(descendant, node);
 			}
 			for (Property equivalent : nodes) {
@@ -36,7 +32,7 @@ public class TBoxTraversal {
 			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(nodes)) {
 				BasicClassDescription descendant = descendants.getRepresentative();
 
-				if (equalityNodes || !descendant.equals(node))  // exclude trivial inclusions
+				if (!descendant.equals(node))  // exclude trivial inclusions
 					listener.onInclusion(descendant, node);
 			}
 			for (BasicClassDescription equivalent : nodes) {
@@ -47,4 +43,6 @@ public class TBoxTraversal {
 			}
 		}	
 	}
+	
+
 }

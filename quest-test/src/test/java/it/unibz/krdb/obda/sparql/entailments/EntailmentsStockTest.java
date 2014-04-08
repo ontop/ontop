@@ -236,7 +236,7 @@ public class EntailmentsStockTest extends TestCase {
 
 	}
 
-	public void testMoreEquivalenctClass() throws Exception {
+	public void testMoreEquivalentClass() throws Exception {
 
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y owl:equivalentClass :Dealer }";
 		QuestOWLStatement st = conn.createStatement();
