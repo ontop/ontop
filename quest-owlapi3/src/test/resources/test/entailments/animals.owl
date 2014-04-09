@@ -37,6 +37,9 @@
         <Class IRI="#Duck"/>
     </Declaration>
     <Declaration>
+        <Class IRI="#Greens"/>
+    </Declaration>
+    <Declaration>
         <Class IRI="#Male"/>
     </Declaration>
     <Declaration>
@@ -61,6 +64,9 @@
         <ObjectProperty IRI="#eats"/>
     </Declaration>
     <Declaration>
+        <ObjectProperty IRI="#hasDog"/>
+    </Declaration>
+    <Declaration>
         <ObjectProperty IRI="#hasPet"/>
     </Declaration>
     <Declaration>
@@ -79,11 +85,8 @@
         </ObjectMinCardinality>
     </EquivalentClasses>
     <EquivalentClasses>
-        <Class IRI="#Vegetarian"/>
-        <ObjectAllValuesFrom>
-            <ObjectProperty IRI="#eats"/>
-            <Class IRI="#Vegetable"/>
-        </ObjectAllValuesFrom>
+        <Class IRI="#Greens"/>
+        <Class IRI="#Vegetable"/>
     </EquivalentClasses>
     <SubClassOf>
         <Class IRI="#Adult"/>
@@ -129,6 +132,10 @@
         <Class IRI="#Animal"/>
         <Class IRI="#Vegetable"/>
     </DisjointClasses>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasDog"/>
+        <ObjectProperty IRI="#hasPet"/>
+    </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasPet"/>
         <ObjectProperty IRI="#likesPet"/>

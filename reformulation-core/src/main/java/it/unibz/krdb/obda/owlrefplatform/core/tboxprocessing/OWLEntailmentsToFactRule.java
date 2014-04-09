@@ -136,6 +136,7 @@ public class OWLEntailmentsToFactRule {
 		}
 
 	}
+	
 
 	/**
 	 * Called by { @link #addEntailmentsForClasses(TBoxReasoner) } add the
@@ -208,8 +209,7 @@ public class OWLEntailmentsToFactRule {
 
 						Property subPropertyItem = itcl.next();
 
-							addNodesRule(subPropertyItem.toString(), propertyItem.toString(), subPropertyOf);
-
+						addNodesRule(subPropertyItem.toString(), propertyItem.toString(), subPropertyOf);
 
 					}
 				}
@@ -242,21 +242,20 @@ public class OWLEntailmentsToFactRule {
 
 				addNodesRule(propertyItem.toString(), propertyItem2.toString(), equivalent);
 				Property inverse;
-				
+
 				if (propertyItem2.isInverse()) {
 					inverse = ontoFactory.createProperty(propertyItem2.getPredicate(), false);
 				}
-				else{
+				else {
 					inverse = ontoFactory.createProperty(propertyItem2.getPredicate(), true);
 				}
-					addNodesRule(propertyItem.toString(), inverse.toString(), inverseOf);
-				}
-			
+				addNodesRule(propertyItem.toString(), inverse.toString(), inverseOf);
+			}
 
 		}
 
 	}
-	
+
 	/**
 	 * From the given ontology add the facts for owl:disjointWith
 	 * 
@@ -264,50 +263,7 @@ public class OWLEntailmentsToFactRule {
 	 *            set of disjoint axiom with class and property some description
 	 */
 
-//	private static void addDisjointClasses(Set<DisjointBasicClassAxiom> set) {
-//
-//		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT_CLASS;
-//
-//		for (DisjointBasicClassAxiom disjointElements : set) {
-//
-//			for (Predicate description1 : disjointElements.getReferencedEntities()) {
-//
-//				for (Predicate description2 : disjointElements.getReferencedEntities()) {
-//
-//					if (!description1.equals(description2)) {
-//
-//						List<Term> terms = new ArrayList<Term>();
-//
-//						if (description1.isClass())
-//							// add URI terms
-//							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.getName())));
-//
-//						else { // if property some description
-//								// add blank node
-//							terms.add(factory.getConstantBNode(description1.getName()));
-//						}
-//
-//						if (description2.isClass())
-//							// add URI terms
-//							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.getName())));
-//
-//						else { // if property some description
-//
-//							// add blank node
-//							terms.add(factory.getConstantBNode(description2.getName()));
-//						}
-//
-//						if (terms.size() == 2) {
-//							Function head = factory.getFunction(disjointClass, terms);
-//							program.appendRule(factory.getCQIE(head));
-//						}
-//					}
-//
-//				}
-//			}
-//
-//		}
-//	}
+
 	
 	private static void addDisjointClasses(Set<DisjointBasicClassAxiom> set) {
 
@@ -320,6 +276,7 @@ public class OWLEntailmentsToFactRule {
 			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
 
 				BasicClassDescription class1 = null;
+				
 				if (predicate1.isClass()) {
 
 					class1 = ontoFactory.createClass(predicate1);
@@ -328,7 +285,13 @@ public class OWLEntailmentsToFactRule {
 
 					class1 = ontoFactory.createPropertySomeRestriction(predicate1, false);
 				}
-				for (BasicClassDescription description1 : dag.getVertex(class1)) {
+				
+				Equivalences<BasicClassDescription> equivalentDescriptions =dag.getVertex(class1);
+				Set<Equivalences<BasicClassDescription>> classes = dag.getSub(equivalentDescriptions);
+
+				for(Equivalences<BasicClassDescription> equivalentclasses : classes) {
+					
+					for(BasicClassDescription description1 : equivalentclasses.getMembers()){
 
 					for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
 
@@ -343,13 +306,24 @@ public class OWLEntailmentsToFactRule {
 
 								class2 = ontoFactory.createPropertySomeRestriction(predicate2, false);
 							}
-							for (BasicClassDescription description2 : dag.getVertex(class2)) {
+							
+							Equivalences<BasicClassDescription> equivalentDescriptions2 =dag.getVertex(class2);
+							Set<Equivalences<BasicClassDescription>> classes2 = dag.getSub(equivalentDescriptions2);
+
+							for(Equivalences<BasicClassDescription> equivalentclasses2 : classes2) {
+								
+								for(BasicClassDescription description2 : equivalentclasses2.getMembers()){
 
 								addBlankNodesRule(description1, description2, disjointClass);
 							}
 
 						}
 
+					}
+				}
+				
+				
+						
 					}
 				}
 			}
@@ -364,27 +338,6 @@ public class OWLEntailmentsToFactRule {
 	 *            set of disjoint axiom with properties
 	 */
 	
-//	private static void addDisjointProperties(Set<DisjointPropertyAxiom> set) {
-//
-//		Predicate disjointProperty = OBDAVocabulary.OWL_DISJOINT_PROPERTY;
-//
-//		for (DisjointPropertyAxiom disjointElements : set) {
-//
-//			for (Predicate description1 : disjointElements.getReferencedEntities()) {
-//
-//				for (Predicate description2 : disjointElements.getReferencedEntities()) {
-//
-//					if (!description1.equals(description2)) {
-//
-//						addNodesRule(description1.getName(), description2.getName(), disjointProperty);
-//					}
-//
-//				}
-//			}
-//
-//		}
-//	}
-	
 	private static void addDisjointProperties(Set<DisjointPropertyAxiom> set) {
 
 		Predicate disjointProperty = OBDAVocabulary.OWL_DISJOINT_PROPERTY;
@@ -393,35 +346,42 @@ public class OWLEntailmentsToFactRule {
 		for (DisjointPropertyAxiom disjointElements : set) {
 
 			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
-				
+
 				Property prop1 = ontoFactory.createProperty(predicate1, false);
-				
-				for (Property description1 : dag.getVertex(prop1)) {
 
-				for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
-					
-					if (!predicate1.equals(predicate2)) {
-						
-					
-						Property prop2 = ontoFactory.createProperty(predicate2, false);
-						
-						for (Property description2 : dag.getVertex(prop2)) {
+				Equivalences<Property> equivalentDescriptions = dag.getVertex(prop1);
+				Set<Equivalences<Property>> properties = dag.getSub(equivalentDescriptions);
 
-						addNodesRule(description1.toString(), description2.toString(), disjointProperty);
-						
-						Property inverseDescription1 = ontoFactory.createProperty(description1.getPredicate(), true);
-						Property inverseDescription2 = ontoFactory.createProperty(description2.getPredicate(), true);
-						
-						addNodesRule(inverseDescription1.toString(), inverseDescription2.toString(), disjointProperty);
+				for (Equivalences<Property> equivalentproperties : properties) {
+
+					for (Property description1 : equivalentproperties.getMembers()) {
+
+						for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
+
+							if (!predicate1.equals(predicate2)) {
+
+								Property prop2 = ontoFactory.createProperty(predicate2, false);
+
+								for (Property description2 : dag.getVertex(prop2)) {
+
+									addNodesRule(description1.toString(), description2.toString(), disjointProperty);
+
+									Property inverseDescription1 = ontoFactory.createProperty(description1.getPredicate(), true);
+									Property inverseDescription2 = ontoFactory.createProperty(description2.getPredicate(), true);
+
+									addNodesRule(inverseDescription1.toString(), inverseDescription2.toString(), disjointProperty);
+
+								}
+							}
+
 						}
 					}
-
-				}
 				}
 			}
 
 		}
 	}
+	
 	/**
 	 * Add ranges and domains. The domain is given by the direct named
 	 * superclass, the range is given by the direct named subclass of a property
@@ -535,14 +495,14 @@ public class OWLEntailmentsToFactRule {
 				Predicate property1 = ((PropertySomeRestriction) subDescription).getPredicate();
 
 				if (((PropertySomeRestriction) subDescription).isInverse())
-				{ 
+				{
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(subDescription.toString())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
 					program.appendRule(factory.getCQIE(head));
 					log.debug(head.toString());
-					
-					terms.clear();	
+
+					terms.clear();
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
@@ -553,14 +513,14 @@ public class OWLEntailmentsToFactRule {
 				}
 				else
 				{
-					PropertySomeRestriction inverse =ontoFactory.createPropertySomeRestriction(property1, true);
+					PropertySomeRestriction inverse = ontoFactory.createPropertySomeRestriction(property1, true);
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(inverse.toString())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					Function head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
 					program.appendRule(factory.getCQIE(head));
 					log.debug(head.toString());
-					
-					terms.clear();	
+
+					terms.clear();
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
@@ -590,6 +550,7 @@ public class OWLEntailmentsToFactRule {
 	 */
 
 	private static void addBlankNodesRule(BasicClassDescription description1, BasicClassDescription description2, Predicate function) {
+		
 		Predicate predDescription1 = description1.getPredicate();
 		Predicate predDescription2 = description2.getPredicate();
 		List<Term> terms = new ArrayList<Term>();
@@ -599,8 +560,8 @@ public class OWLEntailmentsToFactRule {
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
 		}
-		else{
-			if(!predDescription1.isDataTypePredicate()){ //propertySomeDescription
+		else {
+			if (!predDescription1.isDataTypePredicate()) { // propertySomeDescription
 				// add blank node
 				terms.add(factory.getConstantBNode(description1.toString()));
 			}
@@ -611,8 +572,8 @@ public class OWLEntailmentsToFactRule {
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
 		}
-		else{
-			if(!predDescription2.isDataTypePredicate()){ //propertySomeDescription
+		else {
+			if (!predDescription2.isDataTypePredicate()) { // propertySomeDescription
 				// add blank node
 				terms.add(factory.getConstantBNode(description2.toString()));
 			}
@@ -653,149 +614,7 @@ public class OWLEntailmentsToFactRule {
 
 	
 
-//	private static void addDisjointClassesWithEquivalences(Set<DisjointBasicClassAxiom> set, Map<Predicate, Description> equivalenceMaps) {
-//
-//		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT_CLASS;
-//
-//		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
-//
-//		for (DisjointBasicClassAxiom disjointElements : set) {
-//
-//			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
-//
-//				Set<BasicClassDescription> equivalences = new HashSet<BasicClassDescription>();
-//				Description representative = equivalenceMaps.get(predicate1);
-//
-//				if (representative != null) {
-//					equivalences = dag.getVertex((BasicClassDescription) representative).getMembers();
-//
-//					for (BasicClassDescription description1 : equivalences) {
-//
-//						for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
-//
-//							if (!predicate1.equals(predicate2)) {
-//
-//								Set<BasicClassDescription> equivalences2 = new HashSet<BasicClassDescription>();
-//								Description representative2 = equivalenceMaps.get(predicate2);
-//
-//								if (representative2 == null) {
-//									addBlankNodesRule(description1.getPredicate(), predicate2, disjointClass);
-//								}
-//								else {
-//									equivalences2 = dag.getVertex((BasicClassDescription) representative2).getMembers();
-//
-//									for (BasicClassDescription description2 : equivalences2) {
-//
-//										addBlankNodesRule(description1, description2, disjointClass);
-//									}
-//								}
-//
-//							}
-//						}
-//					}
-//				}
-//				else{
-//					
-//
-//						for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
-//
-//							if (!predicate1.equals(predicate2)) {
-//
-//								Set<BasicClassDescription> equivalences2 = new HashSet<BasicClassDescription>();
-//								Description representative2 = equivalenceMaps.get(predicate2);
-//
-//								if (representative2 == null) {
-//									addBlankNodesRuleInverses(predicate1, predicate2, disjointClass);
-//								}
-//								else {
-//									equivalences2 = dag.getVertex((BasicClassDescription) representative2).getMembers();
-//
-//									for (BasicClassDescription description2 : equivalences2) {
-//
-//										addBlankNodesRuleInverses(predicate1, description2.getPredicate(), disjointClass);
-//									}
-//								}
-//
-//							}
-//						}
-//					
-//					
-//				}
-//				}
-//
-//			}
-//		}
-//
-//	
-//	private static void addDisjointPropertiesWithEquivalences(Set<DisjointPropertyAxiom> set, Map<Predicate, Description> equivalenceMaps) {
-//
-//		Predicate disjointProperty = OBDAVocabulary.OWL_DISJOINT_PROPERTY;
-//
-//		EquivalencesDAG<Property> dag = reasoner.getProperties();
-//
-//		for (DisjointPropertyAxiom disjointElements : set) {
-//
-//			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
-//				Description representative = equivalenceMaps.get(predicate1);
-//				Set<Property> equivalences = new HashSet<Property>();
-//
-//				if (representative != null) {
-//
-//					equivalences = dag.getVertex((Property) representative).getMembers();
-//
-//					for (Property description1 : equivalences) {
-//
-//						for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
-//
-//							if (!predicate1.equals(predicate2)) {
-//
-//								Description representative2 = equivalenceMaps.get(predicate2);
-//
-//								Set<Property> equivalences2 = new HashSet<Property>();
-//								
-//								if (representative2 == null) {
-//									addNodesRule(description1.toString(), predicate2.toString(), disjointProperty);
-//								}
-//								else {
-//									equivalences2 = dag.getVertex((Property) representative2).getMembers();
-//
-//									for (Property description2 : equivalences2) {
-//
-//										addNodesRule(description1.toString(), description2.toString(), disjointProperty);
-//									}
-//
-//								}
-//							}
-//						}
-//					}
-//				}
-//
-//				else {
-//					for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
-//
-//						if (!predicate1.equals(predicate2)) {
-//
-//							Description representative2 = equivalenceMaps.get(predicate2);
-//
-//							Set<Property> equivalences2 = new HashSet<Property>();
-//							if (representative2 == null) {
-//								addNodesRule(predicate1.toString(), predicate2.toString(), disjointProperty);
-//							}
-//							else {
-//								equivalences2 = dag.getVertex((Property) representative2).getMembers();
-//
-//								for (Property description2 : equivalences2) {
-//
-//									addNodesRule(predicate1.toString(), description2.toString(), disjointProperty);
-//								}
-//
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
+
 									
 							
 

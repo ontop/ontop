@@ -250,7 +250,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-		assertEquals(88, individualsClass.size());
+		assertEquals(76, individualsClass.size());
 
 		log.info("Find subClass");
 		List<String> classes = runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:subClassOf :Man }", "rdfs:subClassOf");
@@ -293,7 +293,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(5, individualsDomainClass.size());
+		assertEquals(4, individualsDomainClass.size());
 	}
 
 	public void testRanges() throws Exception {
@@ -306,7 +306,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find range");
 		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
-		assertEquals(5, individualsRangeClass.size());
+		assertEquals(4, individualsRangeClass.size());
 	}
 
 	public void testDisjoint() throws Exception {
@@ -323,7 +323,7 @@ public class HierarchyVirtualTest extends TestCase {
 		
 		log.info("Find disjoint properties");
 		List<String> individualsDisjProp = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x owl:propertyDisjointWith ?y }", "owl:propertyDisjointWith");
-		assertEquals(4, individualsDisjProp.size());
+		assertEquals(14, individualsDisjProp.size());
 
 	}
 	
