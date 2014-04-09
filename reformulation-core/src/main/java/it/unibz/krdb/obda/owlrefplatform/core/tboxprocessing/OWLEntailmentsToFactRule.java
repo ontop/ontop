@@ -264,45 +264,93 @@ public class OWLEntailmentsToFactRule {
 	 *            set of disjoint axiom with class and property some description
 	 */
 
+//	private static void addDisjointClasses(Set<DisjointBasicClassAxiom> set) {
+//
+//		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT_CLASS;
+//
+//		for (DisjointBasicClassAxiom disjointElements : set) {
+//
+//			for (Predicate description1 : disjointElements.getReferencedEntities()) {
+//
+//				for (Predicate description2 : disjointElements.getReferencedEntities()) {
+//
+//					if (!description1.equals(description2)) {
+//
+//						List<Term> terms = new ArrayList<Term>();
+//
+//						if (description1.isClass())
+//							// add URI terms
+//							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.getName())));
+//
+//						else { // if property some description
+//								// add blank node
+//							terms.add(factory.getConstantBNode(description1.getName()));
+//						}
+//
+//						if (description2.isClass())
+//							// add URI terms
+//							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.getName())));
+//
+//						else { // if property some description
+//
+//							// add blank node
+//							terms.add(factory.getConstantBNode(description2.getName()));
+//						}
+//
+//						if (terms.size() == 2) {
+//							Function head = factory.getFunction(disjointClass, terms);
+//							program.appendRule(factory.getCQIE(head));
+//						}
+//					}
+//
+//				}
+//			}
+//
+//		}
+//	}
+	
 	private static void addDisjointClasses(Set<DisjointBasicClassAxiom> set) {
 
 		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT_CLASS;
 
+		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
+
 		for (DisjointBasicClassAxiom disjointElements : set) {
 
-			for (Predicate description1 : disjointElements.getReferencedEntities()) {
+			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
 
-				for (Predicate description2 : disjointElements.getReferencedEntities()) {
+				BasicClassDescription class1 = null;
+				if (predicate1.isClass()) {
 
-					if (!description1.equals(description2)) {
+					class1 = ontoFactory.createClass(predicate1);
+				}
+				else {
 
-						List<Term> terms = new ArrayList<Term>();
+					class1 = ontoFactory.createPropertySomeRestriction(predicate1, false);
+				}
+				for (BasicClassDescription description1 : dag.getVertex(class1)) {
 
-						if (description1.isClass())
-							// add URI terms
-							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.getName())));
+					for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
 
-						else { // if property some description
-								// add blank node
-							terms.add(factory.getConstantBNode(description1.getName()));
+						if (!predicate1.equals(predicate2)) {
+
+							BasicClassDescription class2 = null;
+							if (predicate2.isClass()) {
+
+								class2 = ontoFactory.createClass(predicate2);
+							}
+							else {
+
+								class2 = ontoFactory.createPropertySomeRestriction(predicate2, false);
+							}
+							for (BasicClassDescription description2 : dag.getVertex(class2)) {
+
+								addBlankNodesRule(description1, description2, disjointClass);
+							}
+
 						}
 
-						if (description2.isClass())
-							// add URI terms
-							terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.getName())));
-
-						else { // if property some description
-
-							// add blank node
-							terms.add(factory.getConstantBNode(description2.getName()));
-						}
-
-						if (terms.size() == 2) {
-							Function head = factory.getFunction(disjointClass, terms);
-							program.appendRule(factory.getCQIE(head));
-						}
 					}
-
 				}
 			}
 
@@ -316,27 +364,64 @@ public class OWLEntailmentsToFactRule {
 	 *            set of disjoint axiom with properties
 	 */
 	
+//	private static void addDisjointProperties(Set<DisjointPropertyAxiom> set) {
+//
+//		Predicate disjointProperty = OBDAVocabulary.OWL_DISJOINT_PROPERTY;
+//
+//		for (DisjointPropertyAxiom disjointElements : set) {
+//
+//			for (Predicate description1 : disjointElements.getReferencedEntities()) {
+//
+//				for (Predicate description2 : disjointElements.getReferencedEntities()) {
+//
+//					if (!description1.equals(description2)) {
+//
+//						addNodesRule(description1.getName(), description2.getName(), disjointProperty);
+//					}
+//
+//				}
+//			}
+//
+//		}
+//	}
+	
 	private static void addDisjointProperties(Set<DisjointPropertyAxiom> set) {
 
 		Predicate disjointProperty = OBDAVocabulary.OWL_DISJOINT_PROPERTY;
+		EquivalencesDAG<Property> dag = reasoner.getProperties();
 
 		for (DisjointPropertyAxiom disjointElements : set) {
 
-			for (Predicate description1 : disjointElements.getReferencedEntities()) {
+			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
+				
+				Property prop1 = ontoFactory.createProperty(predicate1, false);
+				
+				for (Property description1 : dag.getVertex(prop1)) {
 
-				for (Predicate description2 : disjointElements.getReferencedEntities()) {
+				for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
+					
+					if (!predicate1.equals(predicate2)) {
+						
+					
+						Property prop2 = ontoFactory.createProperty(predicate2, false);
+						
+						for (Property description2 : dag.getVertex(prop2)) {
 
-					if (!description1.equals(description2)) {
-
-						addNodesRule(description1.getName(), description2.getName(), disjointProperty);
+						addNodesRule(description1.toString(), description2.toString(), disjointProperty);
+						
+						Property inverseDescription1 = ontoFactory.createProperty(description1.getPredicate(), true);
+						Property inverseDescription2 = ontoFactory.createProperty(description2.getPredicate(), true);
+						
+						addNodesRule(inverseDescription1.toString(), inverseDescription2.toString(), disjointProperty);
+						}
 					}
 
+				}
 				}
 			}
 
 		}
 	}
-	
 	/**
 	 * Add ranges and domains. The domain is given by the direct named
 	 * superclass, the range is given by the direct named subclass of a property

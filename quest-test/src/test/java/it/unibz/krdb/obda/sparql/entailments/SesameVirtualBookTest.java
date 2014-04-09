@@ -128,9 +128,9 @@ public class SesameVirtualBookTest extends TestCase {
 				}
 
 				assertEquals(8, countResult);
-				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(1));
-				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(6));
-				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(5));
+				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(2));
+				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(7));
+				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(6));
 			} finally {
 				result.close();
 			}

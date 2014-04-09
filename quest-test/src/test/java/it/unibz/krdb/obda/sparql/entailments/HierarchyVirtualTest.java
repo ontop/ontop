@@ -319,11 +319,11 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find disjoint classes");
 		List<String> individualsDisjClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
-		assertEquals(2, individualsDisjClass.size());
+		assertEquals(8, individualsDisjClass.size());
 		
 		log.info("Find disjoint properties");
 		List<String> individualsDisjProp = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x owl:propertyDisjointWith ?y }", "owl:propertyDisjointWith");
-		assertEquals(2, individualsDisjProp.size());
+		assertEquals(4, individualsDisjProp.size());
 
 	}
 	

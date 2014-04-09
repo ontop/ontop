@@ -308,23 +308,23 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 		assertEquals(9, individualsRangeClass.size());
 	}
 
-//	public void testDisjoint() throws Exception {
-//
-//		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-//		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-//
-//		log.info("Find disjoint classes");
-//		List<String> individualsDisjClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
-//		assertEquals(4, individualsDisjClass.size());
-//		
-//		log.info("Find disjoint properties");
-//		List<String> individualsDisjProp = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:propertyDisjointWith ?y }", "owl:propertyDisjointWith");
-//		assertEquals(4, individualsDisjProp.size());
-//
-//	}
+	public void testDisjoint() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+
+		log.info("Find disjoint classes");
+		List<String> individualsDisjClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
+		assertEquals(4, individualsDisjClass.size());
+		
+		log.info("Find disjoint properties");
+		List<String> individualsDisjProp = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:propertyDisjointWith ?y }", "owl:propertyDisjointWith");
+		assertEquals(22, individualsDisjProp.size());
+
+	}
 	
 	public void testInverseOf() throws Exception {
 
