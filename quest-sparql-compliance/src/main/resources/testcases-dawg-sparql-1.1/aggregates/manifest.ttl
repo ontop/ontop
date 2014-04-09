@@ -12,7 +12,7 @@
     ( 
     #:agg01
     #:agg02
-    #:agg03
+    :agg03
     #:agg04
     #:agg05
     #:agg06
@@ -32,7 +32,7 @@
     #:agg-avg-02
     #:agg-min-01
     #:agg-min-02
-    :agg-max-01
+    #:agg-max-01
     #:agg-max-02
     ##:agg-sample-01 
     ##:agg-err-01

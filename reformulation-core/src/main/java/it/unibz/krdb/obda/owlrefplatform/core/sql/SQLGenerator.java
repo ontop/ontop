@@ -399,11 +399,49 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1);
 		String GROUP = getGroupBy(cq.getBody(), index);
-
-		String querystr = SELECT + FROM + WHERE + GROUP;
+		String HAVING = getHaving(cq.getBody(), index);;
+		
+		String querystr = SELECT + FROM + WHERE + GROUP + HAVING;
 		return querystr;
 	}
 
+	private String getHaving(List<Function> body, QueryAliasIndex index) {
+		StringBuilder result = new StringBuilder();
+		List <Term> conditions = new LinkedList<Term> ();
+		List <Function> condFunctions = new LinkedList<Function> ();
+		//List<Variable> varsInHaving = Lists.newArrayList();
+		for (Function atom : body) {
+			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_HAVING)) {
+				conditions = atom.getTerms();
+				break;
+			}
+		}
+		if (conditions.isEmpty()) {
+			return "";
+		}
+		condFunctions.addAll((Collection<? extends Function>) conditions);
+		LinkedHashSet<String> condSet = getBooleanConditionsString(condFunctions, index);
+		
+//		List<String> groupReferences = Lists.newArrayList();
+		
+//		for(Variable var : varsInGroupBy) {
+//			Collection<String> references = index.columnReferences.get(var);
+//			groupReferences.addAll(references);
+//		}
+//		
+//		if(!groupReferences.isEmpty()) {
+//			result.append(" GROUP BY " );
+//			Joiner.on(" , ").appendTo(result, groupReferences);
+//		}
+
+		result.append(" HAVING ( ");
+		for (String c: condSet) {
+			result.append(c);
+		} 
+		result.append(" ) ");
+		return result.toString();
+	}
+	
 	private String getGroupBy(List<Function> body, QueryAliasIndex index) {
 		StringBuilder result = new StringBuilder();
 
@@ -581,14 +619,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String condition = getSQLCondition(innerAtomAsFunction, index);
 
 				conditions.add(condition);
-			} else if (innerAtomAsFunction.isDataTypeFunction()) {
-
-				// if (!havingCond) {
-				// conditions.add(condition);
-				// } else {
-				// havingStr = condition;
-				// havingCond = false;
-				// }
 			} else if (innerAtomAsFunction.isDataTypeFunction()) {
 
 				String condition = getSQLString(innerAtom, index, false);
@@ -1217,19 +1247,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 				// Aggregates
 			} else if (functionString.equals("Count")) {
-				mainColumn = "COUNT(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+				mainColumn = "COUNT(" + getSQLString(ov.getTerm(0), index, false) + ")";
 
 			} else if (functionString.equals("Sum")) {
-				mainColumn = "SUM(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+				mainColumn = "SUM(" + getSQLString(ov.getTerm(0), index, false) + ")";
 
 			} else if (functionString.equals("Avg")) {
-				mainColumn = "AVG(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+				mainColumn = "AVG(" + getSQLString(ov.getTerm(0), index, false) + ")";
 
 			} else if (functionString.equals("Min")) {
-			mainColumn = "MIN(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+			mainColumn = "MIN(" + getSQLString(ov.getTerm(0), index, false) + ")";
 
 			} else if (functionString.equals("Max")) {
-				mainColumn = "MAX(" + getSQLStringForTemplateFunction((Function) ov.getTerm(0), index) + ")";
+				mainColumn = "MAX(" + getSQLString(ov.getTerm(0), index, false) + ")";
 
 			} else {
 				throw new IllegalArgumentException(
@@ -1246,7 +1276,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
 			if (!isStringColType(ht, index)) {
-				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
+				//TODO: See if this breaks something important
+				// We remove the cast, because it doesn't work in case of aggregates
+				// and maybe has lower performance
+				
+				
+				//mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
 		String format = String.format(mainTemplate, mainColumn,
@@ -1332,28 +1367,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 			
 			if (functionString.equals("Sum")) {
-				//return (String.format(typeStr, 5, varName));
-				ov = (Function) ov.getTerm(0);
-				function = ov.getFunctionSymbol();
-				functionString = function.getName();
+				return (String.format(typeStr, 6, varName));
+//				ov = (Function) ov.getTerm(0);
+//				function = ov.getFunctionSymbol();
+//				functionString = function.getName();
 			}
 			if (functionString.equals("Avg")) {
-				//return (String.format(typeStr, 5, varName));
-				ov = (Function) ov.getTerm(0);
-				function = ov.getFunctionSymbol();
-				functionString = function.getName();
+				return (String.format(typeStr, 6, varName));
+//				ov = (Function) ov.getTerm(0);
+//				function = ov.getFunctionSymbol();
+//				functionString = function.getName();
 			}
 			if (functionString.equals("Min")) {
-				//return (String.format(typeStr, 5, varName));
-				ov = (Function) ov.getTerm(0);
-				function = ov.getFunctionSymbol();
-				functionString = function.getName();
+				return (String.format(typeStr, 6, varName));
+//				ov = (Function) ov.getTerm(0);
+//				function = ov.getFunctionSymbol();
+//				functionString = function.getName();
 			}
 			if (functionString.equals("Max")) {
-				//return (String.format(typeStr, 5, varName));
-				ov = (Function) ov.getTerm(0);
-				function = ov.getFunctionSymbol();
-				functionString = function.getName();
+				return (String.format(typeStr, 6, varName));
+//				ov = (Function) ov.getTerm(0);
+//				function = ov.getFunctionSymbol();
+//				functionString = function.getName();
 			}
 
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {

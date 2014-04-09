@@ -414,6 +414,8 @@ public class ExpressionEvaluator {
 			return evalRegex(term);
 		} else if (pred == OBDAVocabulary.SPARQL_LIKE) {
 				return term;
+		} else if (pred == OBDAVocabulary.SPARQL_HAVING) {
+			return term;
 		} else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "

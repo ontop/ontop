@@ -772,15 +772,25 @@ public class SparqlAlgebraToDatalogTranslator {
 			pbody = ofac.getPredicate("ans" + (i * 2), vars.size());
 			bodyAtom = ofac.getFunction(pbody, vars);
 		}
-
+		
 		LinkedList<Function> body = new LinkedList<Function>();
-		body.add(bodyAtom);
-		body.addAll(filterAtoms);
+		
+		TupleExpr sub = filter.getArg();
+		if (sub instanceof Extension) { // The filter is HAVING condition
+			List <Term> havingTerms = new LinkedList<Term> ();
+			havingTerms.addAll(filterAtoms);
+			Function havingAtom = ofac.getFunction(OBDAVocabulary.SPARQL_HAVING,havingTerms );
+			body.add(bodyAtom);
+			body.add(havingAtom);
+		} else {
+			body.add(bodyAtom);
+			body.addAll(filterAtoms);
+		}
 
 		CQIE cq = ofac.getCQIE(head, body);
 		pr.appendRule(cq);
 
-		TupleExpr sub = filter.getArg();
+		
 
 		if (vars.size() == 0 && filteredVariables.size() > 0) {
 			List<Variable> newvars = new LinkedList<Variable>();
