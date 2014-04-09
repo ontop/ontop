@@ -592,6 +592,19 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					}
 				}
 
+			}//this is integer 
+			else{
+				boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+						(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+						(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+						(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+				if (isAnAggregate){
+					//This rule has aggregates so we should 
+					//not unfold the aggregated predicate
+					hasAggregates = true;
+					break;
+				}
+				
 			}
 		}
 	}
