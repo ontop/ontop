@@ -89,18 +89,15 @@ public class OWLEntailmentsToFactRule {
 	}
 
 	/**
-	 * Add subclasses and equivalences in the database using the DAG. All
-	 * subclasses are inserted considering also equivalences.
+	 * Add subclasses and equivalences in the datalog program using the DAG with classes. 
 	 * 
-	 * @param conn
-	 * @param reasoner
-	 * @throws SQLException
 	 */
 
 	private static void addEntailmentsForClasses() {
 
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
 		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
+		
 		Predicate subClassOf = OBDAVocabulary.RDFS_SUBCLASS;
 
 		while (it.hasNext()) {
@@ -109,13 +106,16 @@ public class OWLEntailmentsToFactRule {
 
 			Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
 
+			/*
+			 * Add the equivalences owl:equivalentClass for each node in the graph
+			 */
 			getEquivalencesClasses(eqv.getMembers());
 
 			while (iteq.hasNext()) {
 
 				BasicClassDescription classItem = iteq.next();
 
-				// if we want to add all subrelations not only the direct one
+				// iterate through all subclasses not only the direct ones
 				Iterator<Equivalences<BasicClassDescription>> classesIt = dag.getSub(eqv).iterator();
 
 				while (classesIt.hasNext()) {
@@ -126,6 +126,11 @@ public class OWLEntailmentsToFactRule {
 					while (itcl.hasNext()) {
 
 						BasicClassDescription subClassItem = itcl.next();
+						
+						/*
+						 * Add ot datalog the subclasses rdfs:subclass, 
+						 * create a blank node if some property of description
+						 */
 
 						addBlankNodesRule(subClassItem, classItem, subClassOf);
 
@@ -140,26 +145,31 @@ public class OWLEntailmentsToFactRule {
 
 	/**
 	 * Called by { @link #addEntailmentsForClasses(TBoxReasoner) } add the
-	 * owl:equivalentClass
+	 * owl:equivalentClass 
 	 * 
-	 * @param equivalenceMaps
+	 * @param equivalentMembers
 	 *            set of equivalent descriptions (classes, data-properties and
 	 *            properties some description)
 	 */
 
-	private static void getEquivalencesClasses(Set<BasicClassDescription> equivalenceMaps) {
+	private static void getEquivalencesClasses(Set<BasicClassDescription> equivalentMembers) {
 
-		Iterator<BasicClassDescription> itEquivalences = equivalenceMaps.iterator();
+		Iterator<BasicClassDescription> itEquivalences = equivalentMembers.iterator();
 		Predicate equivalentClass = OBDAVocabulary.OWL_EQUIVALENT_CLASS;
 
 		while (itEquivalences.hasNext()) {
 
 			BasicClassDescription node1 = itEquivalences.next();
-			Iterator<BasicClassDescription> itEquivalences2 = equivalenceMaps.iterator();
+			Iterator<BasicClassDescription> itEquivalences2 = equivalentMembers.iterator();
 
 			while (itEquivalences2.hasNext()) {
 
 				BasicClassDescription node2 = itEquivalences2.next();
+				
+				/*
+				 * Add to datalog program equivalences owl:equivalentClass
+				 * create a blank node if some property of description
+				 */
 				addBlankNodesRule(node1, node2, equivalentClass);
 
 			}
@@ -169,18 +179,15 @@ public class OWLEntailmentsToFactRule {
 	}
 
 	/**
-	 * Add subproperties and inverses in the database using the DAG. All
-	 * subproperties are inserted considering also equivalences
-	 * 
-	 * @param conn
-	 * @param reasoner
-	 * @throws SQLException
+	 * Add subproperties, equivalences and inverses in the datalog program using the DAG with properties.
+	 *
 	 */
 
 	private static void addEntailmentsForProperties() {
 
 		EquivalencesDAG<Property> dag = reasoner.getProperties();
 		Iterator<Equivalences<Property>> it = dag.iterator();
+		
 		Predicate subPropertyOf = OBDAVocabulary.RDFS_SUBPROPERTY;
 
 		while (it.hasNext()) {
@@ -189,7 +196,7 @@ public class OWLEntailmentsToFactRule {
 
 			Iterator<Property> iteq = eqv.getMembers().iterator();
 
-			// add owl:inversesOf
+			// add to datalog program owl:inversesOf and owl:equivalentProperty
 
 			addInversesAndEquivalences(eqv.getMembers());
 
@@ -197,7 +204,7 @@ public class OWLEntailmentsToFactRule {
 
 				Property propertyItem = iteq.next();
 
-				// if we want to add all subrelations not only the direct one
+				// add all subproperty not only the direct ones
 				Iterator<Equivalences<Property>> propertiesIt = dag.getSub(eqv).iterator();
 
 				while (propertiesIt.hasNext()) {
@@ -209,6 +216,9 @@ public class OWLEntailmentsToFactRule {
 
 						Property subPropertyItem = itcl.next();
 
+						/*
+						 * Add to datalog program rdfs:subproperty
+						 */
 						addNodesRule(subPropertyItem.toString(), propertyItem.toString(), subPropertyOf);
 
 					}
@@ -220,35 +230,48 @@ public class OWLEntailmentsToFactRule {
 	}
 	
 	/**
-	 * Called by { @link #addEntailmentsForProperties(TBoxReasoner) } Add
-	 * inverses and equivalences of properties
+	 * Called by { @link #addEntailmentsForProperties(TBoxReasoner) } 
+	 * Add inverses and equivalences of properties to datalog program
 	 * 
-	 * @param members
+	 * @param equivalentMembers
 	 */
-	private static void addInversesAndEquivalences(Set<Property> members) {
+	private static void addInversesAndEquivalences(Set<Property> equivalentMembers) {
 
 		Predicate inverseOf = OBDAVocabulary.OWL_INVERSE;
 		Predicate equivalent = OBDAVocabulary.OWL_EQUIVALENT_PROPERTY;
 
-		Iterator<Property> properties = members.iterator();
+		Iterator<Property> properties = equivalentMembers.iterator();
 
 		while (properties.hasNext()) {
+			
 			Property propertyItem = properties.next();
 
-			Iterator<Property> properties2 = members.iterator();
+			Iterator<Property> properties2 = equivalentMembers.iterator();
 
 			while (properties2.hasNext()) {
+				
 				Property propertyItem2 = properties2.next();
 
+				/*
+				 *Add owl:equivalentProperty to the datalog program
+				 */
 				addNodesRule(propertyItem.toString(), propertyItem2.toString(), equivalent);
+				
 				Property inverse;
 
+				//add the inverse of the equivalent node
 				if (propertyItem2.isInverse()) {
+					
 					inverse = ontoFactory.createProperty(propertyItem2.getPredicate(), false);
 				}
 				else {
+					
 					inverse = ontoFactory.createProperty(propertyItem2.getPredicate(), true);
 				}
+				
+				/*
+				 *Add owl:inverseOf to the datalog program
+				 */
 				addNodesRule(propertyItem.toString(), inverse.toString(), inverseOf);
 			}
 
@@ -257,14 +280,12 @@ public class OWLEntailmentsToFactRule {
 	}
 
 	/**
-	 * From the given ontology add the facts for owl:disjointWith
+	 * From the given ontology and the DAG with classes, add the facts for owl:disjointWith to datalog program
 	 * 
 	 * @param set
-	 *            set of disjoint axiom with class and property some description
+	 *            set of disjoint axiom with predicates of class and property some description. It does not contain inverses
 	 */
 
-
-	
 	private static void addDisjointClasses(Set<DisjointBasicClassAxiom> set) {
 
 		Predicate disjointClass = OBDAVocabulary.OWL_DISJOINT_CLASS;
@@ -276,7 +297,7 @@ public class OWLEntailmentsToFactRule {
 			for (Predicate predicate1 : disjointElements.getReferencedEntities()) {
 
 				BasicClassDescription class1 = null;
-				
+
 				if (predicate1.isClass()) {
 
 					class1 = ontoFactory.createClass(predicate1);
@@ -285,45 +306,52 @@ public class OWLEntailmentsToFactRule {
 
 					class1 = ontoFactory.createPropertySomeRestriction(predicate1, false);
 				}
-				
-				Equivalences<BasicClassDescription> equivalentDescriptions =dag.getVertex(class1);
+
+				Equivalences<BasicClassDescription> equivalentDescriptions = dag.getVertex(class1);
+
+				// add disjoints considering equivalent nodes and subclasses
 				Set<Equivalences<BasicClassDescription>> classes = dag.getSub(equivalentDescriptions);
 
-				for(Equivalences<BasicClassDescription> equivalentclasses : classes) {
-					
-					for(BasicClassDescription description1 : equivalentclasses.getMembers()){
+				for (Equivalences<BasicClassDescription> equivalentclasses : classes) {
 
-					for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
+					for (BasicClassDescription description1 : equivalentclasses.getMembers()) {
 
-						if (!predicate1.equals(predicate2)) {
-
-							BasicClassDescription class2 = null;
-							if (predicate2.isClass()) {
-
-								class2 = ontoFactory.createClass(predicate2);
-							}
-							else {
-
-								class2 = ontoFactory.createPropertySomeRestriction(predicate2, false);
-							}
+						for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
 							
-							Equivalences<BasicClassDescription> equivalentDescriptions2 =dag.getVertex(class2);
-							Set<Equivalences<BasicClassDescription>> classes2 = dag.getSub(equivalentDescriptions2);
+							// a class cannot be disjoint with itself or one of its equivalent classes
+							if (!predicate1.equals(predicate2)) {
 
-							for(Equivalences<BasicClassDescription> equivalentclasses2 : classes2) {
-								
-								for(BasicClassDescription description2 : equivalentclasses2.getMembers()){
+								BasicClassDescription class2 = null;
 
-								addBlankNodesRule(description1, description2, disjointClass);
+								if (predicate2.isClass()) {
+
+									class2 = ontoFactory.createClass(predicate2);
+								}
+								else {
+
+									class2 = ontoFactory.createPropertySomeRestriction(predicate2, false);
+								}
+
+								Equivalences<BasicClassDescription> equivalentDescriptions2 = dag.getVertex(class2);
+
+								Set<Equivalences<BasicClassDescription>> classes2 = dag.getSub(equivalentDescriptions2);
+
+								for (Equivalences<BasicClassDescription> equivalentclasses2 : classes2) {
+
+									for (BasicClassDescription description2 : equivalentclasses2.getMembers()) {
+
+										/*
+										 * Add owl:disjointWith facts to the
+										 * datalog program
+										 */
+										addBlankNodesRule(description1, description2, disjointClass);
+									}
+
+								}
+
 							}
-
 						}
 
-					}
-				}
-				
-				
-						
 					}
 				}
 			}
@@ -332,15 +360,16 @@ public class OWLEntailmentsToFactRule {
 	}
 	
 	/**
-	 * From the given ontology add the facts for owl:propertyDisjointWith
+	 * From the given ontology and the DAG with properties, add the facts for owl:propertyDisjointWith
 	 * 
 	 * @param set
-	 *            set of disjoint axiom with properties
+	 *            set of disjoint axiom with predicates of properties. It does not contain inverses.
 	 */
 	
 	private static void addDisjointProperties(Set<DisjointPropertyAxiom> set) {
 
 		Predicate disjointProperty = OBDAVocabulary.OWL_DISJOINT_PROPERTY;
+		
 		EquivalencesDAG<Property> dag = reasoner.getProperties();
 
 		for (DisjointPropertyAxiom disjointElements : set) {
@@ -350,6 +379,8 @@ public class OWLEntailmentsToFactRule {
 				Property prop1 = ontoFactory.createProperty(predicate1, false);
 
 				Equivalences<Property> equivalentDescriptions = dag.getVertex(prop1);
+				
+				// add disjoints considering equivalent nodes and subproperties
 				Set<Equivalences<Property>> properties = dag.getSub(equivalentDescriptions);
 
 				for (Equivalences<Property> equivalentproperties : properties) {
@@ -358,17 +389,27 @@ public class OWLEntailmentsToFactRule {
 
 						for (Predicate predicate2 : disjointElements.getReferencedEntities()) {
 
+							// a property cannot be disjoint with itself or one of its equivalent properties
 							if (!predicate1.equals(predicate2)) {
 
 								Property prop2 = ontoFactory.createProperty(predicate2, false);
 
 								for (Property description2 : dag.getVertex(prop2)) {
 
+									/*
+									 * Add owl:propertyDisjointWith facts to the
+									 * datalog program
+									 */
+									
 									addNodesRule(description1.toString(), description2.toString(), disjointProperty);
 
 									Property inverseDescription1 = ontoFactory.createProperty(description1.getPredicate(), true);
 									Property inverseDescription2 = ontoFactory.createProperty(description2.getPredicate(), true);
 
+									/*
+									 * Add owl:propertyDisjointWith facts for the inverses to the
+									 * datalog program
+									 */
 									addNodesRule(inverseDescription1.toString(), inverseDescription2.toString(), disjointProperty);
 
 								}
@@ -383,17 +424,18 @@ public class OWLEntailmentsToFactRule {
 	}
 	
 	/**
-	 * Add ranges and domains. The domain is given by the direct named
-	 * superclass, the range is given by the direct named subclass of a property
-	 * some description. It iterates through the graph. It first search between
-	 * the equivalent nodes if they are present and then it search for the
-	 * direct superclass or subclass.
+	 * Add rdfs:domain and rdfs:range. The domain of a property P is given by the direct named (OClass)
+	 * superclass C of the property some description existsP, the range of a property is given by the domain of the inverse
+	 * The method iterates through the DAG with classes. It first search between
+	 * the equivalent nodes (if they are present)  and then it searches in the
+	 * direct superclasses or subclasses.
 	 * 
-	 * @param reasoner
 	 */
+	
 	private static void addRangesAndDomainsFromClasses() {
 
-		boolean foundRange;
+		boolean foundRange; //if true we found the range or domain between the equivalent classes
+		
 		EquivalencesDAG<BasicClassDescription> dag = reasoner.getClasses();
 		Iterator<Equivalences<BasicClassDescription>> it = dag.iterator();
 
@@ -416,14 +458,24 @@ public class OWLEntailmentsToFactRule {
 
 					if (!node1.equals(node2)) {
 
-						if (addRangeOrDomainRule(node1, node2, true))
+						/*
+						 * add rdfs:range and rdfs:domain to datalog program
+						 * considering also inverses
+						 */
+						if (addRangeOrDomainRule(node1, node2)) {
 							foundRange = true;
+						}
 					}
 
 				}
 
 			}
 
+			/*
+			 *Search between superclasses the domain and range
+			 *if there were no named classes in the equivalent nodes.
+			 * 
+			 */
 			if (!foundRange) {
 
 				Iterator<BasicClassDescription> iteq = eqv.getMembers().iterator();
@@ -433,23 +485,6 @@ public class OWLEntailmentsToFactRule {
 					BasicClassDescription classItem = iteq.next();
 
 					if (classItem instanceof PropertySomeRestriction) {
-
-						Iterator<Equivalences<BasicClassDescription>> classesIt = dag.getDirectSub(eqv).iterator();
-
-						while (classesIt.hasNext()) {
-
-							Equivalences<BasicClassDescription> eqq = classesIt.next();
-							Iterator<BasicClassDescription> itcl = eqq.getMembers().iterator();
-
-							while (itcl.hasNext()) {
-
-								BasicClassDescription subClassItem = itcl.next();
-
-								addRangeOrDomainRule(subClassItem, classItem, false);
-
-							}
-
-						}
 
 						Iterator<Equivalences<BasicClassDescription>> classesIt2 = dag.getDirectSuper(eqv).iterator();
 
@@ -462,7 +497,11 @@ public class OWLEntailmentsToFactRule {
 
 								BasicClassDescription superClassItem = itcl.next();
 
-								addRangeOrDomainRule(classItem, superClassItem, false);
+								/*
+								 * add rdfs:range and rdfs:domain to datalog program
+								 * considering also inverses
+								 */
+								addRangeOrDomainRule(classItem, superClassItem);
 
 							}
 
@@ -475,9 +514,8 @@ public class OWLEntailmentsToFactRule {
 	}
 	
 	/**
-	 * The domain of a property can be found looking at the subclass of property
-	 * some description The range of a property can be found looking at the
-	 * subclass of the inverse of property some description
+	 * Add rdfs:range and rdfs:domain facts to datalog program
+	 * It assigns range and domain both to the property and its inverse
 	 * 
 	 * @param subDescription
 	 *            is analyzed if it is a property some restriction
@@ -485,25 +523,28 @@ public class OWLEntailmentsToFactRule {
 	 *            is analyzed if it is a class
 	 */
 
-	private static boolean addRangeOrDomainRule(BasicClassDescription subDescription, BasicClassDescription description, boolean equivalent) {
+	private static boolean addRangeOrDomainRule(BasicClassDescription subDescription, BasicClassDescription description) {
 
 		List<Term> terms = new ArrayList<Term>();
 
 		if (subDescription instanceof PropertySomeRestriction) {
 			if (!(description instanceof PropertySomeRestriction)) {
-				// get the property related to the existential
-				Predicate property1 = ((PropertySomeRestriction) subDescription).getPredicate();
+				// get the predicate 
+				Predicate predicate1 = ((PropertySomeRestriction) subDescription).getPredicate();
+				//get the property as inverse
+				Property inverse = ontoFactory.createProperty(predicate1, true);
 
+				//we assign the domain of the property and the range of its inverse
 				if (((PropertySomeRestriction) subDescription).isInverse())
 				{
-					terms.add(factory.getUriTemplate(factory.getConstantLiteral(subDescription.toString())));
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(inverse.toString())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
 					program.appendRule(factory.getCQIE(head));
 					log.debug(head.toString());
 
 					terms.clear();
-					terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(predicate1.getName())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
 					program.appendRule(factory.getCQIE(head));
@@ -511,19 +552,21 @@ public class OWLEntailmentsToFactRule {
 					return true;
 
 				}
-				else
+				else //we assign the domain of the property and the range of its inverse
 				{
-					PropertySomeRestriction inverse = ontoFactory.createPropertySomeRestriction(property1, true);
-					terms.add(factory.getUriTemplate(factory.getConstantLiteral(inverse.toString())));
+					
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(predicate1.getName())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
-					Function head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
+					Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
 					program.appendRule(factory.getCQIE(head));
 					log.debug(head.toString());
-
+					
 					terms.clear();
-					terms.add(factory.getUriTemplate(factory.getConstantLiteral(property1.getName())));
+					
+					
+					terms.add(factory.getUriTemplate(factory.getConstantLiteral(inverse.toString())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
-					head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
+					head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
 					program.appendRule(factory.getCQIE(head));
 					log.debug(head.toString());
 					return true;
@@ -542,7 +585,7 @@ public class OWLEntailmentsToFactRule {
 	}
 
 	/**
-	 * Create a fact given two blank nodes and a predicate
+	 * Create a fact with the specified predicate as function. Use blank nodes for some property of description and URI for classes 
 	 * 
 	 * @param description1
 	 * @param description2
@@ -589,7 +632,7 @@ public class OWLEntailmentsToFactRule {
 
 
 	/**
-	 * Create a fact given two nodes (transformed in URI) and a predicate
+	 * Create a fact given two nodes (transformed in URI) and a predicate function
 	 * 
 	 * @param description1
 	 * @param description2
