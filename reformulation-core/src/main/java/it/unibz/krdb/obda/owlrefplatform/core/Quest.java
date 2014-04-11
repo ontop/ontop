@@ -847,31 +847,42 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Adding ontology assertions (ABox) as rules (facts, head with
 				 * no body).
 				 */
+				log.info("AboxToFactRule");
 				ABoxToFactRuleConverter.addFacts(
 						inputTBox.getABox().iterator(), unfoldingProgram,
 						equivalenceMaps);
-				
+				log.info("Done AboxToFactRule");
 				/*
 				 * Adding facts about sparql owl entailments in datalogProgram
 				 * rdfs:subclass rdfs:subproperty owl:inverseof owl:equivalentclass
 				 * owl:equivalentProperty owl:disjointWith owl:propertyDisjointWith rdfs:domain rdfs:range
 				 */
-				if(sparqlOwlEntailment)
+							
+				if(sparqlOwlEntailment){
+					log.info("SparqlOWLEntailment");
+					long start = System.nanoTime();
 					OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
-
+					log.info("{}ms", ((System.nanoTime() - start)/1000000));
+					log.info("Done.");
+				}
+				
+				log.info("TMapping");
 				unfoldingProgram = applyTMappings(metadata, optimizeMap,
 						unfoldingProgram, sigma, true);
-
+				log.info("Done TMapping.");
 				/*
 				 * Adding data typing on the mapping axioms.
 				 */
+				log.info("ExtendTypes");
 				extendTypesWithMetadata(metadata, unfoldingProgram);
-
+				log.info("Done ExterndTypes");
 				/*
 				 * Adding NOT NULL conditions to the variables used in the head
 				 * of all mappings to preserve SQL-RDF semantics
 				 */
+				log.info("AddNotNull");
 				addNOTNULLToMappings(fac, unfoldingProgram);
+				log.info("Done AddNotNull");
 
 			}
 
@@ -880,16 +891,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * 
 			 * /* Collecting URI templates
 			 */
+			log.info("URITemplate");
 			generateURITemplateMatchers(fac, unfoldingProgram);
-
+			log.info("Done URITemplate");
 			/*
 			 * Adding "triple(x,y,z)" mappings for support of unbounded
 			 * predicates and variables as class names (implemented in the
 			 * sparql translator)
 			 */
-
+			log.info("Triple");
 			unfoldingProgram.appendRule(generateTripleMappings(fac,
 					unfoldingProgram));
+			log.info("Done Triple");
 
 			log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
@@ -918,9 +931,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Setting up the reformulation engine
 			 */
-
 			setupRewriter(reducedOntology, sigma);
-
 			Ontology saturatedSigma = sigma.clone();
 			saturatedSigma.saturate();
 
@@ -976,6 +987,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
+		
+		if(sparqlOwlEntailment){
+			log.info("SparqlOWLEntailment");
+			long start = System.nanoTime();
+			OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
+			log.info("{}ms", ((System.nanoTime() - start)/1000000));
+			log.info("Done.");
+		}
+		
 		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram,
 				sigma, false);
 		;

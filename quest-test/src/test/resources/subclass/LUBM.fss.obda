@@ -1,0 +1,23 @@
+[PrefixDeclaration]
+:		http://example.org/university.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	h2
+connectionUrl	jdbc:h2:mem:questjunitdb
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+
+mappingId	Person
+target		:person-{p_id} a :Person . 
+source		select p_id, p_name from people
+
+]]
+
