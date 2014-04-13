@@ -235,9 +235,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += modifier;
 			return sql;
 		} else {
-			return generateQuery(queryProgram, signature, "", ruleIndex,
+			String generatedQuery = generateQuery(queryProgram, signature, "", ruleIndex,
 					ruleIndexByBodyPredicate, predicatesInBottomUp,
 					extensionalPredicates);
+			return generatedQuery;
 		}
 	}
 
