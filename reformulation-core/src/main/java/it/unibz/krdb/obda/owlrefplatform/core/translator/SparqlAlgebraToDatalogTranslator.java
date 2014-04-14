@@ -278,18 +278,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Term term = getBooleanTerm(vexp);
 
 			Set<Variable> atom1VarsSet = getBindVariables(subte);
-			atom2VarsSet = getVariables(subte);
-			
 			atom1VarsList.addAll(atom1VarsSet);
-			
-			//new
-			for (Variable v:atom2VarsSet ){
-				if (atom1VarsList.contains(v)){
-					continue;
-				}
-				atom1VarsList.add(v);
-			}
-			
 			
 			atom1VarsList.add(var);
 			Collections.sort(atom1VarsList, comparator);
@@ -299,7 +288,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					atom1VarsList.size());
 			Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
 		
-			
+			atom2VarsSet = getVariables(subte);
 			
 			atom2VarsList.addAll(atom2VarsSet);
 			Collections.sort(atom2VarsList, comparator);
