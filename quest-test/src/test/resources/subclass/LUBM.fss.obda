@@ -15,9 +15,5 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 
-mappingId	Person
-target		:person-{p_id} a :Person . 
-source		select p_id, p_name from people
-
 ]]
 

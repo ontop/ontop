@@ -138,7 +138,7 @@ public class OBDAVocabulary {
 	
 	public static final String OWL_EQUIVALENTCLASS_URI = "http://www.w3.org/2002/07/owl#equivalentClass";
 	
-	private static final String OWL_EQUIVALENTPROPERTY_URI = "http://www.w3.org/2002/07/owl#equivalentProperty";
+	public static final String OWL_EQUIVALENTPROPERTY_URI = "http://www.w3.org/2002/07/owl#equivalentProperty";
 	
 	public static final String OWL_DISJOINTCLASS_URI = "http://www.w3.org/2002/07/owl#disjointWith";
 	

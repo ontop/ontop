@@ -988,17 +988,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
 		
-		if(sparqlOwlEntailment){
-			log.info("SparqlOWLEntailment");
-			long start = System.nanoTime();
-			OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
-			log.info("{}ms", ((System.nanoTime() - start)/1000000));
-			log.info("Done.");
-		}
+//		if(sparqlOwlEntailment){
+//			log.info("SparqlOWLEntailment");
+//			long start = System.nanoTime();
+//			OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputTBox, equivalenceMaps);
+//			log.info("{}ms", ((System.nanoTime() - start)/1000000));
+//			log.info("Done.");
+//		}
 		
 		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram,
 				sigma, false);
-		;
+		
 
 		/*
 		 * Adding "triple(x,y,z)" mappings for support of unbounded predicates

@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
@@ -454,6 +455,12 @@ public class CQCUtilities {
 
 		if (!query.getHead().getFunctionSymbol().equals(canonicalhead.getFunctionSymbol()))
 			return false;
+		
+		/*if owl entailments facts (as rdfs:subClass, rdfs:subProperty, owl:inverseOf, owl:equivalentClass ...)
+		 * do not remove them in any case
+		 */	
+		if(ignoreOwlSparqlEntailments(query))
+			return false;
 
 		for (Function queryatom : query.getBody()) {
 			if (!canonicalpredicates.contains(((Function) queryatom).getFunctionSymbol())) {
@@ -462,6 +469,32 @@ public class CQCUtilities {
 		}
 
 		return hasAnswer(query);
+	}
+
+	/*if owl entailments facts 
+	 * rdfs:subClassOf, rdfs:subPropertyOf, owl:inverseOf, owl:equivalentClass, owl:equivalentProperty,
+	 * rdfs:domain, rdfs:range, owl:disjointWith, owl:disjointPropertyWith
+	 * they do not need to be removed since they have been added only once
+	 */	
+	private boolean ignoreOwlSparqlEntailments(CQIE query) {
+
+		Predicate function = query.getHead().getFunctionSymbol();
+
+		switch (function.getName()) {
+		
+			case OBDAVocabulary.RDFS_DOMAIN_URI:
+			case OBDAVocabulary.RDFS_RANGE_URI:
+			case OBDAVocabulary.RDFS_SUBCLASS_URI:
+			case OBDAVocabulary.RDFS_SUBPROPERTY_URI:
+			case OBDAVocabulary.OWL_DISJOINTCLASS_URI:
+			case OBDAVocabulary.OWL_DISJOINTPROPERTY_URI:
+			case OBDAVocabulary.OWL_EQUIVALENTCLASS_URI:
+			case OBDAVocabulary.OWL_EQUIVALENTPROPERTY_URI:
+			case OBDAVocabulary.OWL_INVERSE_URI:
+				return true;
+		}
+
+		return false;
 	}
 
 	/***
@@ -914,6 +947,7 @@ public class CQCUtilities {
 		if (sigma != null) {
 			for (int i = 0; i < queries.size(); i++) {
 				CQIE query = queries.get(i);
+					
 				CQCUtilities cqc = new CQCUtilities(query, sigma);
 				for (int j = queries.size() - 1; j > i; j--) {
 					CQIE query2 = queries.get(j);
@@ -958,7 +992,8 @@ public class CQCUtilities {
 
 			if (twopasses) {
 				for (int i = (queries.size() - 1); i >= 0; i--) {
-					CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
+					CQIE query = queries.get(i);
+					CQCUtilities cqc = new CQCUtilities(query, rules);
 					if (cqc.rules != null)
 					for (int j = 0; j < i; j++) {
 						if (cqc.isContainedIn(queries.get(j))) {
