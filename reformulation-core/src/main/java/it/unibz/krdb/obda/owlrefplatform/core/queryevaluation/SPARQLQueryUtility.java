@@ -22,7 +22,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.parser.ParsedBooleanQuery;
+import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.query.parser.sparql.SPARQLParser;
 
 public class SPARQLQueryUtility {
@@ -77,6 +80,22 @@ public class SPARQLQueryUtility {
 		return query.toLowerCase().contains(DESCRIBE_KEYWORD);
 	}
 
+	public static boolean isAskQuery(ParsedQuery query) {
+		return (query instanceof ParsedBooleanQuery);
+	}
+	
+	public static boolean isSelectQuery(ParsedQuery query) {
+		return (query instanceof ParsedTupleQuery);
+	}
+	
+	public static boolean isConstructQuery(ParsedQuery query) {
+		return (query instanceof ParsedGraphQuery) && query.getSourceString().toLowerCase().contains(CONSTRUCT_KEYWORD);
+	}
+	
+	public static boolean isDescribeQuery(ParsedQuery query) {
+		return (query instanceof ParsedGraphQuery) && query.getSourceString().toLowerCase().contains(DESCRIBE_KEYWORD);
+	}
+	
 	public static boolean isVarDescribe(String strquery) {
 		if (strquery.contains("where"))
 		{

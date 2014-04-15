@@ -99,6 +99,10 @@ public class QuestStatement implements OBDAStatement {
 	private OBDAModel unfoldingOBDAModel = null;
 
 	private boolean canceled = false;
+	
+	private boolean queryIsParsed = false;
+	
+	private ParsedQuery parsedQ = null;
 
 	private Statement sqlstatement;
 
@@ -314,16 +318,26 @@ public class QuestStatement implements OBDAStatement {
 		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
-
+		ParsedQuery pq = null;
+		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+		try {
+			pq = qp.parseQuery(strquery, null);
+		} catch (MalformedQueryException e1) {
+			e1.printStackTrace();
+		} 
 		// encoding ofquery type into numbers
-		if (SPARQLQueryUtility.isSelectQuery(strquery)) {
+		if (SPARQLQueryUtility.isSelectQuery(pq)) {
+			parsedQ = pq;
+			queryIsParsed = true;
 			TupleResultSet executedQuery = executeTupleQuery(strquery, 1);
 			return executedQuery;
 
-		} else if (SPARQLQueryUtility.isAskQuery(strquery)) {
+		} else if (SPARQLQueryUtility.isAskQuery(pq)) {
+			parsedQ = pq;
+			queryIsParsed = true;
 			TupleResultSet executedQuery = executeTupleQuery(strquery, 2);
 			return executedQuery;
-		} else if (SPARQLQueryUtility.isConstructQuery(strquery)) {
+		} else if (SPARQLQueryUtility.isConstructQuery(pq)) {
 			
 			// Here we need to get the template for the CONSTRUCT query results
 			try {
@@ -337,7 +351,7 @@ public class QuestStatement implements OBDAStatement {
 			GraphResultSet executedGraphQuery = executeGraphQuery(strquery, 3);
 			return executedGraphQuery;
 			
-		} else if (SPARQLQueryUtility.isDescribeQuery(strquery)) {
+		} else if (SPARQLQueryUtility.isDescribeQuery(pq)) {
 			// create list of uriconstants we want to describe
 			List<String> constants = new ArrayList<String>();
 			if (SPARQLQueryUtility.isVarDescribe(strquery)) {
@@ -687,7 +701,7 @@ public class QuestStatement implements OBDAStatement {
 
 		List<String> signatureContainer = new LinkedList<String>();
 		//Query query;
-		ParsedQuery query;
+		ParsedQuery query = null;
 		
 		// Check the cache first if the system has processed the query string
 		// before
@@ -699,8 +713,15 @@ public class QuestStatement implements OBDAStatement {
 			query = sesameQueryCache.get(strquery);
 
 		} else {
-			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-			query = qp.parseQuery(strquery, null); // base URI is null
+			
+			if (!queryIsParsed){
+				QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+				query = qp.parseQuery(strquery, null); // base URI is null
+				//queryIsParsed = true;
+			} else {
+				query = parsedQ;
+				queryIsParsed = false;
+			}
 			//getSignature(query, signatureContainer);
 			getSignature(query, signatureContainer);
 
