@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -36,6 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -245,10 +247,16 @@ public class QuestMaterializer {
 					if (vocabularyIterator.hasNext()) {
 						Predicate pred = vocabularyIterator.next();
 						String query = getQuery(pred);
-						results = (GraphResultSet) stm.execute(query);
-					}
-					else
+						ResultSet execute = stm.execute(query);
+
+						results = (GraphResultSet) execute;
+						if (results!=null){
+							hasNext = results.hasNext();
+
+						}					
+					}else{
 						break;
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -280,13 +288,20 @@ public class QuestMaterializer {
 						//close previous statement if open
 						if (stm!= null && results!=null)
 							{stm.close(); results.close(); }
-						
+
 						//execute next query
 						stm = questConn.createStatement();
-						results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
-						if (results!=null)
+						Predicate next = vocabularyIterator.next();
+						String query = getQuery(next);
+						ResultSet execute = stm.execute(query);
+
+						results = (GraphResultSet) execute;
+						if (results!=null){
 							hasNext = results.hasNext();
-					
+
+						}
+
+
 				}
 				read = true;
 				

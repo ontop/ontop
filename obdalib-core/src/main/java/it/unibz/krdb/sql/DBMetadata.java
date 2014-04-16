@@ -120,10 +120,10 @@ public class DBMetadata implements Serializable {
 			if (names.length == 2) {
 				String schemaName = names[0];
 				String tableName = names[1];
-				if (VisitedQuery.pQuotes.matcher(schemaName).matches())
+				if (pQuotes.matcher(schemaName).matches())
 					schemaName = schemaName.substring(1,
 							schemaName.length() - 1);
-				if (VisitedQuery.pQuotes.matcher(tableName).matches())
+				if (pQuotes.matcher(tableName).matches())
 					tableName = tableName.substring(1, tableName.length() - 1);
 				schema.put(schemaName + "." + tableName, value);
 			} else
