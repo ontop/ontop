@@ -664,6 +664,15 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 
 	}
+	
+	//add support for CAST also in unquoted visited query
+	public void testUnquoted1(){
+		final boolean result = parseUnquotedJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+				+ "FROM people \"QpeopleVIEW0\" "
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+		printJSQL("test_12", result);
+		assertTrue(result);
+	}
 
 	private String queryText;
 
@@ -717,6 +726,21 @@ public class JSQLParserTest extends TestCase {
 					+ queryText);
 		}
 		System.out.println();
+	}
+
+	
+	private boolean parseUnquotedJSQL(String input) {
+
+		queryText = input;
+
+		try {
+			queryP = new VisitedQuery(input,true);
+		} catch (Exception e) {
+
+			return false;
+		}
+
+		return true;
 	}
 
 }

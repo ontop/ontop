@@ -404,6 +404,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getFunctionCast(Term term1, Term term2) {
+		// TODO implement cast function
+		return getFunction(OBDAVocabulary.CAST, term1, term2);
+	}
+	
+	@Override
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, 
 			String password, String driverclass) {
 		URI id = URI.create(UUID.randomUUID().toString());
@@ -479,4 +485,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
 		}
 	}
+
+	
+
+	
 }

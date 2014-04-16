@@ -59,6 +59,10 @@ public class OBDAVocabulary {
 	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl(
 			MULTIPLY_STR, 2);
 	
+	/* Cast operation predicate */	
+	
+	public static final Predicate CAST = null;
+	
 	/* Boolean predicate URIs */
 
 	public static final String strAND = "AND";
@@ -283,4 +287,6 @@ public class OBDAVocabulary {
 	
 	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
 			SPARQL_LIKE_URI, 2);
+
+	
 }

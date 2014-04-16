@@ -49,6 +49,7 @@ import java.util.Stack;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.CastExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -264,6 +265,33 @@ public class MappingAnalyzer {
 		} else {
 			return dfac.getFunctionIsNotNull(var);
 		}
+	}
+	
+	/**
+	 * Methods to create a {@link Function} starting from a
+	 * {@link IsNullExpression}
+	 * 
+	 * @param pred
+	 *            IsNullExpression
+	 * @param lookupTable
+	 * @return a function from the OBDADataFactory
+	 */
+	private Function getFunction(CastExpression pred, LookupTable lookupTable) {
+
+		Expression column = pred.getLeftExpression();
+		String columnName = column.toString();
+		String variableName = lookupTable.lookup(columnName);
+		if (variableName == null) {
+			throw new RuntimeException(
+					"Unable to find column name for variable: " + columnName);
+		}
+		Term var = dfac.getVariable(variableName);
+
+		String datatype= pred.getType().getDataType();
+		
+		Term var2 = null;
+		
+		return dfac.getFunctionCast(var, var2);
 	}
 
 	/**

@@ -596,8 +596,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 
 	@Override
 	public void visit(CastExpression arg0) {
-		// we do not consider CAST expression
-		notSupported = true;
+		
 	}
 
 	/*
