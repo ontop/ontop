@@ -74,9 +74,9 @@ public class LUBM1MySQLTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile =
+	String owlfile =
 			"src/test/resources/test/entailments/univ-bench.owl";
-	final String obdafile =
+	String obdafile =
 			"src/test/resources/test/entailments/univ1-bench.obda";
 
 	@Override
@@ -444,6 +444,20 @@ public class LUBM1MySQLTest extends TestCase {
 		List<String> individualsInverse = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x owl:inverseOf ?y }", "owl:inverseOf");
 		assertEquals(76, individualsInverse.size());
 
+	}
+	
+	public static void main(String[] args) throws Exception{
+		if(args.length != 2){
+			System.err.println("Usage: main ontology.owl mapping.obda");
+			System.exit(0);
+		}
+		
+		
+		LUBM1MySQLTest benchmark = new LUBM1MySQLTest();
+		benchmark.owlfile = args[0];
+		benchmark.obdafile = args[1];
+		benchmark.setUp();
+		benchmark.testLUBM();
 	}
 
 }
