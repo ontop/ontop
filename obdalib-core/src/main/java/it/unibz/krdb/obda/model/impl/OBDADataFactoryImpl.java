@@ -406,7 +406,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
-		return getFunction(OBDAVocabulary.CAST, term1, term2);
+		return getFunction(OBDAVocabulary.QUEST_CAST, term1, term2);
 	}
 	
 	@Override

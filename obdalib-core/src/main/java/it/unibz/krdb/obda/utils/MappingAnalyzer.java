@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -68,6 +69,7 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
 
 //import com.hp.hpl.jena.iri.IRI;
 
@@ -287,11 +289,17 @@ public class MappingAnalyzer {
 		}
 		Term var = dfac.getVariable(variableName);
 
-		String datatype= pred.getType().getDataType();
+		ColDataType datatype= pred.getType();
+		
+
 		
 		Term var2 = null;
 		
+		//first value is a column, second value is a datatype. It can  also have the size
+		
 		return dfac.getFunctionCast(var, var2);
+		
+		
 	}
 
 	/**
