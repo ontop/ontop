@@ -345,7 +345,7 @@ public class LUBM1MySQLTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		
 		try {
-			while(run<4){	
+			while(run<5){	
 			for (Integer number : queries.keySet()) {
 				String query = queries.get(number);
 				log.info("---Query " + number + query);
@@ -355,6 +355,7 @@ public class LUBM1MySQLTest extends TestCase {
 				QuestOWLResultSet rs = st.executeTuple(query);
 				long end= System.currentTimeMillis()-start;
 				log.info("---time " + end);
+				if(run!=1){
 				queriesTime.put(query, Long.valueOf(end) + queriesTime.get(query));
 				int numberResults = 0;
 				
@@ -370,6 +371,7 @@ public class LUBM1MySQLTest extends TestCase {
 				}
 				assertEquals(queriesResult.get(query).intValue(), numberResults);
 				st.close();
+				}
 			}
 
 			run++;

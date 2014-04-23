@@ -538,14 +538,14 @@ public class OWLEntailmentsToFactRule {
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
 					program.appendRule(factory.getCQIE(head));
-					log.debug(head.toString());
+//					log.debug(head.toString());
 
 					terms.clear();
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(predicate1.getName())));
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
 					program.appendRule(factory.getCQIE(head));
-					log.debug(head.toString());
+//					log.debug(head.toString());
 					return true;
 
 				}
@@ -557,7 +557,7 @@ public class OWLEntailmentsToFactRule {
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					Function head = factory.getFunction(OBDAVocabulary.RDFS_DOMAIN, terms);
 					program.appendRule(factory.getCQIE(head));
-					log.debug(head.toString());
+//					log.debug(head.toString());
 
 					terms.clear();
 
@@ -565,7 +565,7 @@ public class OWLEntailmentsToFactRule {
 					terms.add(factory.getUriTemplate(factory.getConstantLiteral(description.toString())));
 					head = factory.getFunction(OBDAVocabulary.RDFS_RANGE, terms);
 					program.appendRule(factory.getCQIE(head));
-					log.debug(head.toString());
+//					log.debug(head.toString());
 					return true;
 				}
 			}
@@ -622,7 +622,7 @@ public class OWLEntailmentsToFactRule {
 		if (terms.size() == 2) {
 			Function head = factory.getFunction(function, terms);
 			program.appendRule(factory.getCQIE(head));
-			log.debug(head.toString());
+//			log.debug(head.toString());
 		}
 
 	}
@@ -646,7 +646,7 @@ public class OWLEntailmentsToFactRule {
 
 		Function head = factory.getFunction(function, terms);
 
-		log.debug(head.toString());
+//		log.debug(head.toString());
 
 		program.appendRule(factory.getCQIE(head));
 

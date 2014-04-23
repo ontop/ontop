@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBM8000MySQLTest extends TestCase {
+public class LUBM500MySQLTest extends TestCase {
 
 	private OBDADataFactory fac;
 
@@ -78,7 +78,7 @@ public class LUBM8000MySQLTest extends TestCase {
 	String owlfile =
 			"src/test/resources/subclass/univ-bench.owl";
 	String obdafile =
-			"src/test/resources/subclass/univ8000-bench.obda";
+			"src/test/resources/subclass/univ500-bench.obda";
 
 	@Override
 	public void setUp() throws Exception {
@@ -513,7 +513,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		
 		try {
-			while(run<4){	
+			while(run<5){	
 			for (Integer number : queries.keySet()) {
 				String query = queries.get(number);
 				log.info("---Query " + number + query);
@@ -523,6 +523,7 @@ public class LUBM8000MySQLTest extends TestCase {
 				QuestOWLResultSet rs = st.executeTuple(query);
 				long end= System.currentTimeMillis()-start;
 				log.info("---time " + end);
+				if(run!=1){
 				queriesTime.put(query, Long.valueOf(end) + queriesTime.get(query));
 //				int numberResults = 0;
 //				
@@ -538,6 +539,7 @@ public class LUBM8000MySQLTest extends TestCase {
 //				}
 ////				assertEquals(queriesResult.get(query).intValue(), numberResults);
 //				st.close();
+				}
 			}
 
 			run++;
@@ -580,8 +582,7 @@ public class LUBM8000MySQLTest extends TestCase {
 
 		factory.setPreferenceHolder(p);
 		int run=1;
-		
-			
+
 		
 		long start1 =System.currentTimeMillis();
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
@@ -729,40 +730,45 @@ public class LUBM8000MySQLTest extends TestCase {
 		
 		try {
 			
-			for (Integer number : queries.keySet()) {
-				String query = queries.get(number);
-				log.info("---Query " + number + query);
-				
-				QuestOWLStatement st = conn.createStatement();
-				long start =System.currentTimeMillis();
-				QuestOWLResultSet rs = st.executeTuple(query);
-				long end= System.currentTimeMillis()-start;
-				log.info("---time " + end);
-				queriesTime.put(query, Long.valueOf(end) + queriesTime.get(query));
-//				int numberResults = 0;
-//				
-//				while (rs.nextRow())
-//				{
-//					for(String element: rs.getSignature()){
-//					OWLObject ind1 = rs.getOWLObject(element);
+			while(run<3){	
+				for (Integer number : queries.keySet()) {
+					String query = queries.get(number);
+					log.info("---Query " + number + query);
+					
+					QuestOWLStatement st = conn.createStatement();
+					long start =System.currentTimeMillis();
+					QuestOWLResultSet rs = st.executeTuple(query);
+					long end= System.currentTimeMillis()-start;
+					log.info("---time " + end);
+					if(run!=1){
+					queriesTime.put(query, Long.valueOf(end) + queriesTime.get(query));
+//					int numberResults = 0;
 //					
-//					log.debug(element + ind1 + " ");
+//					while (rs.nextRow())
+//					{
+//						for(String element: rs.getSignature()){
+//						OWLObject ind1 = rs.getOWLObject(element);
+//						
+//						log.debug(element + ind1 + " ");
+//						}
+//						
+//						numberResults++;
 //					}
-//					
-//					numberResults++;
-//				}
-////				assertEquals(queriesResult.get(query).intValue(), numberResults);
-//				st.close();
-			}
+////					assertEquals(queriesResult.get(query).intValue(), numberResults);
+//					st.close();
+					}
+				}
 
-			
-			
-			int i=1;
-			for (Integer number : queries.keySet()){
-				String query = queries.get(number);
-			log.info("time query" + i + " " +  Math.round(queriesTime.get(query) / 3.0D) );
-			i++;
-			}
+				run++;
+				}
+				int i=1;
+				for (Integer number : queries.keySet()){
+					String query = queries.get(number);
+				log.info("time query" + i + " " + queriesTime.get(query) );
+				i++;
+				}
+				
+
 			
 		} catch (Exception e) {
 			throw e;
@@ -883,7 +889,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		}
 		
 		
-		LUBM8000MySQLTest benchmark = new LUBM8000MySQLTest();
+		LUBM500MySQLTest benchmark = new LUBM500MySQLTest();
 		benchmark.owlfile = args[0];
 		benchmark.obdafile = args[1];
 		benchmark.setUp();
