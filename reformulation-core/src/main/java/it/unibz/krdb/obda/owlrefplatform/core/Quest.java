@@ -712,27 +712,27 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			ViewKeyReader.addViewKeys(metadata, "../view_keys.lst");
 			// Prints all primary keys
-			System.out.println("\n====== Primary keys ==========");
-			List<TableDefinition> table_list = metadata.getTableList();
-			for(TableDefinition dd : table_list){
-				System.out.print("\n" + dd.getName() + ":");
-				for(Attribute attr : dd.getPrimaryKeys() ){
-					System.out.print(attr.getName() + ",");
-				}
-			}
-			// Prints all foreign keys
-			System.out.println("\n====== Foreign keys ==========");
-			for(TableDefinition dd : table_list){
-				System.out.print("\n" + dd.getName() + ":");
-				Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-				for(String fkName  : fkeys.keySet() ){
-					System.out.print("(" + fkName + ":");
-					for(Attribute attr : fkeys.get(fkName)){
-						System.out.print(attr.getName() + ",");
-					}
-					System.out.print("),");
-				}
-			}
+//			 System.out.println("\n====== Primary keys ==========");
+//			List<TableDefinition> table_list = metadata.getTableList();
+//			for(TableDefinition dd : table_list){
+//				System.out.print("\n" + dd.getName() + ":");
+//				for(Attribute attr : dd.getPrimaryKeys() ){
+//					System.out.print(attr.getName() + ",");
+//				}
+//			}
+//			// Prints all foreign keys
+//			System.out.println("\n====== Foreign keys ==========");
+//			for(TableDefinition dd : table_list){
+//				System.out.print("\n" + dd.getName() + ":");
+//				Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
+//				for(String fkName  : fkeys.keySet() ){
+//					System.out.print("(" + fkName + ":");
+//					for(Attribute attr : fkeys.get(fkName)){
+//						System.out.print(attr.getName() + ",");
+//					}
+//					System.out.print("),");
+//				}
+//			}
 
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
