@@ -75,7 +75,7 @@ public class LUBM1MySQLTest extends TestCase {
 	private OWLOntology ontology;
 
 	String owlfile =
-			"src/test/resources/test/entailments/univ-bench.owl";
+			"src/test/resources/test/entailments/univ-benchModified.owl";
 	String obdafile =
 			"src/test/resources/test/entailments/univ1-bench.obda";
 
@@ -94,7 +94,6 @@ public class LUBM1MySQLTest extends TestCase {
 		ioManager.load(obdafile);
 
 	}
-
 
 	private List<String> runTests(Properties p, String query, String function) throws Exception {
 
@@ -160,7 +159,7 @@ public class LUBM1MySQLTest extends TestCase {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while (rs.nextRow())
 			{
-				
+
 				OWLIndividual ind2 = rs.getOWLIndividual("x");
 
 				System.out.println(ind2);
@@ -196,208 +195,273 @@ public class LUBM1MySQLTest extends TestCase {
 		factory.setOBDAController(obdaModel);
 
 		factory.setPreferenceHolder(p);
-		int run=1;
-		
-			
-		
-		long start1 =System.currentTimeMillis();
+		int run = 1;
+
+		long start1 = System.currentTimeMillis();
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		long end1= System.currentTimeMillis()-start1;
+		long end1 = System.currentTimeMillis() - start1;
 		log.info("---time Reasoner " + end1);
-		
+
 		Map<Integer, String> queries = new HashMap<Integer, String>();
 		Map<String, Integer> queriesResult = new HashMap<String, Integer>();
 		Map<String, Long> queriesTime = new HashMap<String, Long>();
 		String queryString;
+
+		 //query1
+		 queryString =
+		 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+		 + "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
+		 + "SELECT ?X WHERE {"
+		 +
+		 "?X rdf:type :GraduateStudent . ?X :takesCourse <http://www.Department0.University0.edu/GraduateCourse0>. }"
+		 ;
 		
-		//query1 
-		queryString = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
-				+ "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
-				+ "SELECT ?X WHERE {"
-				+ "?X rdf:type :GraduateStudent . ?X :takesCourse <http://www.Department0.University0.edu/GraduateCourse0>. }" ;
+		 queries.put(1, queryString);
+		 queriesResult.put(queryString, 4);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query2
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y ?z WHERE { "
+		 +
+		 "?x rdf:type ub:GraduateStudent. " +
+		 "?y rdf:type ub:University. " +
+		 "?z rdf:type ub:Department. " +
+		 "?x ub:memberOf ?z. " +
+		 "?z ub:subOrganizationOf ?y. " +
+		 "?x ub:undergraduateDegreeFrom ?y.}";
+		 queries.put(2, queryString);
+		 queriesResult.put(queryString, 0);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query3
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:Publication. " +
+		 "?x ub:publicationAuthor <http://www.Department0.University0.edu/AssistantProfessor0>.} "
+		 ;
+		 queries.put(3, queryString);
+		 queriesResult.put(queryString, 6);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query4
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y1 ?y2 ?y3 WHERE { "
+		 +
+		 "?x rdf:type ub:Professor. " +
+		 "?x ub:worksFor <http://www.Department0.University0.edu>. " +
+		 "?x ub:name ?y1. " +
+		 "?x ub:emailAddress ?y2. " +
+		 "?x ub:telephone ?y3. }" ;
+		 queries.put(4, queryString);
+		 queriesResult.put(queryString, 34);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query5
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:Person. " +
+		 "?x ub:memberOf <http://www.Department0.University0.edu>. }" ;
+		 queries.put(5, queryString);
+		 queriesResult.put(queryString, 719);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query6
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:Student. }" ;
+		 queries.put(6, queryString);
+		 queriesResult.put(queryString, 7790);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query7
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y WHERE { "
+		 +
+		 "?x rdf:type ub:Student. " +
+		 "?y rdf:type ub:Course. " +
+		 "?x ub:takesCourse ?y. " +
+		 "<http://www.Department0.University0.edu/AssociateProfessor0> ub:teacherOf ?y. }"
+		 ;
+		 queries.put(7, queryString);
+		 queriesResult.put(queryString, 67);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query8
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y ?z WHERE { "
+		 +
+		 "?x rdf:type ub:Student. " +
+		 "?y rdf:type ub:Department. " +
+		 "?x ub:memberOf ?y. " +
+		 "?y ub:subOrganizationOf <http://www.University0.edu>." +
+		 "?x ub:emailAddress ?z. }" ;
+		 queries.put(8, queryString);
+		 queriesResult.put(queryString, 7790);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query9
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y ?z WHERE { "
+		 +
+		 "?x rdf:type ub:Student. " +
+		 "?y rdf:type ub:Faculty. " +
+		 "?z rdf:type ub:Course. " +
+		 "?x ub:advisor ?y. " +
+		 "?y ub:teacherOf ?z. " +
+		 "?x ub:takesCourse ?z. }" ;
+		 queries.put(9, queryString);
+		 queriesResult.put(queryString, 208);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query10
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:Student. " +
+		 "?x ub:takesCourse <http://www.Department0.University0.edu/GraduateCourse0>. }"
+		 ;
+		 queries.put(10, queryString);
+		 queriesResult.put(queryString, 4);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query11
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:ResearchGroup. " +
+		 "?x ub:subOrganizationOf <http://www.University0.edu>. }" ;
+		 queries.put(11, queryString);
+		 queriesResult.put(queryString, 224);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query12
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y WHERE { "
+		 +
+		 "?x rdf:type ub:Chair. " +
+		 "?y rdf:type ub:Department. " +
+		 "?x ub:worksFor ?y. " +
+		 "?y ub:subOrganizationOf <http://www.University0.edu>. }" ;
+		 queries.put(12, queryString);
+		 queriesResult.put(queryString, 15);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		
+		 //query13
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:Person. " +
+		 "<http://www.University0.edu> ub:hasAlumnus ?x.}" ;
+		 queries.put(13, queryString);
+		 queriesResult.put(queryString, 1);
+		 queriesTime.put(queryString, Long.valueOf(0));
+		
+		 //query14
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { "
+		 +
+		 "?x rdf:type ub:UndergraduateStudent. }" ;
+		 queries.put(14, queryString);
+		 queriesResult.put(queryString, 5916);
+		 queriesTime.put(queryString, Long.valueOf(0));
 
-		queries.put(1, queryString);
-		queriesResult.put(queryString, 4);
-		queriesTime.put(queryString, Long.valueOf(0));
+		 //query4_01
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y1 ?y2 ?y3 ?z WHERE { "
+		 +
+		 "?x rdf:type ?z. " +
+		 "?x ub:worksFor <http://www.Department0.University0.edu>. " +
+		 "?x ub:name ?y1. " +
+		 "?x ub:emailAddress ?y2. " +
+		 "?x ub:telephone ?y3. }" ;
+		 queries.put(15, queryString);
+		 queriesResult.put(queryString, 34);
+		 queriesTime.put(queryString, Long.valueOf(0));
 
-		//query2  
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y ?z WHERE { " +
-				"?x rdf:type ub:GraduateStudent. " +
-				"?y rdf:type ub:University. " +
-				"?z rdf:type ub:Department. " +
-				"?x ub:memberOf ?z. " +
-				"?z ub:subOrganizationOf ?y. " +
-				"?x ub:undergraduateDegreeFrom ?y.}";
-		queries.put(2, queryString);
-		queriesResult.put(queryString, 0);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query3 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:Publication. " +
-				"?x ub:publicationAuthor <http://www.Department0.University0.edu/AssistantProfessor0>.} " ;
-		queries.put(3, queryString);
-		queriesResult.put(queryString, 6);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query4
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y1 ?y2 ?y3 WHERE { " +
+		// query4_02
+		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y1 ?y2 ?y3 ?z WHERE { " +
 				"?x rdf:type ub:Professor. " +
+				"ub:Professor rdfs:subClassOf ?z. " +
 				"?x ub:worksFor <http://www.Department0.University0.edu>. " +
 				"?x ub:name ?y1. " +
 				"?x ub:emailAddress ?y2. " +
-				"?x ub:telephone ?y3. }" ;
-		queries.put(4, queryString);
+				"?x ub:telephone ?y3. }";
+		queries.put(16, queryString);
 		queriesResult.put(queryString, 34);
 		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query5 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:Person. " +
-				"?x ub:memberOf <http://www.Department0.University0.edu>. }" ;
-		queries.put(5, queryString);
-		queriesResult.put(queryString, 719);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query6 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:Student. }" ;
-		queries.put(6, queryString);
-		queriesResult.put(queryString, 7790);
-		queriesTime.put(queryString, Long.valueOf(0));
 		
-		//query7 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y WHERE { " +
-				"?x rdf:type ub:Student. " +
-				"?y rdf:type ub:Course. " +
-				"?x ub:takesCourse ?y. " +
-				"<http://www.Department0.University0.edu/AssociateProfessor0> ub:teacherOf ?y. }" ;
-		queries.put(7, queryString);
-		queriesResult.put(queryString, 67);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query8 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y ?z WHERE { " +
-				"?x rdf:type ub:Student. " +
-				"?y rdf:type ub:Department. " +
-				"?x ub:memberOf ?y. " +
-				"?y ub:subOrganizationOf <http://www.University0.edu>." +
-				"?x ub:emailAddress ?z. }" ;
-		queries.put(8, queryString);
-		queriesResult.put(queryString, 7790);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query9 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y ?z WHERE { " +
-				"?x rdf:type ub:Student. " +
-				"?y rdf:type ub:Faculty. " +
-				"?z rdf:type ub:Course. " +
-				"?x ub:advisor ?y. " +
-				"?y ub:teacherOf ?z. " +
-				"?x ub:takesCourse ?z. }" ;
-		queries.put(9, queryString);
-		queriesResult.put(queryString, 208);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query10 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:Student. " +
-				"?x ub:takesCourse <http://www.Department0.University0.edu/GraduateCourse0>. }" ;
-		queries.put(10, queryString);
-		queriesResult.put(queryString, 4);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query11 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:ResearchGroup. " +
-				"?x ub:subOrganizationOf <http://www.University0.edu>. }" ;
-		queries.put(11, queryString);
-		queriesResult.put(queryString, 224);
-		queriesTime.put(queryString, Long.valueOf(0));
-
-		//query12 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?y WHERE { " +
-				"?x rdf:type ub:Chair. " +
-				"?y rdf:type ub:Department. " +
-				"?x ub:worksFor ?y. " +
-				"?y ub:subOrganizationOf <http://www.University0.edu>. }" ;
-		queries.put(12, queryString);
-		queriesResult.put(queryString, 15);
-		queriesTime.put(queryString, Long.valueOf(0));
+		 //query5_01
+		 queryString =
+		 "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x ?z WHERE { "
+		 +
+		 "?x rdf:type ?z. " +
+		 "?x ub:memberOf <http://www.Department0.University0.edu>. }" ;
+		 queries.put(17, queryString);
+		 queriesResult.put(queryString, 719);
+		 queriesTime.put(queryString, Long.valueOf(0));
 		
 		
-		//query13 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:Person. " +
-				"<http://www.University0.edu> ub:hasAlumnus ?x.}" ;
-		queries.put(13, queryString);
-		queriesResult.put(queryString, 1);
-		queriesTime.put(queryString, Long.valueOf(0));
 
-		//query14 
-		queryString = "PREFIX ub:<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT ?x WHERE { " +
-				"?x rdf:type ub:UndergraduateStudent. }" ;
-		queries.put(14, queryString);
-		queriesResult.put(queryString, 5916);
-		queriesTime.put(queryString, Long.valueOf(0));
-	
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
-		
+
 		try {
-			while(run<5){	
+			while (run < 5) {
+				for (Integer number : queries.keySet()) {
+					String query = queries.get(number);
+					log.info("---Query " + number + query);
+
+					QuestOWLStatement st = conn.createStatement();
+					long start = System.currentTimeMillis();
+					QuestOWLResultSet rs = st.executeTuple(query);
+					long end = System.currentTimeMillis() - start;
+					log.info("---time " + end);
+					if (run != 1) {
+						queriesTime.put(query, Long.valueOf(end) + queriesTime.get(query));
+//						int numberResults = 0;
+//
+//						while (rs.nextRow())
+//						{
+//							for (String element : rs.getSignature()) {
+//								OWLObject ind1 = rs.getOWLObject(element);
+//
+//								log.debug(element + ind1 + " ");
+//							}
+//
+//							numberResults++;
+//						}
+//						assertEquals(queriesResult.get(query).intValue(), numberResults);
+//						st.close();
+					}
+				}
+
+				run++;
+			}
+			int i = 1;
 			for (Integer number : queries.keySet()) {
 				String query = queries.get(number);
-				log.info("---Query " + number + query);
-				
-				QuestOWLStatement st = conn.createStatement();
-				long start =System.currentTimeMillis();
-				QuestOWLResultSet rs = st.executeTuple(query);
-				long end= System.currentTimeMillis()-start;
-				log.info("---time " + end);
-				if(run!=1){
-				queriesTime.put(query, Long.valueOf(end) + queriesTime.get(query));
-//				int numberResults = 0;
-//				
-//				while (rs.nextRow())
-//				{
-//					for(String element: rs.getSignature()){
-//					OWLObject ind1 = rs.getOWLObject(element);
-//					
-//					log.debug(element + ind1 + " ");
-//					}
-//					
-//					numberResults++;
-//				}
-//				assertEquals(queriesResult.get(query).intValue(), numberResults);
-//				st.close();
-				}
+				log.info("time query" + number + " " + Math.round(queriesTime.get(query) / 3.0D));
+				i++;
 			}
 
-			run++;
-			}
-			int i=1;
-			for (Integer number : queries.keySet()){
-				String query = queries.get(number);
-			log.info("time query" + i + " " +  Math.round(queriesTime.get(query) / 3.0D) );
-			i++;
-			}
-			
 		} catch (Exception e) {
 			throw e;
 		} finally {
 			try {
 
 			} catch (Exception e) {
-				
 
 			}
 			conn.close();
 
 			reasoner.dispose();
 		}
-		
-		
+
 	}
 
 	public void testSubDescription() throws Exception {
@@ -408,12 +472,15 @@ public class LUBM1MySQLTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
 
-		log.info("Find subProperty");
-		List<String> individualsProperty = runTests(p, "PREFIX :<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
-		assertEquals(106, individualsProperty.size());
+		// log.info("Find subProperty");
+		// List<String> individualsProperty = runTests(p,
+		// "PREFIX :<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }",
+		// "rdfs:subPropertyOf");
+		// assertEquals(106, individualsProperty.size());
 
 		log.info("Find subClass");
-		List<String> individualsClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
+		List<String> individualsClass = runSingleNamedIndividualTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { :Professor rdfs:subClassOf ?x }",
+				"rdfs:subClassOf");
 		assertEquals(283, individualsClass.size());
 
 	}
@@ -495,14 +562,13 @@ public class LUBM1MySQLTest extends TestCase {
 		assertEquals(76, individualsInverse.size());
 
 	}
-	
-	public static void main(String[] args) throws Exception{
-		if(args.length != 2){
+
+	public static void main(String[] args) throws Exception {
+		if (args.length != 2) {
 			System.err.println("Usage: main ontology.owl mapping.obda");
 			System.exit(0);
 		}
-		
-		
+
 		LUBM1MySQLTest benchmark = new LUBM1MySQLTest();
 		benchmark.owlfile = args[0];
 		benchmark.obdafile = args[1];

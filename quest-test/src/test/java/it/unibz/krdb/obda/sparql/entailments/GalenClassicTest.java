@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -159,6 +160,66 @@ public class GalenClassicTest extends TestCase {
 		}
 	}
 
+	
+	public void testSubClass() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+		
+
+		factory.setPreferenceHolder(p);
+
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+		List<String> queries = new ArrayList<String>();
+		
+		String queryString = "PREFIX g:<http://www.co-ode.org/ontologies/galen#> SELECT ?x WHERE {g:Infection rdfs:subClassOf ?x}" ;
+
+		queries.add(queryString);	
+		
+		// Now we are ready for querying
+		QuestOWLConnection conn = reasoner.getConnection();
+		QuestOWLStatement st = conn.createStatement();
+
+		try {
+			
+			for (String query : queries) {
+				log.info("---Query " +query);
+
+				QuestOWLResultSet rs = st.executeTuple(query);
+				
+				while (rs.nextRow())
+				{
+					OWLIndividual ind1 = rs.getOWLIndividual("x");
+
+					System.out.println(ind1);
+
+				}
+
+				st.close();
+			}
+
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+
+			}
+			conn.close();
+
+			reasoner.dispose();
+		}
+	}
 	public void testSubDescription() throws Exception {
 		
 		QuestPreferences p = new QuestPreferences();
