@@ -426,8 +426,9 @@ public class TMappingProcessor implements Serializable {
 				if (equivProperty.equals(current))
 					continue;
 
-				// if (equivProperty.isInverse())
-				// continue;
+				 if (equivProperty.isInverse())
+				 continue;
+				 
 				Predicate p = equivProperty.getPredicate();
 				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
