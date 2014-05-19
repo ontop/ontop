@@ -32,7 +32,14 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +47,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -58,19 +64,46 @@ public class TMappingConcurrencyErrorFixTest{
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
+	private Connection connection;
+	
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/exampleTMapping.owl";
-	final String obdafile = "src/test/resources/exampleTMapping.obda";
+	final String owlfile = "src/test/resources/test/tmapping/exampleTMapping.owl";
+	final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
 	private QuestOWL reasoner;
 
 	@Before
 	public void setUp() throws Exception {
 		
 		
+		/*
+		 * Initializing and H2 database with the stock exchange data
+		 */
+		// String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:questjunitdb;";
+		String username = "sa";
+		String password = "";
+
+		fac = OBDADataFactoryImpl.getInstance();
+
+		connection = DriverManager.getConnection(url, username, password);
+		Statement st = connection.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/tmapping/create-tables.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		connection.commit();
+
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
@@ -101,11 +134,34 @@ public class TMappingConcurrencyErrorFixTest{
 
 	@After
 	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
+		try {
+			dropTables();
+			reasoner.dispose();
+			connection.close();
+			
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
+		
 	}
 	
+	private void dropTables() throws SQLException, IOException {
 
+		Statement st = connection.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/tmapping/drop-tables.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		st.close();
+		connection.commit();
+	}
 	
 	private String runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
@@ -116,7 +172,10 @@ public class TMappingConcurrencyErrorFixTest{
 			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
 			retval = ind1.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#111>", retval);
-			
+			assertTrue(rs.nextRow());
+			OWLIndividual ind2 =	rs.getOWLIndividual("y")	 ;
+			retval = ind2.toString();
+			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#112>", retval);
 		} catch (Exception e) {
 			throw e;
 		} finally {
