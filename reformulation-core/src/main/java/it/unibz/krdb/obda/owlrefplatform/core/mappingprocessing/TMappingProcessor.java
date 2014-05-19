@@ -425,18 +425,13 @@ public class TMappingProcessor implements Serializable {
 			for (Property equivProperty : propertySet) {
 				if (equivProperty.equals(current))
 					continue;
-
-				 if (equivProperty.isInverse())
-				 continue;
 				 
 				Predicate p = equivProperty.getPredicate();
 				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
-//				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
-//				for (CQIE currentNodeMapping : currentNodeMappings) {
-//					mappingList.add(currentNodeMapping);
-//				}
-				for(CQIE currentNodeMapping : currentNodeMappings){
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				
+				for(CQIE currentNodeMapping : mappingList){
 					
 					if (equivProperty.isInverse() == current.isInverse()) {
 						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
@@ -521,8 +516,10 @@ public class TMappingProcessor implements Serializable {
 				
 				Predicate p = ((OClass) equiv).getPredicate();
 				Set<CQIE> equivalentClassMappings = getMappings(mappingIndex, p);
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				
 
-				for (CQIE currentNodeMapping : currentNodeMappings) {
+				for (CQIE currentNodeMapping : mappingList) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
 					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody());
 				}
