@@ -45,10 +45,10 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
 import org.semanticweb.ontop.model.OBDASQLQuery;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.parser.SQLQueryTranslator;
@@ -485,6 +485,8 @@ public class MetaMappingExpander {
 		}
 		
 	}
+	
+	
 	
 	
 

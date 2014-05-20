@@ -20,12 +20,22 @@ package org.semanticweb.ontop.utils;
  * #L%
  */
 
+
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDAQuery;
+import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+import com.google.common.collect.Lists;
 
 public class QueryUtils {
 
@@ -57,5 +67,151 @@ public class QueryUtils {
 			}
 		} 
 		return result;
+	}
+	
+	/**
+	 * Finds atoms with predicate <code>pred</code> in the body of the
+	 * <code>rule</code>
+	 * 
+	 * @param rule
+	 * @param pred
+	 * @return
+	 */
+	public static Collection<Function> findAtomsInRuleBody(CQIE rule,
+			Predicate pred) {
+
+		List<Function> results = Lists.newArrayList();
+
+		Queue<Term> queue = new LinkedList<Term>(rule.getBody());
+		
+		while (!queue.isEmpty()) {
+			Term qHead = queue.poll();
+			if (qHead instanceof Function) {
+				Function func = (Function) qHead;
+
+				if (func.isBooleanFunction() || func.isArithmeticFunction()
+						|| func.isDataTypeFunction()
+						|| func.isAlgebraFunction()) {
+					queue.addAll(func.getTerms());
+				} else if (func.isDataFunction()) {
+					if (func.getFunctionSymbol().equals(pred)) {
+						results.add(func);
+					}
+				}
+			} else /* !(queueHead instanceof Function) */{
+				// NO-OP
+			}
+		}
+
+		return results;
+	}
+
+	
+	/**
+	 * Finds one atom with variable <code>var</code> in the body of the
+	 * <code>rule</code>
+	 * 
+	 * @param rule
+	 * @param var
+	 * @return
+	 */
+	public static Function findOneAtomInRuleBody(CQIE rule,
+			Variable var) {
+
+		Queue<Term> queue = new LinkedList<Term>(rule.getBody());
+		
+		while (!queue.isEmpty()) {
+			Term qHead = queue.poll();
+			if (qHead instanceof Function) {
+				Function func = (Function) qHead;
+
+				if (func.isBooleanFunction() || func.isArithmeticFunction()
+						|| func.isDataTypeFunction()
+						|| func.isAlgebraFunction()) {
+					queue.addAll(func.getTerms());
+				} else if (func.isDataFunction()) {
+					
+					if (func.getTerms().contains(var)){
+						return func;
+					}
+					
+					
+				}
+			} else /* !(queueHead instanceof Function) */{
+				// NO-OP
+			}
+		}
+
+		return null;
+	}
+	
+	/**
+	 * 
+	 * collects the variable names in the input <code>atom</code>
+	 * 
+	 * 
+	 * 
+	 * @param atom
+	 *            
+	 * @return 
+	 */
+	public static List<String> getVariableNamesInAtom(Function atom) {
+
+		List<String> results = new ArrayList<>();
+
+		Queue<Term> queue = new LinkedList<Term>();
+
+		queue.add(atom);
+		while (!queue.isEmpty()) {
+			Term queueHead = queue.poll();
+
+			if (queueHead instanceof Function) {
+				Function funcRoot = (Function) queueHead;
+
+				if (funcRoot.isDataTypeFunction()
+						|| funcRoot.isAlgebraFunction()
+						|| funcRoot.isDataFunction()) {
+					for (Term term : funcRoot.getTerms()) {
+						queue.add(term);
+					}
+				}
+			} else if (queueHead instanceof Variable) {
+				Variable var = (Variable) queueHead;
+				results.add(var.getName());
+			}
+
+		} // end while innerAtom
+		return results;
+
+	}
+
+	/**
+	 * we need to update the cache of this rule manually, as Unifier sometimes is not smart enough 
+	 */
+	public static void clearCache(CQIE query) {
+		clearCache(query.getHead());
+		
+		for(Function atom : query.getBody()){
+			clearCache(atom);
+		}
+		
+		if(query instanceof ListListener){
+			((ListListener)query).listChanged();
+		}
+	}
+
+	public static void clearCache(Function atom) {
+		if(atom instanceof ListListener){
+			((ListListener)atom).listChanged();
+		}
+		
+		/**
+		 * sub terms
+		 */
+		for(Term term : atom.getTerms()){			
+			if(term instanceof Function){
+				clearCache((Function)term);	
+			}
+		}
 	}
 }

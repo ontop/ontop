@@ -1,6 +1,8 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 /*
+ * Copyright (C) 2009-2013, Free University of Bozen Bolzano This source code is
+ * available under the terms of the Affero General Public License v3.
  * #%L
  * ontop-reformulation-core
  * %%
@@ -22,6 +24,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
@@ -40,16 +44,33 @@ import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
+import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.utils.QueryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
+/***
+ * Implements several transformations on the rules of a datalog program that
+ * make it easier to evaluate query containment, or to translate into SQL.
+ * 
+ * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>, mrezk 
+ * 
+ */
 public class DatalogNormalizer {
-
+	private static Logger log = LoggerFactory.getLogger(DatalogNormalizer.class);
 	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
+	private final static Map<Variable, Term> substitutionsTotal= new HashMap<Variable,Term>();
+	
 	/***
 	 * Normalizes all the rules in a Datalog program, pushing equalities into
 	 * the atoms of the queries, when possible
@@ -155,14 +176,14 @@ public class DatalogNormalizer {
 					body.remove(i);
 					for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
 						Term term = currentAtom.getTerm(j);
-						Function asAtom = (Function)term;
+						Function asAtom = (Function) term;
 						if (!body.contains(asAtom))
 							body.add(i, asAtom);
 					}
 					i -= 1;
 				}
-			}
-		}
+			} // end join
+		} // end for body
 	}
 
 	public static CQIE foldJoinTrees(CQIE query, boolean clone) {
@@ -263,7 +284,8 @@ public class DatalogNormalizer {
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			Unifier.applyUnifier(atom, mgu);
+			//TODO: DOUBLE CHECK THIS FALSE
+			Unifier.applyUnifier(atom, mgu,false);
 			if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
 				Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
 				if (s == null) {
@@ -326,14 +348,15 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	public static void pullOutEqualities(CQIE query) {
+	public static CQIE pullOutEqualities(CQIE query) {
 		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
 		int[] newVarCounter = { 1 };
 
-		Set<Function> booleanAtoms = new HashSet<Function>();
+		//Set<Function> booleanAtoms = new HashSet<Function>();
 		List<Function> equalities = new LinkedList<Function>();
+		
 		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
-		List body = query.getBody();
+		List<Function> body = query.getBody();
 		body.addAll(equalities);
 
 		/*
@@ -343,6 +366,14 @@ public class DatalogNormalizer {
 		 */
 
 		Unifier.applyUnifier(query, substitutions, false);
+		
+		substitutionsTotal.clear();
+		
+		/**
+		 * For debugging only
+		 */
+		QueryUtils.clearCache(query);
+		return query;
 
 	}
 
@@ -424,10 +455,19 @@ public class DatalogNormalizer {
 	 * 
 	 * @param currentTerms
 	 * @param substitutions
+	 * @return 
 	 */
-	private static void pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList,
-			int[] newVarCounter, boolean isLeftJoin) {
 
+	@SuppressWarnings("unchecked")
+	private static List<Function> pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter,
+			boolean isLeftJoin) {
+
+
+		//Multimap<Variable, Function> mapVarAtom =  HashMultimap.create();
+		
+		List<Function> eqGoOutside = new LinkedList<Function>();
+
+		
 		for (int i = 0; i < currentTerms.size(); i++) {
 
 			Term term = (Term) currentTerms.get(i);
@@ -444,10 +484,24 @@ public class DatalogNormalizer {
 			List<Term> subterms = atom.getTerms();
 
 			if (atom.isAlgebraFunction()) {
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
-					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, true);
-				else
-					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false);
+				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN){
+					eqGoOutside.addAll(pullOutEqualities(subterms, substitutions, eqList, newVarCounter, true));
+					
+					Set<Variable> uniVarTm = new HashSet<Variable>();
+					getVariablesFromList(subterms, uniVarTm);
+					
+					//I find the scope of the equality
+					for (Function eq:eqGoOutside){
+						if (uniVarTm.containsAll(eq.getReferencedVariables())){
+							subterms.add(eq);
+							//eqGoOutside.remove(eq);
+						}
+					}
+				}
+				
+				else{
+					eqGoOutside.addAll(pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false));
+				}
 
 			} else if (atom.isBooleanFunction()) {
 				continue;
@@ -459,42 +513,10 @@ public class DatalogNormalizer {
 			for (int j = 0; j < subterms.size(); j++) {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
-
-					Variable var1 = (Variable) subTerm;
-					Variable var2 = (Variable) substitutions.get(var1);
-
-					if (var2 == null) {
-						/*
-						 * No substitution exists, hence, no action but generate
-						 * a new variable and register in the substitutions, and
-						 * replace the current value with a fresh one.
-						 */
-						var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
-
-						substitutions.put(var1, var2);
-						subterms.set(j, var2);
-
-					} else {
-
-						/*
-						 * There already exists one, so we generate a fresh,
-						 * replace the current value, and add an equality
-						 * between the substitution and the new value.
-						 */
-
-						if (atom.isDataFunction()) {
-							Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
-
-							subterms.set(j, newVariable);
-							Function equality = fac.getFunctionEQ(var2, newVariable);
-							eqList.add(equality);
-
-						} else { // if its not data function, just replace
-									// variable
-							subterms.set(j, var2);
-						}
-					}
-					newVarCounter[0] += 1;
+					
+					//mapVarAtom.put((Variable)subTerm, atom);
+					renameVariable(substitutions, eqList, newVarCounter, atom,	subterms, j, (Variable) subTerm);
+					
 				} else if (subTerm instanceof Constant) {
 					/*
 					 * This case was necessary for query 7 in BSBM
@@ -512,13 +534,170 @@ public class DatalogNormalizer {
 						eqList.add(equality);
 					}
 
+				} else if (subTerm instanceof Function) {
+					Predicate head = ((Function) subTerm).getFunctionSymbol();
+
+					if (head.isDataTypePredicate()) {
+
+						// This case is for the ans atoms that might have
+						// functions in the head. Check if it is needed.
+						Set<Variable> subtermsset = subTerm
+								.getReferencedVariables();
+
+						// Right now we support only unary functions!!
+						for (Variable var : subtermsset) {
+							renameTerm(substitutions, eqList, newVarCounter,
+									atom, subterms, j, (Function) subTerm, var);
+						}
+					}
 				}
+			} // end for subterms
+			
+			
+			
+			
+			
+			
+			
+			
+			//TODO: WHat about the JOIN????
+			if (isLeftJoin){
+/*
+				Set<Variable> uniVarTm = new HashSet<Variable>();
+				getVariablesFromList(currentTerms, uniVarTm);
+
+				for (Function eq:eqList){
+					
+					//If the variables in the equality are contained in the current terms we add the equality
+					boolean containsVars = uniVarTm.contains(eq.getReferencedVariables());
+					if (containsVars){
+						
+						currentTerms.add(i + 1, eq);
+						eqList.remove(eq);
+					}
+				} //END FOR
+				*/
+				eqGoOutside.addAll(eqList);
+				eqList.clear();
+			}else{
+				currentTerms.addAll(i + 1, eqList);
+				i = i + eqList.size();
+				eqList.clear();
+			}
+			
+		}//end for current terms
+		return eqGoOutside;
+	}
+
+	/**
+	 * @param currentTerms
+	 * @param uniVar
+	 */
+	private static void getVariablesFromList(List currentTerms,
+			Set<Variable> uniVar) {
+		for (Object te:currentTerms){
+			uniVar.addAll(((Term) te).getReferencedVariables());
+		}
+	}
+
+	private static void renameTerm(Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+			List<Term> subterms, int j, Function subTerm, Variable var1) {
+		Predicate head = subTerm.getFunctionSymbol();
+		Variable var2 = (Variable) substitutions.get(var1);
+
+		if (var2 == null) {
+			/*
+			 * No substitution exists, hence, no action but generate a new
+			 * variable and register in the substitutions, and replace the
+			 * current value with a fresh one.
+			 */
+			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+
+			FunctionalTermImpl newFuncTerm = (FunctionalTermImpl) fac.getFunction(head, var1);
+			subterms.set(j, var2);
+
+			Function equality = fac.getFunctionEQ(var2, newFuncTerm);
+			eqList.add(equality);
+
+		} else {
+
+			/*
+			 * There already exists one, so we generate a fresh, replace the
+			 * current value, and add an equality between the substitution and
+			 * the new value.
+			 */
+
+			if (atom.isDataFunction()) {
+				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+
+				subterms.set(j, newVariable);
+				FunctionalTermImpl newFuncTerm = (FunctionalTermImpl) fac.getFunction(head, var2);
+
+				Function equality = fac.getFunctionEQ(newVariable, newFuncTerm);
+				eqList.add(equality);
+
+			} else { // if its not data function, just replace
+						// variable
+				subterms.set(j, var2);
+			}
+		}
+		newVarCounter[0] += 1;
+
+	}
+
+	private static void renameVariable(Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+			List<Term> subterms, int j, Term subTerm) {
+		Variable var1 = (Variable) subTerm;
+		Variable var2 = (Variable) substitutions.get(var1);
+
+		
+		if (var2 == null) {
+			/*
+			 * No substitution exists, hence, no action but generate a new
+			 * variable and register in the substitutions, and replace the
+			 * current value with a fresh one.
+			 */
+			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+
+			substitutions.put(var1, var2);
+			substitutionsTotal.put(var1, var2);
+			subterms.set(j, var2);
+
+		} else {
+
+			/*
+			 * There already exists one, so we generate a fresh, replace the
+			 * current value, and add an equality between the substitution and
+			 * the new value.
+			 */
+			
+			while (substitutionsTotal.containsKey(var2)){
+				var2=(Variable) substitutionsTotal.get(var2);
 			}
 
-			currentTerms.addAll(i + 1, eqList);
-			i = i + eqList.size();
-			eqList.clear();
+			if (atom.isDataFunction()) {
+				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+
+				//replace the variable name
+				subterms.set(j, newVariable);
+
+				//record the change
+				substitutionsTotal.put(var2, newVariable);
+
+				
+				//create the equality
+				Function equality = fac.getFunctionEQ(var2, newVariable);
+				eqList.add(equality);
+				
+
+
+
+			} else { // if its not data function, just replace
+						// variable
+				subterms.set(j, var2);
+			}
 		}
+		newVarCounter[0] += 1;
 	}
 
 	// Saturate equalities list to explicitly state JOIN conditions and
@@ -942,7 +1121,9 @@ public class DatalogNormalizer {
 					firstDataAtomFound = true;
 				}
 
-				if (secondDataAtomFound && isLeftJoin) {
+				// I changed this, booleans were not being added !!
+				if (secondDataAtomFound && !isLeftJoin) {
+					System.err.println("DatalogNormalizer: I changed this!!");
 					tempTerms.addAll(currentBooleans);
 				}
 
@@ -961,7 +1142,8 @@ public class DatalogNormalizer {
 				}
 			}
 
-		}
+		} // end for current terms
+
 		// tempTerms is currentTerms with "bad" boolean conditions removed
 		// now add all these removed conditions at the end
 		// and update current terms
@@ -973,6 +1155,7 @@ public class DatalogNormalizer {
 		// if we are in a Join that is a second data atom, then dont push it all
 		// the way up
 		if (!isSecondJoin) {
+//			System.err.println("DatalogNormalizer: THIS LINE DOES NOT WORK !!");
 			leftConditionBooleans.addAll(tempConditionBooleans);
 		}
 		currentTerms.clear();
@@ -982,4 +1165,6 @@ public class DatalogNormalizer {
 		currentBooleans.addAll(tempConditionBooleans);
 
 	}
+				
+
 }

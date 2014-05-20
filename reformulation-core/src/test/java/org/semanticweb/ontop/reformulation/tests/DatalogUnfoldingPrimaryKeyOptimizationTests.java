@@ -20,6 +20,7 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
+
 import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,10 +33,14 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import junit.framework.TestCase;
 
@@ -146,7 +151,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(query);
-		DatalogProgram output = unfolder.unfold(input, "q");
+		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+		DatalogProgram output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true,multiplePredIdx);
 		System.out.println("input " + input);
 
 		int atomcount = 0;
@@ -175,7 +181,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		query = fac.getCQIE(head, body);
 
 		input = fac.getDatalogProgram(query);
-		output = unfolder.unfold(input, "q");
+		output = unfolder.unfold(input, "q",QuestConstants.TDOWN,true,multiplePredIdx);
 		System.out.println("input " + input);
 
 		atomcount = 0;

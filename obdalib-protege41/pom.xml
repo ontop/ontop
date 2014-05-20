@@ -237,10 +237,16 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-util</artifactId>
 		</dependency>
+		
+		<dependency>
+    		<groupId>com.google.guava</groupId>
+   			<artifactId>guava</artifactId>
+		</dependency>
 		<dependency>
 	   		<groupId>com.github.jsqlparser</groupId>
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -8,7 +8,10 @@
 <>  rdf:type mf:Manifest ;
     rdfs:comment "SPARQL regex test cases" ;
     mf:entries (
-      :dawg-regex-001 :dawg-regex-002 :dawg-regex-003 :dawg-regex-004
+      :dawg-regex-001 
+      :dawg-regex-002 
+      :dawg-regex-003 
+      :dawg-regex-004
     ).
 
 :dawg-regex-001 a mf:QueryEvaluationTest ;

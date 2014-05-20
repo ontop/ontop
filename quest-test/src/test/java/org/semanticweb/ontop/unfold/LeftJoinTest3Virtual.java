@@ -20,6 +20,18 @@ package org.semanticweb.ontop.unfold;
  * #L%
  */
 
+import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -34,17 +46,6 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -53,8 +54,12 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class LeftJoinTestVirtual extends TestCase {
+/**
+ * Class to check the translation of the combination of Optional/Union in SPARQL into Datalog, and finally 
+ * SQL
+ * @author Minda, Guohui, mrezk
+ */
+public class LeftJoinTest3Virtual extends TestCase {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -64,13 +69,37 @@ public class LeftJoinTestVirtual extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person.obda";
+	final String obdafile = "src/test/resources/person3.obda";
 
 	@Override
 	public void setUp() throws Exception {
+		//String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
+		//String username = "sa";
+		//String password = "";
+
+		
+		String url = "jdbc:mysql://obdalin3:3306/optional_test";
+		String username = "fish";
+		String password = "fish";
 
 		fac = OBDADataFactoryImpl.getInstance();
-		
+/*
+		conn = DriverManager.getConnection(url, username, password);
+		log.debug("Creating in-memory DB and inserting data!");
+		Statement st = conn.createStatement();
+		FileReader reader = new FileReader("src/test/resources/create_optional.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line + "\n");
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		conn.commit();
+		log.debug("Data loaded!");
+*/
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
@@ -97,18 +126,19 @@ public class LeftJoinTestVirtual extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query1 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . ?p :age ?age }";
-		String query2 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick11 ?nick1} OPTIONAL {?p :nick22 ?nick2} }";		
-		String query3 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick11 ?nick1} }";
-		String query4 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} }";
-		String query5 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :age ?age} }";
+		//@formatter.off
+		String query_multi1 = "PREFIX : <http://www.example.org/test#> "
+				+ "SELECT DISTINCT * "
+				+ "WHERE {"
+				+ "  ?p a :Person . "
+				+ "  ?p :name ?name . "
+				+ "  OPTIONAL {?p :nick ?nick} }";
+		
+		//@formatter.on
 		
 		try {
-			executeQueryAssertResults(query1, st, 3);
-			executeQueryAssertResults(query2, st, 4);
-			executeQueryAssertResults(query3, st, 4);
-			executeQueryAssertResults(query4, st, 4);
-			executeQueryAssertResults(query5, st, 4);
+			executeQueryAssertResults(query_multi1, st, 5);
+
 			
 		} catch (Exception e) {
 			throw e;
@@ -129,8 +159,10 @@ public class LeftJoinTestVirtual extends TestCase {
 		while (rs.nextRow()) {
 			count++;
 			for (int i = 1; i <= rs.getColumCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
+				String varName = rs.getSignature().get(i-1);
+				System.out.print(varName);
+				//System.out.print("=" + rs.getOWLObject(i));
+				System.out.print("=" + rs.getOWLObject(varName));
 				System.out.print(" ");
 			}
 			System.out.println();
@@ -138,25 +170,10 @@ public class LeftJoinTestVirtual extends TestCase {
 		rs.close();
 		assertEquals(expectedRows, count);
 	}
-	
-//	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-//		List<OWLAxiom> rs = st.executeGraph(query);
-//		int count = 0;
-//		Iterator<OWLAxiom> axit = rs.iterator();
-//		while (axit.hasNext()) {
-//			System.out.println(axit.next());			
-//			count++;
-//		}		
-//		assertEquals(expectedRows, count);
-//	}
 
 	public void testLeftJoin() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
 		runTests(p);
 	}
 

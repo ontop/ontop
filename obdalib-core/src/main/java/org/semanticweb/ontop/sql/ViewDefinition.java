@@ -22,11 +22,29 @@ package org.semanticweb.ontop.sql;
 
 public class ViewDefinition extends DataDefinition {
 
+
 	private static final long serialVersionUID = 3312336193514797486L;
 
 	private String statement;
+	
+	/*
+	 * TODO: Check if really needed
+	 */
+	public ViewDefinition() {
+		super();
+	}
+	
+	public ViewDefinition(String name) {
+		super(name);
+	}
+	
 
+	@Deprecated
 	public void copy(String statement) {
+		this.statement = statement;
+	}
+	
+	public void setSQL(String statement) {
 		this.statement = statement;
 	}
 

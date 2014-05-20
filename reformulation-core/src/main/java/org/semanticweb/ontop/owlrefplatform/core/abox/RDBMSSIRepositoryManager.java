@@ -167,33 +167,33 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  */
 	
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
-			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
+			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN DEFAULT FALSE NOT NULL " + ")";
 
 	public static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" INTEGER NOT NULL, "
-			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, "
-			+ "ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE)";
+			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN DEFAULT FALSE NOT NULL, "
+			+ "ISBNODE2 BOOLEAN DEFAULT FALSE NOT NULL)";
 
 	public static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 	public static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+			+ ", ISBNODE BOOLEAN  DEFAULT FALSE NOT NULL " + ")";
 
 /**
  *  DROP data tables	
@@ -787,7 +787,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		
 		
+		try {
 		st.executeBatch();
+		} catch (Exception e) {
+			
+		}		
 		st.close();
 	}
 
@@ -833,11 +837,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexclassfull2);
 		st.addBatch(indexrolefull22);
 		
+		try {
 		st.executeBatch();
+		} catch (Exception e) {
+			
+		}
 		
 		log.debug("Executing ANALYZE");
 		st.addBatch(analyze);
+		try {
 		st.executeBatch();
+		} catch (Exception e) {
+			
+		}
 		
 		st.close();
 
@@ -866,7 +878,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		st.addBatch("DROP TABLE " + uri_id_table);
 
+		try {
 		st.executeBatch();
+		} catch (Exception e) {
+			
+		}
 		st.close();
 	}
 
@@ -932,16 +948,56 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// Check if the batch count is already in the batch limit
 			if (batchCount == batchLimit) {
+				try {
 				executeBatch(uriidStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(roleStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(attributeLiteralStm);
+			} catch (Exception e) {
+				
+			}
+				try {
 				executeBatch(attributeStringStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(attributeIntegerStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(attributeDecimalStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(attributeDoubleStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(attributeDateStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(attributeBooleanStm);
+				} catch (Exception e) {
+					
+				}
+				try {
 				executeBatch(classStm);
+				} catch (Exception e) {
+					
+				}
 				batchCount = 0; // reset the counter
 			}
 
@@ -953,16 +1009,56 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 
 		// Execute the rest of the batch
+		try {
 		executeBatch(uriidStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(roleStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeLiteralStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeStringStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeIntegerStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeDecimalStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeDoubleStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeDateStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(attributeBooleanStm);
+		} catch (Exception e) {
+			
+		}
+		try {
 		executeBatch(classStm);
+		} catch (Exception e) {
+			
+		}
 
 	
 		// Close all open statements
@@ -3031,15 +3127,23 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				stm.setInt(3, SemanticIndexCache.CLASS_TYPE);
 				stm.addBatch();
 			}
+			try {
 			stm.executeBatch();
-
+			} catch (Exception e) {
+				
+			}
+			
 			for (String role : cacheSI.getIndexKeys(SemanticIndexCache.ROLE_TYPE)) {
 				stm.setString(1, role.toString());
 				stm.setInt(2, cacheSI.getIndex(role, SemanticIndexCache.ROLE_TYPE));
 				stm.setInt(3, SemanticIndexCache.ROLE_TYPE);
 				stm.addBatch();
 			}
+			try {
 			stm.executeBatch();
+			} catch (Exception e) {
+				
+			}
 			stm.clearBatch();
 			stm.close();
 
@@ -3057,8 +3161,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					stm.addBatch();
 				}
 			}
+			try {
 			stm.executeBatch();
-
+			} catch (Exception e) {
+				
+			}
 			for (String role : cacheSI.getIntervalsKeys(SemanticIndexCache.ROLE_TYPE)) {
 				for (Interval it : cacheSI.getIntervals(role, SemanticIndexCache.ROLE_TYPE)) {
 					stm.setString(1, role.toString());
@@ -3068,7 +3175,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					stm.addBatch();
 				}
 			}
+			try {
 			stm.executeBatch();
+			} catch (Exception e) {
+				
+			}
 
 			/* Inserting emptyness index metadata */
 
@@ -3080,7 +3191,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				stm.setInt(4, record.type2.ordinal());
 				stm.addBatch();
 			}
+			try {
 			stm.executeBatch();
+			} catch (Exception e) {
+				
+			}
 
 			stm.close();
 
@@ -3176,7 +3291,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexattribute_datetime3);
 		st.addBatch(dropindexattribute_boolean3);
 
+		try {
 		st.executeBatch();
+		} catch (Exception e) {
+			
+		}
 		st.close();
 
 		isIndexed = false;

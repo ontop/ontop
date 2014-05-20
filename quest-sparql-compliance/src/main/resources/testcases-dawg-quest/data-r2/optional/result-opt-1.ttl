@@ -1,11 +1,13 @@
 @prefix rs:      <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
 @prefix foaf:    <http://xmlns.com/foaf/0.1/> .
 @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix x:     <http://www.w3.org/xx#> .
+
 
 []    rdf:type      rs:ResultSet ;
       rs:resultVariable  "mbox" ;
       rs:resultVariable  "name" ;
-      rs:solution   [ rs:binding    [ rs:value      "Alice" ;
+      rs:solution   [ rs:binding    [ rs:value      x:Alice ;
                                       rs:variable   "name"
                                     ] ;
                       rs:binding    [ rs:value      <mailto:alice@example.net> ;
@@ -16,7 +18,7 @@
                                       rs:variable   "mbox"
                                     ]
                     ] ;
-      rs:solution   [ rs:binding    [ rs:value      "Bert" ;
+      rs:solution   [ rs:binding    [ rs:value      x:Bert ;
                                       rs:variable   "name"
                                     ] ;
                       rs:binding    [ rs:value      <mailto:bert@example.net> ;

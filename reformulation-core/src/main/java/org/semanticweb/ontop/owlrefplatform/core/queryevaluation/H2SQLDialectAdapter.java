@@ -55,7 +55,8 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		if (dotAllMode)
 			pflags += "s"; // equivalent of Pattern.DOTALL
 		pflags +=")";
-		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
+		String statement = columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
+		return statement;
 	}
 	
 }

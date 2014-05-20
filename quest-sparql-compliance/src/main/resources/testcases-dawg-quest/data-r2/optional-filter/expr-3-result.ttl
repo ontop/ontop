@@ -8,12 +8,12 @@
       rs:resultVariable  "title" ;
       rs:resultVariable  "price" ;
       rs:solution
-                  [ rs:binding  [ rs:value    "TITLE 3" ;
+                  [ rs:binding  [ rs:value    x:TITLE3 ;
                                   rs:variable  "title"
                                 ]
                   ] ;
       rs:solution
-                  [ rs:binding  [ rs:value    "TITLE 1" ;
+                  [ rs:binding  [ rs:value    x:TITLE1 ;
                                   rs:variable  "title"
                                 ] ;
                     rs:binding  [ rs:value    "10"^^xsd:integer ;

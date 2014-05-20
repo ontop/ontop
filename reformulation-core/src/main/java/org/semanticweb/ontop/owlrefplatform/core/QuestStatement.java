@@ -79,6 +79,9 @@ import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 //import com.hp.hpl.jena.query.Query;
 //import com.hp.hpl.jena.query.QueryFactory;
 //import com.hp.hpl.jena.sparql.syntax.Template;
@@ -266,14 +269,21 @@ public class QuestStatement implements OBDAStatement {
 
 						set = sqlstatement.executeQuery(sql);
 
-						// }
-						// catch(SQLException e)
-						// {
-						//
+						/*
+						 while (set.next()) {
+					          //set.getLong("id");
+					          String string = set.getString("val");
+					          System.out.println(string);
+					        }
+				*/
+					
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
 							tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+							
+							
+
 
 						} else if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
@@ -307,7 +317,7 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 	}
-
+ 
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
 	 * uri or var logic Returns the result set for the given query
@@ -430,6 +440,7 @@ public class QuestStatement implements OBDAStatement {
 		throw new OBDAException("Error, the result set was null");
 	}
 
+
 	/**
 	 * Translates a SPARQL query into Datalog dealing with equivalences and
 	 * verifying that the vocabulary of the query matches the one in the
@@ -440,36 +451,6 @@ public class QuestStatement implements OBDAStatement {
 	 * @param query
 	 * @return
 	 */
-//	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
-//
-//		// Contruct the datalog program object from the query string
-//		DatalogProgram program = null;
-//		try {
-//			if (questInstance.isSemIdx()) {
-//				translator.setSI();
-//				translator.setUriRef(questInstance.getUriRefIds());
-//			}
-//			program = translator.translate(query, signature);
-//
-//			log.debug("Translated query: \n{}", program);
-//
-//			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
-//			removeNonAnswerQueries(program);
-//
-//			program = unfolder.unfold(program, "ans1");
-//
-//			log.debug("Flattened query: \n{}", program);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			OBDAException ex = new OBDAException(e.getMessage());
-//			ex.setStackTrace(e.getStackTrace());
-//			throw ex;
-//		}
-//		log.debug("Replacing equivalences...");
-//		program = validator.replaceEquivalences(program);
-//		return program;
-//	}
-	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
 		try {
@@ -481,12 +462,23 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Translated query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
-			removeNonAnswerQueries(program);
+			//TODO: cant we use here QuestInstance???
+			
+	
+			
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+			
+			if (questInstance.isSemIdx()==true){
+				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
+			}
+			//Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
 
-			program = unfolder.unfold(program, "ans1");
-
+			
+			
 			log.debug("Flattened query: \n{}", program);
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
@@ -501,7 +493,6 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
 		return program;
-		
 	}
 
 
@@ -510,34 +501,59 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1");
+		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder;
+		
+		//This instnce of the unfolder is carried from Quest, and contains the mappings.
+		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,questInstance.multiplePredIdx);
+		
 		log.debug("Partial evaluation: \n{}", unfolding);
 
-		removeNonAnswerQueries(unfolding);
+		//removeNonAnswerQueries(unfolding);
 
-		log.debug("After target rules removed: \n{}", unfolding);
+		//log.debug("After target rules removed: \n{}", unfolding);
 
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
 		evaluator.evaluateExpressions(unfolding);
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
-		log.debug("Partial evaluation ended.");
+		
+		// PUSH TYPE HERE
+		log.debug("Pushing types...");
+		
+		//TODO: optimise this????
+		if(unfolder.getMultiplePredList().isEmpty()){
+			List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
+
+			for (CQIE rule: newTypedRules){
+				System.out.println(rule);
+			}
+
+			//TODO: can we avoid using this intermediate variable???
+			unfolding.removeAllRules();
+			unfolding.appendRule(newTypedRules);
+		} else{
+			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
+			System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
+		}
+		
+		
+		log.debug("Pulling out equalities...");
+		for (CQIE rule: unfolding.getRules()){
+			DatalogNormalizer.pullOutEqualities(rule);
+			System.out.println(rule);
+		}
+
+		
+
+		
+		
+		log.debug("\n Partial evaluation ended.");
 
 		return unfolding;
 	}
 
-	private void removeNonAnswerQueries(DatalogProgram program) {
-		List<CQIE> toRemove = new LinkedList<CQIE>();
-		for (CQIE rule : program.getRules()) {
-			Predicate headPredicate = rule.getHead().getPredicate();
-			if (!headPredicate.getName().toString().equals("ans1")) {
-				toRemove.add(rule);
-			}
-		}
-		program.removeRules(toRemove);
-	}
-
+	
 	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
 		if (((DatalogProgram) query).getRules().size() == 0) {
 			return "";
@@ -760,6 +776,7 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Start the rewriting process...");
 			try {
 				final long startTime = System.currentTimeMillis();
+				//This unfolding resolve the rules using only the query program, and not the mappings.
 				programAfterRewriting = getRewriting(program);
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
@@ -773,11 +790,16 @@ public class QuestStatement implements OBDAStatement {
 				throw obdaException;
 			}
 
+	
 			try {
 				final long startTime = System.currentTimeMillis();
+				//Here we do include the mappings, and get the final SQL-ready program
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
 				final long endTime = System.currentTimeMillis();
 				unfoldingTime = endTime - startTime;
+
+
+				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 				OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
@@ -838,7 +860,7 @@ public class QuestStatement implements OBDAStatement {
 					// if unifiable, apply to head of tbox rule
 					Function ruleHead = rule.getHead();
 					Function copyRuleHead = (Function) ruleHead.clone();
-					Unifier.applyUnifier(copyRuleHead, theta);
+					Unifier.applyUnifier(copyRuleHead, theta,false);
 
 					removedAtom.add(copyRuleHead);
 				}

@@ -15,15 +15,23 @@
 			<artifactId>ontop-obdalib-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -43,6 +51,7 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-api</artifactId>
 		</dependency> 
+		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
@@ -52,6 +61,11 @@
   			<groupId>net.sf.jgrapht</groupId>
   			<artifactId>jgrapht</artifactId>
 		</dependency>
+		
+		<dependency>
+    		<groupId>com.google.guava</groupId>
+    		<artifactId>guava</artifactId>
+		</dependency>
 			
 		<dependency>
 			<groupId>postgresql</groupId>
@@ -59,6 +73,7 @@
 			<scope>test</scope>		
 			<type>jar</type>
 		</dependency>
+		
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>

@@ -12,7 +12,7 @@
     mf:entries
     (
       # :open-eq-01 :open-eq-02 unsupported user-defined datatype
-      :open-eq-03 :open-eq-04 
+     :open-eq-03 :open-eq-04 
        :open-eq-05 
       # :open-eq-06 user-defined datatype
       # :open-eq-07  variable equality

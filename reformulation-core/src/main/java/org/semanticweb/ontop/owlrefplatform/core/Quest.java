@@ -43,7 +43,9 @@ import java.util.regex.Pattern;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+
 import org.openrdf.query.parser.ParsedQuery;
+
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DatalogProgram;
@@ -99,8 +101,15 @@ import org.semanticweb.ontop.utils.MappingAnalyzer;
 import org.semanticweb.ontop.utils.MappingParser;
 import org.semanticweb.ontop.utils.MappingSplitter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
+
+
+import org.hsqldb.util.DatabaseManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 //import com.hp.hpl.jena.query.Query;
 
@@ -180,6 +189,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * queries into Functions, used by the SPARQL translator.
 	 */
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+	
+	/*
+	 * The list of predicates that are defined in multiple mappings
+	 */
+	protected Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 
 	final HashSet<String> templateStrings = new HashSet<String>();
 
@@ -551,11 +565,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				isSemanticIdx = true;
 				if (inmemory) {
+
+				//	String driver = "org.hsqldb.jdbc.JDBCDriver";
+				//	String url = "jdbc:hsqldb:mem:questrepository:" + System.currentTimeMillis()+";sql.syntax_mys=true";
+							
+
 					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
-							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+
+//					String driver = "org.hsqldb.jdbc.JDBCDriver";
+//					String url = "jdbc:hsqldb:mem:questrepository:"+ System.currentTimeMillis() + ";shutdown=true;hsqldb.app_log=0;hsqldb.sql_log=0;hsqldb.log_data=false;sql.enforce_strict_size=false";
+
 					String username = "sa";
 					String password = "";
+						
+					
 
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
@@ -747,6 +771,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
 
+
+ 			
+ 			
 			/***
 			 * T-Mappings and Fact mappings
 			 */
@@ -815,7 +842,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+
+			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
+			
+			if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
+				multiplePredIdx = unfolder.processMultipleTemplatePredicates(unfoldingProgram);
+			}
+			
+			
+			
+			
+			
+			
+			
+			
 
 			/***
 			 * Setting up the TBox we will use for the reformulation
@@ -904,7 +944,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
 
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 

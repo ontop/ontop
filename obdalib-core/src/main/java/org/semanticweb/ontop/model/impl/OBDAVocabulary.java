@@ -26,6 +26,13 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 
 public class OBDAVocabulary {
 	
+	/*
+	 * Singleton
+	 */
+	private OBDAVocabulary(){
+		
+	}
+	
 
 	/* Constants */
 

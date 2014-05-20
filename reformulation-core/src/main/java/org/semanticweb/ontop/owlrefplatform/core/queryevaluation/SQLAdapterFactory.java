@@ -43,6 +43,8 @@ public class SQLAdapterFactory {
 			return new TeiidSQLDialectAdapter();
 		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
 			return new SQLServerSQLDialectAdapter();
+		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+			return new HSQLSQLDialectAdapter();
 		}
 
 		log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");

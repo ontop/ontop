@@ -30,10 +30,17 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * variables ie. A(#1,#2)
  */
 
+
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
@@ -46,6 +53,7 @@ import org.semanticweb.ontop.model.impl.AlgebraOperatorPredicateImpl;
 import org.semanticweb.ontop.model.impl.AnonymousVariable;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.URIConstantImpl;
 import org.semanticweb.ontop.model.impl.ValueConstantImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
@@ -125,7 +133,7 @@ public class Unifier {
 				newatom.getTerms().set(i, t2);
 			}
 		}
-		applyUnifier(newatom, unifier);
+		applyUnifier(newatom, unifier, isEquality(newatom));
 		return newatom;
 	}
 
@@ -150,9 +158,9 @@ public class Unifier {
 
 		/* applying the unifier to every term in the head */
 		Function head = newq.getHead();
-		applyUnifier(head, unifier);
+		applyUnifier(head, unifier, isEquality(head));
 		for (Function bodyatom : newq.getBody()) {
-			applyUnifier(bodyatom, unifier);
+				applyUnifier(bodyatom, unifier, isEquality(bodyatom));
 		}
 		return newq;
 	}
@@ -182,9 +190,9 @@ public class Unifier {
 	// }
 
 	public static void applyUnifier(Function term,
-			Map<Variable, Term> unifier) {
-		List<Term> terms = term.getTerms();
-		applyUnifier(terms, unifier);
+			Map<Variable, Term> unifier, boolean isEquality) {
+		List<Term> subTerms = term.getTerms();
+		applyUnifier(subTerms, term, unifier, isEquality);
 	}
 	
 	public static void applyUnifierToGetFact(Function term,
@@ -201,36 +209,97 @@ public class Unifier {
 	// }
 
 	
-	public static void applyUnifier(List<Term> terms, 
-			Map<Variable, Term> unifier) {
-		applyUnifier(terms, unifier,0);
+	public static void applyUnifier(List<Term> terms, Function atom,
+			Map<Variable, Term> unifier, boolean isEquality) {
+		
+		applyUnifier(terms, atom, unifier,0, isEquality);
 	}
 	/***
 	 * Applies the subsittution to all the terms in the list. Note that this
 	 * will not clone the list or the terms insdie the list.
 	 * 
 	 * @param terms
+	 * @param atom
+	 * 			the parent of the terms if known, othersize, it is null
 	 * @param unifier
 	 */
-	public static void applyUnifier(List<Term> terms, 
-			Map<Variable, Term> unifier, int fromIndex) {
+	public static void applyUnifier(List<Term> terms, Function atom,
+			Map<Variable, Term> unifier, int fromIndex, boolean isequality) {
+	
+		
 		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
 			/*
 			 * unifiers only apply to variables, simple or inside functional
 			 * terms
 			 */
-			if (t instanceof VariableImpl) {
+			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
-				if (replacement != null)
-					terms.set(i, replacement);
+				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL){
+					replacement = replacement.getReferencedVariables().iterator().next();
+				}
+				if (replacement != null){
+					if(atom != null){
+						/*
+						 * <code>atom.setTerm()</code> will trigger the updating the string cache of the atom
+						 */
+						atom.setTerm(i, replacement);
+					} else {
+						terms.set(i, replacement);
+					}
+				}
 			} else if (t instanceof Function) {
 				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
-
+				boolean equality= isEquality(t2);
+				applyUnifier(t2, unifier, equality);
+				
+	
 			}
 		}
 	}
+	
+	
+	
+	
+	/**
+	 * This method differs from the previous one in that, if the term is URI(p), and we have the replacement
+	 * p=URI(p) then we remove that unification.
+	 * 
+	 * @param term
+	 * @param unifier
+	 * @param isEquality
+	 */
+	public static void applySelectiveUnifier(Function term,
+			Map<Variable, Term> unifier) {
+		List<Term> subTerms = term.getTerms();
+		
+		//cloning the keys of the unifer
+		Set<Variable> keys = unifier.keySet();
+		Set<Variable> keysCopy = new HashSet<Variable>();
+		Iterator vars = keys.iterator();
+		while (vars.hasNext()) {
+			keysCopy.add((Variable)vars.next());
+		}
+		
+		
+		//Removing duplicates
+		vars = keysCopy.iterator();
+		while (vars.hasNext()) {
+			Variable key =  (Variable)vars.next();
+			Term value = unifier.get(key);
+			if (subTerms.contains(value)){
+				unifier.remove(key);
+			}
+		}
+		
+		
+		applyUnifier(subTerms, term, unifier, false);
+	}
+	
+
+	
+	
+	
 	
 	/**
 	 * 
@@ -254,11 +323,20 @@ public class Unifier {
 				}
 			} else if (t instanceof Function) {
 				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
+				applyUnifier(t2, unifier, isEquality(t2));
 			}
 		}
 	}
 
+	
+	
+	public static Map<Variable, Term> getMGU(Function first,
+			Function second) {
+		Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
+
+		Map<Variable, Term> mgu = getMGU(first,second,false,emptyMulti);
+		return mgu;
+	}
 	/***
 	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports
 	 * atoms with terms: Variable, URIConstant, ValueLiteral, ObjectVariableImpl
@@ -270,7 +348,7 @@ public class Unifier {
 	 * @return
 	 */
 	public static Map<Variable, Term> getMGU(Function first,
-			Function second) {
+			Function second , boolean oneWayMGU, Multimap<Predicate,Integer> multPredList) {
 
 		/*
 		 * Basic case, predicates are different or their arity is different,
@@ -350,7 +428,8 @@ public class Unifier {
 					if (currentInnerTerm2 != null)
 						innerterm2 = currentInnerTerm2;
 
-					Substitution s = getSubstitution(innerterm1, innerterm2);
+					Substitution s= getSubstitution(innerterm1, innerterm2);
+					
 					if (s == null) {
 						return null;
 					}
@@ -364,9 +443,25 @@ public class Unifier {
 				/*
 				 * the normal case
 				 */
-
-				Substitution s = getSubstitution(term1, term2);
-
+				Substitution s = null;
+				if(!oneWayMGU){
+					s= getSubstitution(term1, term2);
+				}else{
+					Predicate functionSymbol = firstAtom.getFunctionSymbol();
+					if (multPredList.containsKey(functionSymbol) ){ // it is a problematic predicate regarding templates
+						if (multPredList.get(functionSymbol).contains(termidx)){ //the term is the problematic one
+							s = getOneWaySubstitution(term1, term2,true);
+						} else{
+							s = getOneWaySubstitution(term1, term2,false);	
+						}
+					}
+					else{
+							s = getOneWaySubstitution(term1, term2,false);	
+					}
+					
+					 
+				}
+				
 				if (s == null) {
 					return null;
 				}
@@ -380,9 +475,8 @@ public class Unifier {
 			 * Applying the newly computed substitution to the 'replacement' of
 			 * the existing substitutions
 			 */
-			applyUnifier(terms1, mgu, termidx + 1);
-			applyUnifier(terms2, mgu, termidx + 1);
-
+			applyUnifier(terms1, null, mgu, termidx + 1, isEquality(first));
+			applyUnifier(terms2, null, mgu, termidx + 1,isEquality(second));
 		}
 		return mgu;
 	}
@@ -506,6 +600,88 @@ public class Unifier {
 		throw new RuntimeException("Unsupported unification case: " + term1
 				+ " " + term2);
 	}
+	
+	
+	
+	
+	/**
+	 * This method differs from the method above in that, the previous finds a subtitutions f
+	 * such that f(t1)=f(t2) and this one finds an f such that f(t1)=t2
+	 * @param term1
+	 * @param term2
+	 * @param problemTerm 
+	 * @return
+	 */
+	public static Substitution getOneWaySubstitution(Term term1,
+			Term term2, boolean problemTerm) {
+
+		if (problemTerm){
+			return new NeutralSubstitution();
+		}
+		if (!(term1 instanceof VariableImpl)
+				&& !(term2 instanceof VariableImpl)) {
+			/*
+			 * none is a variable, impossible to unify unless the two terms are
+			 * equal, in which case there the substitution is empty
+			 */
+			if (isEqual(term1, term2))
+				return new NeutralSubstitution();
+			else
+				return null;
+		}
+
+		/* Arranging the terms so that the first is always a variable */
+		Term t1 = null;
+		Term t2 = null;
+
+		if (term1 instanceof VariableImpl) {
+			t1 = term1;
+			t2 = term2;
+		} else {
+			t1 = term2;
+			t2 = term1;
+		}
+
+		/*
+		 * Undistinguished variables do not need a substitution, the unifier
+		 * knows about this
+		 */
+		if ((t1 instanceof AnonymousVariable || t2 instanceof AnonymousVariable)) {
+			return new NeutralSubstitution();
+		}
+
+		if (t2 instanceof VariableImpl) {
+			if (isEqual(t1, t2)) {
+				return new NeutralSubstitution();
+			} else {
+				return new Substitution(t1, t2);
+			}
+		} else if (t2 instanceof ValueConstant) {
+			return new Substitution(t1, t2);
+		} else if (t2 instanceof URIConstantImpl) {
+			return new Substitution(t1, t2);
+		} else if (t2 instanceof FunctionalTermImpl) {
+			return new Substitution(t1, t2);
+		}
+		/* This should never happen */
+		throw new RuntimeException("Unsupported unification case: " + term1
+				+ " " + term2);
+	}
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	/***
 	 * A equality calculation based on the strings that identify the terms.
@@ -557,4 +733,24 @@ public class Unifier {
 							+ ", " + t2.getClass());
 		}
 	}
+	/**
+	* This method returns true if the atom has the shape EQ(a,b). False otherwise
+	* 
+	* @param atom1
+	* @return
+	*/
+	private static boolean isEquality(Function atom1) {
+		boolean isEquality;
+		if (atom1.isBooleanFunction()){
+			if (atom1.getFunctionSymbol().equals(OBDAVocabulary.EQ)){
+				isEquality = true;
+			} else {
+				isEquality = false;
+			}
+		}else{
+			isEquality = false;
+		}
+		return isEquality;
+	}
+
 }

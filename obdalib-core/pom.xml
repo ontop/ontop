@@ -46,6 +46,21 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+  			<groupId>net.sf.jgrapht</groupId>
+  			<artifactId>jgrapht</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+		</dependency>
+		
+		<dependency>
+    		<groupId>com.google.guava</groupId>
+    		<artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>

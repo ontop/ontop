@@ -287,4 +287,8 @@ public interface OBDADataFactory extends Serializable {
 	Predicate getJoinPredicate();
 
 	Predicate getLeftJoinPredicate();
+
+	public Function getStringVariable(String name);
+
+	public Function getIntegerVariable(String name);
 }

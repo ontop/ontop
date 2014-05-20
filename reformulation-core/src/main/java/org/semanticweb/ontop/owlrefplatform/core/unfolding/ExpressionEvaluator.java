@@ -20,12 +20,15 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  * #L%
  */
 
+
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BNodePredicate;
@@ -76,21 +79,162 @@ public class ExpressionEvaluator {
 	}
 
 	public boolean evaluateExpressions(CQIE q) {
+		
+		Stack<Integer> termidx = new Stack<Integer>();
+		
+		
 		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
+			
+			termidx.push(atomidx);
+			 
 			Function atom = q.getBody().get(atomidx);
 			Term newatom = eval(atom);
+	
 			if (newatom == fac.getConstantTrue()) {
 				q.getBody().remove(atomidx);
 				atomidx -= 1;
 				continue;
 			} else if (newatom == fac.getConstantFalse()) {
 				return true;
-			}
+			} 
+			
+			/*else if (atom.getFunctionSymbol() instanceof BooleanOperationPredicate) {
+				
+				q= replaceNullEqualities(atom, q,termidx);
+			}else{	
+				
+			}*/
 			q.getBody().remove(atomidx);
 			q.getBody().add(atomidx, (Function)newatom);
 		}
 		return false;
 	}
+	
+	/**
+	 * This method will look for equalities of the form EQ(x,null) and enforce the unification of x-null, and remove EQ
+	 * @param atom
+	 * @param q
+	 * @param termidx
+	 */
+		private CQIE replaceNullEqualities(Function atom, CQIE q, Stack<Integer> termidx) {
+
+			//TODO: make this more efficient... no string!
+			//TODO: do we need termidx?
+		
+			if (isBinary(atom)) {
+				if (atom.isBooleanFunction()) {
+					// For binary boolean operators, e.g., EQ
+					Term left = atom.getTerm(0);
+					Term right = atom.getTerm(1);
+					boolean leftOpIsNULL=false;
+					boolean rightOpIsNULL=false;
+
+					String value;
+					if (left instanceof ValueConstant) {
+						 value = ((ValueConstant)left).getValue();
+						leftOpIsNULL= value.equals("null");
+					}
+					if (right instanceof ValueConstant) {
+						value = ((ValueConstant)right).getValue();
+						rightOpIsNULL= value.equals("null") ; 
+						//value.equals("null");
+					}
+
+					if (leftOpIsNULL  && !rightOpIsNULL){
+
+						Set<Variable> varSet=  right.getReferencedVariables();
+
+						if (!varSet.isEmpty()){ 
+							Variable var = varSet.iterator().next();
+							Map<Variable, Term> mgu = new HashMap<Variable, Term>();   
+							mgu.put(var, OBDAVocabulary.NULL);
+							Unifier.applyUnifier(q, mgu, false);
+						}
+					}else if (!leftOpIsNULL && rightOpIsNULL){
+
+						Set<Variable> varSet=  left.getReferencedVariables();
+
+						if (!varSet.isEmpty()){ 
+							Variable var = varSet.iterator().next();
+							Map<Variable, Term> mgu = new HashMap<Variable, Term>();   
+							mgu.put(var, OBDAVocabulary.NULL);
+							q.getBody().remove(atom);
+							q=Unifier.applyUnifier(q, mgu, false);
+							
+						}	 	
+					} //end else if
+				} // end boolean function
+			} //end binary atom
+			return q;
+	}
+		
+		/***
+		 * Returns the list of terms contained in the nested atom indicated by term
+		 * idx. If termidx is empty, then this is the list of atoms in the body of
+		 * the rule, otherwise the list correspond to the terms of the nested atom
+		 * indicated by termidx viewed as a path of atoms. For example, if termidx =
+		 * <2,4> then this atom returns the list of terms of the 4 atom, of the
+		 * second atom in the body of the rule.
+		 * 
+		 * <p>
+		 * Example two. IF the rule is q(x):-A(x), Join(R(x,y), Join(P(s),R(x,y) and
+		 * termidx = <1,2>, then this method returns the the terms of the second
+		 * join atom, ie.,
+		 * <P(s),R(x,y)>
+		 * ,
+		 * 
+		 * <p>
+		 * note that this list is the actual list of terms of the atom, so
+		 * manipulating the list will change the atom.
+		 * 
+		 * 
+		 * @param termidx
+		 * @param rule
+		 * @return
+		 */
+		private static List getNestedList(Stack<Integer> termidx, CQIE rule) {
+			List innerTerms = null;
+
+			//TODO: this method is taken from the unfolder!
+			if (termidx.size() > 1) {
+				/*
+				 * Its a nested term
+				 */
+				Term nestedTerm = null;
+				for (int y = 0; y < termidx.size() - 1; y++) {
+					int i = termidx.get(y);
+					if (nestedTerm == null)
+						nestedTerm = (Function) rule.getBody().get(i);
+					else
+						nestedTerm = ((Function) nestedTerm).getTerm(i);
+				}
+				Function newfocusFunction = (Function) nestedTerm;
+
+				innerTerms = newfocusFunction.getTerms();
+			} else {
+				/*
+				 * Its directly on the body of the query
+				 */
+				innerTerms = rule.getBody();
+			}
+			return innerTerms;
+		}
+
+		private boolean isBinary(Function fun) {
+			return (fun.getArity() == 2) ? true : false;
+		}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	public Term eval(Term expr) {
 		if (expr instanceof Variable) {
