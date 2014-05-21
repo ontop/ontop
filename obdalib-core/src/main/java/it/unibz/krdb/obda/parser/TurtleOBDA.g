@@ -247,47 +247,53 @@ private class ColumnString implements FormatString {
  *  <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
  * </ul>
  */
-private Function makeAtom(Term subject, Term pred, Term object) {
-     Function atom = null;
-      
-       if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
-             if (object instanceof  Function) {
-                  if(QueryUtils.isGrounded(object)) {
-                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-                      Predicate predicate = dfac.getClassPredicate(c.getValue());
-                      atom = dfac.getFunction(predicate, subject);
-                  } else {
-                        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred, object);                  }
-             } else if (object instanceof  Variable){
-                  Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
-                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
-              } else {
-                  throw new IllegalArgumentException("parser cannot handle object " + object);  
-              }
-        } else if( ! QueryUtils.isGrounded(pred) ){
-             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
-        } else {
-             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-             Predicate predicate;
-             if(pred instanceof Function){
-                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-                  predicate = dfac.getPredicate(pr.getValue(), 2);
-             } else {
-                  throw new IllegalArgumentException("predicate should be a URI Function");
-             }
-             atom = dfac.getFunction(predicate, subject, object);
-       }
-        return atom;
-  }
+	private Function makeAtom(Term subject, Term pred, Term object) {
+	     Function atom = null;
+	      
+ 	       if (isRDFType(pred)) {
+	             if (object instanceof  Function) {
+	                  if(QueryUtils.isGrounded(object)) {
+	                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
+	                      Predicate predicate = dfac.getClassPredicate(c.getValue());
+	                      atom = dfac.getFunction(predicate, subject);
+	                  } else {
+//	                        Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+//	                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+	                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred, object);                  }
+	             } else if (object instanceof  Variable){
+	                  Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+	                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+	                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
+	                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
+	              } else {
+	                  throw new IllegalArgumentException("parser cannot handle object " + object);  
+	              }
+	        } else if( ! QueryUtils.isGrounded(pred) ){
+	             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+	        } else {
+	             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+	             Predicate predicate;
+	             if(pred instanceof Function){
+	                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+	                  predicate = dfac.getPredicate(pr.getValue(), 2);
+	             } else {
+	                  throw new IllegalArgumentException("predicate should be a URI Function");
+	             }
+	             atom = dfac.getFunction(predicate, subject, object);
+	       }
+	        return atom;
+	  }
 
-
-}
-
-
+	private static boolean isRDFType(Term pred) {
+//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+//			return true;
+//		}
+		if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
+			String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
+			return c.equals(OBDAVocabulary.RDF_TYPE);
+		}	
+		return false;
+	}
 /*------------------------------------------------------------------
  * PARSER RULES
  *------------------------------------------------------------------*/
@@ -367,7 +373,10 @@ predicateObjectList returns [List<Function> value]
 //verb returns [String value]
 verb returns [Term value]
   : predicate { $value = $predicate.value; }
-  | 'a' {value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
+  | 'a' {Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+         Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
+		 $value = dfac.getFunction(uriPredicate, constant); 
+  //value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
   //$value = OBDAVocabulary.RDF_TYPE; 
   }
   ;

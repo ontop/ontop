@@ -323,18 +323,18 @@ public class TurtleOBDAParser extends Parser {
 	private Function makeAtom(Term subject, Term pred, Term object) {
 	     Function atom = null;
 	      
-	       if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+ 	       if (isRDFType(pred)) {
 	             if (object instanceof  Function) {
 	                  if(QueryUtils.isGrounded(object)) {
 	                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
 	                      Predicate predicate = dfac.getClassPredicate(c.getValue());
 	                      atom = dfac.getFunction(predicate, subject);
 	                  } else {
-	                        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-	                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-	                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred, object);                  }
+//	                        Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+//	                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+	                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred, object);                  }
 	             } else if (object instanceof  Variable){
-	                  Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
+	                  Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
 	                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
 	                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
 	                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
@@ -357,8 +357,16 @@ public class TurtleOBDAParser extends Parser {
 	        return atom;
 	  }
 
-
-
+	private static boolean isRDFType(Term pred) {
+//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+//			return true;
+//		}
+		if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
+			String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
+			return c.equals(OBDAVocabulary.RDF_TYPE);
+		}	
+		return false;
+	}
 
 
 	// $ANTLR start "parse"
@@ -528,7 +536,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 
 			match(input,PERIOD,FOLLOW_PERIOD_in_triplesStatement115); 
-			 value = triples1; 
+ 			 value = triples1; 
 			}
 
 		}
@@ -887,7 +895,9 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:370:5: 'a'
 					{
 					match(input,77,FOLLOW_77_in_verb291); 
-					value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
+					Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+                    Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
+					value = dfac.getFunction(uriPredicate, constant); 
 					  //value = OBDAVocabulary.RDF_TYPE; 
 					  
 					}
