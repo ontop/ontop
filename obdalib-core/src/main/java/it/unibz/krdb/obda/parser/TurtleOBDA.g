@@ -1,22 +1,23 @@
 /*
- * Turtle.g
- * Copyright (C) 2010 Obdalib Team
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * For information on how to redistribute this software under
- * the terms of a license other than GNU General Public License
- * contact TMate Software at support@sqljet.com
- *
- * @author Josef Hardi (josef.hardi@unibz.it)
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
+ 
 grammar TurtleOBDA;
 
 @header {
@@ -247,10 +248,10 @@ private class ColumnString implements FormatString {
  *  <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
  * </ul>
  */
-	private Function makeAtom(Term subject, Term pred, Term object) {
-	     Function atom = null;
-	      
- 	       if (isRDFType(pred)) {
+private Function makeAtom(Term subject, Term pred, Term object) {
+     Function atom = null;
+      
+        if (isRDFType(pred)) {
 	             if (object instanceof  Function) {
 	                  if(QueryUtils.isGrounded(object)) {
 	                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
@@ -282,9 +283,10 @@ private class ColumnString implements FormatString {
 	             atom = dfac.getFunction(predicate, subject, object);
 	       }
 	        return atom;
-	  }
+  }
 
-	private static boolean isRDFType(Term pred) {
+
+private static boolean isRDFType(Term pred) {
 //		if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
 //			return true;
 //		}
@@ -294,6 +296,10 @@ private class ColumnString implements FormatString {
 		}	
 		return false;
 	}
+
+}
+
+
 /*------------------------------------------------------------------
  * PARSER RULES
  *------------------------------------------------------------------*/
@@ -375,8 +381,7 @@ verb returns [Term value]
   : predicate { $value = $predicate.value; }
   | 'a' {Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
          Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
-		 $value = dfac.getFunction(uriPredicate, constant); 
-  //value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
+	$value = dfac.getFunction(uriPredicate, constant);  
   //$value = OBDAVocabulary.RDF_TYPE; 
   }
   ;
