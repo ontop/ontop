@@ -77,10 +77,10 @@ public class EmptiesDescriptionsTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	// final String owlfile = "src/test/resources/smallDatabase.owl";
-	// final String obdafile = "src/test/resources/smallDatabase.obda";
-	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	 final String owlfile = "src/test/resources/smallDatabase.owl";
+	 final String obdafile = "src/test/resources/smallDatabase.obda";
+//	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+//	final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
 	private QuestOWL reasoner;
@@ -89,28 +89,28 @@ public class EmptiesDescriptionsTest {
 	@Before
 	public void setUp() throws Exception {
 
-		// String driver = "org.h2.Driver";
-		// String url = "jdbc:h2:mem:questjunitdb;";
-		// String username = "sa";
-		// String password = "";
-		//
-		// fac = OBDADataFactoryImpl.getInstance();
-		//
-		// connection = DriverManager.getConnection(url, username, password);
-		// Statement st = connection.createStatement();
-		//
-		// FileReader reader = new
-		// FileReader("src/test/resources/smallDatabase-h2.sql");
-		// BufferedReader in = new BufferedReader(reader);
-		// StringBuilder bf = new StringBuilder();
-		// String line = in.readLine();
-		// while (line != null) {
-		// bf.append(line);
-		// line = in.readLine();
-		// }
-		//
-		// st.executeUpdate(bf.toString());
-		// connection.commit();
+		 String driver = "org.h2.Driver";
+		 String url = "jdbc:h2:mem:questjunitdb;";
+		 String username = "sa";
+		 String password = "";
+		
+		 fac = OBDADataFactoryImpl.getInstance();
+		
+		 connection = DriverManager.getConnection(url, username, password);
+		 Statement st = connection.createStatement();
+		
+		 FileReader reader = new
+		 FileReader("src/test/resources/smallDatabase-h2.sql");
+		 BufferedReader in = new BufferedReader(reader);
+		 StringBuilder bf = new StringBuilder();
+		 String line = in.readLine();
+		 while (line != null) {
+		 bf.append(line);
+		 line = in.readLine();
+		 }
+		
+		 st.executeUpdate(bf.toString());
+		 connection.commit();
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -146,9 +146,9 @@ public class EmptiesDescriptionsTest {
 	@After
 	public void tearDown() throws Exception {
 		try {
-			// dropTables();
+			 dropTables();
 			reasoner.dispose();
-			// connection.close();
+			 connection.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
