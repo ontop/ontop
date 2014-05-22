@@ -7,7 +7,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Datasource editor"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.views.DatasourcesManagerView">
+			value="org.semanticweb.ontop.protege4.views.DatasourcesManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"></category>
@@ -17,7 +17,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping editor"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.views.MappingsManagerView">
+			value="org.semanticweb.ontop.protege4.views.MappingsManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"></category>
@@ -28,7 +28,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping assistant"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.views.MappingAssistantView">
+			value="org.semanticweb.ontop.protege4.views.MappingAssistantView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"></category>
@@ -40,7 +40,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Query manager"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.views.QueryManagerView">
+			value="org.semanticweb.ontop.protege4.views.QueryManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"></category>
@@ -50,7 +50,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="ontop query editor"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.views.QueryInterfaceView">
+			value="org.semanticweb.ontop.protege4.views.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"></category>
@@ -62,7 +62,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="ontop Mappings"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.tab.OBDATab">
+			value="org.semanticweb.ontop.protege4.gui.tab.OBDATab">
 		</class>
 		<index value="X"></index>
 		<editorKitId value="OWLEditorKit"></editorKitId>
@@ -74,7 +74,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="ontop SPARQL"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.tab.OBDAQueriesTab">
+			value="org.semanticweb.ontop.protege4.gui.tab.OBDAQueriesTab">
 		</class>
 		<index value="X"></index>
 		<editorKitId value="OWLEditorKit"></editorKitId>
@@ -85,13 +85,13 @@
 	<!-- Editor Kit setup extensions -->	
 
   <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
-  	<class value="it.unibz.krdb.obda.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
+  	<class value="org.semanticweb.ontop.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
   	<editorKitId value="OWLEditorKit"/>
   </extension>
   
   <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
     <label value="Quest"/>
-    <class value="it.unibz.krdb.obda.protege4.gui.preferences.OBDAOWLReformulationPlatformConfigPanel"/>
+    <class value="org.semanticweb.ontop.protege4.gui.preferences.OBDAOWLReformulationPlatformConfigPanel"/>
   </extension>
   
   <!-- MENUS -->
@@ -106,55 +106,55 @@
   <extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Import data from mappings..."/> 
 		<toolTip value="Import OWL Assertions (ABox/Triples) from the mappings..."/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.AboxMaterializationAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotA-A"></path>
+		<class value="org.semanticweb.ontop.protege4.gui.action.AboxMaterializationAction"/>
+		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotA-A"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
    <extension id="menu.obda.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Display the mapping statistics..."/> 
 		<toolTip value="Provide information about the number of assertions (triples) from the mappings"/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.ABoxStatisticsAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-A"></path>
+		<class value="org.semanticweb.ontop.protege4.gui.action.ABoxStatisticsAction"/>
+		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotB-A"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
 	 <extension id="menu.obda.inconsistecychecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for inconsistencies..."/> 
 		<toolTip value="Run consistency check regarding disjoint and functional properties"/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.InconsistencyCheckAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-B"></path>
+		<class value="org.semanticweb.ontop.protege4.gui.action.InconsistencyCheckAction"/>
+		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotB-B"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
 	 <extension id="menu.obda.importr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Import R2RML mappings..."/> 
 		<toolTip value="Import mappings from an R2RML mapping file"/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.R2RMLImportAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotC-A"></path>
+		<class value="org.semanticweb.ontop.protege4.gui.action.R2RMLImportAction"/>
+		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotC-A"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
 	 <extension id="menu.obda.exportr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Export R2RML mappings..."/> 
 		<toolTip value="Export mappings as an R2RML mapping file"/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.R2RMLExportAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotC-B"></path>
+		<class value="org.semanticweb.ontop.protege4.gui.action.R2RMLExportAction"/>
+		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotC-B"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 	
 	<extension id="menu.obda.bootstrap" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Generate ontology and mappings..."/>
 		<toolTip value="Automatically generates classes/propertis and mappings for a DB..."/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.BootstrapAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotD-A"/>
+		<class value="org.semanticweb.ontop.protege4.gui.action.BootstrapAction"/>
+		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotD-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	<!-- Reasoner plugins -->
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
-    <name value="Quest 1.11.0 (ontop)"/>
-    <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
+    <name value="Quest 2.0.0 (ontop)"/>
+    <class value="org.semanticweb.ontop.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
 </plugin>
