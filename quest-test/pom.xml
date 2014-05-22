@@ -76,6 +76,11 @@
 			<scope>test</scope>		
 		</dependency>
 		<dependency>
+			<groupId>madgik.adp</groupId>
+    		<artifactId>adp-jdbc</artifactId>
+    		<version>0.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
