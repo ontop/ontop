@@ -250,10 +250,10 @@ public class QuestMaterializer {
 						ResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;
-						if (results!=null){
-							hasNext = results.hasNext();
-
-						}					
+//						if (results!=null){
+//							hasNext = results.hasNext();
+//
+//						}					
 					}else{
 						break;
 					}

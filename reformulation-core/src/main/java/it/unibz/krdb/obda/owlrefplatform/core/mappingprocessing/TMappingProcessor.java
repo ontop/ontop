@@ -92,7 +92,7 @@ public class TMappingProcessor implements Serializable {
 	 * @return A map from a predicate to the list of mappings that have that
 	 *         predicate in the head atom.
 	 */
-	private static Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
+	private Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
 		Map<Predicate, Set<CQIE>> mappingIndex = new HashMap<Predicate, Set<CQIE>>();
 
 		for (CQIE mapping : mappings.getRules()) {
@@ -162,7 +162,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param newmapping
 	 *            The new mapping for A/P
 	 */
-	public static void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
+	public void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
 		List<Function> strippedNewConditions = new LinkedList<Function>();
 		CQIE strippedNewMapping = getStrippedMapping(newmapping, strippedNewConditions);
 		Ontology sigma = null;
@@ -249,7 +249,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param conditions
 	 * @return
 	 */
-	private static Function mergeConditions(List<Function> conditions) {
+	private Function mergeConditions(List<Function> conditions) {
 		if (conditions.size() == 1)
 			return conditions.get(0);
 		Function atom0 = conditions.remove(0);
@@ -280,7 +280,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param strippedConditionsHolder
 	 * @return
 	 */
-	private static CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
+	private CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
 		strippedConditionsHolder.clear();
 		Function head = (Function)mapping.getHead().clone();
 		List<Function> body = mapping.getBody();
@@ -425,16 +425,12 @@ public class TMappingProcessor implements Serializable {
 			for (Property equivProperty : propertySet) {
 				if (equivProperty.equals(current))
 					continue;
-
-				// if (equivProperty.isInverse())
-				// continue;
+				 
 				Predicate p = equivProperty.getPredicate();
 				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
-				ArrayList<CQIE> mappingList = new ArrayList<CQIE>();
-				for (CQIE currentNodeMapping : currentNodeMappings) {
-					mappingList.add(currentNodeMapping);
-				}
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				
 				for(CQIE currentNodeMapping : mappingList){
 					
 					if (equivProperty.isInverse() == current.isInverse()) {
@@ -520,8 +516,10 @@ public class TMappingProcessor implements Serializable {
 				
 				Predicate p = ((OClass) equiv).getPredicate();
 				Set<CQIE> equivalentClassMappings = getMappings(mappingIndex, p);
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				
 
-				for (CQIE currentNodeMapping : currentNodeMappings) {
+				for (CQIE currentNodeMapping : mappingList) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
 					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody());
 				}
@@ -537,7 +535,7 @@ public class TMappingProcessor implements Serializable {
 	}
 
 	
-	private static Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
+	private Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
 		
 		Set<CQIE> currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {
