@@ -127,7 +127,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected boolean logAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
+	
 	// Filename of file containing list of keys for views. Set in preferences
+	private boolean useViewKeyFile;
 	private String viewKeyFile;
 
 	/***
@@ -436,6 +438,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
 		
+		useViewKeyFile = Boolean.valueOf((String) preferences.getProperty(QuestPreferences.USE_VIEW_KEY_FILE));
 		viewKeyFile = (String) preferences.get(QuestPreferences.VIEW_KEY_FILE);
 
 		if (!inmemory) {
@@ -713,30 +716,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 			
 			//Adds keys from the text file
-			
-			ViewKeyReader.addViewKeys(metadata, viewKeyFile);
-			// Prints all primary keys
-//			 System.out.println("\n====== Primary keys ==========");
-//			List<TableDefinition> table_list = metadata.getTableList();
-//			for(TableDefinition dd : table_list){
-//				System.out.print("\n" + dd.getName() + ":");
-//				for(Attribute attr : dd.getPrimaryKeys() ){
-//					System.out.print(attr.getName() + ",");
-//				}
-//			}
-//			// Prints all foreign keys
-//			System.out.println("\n====== Foreign keys ==========");
-//			for(TableDefinition dd : table_list){
-//				System.out.print("\n" + dd.getName() + ":");
-//				Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-//				for(String fkName  : fkeys.keySet() ){
-//					System.out.print("(" + fkName + ":");
-//					for(Attribute attr : fkeys.get(fkName)){
-//						System.out.print(attr.getName() + ",");
-//					}
-//					System.out.print("),");
-//				}
-//			}
+			if(useViewKeyFile)
+				ViewKeyReader.addViewKeys(metadata, viewKeyFile);
 
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
