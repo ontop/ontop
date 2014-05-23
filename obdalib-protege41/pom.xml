@@ -375,7 +375,7 @@
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
 							or protege wont load it -->
-						<Bundle-SymbolicName>it.unibz.krdb.obda.protege4;singleton:=true</Bundle-SymbolicName>
+						<Bundle-SymbolicName>org.semanticweb.ontop.protege4;singleton:=true</Bundle-SymbolicName>
 
 						<!-- This makes sure ONLY the necessary dependencies are imported. 
 							If this is not supplied, maven-bundle-plugin will attempt to import ALL classes 
