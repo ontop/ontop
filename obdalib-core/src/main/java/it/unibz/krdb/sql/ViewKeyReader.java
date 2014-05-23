@@ -19,6 +19,7 @@ import java.util.ArrayList;
  *
  */
 public class ViewKeyReader {
+	
 	/**
 	 * Reads colon separated pairs of view name and primary key
 	 * @param The metadata, already populated

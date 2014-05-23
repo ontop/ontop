@@ -127,6 +127,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected boolean logAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
+	// Filename of file containing list of keys for views. Set in preferences
+	private String viewKeyFile;
 
 	/***
 	 * Internal components
@@ -433,6 +435,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
+		
+		viewKeyFile = (String) preferences.get(QuestPreferences.VIEW_KEY_FILE);
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -710,7 +714,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			//Adds keys from the text file
 			
-			ViewKeyReader.addViewKeys(metadata, "../view_keys.lst");
+			ViewKeyReader.addViewKeys(metadata, viewKeyFile);
 			// Prints all primary keys
 //			 System.out.println("\n====== Primary keys ==========");
 //			List<TableDefinition> table_list = metadata.getTableList();
