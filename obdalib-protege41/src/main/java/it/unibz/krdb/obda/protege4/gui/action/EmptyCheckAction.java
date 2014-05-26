@@ -20,17 +20,11 @@ package it.unibz.krdb.obda.protege4.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.EmptiesAboxCheck;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.panels.EmptiesCheckPanel;
-import it.unibz.krdb.obda.protege4.panels.OBDAModelStatisticsPanel;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.utils.VirtualABoxStatistics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -53,7 +47,6 @@ public class EmptyCheckAction extends ProtegeAction {
 	private static final long serialVersionUID = 3322509244957306932L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
 	private OWLModelManager owlManager = null;
 	private OWLOntology currentOnto;
 	private EmptiesAboxCheck check;

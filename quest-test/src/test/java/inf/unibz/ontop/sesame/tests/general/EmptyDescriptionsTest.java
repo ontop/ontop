@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
@@ -33,7 +32,6 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -52,7 +50,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -67,10 +64,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Tests that TMapping does not return error in case of symmetric properties.
- * Use to check that no concurrency error appears.
+ * Test return of empty concepts and roles, based on the mappings.
+ * Given ontology, which is connected to a database via mappings,
+ * generate a suitable set of queries that test if there are empty concepts,
+ *  concepts that are no populated to anything.
  */
-public class EmptiesDescriptionsTest {
+
+public class EmptyDescriptionsTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -80,43 +80,47 @@ public class EmptiesDescriptionsTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	 final String owlfile = "src/test/resources/smallDatabase.owl";
-	 final String obdafile = "src/test/resources/smallDatabase.obda";
-//	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-//	final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	final String owlfile = "src/test/resources/smallDatabase.owl";
+	final String obdafile = "src/test/resources/smallDatabase.obda";
+	
+	// final String owlfile =
+	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	// final String obdafile =
+	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
 	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
 	private Set<Property> emptyProperties = new HashSet<Property>();
-	
+
 	private QuestOWL reasoner;
 	private Ontology onto;
 
 	@Before
 	public void setUp() throws Exception {
 
-		 String driver = "org.h2.Driver";
-		 String url = "jdbc:h2:mem:questjunitdb;";
-		 String username = "sa";
-		 String password = "";
-		
-		 fac = OBDADataFactoryImpl.getInstance();
-		
-		 connection = DriverManager.getConnection(url, username, password);
-		 Statement st = connection.createStatement();
-		
-		 FileReader reader = new
-		 FileReader("src/test/resources/smallDatabase-h2.sql");
-		 BufferedReader in = new BufferedReader(reader);
-		 StringBuilder bf = new StringBuilder();
-		 String line = in.readLine();
-		 while (line != null) {
-		 bf.append(line);
-		 line = in.readLine();
-		 }
-		
-		 st.executeUpdate(bf.toString());
-		 connection.commit();
+		String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:questjunitdb;";
+		String username = "sa";
+		String password = "";
+
+		fac = OBDADataFactoryImpl.getInstance();
+
+		connection = DriverManager.getConnection(url, username, password);
+		Statement st = connection.createStatement();
+
+		FileReader reader = new
+				FileReader("src/test/resources/smallDatabase-h2.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		connection.commit();
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -146,16 +150,15 @@ public class EmptiesDescriptionsTest {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 
 		onto = translator.translate(ontology);
-		
 
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		try {
-			 dropTables();
+			dropTables();
 			reasoner.dispose();
-			 connection.close();
+			connection.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -196,7 +199,7 @@ public class EmptiesDescriptionsTest {
 				st.close();
 			}
 			st.close();
-//			conn.close();
+			// conn.close();
 
 		}
 
@@ -217,7 +220,7 @@ public class EmptiesDescriptionsTest {
 			} catch (Exception e) {
 				st.close();
 			}
-//			conn.close();
+			// conn.close();
 			st.close();
 
 		}
@@ -233,7 +236,7 @@ public class EmptiesDescriptionsTest {
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
 		for (Predicate concept : onto.getConcepts()) {
-			
+
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
 				c++;
@@ -288,37 +291,37 @@ public class EmptiesDescriptionsTest {
 		log.info(r + " Empty role/s: " + emptyRoles);
 
 	}
-	
+
 	/**
-	 * Test numbers of empty concepts and roles considering existential and inverses
-	 * 
+	 * Test numbers of empty concepts and roles considering existential and
+	 * inverses
+	 * Cannot work until inverses and existentials are considered  in the Abox
 	 * @throws Exception
 	 */
-	
+	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-	TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
-	System.out.println();
-	System.out.println(tboxreasoner.getProperties());
-	
-	
-	int c = 0; // number of empty concepts
-	for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
-		BasicClassDescription representative= concept.getRepresentative();
-		if ((!representative.getPredicate().isDataTypePredicate()) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
-			emptyBasicConcepts.addAll(concept.getMembers());
-			c+=concept.size();
-		}
-	}
-	log.info(c + " Empty concept/s: " + emptyConcepts);
+		TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
+		System.out.println();
+		System.out.println(tboxreasoner.getProperties());
 
-	int r = 0; // number of empty concepts
-	for (Equivalences<Property> properties : tboxreasoner.getProperties()) {
-		if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
-			emptyProperties.addAll(properties.getMembers());
-			r+=properties.size();
+		int c = 0; // number of empty concepts
+		for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
+			BasicClassDescription representative = concept.getRepresentative();
+			if ((!representative.getPredicate().isDataTypePredicate()) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
+				emptyBasicConcepts.addAll(concept.getMembers());
+				c += concept.size();
+			}
 		}
-	}
-	log.info(r + " Empty role/s: " + emptyRoles);
+		log.info(c + " Empty concept/s: " + emptyConcepts);
+
+		int r = 0; // number of empty concepts
+		for (Equivalences<Property> properties : tboxreasoner.getProperties()) {
+			if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
+				emptyProperties.addAll(properties.getMembers());
+				r += properties.size();
+			}
+		}
+		log.info(r + " Empty role/s: " + emptyRoles);
 	}
 
 }

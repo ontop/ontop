@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.protege4.panels;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.EmptiesAboxCheck;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class EmptiesCheckPanel extends javax.swing.JPanel {
 		lblSummaryValue.setText(message);
 
 		/* Create table list for empty concepts */
-		List<String> emptyC = check.getEmptyConcepts();
+		List<Predicate> emptyC = check.getEmptyConcepts();
 
 		final int rowConcepts = emptyC.size();
 		final int col = 1;
@@ -58,16 +59,16 @@ public class EmptiesCheckPanel extends javax.swing.JPanel {
 
 		int index = 0;
 
-		for (String concept : emptyC) {
+		for (Predicate concept : emptyC) {
 
-			rowDataConcept[index][0] = concept;
+			rowDataConcept[index][0] = concept.getName();
 			index++;
 		}
 		JTable tblConceptCount = createTable(rowDataConcept, columnConcept);
 		jScrollConcepts.setViewportView(tblConceptCount);
 
 		/* Create table list for empty roles */
-		List<String> emptyR = check.getEmptyRoles();
+		List<Predicate> emptyR = check.getEmptyRoles();
 
 		final int rowRoles = emptyR.size();
 
@@ -77,13 +78,13 @@ public class EmptiesCheckPanel extends javax.swing.JPanel {
 
 		index = 0;
 
-		for (String role : emptyR) {
+		for (Predicate role : emptyR) {
 
-			rowDataRole[index][0] = role;
+			rowDataRole[index][0] = role.getName();
 			index++;
 		}
 		JTable tblRoleCount = createTable(rowDataRole, columnsRole);
-		
+
 		jScrollRoles.setViewportView(tblRoleCount);
 	}
 
@@ -110,49 +111,50 @@ public class EmptiesCheckPanel extends javax.swing.JPanel {
 	 */
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+	// <editor-fold defaultstate="collapsed"
+	// desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents() {
 
-        pnlSummary = new javax.swing.JPanel();
-        lblSummary = new javax.swing.JLabel();
-        lblSummaryValue = new javax.swing.JLabel();
-        pnlEmptiesSummary = new javax.swing.JPanel();
-        jScrollConcepts = new javax.swing.JScrollPane();
-        jScrollRoles = new javax.swing.JScrollPane();
+		pnlSummary = new javax.swing.JPanel();
+		lblSummary = new javax.swing.JLabel();
+		lblSummaryValue = new javax.swing.JLabel();
+		pnlEmptiesSummary = new javax.swing.JPanel();
+		jScrollConcepts = new javax.swing.JScrollPane();
+		jScrollRoles = new javax.swing.JScrollPane();
 
-        setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        setMinimumSize(new java.awt.Dimension(520, 400));
-        setPreferredSize(new java.awt.Dimension(520, 400));
-        setLayout(new java.awt.BorderLayout());
+		setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+		setMinimumSize(new java.awt.Dimension(520, 400));
+		setPreferredSize(new java.awt.Dimension(520, 400));
+		setLayout(new java.awt.BorderLayout());
 
-        pnlSummary.setMinimumSize(new java.awt.Dimension(156, 23));
-        pnlSummary.setPreferredSize(new java.awt.Dimension(156, 23));
-        pnlSummary.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+		pnlSummary.setMinimumSize(new java.awt.Dimension(156, 23));
+		pnlSummary.setPreferredSize(new java.awt.Dimension(156, 23));
+		pnlSummary.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        lblSummary.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        lblSummary.setText("Empty concepts and roles");
-        pnlSummary.add(lblSummary);
+		lblSummary.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+		lblSummary.setText("Empty concepts and roles");
+		pnlSummary.add(lblSummary);
 
-        lblSummaryValue.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        pnlSummary.add(lblSummaryValue);
+		lblSummaryValue.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+		pnlSummary.add(lblSummaryValue);
 
-        add(pnlSummary, java.awt.BorderLayout.NORTH);
+		add(pnlSummary, java.awt.BorderLayout.NORTH);
 
-        pnlEmptiesSummary.setLayout(new javax.swing.BoxLayout(pnlEmptiesSummary, javax.swing.BoxLayout.PAGE_AXIS));
-        pnlEmptiesSummary.add(jScrollConcepts);
+		pnlEmptiesSummary.setLayout(new javax.swing.BoxLayout(pnlEmptiesSummary, javax.swing.BoxLayout.PAGE_AXIS));
+		pnlEmptiesSummary.add(jScrollConcepts);
 
-        jScrollRoles.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        pnlEmptiesSummary.add(jScrollRoles);
+		jScrollRoles.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+		pnlEmptiesSummary.add(jScrollRoles);
 
-        add(pnlEmptiesSummary, java.awt.BorderLayout.CENTER);
-    }// </editor-fold>//GEN-END:initComponents
+		add(pnlEmptiesSummary, java.awt.BorderLayout.CENTER);
+	}// </editor-fold>//GEN-END:initComponents
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollConcepts;
-    private javax.swing.JScrollPane jScrollRoles;
-    private javax.swing.JLabel lblSummary;
-    private javax.swing.JLabel lblSummaryValue;
-    private javax.swing.JPanel pnlEmptiesSummary;
-    private javax.swing.JPanel pnlSummary;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JScrollPane jScrollConcepts;
+	private javax.swing.JScrollPane jScrollRoles;
+	private javax.swing.JLabel lblSummary;
+	private javax.swing.JLabel lblSummaryValue;
+	private javax.swing.JPanel pnlEmptiesSummary;
+	private javax.swing.JPanel pnlSummary;
+	// End of variables declaration//GEN-END:variables
 }

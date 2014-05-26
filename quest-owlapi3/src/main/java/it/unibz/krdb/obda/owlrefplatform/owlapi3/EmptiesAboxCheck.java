@@ -21,24 +21,21 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A utility class about the ABox materialization.
+ * Return empty concepts and roles, based on the mappings. Given an ontology,
+ * which is connected to a database via mappings, generate a suitable set of
+ * queries that test if there are empty concepts, concepts that are no populated
+ * to anything.
  */
 public class EmptiesAboxCheck {
 
@@ -47,18 +44,15 @@ public class EmptiesAboxCheck {
 
 	Logger log = LoggerFactory.getLogger(EmptiesAboxCheck.class);
 
-	
-	private List<String> emptyConcepts = new ArrayList<String>();
-	private List<String> emptyRoles = new ArrayList<String>();
-	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
-	private Set<Property> emptyProperties = new HashSet<Property>();
-	
+	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
+	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
+
 	/**
 	 * Inserts the OBDA model to this utility class.
 	 * 
 	 * @param model
 	 *            The mandatory OBDA model.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public EmptiesAboxCheck(OWLOntology onto, QuestOWLConnection conn) throws Exception {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
@@ -66,7 +60,7 @@ public class EmptiesAboxCheck {
 		this.onto = translator.translate(onto);
 		this.conn = conn;
 		refresh();
-		
+
 	}
 
 	/**
@@ -74,21 +68,19 @@ public class EmptiesAboxCheck {
 	 * 
 	 * @return The empty concepts.
 	 */
-	public  List<String> getEmptyConcepts() {
+	public List<Predicate> getEmptyConcepts() {
 		return emptyConcepts;
 	}
-	
+
 	/**
 	 * Returns the empty roles.
 	 * 
 	 * @return The empty roles.
 	 */
-	public  List<String> getEmptyRoles() {
+	public List<Predicate> getEmptyRoles() {
 		return emptyRoles;
 	}
 
-
-	
 	/**
 	 * Gets the total number of triples from all the data sources and mappings.
 	 * 
@@ -96,45 +88,43 @@ public class EmptiesAboxCheck {
 	 * @throws Exception
 	 */
 	public int getNumberEmpties() throws Exception {
-		
+
 		return emptyConcepts.size() + emptyRoles.size();
 	}
 
 	@Override
 	public String toString() {
-		String str = new String(); 
-		
-			int countC = emptyConcepts.size();
-			str += String.format("- %s Empty %s\n", countC,  (countC == 1) ? "concept" : "concepts");
-			int countR = emptyRoles.size();
-			str += String.format("- %s Empty %s\n", countR,  (countR == 1 ) ? "role" : "roles");
+		String str = new String();
+
+		int countC = emptyConcepts.size();
+		str += String.format("- %s Empty %s\n", countC, (countC == 1) ? "concept" : "concepts");
+		int countR = emptyRoles.size();
+		str += String.format("- %s Empty %s\n", countR, (countR == 1) ? "role" : "roles");
 		return str;
 	}
 
 	public void refresh() throws Exception {
 
-
 		int c = 0; // number of empty concepts
 		for (Predicate concept : onto.getConcepts()) {
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
-				emptyConcepts.add(concept.getName());
+				emptyConcepts.add(concept);
 				c++;
 			}
 		}
-		log.info(c + " Empty concept/s: " + emptyConcepts);
+		log.debug(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
 		for (Predicate role : onto.getRoles()) {
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role.getName());
+				emptyRoles.add(role);
 				r++;
 			}
 		}
-		log.info(r + " Empty role/s: " + emptyRoles);
+		log.debug(r + " Empty role/s: " + emptyRoles);
 
-		
 	}
-	
+
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
 		QuestOWLStatement st = conn.createStatement();
@@ -150,7 +140,7 @@ public class EmptiesAboxCheck {
 			} catch (Exception e) {
 				st.close();
 			}
-//			conn.close();
+			// conn.close();
 			st.close();
 
 		}
@@ -172,12 +162,11 @@ public class EmptiesAboxCheck {
 			} catch (Exception e) {
 				st.close();
 			}
-//			conn.close();
+			// conn.close();
 			st.close();
 
 		}
 
 	}
 
-	
 }
