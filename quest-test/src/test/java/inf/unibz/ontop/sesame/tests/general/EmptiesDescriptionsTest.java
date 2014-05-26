@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -50,8 +51,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,6 +86,9 @@ public class EmptiesDescriptionsTest {
 //	final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
+	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
+	private Set<Property> emptyProperties = new HashSet<Property>();
+	
 	private QuestOWL reasoner;
 	private Ontology onto;
 
@@ -140,6 +146,7 @@ public class EmptiesDescriptionsTest {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 
 		onto = translator.translate(ontology);
+		
 
 	}
 
@@ -188,7 +195,8 @@ public class EmptiesDescriptionsTest {
 			} catch (Exception e) {
 				st.close();
 			}
-			conn.close();
+			st.close();
+//			conn.close();
 
 		}
 
@@ -209,7 +217,8 @@ public class EmptiesDescriptionsTest {
 			} catch (Exception e) {
 				st.close();
 			}
-			conn.close();
+//			conn.close();
+			st.close();
 
 		}
 
@@ -224,6 +233,7 @@ public class EmptiesDescriptionsTest {
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
 		for (Predicate concept : onto.getConcepts()) {
+			
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
 				c++;
@@ -277,6 +287,38 @@ public class EmptiesDescriptionsTest {
 		}
 		log.info(r + " Empty role/s: " + emptyRoles);
 
+	}
+	
+	/**
+	 * Test numbers of empty concepts and roles considering existential and inverses
+	 * 
+	 * @throws Exception
+	 */
+	
+	public void testEmptiesWithInverses() throws Exception {
+	TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
+	System.out.println();
+	System.out.println(tboxreasoner.getProperties());
+	
+	
+	int c = 0; // number of empty concepts
+	for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
+		BasicClassDescription representative= concept.getRepresentative();
+		if ((!representative.getPredicate().isDataTypePredicate()) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
+			emptyBasicConcepts.addAll(concept.getMembers());
+			c+=concept.size();
+		}
+	}
+	log.info(c + " Empty concept/s: " + emptyConcepts);
+
+	int r = 0; // number of empty concepts
+	for (Equivalences<Property> properties : tboxreasoner.getProperties()) {
+		if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
+			emptyProperties.addAll(properties.getMembers());
+			r+=properties.size();
+		}
+	}
+	log.info(r + " Empty role/s: " + emptyRoles);
 	}
 
 }

@@ -37,7 +37,7 @@ INSERT INTO client VALUES (111, 'John', 'Smith', '1950-03-21', 'JSRX229500321', 
 INSERT INTO client VALUES (112, 'Joana', 'Lopatenkko', '1970-07-14', 'JLPTK54992', 992, 'F');
 
 INSERT INTO company VALUES (211, 'General Motors', 25000000, 1.2345678e+03, 995);
-INSERT INTO company VALUES (212, 'GnA Investments', 100000, 1234.5678, 996);
+INSERT INTO company VALUES (212, 'GnA Investments', 100000, 1234.5678, 992);
 
 
 ALTER TABLE address
