@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 
 import java.io.File;
+import java.io.FileReader;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -31,10 +32,11 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import com.google.common.base.Joiner;
+import com.google.common.io.CharStreams;
 
 /**
  *
- * @author dimitris
+ * @author 
  */
 public class ADPOntopTest {
 	
@@ -45,18 +47,8 @@ public class ADPOntopTest {
 
 	public void runQuery() throws Exception {
 
-		  Class.forName("madgik.adp.federatedjdbc.AdpDriver");
-		  
-		  String conString="jdbc:adp:http://whale.di.uoa.gr:9090/datasets/npd-dataset";
-
-		  Connection conn2 = DriverManager.getConnection(
-		    		conString,
-		            "adp",
-		            "adp");
-		    
-		  Statement adpSt=conn2.createStatement();
-		  adpSt.executeQuery("addFederatedEndpoint(NPD, jdbc:mysql://whale.di.uoa.gr:3306/newnpd, com.mysql.jdbc.Driver, optique, gray769watt724)");
-
+		
+	
 		/*
 		 * Load the ontology from an external .owl file.
 		 */
@@ -95,11 +87,11 @@ public class ADPOntopTest {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String sparqlQuery = Joiner.on("\n").join( 
-				Files.readAllLines(Paths.get(queryfile), Charset.defaultCharset())); 
-				
-				
-
+		String sparqlQuery = Joiner.on("\n").join(
+				CharStreams.readLines(new FileReader(queryfile))); 
+		
+		//System.out.println(sparqlQuery);
+		
 		try {
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 			int columnSize = rs.getColumCount();
