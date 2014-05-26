@@ -21,7 +21,7 @@ diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 
 [SourceDeclaration]
 sourceUri	fed-npd
-connectionUrl	jdbc:adp:http://whale.di.uoa.gr:9090/datasets/npd-dataset
+connectionUrl	jdbc:adp:http://whale.di.uoa.gr:9090/datasets/npd-dataset/-fedDB-NPD-next-jdbc:mysql://whale.di.uoa.gr:3306/newnpd-next-com.mysql.jdbc.Driver-next-optique-next-gray769watt724
 username	adp
 password	adp
 driverClass	madgik.adp.federatedjdbc.AdpDriver
