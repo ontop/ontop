@@ -104,7 +104,11 @@
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sparql-testsuite</artifactId>
-        </dependency>      
+        </dependency>
+        <dependency>
+   			<groupId>com.google.guava</groupId>
+   			<artifactId>guava</artifactId>
+   		</dependency>      
 	</dependencies>
                           
 	<repositories>
