@@ -34,6 +34,7 @@ import java.net.URI;
 import java.util.ArrayList;
 
 import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 
 public class R2RMLReader {
 	
@@ -42,11 +43,11 @@ public class R2RMLReader {
 
 	private OBDAModel obdaModel = fac.getOBDAModel();
 	
-	private Graph graph ;
+	private Model m ;
 	
-	public R2RMLReader(Graph graph) {
-		manager = new R2RMLManager(graph);
-		this.graph = graph;
+	public R2RMLReader(Model m) {
+		manager = new R2RMLManager(m);
+		this.m = m;
 	}
 	
 	public R2RMLReader(String file)
@@ -63,7 +64,7 @@ public class R2RMLReader {
 	public R2RMLReader(File file)
 	{
 		manager = new R2RMLManager(file);
-		graph = manager.getGraph();
+		m = manager.getModel();
 	}
 	
 	public void setOBDAModel(OBDAModel model)
@@ -79,7 +80,7 @@ public class R2RMLReader {
 	public OBDAModel readModel(URI sourceUri){
 		try {
 			//add to the model the mappings retrieved from the manager
-			obdaModel.addMappings(sourceUri, manager.getMappings(graph));
+			obdaModel.addMappings(sourceUri, manager.getMappings(m));
 		} catch (DuplicateMappingException e) {
 			e.printStackTrace();
 		}
@@ -91,16 +92,13 @@ public class R2RMLReader {
 	 * @return list of obdaMappingAxioms
 	 */
 	public ArrayList<OBDAMappingAxiom> readMappings(){
-		return manager.getMappings(graph);
+		return manager.getMappings(m);
 	}
 	
 
 	public static void main(String args[])
 	{
-		String file = "/Users/timi/Documents/hdd/Project/Test Cases/mapping1.ttl";
-	//	"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D014/r2rmla.ttl";
-	//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl";
-	
+		String file = "/Users/mindaugas/r2rml/test26.ttl";	
 		R2RMLReader reader = new R2RMLReader(file);
 		ArrayList<OBDAMappingAxiom> axioms = reader.readMappings();
 		for (OBDAMappingAxiom ax : axioms)

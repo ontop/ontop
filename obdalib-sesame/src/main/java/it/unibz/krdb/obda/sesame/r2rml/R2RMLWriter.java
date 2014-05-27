@@ -43,20 +43,30 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.GraphImpl;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.Rio;
 import org.openrdf.rio.turtle.TurtleWriter;
+
+import eu.optique.api.mapping.R2RMLMappingManager;
+import eu.optique.api.mapping.R2RMLMappingManagerFactory;
+import eu.optique.api.mapping.TriplesMap;
 
 
 public class R2RMLWriter {
@@ -92,6 +102,7 @@ public class R2RMLWriter {
 	 * that represents the R2RML mappings
 	 * @return an RDF Graph
 	 */
+	@Deprecated
 	public Graph getGraph() {
 		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
 		List<Statement> statements = new ArrayList<Statement>();
@@ -105,6 +116,16 @@ public class R2RMLWriter {
 		g.addAll(statements);
 		return g;
 	}
+
+	public Collection <TriplesMap> getTriplesMaps() {
+		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+		Collection<TriplesMap> coll = new LinkedList<TriplesMap>();
+		for (OBDAMappingAxiom axiom: this.mappings) {
+			TriplesMap tm = transformer.getTriplesMap(axiom, prefixmng);
+			coll.add(tm);
+		}
+		return coll;
+	}
 	
 	/**
 	 * the method to write the R2RML mappings
@@ -114,40 +135,33 @@ public class R2RMLWriter {
 	public void write(File file)
 	{
 		try {
-			//retrieve rdf graph to write
-			Graph result = getGraph();
-			//open output stream
-			this.out = new BufferedWriter(new FileWriter(file));
-			//set up turtle writer
-			TurtleWriter writer =  new TurtleWriter(this.out);
-			writer.startRDF();
-			//handle namespaces
-			Map<String, String> prefixes = this.prefixmng.getPrefixMap();
-			for (String pref : prefixes.keySet()) {
-				writer.handleNamespace(pref, prefixes.get(pref));
-			}
-			//write graph statements
-			Iterator<Statement> stIterator = result.iterator();
-			while (stIterator.hasNext()) {
-				writer.handleStatement(stIterator.next());
-			}
-			writer.endRDF();
-			//close output stream
-			out.close();
+			//Graph result = getGraph();
+			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+			Collection<TriplesMap> coll = getTriplesMaps();
+			Model out = mm.exportMappings(coll, Model.class);
+			
+			FileOutputStream fos = new FileOutputStream(file);
+			
+//			Map<String, String> prefixes = this.prefixmng.getPrefixMap();
+//			for (String pref : prefixes.keySet()) {
+//				writer.handleNamespace(pref, prefixes.get(pref));
+//			}
+			
+			Rio.write(out, fos, RDFFormat.TURTLE);
+			fos.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	
 	public static void main(String args[])
 	{
-		String file = "/Users/timi/Documents/hdd/Project/Test Cases/mapping1.ttl";
+		String file = "/Users/mindaugas/r2rml/test2.ttl";
 		R2RMLReader reader = new R2RMLReader(file);
 		
 		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("blah")),URI.create("blah"));
-		File out = new File("/Users/timi/Documents/hdd/Project/Test Cases/mapping1out.ttl");
-				//"C:/Project/Timi/Workspace/obdalib-parent/quest-rdb2rdf-compliance/src/main/resources/D004/WRr2rmlb.ttl");
+		File out = new File("/Users/mindaugas/r2rml/out.ttl");
+				
 		Graph g = writer.getGraph();
 		Iterator<Statement> st = g.iterator();
 		while (st.hasNext())
