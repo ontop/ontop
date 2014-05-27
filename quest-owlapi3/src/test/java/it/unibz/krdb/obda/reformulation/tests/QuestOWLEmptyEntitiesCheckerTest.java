@@ -20,17 +20,18 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
+import static org.junit.Assert.assertEquals;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,46 +41,52 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***
- * Tests that TMapping does not return error in case of symmetric properties.
- * Use to check that no concurrency error appears. 
+/**
+ * Use the class EmptiesAboxCheck to test the return of empty concepts and
+ * roles, based on the mappings. Given ontology, which is connected to a
+ * database via mappings, generate a suitable set of queries that test if there
+ * are empty concepts, concepts that are no populated to anything.
  */
-public class TMappingConcurrencyErrorFixTest{
+public class QuestOWLEmptyEntitiesCheckerTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 	private Connection connection;
-	
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/tmapping/exampleTMapping.owl";
-	final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
+	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
+	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
+
+	// final String owlfile =
+	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	// final String obdafile =
+	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+
+	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
+	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
+
 	private QuestOWL reasoner;
 
 	@Before
 	public void setUp() throws Exception {
-		
-		
-		// String driver = "org.h2.Driver";
+
+		String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb;";
 		String username = "sa";
 		String password = "";
@@ -89,7 +96,8 @@ public class TMappingConcurrencyErrorFixTest{
 		connection = DriverManager.getConnection(url, username, password);
 		Statement st = connection.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/create-tables.sql");
+		FileReader reader = new
+				FileReader("src/test/resources/test/emptiesDatabase-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -108,10 +116,10 @@ public class TMappingConcurrencyErrorFixTest{
 		// Loading the OBDA data
 		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
-		
+
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-	
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
@@ -126,27 +134,25 @@ public class TMappingConcurrencyErrorFixTest{
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		
 	}
 
 	@After
-	public void tearDown() throws Exception{
+	public void tearDown() throws Exception {
 		try {
 			dropTables();
 			reasoner.dispose();
 			connection.close();
-			
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
-		
+
 	}
-	
+
 	private void dropTables() throws SQLException, IOException {
 
 		Statement st = connection.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/drop-tables.sql");
+		FileReader reader = new FileReader("src/test/resources/test/emptiesDatabase-drop-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -159,46 +165,53 @@ public class TMappingConcurrencyErrorFixTest{
 		st.close();
 		connection.commit();
 	}
-	
-	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		String retval=null;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
-			retval = ind1.toString();
-			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#111>", retval);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind2 =	rs.getOWLIndividual("y")	 ;
-			retval = ind2.toString();
-			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#112>", retval);
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
-	}
 
 	/**
-	 * Test no error is generate before SPARQL query 
+	 * Test numbers of empty concepts
+	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void test() throws Exception {
-		String query = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> SELECT ?y WHERE { ?y a :Man }";
-		String val = runTests(query);
-		
+	public void testEmptyConcepts() throws Exception {
+
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
+		emptyConcepts = empties.getEmptyConcepts();
+		log.info("Empty concept/s: " + emptyConcepts);
+		assertEquals(1, emptyConcepts.size());
+
 	}
-	
 
+	/**
+	 * Test numbers of empty roles
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testEmptyRoles() throws Exception {
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
+		emptyRoles = empties.getEmptyRoles();
+		log.info("Empty role/s: " + emptyRoles);
+		assertEquals(2, emptyRoles.size());
 
-			
+	}
+
+	/**
+	 * Test numbers of empty concepts and roles
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testEmpties() throws Exception {
+
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
+		emptyConcepts = empties.getEmptyConcepts();
+		log.info(empties.toString());
+		log.info("Empty concept/s: " + emptyConcepts);
+		assertEquals(1, emptyConcepts.size());
+		emptyRoles = empties.getEmptyRoles();
+		log.info("Empty role/s: " + emptyRoles);
+		assertEquals(2, emptyRoles.size());
+
+	}
+
 }
