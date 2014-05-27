@@ -118,7 +118,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// These can be changed in the properties file
 	protected int maxPoolSize = 20;
 	protected int startPoolSize = 2;
-	protected boolean removeAbandoned = false;
+	protected boolean removeAbandoned = true;
+	protected boolean logAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
 
@@ -1298,10 +1299,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		poolProperties.setMaxActive(maxPoolSize);
 		poolProperties.setMaxIdle(maxPoolSize);
 		poolProperties.setInitialSize(startPoolSize);
-		poolProperties.setMaxWait(10000);
+		poolProperties.setMaxWait(30000);
 		poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
 		poolProperties.setMinEvictableIdleTimeMillis(30000);
-		poolProperties.setLogAbandoned(removeAbandoned);
+		poolProperties.setLogAbandoned(logAbandoned);
 		poolProperties.setRemoveAbandoned(removeAbandoned);
 		poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
 				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");

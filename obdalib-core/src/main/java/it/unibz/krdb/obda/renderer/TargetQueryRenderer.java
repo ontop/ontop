@@ -66,7 +66,16 @@ public class TargetQueryRenderer {
 				if (originalString.equals(object)) {
 					object = "<" + object + ">";
 				}
-			} else {
+			}
+			else if (originalString.equals("triple")) {
+					Term subjectTerm = atom.getTerm(0);
+					subject = getDisplayName(subjectTerm, prefixManager);
+					Term predicateTerm = atom.getTerm(1);
+					predicate = getDisplayName(predicateTerm, prefixManager);
+					Term objectTerm = atom.getTerm(2);
+					object = getDisplayName(objectTerm, prefixManager);
+			}			
+			else {
 				Term subjectTerm = atom.getTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = getAbbreviatedName(originalString, prefixManager, false);
@@ -162,6 +171,11 @@ public class TargetQueryRenderer {
 					}
 				}
 				String originalUri = String.format(templateFormat, varNames.toArray());
+				if(originalUri.equals(OBDAVocabulary.RDF_TYPE))
+				{
+					sb.append("a");
+				}
+				else{
 				String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
 				if (!shortenUri.equals(originalUri)) {
 					sb.append(shortenUri);
@@ -170,7 +184,8 @@ public class TargetQueryRenderer {
 					sb.append("<");
 					sb.append(originalUri);
 					sb.append(">");
-				}				
+				}		
+				}
 			} else { // for any ordinary function symbol
 				sb.append(fname);
 				sb.append("(");
@@ -190,6 +205,7 @@ public class TargetQueryRenderer {
 			sb.append("}");
 		} else if (term instanceof URIConstant) {
 			String originalUri = term.toString();
+			
 			String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
 			if (!shortenUri.equals(originalUri)) {
 				sb.append(shortenUri);
@@ -199,6 +215,7 @@ public class TargetQueryRenderer {
 				sb.append(originalUri);
 				sb.append(">");
 			}
+		
 		} else if (term instanceof ValueConstant) {
 			sb.append("\"");
 			sb.append(((ValueConstant) term).getValue());

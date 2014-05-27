@@ -45,6 +45,7 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -111,7 +112,7 @@ public class R2RMLParser {
 		if (objects.size() > 0){
 		Resource object = (Resource) objects.toArray()[0];
 		
-		if (object instanceof BNode) {
+		if (object instanceof BNode || object instanceof URI) {
 			
 			//look for tableName declaration
 			String tableName =  getSQLTableName(myGraph, object);
