@@ -67,7 +67,7 @@
 			<directory>${project.basedir}/../quest-sesame/target/classes/org</directory>
 			<outputDirectory>/org</outputDirectory>
 			<includes>
-				<include>*</include>
+				<include>**/*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
