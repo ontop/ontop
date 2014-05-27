@@ -77,29 +77,25 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					
+				<configuration>					
 					<source>1.7</source>
 					<target>1.7</target>
 					<testExcludes>
-						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
-						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
-						<exclude>**/RDBMSDirect*.java</exclude>
-						<exclude>**/OWLAPI2ABox*.java</exclude>
-						<exclude>**/SemanticIndexTestSuite.java</exclude>
-						<exclude>**/SNOMEDTest.java</exclude>
+						<!-- <exclude>**/DAGCreationFromOntologyTest.java</exclude> --> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
+						<!-- <exclude>**/RDBMSDirect*.java</exclude> -->
+						<!-- <exclude>**/OWLAPI2ABox*.java</exclude> -->
+						<!-- <exclude>**/SemanticIndexTestSuite.java</exclude> -->
+						<!-- <exclude>**/SNOMEDTest.java</exclude>  -->
 					</testExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.16</version>
         <configuration>
           <excludes>
           	<!-- H2 case sensitivity is failing (sometimes) -->
-			<exclude>**/MetaMappingVirtualABoxTest.java</exclude>
+			<!-- <exclude>**/MetaMappingVirtualABoxTest.java</exclude>  -->
           </excludes>
         </configuration>
       </plugin>

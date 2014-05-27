@@ -96,7 +96,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     
     private void loadOntologyToModel(OBDAModel model) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        File file = new File("src/test/java/it/unibz/krdb/obda/api/io/School.owl");
+        File file = new File("src/test/java/org/semanticweb/ontop/api/io/School.owl");
         OWLOntology schoolOntology = manager.loadOntologyFromOntologyDocument(file);
         
         // Setup the entity declarations
@@ -212,7 +212,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void saveRegularFile() throws IOException {
         ioManager = new ModelIOManager(model);
-        ioManager.save("src/test/java/it/unibz/krdb/obda/api/io/SchoolRegularFile.obda");
+        ioManager.save("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
     }
 
     private void saveFileWithMultipleDataSources() throws IOException {
@@ -227,7 +227,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
         // Save the model
         ioManager = new ModelIOManager(model);
-        ioManager.save("src/test/java/it/unibz/krdb/obda/api/io/SchoolMultipleDataSources.obda");
+        ioManager.save("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
     }
 
     /*
@@ -236,7 +236,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void loadRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         ioManager = new ModelIOManager(model);
-        ioManager.load("src/test/java/it/unibz/krdb/obda/api/io/SchoolRegularFile.obda");
+        ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
 
         // Check the content
         assertTrue(model.getPrefixManager().getPrefixMap().size() == 6);
@@ -246,7 +246,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void loadFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         ioManager = new ModelIOManager(model);
-        ioManager.load("src/test/java/it/unibz/krdb/obda/api/io/SchoolMultipleDataSources.obda");
+        ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
 
         // Check the content
         assertTrue(model.getPrefixManager().getPrefixMap().size() == 6);
