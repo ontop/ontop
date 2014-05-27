@@ -302,7 +302,7 @@
 				<extensions>true</extensions>
 				<configuration>
 
-					<!-- The follwing is the set of instructions of how pack the bundle 
+					<!-- The following is the set of instructions of how pack the bundle
 						and how to create the MANIFEST.MF for the bundle. The configuration does 
 						4 things. 1. It makes sure that the "tight" dependencies are not packed as 
 						jars, but as .class files (inline). It makes sure that all the runtime dependencies 
@@ -313,7 +313,7 @@
 					<instructions>
 
 						<!-- <Build-Jdk>1.6</Build-Jdk> -->
-						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+						<Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
@@ -336,8 +336,8 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Build-Number>0</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
-						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>it.unibz.krdb.obda.protege4.*,
+						<Export-Package>org.semanticweb.ontop.protege4.*</Export-Package>
+						<Import-Package>org.semanticweb.ontop.protege4.*,
 							!org.json,
 							!org.codehaus.groovy.*,
 							!groovy.*,
