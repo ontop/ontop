@@ -64,13 +64,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Test return of empty concepts and roles, based on the mappings.
- * Given ontology, which is connected to a database via mappings,
+ * Test returns  empty concepts and roles, based on the mappings.
+ * Given an ontology, which is connected to a database via mappings,
  * generate a suitable set of queries that test if there are empty concepts,
  *  concepts that are no populated to anything.
  */
 
-public class EmptyDescriptionsTest {
+public class EmptyEntitiesTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -80,13 +80,13 @@ public class EmptyDescriptionsTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/smallDatabase.owl";
-	final String obdafile = "src/test/resources/smallDatabase.obda";
+//	final String owlfile = "src/test/resources/emptiesDatabase.owl";
+//	final String obdafile = "src/test/resources/emptiesDatabase.obda";
 	
-	// final String owlfile =
-	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	// final String obdafile =
-	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	 final String owlfile =
+	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	 final String obdafile =
+	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 	
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
@@ -109,8 +109,7 @@ public class EmptyDescriptionsTest {
 		connection = DriverManager.getConnection(url, username, password);
 		Statement st = connection.createStatement();
 
-		FileReader reader = new
-				FileReader("src/test/resources/smallDatabase-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/smallDatabase-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -314,7 +313,7 @@ public class EmptyDescriptionsTest {
 		}
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
-		int r = 0; // number of empty concepts
+		int r = 0; // number of empty roles
 		for (Equivalences<Property> properties : tboxreasoner.getProperties()) {
 			if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 				emptyProperties.addAll(properties.getMembers());

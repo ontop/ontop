@@ -20,9 +20,8 @@ package it.unibz.krdb.obda.protege4.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.EmptiesAboxCheck;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 import it.unibz.krdb.obda.protege4.panels.EmptiesCheckPanel;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 
@@ -39,23 +38,21 @@ import javax.swing.JPanel;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
-public class EmptyCheckAction extends ProtegeAction {
+public class EmptiesCheckAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 3322509244957306932L;
 
 	private OWLEditorKit editorKit = null;
 	private OWLModelManager owlManager = null;
-	private OWLOntology currentOnto;
-	private EmptiesAboxCheck check;
+	private QuestOWLEmptyEntitiesChecker check;
 
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
 		owlManager = editorKit.getOWLModelManager();
-		currentOnto = owlManager.getActiveOntology();
+//		currentOnto = owlManager.getActiveOntology();
 
 	}
 
@@ -66,12 +63,13 @@ public class EmptyCheckAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
 		OWLReasoner reasoner = owlManager.getOWLReasonerManager().getCurrentReasoner();
+		
+
 		if (reasoner instanceof QuestOWL) {
-			try {
-				QuestOWL questReasoner = (QuestOWL) reasoner;
-				QuestOWLConnection questconnection = questReasoner.getConnection();
-				check = new EmptiesAboxCheck(currentOnto, questconnection);
+			try {			
+				check = ((QuestOWL) reasoner).getEmptyEntitiesChecker();
 
 				JDialog dialog = new JDialog();
 				dialog.setModal(true);

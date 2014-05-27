@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.krdb.obda.reformulation.tests;
 
 /*
  * #%L
@@ -20,6 +20,7 @@ package inf.unibz.ontop.sesame.tests.general;
  * #L%
  */
 
+import static org.junit.Assert.assertEquals;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -27,7 +28,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.EmptiesAboxCheck;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * database via mappings, generate a suitable set of queries that test if there
  * are empty concepts, concepts that are no populated to anything.
  */
-public class EmptiesAboxCheckTest {
+public class QuestOWLEmptyEntitiesCheckerTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -69,8 +70,8 @@ public class EmptiesAboxCheckTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/smallDatabase.owl";
-	final String obdafile = "src/test/resources/smallDatabase.obda";
+	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
+	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
 	// final String owlfile =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
@@ -96,7 +97,7 @@ public class EmptiesAboxCheckTest {
 		Statement st = connection.createStatement();
 
 		FileReader reader = new
-				FileReader("src/test/resources/smallDatabase-h2.sql");
+				FileReader("src/test/resources/test/emptiesDatabase-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -151,7 +152,7 @@ public class EmptiesAboxCheckTest {
 
 		Statement st = connection.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/smallDatabase-drop-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/emptiesDatabase-drop-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -173,9 +174,10 @@ public class EmptiesAboxCheckTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 
-		EmptiesAboxCheck empties = new EmptiesAboxCheck(ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
 		emptyConcepts = empties.getEmptyConcepts();
 		log.info("Empty concept/s: " + emptyConcepts);
+		assertEquals(1, emptyConcepts.size());
 
 	}
 
@@ -186,9 +188,10 @@ public class EmptiesAboxCheckTest {
 	 */
 	@Test
 	public void testEmptyRoles() throws Exception {
-		EmptiesAboxCheck empties = new EmptiesAboxCheck(ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
 		emptyRoles = empties.getEmptyRoles();
 		log.info("Empty role/s: " + emptyRoles);
+		assertEquals(2, emptyRoles.size());
 
 	}
 
@@ -200,12 +203,14 @@ public class EmptiesAboxCheckTest {
 	@Test
 	public void testEmpties() throws Exception {
 
-		EmptiesAboxCheck empties = new EmptiesAboxCheck(ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
 		emptyConcepts = empties.getEmptyConcepts();
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConcepts);
+		assertEquals(1, emptyConcepts.size());
 		emptyRoles = empties.getEmptyRoles();
 		log.info("Empty role/s: " + emptyRoles);
+		assertEquals(2, emptyRoles.size());
 
 	}
 

@@ -130,7 +130,7 @@
 	<extension id="menu.obda.emptieschecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for empties..."/> 
 		<toolTip value="Provide information about empty concepts and roles "/>
-		<class value="it.unibz.krdb.obda.protege4.gui.action.EmptyCheckAction"/>
+		<class value="it.unibz.krdb.obda.protege4.gui.action.EmptiesCheckAction"/>
 		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-C"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>

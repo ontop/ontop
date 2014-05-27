@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,30 +38,41 @@ import org.slf4j.LoggerFactory;
  * queries that test if there are empty concepts, concepts that are no populated
  * to anything.
  */
-public class EmptiesAboxCheck {
+public class QuestOWLEmptyEntitiesChecker {
 
 	private Ontology onto;
 	private QuestOWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(EmptiesAboxCheck.class);
+	Logger log = LoggerFactory.getLogger(QuestOWLEmptyEntitiesChecker.class);
 
 	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
 	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
 
 	/**
-	 * Inserts the OBDA model to this utility class.
+	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
 	 * 
-	 * @param model
-	 *            The mandatory OBDA model.
+	 * @param onto the OWLOntology needs to be translated in OWLAPI3, conn QuestOWL connection
 	 * @throws Exception
 	 */
-	public EmptiesAboxCheck(OWLOntology onto, QuestOWLConnection conn) throws Exception {
+	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 
 		this.onto = translator.translate(onto);
 		this.conn = conn;
-		refresh();
+		runQueries();
 
+	}
+
+	/**
+	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
+	 * 
+	 * @param translatedOntologyMerge the OWLAPI3 ontology, conn QuestOWL connection
+	 * @throws Exception
+	 */
+	public QuestOWLEmptyEntitiesChecker(Ontology translatedOntologyMerge, QuestOWLConnection conn) throws Exception {
+		this.onto = translatedOntologyMerge;
+		this.conn = conn;
+		runQueries();
 	}
 
 	/**
@@ -82,12 +94,12 @@ public class EmptiesAboxCheck {
 	}
 
 	/**
-	 * Gets the total number of triples from all the data sources and mappings.
+	 * Gets the total number of empty entities
 	 * 
-	 * @return The total number of triples.
+	 * @return The total number of empty entities.
 	 * @throws Exception
 	 */
-	public int getNumberEmpties() throws Exception {
+	public int getNumberEmptyEntities() throws Exception {
 
 		return emptyConcepts.size() + emptyRoles.size();
 	}
@@ -97,31 +109,27 @@ public class EmptiesAboxCheck {
 		String str = new String();
 
 		int countC = emptyConcepts.size();
-		str += String.format("- %s Empty %s\n", countC, (countC == 1) ? "concept" : "concepts");
+		str += String.format("- %s Empty %s ", countC, (countC == 1) ? "concept" : "concepts");
 		int countR = emptyRoles.size();
 		str += String.format("- %s Empty %s\n", countR, (countR == 1) ? "role" : "roles");
 		return str;
 	}
 
-	public void refresh() throws Exception {
+	private void runQueries() throws Exception {
 
-		int c = 0; // number of empty concepts
 		for (Predicate concept : onto.getConcepts()) {
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept);
-				c++;
 			}
 		}
-		log.debug(c + " Empty concept/s: " + emptyConcepts);
+		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		int r = 0; // number of empty roles
 		for (Predicate role : onto.getRoles()) {
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);
-				r++;
 			}
 		}
-		log.debug(r + " Empty role/s: " + emptyRoles);
+		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 
 	}
 
@@ -140,7 +148,7 @@ public class EmptiesAboxCheck {
 			} catch (Exception e) {
 				st.close();
 			}
-			// conn.close();
+			
 			st.close();
 
 		}
@@ -162,7 +170,7 @@ public class EmptiesAboxCheck {
 			} catch (Exception e) {
 				st.close();
 			}
-			// conn.close();
+			
 			st.close();
 
 		}

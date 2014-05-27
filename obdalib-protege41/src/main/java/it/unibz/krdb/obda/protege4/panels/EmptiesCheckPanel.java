@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.protege4.panels;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.EmptiesAboxCheck;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 
 import java.util.List;
 
@@ -32,12 +32,12 @@ public class EmptiesCheckPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 2317777246039649415L;
 
-	public EmptiesCheckPanel(EmptiesAboxCheck check) {
+	public EmptiesCheckPanel(QuestOWLEmptyEntitiesChecker check) {
 		initComponents();
 		initContent(check);
 	}
 
-	private void initContent(EmptiesAboxCheck check) {
+	private void initContent(QuestOWLEmptyEntitiesChecker check) {
 
 		/* Fill the label summary value */
 		String message;
