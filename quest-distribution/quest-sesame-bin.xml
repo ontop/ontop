@@ -22,15 +22,8 @@
 		</fileSet>
 		
 		<fileSet>
-			<directory>${project.basedir}/../obdalib-core/target/classes/it</directory>
-			<outputDirectory>/it</outputDirectory>
-			<includes>
-				<include>**/*</include>
-			</includes>
-		</fileSet>
-		<fileSet>
-			<directory>${project.basedir}/../obdalib-owlapi3/target/classes/it</directory>
-			<outputDirectory>/it</outputDirectory>
+			<directory>${project.basedir}/../obdalib-core/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>
@@ -43,29 +36,36 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../obdalib-sesame/target/classes/it</directory>
-			<outputDirectory>/it</outputDirectory>
+			<directory>${project.basedir}/../obdalib-owlapi3/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../quest-db/target/classes/it</directory>
-			<outputDirectory>/it</outputDirectory>
+			<directory>${project.basedir}/../obdalib-sesame/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../quest-owlapi3/target/classes/it</directory>
-			<outputDirectory>/it</outputDirectory>
+			<directory>${project.basedir}/../quest-db/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../quest-sesame/target/classes/sesameWrapper</directory>
-			<outputDirectory>/sesameWrapper</outputDirectory>
+			<directory>${project.basedir}/../quest-owlapi3/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../quest-sesame/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
 			<includes>
 				<include>*</include>
 			</includes>
@@ -78,8 +78,8 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../reformulation-core/target/classes/it</directory>
-			<outputDirectory>/it</outputDirectory>
+			<directory>${project.basedir}/../reformulation-core/target/classes/org</directory>
+			<outputDirectory>/org</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>

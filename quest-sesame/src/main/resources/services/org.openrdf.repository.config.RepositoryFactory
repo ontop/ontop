@@ -1,1 +1,1 @@
-sesameWrapper.SesameRepositoryFactory
+org.semanticweb.ontop.sesame.SesameRepositoryFactory
