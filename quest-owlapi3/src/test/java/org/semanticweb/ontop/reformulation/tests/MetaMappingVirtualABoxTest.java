@@ -30,7 +30,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import com.google.common.base.Joiner;
+import com.google.common.io.CharStreams;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*; 
 
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -54,7 +59,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This test is adapted from {@link org.semanticweb.ontop.reformulation.tests#SimpleMappingVirtualABoxTest}.
+ * This test is adapted from {@link org.semanticweb.ontop.reformulation.tests.SimpleMappingVirtualABoxTest}.
  *
  * A simple test that check if the system is able to handle Mappings for
  * classes/roles and attributes even if there are no URI templates. i.e., the
@@ -63,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MetaMappingVirtualABoxTest extends TestCase {
+public class MetaMappingVirtualABoxTest{
 
 
 	private OBDADataFactory fac;
@@ -76,7 +81,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		
@@ -84,7 +89,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
+		String url = "jdbc:h2:mem:questjunitdb_meta;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
 
@@ -93,16 +98,11 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/metamapping-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
+        String sql = Joiner.on("\n").join(
+                CharStreams.readLines(new FileReader("src/test/resources/test/metamapping-create-h2.sql")));
 
-		st.executeUpdate(bf.toString());
+
+        st.executeUpdate(sql);
 		conn.commit();
 
 		// Loading the OWL file
@@ -117,7 +117,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		try {
 			dropTables();
@@ -195,6 +195,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testViEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -205,6 +206,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		runTests(p);
 	}
 	
+	@Test
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
