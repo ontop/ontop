@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#
+
+[SourceDeclaration]
+sourceUri	Friends
+connectionUrl	jdbc:h2:mem:questjunitdb;
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Friendof
+target		:{id} a :Man ; :friendOf :{id} . 
+source		select id from client
+]]
+

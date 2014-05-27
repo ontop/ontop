@@ -409,7 +409,7 @@ public class MappingAnalyzer {
 			funct = dfac.getFunctionGTE(t1, t2);
 		else if (op.equals("<="))
 			funct = dfac.getFunctionLTE(t1, t2);
-		else if (op.equals("<>"))
+		else if (op.equals("<>") || op.equals("!="))
 			funct = dfac.getFunctionNEQ(t1, t2);
 		else if (op.equals("AND"))
 			funct = dfac.getFunctionAND(t1, t2);

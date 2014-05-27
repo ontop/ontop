@@ -95,23 +95,22 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra() {
 
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		printJSQL("test_1_5_extra", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
-
 	
 	public void test_1_5_extra_3() {
 		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
@@ -127,6 +126,13 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
+	// all of these are legal in SQL server; 'row' and 'rows' are not legal on
+	// Oracle, though;
+	public void test_1_5_extra_5() {
+		final boolean result = parseJSQL("SELECT cast, do, extract, first, following, last, materialized, nulls, partition, range, row, rows, siblings, value, xml FROM tableName");
+		printJSQL("test_1_5_extra_5", result);
+		assertTrue(result);
+	}
 	
 	public void test_1_6_1() {
 		final boolean result = parseJSQL("SELECT undergraduate.* FROM student as undergraduate");
@@ -660,7 +666,7 @@ public class JSQLParserTest extends TestCase {
 		final boolean result = parseJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
-		printJSQL("test_12", result);
+		printJSQL("test_13", result);
 		assertTrue(result);
 
 	}
