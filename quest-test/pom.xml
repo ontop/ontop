@@ -78,7 +78,7 @@
 		<dependency>
 			<groupId>madgik.adp</groupId>
     		<artifactId>adp-jdbc</artifactId>
-    		<version>0.1</version>
+    		<version>0.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>

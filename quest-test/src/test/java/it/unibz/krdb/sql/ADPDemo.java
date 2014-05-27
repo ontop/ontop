@@ -29,7 +29,28 @@ public class ADPDemo {
 	    ResultSet rs2=st.executeQuery("addFederatedEndpoint(NPD, jdbc:mysql://whale.di.uoa.gr:3306/newnpd, com.mysql.jdbc.Driver, optique, gray769watt724)");
 
 	    
-	    String q="select fldName as c1 from NPD_discovery";
+	    //String q="select fldName as c1 from NPD_discovery";
+	    
+	    String q = "SELECT *\n" + 
+	    		"FROM (\n" + 
+	    		"SELECT DISTINCT \n" + 
+	    		"   1 AS \"licenceURIQuestType\", NULL AS \"licenceURILang\", ('http://sws.ifi.uio.no/data/npd-v2/licence/' || REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(QVIEW1.\"prlNpdidLicence\" AS CHAR),' ', '%20'),'!', '%21'),'@', '%40'),'#', '%23'),'$', '%24'),'&', '%26'),'*', '%42'), '(', '%28'), ')', '%29'), '[', '%5B'), ']', '%5D'), ',', '%2C'), ';', '%3B'), ':', '%3A'), '?', '%3F'), '=', '%3D'), '+', '%2B'), '''', '%22'), '/', '%2F')) AS \"licenceURI\", \n" + 
+	    		"   1 AS \"interestQuestType\", NULL AS \"interestLang\", ('http://example.com/base/' || REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(QVIEW1.\"prlLicenseeInterest\" AS CHAR),' ', '%20'),'!', '%21'),'@', '%40'),'#', '%23'),'$', '%24'),'&', '%26'),'*', '%42'), '(', '%28'), ')', '%29'), '[', '%5B'), ']', '%5D'), ',', '%2C'), ';', '%3B'), ':', '%3A'), '?', '%3F'), '=', '%3D'), '+', '%2B'), '''', '%22'), '/', '%2F')) AS \"interest\", \n" + 
+	    		"   1 AS \"dateQuestType\", NULL AS \"dateLang\", ('http://example.com/base/' || REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(QVIEW1.\"prlLicenseeDateValidFrom\" AS CHAR),' ', '%20'),'!', '%21'),'@', '%40'),'#', '%23'),'$', '%24'),'&', '%26'),'*', '%42'), '(', '%28'), ')', '%29'), '[', '%5B'), ']', '%5D'), ',', '%2C'), ';', '%3B'), ':', '%3A'), '?', '%3F'), '=', '%3D'), '+', '%2B'), '''', '%22'), '/', '%2F')) AS \"date\"\n" + 
+	    		" FROM \n" + 
+	    		"NPD_licence_licensee_hst QVIEW1\n" + 
+	    		"WHERE \n" + 
+	    		"(('9999-12-31T00:00:00' <> QVIEW1.\"prlLicenseeDateValidFrom\") OR (('9999-12-31T00:00:00' <> QVIEW1.\"prlLicenseeDateValidFrom\") OR ('9999-12-31T00:00:00' <> QVIEW1.\"prlLicenseeDateValidFrom\"))) AND\n" + 
+	    		"QVIEW1.\"prlNpdidLicence\" IS NOT NULL AND\n" + 
+	    		"QVIEW1.\"cmpNpdidCompany\" IS NOT NULL AND\n" + 
+	    		"QVIEW1.\"prlLicenseeDateValidFrom\" IS NOT NULL AND\n" + 
+	    		"QVIEW1.\"prlLicenseeDateValidTo\" IS NOT NULL AND\n" + 
+	    		"QVIEW1.\"prlLicenseeInterest\" IS NOT NULL AND\n" + 
+	    		"(QVIEW1.\"prlNpdidLicence\" IS NOT NULL OR (QVIEW1.\"prlNpdidLicence\" IS NOT NULL OR QVIEW1.\"prlNpdidLicence\" IS NOT NULL)) AND\n" + 
+	    		"(('http://example.com/base/' || REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(QVIEW1.\"prlLicenseeDateValidFrom\" AS CHAR),' ', '%20'),'!', '%21'),'@', '%40'),'#', '%23'),'$', '%24'),'&', '%26'),'*', '%42'), '(', '%28'), ')', '%29'), '[', '%5B'), ']', '%5D'), ',', '%2C'), ';', '%3B'), ':', '%3A'), '?', '%3F'), '=', '%3D'), '+', '%2B'), '''', '%22'), '/', '%2F')) > '1979-12-31T00:00:00')\n" + 
+	    		") SUB_QVIEW";
+	    
+	    
 	    System.out.println(q);
 	    rs2.close();
 	    rs2=st.executeQuery(q);
