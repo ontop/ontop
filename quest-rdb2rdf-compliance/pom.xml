@@ -6,7 +6,7 @@
     	<version>1.11.1-SNAPSHOT</version>
   	</parent>
   	
-  	<artifactId>ontop-rdb2rdb-compliance</artifactId>
+  	<artifactId>ontop-rdb2rdf-compliance</artifactId>
   	<name>ontop-rdb2rdf-compliance</name>
   
   	<dependencies>

@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#
+
+[SourceDeclaration]
+sourceUri	Friends
+connectionUrl	jdbc:mysql://10.7.20.39/stockexchange
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-4aa07a17589a46fa8756f8c2d462c23d
+target		:{id} a :Man ; :friendOf :{id} . 
+source		select id from client
+]]
+
