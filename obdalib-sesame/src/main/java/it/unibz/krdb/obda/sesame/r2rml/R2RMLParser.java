@@ -102,10 +102,19 @@ public class R2RMLParser {
 		return coll;
 	}
 
+	/**
+	 * Get SQL query of the TriplesMap
+	 * @param tm
+	 * @return
+	 */
 	public String getSQLQuery(TriplesMap tm) {
 		return tm.getLogicalTable().getSQLQuery();
 	}
 
+	/**
+	 * Get classes
+	 * @return
+	 */
 	public List<Predicate> getClassPredicates() {
 		List<Predicate> classes = new ArrayList<Predicate>();
 		for (Predicate p: classPredicates)
@@ -114,6 +123,11 @@ public class R2RMLParser {
 		return classes;
 	}
 
+	/**
+	 * Get predicates
+	 * @param tm
+	 * @return
+	 */
 	public Set<Resource> getPredicateObjects(TriplesMap tm) {
 		Set<Resource> predobjs = new HashSet<Resource>();
 		for (PredicateObjectMap pobj : tm.getPredicateObjectMaps()) {
@@ -129,7 +143,14 @@ public class R2RMLParser {
 			throws Exception {
 		return getSubjectAtom(tm, "");
 	}
-
+	
+	/**
+	 * Get subject
+	 * @param tm
+	 * @param joinCond
+	 * @return
+	 * @throws Exception
+	 */
 	public Term getSubjectAtom(TriplesMap tm, String joinCond)
 			throws Exception {
 		Term subjectAtom = null;
@@ -183,6 +204,12 @@ public class R2RMLParser {
 
 	}
 
+	/**
+	 * Get body predicates
+	 * @param pom
+	 * @return
+	 * @throws Exception
+	 */
 	public List<Predicate> getBodyPredicates(PredicateObjectMap pom)
 			throws Exception {
 		List<Predicate> bodyPredicates = new ArrayList<Predicate>();
@@ -196,6 +223,12 @@ public class R2RMLParser {
 		return bodyPredicates;
 	}
 
+	/**
+	 * Get body predicates with templates
+	 * @param pom
+	 * @return
+	 * @throws Exception
+	 */
 	public List<Function> getBodyURIPredicates(PredicateObjectMap pom)
 			throws Exception {
 		List<Function> predicateAtoms = new ArrayList<Function>();
@@ -227,6 +260,13 @@ public class R2RMLParser {
 		return getObjectAtom(pom, "");
 	}
 
+	/**
+	 * Get the object atom
+	 * @param pom
+	 * @param joinCond
+	 * @return
+	 * @throws Exception
+	 */
 	public Term getObjectAtom(PredicateObjectMap pom, String joinCond)
 			throws Exception {
 		Term objectAtom = null;
@@ -272,6 +312,7 @@ public class R2RMLParser {
 	}
 
 
+	@Deprecated
 	private Term getConstantObject(String objectString) {
 		if (objectString.startsWith("http:"))
 			return getURIFunction(objectString);
@@ -284,6 +325,7 @@ public class R2RMLParser {
 		}
 	}
 
+	@Deprecated
 	private Term getExplicitTypedObject(String string) {
 
 		Term typedObject = null;
@@ -303,6 +345,7 @@ public class R2RMLParser {
 		return typedObject;
 	}
 
+	@Deprecated
 	public List<Resource> getJoinNodes(TriplesMap tm)
 	{
 		List<Resource> joinPredObjNodes = new ArrayList<Resource>();

@@ -70,7 +70,12 @@ public class OBDAMappingTransformer {
 	public OBDAMappingTransformer() {
 		this.vf = new ValueFactoryImpl();
 	}
-	
+	/**
+	 * Get Sesame statements from OBDA mapping axiom
+	 * @param axiom
+	 * @param prefixmng
+	 * @return
+	 */
 	public List<Statement> getStatements(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
 		List<Statement> statements = new ArrayList<Statement>();
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
@@ -103,9 +108,6 @@ public class OBDAMappingTransformer {
 				}
 				
 				statements.add(vf.createStatement(logicalTableNode, R2RMLVocabulary.tableName, vf.createLiteral(tableName)));
-//			} else if (sqlquery.contains("CHILD")) {
-//				//join mapping
-//				
 		} else {
 			//sqlquery -> general case
 			//creating triple main-node -- logical table
@@ -131,8 +133,6 @@ public class OBDAMappingTransformer {
 		
 		//add template subject
 		statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.template, vf.createLiteral(subjectTemplate)));
-		//TODO: deal with column and termType
-
 		
 		//process target query
 		for (Function func : tquery.getBody()) {
@@ -221,14 +221,9 @@ public class OBDAMappingTransformer {
 							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
 							//add template subject
 							statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectTemplate)));
-							//TODO: deal with column and termType
-							
 						} else if (objectTerm instanceof Constant) {
 							statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 						}
-					//	statements.add(vf.createStatement(objNode, R2RMLVocabulary.datatype, vf.createURI(objectPred.getName())));
-						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.termType, R2RMLVocabulary.literal));
-						
 					}
 				} else {
 					System.out.println("FOUND UNKNOWN: "+object.toString());
@@ -249,6 +244,12 @@ public class OBDAMappingTransformer {
 		return input;
 	}
 
+	/**
+	 * Get R2RML TriplesMap from OBDA mapping axiom
+	 * @param axiom
+	 * @param prefixmng
+	 * @return
+	 */
 	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
 			PrefixManager prefixmng) {
 		

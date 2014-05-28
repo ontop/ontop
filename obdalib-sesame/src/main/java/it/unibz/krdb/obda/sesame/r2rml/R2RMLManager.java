@@ -146,7 +146,12 @@ public class R2RMLManager {
 		}
 		return mappings;
 	}
-	
+	/**
+	 * Get OBDA mapping axiom from R2RML TriplesMap 
+	 * @param tm
+	 * @return
+	 * @throws Exception
+	 */
 	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm);
 		List<Function> body = getMappingTripleAtoms(tm);
@@ -156,6 +161,13 @@ public class R2RMLManager {
 		return mapping;
 	}
 	
+	/**
+	 * Get join OBDA mapping axiom from R2RML TriplesMap
+	 * @param tripleMaps
+	 * @param tm
+	 * @return
+	 * @throws Exception
+	 */
 	private List<OBDAMappingAxiom> getJoinMappings(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws Exception {
 		String sourceQuery = "";
 		List<OBDAMappingAxiom> joinMappings = new ArrayList<OBDAMappingAxiom>();
@@ -205,7 +217,12 @@ public class R2RMLManager {
 		}
 		return joinMappings;
 	}
-		
+	
+	/**
+	 * Get OBDA mapping head
+	 * @param body
+	 * @return
+	 */
 	private Function getHeadAtom(List<Function> body) {
 		Set<Variable> vars = new HashSet<Variable>();
 		for (Function bodyAtom : body) {
@@ -217,6 +234,12 @@ public class R2RMLManager {
 		return head;
 	}
 	
+	/**
+	 * Get OBDA mapping body terms from R2RML TriplesMap
+	 * @param tm
+	 * @return
+	 * @throws Exception
+	 */
 	private List<Function> getMappingTripleAtoms(TriplesMap tm) throws Exception {
 		//the body to return
 		List<Function> body = new ArrayList<Function>();

@@ -56,12 +56,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.callimachusproject.io.TurtleStreamWriter;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.GraphImpl;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleWriter;
 
 import eu.optique.api.mapping.R2RMLMappingManager;
@@ -129,24 +133,16 @@ public class R2RMLWriter {
 	
 	/**
 	 * the method to write the R2RML mappings
-	 * from an rdf Graph to a file
+	 * from an rdf Model to a file
 	 * @param file the ttl file to write to
 	 */
 	public void write(File file)
 	{
 		try {
-			//Graph result = getGraph();
 			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
 			Collection<TriplesMap> coll = getTriplesMaps();
-			Model out = mm.exportMappings(coll, Model.class);
-			
+			Model out = mm.exportMappings(coll, Model.class);			
 			FileOutputStream fos = new FileOutputStream(file);
-			
-//			Map<String, String> prefixes = this.prefixmng.getPrefixMap();
-//			for (String pref : prefixes.keySet()) {
-//				writer.handleNamespace(pref, prefixes.get(pref));
-//			}
-			
 			Rio.write(out, fos, RDFFormat.TURTLE);
 			fos.close();
 		} catch (Exception e) {
@@ -154,19 +150,46 @@ public class R2RMLWriter {
 		}
 	}
 	
+	/**
+	 * "Pretty" R2RML output
+	 * @param file
+	 */
+	public void writePretty(File file) {
+		try {
+			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+			Collection<TriplesMap> coll = getTriplesMaps();
+			Model m = mm.exportMappings(coll, Model.class);			
+			FileWriter fw = new FileWriter(file);
+			TurtleWriter writer = new TurtleStreamWriter(fw, null);
+			writer.startRDF();
+			Map<String, String> map = prefixmng.getPrefixMap();
+			for (String key : map.keySet()) {
+				//System.out.println(key + "->" + map.get(key));
+				writer.handleNamespace(key, map.get(key));
+			}
+			Iterator<Statement> it = m.iterator();
+			while(it.hasNext()){
+				writer.handleStatement(it.next());
+			}
+			writer.endRDF();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	
 	public static void main(String args[])
 	{
 		String file = "/Users/mindaugas/r2rml/test2.ttl";
 		R2RMLReader reader = new R2RMLReader(file);
-		
-		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("blah")),URI.create("blah"));
+
+		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("test")),URI.create("test"));
 		File out = new File("/Users/mindaugas/r2rml/out.ttl");
-				
-		Graph g = writer.getGraph();
-		Iterator<Statement> st = g.iterator();
-		while (st.hasNext())
-			System.out.println(st.next());
-		writer.write(out);
+//		Graph g = writer.getGraph();
+//		Iterator<Statement> st = g.iterator();
+//		while (st.hasNext())
+//			System.out.println(st.next());
+		writer.writePretty(out);
 		
 	}
 }
