@@ -309,17 +309,21 @@
     			<artifactId>jsqlparser</artifactId>
     			<version>0.9</version>
 			</dependency>
-
+			<dependency>
+    			<groupId>com.google.guava</groupId>
+    			<artifactId>guava</artifactId>
+    			<version>15.0</version>
+			</dependency>
 			<!-- OWL API -->
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-api</artifactId>
-				<version>3.4.5</version>
+				<version>3.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-apibinding</artifactId>
-				<version>3.4.5</version>
+				<version>3.5.0</version>
 			</dependency>
 
 			<!-- Sesame API -->
