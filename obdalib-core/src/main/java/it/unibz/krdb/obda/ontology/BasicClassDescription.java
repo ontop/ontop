@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.ontology;
 
+import it.unibz.krdb.obda.model.Predicate;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -25,5 +27,7 @@ package it.unibz.krdb.obda.ontology;
  * as indicated in the OWL 2 QL profile (DL-Lite subclass axioms).
  */
 public interface BasicClassDescription extends ClassDescription {
-	// NO-OP
+
+	public Predicate getPredicate();
+	
 }
