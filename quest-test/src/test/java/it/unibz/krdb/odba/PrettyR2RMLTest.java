@@ -1,6 +1,5 @@
 package it.unibz.krdb.odba;
 
-import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.io.File;
 import java.io.FileInputStream;
