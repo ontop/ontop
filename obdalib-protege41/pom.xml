@@ -251,16 +251,7 @@
 	   		<groupId>com.github.jsqlparser</groupId>
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
-		
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-apibinding</artifactId>
-		</dependency>
-		
+
 	</dependencies>
 
 
@@ -270,7 +261,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
