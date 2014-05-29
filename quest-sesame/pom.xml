@@ -125,7 +125,22 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Optique R2RML API -->
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api</artifactId>
+		</dependency>
+	
+	
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-sesame-bridge</artifactId>			
+		</dependency>
+		
+
 	</dependencies>
+	
+	
 
 	<build>
 		<plugins>
