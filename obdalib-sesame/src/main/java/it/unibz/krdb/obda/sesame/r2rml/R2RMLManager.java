@@ -21,8 +21,8 @@ package it.unibz.krdb.obda.sesame.r2rml;
  */
 
 /**
- * @author timea bagosi
- * Class responsible of parsing R2RML mappings from file or from an RDF graph
+ * @author timea bagosi, mindaugas slusnys
+ * Class responsible of parsing R2RML mappings from file or from an RDF Model
  */
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -41,26 +41,31 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
+import eu.optique.api.mapping.Join;
+import eu.optique.api.mapping.PredicateMap;
+import eu.optique.api.mapping.PredicateObjectMap;
+import eu.optique.api.mapping.RefObjectMap;
+import eu.optique.api.mapping.TriplesMap;
+
 public class R2RMLManager {
 	
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	
-	private org.openrdf.model.Graph myGraph;
-	
 	private R2RMLParser r2rmlParser;
+	private Model myModel;
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
@@ -76,66 +81,62 @@ public class R2RMLManager {
 	 */
 	public R2RMLManager(File file) {
 		try {
-			r2rmlParser = new R2RMLParser();
+			myModel = new LinkedHashModel();			
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
 			URL documentUrl = new URL("file://" + file);
-			myGraph = new org.openrdf.model.impl.GraphImpl();
-			StatementCollector collector = new StatementCollector(myGraph);
+			StatementCollector collector = new StatementCollector(myModel);
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
+			r2rmlParser = new R2RMLParser();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	/**
-	 * Constructor to start the parser from an RDF graph
-	 * @param graph - the sesame graph containing mappings
+	 * Constructor to start the parser from an RDF Model
+	 * @param Model - the sesame Model containing mappings
 	 */
-	public R2RMLManager(Graph graph){
-		myGraph = graph;
+	public R2RMLManager(Model model){
+		myModel = model;
 		r2rmlParser = new R2RMLParser();
-		
 	}
 	
 	/**
-	 * Get the graph of mappings
-	 * @return the Graph object containing the mappings
+	 * Get the Model of mappings
+	 * @return the Model object containing the mappings
 	 */
-	public Graph getGraph() {
-		Iterator<Statement> it = myGraph.iterator();
-		while (it.hasNext())
-			System.out.println(it.next());
-		return myGraph;
+	public Model getModel() {
+		return myModel;
 	}
 	
 	/**
-	 * This method return the list of mappings from the Graph main method to be
+	 * This method return the list of mappings from the Model main method to be
 	 * called, assembles everything
-	 * @param myGraph - the graph structure containing mappings
-	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the graph
+	 * @param myModel - the Model structure containing mappings
+	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ArrayList<OBDAMappingAxiom> getMappings(Graph myGraph) {
+	public ArrayList<OBDAMappingAxiom> getMappings(Model myModel) {
 
 		ArrayList<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 
 		// retrieve the TriplesMap nodes
-		Set<Resource> tripleMaps = r2rmlParser.getMappingNodes(myGraph);
+		Collection<TriplesMap> tripleMaps = r2rmlParser.getMappingNodes(myModel);
 
-		for (Resource tripleMap : tripleMaps) {
+		for (TriplesMap tm : tripleMaps) {
 
 			// for each node get a mapping
 			OBDAMappingAxiom mapping;
 
 			try {
-				mapping = getMapping(myGraph, tripleMap);
+				mapping = getMapping(tm);
 
 				// add it to the list of mappings
 				mappings.add(mapping);
 
 				// pass 2 - check for join conditions, add to list
-				List<OBDAMappingAxiom> joinMappings = getJoinMappings(myGraph, tripleMap);
+				List<OBDAMappingAxiom> joinMappings = getJoinMappings(tripleMaps, tm);
 				if (joinMappings != null) {
 					mappings.addAll(joinMappings);
 				}
@@ -145,108 +146,82 @@ public class R2RMLManager {
 		}
 		return mappings;
 	}
-	
 	/**
-	 * Method to get an OBDAMappingAxiom from a Resource node in the given Graph
-	 * @param myGraph - the graph containing mappings
-	 * @param subj - the Resource node of one mapping
-	 * @return OBDAMappingAxiom - the mapping axiom read from the graph
+	 * Get OBDA mapping axiom from R2RML TriplesMap 
+	 * @param tm
+	 * @return
+	 * @throws Exception
 	 */
-	private OBDAMappingAxiom getMapping(Graph myGraph, Resource subj) throws Exception {
-		String sourceQuery = r2rmlParser.getSQLQuery(myGraph, subj);
-		List<Function> body = getMappingTripleAtoms(myGraph, subj);
+	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
+		String sourceQuery = r2rmlParser.getSQLQuery(tm);
+		List<Function> body = getMappingTripleAtoms(tm);
 		Function head = getHeadAtom(body);
 		CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+subj.stringValue(), sourceQuery, targetQuery);
+		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), sourceQuery, targetQuery);
 		return mapping;
 	}
 	
 	/**
-	 * Method to get the join OBDAMappingAxioms from a Resource node in the given Graph
-	 * @param myGraph - the Graph structure containing mappings
-	 * @param tripleMap - the Resource node of a mapping
-	 * @return List<OBDAMappingAxiom> - the list of join mappings read from the given node
+	 * Get join OBDA mapping axiom from R2RML TriplesMap
+	 * @param tripleMaps
+	 * @param tm
+	 * @return
+	 * @throws Exception
 	 */
-	private List<OBDAMappingAxiom> getJoinMappings(Graph myGraph, Resource tripleMap) throws Exception {
+	private List<OBDAMappingAxiom> getJoinMappings(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws Exception {
 		String sourceQuery = "";
-		
-		//get all predicateobject nodes that contain joins for the subj triplemap given
-		List<Resource> joinNodes = r2rmlParser.getJoinNodes(myGraph, tripleMap);
-		if (!joinNodes.isEmpty()) {
-			List<OBDAMappingAxiom> joinMappings = new ArrayList<OBDAMappingAxiom>(joinNodes.size());
+		List<OBDAMappingAxiom> joinMappings = new ArrayList<OBDAMappingAxiom>();
+		for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 			
-			//get subject sql string and newliteral of given node
-			String sourceQuery1 = r2rmlParser.getSQLQuery(myGraph, tripleMap);
-			Term joinSubject1 = r2rmlParser.getSubjectAtom(myGraph, tripleMap);
-			Term joinSubject1Child = r2rmlParser.getSubjectAtom(myGraph, tripleMap, "CHILD_");
-			
-			int idx = 1;
-			//for each predicateobject map that contains a join
-			for (Resource joinPredObjNode : joinNodes) {
-				//get the predicates
-				List<Predicate> joinPredicates = r2rmlParser.getBodyPredicates(myGraph, joinPredObjNode);
+			for(RefObjectMap robm : pobm.getRefObjectMaps()) {
+				sourceQuery = robm.getJointQuery();
 				
-				//get the referenced triple map node
-				Resource referencedTripleMap = r2rmlParser.getReferencedTripleMap(myGraph, joinPredObjNode);
-				
-				//get the referenced triple map sql query and subject atom
-				String sourceQuery2 = r2rmlParser.getSQLQuery(myGraph, referencedTripleMap);
-				Term joinSubject2 = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap);
-				Term joinSubject2Parent = r2rmlParser.getSubjectAtom(myGraph, referencedTripleMap, "PARENT_");
-				
-				//get join condition
-				String childCol = r2rmlParser.getChildColumn(myGraph, joinPredObjNode);
-				String parentCol = r2rmlParser.getParentColumn(myGraph, joinPredObjNode);
-				
-				
+				List <Join> conds = robm.getJoinConditions();
 				List<Function> body = new ArrayList<Function>();
-				// construct the atom from subject 1 and 2
 				List<Term> terms = new ArrayList<Term>();
+				Term joinSubject1 = r2rmlParser.getSubjectAtom(tm);
 				
-				
-				//if join condition is empty, the two sql queries are the same
-				if (childCol == null || parentCol == null) {
-					sourceQuery = sourceQuery1;
-					terms.add(joinSubject1);
-					terms.add(joinSubject2);
-				} else {
-					//TODO replace this workaround
-					//have to introduce alias as Child and as Parent 
-					sourceQuery = "SELECT * FROM ("+sourceQuery1 + ") as CHILD, (" + sourceQuery2 + ") as PARENT " +
-							"WHERE CHILD." + childCol + " = PARENT." + parentCol;
-					terms.add(joinSubject1Child);
-					terms.add(joinSubject2Parent);
+				Resource parent = (Resource) robm.getParentMap(Resource.class);
+				TriplesMap parentTriple = null;
+				Iterator<TriplesMap> it = tripleMaps.iterator();
+				while(it.hasNext()){
+					TriplesMap current = it.next();
+					if (current.getResource(Resource.class).equals(parent)) {
+						parentTriple = current;
+						break;
+					}
 				}
 				
-				//for each predicate construct an atom and add to body
-				for (Predicate pred : joinPredicates) {
-					Function bodyAtom = fac.getFunction(pred, terms);
-					body.add(bodyAtom);
-				}
-				//get head and construct cqie
-				Function head = getHeadAtom(body);
-				CQIE targetQuery = fac.getCQIE(head, body);
+				Term joinSubject2 = r2rmlParser.getSubjectAtom(parentTriple);
+				terms.add(joinSubject1);
+				terms.add(joinSubject2);
 				
-				if (sourceQuery.isEmpty()) {
-					throw new Exception("Could not create source query for join in "+tripleMap.stringValue());
-				}
-				//finally, create mapping and add it to the list
-				OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join"+idx+"-"+tripleMap.stringValue(), sourceQuery, targetQuery);
-				idx++;
-				System.out.println("WARNING joinMapping introduced : "+mapping.toString());
-				System.out.println("Renaming of variables as CHILD_ and PARENT_ introduced!");
-				
-				joinMappings.add(mapping);
+			List<Predicate> joinPredicates = r2rmlParser.getBodyPredicates(pobm);
+			for (Predicate pred : joinPredicates) {
+				Function bodyAtom = fac.getFunction(pred, terms);
+				body.add(bodyAtom);
 			}
-			return joinMappings;
+
+			Function head = getHeadAtom(body);
+			CQIE targetQuery = fac.getCQIE(head, body);
+			
+			if (sourceQuery.isEmpty()) {
+				throw new Exception("Could not create source query for join in "+tm.toString());
+			}
+			//finally, create mapping and add it to the list
+			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+tm.hashCode(), sourceQuery, targetQuery);
+			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
+			joinMappings.add(mapping);
 		}
-		return null;
+			
+		}
+		return joinMappings;
 	}
-		
+	
 	/**
-	 * construct head of mapping q(variables) from the body
-	 * @param body - the body of the mapping
-	 * @return Function - the head of the mapping
+	 * Get OBDA mapping head
+	 * @param body
+	 * @return
 	 */
 	private Function getHeadAtom(List<Function> body) {
 		Set<Variable> vars = new HashSet<Variable>();
@@ -260,36 +235,34 @@ public class R2RMLManager {
 	}
 	
 	/**
-	 * method to get the body atoms of the mapping from a given Resource node in the Graph
-	 * @param myGraph - the rdf graph containing mappings
-	 * @param subj - the Resource node of the specific mapping
-	 * @return List<Function> - the body of the mapping constructed from the graph
+	 * Get OBDA mapping body terms from R2RML TriplesMap
+	 * @param tm
+	 * @return
+	 * @throws Exception
 	 */
-	private List<Function> getMappingTripleAtoms(Graph myGraph, Resource subj) throws Exception {
+	private List<Function> getMappingTripleAtoms(TriplesMap tm) throws Exception {
 		//the body to return
 		List<Function> body = new ArrayList<Function>();
-				
+		
 		//get subject
-		Term subjectAtom = r2rmlParser.getSubjectAtom(myGraph, subj);		
+		Term subjectAtom = r2rmlParser.getSubjectAtom(tm);		
 		
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates) {
 			body.add(fac.getFunction(classPred, subjectAtom));
 		}		
-		//get predicate-object nodes
-		Set<Resource> predicateObjectNodes = r2rmlParser.getPredicateObjects(myGraph, subj);	
-		
-		for (Resource predobj : predicateObjectNodes) {
+
+		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
 			//for each predicate object map
 			
 			//get body predicate
-			List<Predicate> bodyPredicates = r2rmlParser.getBodyPredicates(myGraph, predobj);
+			List<Predicate> bodyPredicates = r2rmlParser.getBodyPredicates(pom);
 			//predicates that contain a variable are separately treated
-			List<Function> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(myGraph, predobj);
+			List<Function> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(pom);
 			
 			//get object atom
-			Term objectAtom = r2rmlParser.getObjectAtom(myGraph, predobj);
+			Term objectAtom = r2rmlParser.getObjectAtom(pom);
 			if (objectAtom == null) {
 				// skip, object is a join
 				continue;
