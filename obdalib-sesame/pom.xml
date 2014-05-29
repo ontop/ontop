@@ -56,26 +56,19 @@
 		<dependency>
 			<groupId>org.optique-project</groupId>
 			<artifactId>r2rml-api</artifactId>
-			<version>0.1.1</version>
-		</dependency>
-	
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api-jena-bridge</artifactId>
-			<version>0.1.1</version>
+			<version>0.1.2</version>
 		</dependency>
 	
 		<dependency>
 			<groupId>org.optique-project</groupId>
 			<artifactId>r2rml-api-owlapi-bridge</artifactId>
-			<version>0.1.1</version>
-	
+			<version>0.1.2</version>
 		</dependency>
 	
 		<dependency>
 			<groupId>org.optique-project</groupId>
 			<artifactId>r2rml-api-sesame-bridge</artifactId>
-			<version>0.1.1</version>
+			<version>0.1.2</version>
 		</dependency>
 	
 	
