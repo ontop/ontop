@@ -1,4 +1,4 @@
-package it.unibz.krdb.sql;
+package org.semanticweb.ontop.sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
