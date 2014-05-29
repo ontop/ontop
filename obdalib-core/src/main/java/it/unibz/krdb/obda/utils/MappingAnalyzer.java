@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -49,6 +50,7 @@ import java.util.Stack;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.CastExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -67,6 +69,7 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
 
 //import com.hp.hpl.jena.iri.IRI;
 
@@ -265,6 +268,39 @@ public class MappingAnalyzer {
 			return dfac.getFunctionIsNotNull(var);
 		}
 	}
+	
+	/**
+	 * Methods to create a {@link Function} starting from a
+	 * {@link IsNullExpression}
+	 * 
+	 * @param pred
+	 *            IsNullExpression
+	 * @param lookupTable
+	 * @return a function from the OBDADataFactory
+	 */
+	private Function getFunction(CastExpression pred, LookupTable lookupTable) {
+
+		Expression column = pred.getLeftExpression();
+		String columnName = column.toString();
+		String variableName = lookupTable.lookup(columnName);
+		if (variableName == null) {
+			throw new RuntimeException(
+					"Unable to find column name for variable: " + columnName);
+		}
+		Term var = dfac.getVariable(variableName);
+
+		ColDataType datatype= pred.getType();
+		
+
+		
+		Term var2 = null;
+		
+		//first value is a column, second value is a datatype. It can  also have the size
+		
+		return dfac.getFunctionCast(var, var2);
+		
+		
+	}
 
 	/**
 	 * Recursive methods to create a {@link Function} starting from a
@@ -373,7 +409,7 @@ public class MappingAnalyzer {
 			funct = dfac.getFunctionGTE(t1, t2);
 		else if (op.equals("<="))
 			funct = dfac.getFunctionLTE(t1, t2);
-		else if (op.equals("<>"))
+		else if (op.equals("<>") || op.equals("!="))
 			funct = dfac.getFunctionNEQ(t1, t2);
 		else if (op.equals("AND"))
 			funct = dfac.getFunctionAND(t1, t2);
