@@ -1,6 +1,8 @@
 package org.semanticweb.ontop.ontology;
 
-import it.unibz.krdb.obda.model.Predicate;
+import org.semanticweb.ontop.model.Predicate;
+
+
 
 /*
  * #%L

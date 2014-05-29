@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.owlapi3;
+package org.semanticweb.ontop.owlrefplatform.owlapi3;
 
 /*
  * #%L
@@ -20,14 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

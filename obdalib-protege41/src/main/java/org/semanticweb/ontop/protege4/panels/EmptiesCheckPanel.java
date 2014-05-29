@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.protege4.panels;
+package org.semanticweb.ontop.protege4.panels;
 
 /*
  * #%L
@@ -20,13 +20,14 @@ package it.unibz.krdb.obda.protege4.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+import org.semanticweb.ontop.model.Predicate;
 
 import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 
 public class EmptiesCheckPanel extends javax.swing.JPanel {
 

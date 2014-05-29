@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.protege4.gui.action;
+package org.semanticweb.ontop.protege4.gui.action;
 
 /*
  * #%L
@@ -20,10 +20,6 @@ package it.unibz.krdb.obda.protege4.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
-import it.unibz.krdb.obda.protege4.panels.EmptiesCheckPanel;
-import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -38,6 +34,10 @@ import javax.swing.JPanel;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+import org.semanticweb.ontop.protege4.panels.EmptiesCheckPanel;
+import org.semanticweb.ontop.protege4.utils.DialogUtils;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 public class EmptiesCheckAction extends ProtegeAction {
