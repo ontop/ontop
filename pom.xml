@@ -83,6 +83,7 @@
 		<module>quest-test</module>
 	</modules>
 
+    <!--
 	<profiles>
 		<profile>
 			<id>all</id>
@@ -91,6 +92,7 @@
 			</modules>
 		</profile>
 	</profiles>
+    -->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
