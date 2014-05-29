@@ -76,6 +76,11 @@
 			<scope>test</scope>		
 		</dependency>
 		<dependency>
+			<groupId>madgik.adp</groupId>
+    		<artifactId>adp-jdbc</artifactId>
+    		<version>0.1.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
 		</dependency>
@@ -101,32 +106,12 @@
             <artifactId>sesame-sparql-testsuite</artifactId>
         </dependency>
 
-		<!-- Optique R2RML API -->
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api</artifactId>
-			<version>0.1.1</version>
-		</dependency>
-	
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api-jena-bridge</artifactId>
-			<version>0.1.1</version>
-		</dependency>
-	
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api-owlapi-bridge</artifactId>
-			<version>0.1.1</version>
-	
-		</dependency>
-	
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api-sesame-bridge</artifactId>
-			<version>0.1.1</version>
-		</dependency>
 					
+        <dependency>
+   			<groupId>com.google.guava</groupId>
+   			<artifactId>guava</artifactId>
+   		</dependency>      
+
 	</dependencies>
                           
 	<repositories>

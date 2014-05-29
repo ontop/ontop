@@ -119,6 +119,16 @@
 			<artifactId>jgraph</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-sesame-bridge</artifactId>
+		</dependency>
+		
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
@@ -249,12 +259,13 @@
 
 	</dependencies>
 
+
+
 	<build>
 		<finalName>it.unibz.inf.obda.p4plugin-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>

@@ -315,21 +315,36 @@
 			<dependency>
     			<groupId>com.github.jsqlparser</groupId>
     			<artifactId>jsqlparser</artifactId>
-    			<version>0.8.8</version>
+    			<version>0.9</version>
 			</dependency>
 
 			<!-- OWL API -->
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-api</artifactId>
-				<version>3.5.0</version>
+				<version>3.4.10</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-apibinding</artifactId>
-				<version>3.5.0</version>
+				<version>3.4.10</version>
 			</dependency>
-
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-impl</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-parsers</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-oboformat</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			
 			<!-- Sesame API -->
 
 			<dependency>
@@ -491,8 +506,37 @@
 				<artifactId>hsqldb</artifactId>
 				<version>2.3.2</version>
 			</dependency>
+
+			
+			<!-- Optique R2RML API -->
+			<dependency>
+				<groupId>org.optique-project</groupId>
+				<artifactId>r2rml-api</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.optique-project</groupId>
+				<artifactId>r2rml-api-sesame-bridge</artifactId>
+				<version>0.1.2</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<repositories>	
+		<repository>
+			<!-- for R2RML api -->
+			<id>bolzano-nexus-public</id>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	
 
 	<reporting>
 		<plugins>

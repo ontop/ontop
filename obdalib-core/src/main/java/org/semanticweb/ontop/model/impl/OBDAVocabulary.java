@@ -290,4 +290,6 @@ public class OBDAVocabulary {
 	
 	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
 			SPARQL_LIKE_URI, 2);
+
+	
 }
