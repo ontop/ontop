@@ -559,10 +559,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
 			
-			System.out.println("Initial-----");
-			for (CQIE rule: workingList){
-				System.out.println(rule);
-			}
+//			System.out.println("Initial-----");
+//			for (CQIE rule: workingList){
+//				System.out.println(rule);
+//			}
 			log.debug("Generating Dependency Graph!");
 			 depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
@@ -606,16 +606,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						
 						
 						if (partialEvaluation != null){
-							System.out.print("Result: ");
-							for (CQIE rule: partialEvaluation){
-								System.out.println(rule);
-							}
+//							System.out.print("Result: ");
+//							for (CQIE rule: partialEvaluation){
+//								System.out.println(rule);
+//							}
 						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
 						} else{
-							System.out.println("Empty: "+pred);
+//							System.out.println("Empty: "+pred);
 							predicatesMightGotEmpty.add(preFather);
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
 						}
@@ -638,7 +638,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// I add to the working list all the rules touched by the unfolder!
 			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
 			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
-			System.out.println(workingList);
+			//System.out.println(workingList);
 
 		}
 
@@ -692,13 +692,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						if (isLeftJoinSecondArgument[0]){
 							CQIE newrule = generateNullBindingsForLeftJoin(fatherRule,termidx);
 							List<CQIE> result = new LinkedList<CQIE>();
-							System.out.println(newrule);
+							//System.out.println(newrule);
 							result.add(newrule);
 							updateIndexes(predEmpty, fatherpred, result, fatherRule,  workingList);
 							touchedPredicates.add(fatherpred);
 						} else{
 							//here I remove fatherRule, since it is either a join, or it is the first argument of the LJ
-							System.out.println("deleting"+fatherpred);
+							//System.out.println("deleting"+fatherpred);
 							
 							updateNullIndexes( predEmpty, fatherpred,  fatherRule,  workingList);
 							deletedPredicates.add(fatherpred);
@@ -2408,7 +2408,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 	In this case we need to take care of that join in p !!, most of the code is dont so...
 							 */
 							
-							System.out.println("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
+							log.debug("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
+							
 							mgu.remove(key);
 							exclude.add(value);
 						/*	//if targetAtom is the only one in the father rule that contains key
@@ -2436,7 +2437,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						}
 					} 
 				} else {
-					System.out.println("value: "+value.toString());
+					log.debug("value: "+value.toString());
 				}
 
 			}

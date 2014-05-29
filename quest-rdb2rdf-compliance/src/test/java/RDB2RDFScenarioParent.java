@@ -30,6 +30,7 @@ import java.util.Scanner;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.junit.Ignore;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.MalformedQueryException;
@@ -51,6 +52,7 @@ import org.semanticweb.ontop.sesame.SesameVirtualRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Ignore("The does not need to be run")
 public class RDB2RDFScenarioParent extends TestCase {
 
 	protected final String sqlFileURL;
