@@ -309,7 +309,11 @@
     			<artifactId>jsqlparser</artifactId>
     			<version>0.8.8</version>
 			</dependency>
-
+			<dependency>
+    			<groupId>com.google.guava</groupId>
+    			<artifactId>guava</artifactId>
+    			<version>15.0</version>
+			</dependency>
 			<!-- OWL API -->
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
