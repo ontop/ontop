@@ -729,7 +729,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sb.append("DISTINCT ");
 		}
 		if (headterms.size() == 0) {
-			sb.append("true as x");
+			sb.append("'true' as x");
 			return sb.toString();
 		}
 
