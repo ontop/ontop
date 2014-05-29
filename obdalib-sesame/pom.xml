@@ -50,8 +50,49 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
 		</dependency>
-	</dependencies>
+			
+			
+			<!-- Optique R2RML API -->
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api</artifactId>
+			<version>0.1.1</version>
+		</dependency>
 	
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-jena-bridge</artifactId>
+			<version>0.1.1</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-owlapi-bridge</artifactId>
+			<version>0.1.1</version>
+	
+		</dependency>
+	
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-sesame-bridge</artifactId>
+			<version>0.1.1</version>
+		</dependency>
+	
+	
+	</dependencies>
+	<repositories>
+		<repository>
+			<id>bolzano-nexus-public</id>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+		
 	<build>
 		<plugins>
 			<plugin>
