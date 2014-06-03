@@ -55,14 +55,14 @@
       :test_87b
       :test_87c
       :test_87d
-      :test_87e
-      :test_87f
-      :test_87g
-      :test_87h
-      :test_87i
-      :test_87j
-      :test_87k
-      :test_87l
+#      :test_87e # DISABLE for release of v2.0.0-beta-1
+#      :test_87f # DISABLE for release of v2.0.0-beta-1
+#      :test_87g # DISABLE for release of v2.0.0-beta-1
+#      :test_87h # DISABLE for release of v2.0.0-beta-1
+#      :test_87i # DISABLE for release of v2.0.0-beta-1
+#      :test_87j # DISABLE for release of v2.0.0-beta-1
+#      :test_87k # DISABLE for release of v2.0.0-beta-1
+#      :test_87l # DISABLE for release of v2.0.0-beta-1
       :test_88a
       :test_88b
       :test_88c
