@@ -406,7 +406,8 @@ public class MetaMappingExpander {
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
 		List<Variable> vars = new ArrayList<Variable>();
-		for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		//for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		for(int i = 1; i < uriTermForPredicate.getTerms().size(); i++){
 			vars.add((Variable) uriTermForPredicate.getTerm(i));
 		}
 		return vars;

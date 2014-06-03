@@ -285,7 +285,8 @@ public class RDB2RDFScenarioParent extends TestCase {
 				logger.debug("Found test case: {}", testName);
 
 				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
-				String path = pathUri.substring(8);
+				//String path = pathUri.substring(8);
+				String path = pathUri.substring(pathUri.indexOf(':')+1);
 				RDB2RDFScenarioParent test2 = null;
 				if (outputFile == null) {
 					test2 = factory.createRDB2RDFScenarioTest(testURI,
@@ -304,6 +305,7 @@ public class RDB2RDFScenarioParent extends TestCase {
 		}
 
 		testCases.close();
+		con.commit();
 		con.close();
 
 		manifestRep.shutDown();
