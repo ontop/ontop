@@ -57,6 +57,7 @@ import eu.optique.api.mapping.R2RMLMappingManager;
 import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
+import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
@@ -160,6 +161,11 @@ public class R2RMLParser {
 		SubjectMap sMap = tm.getSubjectMap();
 		SubjectMapImpl sm = (SubjectMapImpl) sMap;
 		// process template declaration
+		Object termType = sm.getTermType(Object.class);
+		
+		
+		TermMapType subjectTermType = sm.getTermMapType() ;
+		
 		subj = sMap.getTemplateString();
 		if (subj != null) {
 			// craete uri("...",var)
