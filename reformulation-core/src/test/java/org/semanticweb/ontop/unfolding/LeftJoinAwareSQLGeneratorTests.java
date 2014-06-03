@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
@@ -51,6 +52,7 @@ import com.mysql.jdbc.Statement;
  * @author mrezk
  *
  */
+@Ignore("check if we still need it or not")
 public class LeftJoinAwareSQLGeneratorTests extends TestCase {
 
 	private DBMetadata md = new DBMetadata();
