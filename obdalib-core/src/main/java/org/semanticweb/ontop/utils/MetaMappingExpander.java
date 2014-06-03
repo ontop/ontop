@@ -171,8 +171,8 @@ public class MetaMappingExpander {
 					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement(), false);
 					
 				} catch (JSQLParserException e1) {
-					
-					continue;
+					throw new IllegalArgumentException(e1);
+					//continue;
 				}
 
 				distinctParsedQuery.setProjection(distinctParamsProjection);
@@ -405,7 +405,9 @@ public class MetaMappingExpander {
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
 		List<Variable> vars = new ArrayList<Variable>();
-		for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		//for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		// TODO: check when getTerms().size() != getArity() 
+		for(int i = 1; i < uriTermForPredicate.getTerms().size(); i++){
 			vars.add((Variable) uriTermForPredicate.getTerm(i));
 		}
 		return vars;

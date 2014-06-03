@@ -1,5 +1,25 @@
 package org.semanticweb.ontop.sesame.r2rml;
 
+/*
+ * #%L
+ * ontop-obdalib-sesame
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -32,32 +52,12 @@ import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
 
-/*
- * #%L
- * ontop-obdalib-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+
 
 /**
- * @author timea bagosi
+ * @author timea bagosi, mindagaus
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
-
-
 public class R2RMLParser {
 
 	private ValueFactory fact;
@@ -156,6 +156,9 @@ public class R2RMLParser {
 		SubjectMap sMap = tm.getSubjectMap();
 		SubjectMapImpl sm = (SubjectMapImpl) sMap;
 		// process template declaration
+		Object termType = sm.getTermType(Object.class);
+		
+		
 		subj = sMap.getTemplateString();
 		if (subj != null) {
 			// craete uri("...",var)

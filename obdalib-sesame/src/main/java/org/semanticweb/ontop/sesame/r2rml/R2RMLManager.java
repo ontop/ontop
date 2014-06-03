@@ -262,6 +262,9 @@ public class R2RMLManager {
 			
 			//get object atom
 			Term objectAtom = r2rmlParser.getObjectAtom(pom);
+			
+		
+			
 			if (objectAtom == null) {
 				// skip, object is a join
 				continue;
@@ -278,12 +281,20 @@ public class R2RMLManager {
 				//check if predicate = rdf:type
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
 					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
+					// if object is a predicate
+					if (objectAtom.getReferencedVariables().isEmpty()) { 	
+						Function constPred = (Function) ((Function) objectAtom).getTerm(0);
+						Predicate newpred = constPred.getFunctionSymbol();
+						Function newAtom = fac.getFunction(newpred, subjectAtom);
+						body.add(newAtom);
+					}else{ // if object is a variable
 						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Predicate uriPred = fac.getUriTemplatePredicate(1);
 						Function rdftype = fac.getFunction(uriPred, fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 						terms.add(rdftype);
 						terms.add(objectAtom);
 						body.add(fac.getFunction(newpred, terms));
+					}
 				} else {
 					// create predicate(subject, object) and add it to the body
 					terms.add(objectAtom);
