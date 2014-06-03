@@ -7,7 +7,8 @@
 	dcterms:title "One table, a primary key, three columns, three rows" ;
 	dcterms:identifier "D010-1table1primarykey3colums3rows" ;
 	rdb2rdftest:sqlScriptFile "create.sql";
-	rdb2rdftest:relatedTestCase <tc0010c>  ;
+	rdb2rdftest:relatedTestCase <dg0010>, <tc0010a>, <tc0010b> ;
+	#<tc0010c>  ;## Additional {} chars in the template
 .
 
 <dg0010> a rdb2rdftest:DirectMapping ;	

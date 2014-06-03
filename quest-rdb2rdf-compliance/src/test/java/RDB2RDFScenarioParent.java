@@ -73,7 +73,6 @@ public class RDB2RDFScenarioParent extends TestCase {
 	
 		String getMainManifestFile();
 	}
-
 	
 	public RDB2RDFScenarioParent(String testUri, String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException {
 		super(name);
