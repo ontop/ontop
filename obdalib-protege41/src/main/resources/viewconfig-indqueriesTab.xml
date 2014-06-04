@@ -4,13 +4,13 @@
 		<CNode>
 			<Component label="SPARQL query manager">
 				<Property id="pluginId"
-					value="it.unibz.krdb.obda.protege4.QueryManagerViewComponent"/>
+					value="org.semanticweb.ontop.protege4.QueryManagerViewComponent"/>
 			</Component>
 		</CNode>
 		<CNode>
 			<Component label="SPARQL query editor">
 				<Property id="pluginId"
-					value="it.unibz.krdb.obda.protege4.QueryInterfaceViewComponent"/>
+					value="org.semanticweb.ontop.protege4.QueryInterfaceViewComponent"/>
 			</Component>
 		</CNode>
 	</VSNode>

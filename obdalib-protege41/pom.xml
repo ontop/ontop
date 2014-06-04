@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.11.1-SNAPSHOT</version>
+		<version>2.0.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -119,6 +119,16 @@
 			<artifactId>jgraph</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-sesame-bridge</artifactId>
+		</dependency>
+		
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
@@ -249,12 +259,13 @@
 
 	</dependencies>
 
+
+
 	<build>
 		<finalName>it.unibz.inf.obda.p4plugin-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -302,7 +313,7 @@
 				<extensions>true</extensions>
 				<configuration>
 
-					<!-- The follwing is the set of instructions of how pack the bundle 
+					<!-- The following is the set of instructions of how pack the bundle
 						and how to create the MANIFEST.MF for the bundle. The configuration does 
 						4 things. 1. It makes sure that the "tight" dependencies are not packed as 
 						jars, but as .class files (inline). It makes sure that all the runtime dependencies 
@@ -313,7 +324,7 @@
 					<instructions>
 
 						<!-- <Build-Jdk>1.6</Build-Jdk> -->
-						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+						<Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
@@ -336,8 +347,8 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Build-Number>0</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
-						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>it.unibz.krdb.obda.protege4.*,
+						<Export-Package>org.semanticweb.ontop.protege4.*</Export-Package>
+						<Import-Package>org.semanticweb.ontop.protege4.*,
 							!org.json,
 							!org.codehaus.groovy.*,
 							!groovy.*,
@@ -375,7 +386,7 @@
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
 							or protege wont load it -->
-						<Bundle-SymbolicName>it.unibz.krdb.obda.protege4;singleton:=true</Bundle-SymbolicName>
+						<Bundle-SymbolicName>org.semanticweb.ontop.protege4;singleton:=true</Bundle-SymbolicName>
 
 						<!-- This makes sure ONLY the necessary dependencies are imported. 
 							If this is not supplied, maven-bundle-plugin will attempt to import ALL classes 

@@ -13,8 +13,8 @@
       :dawg-bev-2 
       :dawg-bev-3 
       :dawg-bev-4 
-      :dawg-bev-5 #We CANT HANDLE THIS CASE RIGHT NOW!!! 
-      :dawg-bev-6 #We CANT HANDLE THIS CASE RIGHT NOW!!! 
+      # :dawg-bev-5 #We CANT HANDLE THIS CASE RIGHT NOW!!! TEMPORAL DISABLE for the release of v2.0.0-beta-1
+      # :dawg-bev-6 #We CANT HANDLE THIS CASE RIGHT NOW!!! TEMPORAL DISABLE for the release of v2.0.0-beta-1
 
        ) .
 

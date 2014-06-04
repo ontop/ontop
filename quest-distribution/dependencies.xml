@@ -10,6 +10,7 @@
 		<dependencySet>
 			<outputDirectory></outputDirectory>
 			<excludes>
+				<exclude>org.semanticweb.ontop*</exclude>
 				<exclude>it.unibz.inf.ontop*</exclude>
 				<exclude>antlr*</exclude>
 				<exclude>log4j*</exclude>

@@ -30,17 +30,17 @@
 			<CNode>
 				<Component label="Datasource manager">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent" />
+						value="org.semanticweb.ontop.protege4.DatasourcesManagerViewComponent" />
 				</Component>
 				<Component label="Mapping manager">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent" />
+						value="org.semanticweb.ontop.protege4.MappingsManagerViewComponent" />
 				</Component>
 				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
-					value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
+					value="org.semanticweb.ontop.protege4.RDBMSInspectorViewComponent"/> </Component> -->
 				<Component label="Mapping Assistant - BETA">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.MappingAssistantViewComponent" />
+						value="org.semanticweb.ontop.protege4.MappingAssistantViewComponent" />
 				</Component>
 			</CNode>
 		</VSNode>
