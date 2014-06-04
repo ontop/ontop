@@ -728,6 +728,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (distinct) {
 			sb.append("DISTINCT ");
 		}
+		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
 			return sb.toString();
