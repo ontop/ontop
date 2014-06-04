@@ -1,4 +1,4 @@
-package it.unibz.krdb.odba;
+package org.semanticweb.ontop.r2rml;
 
 
 import java.io.File;
