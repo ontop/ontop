@@ -255,9 +255,24 @@ public class JDBCUtility implements Serializable {
 
 
 	/**
+	 * Each database handle differently dummy tables
 	 * @return
 	 */
 	public String getDummyTable() {
-		return "(SELECT 1)";
+		String sql = null;
+	
+		switch (driver) {
+		case MYSQL:
+		case H2:
+		case PGSQL:
+			sql= "(SELECT 1)";
+		case DB2:
+			sql= "(SELECT 1 from sysibm.sysdummy1)";
+		case ORACLE:
+			sql= "(SELECT 1 from dual)";
+		case SQLSERVER:
+			sql= "(SELECT 1 as \"example\")";
+		}
+		return sql;
 	}
 }
