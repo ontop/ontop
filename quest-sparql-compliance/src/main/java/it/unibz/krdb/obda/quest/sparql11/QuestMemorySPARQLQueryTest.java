@@ -24,8 +24,9 @@ import junit.framework.Test;
 
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.Repository;
+import org.semanticweb.ontop.sesame.SesameClassicInMemoryRepo;
 
-import sesameWrapper.SesameClassicInMemoryRepo;
+
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 
