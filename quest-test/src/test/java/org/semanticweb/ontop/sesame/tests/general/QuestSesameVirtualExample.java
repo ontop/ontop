@@ -27,7 +27,10 @@ import java.net.URL;
 import java.util.List;
 
 import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.util.ModelUtil;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
@@ -144,8 +147,9 @@ public class QuestSesameVirtualExample {
 		RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 		InputStream in = new FileInputStream(ttlFile);
 		URL documentUrl = new URL("file://" + ttlFile);
-		Graph myGraph = new org.openrdf.model.impl.GraphImpl();
-		StatementCollector collector = new StatementCollector(myGraph);
+		//Graph myGraph = new org.openrdf.model.impl.GraphImpl();
+		Model myModel = new LinkedHashModel();
+		StatementCollector collector = new StatementCollector(myModel);
 		parser.setRDFHandler(collector);
 		parser.parse(in, documentUrl.toString());
 		
@@ -160,9 +164,9 @@ public class QuestSesameVirtualExample {
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
 		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 		
-		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myGraph, pref);
+		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myModel, pref);
 
-		System.out.println(myGraph);
+		System.out.println(myModel);
 		/*
 		 * Repository must be always initialized first
 		 */

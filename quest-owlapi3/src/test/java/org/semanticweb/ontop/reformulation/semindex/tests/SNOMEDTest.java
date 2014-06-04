@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.semindex.tests;
+package org.semanticweb.ontop.reformulation.semindex.tests;
 
 /*
  * #%L
@@ -20,13 +20,13 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 
 import java.io.File;
 
@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 
 public class SNOMEDTest {
 	
+	
+	// TODO: check with mariano
 	public static void main(String args[]) throws Exception {
 		
 		Logger log = LoggerFactory.getLogger("SNOMEDTEST");

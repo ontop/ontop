@@ -49,8 +49,8 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.11
-export REVISION=0
+export VERSION=2.0
+export REVISION=0-SNAPSHOT
 
 
 # Start building the packages
@@ -64,7 +64,7 @@ echo ""
 echo "========================================="
 echo " Making -ontopPro- distribution package"
 echo "-----------------------------------------"
-echo "pluginVersion=$VERSION.$REVISION" >  $BUILD_ROOT/obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
+echo "pluginVersion=$VERSION.$REVISION" >  $BUILD_ROOT/obdalib-core/src/main/resources/org/semanticweb/ontop/utils/version.properties
 rm -fr $BUILD_ROOT/obdalib-protege41/dist
 mvn install -DskipTests
 cd $BUILD_ROOT/obdalib-protege41/

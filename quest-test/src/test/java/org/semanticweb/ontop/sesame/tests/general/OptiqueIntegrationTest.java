@@ -10,6 +10,8 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -39,7 +41,7 @@ public class OptiqueIntegrationTest extends TestCase {
 	String queryfile = "";
 
 	OWLOntology owlontology;
-	Graph mappings;
+	Model mappings;
 	RepositoryConnection con;
 	QuestPreferences pref;
 
@@ -57,7 +59,7 @@ public class OptiqueIntegrationTest extends TestCase {
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(mappingfile);
 			URL documentUrl = new URL("file://" + mappingfile);
-			mappings = new org.openrdf.model.impl.GraphImpl();
+			mappings = new LinkedHashModel();
 			StatementCollector collector = new StatementCollector(mappings);
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());

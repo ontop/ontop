@@ -50,7 +50,17 @@ import org.semanticweb.ontop.model.impl.SQLQueryImpl;
 import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.URITemplates;
 
-//import com.hp.hpl.jena.vocabulary.RDFS;
+import eu.optique.api.mapping.LogicalTable;
+import eu.optique.api.mapping.MappingFactory;
+import eu.optique.api.mapping.ObjectMap;
+import eu.optique.api.mapping.PredicateMap;
+import eu.optique.api.mapping.PredicateObjectMap;
+import eu.optique.api.mapping.R2RMLMappingManager;
+import eu.optique.api.mapping.R2RMLMappingManagerFactory;
+import eu.optique.api.mapping.SubjectMap;
+import eu.optique.api.mapping.Template;
+import eu.optique.api.mapping.TriplesMap;
+import eu.optique.api.mapping.TermMap.TermMapType;
 
 public class OBDAMappingTransformer {
 	
@@ -59,7 +69,12 @@ public class OBDAMappingTransformer {
 	public OBDAMappingTransformer() {
 		this.vf = new ValueFactoryImpl();
 	}
-	
+	/**
+	 * Get Sesame statements from OBDA mapping axiom
+	 * @param axiom
+	 * @param prefixmng
+	 * @return
+	 */
 	public List<Statement> getStatements(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
 		List<Statement> statements = new ArrayList<Statement>();
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
@@ -92,9 +107,6 @@ public class OBDAMappingTransformer {
 				}
 				
 				statements.add(vf.createStatement(logicalTableNode, R2RMLVocabulary.tableName, vf.createLiteral(tableName)));
-//			} else if (sqlquery.contains("CHILD")) {
-//				//join mapping
-//				
 		} else {
 			//sqlquery -> general case
 			//creating triple main-node -- logical table
@@ -120,8 +132,6 @@ public class OBDAMappingTransformer {
 		
 		//add template subject
 		statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.template, vf.createLiteral(subjectTemplate)));
-		//TODO: deal with column and termType
-
 		
 		//process target query
 		for (Function func : tquery.getBody()) {
@@ -210,14 +220,9 @@ public class OBDAMappingTransformer {
 							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
 							//add template subject
 							statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectTemplate)));
-							//TODO: deal with column and termType
-							
 						} else if (objectTerm instanceof Constant) {
 							statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 						}
-					//	statements.add(vf.createStatement(objNode, R2RMLVocabulary.datatype, vf.createURI(objectPred.getName())));
-						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.termType, R2RMLVocabulary.literal));
-						
 					}
 				} else {
 					System.out.println("FOUND UNKNOWN: "+object.toString());
@@ -236,6 +241,138 @@ public class OBDAMappingTransformer {
 		while (input.endsWith("\""))
 			input = input.substring(0, input.length()-1);
 		return input;
+	}
+
+	/**
+	 * Get R2RML TriplesMap from OBDA mapping axiom
+	 * @param axiom
+	 * @param prefixmng
+	 * @return
+	 */
+	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
+			PrefixManager prefixmng) {
+		
+		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
+		CQIE tquery = (CQIE) axiom.getTargetQuery();
+		
+		String random_number = IDGenerator.getNextUniqueID("");
+		
+		//triplesMap node
+		String mapping_id = axiom.getId();
+		if (!mapping_id.startsWith("http://"))
+			mapping_id = "http://example.org/" + mapping_id;
+		Resource mainNode = vf.createURI(mapping_id);
+
+		R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+		MappingFactory mfact = mm.getMappingFactory();
+		
+		//Table
+		LogicalTable lt = mfact.createR2RMLView(squery.getSQLQuery());
+		
+		//SubjectMap
+		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
+		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
+		Template templs = mfact.createTemplate(subjectTemplate);
+		SubjectMap sm = mfact.createSubjectMap(templs);
+		
+		TriplesMap tm = mfact.createTriplesMap(lt, sm);
+		
+		//process target query
+		for (Function func : tquery.getBody()) {
+			random_number = IDGenerator.getNextUniqueID("");
+			Predicate pred = func.getFunctionSymbol();
+			String predName = pred.getName();
+			URI predUri = null; String predURIString ="";
+			
+			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
+			{
+				//triple
+				Function predf = (Function)func.getTerm(1);
+				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
+				{
+					if (predf.getTerms().size() == 1) //fixed string
+					{
+						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						predUri = vf.createURI(pred.getName());
+					}
+					else
+					{
+						//custom predicate
+						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
+						predUri = vf.createURI(predURIString);
+					}
+				}
+				
+			} else {
+				predUri = vf.createURI(predName);
+			}
+			predURIString = predUri.stringValue();
+			
+		
+			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+				// The term is actually a SubjectMap (class)
+				//add class declaration to subject Map node
+				sm.addClass(predUri);
+				
+			} else {
+				
+				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, "predicateObjectMap"+ random_number);
+				ObjectMap obm = null; PredicateObjectMap pom = null;
+				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+					predM.setConstant(predURIString);
+				}
+				else {
+					//add predicate template declaration
+					Template templo = mfact.createTemplate(predURIString);
+					obm = mfact.createObjectMap(templo);
+					pom = mfact.createPredicateObjectMap(predM, obm);
+					tm.addPredicateObjectMap(pom);
+				}
+
+				//add object declaration to predObj node
+				//term 0 is always the subject, we are interested in term 1
+				Term object = func.getTerm(1);
+
+				if (object instanceof Variable){
+					//statements.add(vf.createStatement(objNode, R2RMLVocabulary.column, vf.createLiteral(((Variable) object).getName())));
+					obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
+					//obm.setColumn(vf.createLiteral(((Variable) object).getName()).stringValue());
+				} else if (object instanceof Function) {
+					//check if uritemplate
+					Predicate objectPred = ((Function) object).getFunctionSymbol();
+					if (objectPred instanceof URITemplatePredicate) {
+						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
+						//add template object
+						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
+						//obm.setTemplate(mfact.createTemplate(objectURI));
+						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
+					}else if (objectPred instanceof DataTypePredicate) {
+						Term objectTerm = ((Function) object).getTerm(0);
+
+						if (objectTerm instanceof Variable) {
+							//Now we add the template!!
+							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
+							//add template subject
+							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectTemplate)));
+							//obm.setTemplate(mfact.createTemplate(objectTemplate));
+							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
+						} else if (objectTerm instanceof Constant) {
+							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
+							//obm.setConstant(vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+							obm = mfact.createObjectMap(TermMapType.CONSTANT_VALUED, vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+						}
+						
+					}
+					pom = mfact.createPredicateObjectMap(predM, obm);
+					tm.addPredicateObjectMap(pom);
+				} else {
+					System.out.println("FOUND UNKNOWN: "+object.toString());
+				}
+			}
+			
+		}
+
+		return tm;
 	}
 	
 

@@ -1,5 +1,9 @@
 package org.semanticweb.ontop.ontology;
 
+import org.semanticweb.ontop.model.Predicate;
+
+
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -25,5 +29,7 @@ package org.semanticweb.ontop.ontology;
  * as indicated in the OWL 2 QL profile (DL-Lite subclass axioms).
  */
 public interface BasicClassDescription extends ClassDescription {
-	// NO-OP
+
+	public Predicate getPredicate();
+	
 }

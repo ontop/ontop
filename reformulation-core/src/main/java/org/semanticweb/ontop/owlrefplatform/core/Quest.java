@@ -1131,7 +1131,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					 // If the SQL string has sub-queries in its statement
 					if (containChildParentSubQueries(sourceString)) {
 						int childquery1 = sourceString.indexOf("(");
-						int childquery2 = sourceString.indexOf(") as CHILD");
+						int childquery2 = sourceString.indexOf(") AS child");
 						String childquery = sourceString.substring(childquery1 + 1, childquery2);
 
 						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
@@ -1144,14 +1144,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("CHILD." + col );
-								sb.append("CHILD.\"" + col + "\" as \"CHILD_" + (col)+"\"");
+								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
 								needComma = true;
 							}
 						}
 						sb.append(", ");
 
 						int parentquery1 = sourceString.indexOf(", (", childquery2);
-						int parentquery2 = sourceString.indexOf(") as PARENT");
+						int parentquery2 = sourceString.indexOf(") AS parent");
 						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
 
 						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
@@ -1164,7 +1164,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("PARENT." + col);
-								sb.append("PARENT.\"" + col + "\" as \"PARENT_" + (col)+"\"");
+								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
 								needComma = true;
 							}
 						}

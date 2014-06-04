@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package org.semanticweb.ontop.reformulation.tests;
 
 /*
  * #%L
@@ -20,8 +20,8 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 
 import java.io.File;
 import java.util.HashSet;

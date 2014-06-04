@@ -138,14 +138,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * program
 	 * 
 	 * @param metadata
-	 *            This is an instance of {@link #DBMetadata}
+	 *            This is an instance of {@link org.semanticweb.ontop.sql.DBMetadata}
 	 * @param jdbcutil
 	 *            This is the set of useful tools to created JDBC compliant
 	 *            queries. It depends on the DB driver, for instance:
-	 *            com.mysql.jdbc.Driver. {@see #JDBCUtility}
+	 *            com.mysql.jdbc.Driver.
 	 * @param sqladapter
-	 *            This contains the syntax that each DB uses. {@see
-	 *            #SQLDialectAdapter}
+	 *            This contains the syntax that each DB uses.
 	 */
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil,
 			SQLDialectAdapter sqladapter) {
@@ -241,7 +240,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (query.getQueryModifiers().hasModifiers()) {
 			final List<OrderCondition> conditions = query.getQueryModifiers()
 					.getSortConditions();
-			toReturn = (conditions.isEmpty()) ? false : true;
+			toReturn = (!conditions.isEmpty());
 		}
 		return toReturn;
 	}
@@ -330,15 +329,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return result.toString();
 	}
 
-	/**
-	 * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION.... This
-	 * method complements {@link #generateQueryFromSingleRule}
-	 * 
-	 * @param list
-	 *            of SQL strings
-	 * @return Union of sql queries
-	 */
-	private StringBuilder createUnionFromSQLList(List<String> queriesStrings) {
+    /**
+     * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION.... This
+     * method complements {@link #generateQueryFromSingleRule}
+     *
+     * @param queriesStrings list
+     *                       of SQL strings
+     * @return Union of sql queries
+     */
+    private StringBuilder createUnionFromSQLList(List<String> queriesStrings) {
 		Iterator<String> queryStringIterator = queriesStrings.iterator();
 		StringBuilder result = new StringBuilder();
 		if (queryStringIterator.hasNext()) {
@@ -1013,17 +1012,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI)
+            if (p.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI))
 				return Types.BOOLEAN;
-			if (p.toString() == OBDAVocabulary.XSD_INT_URI)
+			if (p.getName().equals(OBDAVocabulary.XSD_INT_URI))
 				return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)
+			if (p.getName().equals(OBDAVocabulary.XSD_INTEGER_URI))
 				return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI)
+			if (p.getName().equals(OBDAVocabulary.XSD_DOUBLE_URI))
 				return Types.DOUBLE;
-			if (p.toString() == OBDAVocabulary.XSD_STRING_URI)
+			if (p.getName().equals(OBDAVocabulary.XSD_STRING_URI))
 				return Types.VARCHAR;
-			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI)
+			if (p.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI))
 				return Types.VARCHAR;
 		}
 		// Return varchar for unknown
@@ -1041,7 +1040,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * produces the select clause of the sql query for the given CQIE
 	 * 
-	 * @param q
+	 * @param query
 	 *            the query
 	 * @return the sql select clause
 	 */
@@ -1059,7 +1058,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sb.append("DISTINCT ");
 		}
 		if (headterms.size() == 0) {
-			sb.append("true as x");
+			sb.append("'true' as x");
 			return sb.toString();
 		}
 
@@ -1108,7 +1107,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
-			mainColumn = jdbcutil.getSQLLexicalForm(uc.getURI().toString());
+			mainColumn = jdbcutil.getSQLLexicalForm(uc.getURI());
 		} else if (ht instanceof Variable) {
 			Variable termVar = (Variable) ht;
 			mainColumn = getSQLString(termVar, index, false);
@@ -1194,8 +1193,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
 
-			if (function == OBDAVocabulary.RDFS_LITERAL
-					|| function == OBDAVocabulary.RDFS_LITERAL_LANG)
+			if (function.equals(OBDAVocabulary.RDFS_LITERAL)
+					|| function.equals(OBDAVocabulary.RDFS_LITERAL_LANG))
 				if (ov.getTerms().size() > 1) {
 					/*
 					 * Case for rdf:literal s with a language, we need to select
@@ -1252,8 +1251,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * set to know the type of constant)
 			 */
 			// TODO: DO NOT use magic numbers, extract them to constants
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName()
-					.toString())) {
+			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName())) {
 				return (String.format(typeStr, 9, varName));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
 				return (String.format(typeStr, 8, varName));
@@ -1341,9 +1339,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * The first inner term determines the form of the result
 		 */
 		Term t = ov.getTerms().get(0);
-		Term c;
 
-		String literalValue = "";
+        String literalValue = "";
 
 		if (t instanceof ValueConstant || t instanceof BNode) {
 			/*
@@ -1354,11 +1351,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * and form the CONCAT
 			 */
 			if (t instanceof BNode) {
-				c = (BNode) t;
-				literalValue = ((BNode) t).getValue();
+                literalValue = ((BNode) t).getValue();
 			} else {
-				c = (ValueConstant) t;
-				literalValue = ((ValueConstant) t).getValue();
+                literalValue = ((ValueConstant) t).getValue();
 			}
 			Predicate pred = ov.getFunctionSymbol();
 
@@ -1388,8 +1383,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (pred == OBDAVocabulary.RDFS_LITERAL
-						|| pred == OBDAVocabulary.RDFS_LITERAL_LANG) {
+				if (pred.equals(OBDAVocabulary.RDFS_LITERAL)
+						|| pred.equals(OBDAVocabulary.RDFS_LITERAL_LANG)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
@@ -1439,7 +1434,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * concrete URI, we return the string representing that URI.
 			 */
 			URIConstant uc = (URIConstant) t;
-			return jdbcutil.getSQLLexicalForm(uc.getURI().toString());
+			return jdbcutil.getSQLLexicalForm(uc.getURI());
 		}
 
 		/*

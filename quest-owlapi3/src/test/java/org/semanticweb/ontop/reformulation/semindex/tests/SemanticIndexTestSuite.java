@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.semindex.tests;
+package org.semanticweb.ontop.reformulation.semindex.tests;
 
 /*
  * #%L
@@ -20,10 +20,12 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.reformulation.tests.SigmaTest;
+import org.junit.Ignore;
+import org.semanticweb.ontop.reformulation.tests.SigmaTest;
 import junit.framework.TestSuite;
 
 
+@Ignore("check whether we still need it or not")
 public class SemanticIndexTestSuite {
 
     public static TestSuite suite() {

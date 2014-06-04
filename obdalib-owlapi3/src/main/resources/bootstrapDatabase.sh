@@ -1,1 +1,2 @@
-java -Dlogback.configurationFile=log/logback.xml -Djava.ext.dirs=lib/:jdbc/ it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapperCMD $@
+#!/bin/sh
+java -Dlogback.configurationFile=log/logback.xml -Djava.ext.dirs=lib/:jdbc/ org.semanticweb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapperCMD $@

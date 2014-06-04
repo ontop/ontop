@@ -999,6 +999,18 @@ public class QuestOWL extends OWLReasonerBase {
 		return new OWLNamedIndividualNodeSet();
 	}
 
+	/**
+	 * Methods to get the empty concepts and roles in the ontology using the given mappings.
+	 * It generates SPARQL queries to check for entities.
+	 * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and roles
+	 * @throws Exception
+	 */
+	
+	public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception{
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(translatedOntologyMerge, owlconn);
+		return empties;
+	}
+	
 	protected OWLDataFactory getDataFactory() {
 		return getRootOntology().getOWLOntologyManager().getOWLDataFactory();
 	}

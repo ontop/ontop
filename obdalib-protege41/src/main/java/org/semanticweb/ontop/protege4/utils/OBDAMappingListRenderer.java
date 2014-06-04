@@ -439,7 +439,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private void prepareTextPanes(OBDAMappingAxiom value, boolean selected) {
 		OBDAQuery targetQuery = value.getTargetQuery();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
-		trgQueryTextPane.setText(trgQuery);
+ 		trgQueryTextPane.setText(trgQuery);
 
 		OBDAQuery sourceQuery = value.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);

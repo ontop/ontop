@@ -36,13 +36,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -197,12 +197,6 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -472,6 +466,12 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(RegExpMatchOperator rexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SignedExpression arg0) {
 		// TODO Auto-generated method stub
 		
 	}

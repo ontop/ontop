@@ -1,41 +1,42 @@
 /*
- * Turtle.g
- * Copyright (C) 2010 Obdalib Team
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * For information on how to redistribute this software under
- * the terms of a license other than GNU General Public License
- * contact TMate Software at support@sqljet.com
- *
- * @author Josef Hardi (josef.hardi@unibz.it)
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
+ 
 grammar TurtleOBDA;
 
 @header {
-package it.unibz.krdb.obda.parser;
+package org.semanticweb.ontop.parser;
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.utils.QueryUtils;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDALibConstants;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.URIConstant;
+import org.semanticweb.ontop.model.ValueConstant;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.utils.QueryUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ import org.antlr.runtime.TokenStream;
 }
 
 @lexer::header {
-package it.unibz.krdb.obda.parser;
+package org.semanticweb.ontop.parser;
 
 import java.util.List;
 import java.util.Vector;
@@ -250,40 +251,51 @@ private class ColumnString implements FormatString {
 private Function makeAtom(Term subject, Term pred, Term object) {
      Function atom = null;
       
-       if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
-             if (object instanceof  Function) {
-                  if(QueryUtils.isGrounded(object)) {
-                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-                      Predicate predicate = dfac.getClassPredicate(c.getValue());
-                      atom = dfac.getFunction(predicate, subject);
-                  } else {
-                        Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred, object);                  }
-             } else if (object instanceof  Variable){
-                  Predicate uriPredicate = dfac.getPredicate(OBDAVocabulary.QUEST_URI, 1);
-                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
-                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
-              } else {
-                  throw new IllegalArgumentException("parser cannot handle object " + object);  
-              }
-        } else if( ! QueryUtils.isGrounded(pred) ){
-             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
-        } else {
-             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-             Predicate predicate;
-             if(pred instanceof Function){
-                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-                  predicate = dfac.getPredicate(pr.getValue(), 2);
-             } else {
-                  throw new IllegalArgumentException("predicate should be a URI Function");
-             }
-             atom = dfac.getFunction(predicate, subject, object);
-       }
-        return atom;
+        if (isRDFType(pred)) {
+	             if (object instanceof  Function) {
+	                  if(QueryUtils.isGrounded(object)) {
+	                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
+	                      Predicate predicate = dfac.getClassPredicate(c.getValue());
+	                      atom = dfac.getFunction(predicate, subject);
+	                  } else {
+//	                        Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+//	                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+	                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred, object);                  }
+	             } else if (object instanceof  Variable){
+	                  Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+	                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
+	                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
+	                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
+	              } else {
+	                  throw new IllegalArgumentException("parser cannot handle object " + object);  
+	              }
+	        } else if( ! QueryUtils.isGrounded(pred) ){
+	             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+	        } else {
+	             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+	             Predicate predicate;
+	             if(pred instanceof Function){
+	                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+	                  predicate = dfac.getPredicate(pr.getValue(), 2);
+	             } else {
+	                  throw new IllegalArgumentException("predicate should be a URI Function");
+	             }
+	             atom = dfac.getFunction(predicate, subject, object);
+	       }
+	        return atom;
   }
 
+
+private static boolean isRDFType(Term pred) {
+//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+//			return true;
+//		}
+		if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
+			String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
+			return c.equals(OBDAVocabulary.RDF_TYPE);
+		}	
+		return false;
+	}
 
 }
 
@@ -367,7 +379,9 @@ predicateObjectList returns [List<Function> value]
 //verb returns [String value]
 verb returns [Term value]
   : predicate { $value = $predicate.value; }
-  | 'a' {value = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE); 
+  | 'a' {Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
+         Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
+	$value = dfac.getFunction(uriPredicate, constant);  
   //$value = OBDAVocabulary.RDF_TYPE; 
   }
   ;

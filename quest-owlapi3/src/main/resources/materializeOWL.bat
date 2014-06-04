@@ -1,1 +1,1 @@
-java -Dlogback.configurationFile=log\logback.xml -Djava.ext.dirs=lib\;jdbc\ it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLMaterializerCMD %*
+java -Dlogback.configurationFile=log\logback.xml -Djava.ext.dirs=lib\;jdbc\ org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLMaterializerCMD %*
