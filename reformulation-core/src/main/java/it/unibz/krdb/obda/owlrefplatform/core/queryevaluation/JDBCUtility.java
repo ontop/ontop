@@ -265,13 +265,13 @@ public class JDBCUtility implements Serializable {
 		case MYSQL:
 		case H2:
 		case PGSQL:
-			sql= "(SELECT 1)";
+			sql= "SELECT 1";
 		case DB2:
-			sql= "(SELECT 1 from sysibm.sysdummy1)";
+			sql= "SELECT 1 from sysibm.sysdummy1";
 		case ORACLE:
-			sql= "(SELECT 1 from dual)";
+			sql= "SELECT 1 from dual";
 		case SQLSERVER:
-			sql= "(SELECT 1 as \"example\")";
+			sql= "SELECT 1 as \"example\"";
 		}
 		return sql;
 	}
