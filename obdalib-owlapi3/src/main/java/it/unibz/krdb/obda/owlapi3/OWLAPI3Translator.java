@@ -353,6 +353,7 @@ public class OWLAPI3Translator {
 					Property role = getRoleExpression(aux.getProperty());
 
 					ClassDescription subclass = ofac.getPropertySomeRestriction(role.getPredicate(), true);
+					if(aux.getRange().isDatatype()){
 					OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
 
 					if (rangeDatatype.isBuiltIn()) {
@@ -362,6 +363,9 @@ public class OWLAPI3Translator {
 						addSubclassAxiom(dl_onto, subclass, datatype);
 					} else {
 						log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
+					}
+					}else{
+						log.warn("Ignoring range axiom since it is not a datatype: " + axiom.toString());
 					}
 
 				} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
