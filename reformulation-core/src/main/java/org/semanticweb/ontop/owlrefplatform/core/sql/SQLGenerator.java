@@ -419,7 +419,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (conditions.isEmpty()) {
 			return "";
 		}
-		condFunctions.addAll((Collection<? extends Function>) conditions);
+		//The "addAll" methods does not compile on travis-CI:
+		// inconvertible types
+		 // required: java.util.Collection<? extends org.semanticweb.ontop.model.Function>
+		 // found:    java.util.List<org.semanticweb.ontop.model.Term>
+		//condFunctions.addAll((Collection<? extends Function>) conditions);
+
+		for(Term cond : conditions){
+			condFunctions.add((Function) cond);
+		}
+		
 		LinkedHashSet<String> condSet = getBooleanConditionsString(condFunctions, index);
 		
 //		List<String> groupReferences = Lists.newArrayList();
