@@ -20,6 +20,7 @@ package org.semanticweb.ontop.quest.sparql;
  * #L%
  */
 
+import org.junit.Ignore;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
@@ -61,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
+@Ignore("Won't fix because it is not a well-designed BGP")
 public class CompanyTest2 extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
