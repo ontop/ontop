@@ -41,8 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openrdf.rio.RDFHandler;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 class MappingConverterCMD {
 

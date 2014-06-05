@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.sesame.r2rml.R2RMLVocabulary;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -291,9 +292,23 @@ public class R2RMLParser {
 		ObjectMap om = pom.getObjectMap(0);
 		String obj = om.getConstant();
 		if (obj != null) {
-			Predicate pred = fac.getUriTemplatePredicate(1);
+			boolean isURI = false;
+			try {
+				java.net.URI.create(obj);
+				isURI = true;
+			} catch (IllegalArgumentException e){
+
+			}
+			Predicate pred;
+			if (isURI) {
+				pred = fac.getUriTemplatePredicate(1);
+			} else {
+				// TODO: handle typed Literal
+				pred = OBDAVocabulary.RDFS_LITERAL;
+			}
 			Term newlit = fac.getConstantLiteral(obj);
 			objectAtom = fac.getFunction(pred, newlit);
+			
 		}
 
 		String col = om.getColumn();
