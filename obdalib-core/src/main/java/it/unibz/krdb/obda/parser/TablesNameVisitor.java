@@ -40,13 +40,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -173,7 +173,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Table tableName) {
 		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
-		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())) {
+		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
 			tables.add(relation);
 		}
 	}
@@ -251,11 +251,6 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(InExpression inExpression) {
 		inExpression.getLeftExpression().accept(this);
 		inExpression.getRightItemsList().accept(this);
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
-		inverseExpression.getExpression().accept(this);
 	}
 
 	@Override
@@ -488,5 +483,13 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(RegExpMatchOperator rexpr) {
 		notSupported = true;
 		visitBinaryExpression(rexpr);
+	}
+
+
+
+	@Override
+	public void visit(SignedExpression arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

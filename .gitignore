@@ -4,7 +4,8 @@
 # Maven generated file
 target
 *.versionsBackup
-
+*.releaseBackup
+release.properties
 
 # Eclipse generated files
 .classpath

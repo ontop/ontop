@@ -166,7 +166,16 @@ public class R2RMLParser {
 		
 		TermMapType subjectTermType = sm.getTermMapType() ;
 		
-		subj = sMap.getTemplateString();
+		// WORKAROUND for: 
+		// SubjectMap.getTemplateString() throws NullPointerException when template == null
+		// 
+		if(sMap.getTemplate() == null){
+			subj = null;
+		} else {
+			subj = sMap.getTemplateString();
+		}
+		
+		
 		if (subj != null) {
 			// craete uri("...",var)
 			subjectAtom = getURIFunction((subj), joinCond);
