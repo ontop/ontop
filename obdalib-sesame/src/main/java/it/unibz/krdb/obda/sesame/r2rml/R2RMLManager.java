@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -142,6 +143,7 @@ public class R2RMLManager {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 		return mappings;
@@ -284,10 +286,22 @@ public class R2RMLManager {
 					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
 					// if object is a predicate
 					if (objectAtom.getReferencedVariables().isEmpty()) { 	
-						Function constPred = (Function) ((Function) objectAtom).getTerm(0);
-						Predicate newpred = constPred.getFunctionSymbol();
-						Function newAtom = fac.getFunction(newpred, subjectAtom);
-						body.add(newAtom);
+						Function funcObjectAtom = (Function) objectAtom;
+						Term term0 = funcObjectAtom.getTerm(0);
+						if(term0 instanceof Function){
+							Function constPred = (Function) term0;
+							Predicate newpred = constPred.getFunctionSymbol();
+							Function newAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(newAtom);
+						}else if (term0 instanceof ValueConstant) {							
+							ValueConstant vconst = (ValueConstant) term0;
+							String predName = vconst.getValue();
+							Predicate newpred = fac.getPredicate(predName, 1);
+							Function newAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(newAtom);
+						} else {
+							throw new IllegalStateException();
+						}
 					}else{ // if object is a variable
 						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Predicate uriPred = fac.getUriTemplatePredicate(1);
