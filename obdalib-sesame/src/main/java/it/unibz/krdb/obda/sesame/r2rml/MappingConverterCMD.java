@@ -22,6 +22,10 @@ package it.unibz.krdb.obda.sesame.r2rml;
 
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.io.TurtleFormatter;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -33,12 +37,14 @@ import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.openrdf.rio.RDFHandler;
 
@@ -85,15 +91,55 @@ class MappingConverterCMD {
 			else if (mapfile.toString().endsWith(".ttl"))
 			{
 				String outfile = mapfile.substring(0, mapfile.length() - 4).concat(".obda");
-				File out = new File(outfile);
+				//File out = new File(outfile);
 				R2RMLReader reader = new R2RMLReader(mapfile);
+				OBDAModel model = reader.readModel(new URI("http://example.org/customOBDA"));
+				PrefixManager pm = model.getPrefixManager();
+				
+				TurtleFormatter tf = new TurtleFormatter(pm);
 				ArrayList<OBDAMappingAxiom> axioms = reader.readMappings();
-				for (OBDAMappingAxiom ax : axioms)
-					//ax.getId()
-					System.out.println(ax);
-
+				BufferedWriter writer = null;
+				writer = new BufferedWriter(new FileWriter(outfile));
+				writer.write("[PrefixDeclaration]");
+				writer.newLine();
+				Map<String, String> map = pm.getPrefixMap();
+				for (String key : map.keySet()) {
+					writer.write(key + "\t" + map.get(key));
+					writer.newLine();
+				}
+				writer.newLine();
+				writer.write("[SourceDeclaration]");
+				writer.newLine();
+				writer.write("sourceUri" + "\t" + "customSource");
+				writer.newLine();
+				writer.write("connectionUrl" + "\t" + "jdbc:h2:tcp://localhost/DBName");
+				writer.newLine();
+				writer.write("username" + "\t" + "sa");
+				writer.newLine();
+				writer.write("password"+ "\t");
+				writer.newLine();
+				writer.write("driverClass" + "\t" + "org.h2.Driver");
+				writer.newLine();
+				writer.newLine();
+				writer.write("[MappingDeclaration] @collection [[");
+				writer.newLine();
+				
+				for (OBDAMappingAxiom ax : axioms) {
+					writer.write("mappingId" + "\t" + ax.getId());
+					writer.newLine();
+					CQIE cq = (CQIE) ax.getTargetQuery();
+					String cqStr = tf.print(cq);
+					writer.write("target" + "\t" + cqStr);
+					writer.newLine();
+					writer.write("source" + "\t" + ax.getSourceQuery());
+					writer.newLine();
+					writer.newLine();
+				}
+				writer.write("]]");
+				writer.close();
+				System.out.println("OBDA mapping file " + outfile + " written!");
 			}
-
+			
 
 		} catch (Exception e) {
 			System.out.println("Error converting mappings:");
