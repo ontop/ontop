@@ -23,52 +23,40 @@ package it.unibz.krdb.obda.sesame.r2rml;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.io.TurtleFormatter;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.sesame.SesameStatementIterator;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import org.openrdf.rio.RDFHandler;
 
 class MappingConverterCMD {
 
 	public static void main(String[] args) {
 		if (args.length != 1 ) {
 			System.out.println("Usage:");
-			System.out.println(" MappingConverterCMD mappingfile");
+			System.out.println(" MappingConverterCMD mappingFile");
 			System.out.println("");
-			System.out.println(" mappingfile   The full path to the OBDA/R2RML file");
+			System.out.println(" mappingFile   The full path to the OBDA/R2RML file");
 			System.out.println(" Given *.obda file, the script will produce *.ttl file and vice versa");
 			System.out.println("");
 			return;
 		}
 
-		String mapfile = args[0].trim();
+		String mapFile = args[0].trim();
 
 		try {
-			if (mapfile.endsWith(".obda"))
-			{
-				String outfile = mapfile.substring(0, mapfile.length() - 5).concat(".ttl");
+			if (mapFile.endsWith(".obda")) {
+				String outfile = mapFile.substring(0, mapFile.length() - 5).concat(".ttl");
 				File out = new File(outfile);
-				URI obdaURI =  new File(mapfile).toURI();
+				URI obdaURI =  new File(mapFile).toURI();
 				//create model
 				OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 				
@@ -77,22 +65,19 @@ class MappingConverterCMD {
 				
 				try {
 					modelIO.load(new File(obdaURI));
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (InvalidMappingException e) {
+				} catch (IOException | InvalidMappingException e) {
 					e.printStackTrace();
 				}
-				URI srcURI = model.getSources().get(0).getSourceID();
+                URI srcURI = model.getSources().get(0).getSourceID();
 				R2RMLWriter writer = new R2RMLWriter(model, srcURI);
 				//writer.writePretty(out);
 				writer.write(out);
 				System.out.println("R2RML mapping file " + outfile + " written!");
 			}
-			else if (mapfile.toString().endsWith(".ttl"))
-			{
-				String outfile = mapfile.substring(0, mapfile.length() - 4).concat(".obda");
+			else if (mapFile.endsWith(".ttl")) {
+				String outfile = mapFile.substring(0, mapFile.length() - 4).concat(".obda");
 				//File out = new File(outfile);
-				R2RMLReader reader = new R2RMLReader(mapfile);
+				R2RMLReader reader = new R2RMLReader(mapFile);
 				OBDAModel model = reader.readModel(new URI("http://example.org/customOBDA"));
 				PrefixManager pm = model.getPrefixManager();
 				
