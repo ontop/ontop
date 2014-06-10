@@ -112,6 +112,9 @@ public class RDB2RDFScenarioParent extends TestCase {
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
+				// when output == null, there is no expected output file
+				// and normally the expect result is "non-conforming R2RML mapping".
+				// Thus the test does not fail
 				if (output!=null)
 					throw exc;
 			}	
