@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -33,17 +32,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
-import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +44,14 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+
+/* 
+ * Test class for infinite loop in the ontology "final_project_original.owl"
+ * after the method eliominateCycles is called there is still a cycle in the graph with the nodes
+ * [Ehttp://www.semanticweb.org/orchidlioness/ontologies/2014/4/final_project#writes^-, http://www.semanticweb.org/orchidlioness/ontologies/2014/4/final_project#Work]
+ * it generates a loop in eliminateRedundantEdge
+ */
 
 public class DAGLoopTest {
 
@@ -66,10 +67,10 @@ public class DAGLoopTest {
 		
 		onto = t.translate(owlonto);
 		} catch (OWLOntologyCreationException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (PunningException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -88,6 +89,7 @@ public class DAGLoopTest {
 		DAGBuilder change2 = new DAGBuilderImpl(graph);
 
 		DAG dag = change2.getDAG();
+		
 		// generate named DAG
 		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
 
