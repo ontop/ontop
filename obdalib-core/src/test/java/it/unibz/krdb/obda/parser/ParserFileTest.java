@@ -149,7 +149,7 @@ public class ParserFileTest extends TestCase {
 		VisitedQuery queryP; 
 		
 		try {
-			queryP = new VisitedQuery(input);
+			queryP = new VisitedQuery(input,true);
 		} catch (JSQLParserException e) {
 			log.debug(e.getMessage());
 			return false;

@@ -118,7 +118,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// These can be changed in the properties file
 	protected int maxPoolSize = 20;
 	protected int startPoolSize = 2;
-	protected boolean removeAbandoned = false;
+	protected boolean removeAbandoned = true;
+	protected boolean logAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
 
@@ -1091,7 +1092,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					 // If the SQL string has sub-queries in its statement
 					if (containChildParentSubQueries(sourceString)) {
 						int childquery1 = sourceString.indexOf("(");
-						int childquery2 = sourceString.indexOf(") as CHILD");
+						int childquery2 = sourceString.indexOf(") AS child");
 						String childquery = sourceString.substring(childquery1 + 1, childquery2);
 
 						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
@@ -1104,14 +1105,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("CHILD." + col );
-								sb.append("CHILD.\"" + col + "\" as \"CHILD_" + (col)+"\"");
+								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
 								needComma = true;
 							}
 						}
 						sb.append(", ");
 
 						int parentquery1 = sourceString.indexOf(", (", childquery2);
-						int parentquery2 = sourceString.indexOf(") as PARENT");
+						int parentquery2 = sourceString.indexOf(") AS parent");
 						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
 
 						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
@@ -1124,7 +1125,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("PARENT." + col);
-								sb.append("PARENT.\"" + col + "\" as \"PARENT_" + (col)+"\"");
+								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
 								needComma = true;
 							}
 						}
@@ -1298,10 +1299,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		poolProperties.setMaxActive(maxPoolSize);
 		poolProperties.setMaxIdle(maxPoolSize);
 		poolProperties.setInitialSize(startPoolSize);
-		poolProperties.setMaxWait(10000);
+		poolProperties.setMaxWait(30000);
 		poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
 		poolProperties.setMinEvictableIdleTimeMillis(30000);
-		poolProperties.setLogAbandoned(removeAbandoned);
+		poolProperties.setLogAbandoned(logAbandoned);
 		poolProperties.setRemoveAbandoned(removeAbandoned);
 		poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
 				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");

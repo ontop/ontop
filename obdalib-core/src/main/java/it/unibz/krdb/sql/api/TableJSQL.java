@@ -37,7 +37,6 @@ public class TableJSQL implements Serializable{
 	
 	private String schema;
 	private String tableName;
-	private String name;
 	private String aliasName;
 	private Alias alias;
 	
@@ -72,7 +71,6 @@ public class TableJSQL implements Serializable{
 			setGivenSchema(schema);
 			setTableName(tableName);
 			setGivenName(givenName);
-			setName(givenName);
 			
 		}
 	
@@ -80,8 +78,7 @@ public class TableJSQL implements Serializable{
 		setSchema(table.getSchemaName());
 		setGivenSchema(table.getSchemaName());
 		setTableName(table.getName());
-		setGivenName(table.getWholeTableName());
-		setName(table.getName());
+		setGivenName(table.getFullyQualifiedName());
 		setAlias(table.getAlias());
 	}
 
@@ -140,18 +137,7 @@ public class TableJSQL implements Serializable{
 
 	public String getTableName() {
 		return tableName;
-	}
-	
-
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-
-	public String getName() {
-		return name;
-	}
-	
+	}	
 
 	public void setAlias(Alias alias) {
 		if (alias == null) {

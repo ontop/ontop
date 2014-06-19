@@ -30,6 +30,7 @@ import java.util.Scanner;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.junit.Ignore;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.MalformedQueryException;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import sesameWrapper.SesameVirtualRepo;
 
+@Ignore
 public class RDB2RDFScenarioParent extends TestCase {
 
 	protected final String sqlFileURL;
@@ -73,7 +75,6 @@ public class RDB2RDFScenarioParent extends TestCase {
 	
 		String getMainManifestFile();
 	}
-
 	
 	public RDB2RDFScenarioParent(String testUri, String name, String sqlFile, String mappingFile, String outputFile) throws FileNotFoundException {
 		super(name);
@@ -285,7 +286,8 @@ public class RDB2RDFScenarioParent extends TestCase {
 				logger.debug("Found test case: {}", testName);
 
 				String pathUri =  manifestFileURL.substring(0, manifestFileURL.lastIndexOf('/')+1);
-				String path = pathUri.substring(8);
+				//String path = pathUri.substring(8);
+				String path = pathUri.substring(pathUri.indexOf(':')+1);
 				RDB2RDFScenarioParent test2 = null;
 				if (outputFile == null) {
 					test2 = factory.createRDB2RDFScenarioTest(testURI,
@@ -304,6 +306,7 @@ public class RDB2RDFScenarioParent extends TestCase {
 		}
 
 		testCases.close();
+		con.commit();
 		con.close();
 
 		manifestRep.shutDown();

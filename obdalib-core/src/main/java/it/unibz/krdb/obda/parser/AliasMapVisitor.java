@@ -30,6 +30,7 @@ import java.util.HashMap;
 
 
 
+
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -42,13 +43,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -100,6 +101,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
 
 	HashMap<String,String> aliasMap;
+	boolean unquote; //remove quotes from columns
 	
 	/**
 	 * Return a map between the column in the select statement and its alias.
@@ -107,8 +109,9 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	 * @return alias map
 	 */
 	
-	public HashMap<String,String> getAliasMap(Select select) {
+	public HashMap<String,String> getAliasMap(Select select, boolean unquote) {
 		
+		this.unquote= unquote;
 		aliasMap = new HashMap<String, String>();
 		
 		if (select.getWithItemsList() != null) {
@@ -159,7 +162,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
-			if(VisitedQuery.pQuotes.matcher(alias).matches()){
+			if(unquote && VisitedQuery.pQuotes.matcher(alias).matches()){
 				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
 			}
 			else
@@ -186,12 +189,6 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -459,6 +456,12 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SignedExpression arg0) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -39,11 +40,13 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,9 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class TMappingProcessor implements Serializable {
 
 	/**
@@ -66,30 +66,20 @@ public class TMappingProcessor implements Serializable {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final DAG dag;
-
 	private final Ontology aboxDependencies;
-
-	private final DAG pureIsa;
 	
 	private final TBoxReasonerImpl reasoner;
 
-	private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
+	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
 	boolean optimize = true;
 
 	public TMappingProcessor(Ontology tbox, boolean optmize) {
 		this.optimize = optmize;
-		reasoner= new TBoxReasonerImpl(tbox, false);
-		dag = reasoner.getDAG();
-		NamedDAGBuilderImpl namedDagConstructor= new NamedDAGBuilderImpl(dag);
-		pureIsa =namedDagConstructor.getDAG();
-
-
-
-		aboxDependencies =  reasoner.getSigmaOntology();
 		
+		reasoner = new TBoxReasonerImpl(tbox);
 
+		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 	}
 
 	/***
@@ -375,117 +365,84 @@ public class TMappingProcessor implements Serializable {
 		 * Merge original mappings that have similar source query.
 		 */
 		if (optimize)
-		optimizeMappingProgram(mappingIndex);
+			optimizeMappingProgram(mappingIndex);
 		
 		/*
 		 * Processing mappings for all Properties
 		 */
 
 		/*
-		 * We process the mappings for the descendents of the current node,
+		 * We process the mappings for the descendants of the current node,
 		 * adding them to the list of mappings of the current node as defined in
 		 * the TMappings specification.
 		 */
 
 		/*
 		 * We start with the property mappings, since class t-mappings require
-		 * that these are already processed. We start with the leafs.
+		 * that these are already processed. 
 		 */
 
-		for (Property currentProperty : dag.getRoles()) {
-			/* setting up the queue for the next iteration */
+		for (Equivalences<Property> propertySet : reasoner.getProperties()) {
 
-			if (dag.getReplacements().containsKey(currentProperty)) {
-
-
-				/* we only create mappings for named properties and not considering equivalences*/
-				continue;
-			}
+			Property current = propertySet.getRepresentative();
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = currentProperty.getPredicate();
-			Set<CQIE> currentNodeMappings = mappingIndex.get(currentPredicate);	
-			if (currentNodeMappings == null) {
-				currentNodeMappings = new LinkedHashSet<CQIE>();
-				mappingIndex.put(currentPredicate, currentNodeMappings);
-			}
+			Predicate currentPredicate = current.getPredicate();
+			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
+			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(propertySet)) {
+				for(Property childproperty : descendants) {
 
-			for (Set<Description> descendants : reasoner.getDescendants(currentProperty, false)) {
-				for(Description descendant: descendants){
+					/*
+					 * adding the mappings of the children as own mappings, the new
+					 * mappings use the current predicate instead of the child's
+					 * predicate and, if the child is inverse and the current is
+					 * positive, it will also invert the terms in the head
+					 */
+					List<CQIE> childMappings = originalMappings.getRules(childproperty.getPredicate());
 
-				/*
-				 * adding the mappings of the children as own mappings, the new
-				 * mappings use the current predicate instead of the childs
-				 * predicate and, if the child is inverse and the current is
-				 * positive, it will also invert the terms in the head
-				 */
-				Property childproperty = (Property) descendant;
-				List<CQIE> childMappings = originalMappings.getRules(childproperty.getPredicate());
+					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
 
-				boolean requiresInverse = (currentProperty.isInverse() != childproperty.isInverse());
-
-				for (CQIE childmapping : childMappings) {
-					CQIE newmapping = null;
-					Function newMappingHead = null;
-					Function oldMappingHead = childmapping.getHead();
-					if (!requiresInverse) {
-
-						if (!full)
-							continue;
-
-
-						newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
-					} else {
-						Term term0 = oldMappingHead.getTerms().get(1);
-						Term term1 = oldMappingHead.getTerms().get(0);
-						newMappingHead = fac.getFunction(currentPredicate, term0, term1);
+					for (CQIE childmapping : childMappings) {
+						Function newMappingHead = null;
+						Function oldMappingHead = childmapping.getHead();
+						if (!requiresInverse) {
+							if (!full)
+								continue;
+							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
+						} 
+						else {
+							Term term0 = oldMappingHead.getTerms().get(1);
+							Term term1 = oldMappingHead.getTerms().get(0);
+							newMappingHead = fac.getFunction(currentPredicate, term0, term1);
+						}
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody());
 					}
-					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-
-					if (optimize)
-					  mergeMappingsWithCQC(currentNodeMappings, newmapping);
-					else 
-						currentNodeMappings.add(newmapping);
 				}
-
-			}
 			}
 
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getEquivalences(currentProperty, false)) {
-				if(equiv.equals(currentProperty))
+			for (Property equivProperty : propertySet) {
+				if (equivProperty.equals(current))
 					continue;
+				 
+				Predicate p = equivProperty.getPredicate();
+				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
-				Property equivProperty = (Property) equiv;
-				// if (equivProperty.isInverse())
-				// continue;
-				Predicate p = ((Property) equiv).getPredicate();
-				Set<CQIE> equivalentPropertyMappings = mappingIndex.get(p);
-				if (equivalentPropertyMappings == null) {
-					equivalentPropertyMappings = new LinkedHashSet<CQIE>();
-					mappingIndex.put(p, equivalentPropertyMappings);
-				}
-
-				for (CQIE currentNodeMapping : currentNodeMappings) {
-
-					if (equivProperty.isInverse() == currentProperty.isInverse()) {
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				
+				for(CQIE currentNodeMapping : mappingList){
+					
+					if (equivProperty.isInverse() == current.isInverse()) {
 						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-
-						if (optimize)
-						mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
-						else 
-							equivalentPropertyMappings.add(newmapping);
-					} else {
+						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
+					} 
+					else {
 						Term term0 = currentNodeMapping.getHead().getTerms().get(1);
 						Term term1 = currentNodeMapping.getHead().getTerms().get(0);
 						Function newhead = fac.getFunction(p, term0, term1);
-						CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-						if (optimize)
-							mergeMappingsWithCQC(equivalentPropertyMappings, newmapping);
-							else 
-								equivalentPropertyMappings.add(newmapping);					}
+						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
+					}
 				}
 			}
 		} // Properties loop ended
@@ -495,163 +452,76 @@ public class TMappingProcessor implements Serializable {
 		 * Starting with the leafs.
 		 */
 
-		for (OClass currentProperty : dag.getClasses()) {
+		for (Equivalences<BasicClassDescription> classSet : reasoner.getClasses()) {
 
-			if(dag.getReplacements().containsKey(currentProperty)) {//don't consider the equivalences
-
-
+			if (!(classSet.getRepresentative() instanceof OClass)) 
 				continue;
-			}
 
-
+			OClass current = (OClass)classSet.getRepresentative();
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = currentProperty.getPredicate();
-			Set<CQIE> currentNodeMappings = mappingIndex.get(currentPredicate);
-			if (currentNodeMappings == null) {
-				currentNodeMappings = new LinkedHashSet<CQIE>();
-				mappingIndex.put(currentPredicate, currentNodeMappings);
+			Predicate currentPredicate = current.getPredicate();
+			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);
+
+			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
+				for (BasicClassDescription childDescription : descendants) {
+
+					/* adding the mappings of the children as own mappings, the new
+					 * mappings. There are three cases, when the child is a named
+					 * class, or when it is an \exists P or \exists \inv P. 
+					 */
+					
+					Predicate childPredicate = null;
+					boolean isClass = true;
+					boolean isInverse = false;
+					if (childDescription instanceof OClass) {
+						if (!full)
+							continue;
+						childPredicate = ((OClass) childDescription).getPredicate();
+					} 
+					else if (childDescription instanceof PropertySomeRestriction) {
+						childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();
+						isInverse = ((PropertySomeRestriction) childDescription).isInverse();
+						isClass = false;
+					} 
+					else 
+						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
+					
+					List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);
+
+					for (CQIE childmapping : desendantMappings) {
+						Function newMappingHead = null;
+						Function oldMappingHead = childmapping.getHead();
+
+						if (isClass) {
+							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
+						} 
+						else {
+							if (!isInverse) 
+								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(0));
+							else 
+								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
+						}
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody());
+					}
+				}
 			}
 
-			for (Set<Description> descendants : reasoner.getDescendants(currentProperty, false)) {
-				for(Description descendant: descendants){
-				
-					
-
-				/*
-				 * adding the mappings of the children as own mappings, the new
-				 * mappings. There are three cases, when the child is a named
-				 * class, or when it is an \exists P or \exists \inv P.
-				 */
-				ClassDescription childDescription = (ClassDescription) descendant;
-				Predicate childPredicate = null;
-				boolean isClass = true;
-				boolean isInverse = false;
-				if (childDescription instanceof OClass) {
-					if (!full)
-						continue;
-					childPredicate = ((OClass) childDescription).getPredicate();
-				} else if (childDescription instanceof PropertySomeRestriction) {
-					childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();
-					isInverse = ((PropertySomeRestriction) childDescription).isInverse();
-					isClass = false;
-				} else {
-					throw new RuntimeException("Unknown type of node in DAG: " + descendant);
-				}
-
-				List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);
-
-				for (CQIE childmapping : desendantMappings) {
-					CQIE newmapping = null;
-					Function newMappingHead = null;
-					Function oldMappingHead = childmapping.getHead();
-
-					if (isClass) {
-						newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
-					} else {
-						if (!isInverse) {
-							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(0));
-						} else {
-							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
-						}
-					}
-					newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-					
-					if (optimize)
-					mergeMappingsWithCQC(currentNodeMappings, newmapping);
-					else
-						currentNodeMappings.add(newmapping);
-
-				}
-				}}
-
-				// TODO HACK! Remove when the API of DAG is clean, the following
-				// is a hack due to a bug in the DAG API.
-				/*
-				 * Currently, the DAG.buildDescendants() call has an error with
-				 * \exists R. If a node A has an equivalent node \exists R, and
-				 * R has equivalent roles P,S, we will have that \exists P and
-				 * \exists S do not appear as descendants of A altough they
-				 * should. Hence, we have to collect them manually with the next
-				 * code block.
-				 */
-
-//				if (descendant instanceof PropertySomeRestriction) {
-//					for (Description descendant2 : reasoner.getEquivalences(descendant,false)) {
-
-//						childDescription = (ClassDescription) descendant2;
-//						childPredicate = null;
-//						isClass = true;
-//						isInverse = false;
-//						if (childDescription instanceof OClass) {
-//							childPredicate = ((OClass) childDescription).getPredicate();
-//						} else if (childDescription instanceof PropertySomeRestriction) {
-//							childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();
-//							isInverse = ((PropertySomeRestriction) childDescription).isInverse();
-//							isClass = false;
-//						} else {
-//							throw new RuntimeException("Unknown type of node in DAG: " + descendant2);
-//						}
-//
-
-
-//						desendantMappings = originalMappings.getRules(childPredicate);
-//
-
-//						for (CQIE childmapping : desendantMappings) {
-//							CQIE newmapping = null;
-//							Atom newMappingHead = null;
-//							Atom oldMappingHead = childmapping.getHead();
-//
-
-//							if (isClass) {
-//								newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms());
-//							} else {
-//								if (!isInverse) {
-//									newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms().get(0));
-//								} else {
-
-//									newMappingHead = fac.getAtom(currentPredicate, oldMappingHead.getTerms().get(1));
-//								}
-//							}
-
-
-//							newmapping = fac.getCQIE(newMappingHead, childmapping.getBody());
-//							if (optimize)
-//								mergeMappingsWithCQC(currentNodeMappings, newmapping);
-//								else
-
-//									currentNodeMappings.add(newmapping);						}
-//					}
-//				}
-//			}
 			
-
-
-
-
 			/* Setting up mappings for the equivalent classes */
-			for (Description equiv : reasoner.getEquivalences(currentProperty, false)) {
+			for (BasicClassDescription equiv : classSet) {
 
-				if (!(equiv instanceof OClass) || equiv.equals(currentProperty))
+				if (!(equiv instanceof OClass) || equiv.equals(current))
 					continue;
+				
 				Predicate p = ((OClass) equiv).getPredicate();
-				Set<CQIE> equivalentClassMappings = mappingIndex.get(p);
+				Set<CQIE> equivalentClassMappings = getMappings(mappingIndex, p);
+				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				
 
-				if (equivalentClassMappings == null) {
-					equivalentClassMappings = new LinkedHashSet<CQIE>();
-					mappingIndex.put(p, equivalentClassMappings);
-				}
-
-				for (CQIE currentNodeMapping : currentNodeMappings) {
+				for (CQIE currentNodeMapping : mappingList) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-					CQIE newmapping = fac.getCQIE(newhead, currentNodeMapping.getBody());
-					
-					if (optimize)
-						mergeMappingsWithCQC(equivalentClassMappings, newmapping);
-						else
-							equivalentClassMappings.add(newmapping);
-					
+					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody());
 				}
 			}
 		}
@@ -664,6 +534,27 @@ public class TMappingProcessor implements Serializable {
 		return tmappingsProgram;
 	}
 
+	
+	private Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
+		
+		Set<CQIE> currentMappings = mappingIndex.get(current);	
+		if (currentMappings == null) {
+			currentMappings = new LinkedHashSet<CQIE>();
+			mappingIndex.put(current, currentMappings);
+		}
+		return currentMappings;
+	}
+
+	
+	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {	
+		
+		CQIE newmapping = fac.getCQIE(head, body);				
+		if (optimize)
+			mergeMappingsWithCQC(mappings, newmapping);
+		else
+			mappings.add(newmapping);					
+	}
+	
 	private void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
 			Set<CQIE> similarMappings = mappingIndex.get(p);
@@ -682,15 +573,4 @@ public class TMappingProcessor implements Serializable {
 			mappingIndex.put(p, result);
 		}
 	}
-
-	private List<Description> getLeafs(Collection<Description> nodes) {
-		LinkedList<Description> leafs = new LinkedList<Description>();
-		for (Description node : nodes) {
-			if (reasoner.getDirectChildren(node, false).isEmpty())
-
-				leafs.add(node);
-		}
-		return leafs;
-	}
-
 }

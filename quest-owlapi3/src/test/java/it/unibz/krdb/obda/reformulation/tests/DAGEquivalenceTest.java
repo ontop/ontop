@@ -21,22 +21,14 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngine;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexEngineImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
@@ -76,26 +68,12 @@ public class DAGEquivalenceTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
 				testEquivalenceClasses));
 		Ontology onto = t.translate(owlonto);
-
-		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
-
-		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
-		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
-
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
-
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		SemanticIndexEngine engine = new SemanticIndexEngineImpl(namedReasoner);
+		// generate DAG
+		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		
+		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getIntervals(ofac
 				.createClass(testURI + "B1"));
 
@@ -147,24 +125,13 @@ public class DAGEquivalenceTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
 				testEquivalenceRoles));
 		Ontology onto = t.translate(owlonto);
-		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
-
-		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
-		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
-
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		SemanticIndexEngine engine = new SemanticIndexEngineImpl(namedReasoner);
+		// generate DAG
+		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		// generate named DAG
+		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		
 		List<Interval> nodeInterval = engine.getIntervals(ofac
 				.createObjectProperty(testURI + "R1"));
 
@@ -221,26 +188,13 @@ public class DAGEquivalenceTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
 				testEquivalenceRolesInverse));
 		Ontology onto = t.translate(owlonto);
-
-		// generate Graph
-		GraphBuilder change = new GraphBuilderImpl(onto);
-
-		GraphImpl graph = (GraphImpl) change.getGraph();
-
-		// generate DAG
-		DAGBuilder change2 = new DAGBuilderImpl(graph);
-
-		DAG dag = change2.getDAG();
-		// generate named DAG
-		NamedDAGBuilderImpl namedchange = new NamedDAGBuilderImpl(dag);
-
-		DAG pureIsa = namedchange.getDAG();
-
-		TBoxReasoner namedReasoner = new TBoxReasonerImpl(pureIsa);
-
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		SemanticIndexEngine engine = new SemanticIndexEngineImpl(namedReasoner);
+		// generate DAG
+		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		// generate named DAG
+		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		
 		List<Interval> nodeInterval = engine.getIntervals(ofac
 				.createObjectProperty(testURI + "A1"));
 
@@ -249,8 +203,9 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(1, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		Description d = pureIsa.getReplacements().get(
-				ofac.createObjectProperty(testURI + "A2"));
+		EquivalencesDAG<Property> properties = dag.getProperties();
+		
+		Property d = properties.getVertex(ofac.createObjectProperty(testURI + "A2")).getRepresentative();
 		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A1",true)));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
@@ -267,9 +222,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(3, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = pureIsa.getReplacements().get(
-				ofac.createObjectProperty(testURI + "C2"));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "C1",true)));
+		d = properties.getVertex(ofac.createObjectProperty(testURI + "C2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "C1",true)).getRepresentative()));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "C3"));
@@ -286,9 +240,8 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(2, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = pureIsa.getReplacements().get(
-				ofac.createObjectProperty(testURI + "B2"));
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "B3",true)));
+		d = properties.getVertex(ofac.createObjectProperty(testURI + "B2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "B3",true)).getRepresentative()));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
 				+ "B3"));

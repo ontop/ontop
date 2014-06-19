@@ -95,20 +95,20 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra() {
 
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		printJSQL("test_1_5_extra", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -665,7 +665,7 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new VisitedQuery(input);
+			queryP = new VisitedQuery(input,true);
 		} catch (Exception e) {
 
 			return false;
