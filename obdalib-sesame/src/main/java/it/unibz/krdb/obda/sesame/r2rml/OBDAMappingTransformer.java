@@ -357,7 +357,7 @@ public class OBDAMappingTransformer {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectTemplate)));
 							//obm.setTemplate(mfact.createTemplate(objectTemplate));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
-							
+							obm.setTermType(R2RMLVocabulary.literal);
 							
 							
 							
@@ -365,6 +365,7 @@ public class OBDAMappingTransformer {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
 							obm = mfact.createObjectMap(TermMapType.CONSTANT_VALUED, vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+//							obm.setTermType(R2RMLVocabulary.literal);
 						}
 						
 					}

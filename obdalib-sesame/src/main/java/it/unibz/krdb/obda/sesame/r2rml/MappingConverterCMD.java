@@ -70,8 +70,8 @@ class MappingConverterCMD {
 				}
                 URI srcURI = model.getSources().get(0).getSourceID();
 				R2RMLWriter writer = new R2RMLWriter(model, srcURI);
-				//writer.writePretty(out);
-				writer.write(out);
+				writer.writePretty(out);
+				//writer.write(out);
 				System.out.println("R2RML mapping file " + outfile + " written!");
 			}
 			else if (mapFile.endsWith(".ttl")) {
