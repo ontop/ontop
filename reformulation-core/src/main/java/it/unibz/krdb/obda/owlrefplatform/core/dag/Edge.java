@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import java.io.Serializable;
 
+@Deprecated
 public class Edge implements Serializable  {
     /**
 	 * 
