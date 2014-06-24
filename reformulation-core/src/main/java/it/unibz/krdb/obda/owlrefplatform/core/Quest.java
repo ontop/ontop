@@ -211,6 +211,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	
 	private boolean obtainFullMetadata = false;
 
+    private boolean sqlGenerateReplace = true;
+
 	private String aboxMode = QuestConstants.CLASSIC;
 
 	private String aboxSchemaType = QuestConstants.SEMANTIC_INDEX;
@@ -252,7 +254,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private Map<Predicate, List<Integer>> pkeys;
 
-	/***
+
+    /***
 	 * Will prepare an instance of Quest in "classic ABox mode", that is, to
 	 * work as a triple store. The property
 	 * "org.obda.owlreformulationplatform.aboxmode" must be set to "classic".
@@ -431,6 +434,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
+
+        sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -724,7 +729,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
-					sqladapter);
+					sqladapter, sqlGenerateReplace);
+
+
+
 			if (isSemanticIdx) {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
