@@ -75,6 +75,7 @@ import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -96,6 +97,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+
+import net.sf.jsqlparser.JSQLParserException;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -696,7 +699,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
 					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
-					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
+					try{
+						ArrayList<RelationJSQL> realTables = mParser.getRealTables();
+						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
+					}catch (JSQLParserException e){
+						System.out.println("Error obtaining the tables"+ e);
+					}catch( SQLException e ){
+						System.out.println("Error obtaining the Metadata"+ e);
+					
+					}
+					
 					// This call should be used if the ParsedMappings 
 					// are reused for the parsing below
 					mParser.addViewDefs(metadata);
