@@ -55,7 +55,7 @@ class MappingConverterCMD {
 		try {
 			if (mapFile.endsWith(".obda")) {
 				String outfile = mapFile.substring(0, mapFile.length() - 5).concat(".ttl");
-				File out = new File(outfile);
+				File out = new File(outfile); 
 				URI obdaURI =  new File(mapFile).toURI();
 				//create model
 				OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();

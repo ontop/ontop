@@ -41,7 +41,7 @@ import java.util.Map;
 
 
 
-
+@Deprecated
 public class DAGConstructor {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();

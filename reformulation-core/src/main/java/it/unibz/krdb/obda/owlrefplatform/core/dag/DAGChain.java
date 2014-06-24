@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Utilities to transform/manipulate DAGs into "chain-reachability" DAGs.
  */
+@Deprecated
 public class DAGChain {
 
 	private final static Logger	log	= LoggerFactory.getLogger(DAGChain.class);
