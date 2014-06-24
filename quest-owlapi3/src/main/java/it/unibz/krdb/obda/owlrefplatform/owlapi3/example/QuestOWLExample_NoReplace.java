@@ -26,21 +26,16 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
-public class QuestOWLExample {
+import java.io.File;
+
+public class QuestOWLExample_NoReplace {
 	
 	/*
 	 * Use the sample database using H2 from
@@ -74,6 +69,7 @@ public class QuestOWLExample {
 		 */
 		QuestPreferences preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -112,7 +108,6 @@ public class QuestOWLExample {
 			}
 			rs.close();
             long t2 = System.currentTimeMillis();
-
 			/*
 			 * Print the query summary
 			 */
@@ -153,7 +148,7 @@ public class QuestOWLExample {
 	 */
 	public static void main(String[] args) {
 		try {
-			QuestOWLExample example = new QuestOWLExample();
+			QuestOWLExample_NoReplace example = new QuestOWLExample_NoReplace();
 			example.runQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
