@@ -338,6 +338,9 @@ public class OBDAMappingTransformer {
 					//statements.add(vf.createStatement(objNode, R2RMLVocabulary.column, vf.createLiteral(((Variable) object).getName())));
 					obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
 					//obm.setColumn(vf.createLiteral(((Variable) object).getName()).stringValue());
+					//we add the predicate object map in case of literal
+					pom = mfact.createPredicateObjectMap(predM, obm);
+					tm.addPredicateObjectMap(pom);
 				} else if (object instanceof Function) {
 					//check if uritemplate
 					Predicate objectPred = ((Function) object).getFunctionSymbol();
@@ -365,7 +368,6 @@ public class OBDAMappingTransformer {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
 							obm = mfact.createObjectMap(TermMapType.CONSTANT_VALUED, vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
-//							obm.setTermType(R2RMLVocabulary.literal);
 						}
 						
 					}

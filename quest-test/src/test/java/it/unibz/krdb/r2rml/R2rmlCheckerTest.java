@@ -75,7 +75,8 @@ public class R2rmlCheckerTest {
 	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
 
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_uglyVersion.ttl";
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_literal.ttl";
+//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
 	private List<Predicate> emptyRolesObda = new ArrayList<Predicate>();
@@ -94,8 +95,12 @@ public class R2rmlCheckerTest {
 	public void tearDown() throws Exception {
 		try {
 
+			if(reasonerOBDA!=null){
 			reasonerOBDA.dispose();
+			}
+			if(reasonerR2rml!=null){
 			reasonerR2rml.dispose();
+			}
 
 		} catch (Exception e) {
 			log.debug(e.getMessage());
