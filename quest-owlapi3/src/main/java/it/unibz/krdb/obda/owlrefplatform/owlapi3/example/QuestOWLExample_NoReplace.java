@@ -98,7 +98,7 @@ public class QuestOWLExample_NoReplace {
 		try {
             long t1 = System.currentTimeMillis();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			int columnSize = rs.getColumCount();
+			int columnSize = rs.getColumnCount();
 			while (rs.nextRow()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
 					OWLObject binding = rs.getOWLObject(idx);
