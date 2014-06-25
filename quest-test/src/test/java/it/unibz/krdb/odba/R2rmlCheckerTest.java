@@ -1,4 +1,4 @@
-package it.unibz.krdb.r2rml;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class R2rmlCheckerTest {
 	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
 
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_uglyVersion.ttl";
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_literal.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
@@ -140,8 +141,9 @@ public class R2rmlCheckerTest {
 		String driverclass = "com.mysql.jdbc.Driver";
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-		String sourceUrl = "http://example.org/customOBDA";
-
+//		String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI =  new File(r2rmlfile).toURI();
+		String sourceUrl =obdaURI.toString();
 		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
 				username, password, driverclass);
 
@@ -234,7 +236,9 @@ public class R2rmlCheckerTest {
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
 
-		String sourceUrl = "http://example.org/customOBDA";
+//		String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI =  new File(r2rmlfile).toURI();
+		String sourceUrl =obdaURI.toString();
 		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
 				username, password, driverclass);
 
@@ -285,7 +289,9 @@ public class R2rmlCheckerTest {
 		String driverclass = "com.mysql.jdbc.Driver";
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-		String sourceUrl = "http://example.org/customOBDA";
+//		String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI =  new File(r2rmlfile).toURI();
+		String sourceUrl =obdaURI.toString();
 
 		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
 				username, password, driverclass);
@@ -300,6 +306,52 @@ public class R2rmlCheckerTest {
 
 	}
 
+	@Test
+	public void testOneRole() throws Exception {
+
+		// Loading the OWL file
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		ontology = manager
+				.loadOntologyFromOntologyDocument((new File(owlfile)));
+
+		OWLAPI3Translator translator = new OWLAPI3Translator();
+
+		onto = translator.translate(ontology);
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
+				QuestConstants.FALSE);
+
+		loadOBDA(p);
+
+		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
+		String username = "fish";
+		String password = "fish";
+		String driverclass = "com.mysql.jdbc.Driver";
+
+		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+//		String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI =  new File(r2rmlfile).toURI();
+		String sourceUrl =obdaURI.toString();
+
+		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+				username, password, driverclass);
+
+		loadR2rml(p, dataSource);
+
+		// Now we are ready for querying
+		log.debug("Comparing roles");
+
+			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>",
+					reasonerOBDA.getConnection());
+			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>",
+					reasonerR2rml.getConnection());
+
+			assertEquals(roleOBDA, roleR2rml);
+
+		
+	}
 	/*
 	 * First npd query
 	 */
@@ -415,6 +467,8 @@ public class R2rmlCheckerTest {
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while (rs.nextRow()) {
+				log.debug("result : "  + rs.getOWLObject("x"));
+				log.debug("result : "  + rs.getOWLObject("y"));
 				n++;
 			}
 			// log.info("description: " + n);

@@ -39,10 +39,7 @@ import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import org.openrdf.model.Resource;
@@ -50,6 +47,11 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 
 import eu.optique.api.mapping.LogicalTable;
 import eu.optique.api.mapping.MappingFactory;
@@ -60,15 +62,23 @@ import eu.optique.api.mapping.R2RMLMappingManager;
 import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.TermMap.TermMapType;
-
+import eu.optique.api.mapping.TriplesMap;
+/**
+ * Transform OBDA mappings in R2rml mappings
+ * @author Sarah, Mindas, Timi, Guohui, Martin
+ *
+ */
 public class OBDAMappingTransformer {
 	
 	private ValueFactory vf;
+	private OWLOntology onto;
+	private Set<OWLObjectProperty> objectProperties;
 	
-	public OBDAMappingTransformer() {
+	public OBDAMappingTransformer(OWLOntology onto) {
 		this.vf = new ValueFactoryImpl();
+		//get the objectProperties in the ontology so that we can distinguish between object property and data property
+		objectProperties = onto.getObjectPropertiesInSignature();
 	}
 	/**
 	 * Get Sesame statements from OBDA mapping axiom
@@ -134,10 +144,14 @@ public class OBDAMappingTransformer {
 		//add template subject
 		statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.template, vf.createLiteral(subjectTemplate)));
 		
+		
+		
 		//process target query
 		for (Function func : tquery.getBody()) {
 			random_number = IDGenerator.getNextUniqueID("");
 			Predicate pred = func.getFunctionSymbol();
+			
+
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
@@ -165,6 +179,9 @@ public class OBDAMappingTransformer {
 			}
 			predURIString = predUri.stringValue();
 			
+			IRI propname = IRI.create(predURIString);
+			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
+			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
 		
 			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
 				// The term is actually a SubjectMap (class)
@@ -198,6 +215,8 @@ public class OBDAMappingTransformer {
 				//add object declaration to predObj node
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
+				
+				
 				
 				Resource objNode = vf.createBNode("objectMap"+random_number);
 				
@@ -309,7 +328,10 @@ public class OBDAMappingTransformer {
 			}
 			predURIString = predUri.stringValue();
 			
-		
+			IRI propname = IRI.create(predURIString);
+			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
+			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
+			
 			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
 				// The term is actually a SubjectMap (class)
 				//add class declaration to subject Map node
@@ -335,9 +357,13 @@ public class OBDAMappingTransformer {
 				Term object = func.getTerm(1);
 
 				if (object instanceof Variable){
-					//statements.add(vf.createStatement(objNode, R2RMLVocabulary.column, vf.createLiteral(((Variable) object).getName())));
+					if(objectProperties.contains(prop)){
+						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
+						obm.setTermType(R2RMLVocabulary.iri);
+					}
+					else{
 					obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
-					//obm.setColumn(vf.createLiteral(((Variable) object).getName()).stringValue());
+					}
 					//we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);

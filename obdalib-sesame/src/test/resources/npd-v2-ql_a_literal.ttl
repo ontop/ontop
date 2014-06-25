@@ -2378,7 +2378,7 @@ _:node18r95eetux467 rr:termType rr:Literal .
 
 _:node18r95eetux464 a rr:TermMap .
 
-_:node18r95eetux473 rr:termType rr:IRI .
+_:node18r95eetux473 rr:termType rr:Literal .
 
 _:node18r95eetux474 rr:predicate <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL> .
 

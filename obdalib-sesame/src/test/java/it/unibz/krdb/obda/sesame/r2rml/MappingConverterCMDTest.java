@@ -8,7 +8,7 @@ public class MappingConverterCMDTest {
 
 	@Test
 	public void test() {
-		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a.obda"});
+		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a.obda", "src/test/resources/npd-v2-ql_a.owl"});
 	}
 
 }

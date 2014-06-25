@@ -67,6 +67,7 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleWriter;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import eu.optique.api.mapping.R2RMLMappingManager;
 import eu.optique.api.mapping.R2RMLMappingManagerFactory;
@@ -79,8 +80,9 @@ public class R2RMLWriter {
 	private List<OBDAMappingAxiom> mappings;
 	private URI sourceUri;
 	private PrefixManager prefixmng;
+	private OWLOntology ontology;
 	
-	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI)
+	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		try {
 			this.out = new BufferedWriter(new FileWriter(file));
@@ -91,14 +93,16 @@ public class R2RMLWriter {
 		}
 		this.sourceUri = sourceURI;
 		this.mappings = obdamodel.getMappings(sourceUri);
-		this.prefixmng = obdamodel.getPrefixManager(); 
+		this.prefixmng = obdamodel.getPrefixManager();
+		this.ontology = ontology;
 	}
 	
-	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI)
+	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		this.sourceUri = sourceURI;	
 		this.mappings = obdamodel.getMappings(sourceUri);
 		this.prefixmng = obdamodel.getPrefixManager(); 
+		this.ontology = ontology;
 	}
 
 	/**
@@ -108,7 +112,7 @@ public class R2RMLWriter {
 	 */
 	@Deprecated
 	public Graph getGraph() {
-		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+		OBDAMappingTransformer transformer = new OBDAMappingTransformer(ontology);
 		List<Statement> statements = new ArrayList<Statement>();
 		
 		for (OBDAMappingAxiom axiom: this.mappings) {
@@ -122,7 +126,7 @@ public class R2RMLWriter {
 	}
 
 	public Collection <TriplesMap> getTriplesMaps() {
-		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+		OBDAMappingTransformer transformer = new OBDAMappingTransformer(ontology);
 		Collection<TriplesMap> coll = new LinkedList<TriplesMap>();
 		for (OBDAMappingAxiom axiom: this.mappings) {
 			TriplesMap tm = transformer.getTriplesMap(axiom, prefixmng);
@@ -182,8 +186,9 @@ public class R2RMLWriter {
 	{
 		String file = "/Users/mindaugas/r2rml/test2.ttl";
 		R2RMLReader reader = new R2RMLReader(file);
+		OWLOntology ontology = null;
 
-		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("test")),URI.create("test"));
+		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("test")),URI.create("test"), ontology);
 		File out = new File("/Users/mindaugas/r2rml/out.ttl");
 //		Graph g = writer.getGraph();
 //		Iterator<Statement> st = g.iterator();
