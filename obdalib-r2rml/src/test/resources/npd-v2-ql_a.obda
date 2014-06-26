@@ -19,7 +19,7 @@ diskos:		http://sws.ifi.uio.no/data/diskos/
 diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 
 [SourceDeclaration]
-sourceUri	http://sws.ifi.uio.no/vocab/npd-v2
+sourceUri	npd-v2
 connectionUrl	jdbc:mysql://hostname/npd
 username	user
 password	pass

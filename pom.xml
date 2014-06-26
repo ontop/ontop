@@ -73,6 +73,7 @@
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-protege41</module>
 		<module>obdalib-sesame</module>
+		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
 		<module>quest-distribution</module>
 		<module>quest-sparql-compliance</module>
@@ -81,6 +82,7 @@
 		<module>quest-rdb2rdf-compliance</module>
 
 		<module>quest-test</module>
+		
 	</modules>
 
 	<profiles>

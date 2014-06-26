@@ -37,7 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 
 import java.io.File;

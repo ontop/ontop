@@ -1,16 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>ontop</artifactId>
     <groupId>it.unibz.inf.ontop</groupId>
-    <version>1.12.1-SNAPSHOT</version>
+    <artifactId>ontop</artifactId>
+    <version>1.11.1-SNAPSHOT</version>
   </parent>
-  <artifactId>ontop-obdalib-sesame</artifactId>
-  <name>ontop-obdalib-sesame</name>
-  
-  
-	<dependencies>
-		<dependency>
+  <artifactId>ontop-obdalib-r2rml</artifactId>
+  <dependencies>
+  		<dependency>
 			<artifactId>ontop-obdalib-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
@@ -51,31 +48,38 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
 		</dependency>
-			
-			
-	</dependencies>
+  			<!-- Optique R2RML API -->
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api</artifactId>
+		</dependency>
 	
-		
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-			</plugin>
-			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-surefire-plugin</artifactId>
-	       		<configuration>
-          			<skipTests>true</skipTests>
-        		</configuration>
-      		</plugin>
-		</plugins>
-	</build>
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-sesame-bridge</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-impl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-apibinding</artifactId>
+		</dependency>
+  
+  </dependencies>
+  <repositories>
+		<repository>
+			<id>bolzano-nexus-public</id>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>

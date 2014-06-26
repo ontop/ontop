@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.sesame.r2rml;
+package it.unibz.krdb.obda.r2rml;
 
 /*
  * #%L
@@ -34,7 +34,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLVocabulary;
+import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
 
 import java.net.URL;
 import java.util.ArrayList;
