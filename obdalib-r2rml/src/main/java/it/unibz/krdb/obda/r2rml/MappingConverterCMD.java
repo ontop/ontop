@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.sesame.r2rml;
+package it.unibz.krdb.obda.r2rml;
 
 /*
  * #%L
@@ -37,14 +37,20 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 class MappingConverterCMD {
 
 	public static void main(String[] args) {
-		if (args.length != 1 ) {
+		if (args.length < 1 ) {
 			System.out.println("Usage:");
-			System.out.println(" MappingConverterCMD mappingFile");
+			System.out.println(" MappingConverterCMD");
 			System.out.println("");
-			System.out.println(" mappingFile   The full path to the OBDA/R2RML file");
+			System.out.println(" (1) MappingConverterCMD  map.obda [ontology.owl] ");
+			System.out.println(" (2) MappingConverterCMD  map.ttl  ");
+			System.out.println(" map.obda/map.ttl   The full path to the OBDA/R2RML file");
 			System.out.println(" Given *.obda file, the script will produce *.ttl file and vice versa");
 			System.out.println("");
 			return;
@@ -69,16 +75,27 @@ class MappingConverterCMD {
 					e.printStackTrace();
 				}
                 URI srcURI = model.getSources().get(0).getSourceID();
-				R2RMLWriter writer = new R2RMLWriter(model, srcURI);
-				writer.writePretty(out);
-				//writer.write(out);
+                
+                OWLOntology ontology = null;
+                if(args.length > 1){
+                	String owlfile = args[1].trim();
+                	// Loading the OWL file
+        			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+                }
+				
+				R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology);
+//				writer.writePretty(out);
+				writer.write(out);
 				System.out.println("R2RML mapping file " + outfile + " written!");
 			}
 			else if (mapFile.endsWith(".ttl")) {
 				String outfile = mapFile.substring(0, mapFile.length() - 4).concat(".obda");
 				//File out = new File(outfile);
+				
+				URI obdaURI =  new File(mapFile).toURI();
 				R2RMLReader reader = new R2RMLReader(mapFile);
-				OBDAModel model = reader.readModel(new URI("http://example.org/customOBDA"));
+				OBDAModel model = reader.readModel(obdaURI);
 				PrefixManager pm = model.getPrefixManager();
 				
 				TurtleFormatter tf = new TurtleFormatter(pm);
