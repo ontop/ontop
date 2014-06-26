@@ -84,6 +84,7 @@ public class R2RMLWriter {
 	
 	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
+		this(obdamodel, sourceURI, ontology);
 		try {
 			this.out = new BufferedWriter(new FileWriter(file));
 		} catch (FileNotFoundException e) {
@@ -91,10 +92,6 @@ public class R2RMLWriter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.sourceUri = sourceURI;
-		this.mappings = obdamodel.getMappings(sourceUri);
-		this.prefixmng = obdamodel.getPrefixManager();
-		this.ontology = ontology;
 	}
 	
 	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
@@ -104,6 +101,15 @@ public class R2RMLWriter {
 		this.prefixmng = obdamodel.getPrefixManager(); 
 		this.ontology = ontology;
 	}
+	
+	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI){
+		this(obdamodel, sourceURI, null);
+	}
+	
+	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI){
+		this(file, obdamodel, sourceURI, null);
+	}
+
 
 	/**
 	 * call this method if you need the RDF Graph
@@ -112,7 +118,8 @@ public class R2RMLWriter {
 	 */
 	@Deprecated
 	public Graph getGraph() {
-		OBDAMappingTransformer transformer = new OBDAMappingTransformer(ontology);
+		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+		transformer.setOntology(ontology);
 		List<Statement> statements = new ArrayList<Statement>();
 		
 		for (OBDAMappingAxiom axiom: this.mappings) {
@@ -126,7 +133,8 @@ public class R2RMLWriter {
 	}
 
 	public Collection <TriplesMap> getTriplesMaps() {
-		OBDAMappingTransformer transformer = new OBDAMappingTransformer(ontology);
+		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+		transformer.setOntology(ontology);
 		Collection<TriplesMap> coll = new LinkedList<TriplesMap>();
 		for (OBDAMappingAxiom axiom: this.mappings) {
 			TriplesMap tm = transformer.getTriplesMap(axiom, prefixmng);

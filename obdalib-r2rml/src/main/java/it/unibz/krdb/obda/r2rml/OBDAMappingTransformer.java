@@ -72,14 +72,18 @@ import eu.optique.api.mapping.TriplesMap;
 public class OBDAMappingTransformer {
 	
 	private ValueFactory vf;
-	private OWLOntology onto;
+	private OWLOntology ontology;
 	private Set<OWLObjectProperty> objectProperties;
 	
-	public OBDAMappingTransformer(OWLOntology onto) {
+	public OBDAMappingTransformer() {
 		this.vf = new ValueFactoryImpl();
-		//get the objectProperties in the ontology so that we can distinguish between object property and data property
-		objectProperties = onto.getObjectPropertiesInSignature();
+		
 	}
+//	public OBDAMappingTransformer(OWLOntology onto) {
+//		this.vf = new ValueFactoryImpl();
+//		//get the objectProperties in the ontology so that we can distinguish between object property and data property
+//		objectProperties = onto.getObjectPropertiesInSignature();
+//	}
 	/**
 	 * Get Sesame statements from OBDA mapping axiom
 	 * @param axiom
@@ -357,7 +361,7 @@ public class OBDAMappingTransformer {
 				Term object = func.getTerm(1);
 
 				if (object instanceof Variable){
-					if(objectProperties.contains(prop)){
+					if(ontology!= null && objectProperties.contains(prop)){
 						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
 						obm.setTermType(R2RMLVocabulary.iri);
 					}
@@ -407,6 +411,15 @@ public class OBDAMappingTransformer {
 		}
 
 		return tm;
+	}
+	
+	public OWLOntology getOntology() {
+		return ontology;
+	}
+	
+	public void setOntology(OWLOntology ontology) {
+		this.ontology = ontology;
+		objectProperties = ontology.getObjectPropertiesInSignature();
 	}
 	
 
