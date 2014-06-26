@@ -158,7 +158,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 	 * returns always 1
 	 */
 	@Override
-	public int getColumCount() throws OBDAException {
+	public int getColumnCount() throws OBDAException {
 		return 1;
 	}
 
@@ -174,7 +174,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 	public List<String> getSignature() throws OBDAException {
 		Vector<String> signature = new Vector<String>();
 		if (set != null) {
-			int i = getColumCount();
+			int i = getColumnCount();
 
 			for (int j = 1; j <= i; j++) {
 				try {

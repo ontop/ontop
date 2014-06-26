@@ -25,6 +25,7 @@ package it.unibz.krdb.obda.sesame.r2rml;
  */
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -81,6 +82,24 @@ public class R2RMLReader {
 		try {
 			//add to the model the mappings retrieved from the manager
 			obdaModel.addMappings(sourceUri, manager.getMappings(m));
+		} catch (DuplicateMappingException e) {
+			e.printStackTrace();
+		}
+		return obdaModel;
+	}
+	
+	/**
+	 * the method that gives the obda model based on the given graph
+	 * @param datasource - the datasource of the model
+	 * @return the read obda model
+	 */
+	public OBDAModel readModel(OBDADataSource dataSource){
+		try {
+			obdaModel.addSource(dataSource);
+			URI sourceUri = dataSource.getSourceID();
+			//add to the model the mappings retrieved from the manager
+			obdaModel.addMappings(sourceUri, manager.getMappings(m));
+			
 		} catch (DuplicateMappingException e) {
 			e.printStackTrace();
 		}
