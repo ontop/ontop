@@ -123,6 +123,9 @@ public class MappingAnalyzer {
 
 				// Construct the body from the source query
 				ArrayList<Function> atoms = new ArrayList<Function>();
+				
+				
+				
 				for (RelationJSQL table : tableList) {
 					// Construct the URI from the table name
 					String tableName = table.getFullName();
