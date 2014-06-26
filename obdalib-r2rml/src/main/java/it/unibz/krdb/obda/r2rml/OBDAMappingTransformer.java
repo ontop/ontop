@@ -359,6 +359,10 @@ public class OBDAMappingTransformer {
 				//add object declaration to predObj node
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
+				
+				if(func.toString().contains("dateBaaLicenseeValidTo"))
+					System.out.print("found you");
+				
 
 				if (object instanceof Variable){
 					if(ontology!= null && objectProperties.contains(prop)){
@@ -391,6 +395,7 @@ public class OBDAMappingTransformer {
 							//obm.setTemplate(mfact.createTemplate(objectTemplate));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
 							obm.setTermType(R2RMLVocabulary.literal);
+						
 							
 							
 							
@@ -419,7 +424,9 @@ public class OBDAMappingTransformer {
 	
 	public void setOntology(OWLOntology ontology) {
 		this.ontology = ontology;
-		objectProperties = ontology.getObjectPropertiesInSignature();
+		if(ontology != null){
+			objectProperties = ontology.getObjectPropertiesInSignature();
+		}
 	}
 	
 
