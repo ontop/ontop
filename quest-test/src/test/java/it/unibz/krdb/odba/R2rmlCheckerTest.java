@@ -57,10 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Use the class EmptiesAboxCheck to test the return of empty concepts and
- * roles, based on the mappings. Given ontology, which is connected to a
- * database via mappings, generate a suitable set of queries that test if there
- * are empty concepts, concepts that are no populated to anything.
+ * Class to test that the r2rml file with the mappings give the same results of the corresponding obda file.
+ * We use the npd database.
  */
 public class R2rmlCheckerTest {
 
@@ -260,12 +258,12 @@ public class R2rmlCheckerTest {
 	}
 
 	/**
-	 * Test numbers of first npd query using obda and r2rml mapping
+	 * Compare numbers of result given by the obda file and the r2rml file over an npd query 
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testCompares() throws Exception {
+	public void testComparesNpdQuery() throws Exception {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -279,8 +277,8 @@ public class R2rmlCheckerTest {
 
 		loadOBDA(p);
 		// Now we are ready for querying
-		conn = reasonerOBDA.getConnection();
-		npdQuery();
+		// npd query 1
+		int obdaResult = npdQuery(reasonerOBDA.getConnection());
 		// reasoner.dispose();
 
 		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
@@ -299,13 +297,17 @@ public class R2rmlCheckerTest {
 		loadR2rml(p, dataSource);
 
 		// Now we are ready for querying
-		conn = reasonerR2rml.getConnection();
-
-		// npd queries
-		npdQuery();
+		// npd query 1
+		int r2rmlResult = npdQuery(reasonerR2rml.getConnection());
+		
+		assertEquals(obdaResult, r2rmlResult);
 
 	}
 
+	/**
+	 * Compare the results of r2rml and obda files over the role <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>
+	 * @throws Exception
+	 */
 	@Test
 	public void testOneRole() throws Exception {
 
@@ -352,24 +354,25 @@ public class R2rmlCheckerTest {
 
 		
 	}
-	/*
-	 * First npd query
+	/**
+	 * Execute Npd query 1 and give the number of results
+	 * @return 
 	 */
-	private void npdQuery() throws OWLException {
+	private int npdQuery(QuestOWLConnection questOWLConnection) throws OWLException {
 		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?licenceURI WHERE { ?licenceURI a npdv:ProductionLicence ."
 				+ "[ ] a npdv:ProductionLicenceLicensee ; "
 				+ "npdv:dateLicenseeValidFrom ?date ;"
 				+ "npdv:licenseeInterest ?interest ;"
 				+ "npdv:licenseeForLicence ?licenceURI . "
 				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
-		QuestOWLStatement st = conn.createStatement();
+		QuestOWLStatement st = questOWLConnection.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while (rs.nextRow()) {
 				n++;
 			}
-			log.info("q1: " + n);
+			log.debug("number of results of q1: " + n);
 
 		} catch (Exception e) {
 			throw e;
@@ -383,6 +386,7 @@ public class R2rmlCheckerTest {
 			st.close();
 
 		}
+		return n;
 
 	}
 
@@ -461,7 +465,7 @@ public class R2rmlCheckerTest {
 	}
 
 	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
-		String query = "SELECT * WHERE {?x " + description + " ?y.}";
+		String query = "SELECT * WHERE {?x " + description + " ?y.  FILTER isLiteral(?y)}";
 		QuestOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
