@@ -508,19 +508,14 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(AllColumns expr) {
-		//System.out.println("WARNING: AllColumns   not implemented ");
-		
-		//expr.accept(this);
-		//getExpression().accept(this);
-		
+		//Do nothing!
 	}
 
 
 
 	@Override
 	public void visit(AllTableColumns arg0) {
-		System.out.println("WARNING: AllTableColumns not implemented ");
-		notSupported = true;
+		//Do nothing!
 		
 	}
 
