@@ -38,7 +38,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 
 import java.io.File;
 import java.net.URI;

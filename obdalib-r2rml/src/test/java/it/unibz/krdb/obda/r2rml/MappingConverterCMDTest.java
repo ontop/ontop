@@ -1,6 +1,7 @@
-package it.unibz.krdb.obda.sesame.r2rml;
+package it.unibz.krdb.obda.r2rml;
 
 import static org.junit.Assert.*;
+import it.unibz.krdb.obda.r2rml.MappingConverterCMD;
 
 import org.junit.Test;
 
