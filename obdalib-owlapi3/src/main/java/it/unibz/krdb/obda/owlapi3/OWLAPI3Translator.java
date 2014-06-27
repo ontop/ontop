@@ -1,10 +1,3 @@
-/*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano This source code is
- * available under the terms of the Affero General Public License v3.
- * 
- * Please see LICENSE.txt for full license terms, including the availability of
- * proprietary exceptions.
- */
 package it.unibz.krdb.obda.owlapi3;
 
 /*
@@ -360,15 +353,20 @@ public class OWLAPI3Translator {
 					Property role = getRoleExpression(aux.getProperty());
 
 					ClassDescription subclass = ofac.getPropertySomeRestriction(role.getPredicate(), true);
-					OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
 
-					if (rangeDatatype.isBuiltIn()) {
+					if (aux.getRange().isDatatype()) {
+						OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
 
-						Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
-						DataType datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
-						addSubclassAxiom(dl_onto, subclass, datatype);
+						if (rangeDatatype.isBuiltIn()) {
+
+							Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
+							DataType datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
+							addSubclassAxiom(dl_onto, subclass, datatype);
+						} else {
+							log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
+						}
 					} else {
-						log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
+						log.warn("Ignoring range axiom since it is not a datatype: " + axiom.toString());
 					}
 
 				} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {

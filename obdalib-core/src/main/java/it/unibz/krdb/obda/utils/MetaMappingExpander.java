@@ -134,8 +134,15 @@ public class MetaMappingExpander {
 					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 				}
 				
-				// Construct the SQL query tree from the source query
-				VisitedQuery sourceQueryParsed = translator.constructParser(sourceQuery.toString());
+				// Construct the SQL query tree from the source query we do not work with views 
+				VisitedQuery sourceQueryParsed = translator.constructParserNoView(sourceQuery.toString());
+//				Select selectQuery;
+//				
+//				try {
+//					selectQuery = (Select) CCJSqlParserUtil.parse(sourceQuery.toString());
+//				} catch (JSQLParserException e3) {
+//					e3.printStackTrace();
+//				}
 				
 				ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
 				
@@ -143,12 +150,13 @@ public class MetaMappingExpander {
 				
 				
 				ArrayList<SelectExpressionItem> columnList = null;
-				try {
-					columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
-				} catch (JSQLParserException e2) {
-					
-					e2.printStackTrace();
-				}
+			
+					try {
+						columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
+					} catch (JSQLParserException e2) {
+						continue;
+					}
+				
 				
 				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 				
@@ -161,11 +169,11 @@ public class MetaMappingExpander {
 				
 				VisitedQuery distinctParsedQuery = null;
 				try {
-					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement());
+					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement(), false);
 					
 				} catch (JSQLParserException e1) {
-					
-					e1.printStackTrace();
+					throw new IllegalArgumentException(e1);
+					//continue;
 				}
 
 				distinctParsedQuery.setProjection(distinctParamsProjection);
@@ -275,13 +283,11 @@ public class MetaMappingExpander {
 			
 			e1.printStackTrace();
 		}
-		SelectionJSQL newSelection;
+		SelectionJSQL newSelection = new SelectionJSQL();
 		
-		if(selection != null){
-			newSelection = selection;
-		} else {
-			newSelection = new SelectionJSQL();
-		}
+		if(selection != null)
+			newSelection.addCondition(selection.getRawConditions());
+	
 		
 			int j=0;
 			for(SelectExpressionItem column : columnsForTemplate){
@@ -320,7 +326,7 @@ public class MetaMappingExpander {
 		
 		VisitedQuery newSourceParsedQuery = null;
 		try {
-			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement());
+			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement(),false);
 			newSourceParsedQuery.setProjection(newProjection);
 			newSourceParsedQuery.setSelection(newSelection);
 			
@@ -352,11 +358,11 @@ public class MetaMappingExpander {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
 				String expression=column.getExpression().toString();
-//				if(expression.contains("\"")) //remove the quotes when present to compare with var
-//					expression= expression.substring(1, expression.length()-1);
+				if(VisitedQuery.pQuotes.matcher(expression).matches()) //remove the quotes when present to compare with var
+					expression= expression.substring(1, expression.length()-1);
 									
 				if ((column.getAlias()==null && expression.equals(var.getName())) ||
-						(column.getAlias()!=null && column.getAlias().equals(var.getName()))) {
+						(column.getAlias()!=null && column.getAlias().getName().equals(var.getName()))) {
 					columnsForTemplate.add(column);
 					found = true;
 					break;
@@ -400,7 +406,9 @@ public class MetaMappingExpander {
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
 		List<Variable> vars = new ArrayList<Variable>();
-		for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		//for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		// TODO: check when getTerms().size() != getArity() 
+		for(int i = 1; i < uriTermForPredicate.getTerms().size(); i++){
 			vars.add((Variable) uriTermForPredicate.getTerm(i));
 		}
 		return vars;

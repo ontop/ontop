@@ -40,6 +40,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -104,6 +105,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final JDBCUtility jdbcutil;
 	private final SQLDialectAdapter sqladapter;
 
+
+    private boolean generatingREPLACE = true;
+
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
@@ -116,8 +120,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.jdbcutil = jdbcutil;
 		this.sqladapter = sqladapter;
 	}
-	
-	@Override
+
+    public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
+        this(metadata, jdbcutil, sqladapter);
+        this.generatingREPLACE = sqlGenerateReplace;
+    }
+
+    @Override
 	public void setUriIds (Map<String,Integer> uriid){
 		this.isSI = true;
 		this.uriRefIds = uriid;
@@ -383,7 +392,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * If process boolean operators is enabled, all boolean conditions will be
 	 * added to the ON clause of the first JOIN.
 	 * 
-	 * @param atoms
+	 * @param inneratoms
 	 * @param index
 	 * @param isTopLevel
 	 *            indicates if the list of atoms is actually the main body of
@@ -712,7 +721,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * produces the select clause of the sql query for the given CQIE
 	 * 
-	 * @param q
+	 * @param query
 	 *            the query
 	 * @return the sql select clause
 	 */
@@ -728,8 +737,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (distinct) {
 			sb.append("DISTINCT ");
 		}
+		//Only for ASK
 		if (headterms.size() == 0) {
-			sb.append("true as x");
+			sb.append("'true' as x");
 			return sb.toString();
 		}
 
@@ -936,29 +946,41 @@ public class SQLGenerator implements SQLQueryGenerator {
 				literalValue = ((ValueConstant) t).getValue();
 			}		
 			Predicate pred = ov.getFunctionSymbol();
-			String replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-					"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" ;
-			String replace2 = ",' ', '%20')," +
-					  "'!', '%21')," +
-					  "'@', '%40'),"+
-					  "'#', '%23')," +
-					  "'$', '%24'),"+
-					  "'&', '%26'),"+
-					  "'*', '%42'), "+
-					  "'(', '%28'), "+
-					  "')', '%29'), "+
-					  "'[', '%5B'), "+
-					  "']', '%5D'), "+
-					  "',', '%2C'), "+
-					  "';', '%3B'), "+
-					  "':', '%3A'), "+
-					  "'?', '%3F'), "+
-					  "'=', '%3D'), "+
-					  "'+', '%2B'), "+
-					  "'''', '%22'), "+
-					  "'/', '%2F')";
-				
-			String template = trim(literalValue);
+
+
+
+
+			String replace1;
+            String replace2;
+            if(generatingREPLACE) {
+
+                replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
+
+                replace2 = ",' ', '%20')," +
+                        "'!', '%21')," +
+                        "'@', '%40')," +
+                        "'#', '%23')," +
+                        "'$', '%24')," +
+                        "'&', '%26')," +
+                        "'*', '%42'), " +
+                        "'(', '%28'), " +
+                        "')', '%29'), " +
+                        "'[', '%5B'), " +
+                        "']', '%5D'), " +
+                        "',', '%2C'), " +
+                        "';', '%3B'), " +
+                        "':', '%3A'), " +
+                        "'?', '%3F'), " +
+                        "'=', '%3D'), " +
+                        "'+', '%2B'), " +
+                        "'''', '%22'), " +
+                        "'/', '%2F')";
+            } else {
+                replace1 = replace2 = "";
+            }
+
+            String template = trim(literalValue);
 			String[] split = template.split("[{][}]");
 			
 			List<String> vex = new LinkedList<String>();
@@ -1337,7 +1359,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return operator;
 	}
 
-	/**
+    public boolean isGeneratingREPLACE() {
+        return generatingREPLACE;
+    }
+
+    public void setGeneratingREPLACE(boolean generatingREPLACE) {
+        this.generatingREPLACE = generatingREPLACE;
+    }
+
+    /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
 	 * the existing view definitons of a query.
@@ -1404,7 +1434,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			dataTableCount += 1;
 			viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
-			tableNames.put(atom, tableName);
+			tableNames.put(atom, def.getName());
 			dataDefinitions.put(atom, def);
 			
 			indexVariables(atom);

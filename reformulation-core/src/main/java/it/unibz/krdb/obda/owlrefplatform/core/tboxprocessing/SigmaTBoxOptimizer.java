@@ -20,28 +20,19 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.traverse.AbstractGraphIterator;
-import org.jgrapht.traverse.BreadthFirstIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,120 +41,76 @@ import org.slf4j.LoggerFactory;
  */
 public class SigmaTBoxOptimizer {
 
-	private static final Logger		log					= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
-	private final DAGImpl				isa;
-	private final DAGImpl				sigma;
-	private final DAGImpl				isaChain;
-	private final DAGImpl				sigmaChain;
-	private final TBoxReasonerImpl reasonerIsa;
-	private final TBoxReasonerImpl reasonerSigmaChain;
-	private final TBoxReasonerImpl reasonerIsaChain;
+	private final TBoxReasonerImpl isa;
+	private final TBoxReasonerImpl isaChain;
+	private final TBoxReasonerImpl sigmaChain;
 
-	private static final OBDADataFactory	predicateFactory = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory	descFactory = OntologyFactoryImpl.getInstance();
+	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
+	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 
-	private Ontology				originalOntology	= null;
-
-	private Ontology				originalSigma		= null;
+	private Set<Predicate> vocabulary;
+	private Ontology optimizedTBox = null;
 
 	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
-		this.originalOntology = isat;
-
-		this.originalSigma = sigmat;
-		reasonerIsa= new TBoxReasonerImpl(isat,false);
-		this.isa = reasonerIsa.getDAG();
-		TBoxReasonerImpl reasonerSigma= new TBoxReasonerImpl(sigmat,false);
-		this.sigma = reasonerSigma.getDAG();
-		reasonerIsaChain= new TBoxReasonerImpl(isat,false);
-		this.isaChain = reasonerIsaChain.getDAG();
-		reasonerIsaChain.getChainDAG();
 		
-		reasonerSigmaChain= new TBoxReasonerImpl(sigmat,false);
-		this.sigmaChain =  reasonerSigmaChain.getDAG();
-		reasonerSigmaChain.getChainDAG();
-
+		vocabulary = isat.getVocabulary();
+		
+		isa = new TBoxReasonerImpl(isat);
+		//DAGImpl isaChainDAG = isa.getChainDAG();
+		isaChain = TBoxReasonerImpl.getChainReasoner(isat);
+		
+		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
+		//DAGImpl sigmaChainDAG =  reasonerSigma.getChainDAG();
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigmat);
 	}
 
 	public Ontology getReducedOntology() {
-		Ontology reformulationOntology = descFactory.createOntology("http://it.unibz.krdb/obda/auxontology");
-		reformulationOntology.addEntities(originalOntology.getVocabulary());
+		if (optimizedTBox == null) {
+			optimizedTBox = fac.createOntology("http://it.unibz.krdb/obda/auxontology");
+			optimizedTBox.addEntities(vocabulary);
 
-		reformulationOntology.addAssertions(reduce());
-		return reformulationOntology;
-	}
+			log.debug("Starting semantic-reduction");
 
-	public List<Axiom> reduce() {
-		log.debug("Starting semantic-reduction");
-		List<Axiom> rv = new LinkedList<Axiom>();
+			TBoxTraversal.traverse(isa, new TBoxTraverseListener() {
 
-		for(Description node:isa.vertexSet()){
-			for (Set<Description> descendants: reasonerIsa.getDescendants(node, false)){
-					Description firstDescendant=descendants.iterator().next();
-					Description descendant= isa.getReplacements().get(firstDescendant);
-					if(descendant==null)
-						descendant=firstDescendant;
-					Axiom axiom = null;
-					if(!descendant.equals(node)){
-					/*
-					 * Creating subClassOf or subPropertyOf axioms
-					 */
-					if (descendant instanceof ClassDescription) {
-				if (!check_redundant(node, descendant)) {
-					rv.add(descFactory.createSubClassAxiom((ClassDescription) descendant, (ClassDescription) node));
-				}
-			} else {
-				if (!check_redundant_role(node,descendant)) {
-					rv.add(descFactory.createSubPropertyAxiom((Property) descendant, (Property) node));
+				@Override
+				public void onInclusion(Property sub, Property sup) {
+					if (!check_redundant_role(sup, sub)) 
+						optimizedTBox.addAssertion(fac.createSubPropertyAxiom(sub, sup));
 				}
 
-			}
-					}
-			}
-			Set<Description> equivalents = reasonerIsa.getEquivalences(node, false);
-
-			for(Description equivalent:equivalents){
-				if(!equivalent.equals(node)){
-					if (node instanceof ClassDescription) {
-						if (!check_redundant(equivalent, node)) {
-							rv.add(descFactory.createSubClassAxiom((ClassDescription) node, (ClassDescription) equivalent));
-						}
-					} else {
-						if (!check_redundant_role(equivalent,node)) {
-							rv.add(descFactory.createSubPropertyAxiom((Property) node, (Property) equivalent));
-						}
-
-					}
-					
-					if (equivalent instanceof ClassDescription) {
-						if (!check_redundant(node, equivalent)) {
-							rv.add(descFactory.createSubClassAxiom((ClassDescription) equivalent, (ClassDescription) node));
-						}
-					} else {
-						if (!check_redundant_role(node,equivalent)) {
-							rv.add(descFactory.createSubPropertyAxiom((Property) equivalent, (Property) node));
-						}
-					}
-					}
+				@Override
+				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+					if (!check_redundant(sup, sub)) 
+						optimizedTBox.addAssertion(fac.createSubClassAxiom(sub, sup));
 				}
+			});
 		}
-//		log.debug("Finished semantic-reduction.");
-		return rv;
+		return optimizedTBox;
 	}
 
-	private boolean check_redundant_role(Description parent, Description child) {
+	
+	
+	
+	
+	
+	
+	
+	
+	private boolean check_redundant_role(Property parent, Property child) {
 
 		if (check_directly_redundant_role(parent, child))
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent, false)) {
-				Description child_prime=children_prime.iterator().next();
+			for (Equivalences<Property> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
+				Property child_prime = children_prime.getRepresentative();
 
-				if (!child_prime.equals(child) && check_directly_redundant_role(child_prime, child)
-						&& !check_redundant(child_prime, parent)) {
+				if (!child_prime.equals(child) && 
+						check_directly_redundant_role(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
 					return true;
 				}
-//				}
 			}
 		}
 //		log.debug("Not redundant role {} {}", parent, child);
@@ -171,66 +118,132 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 
-	private boolean check_directly_redundant_role(Description parent, Description child) {
-		Property parentDesc = (Property) parent;
-		Property childDesc = (Property) child;
+	private boolean check_directly_redundant_role(Property parent, Property child) {
 
-		PropertySomeRestriction existParentDesc = descFactory.getPropertySomeRestriction(parentDesc.getPredicate(), parentDesc.isInverse());
-		PropertySomeRestriction existChildDesc = descFactory.getPropertySomeRestriction(childDesc.getPredicate(), childDesc.isInverse());
+		PropertySomeRestriction existParentDesc = 
+				fac.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
+		PropertySomeRestriction existChildDesc = 
+				fac.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
 
-		Description exists_parent = isa.getNode(existParentDesc);
-		Description exists_child = isa.getNode(existChildDesc);
-
-		return check_directly_redundant(parent, child) && check_directly_redundant(exists_parent, exists_child);
+		return check_directly_redundant(parent, child) && 
+				check_directly_redundant(existParentDesc, existChildDesc);
 	}
 
-	private boolean check_redundant(Description parent, Description child) {
+	private boolean check_redundant(Property parent, Property child) {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Set<Description> children_prime : reasonerIsa.getDirectChildren(parent, false)) {
-			Description child_prime=children_prime.iterator().next();
+			for (Equivalences<Property> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
+				Property child_prime = children_prime.getRepresentative();
 
-				if (!child_prime.equals(child) && check_directly_redundant(child_prime, child) && !check_redundant(child_prime, parent)) {
+				if (!child_prime.equals(child) && 
+						check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
 					return true;
 				}
-				}
+			}
 		}
 		return false;
 	}
 
-	private boolean check_directly_redundant(Description parent, Description child) {
-		Description sp = sigmaChain.getNode(parent);
-		Description sc = sigmaChain.getNode(child);
-		Description tc = isaChain.getNode(child);
+	private boolean check_redundant(BasicClassDescription parent, BasicClassDescription child) {
+		if (check_directly_redundant(parent, child))
+			return true;
+		else {
+			for (Equivalences<BasicClassDescription> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
+				BasicClassDescription child_prime = children_prime.getRepresentative();
 
-		if (sp == null || sc == null || tc == null) {
-			return false;
+				if (!child_prime.equals(child) && 
+						check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
 		}
-		
-		Set<Set<Description>> spChildren= reasonerSigmaChain.getDirectChildren(sp, false);
-		Set<Description> scEquivalent=reasonerSigmaChain.getEquivalences(sc, false);
-		Set<Set<Description>> scChildren= reasonerSigmaChain.getDescendants(sc, false);
-		Set<Set<Description>> tcChildren= reasonerIsaChain.getDescendants(tc,false);
-		
-		if (sigmaChain.getReplacements().get(parent) != null){
-			sp = sigmaChain.getNode(sigmaChain.getReplacements().get(parent));
-			spChildren= reasonerSigmaChain.getDirectChildren(sp, false);
-		}
-		if (sigmaChain.getReplacements().get(child) != null){
-			sc = sigmaChain.getNode(sigmaChain.getReplacements().get(child));
-			scEquivalent=reasonerSigmaChain.getEquivalences(sc, false);
-			scChildren=reasonerSigmaChain.getDescendants(sc, false); 
-			
-		}
-		if (isaChain.getReplacements().get(child) != null){
-			tc = sigmaChain.getNode(isaChain.getReplacements().get(child));
-			reasonerSigmaChain.getDescendants(tc,false);
-		}
-
-		boolean redundant =spChildren.contains(scEquivalent) && scChildren.containsAll(tcChildren);
-		return (redundant);
-
+		return false;
 	}
+	
+	private boolean check_directly_redundant(Property parent, Property child) {
+		
+		Equivalences<Property> sp = sigmaChain.getProperties().getVertex(parent);
+		Equivalences<Property> sc = sigmaChain.getProperties().getVertex(child);
+		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
 
+		Set<Equivalences<Property>> spChildren =  sigmaChain.getProperties().getDirectSub(sp);
+		
+		if (!spChildren.contains(sc))
+			return false;
+		
+		
+		
+		Equivalences<Property> tc = isaChain.getProperties().getVertex(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
+		Set<Equivalences<Property>> scChildren = sigmaChain.getProperties().getSub(sc);
+		Set<Equivalences<Property>> tcChildren = isaChain.getProperties().getSub(tc);
+
+		return scChildren.containsAll(tcChildren);
+	}
+	
+	private boolean check_directly_redundant(BasicClassDescription parent, BasicClassDescription child) {
+		
+		Equivalences<BasicClassDescription> sp = sigmaChain.getClasses().getVertex(parent);
+		Equivalences<BasicClassDescription> sc = sigmaChain.getClasses().getVertex(child);
+		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
+
+		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
+		
+		if (!spChildren.contains(sc))
+			return false;
+		
+		
+		
+		Equivalences<BasicClassDescription> tc = isaChain.getClasses().getVertex(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
+		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getClasses().getSub(sc);
+		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(tc);
+
+		return scChildren.containsAll(tcChildren);
+	}
+	
+	
+	
+	
+	
+	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
+
+		final Ontology sigma = fac.createOntology("sigma");
+
+		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
+			
+			@Override
+			public void onInclusion(Property sub, Property sup) {
+				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
+				sigma.addEntities(ax.getReferencedEntities());
+				sigma.addAssertion(ax);						
+			}
+
+			@Override
+			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+				if (!(sup instanceof PropertySomeRestriction)) {
+					Axiom ax = fac.createSubClassAxiom(sub, sup);
+					sigma.addEntities(ax.getReferencedEntities());
+					sigma.addAssertion(ax);						
+				}
+			}
+		});
+		
+		return sigma;
+	}
 }

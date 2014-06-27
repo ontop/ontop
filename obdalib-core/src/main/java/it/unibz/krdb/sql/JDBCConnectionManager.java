@@ -335,10 +335,13 @@ public class JDBCConnectionManager {
 		Iterator<RelationJSQL> table_iter = tables.iterator();
 		/* Obtain the column information for each relational object */
 		while (table_iter.hasNext()) {
+			
 			RelationJSQL table = table_iter.next();
 			ResultSet rsColumns = null;
 			Set<String> tableColumns = new HashSet<String>();
 			String tblName = table.getTableName(); 
+			
+			log.debug("get metadata for " + tblName);
 			
 			/**
 			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
@@ -370,6 +373,7 @@ public class JDBCConnectionManager {
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
+//			TableDefinition td = new TableDefinition(tblName);
 
 			try {
 				rsColumns = md.getColumns(null, tableSchema, tblName, null);
@@ -659,6 +663,7 @@ public class JDBCConnectionManager {
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tableGivenName);
+//					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 			
 					for (int pos = 1; rsColumns.next(); pos++) {

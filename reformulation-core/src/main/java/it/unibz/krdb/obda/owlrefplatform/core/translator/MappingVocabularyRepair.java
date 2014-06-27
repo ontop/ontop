@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
@@ -77,7 +78,7 @@ public class MappingVocabularyRepair {
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
-//		log.debug("Reparing/validating {} mappings", originalMappings.size());
+		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
 		for (Predicate p : vocabulary) {
 			urimap.put(p.getName(), p);
@@ -91,26 +92,59 @@ public class MappingVocabularyRepair {
 
 			for (Function atom : body) {
 				Predicate p = atom.getPredicate();
-				
+
 				Function newatom = null;
 				Predicate predicate = urimap.get(p.getName());
+
+				/* Fixing terms */
+				LinkedList<Term> newTerms = new LinkedList<Term>();
+				for (Term term : atom.getTerms()) {
+					newTerms.add(fixTerm(term));
+				}
+
 				if (predicate == null) {
 					/**
 					 * ignore triple  
 					 */
 					//if (!p.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
 					if (!p.isTriplePredicate()){
-						throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+						//throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+						log.warn("WARNING: Mapping references an unknown class/property: " + p.getName());
 						
+						/**
+						 * All this part is to handle the case where the predicate or the class is defined
+						 * by the mapping but not present in the ontology.
+						 */
+						if (newTerms.size()==1){
+							predicate=dfac.getClassPredicate(p.getName());
+						} else if (newTerms.size()==2){
+
+
+							Term t1= newTerms.get(0);
+							Term t2= newTerms.get(1);
+
+							if (( t1 instanceof Function) && ( t2 instanceof Function)){
+
+								Function ft1 = (Function) t1;
+								Function ft2 = (Function) t2;
+
+								boolean t1uri = ft1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+								boolean t2uri = ft2.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+
+								if (t1uri && t2uri){
+									predicate= dfac.getObjectPropertyPredicate(p.getName());
+								}else{
+									predicate=dfac.getDataPropertyPredicate(p.getName());
+								}
+							} else {
+								throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
+							}
+						}
 					}else{
 						predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 					}
-				}
-				/* Fixing terms */
-				LinkedList<Term> newTerms = new LinkedList<Term>();
-				for (Term term : atom.getTerms()) {
-					newTerms.add(fixTerm(term));
-				}
+
+				}// predicate null
 
 				/*
 				 * Fixing wrapping each variable with a URI function if the
@@ -125,7 +159,8 @@ public class MappingVocabularyRepair {
 				}
 				newatom = dfac.getFunction(predicate, newTerms);
 				newbody.add(newatom);
-			}
+			} //end for
+			
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
 			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
 		}

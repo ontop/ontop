@@ -19,7 +19,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * limitations under the License.
  * #L%
  */
-
+@Deprecated
 public class TestDAG {
 
 	/**

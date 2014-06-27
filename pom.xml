@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.11.0</version>
+	<version>1.12.0</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -73,6 +73,7 @@
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-protege41</module>
 		<module>obdalib-sesame</module>
+		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
 		<module>quest-distribution</module>
 		<module>quest-sparql-compliance</module>
@@ -81,14 +82,35 @@
 		<module>quest-rdb2rdf-compliance</module>
 
 		<module>quest-test</module>
+		
 	</modules>
 
 	<profiles>
 		<profile>
-			<id>all</id>
-			<modules>
-				<module>quest-benchmarks</module>
-			</modules>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 
@@ -191,21 +213,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            <!-- Uncomment the following block when releasing/deploying
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-            -->
 		</plugins>
 	</build>
 
@@ -307,21 +314,41 @@
 			<dependency>
     			<groupId>com.github.jsqlparser</groupId>
     			<artifactId>jsqlparser</artifactId>
-    			<version>0.8.8</version>
+    			<version>0.9</version>
 			</dependency>
-
+			<dependency>
+    			<groupId>com.google.guava</groupId>
+    			<artifactId>guava</artifactId>
+    			<version>15.0</version>
+			</dependency>
+			
 			<!-- OWL API -->
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-api</artifactId>
-				<version>3.4.5</version>
+				<version>3.4.10</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-apibinding</artifactId>
-				<version>3.4.5</version>
+				<version>3.4.10</version>
 			</dependency>
-
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-impl</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-parsers</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-oboformat</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			
 			<!-- Sesame API -->
 
 			<dependency>
@@ -478,8 +505,37 @@
 				<artifactId>mysql-connector-java</artifactId>
 				<version>5.1.22</version>
 			</dependency>
+			
+			<!-- Optique R2RML API -->
+			<dependency>
+				<groupId>org.optique-project</groupId>
+				<artifactId>r2rml-api</artifactId>
+				<version>0.1.3</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.optique-project</groupId>
+				<artifactId>r2rml-api-sesame-bridge</artifactId>
+				<version>0.1.3</version>
+			</dependency>
+			
 		</dependencies>
 	</dependencyManagement>
+
+	<repositories>	
+		<repository>
+			<!-- for R2RML api -->
+			<id>bolzano-nexus-public</id>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	
 
 	<reporting>
 		<plugins>

@@ -37,13 +37,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -105,9 +105,10 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
 	 * @param select
+	 * @param unquote 
 	 * @return
 	 */
-	public ArrayList<SelectJSQL> getSubSelectList(Select select) {
+	public ArrayList<SelectJSQL> getSubSelectList(Select select, boolean unquote) {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -220,11 +221,6 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	public void visit(InExpression inExpression) {
 		inExpression.getLeftExpression().accept(this);
 		inExpression.getRightItemsList().accept(this);
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
-		inverseExpression.getExpression().accept(this);
 	}
 
 	@Override
@@ -436,6 +432,14 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
+		
+		
+	}
+
+
+
+	@Override
+	public void visit(SignedExpression arg0) {
 		// TODO Auto-generated method stub
 		
 	}

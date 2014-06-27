@@ -41,13 +41,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -101,6 +101,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	
 	ArrayList<Expression> joinConditions;
 	boolean notSupported = false;
+	boolean unquote; //remove quotes form columns 
 	
 	/**
 	 * Obtain the join conditions in a format "expression condition expression"
@@ -109,11 +110,12 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 * @param select statement with the parsed query
 	 * @return a list of string containing the join conditions
 	 */
-	public ArrayList<Expression> getJoinConditions(Select select)  throws JSQLParserException {
+	public ArrayList<Expression> getJoinConditions(Select select, boolean unquote)  throws JSQLParserException {
+		this.unquote=unquote;
 		joinConditions = new ArrayList<Expression>();
 		select.getSelectBody().accept(this);
 	
-		if(notSupported) // used to throw exception for the currently unsupported methods
+		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
 			throw new JSQLParserException("Query not yet supported");
 		
 		return joinConditions;
@@ -140,7 +142,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 				{
 					String columnName= column.getColumnName();
 					
-					if(VisitedQuery.pQuotes.matcher(columnName).matches())
+					if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
 					{
 						columnName=columnName.substring(1, columnName.length()-1);
 						column.setColumnName(columnName);
@@ -189,6 +191,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	@Override
 	public void visit(SetOperationList operations) { //UNION
 		 notSupported = true;
+		 operations.getPlainSelects().get(0).accept(this);
 		// we do not consider the case of union
 		/*for (PlainSelect plainSelect: operations.getPlainSelects()){
 			plainSelect.getFromItem().accept(this);
@@ -231,12 +234,6 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 
 	@Override
 	public void visit(Function arg0) {
-		//we do not execute anything 
-		
-	}
-
-	@Override
-	public void visit(InverseExpression arg0) {
 		//we do not execute anything 
 		
 	}
@@ -482,7 +479,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	@Override
 	public void visit(Column col) {
 		Table table= col.getTable();
-		if(table.getName()!=null){
+		if(table.getName()!=null && unquote){
 			
 			TableJSQL fixTable = new TableJSQL(table);
 			table.setAlias(fixTable.getAlias());
@@ -491,7 +488,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 		
 		}
 		String columnName= col.getColumnName();
-		if(VisitedQuery.pQuotes.matcher(columnName).matches())
+		if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
 			col.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}
@@ -599,8 +596,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 
 	@Override
 	public void visit(CastExpression arg0) {
-		// we do not consider CAST expression
-		notSupported = true;
+		
 	}
 
 	/*
@@ -689,8 +685,13 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
-		// TODO Auto-generated method stub
 		notSupported = true;
+	}
+
+	@Override
+	public void visit(SignedExpression arg0) {
+		notSupported = true;
+		
 	}
 
 }

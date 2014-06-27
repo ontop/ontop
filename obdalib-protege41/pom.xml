@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.11.0</version>
+		<version>1.12.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -76,10 +76,17 @@
 		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-r2rml</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-sesame</artifactId>
 			<version>${project.version}</version>
-
 		</dependency>
+		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-quest-sesame</artifactId>
@@ -119,6 +126,16 @@
 			<artifactId>jgraph</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.optique-project</groupId>
+			<artifactId>r2rml-api-sesame-bridge</artifactId>
+		</dependency>
+		
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
 		<dependency>
@@ -241,14 +258,16 @@
 	   		<groupId>com.github.jsqlparser</groupId>
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
+
 	</dependencies>
+
+
 
 	<build>
 		<finalName>it.unibz.inf.obda.p4plugin-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -327,7 +346,7 @@
 						<Implementation-Version>${project.version}</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.9</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Build-Number>0</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>

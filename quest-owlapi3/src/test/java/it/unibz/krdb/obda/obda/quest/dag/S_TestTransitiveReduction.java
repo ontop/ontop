@@ -21,11 +21,13 @@ package it.unibz.krdb.obda.obda.quest.dag;
  */
 
 
+
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGBuilderImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DAGImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.GraphImpl;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,6 +35,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,32 +106,26 @@ public class S_TestTransitiveReduction extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			GraphImpl graph1= S_InputOWL.createGraph(fileInput);
-
-			DAGBuilderImpl change2 = new DAGBuilderImpl(graph1);
-			
-			DAGImpl dag2=(DAGImpl) change2.getDAG();
-//			DAGImpl dag2= S_InputOWL.createDAG(fileInput);
-
+			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			Test_TBoxReasonerImplOnGraph reasonerd1 = new Test_TBoxReasonerImplOnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
-			log.info("First graph {}", graph1);
+			log.info("First graph {}", dag2.getPropertyGraph());
+			log.info("First graph {}", dag2.getClassGraph());
 			log.info("Second dag {}", dag2);
-			
-			
-
-			assertTrue(testRedundantEdges(graph1,dag2));
+						
+			assertTrue(testRedundantEdges(reasonerd1,dag2));
 
 
 		}
 	}
 
 
-	private boolean testRedundantEdges(GraphImpl g1, DAGImpl d2){
+	private boolean testRedundantEdges(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
 		//number of edges in the graph
-		int  numberEdgesD1= g1.edgeSet().size();
+		int  numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag
-		int numberEdgesD2 = d2.edgeSet().size();
+		int numberEdgesD2 = d2.edgeSetSize();
 
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
@@ -136,62 +133,74 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		TBoxReasonerImpl reasonerd2= new TBoxReasonerImpl(d2);
-
-		Set<Set<Description>> nodesd2= reasonerd2.getNodes(false);
-		Iterator<Set<Description>> it1 =nodesd2.iterator();
-		while (it1.hasNext()) {
-			Set<Description> equivalents=it1.next();
-
-			//two nodes have two edges, three nodes have three edges...
-			if(equivalents.size()>=2){
+		for(Equivalences<Property> equivalents: d2.getProperties()) 
+			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
-			}
-		}
+			
+		for(Equivalences<BasicClassDescription> equivalents: d2.getClasses()) 
+			if(equivalents.size()>=2)
+				numberEquivalents += equivalents.size();
 
-		TBoxReasonerImpl reasonerd1= new TBoxReasonerImpl(g1);
 
-		Set<Set<Description>> nodesg1= reasonerd1.getNodes(false);
-		Iterator<Set<Description>> it2 =nodesg1.iterator();
-		
-
-		while (it2.hasNext()) {
-
-			
-			Set<Description> equivalents=it2.next();
-			log.info("equivalents {} ", equivalents);
-			
-			
-			
-			//check if there are redundant edges
-			for (Description vertex: equivalents){
-				if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
-					numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
-			
+		{
+			DefaultDirectedGraph<Property,DefaultEdge> g1 = 	reasonerd1.getPropertyGraph();	
+			for (Equivalences<Property> equivalents: reasonerd1.getProperties()) {
 				
-				//descendants of the vertex
-				Set<Set<Description>> descendants=reasonerd2.getDescendants(vertex, false);
-				Set<Set<Description>> children=reasonerd2.getDirectChildren(vertex, false);
-
-				log.info("descendants{} ", descendants);
-				log.info("children {} ", children);
-
-				for(DefaultEdge edge: g1.incomingEdgesOf(vertex)){
-					Description source=g1.getEdgeSource(edge);
-					for(Set<Description> descendant:descendants){
-
-					if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
-						numberRedundants +=1;	
-					}
+				log.info("equivalents {} ", equivalents);
+				
+				//check if there are redundant edges
+				for (Property vertex: equivalents) {
+					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
+						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
+				
 					
+					//descendants of the vertex
+					Set<Equivalences<Property>> descendants = d2.getProperties().getSub(equivalents);
+					Set<Equivalences<Property>> children = d2.getProperties().getDirectSub(equivalents);
 
+					log.info("descendants{} ", descendants);
+					log.info("children {} ", children);
+
+					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
+						Property source=g1.getEdgeSource(edge);
+						for(Equivalences<Property> descendant:descendants) {
+							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
+								numberRedundants +=1;	
+						}
+					}
 				}
-				
-				
 			}
-
 		}
+		{
+			DefaultDirectedGraph<BasicClassDescription,DefaultEdge> g1 = 	reasonerd1.getClassGraph();	
 
+			for (Equivalences<BasicClassDescription> equivalents : reasonerd1.getClasses()) {
+				
+				log.info("equivalents {} ", equivalents);
+				
+				//check if there are redundant edges
+				for (BasicClassDescription vertex: equivalents) {
+					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
+						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
+				
+					
+					//descendants of the vertex
+					Set<Equivalences<BasicClassDescription>> descendants = d2.getClasses().getSub(equivalents);
+					Set<Equivalences<BasicClassDescription>> children = d2.getClasses().getDirectSub(equivalents);
+
+					log.info("descendants{} ", descendants);
+					log.info("children {} ", children);
+
+					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
+						BasicClassDescription source=g1.getEdgeSource(edge);
+						for(Equivalences<BasicClassDescription> descendant:descendants) {
+							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
+								numberRedundants +=1;	
+						}
+					}
+				}
+			}
+		}
 		log.info("edges graph {}", numberEdgesD1);
 		log.info("edges dag {}", numberEdgesD2);
 		log.info("equivalents {} ", numberEquivalents);

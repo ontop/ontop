@@ -35,6 +35,7 @@ import java.net.URI;
 import java.util.Properties;
 
 import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -63,15 +64,15 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName));
 	}
 	
-	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, String configFileName) throws Exception {
+	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName));
 	}
 
-	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, QuestPreferences config) throws Exception {
+	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, QuestPreferences config) throws Exception {
 		this(name, tbox, mappings, null, config);
 	}
-	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
+	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, metadata, prop);
 	}
@@ -115,7 +116,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		return pref;
 	}
 	
-	private void createRepo(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
+	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
 	{
 		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}

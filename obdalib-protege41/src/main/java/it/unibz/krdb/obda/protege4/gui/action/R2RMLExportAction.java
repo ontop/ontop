@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLWriter;
+import it.unibz.krdb.obda.r2rml.R2RMLWriter;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class R2RMLExportAction extends ProtegeAction {
 
 	private OWLEditorKit editorKit = null;
 	private OBDAModel obdaModel = null;
+	private OWLModelManager modelManager= null;
 	
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
@@ -55,6 +57,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
 		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		modelManager = editorKit.getOWLModelManager();
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class R2RMLExportAction extends ProtegeAction {
           File file = fc.getSelectedFile();
           
     	  
-		R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID);
+		R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
 		writer.write(file);
 
 	}

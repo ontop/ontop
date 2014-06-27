@@ -40,13 +40,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -80,11 +80,16 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubJoin;
@@ -95,7 +100,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Find all used tables within an select statement.
  */
-public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
+public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
 
 	/**
 	 * Store the table selected by the SQL query in RelationJSQL
@@ -117,9 +122,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
 	 * @param select
+	 * @param unquote 
 	 * @return
 	 */
-	public ArrayList<RelationJSQL> getTableList(Select select) throws JSQLParserException {
+	public ArrayList<RelationJSQL> getTableList(Select select, boolean unquote) throws JSQLParserException {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -128,7 +134,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		}
 		select.getSelectBody().accept(this);
 		
-		if(notSupported) // used to throw exception for the currently unsupported methods
+		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
 			throw new JSQLParserException("Query not yet supported");
 		
 		return tables;
@@ -159,7 +165,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		if (plainSelect.getWhere() != null) {
 			plainSelect.getWhere().accept(this);
 		}
-
+		
+		for (SelectItem expr : plainSelect.getSelectItems()){
+			expr.accept(this);
+		}
 	}
 
 	/*
@@ -172,24 +181,24 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Table tableName) {
 		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
-		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())) {
+		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
 			tables.add(relation);
 		}
 	}
 
 	@Override
 	public void visit(SubSelect subSelect) {
+		
 		if (subSelect.getSelectBody() instanceof PlainSelect) {
 			
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 			
-			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
+			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
 				notSupported = true;
-			} else {
-				subSelBody.accept(this);
-			}
+			
 		} else
 			notSupported = true;
+		subSelect.getSelectBody().accept(this);
 	}
 
 	/*
@@ -215,6 +224,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Column tableColumn) {
+		//it does nothing here, everything is good
 	}
 
 	@Override
@@ -250,11 +260,6 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(InExpression inExpression) {
 		inExpression.getLeftExpression().accept(this);
 		inExpression.getRightItemsList().accept(this);
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
-		inverseExpression.getExpression().accept(this);
 	}
 
 	@Override
@@ -363,20 +368,20 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
 		notSupported = true;
-	//	allComparisonExpression.getSubSelect().getSelectBody().accept(this);
+		allComparisonExpression.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
 		notSupported = true;
-		//anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
+		anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(SubJoin subjoin) {
 		notSupported = true;
-//		subjoin.getLeft().accept(this);
-//		subjoin.getJoin().getRightItem().accept(this);
+		subjoin.getLeft().accept(this);
+		subjoin.getJoin().getRightItem().accept(this);
 	}
 
 	@Override
@@ -387,25 +392,25 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Matches matches) {
 		notSupported = true;
-		//visitBinaryExpression(matches);
+		visitBinaryExpression(matches);
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
 		notSupported = true;
-		//visitBinaryExpression(bitwiseAnd);
+		visitBinaryExpression(bitwiseAnd);
 	}
 
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
 		notSupported = true;
-		//visitBinaryExpression(bitwiseOr);
+		visitBinaryExpression(bitwiseOr);
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
 		notSupported = true;
-		//visitBinaryExpression(bitwiseXor);
+		visitBinaryExpression(bitwiseXor);
 	}
 
 	@Override
@@ -416,7 +421,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Modulo modulo) {
 		notSupported = true;
-		//visitBinaryExpression(modulo);
+		visitBinaryExpression(modulo);
 	}
 
 	@Override
@@ -431,9 +436,9 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(SetOperationList list) {
 		notSupported = true;
-//		for (PlainSelect plainSelect : list.getPlainSelects()) {
-//			visit(plainSelect);
-//		}
+		for (PlainSelect plainSelect : list.getPlainSelects()) {
+			visit(plainSelect);
+		}
 	}
 
 	@Override
@@ -444,15 +449,15 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(LateralSubSelect lateralSubSelect) {
 		notSupported = true;
-	//	lateralSubSelect.getSubSelect().getSelectBody().accept(this);
+		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(MultiExpressionList multiExprList) {
 		notSupported = true;
-//		for (ExpressionList exprList : multiExprList.getExprList()) {
-//			exprList.accept(this);
-//		}
+		for (ExpressionList exprList : multiExprList.getExprList()) {
+			exprList.accept(this);
+		}
 	}
 
 	@Override
@@ -484,8 +489,40 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	}
 
 	@Override
-	public void visit(RegExpMatchOperator arg0) {
-		// TODO Auto-generated method stub
+	public void visit(RegExpMatchOperator rexpr) {
 		notSupported = true;
+		visitBinaryExpression(rexpr);
+	}
+
+
+
+	@Override
+	public void visit(SignedExpression arg0) {
+		System.out.println("WARNING: SignedExpression   not implemented ");
+
+		notSupported = true;
+		
+	}
+
+
+
+	@Override
+	public void visit(AllColumns expr) {
+		//Do nothing!
+	}
+
+
+
+	@Override
+	public void visit(AllTableColumns arg0) {
+		//Do nothing!
+		
+	}
+
+
+
+	@Override
+	public void visit(SelectExpressionItem expr) {
+		expr.getExpression().accept(this);
 	}
 }

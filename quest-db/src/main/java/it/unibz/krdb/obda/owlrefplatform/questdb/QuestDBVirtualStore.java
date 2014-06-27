@@ -37,7 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 
 import java.io.File;
@@ -47,6 +47,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
@@ -174,7 +175,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param pref - QuestPreferences
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences config) throws Exception {
+	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences config) throws Exception {
 		//call super constructor -> QuestDBAbstractStore
 		super(name);
 		

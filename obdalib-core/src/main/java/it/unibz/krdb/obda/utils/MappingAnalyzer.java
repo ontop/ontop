@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -49,6 +50,7 @@ import java.util.Stack;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.CastExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -67,6 +69,7 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
 
 //import com.hp.hpl.jena.iri.IRI;
 
@@ -120,15 +123,23 @@ public class MappingAnalyzer {
 
 				// Construct the body from the source query
 				ArrayList<Function> atoms = new ArrayList<Function>();
+				
+				
+				
 				for (RelationJSQL table : tableList) {
 					// Construct the URI from the table name
-					String tableName = table.getGivenName();
-					String predicateName = tableName;
+					String tableName = table.getFullName();
+//					String tableName = table.getTableName();
+					//String predicateName = tableName;
+//					String predicateName = table.getTableName();
 
 					// Construct the predicate using the table name
 					int arity = dbMetaData.getDefinition(tableName)
 							.countAttribute();
-					Predicate predicate = dfac.getPredicate(predicateName,
+					
+					
+					
+					Predicate predicate = dfac.getPredicate(tableName,
 							arity);
 
 					// Swap the column name with a new variable from the lookup
@@ -260,6 +271,39 @@ public class MappingAnalyzer {
 			return dfac.getFunctionIsNotNull(var);
 		}
 	}
+	
+	/**
+	 * Methods to create a {@link Function} starting from a
+	 * {@link IsNullExpression}
+	 * 
+	 * @param pred
+	 *            IsNullExpression
+	 * @param lookupTable
+	 * @return a function from the OBDADataFactory
+	 */
+	private Function getFunction(CastExpression pred, LookupTable lookupTable) {
+
+		Expression column = pred.getLeftExpression();
+		String columnName = column.toString();
+		String variableName = lookupTable.lookup(columnName);
+		if (variableName == null) {
+			throw new RuntimeException(
+					"Unable to find column name for variable: " + columnName);
+		}
+		Term var = dfac.getVariable(variableName);
+
+		ColDataType datatype= pred.getType();
+		
+
+		
+		Term var2 = null;
+		
+		//first value is a column, second value is a datatype. It can  also have the size
+		
+		return dfac.getFunctionCast(var, var2);
+		
+		
+	}
 
 	/**
 	 * Recursive methods to create a {@link Function} starting from a
@@ -368,7 +412,7 @@ public class MappingAnalyzer {
 			funct = dfac.getFunctionGTE(t1, t2);
 		else if (op.equals("<="))
 			funct = dfac.getFunctionLTE(t1, t2);
-		else if (op.equals("<>"))
+		else if (op.equals("<>") || op.equals("!="))
 			funct = dfac.getFunctionNEQ(t1, t2);
 		else if (op.equals("AND"))
 			funct = dfac.getFunctionAND(t1, t2);
@@ -502,14 +546,16 @@ public class MappingAnalyzer {
 		for (RelationJSQL table : tableList) {
 			
 			String tableName = table.getTableName();
+			String fullName = table.getFullName();
 			String tableGivenName = table.getGivenName();
-			DataDefinition def = dbMetaData.getDefinition(tableGivenName);
-			if (def == null) {
-				 def = dbMetaData.getDefinition(tableName);
+			DataDefinition def = dbMetaData.getDefinition(fullName);
+			
+			
 				 if (def == null) {
 					 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
 				 }
-			}
+			
+			
 			int size = def.countAttribute();
 
 			for (int i = 1; i <= size; i++) {
@@ -517,7 +563,8 @@ public class MappingAnalyzer {
 				int index = i + offset;
 				
 				// simple attribute name
-				String columnName = dbMetaData.getAttributeName(tableGivenName, i);
+//				String columnName = dbMetaData.getAttributeName(tableName, i);
+				String columnName = dbMetaData.getAttributeName(fullName, i);
 				
 				lookupTable.add(columnName, index);
 				
@@ -555,7 +602,8 @@ public class MappingAnalyzer {
 				
 				
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableGivenName, i);
+				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(fullName, i);
+//				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
 				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the alias name, if any
@@ -565,7 +613,8 @@ public class MappingAnalyzer {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias!=null) {
-					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableGivenName, tableAlias, i);
+					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(fullName, tableAlias, i);
+//					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);		
 						String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
 						if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any

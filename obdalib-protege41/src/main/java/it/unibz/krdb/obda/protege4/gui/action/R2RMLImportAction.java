@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -90,7 +90,10 @@ public class R2RMLImportAction extends ProtegeAction {
 					for (OBDAMappingAxiom mapping : reader.readMappings()) {
 						if (mapping.getTargetQuery().toString().contains("BNODE"))
 							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains BNode. -ontoPro- does not support it yet.");
-						else
+						else if (mapping.getTargetQuery().toString().contains("triple"))
+						{
+							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains a URI as predicate. -ontoPro- plugin does not support that yet. Please use the -ontop- API.");
+						} else
 							obdaModel.addMapping(sourceID, mapping);
 					}
 				} catch (DuplicateMappingException dm) {

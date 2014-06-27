@@ -68,7 +68,7 @@ public class MappingParser {
 			ArrayList<RelationJSQL> removeThese = new ArrayList<RelationJSQL>();
 			for(ViewDefinition vd : translator.getViewDefinitions()){
 				for(RelationJSQL rel : _realTables){
-					if(rel.getName().equals(vd.getName()))
+					if(rel.getFullName().equals(vd.getName()))
 						removeThese.add(rel);
 				}
 			}
