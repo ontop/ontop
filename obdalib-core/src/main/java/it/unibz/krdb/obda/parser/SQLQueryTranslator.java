@@ -122,7 +122,11 @@ public class SQLQueryTranslator {
 		boolean errors=false;
 		VisitedQuery queryParser = null;
 		
+		
 		try {
+		/*
+		 * 
+		 */
 			queryParser = new VisitedQuery(query,generateViews);
 			
 		} catch (JSQLParserException e) 

@@ -42,7 +42,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * WARNING: THIS CLASS IS FOR TESTING ONLY 
  */
 
-
+@Deprecated
 public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	private EquivalencesDAG<Property> propertyDAG;

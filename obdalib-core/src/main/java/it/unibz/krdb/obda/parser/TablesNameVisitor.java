@@ -40,13 +40,13 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.ExtractExpression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.SignedExpression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimeValue;
 import net.sf.jsqlparser.expression.TimestampValue;
@@ -80,11 +80,16 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubJoin;
@@ -95,7 +100,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Find all used tables within an select statement.
  */
-public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
+public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
 
 	/**
 	 * Store the table selected by the SQL query in RelationJSQL
@@ -160,7 +165,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		if (plainSelect.getWhere() != null) {
 			plainSelect.getWhere().accept(this);
 		}
-
+		
+		for (SelectItem expr : plainSelect.getSelectItems()){
+			expr.accept(this);
+		}
 	}
 
 	/*
@@ -173,7 +181,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	@Override
 	public void visit(Table tableName) {
 		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
-		if (!otherItemNames.contains(tableName.getWholeTableName().toLowerCase())) {
+		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
 			tables.add(relation);
 		}
 	}
@@ -216,6 +224,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Column tableColumn) {
+		//it does nothing here, everything is good
 	}
 
 	@Override
@@ -251,11 +260,6 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(InExpression inExpression) {
 		inExpression.getLeftExpression().accept(this);
 		inExpression.getRightItemsList().accept(this);
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
-		inverseExpression.getExpression().accept(this);
 	}
 
 	@Override
@@ -488,5 +492,37 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(RegExpMatchOperator rexpr) {
 		notSupported = true;
 		visitBinaryExpression(rexpr);
+	}
+
+
+
+	@Override
+	public void visit(SignedExpression arg0) {
+		System.out.println("WARNING: SignedExpression   not implemented ");
+
+		notSupported = true;
+		
+	}
+
+
+
+	@Override
+	public void visit(AllColumns expr) {
+		//Do nothing!
+	}
+
+
+
+	@Override
+	public void visit(AllTableColumns arg0) {
+		//Do nothing!
+		
+	}
+
+
+
+	@Override
+	public void visit(SelectExpressionItem expr) {
+		expr.getExpression().accept(this);
 	}
 }

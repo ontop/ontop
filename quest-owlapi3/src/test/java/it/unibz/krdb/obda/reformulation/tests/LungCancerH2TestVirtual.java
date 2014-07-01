@@ -211,7 +211,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
-			for (int i = 1; i <= rs.getColumCount(); i++) {
+			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				System.out.print(rs.getSignature().get(i-1));
 				System.out.print("=" + rs.getOWLObject(i));
 				System.out.print(" ");

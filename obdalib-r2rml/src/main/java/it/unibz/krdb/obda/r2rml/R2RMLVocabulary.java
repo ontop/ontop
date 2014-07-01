@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.sesame.r2rml;
+package it.unibz.krdb.obda.r2rml;
 
 /*
  * #%L

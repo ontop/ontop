@@ -74,11 +74,11 @@ import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewKeyReader;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -101,6 +101,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.regex.Pattern;
+
+import net.sf.jsqlparser.JSQLParserException;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -217,6 +219,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	
 	private boolean obtainFullMetadata = false;
 
+    private boolean sqlGenerateReplace = true;
+
 	private String aboxMode = QuestConstants.CLASSIC;
 
 	private String aboxSchemaType = QuestConstants.SEMANTIC_INDEX;
@@ -258,7 +262,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private Map<Predicate, List<Integer>> pkeys;
 
-	/***
+
+    /***
 	 * Will prepare an instance of Quest in "classic ABox mode", that is, to
 	 * work as a triple store. The property
 	 * "org.obda.owlreformulationplatform.aboxmode" must be set to "classic".
@@ -436,10 +441,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		aboxSchemaType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 		
-		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
-		
+		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
 		useViewKeyFile = Boolean.valueOf((String) preferences.getProperty(QuestPreferences.USE_VIEW_KEY_FILE));
 		viewKeyFile = (String) preferences.get(QuestPreferences.VIEW_KEY_FILE);
+
+        sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -708,7 +714,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
 					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
-					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
+					try{
+						ArrayList<RelationJSQL> realTables = mParser.getRealTables();
+						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
+					}catch (JSQLParserException e){
+						System.out.println("Error obtaining the tables"+ e);
+					}catch( SQLException e ){
+						System.out.println("Error obtaining the Metadata"+ e);
+					
+					}
+					
 					// This call should be used if the ParsedMappings 
 					// are reused for the parsing below
 					mParser.addViewDefs(metadata);
@@ -716,8 +731,33 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 			
 			//Adds keys from the text file
-			if(useViewKeyFile)
+			if(useViewKeyFile){
 				ViewKeyReader.addViewKeys(metadata, viewKeyFile);
+				System.out.println("Read view keys from file");
+				// Prints all primary keys
+				System.out.println("\n====== Primary keys ==========");
+				List<TableDefinition> table_list = metadata.getTableList();
+				for(TableDefinition dd : table_list){
+					System.out.print("\n" + dd.getName() + ":");
+					for(Attribute attr : dd.getPrimaryKeys() ){
+						System.out.print(attr.getName() + ",");
+					}
+				}
+				// Prints all foreign keys
+				System.out.println("\n====== Foreign keys ==========");
+				for(TableDefinition dd : table_list){
+					System.out.print("\n" + dd.getName() + ":");
+					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
+					for(String fkName : fkeys.keySet() ){
+							System.out.print("(" + fkName + ":");
+							for(Attribute attr : fkeys.get(fkName)){
+								System.out.print(attr.getName() + ",");
+							}
+							System.out.print("),");
+					}
+				}		
+			}
+				
 
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
@@ -727,7 +767,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
-					sqladapter);
+					sqladapter, sqlGenerateReplace);
+
+
+
 			if (isSemanticIdx) {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
@@ -1107,7 +1150,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					 // If the SQL string has sub-queries in its statement
 					if (containChildParentSubQueries(sourceString)) {
 						int childquery1 = sourceString.indexOf("(");
-						int childquery2 = sourceString.indexOf(") as CHILD");
+						int childquery2 = sourceString.indexOf(") AS child");
 						String childquery = sourceString.substring(childquery1 + 1, childquery2);
 
 						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
@@ -1120,14 +1163,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("CHILD." + col );
-								sb.append("CHILD.\"" + col + "\" as \"CHILD_" + (col)+"\"");
+								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
 								needComma = true;
 							}
 						}
 						sb.append(", ");
 
 						int parentquery1 = sourceString.indexOf(", (", childquery2);
-						int parentquery2 = sourceString.indexOf(") as PARENT");
+						int parentquery2 = sourceString.indexOf(") AS parent");
 						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
 
 						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
@@ -1140,7 +1183,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 								}
 								String col = rsm.getColumnName(pos);
 								//sb.append("PARENT." + col);
-								sb.append("PARENT.\"" + col + "\" as \"PARENT_" + (col)+"\"");
+								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
 								needComma = true;
 							}
 						}

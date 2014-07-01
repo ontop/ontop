@@ -37,6 +37,7 @@ import java.util.List;
  * Helper class to dump isa relationships into .dot format for processing them
  * into png
  */
+@Deprecated
 public class GraphGenerator {
 
 	static String isaClsFile = "isaClasses";

@@ -1,0 +1,10 @@
+_:N8283ef39fd21408fa78ec3f89cf68cd9 <http://www.w3.org/ns/r2rml#column> "ENAME" .
+_:Ndcae8686564b482f8b42aa891cf71e2c <http://www.w3.org/ns/r2rml#template> "http://data.example.com/employee/{EMPNO}" .
+_:Ndcae8686564b482f8b42aa891cf71e2c <http://www.w3.org/ns/r2rml#class> <http://example.com/ns#Employee> .
+_:N9b45e117ad724dae84a4e8ad5f4665e8 <http://www.w3.org/ns/r2rml#tableName> "EMP" .
+<http://test.mapping#TriplesMap1> <http://www.w3.org/ns/r2rml#predicateObjectMap> _:Nc3bf7adacb3b4628b614ba56c8cad23f .
+<http://test.mapping#TriplesMap1> <http://www.w3.org/ns/r2rml#subjectMap> _:Ndcae8686564b482f8b42aa891cf71e2c .
+<http://test.mapping#TriplesMap1> <http://www.w3.org/ns/r2rml#logicalTable> _:N9b45e117ad724dae84a4e8ad5f4665e8 .
+_:Nc3bf7adacb3b4628b614ba56c8cad23f <http://www.w3.org/ns/r2rml#objectMap> _:N8283ef39fd21408fa78ec3f89cf68cd9 .
+_:Nc3bf7adacb3b4628b614ba56c8cad23f <http://www.w3.org/ns/r2rml#predicate> <http://example.com/ns#name> .
+

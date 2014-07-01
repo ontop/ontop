@@ -50,8 +50,10 @@ public class QuestPreferences extends Properties {
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
 	
 	public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
-	
-	public static final String  REWRITE 	= "rewrite";
+
+    public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
+
+    public static final String  REWRITE 	= "rewrite";
 	
 	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
@@ -70,7 +72,7 @@ public class QuestPreferences extends Properties {
 	
 	public static final String VIEW_KEY_FILE = "VIEW_KEY_FILE";
 	public static final String USE_VIEW_KEY_FILE = "USE_VIEW_KEY_FILE";
-	
+
 	// Tomcat connection pool properties
 	public static final String MAX_POOL_SIZE = "max_pool_size";
 	public static final String INIT_POOL_SIZE = "initial_pool_size";

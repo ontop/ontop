@@ -78,7 +78,7 @@ public class TableJSQL implements Serializable{
 		setSchema(table.getSchemaName());
 		setGivenSchema(table.getSchemaName());
 		setTableName(table.getName());
-		setGivenName(table.getWholeTableName());
+		setGivenName(table.getFullyQualifiedName());
 		setAlias(table.getAlias());
 	}
 

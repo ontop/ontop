@@ -69,7 +69,7 @@ public class OWLResultSetTableModel implements TableModel {
 		this.isFetchAll = fetchAll;
 		this.fetchSizeLimit = fetchSizeLimit;
 
-		numcols = results.getColumCount();
+		numcols = results.getColumnCount();
 		numrows = 0;
 		
 		resultsTable = new Vector<String[]>();
