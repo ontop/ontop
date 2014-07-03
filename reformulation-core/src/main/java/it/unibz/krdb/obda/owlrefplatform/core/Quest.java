@@ -693,7 +693,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-
+			
+			// Parse mappings. Includes extracting view definitions
+			MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -703,7 +705,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				} else {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
-					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
+					
 					try{
 						ArrayList<RelationJSQL> realTables = mParser.getRealTables();
 						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
@@ -714,11 +716,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 					}
 					
-					// This call should be used if the ParsedMappings 
-					// are reused for the parsing below
-					mParser.addViewDefs(metadata);
 				}
 			}
+
+			// This call should be used if the ParsedMappings 
+			// are reused for the parsing below
+			mParser.addViewDefs(metadata);
 			
 		
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
