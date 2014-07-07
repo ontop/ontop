@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to test that the r2rml file with the mappings give the same results of the corresponding obda file.
- * We use the npd database.
+ * We use the booktutorial database and the r2rml mapping of the Plugin Test for the release.
  */
-public class R2rmlCheckerTest {
+public class MappingR2rmlCheckerTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -70,10 +70,10 @@ public class R2rmlCheckerTest {
 	private OWLOntology ontology;
 	private Ontology onto;
 
-	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
-	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
+	final String owlfile = "src/test/resources/r2rml/booktutorial.owl";
+	final String obdafile = "src/test/resources/r2rml/booktutorial.obda";
 
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_datatype.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/mapping.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
 
@@ -133,10 +133,10 @@ public class R2rmlCheckerTest {
 
 		loadOBDA(p);
 
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
+		String jdbcurl = "jdbc:postgresql://10.7.20.39/books";
+		String username = "postgres";
+		String password = "postgres";
+		String driverclass = "org.postgresql.Driver";
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
 //		String sourceUrl = "http://example.org/customOBDA";

@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.datatype.DatatypeFactory;
+
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -360,10 +362,6 @@ public class OBDAMappingTransformer {
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
 				
-				if(func.toString().contains("dateBaaLicenseeValidTo"))
-					System.out.print("found you");
-				
-
 				if (object instanceof Variable){
 					if(ontology!= null && objectProperties.contains(prop)){
 						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
@@ -395,6 +393,8 @@ public class OBDAMappingTransformer {
 							//obm.setTemplate(mfact.createTemplate(objectTemplate));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
 							obm.setTermType(R2RMLVocabulary.literal);
+							
+//							obm.setDatatype(vf.createURI(objectPred.getName()));
 						
 							
 							
