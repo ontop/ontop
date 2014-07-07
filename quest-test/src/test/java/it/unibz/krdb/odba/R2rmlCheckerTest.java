@@ -73,8 +73,8 @@ public class R2rmlCheckerTest {
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
 	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
 
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_datatype.ttl";
-//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
+//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_datatype.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
@@ -180,7 +180,7 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testOBDA() throws Exception {
+	public void testOBDAEmpties() throws Exception {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -216,7 +216,7 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testR2rml() throws Exception {
+	public void testR2rmlEmpties() throws Exception {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager

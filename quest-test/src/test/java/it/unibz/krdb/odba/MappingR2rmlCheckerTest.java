@@ -257,52 +257,6 @@ public class MappingR2rmlCheckerTest {
 		assertEquals(46, emptyRolesR2rml.size());
 	}
 
-	/**
-	 * Compare numbers of result given by the obda file and the r2rml file over an npd query 
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testComparesNpdQuery() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-		// Now we are ready for querying
-		// npd query 1
-		int obdaResult = npdQuery(reasonerOBDA.getConnection());
-		// reasoner.dispose();
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
-
-		// Now we are ready for querying
-		// npd query 1
-		int r2rmlResult = npdQuery(reasonerR2rml.getConnection());
-		
-		assertEquals(obdaResult, r2rmlResult);
-
-	}
 
 	/**
 	 * Compare the results of r2rml and obda files over the role <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>
