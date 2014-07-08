@@ -73,7 +73,7 @@ public class R2rmlCheckerTest {
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
 	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
 
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_datatype.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_different.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
 
@@ -349,9 +349,9 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		log.debug("Comparing roles");
 
-			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#wellboreHoleDiameter>",
+			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",
 					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#wellboreHoleDiameter>",
+			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",
 					reasonerR2rml.getConnection());
 
 			assertEquals(roleOBDA, roleR2rml);
@@ -469,7 +469,7 @@ public class R2rmlCheckerTest {
 	}
 
 	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
-		String query = "SELECT * WHERE {?x " + description + " ?y.}";
+		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER ( lang(?name) = \"en-us\" ) }";
 //		String query = "SELECT * WHERE {?x " + description + " ?y. }";
 		QuestOWLStatement st = conn.createStatement();
 		int n = 0;
