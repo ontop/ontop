@@ -449,7 +449,7 @@ _:node18rc236e0x83 a rr:ObjectMap .
 
 _:node18rc236e0x80 rr:template "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/point" .
 
-_:node18rc236e0x83 a rr:TermMap ;
+_:node18rc236e0x83 
 	rr:termType rr:Literal .
 
 _:node18rc236e0x81 rr:predicateObjectMap _:node18rc236e0x84 .

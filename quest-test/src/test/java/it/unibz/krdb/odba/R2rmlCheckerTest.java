@@ -73,8 +73,8 @@ public class R2rmlCheckerTest {
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
 	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
 
-//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_datatype.ttl";
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_datatype.ttl";
+//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
 //	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
@@ -305,7 +305,11 @@ public class R2rmlCheckerTest {
 	}
 
 	/**
-	 * Compare the results of r2rml and obda files over the role <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>
+	 * Compare the results of r2rml and obda files over one role
+	 * Try <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL> for the case of termtype set to IRI
+	 * Try <http://sws.ifi.uio.no/vocab/npd-v2#dateSyncNPD> or <http://sws.ifi.uio.no/vocab/npd-v2#dateBaaLicenseeValidTo>  to test typed literal
+	 * Try <http://sws.ifi.uio.no/vocab/npd-v2#sensorLength>, <http://sws.ifi.uio.no/vocab/npd-v2#wellboreHoleDiameter> or <http://sws.ifi.uio.no/vocab/npd-v2#isMultilateral> for a plain Literal
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -345,9 +349,9 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		log.debug("Comparing roles");
 
-			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#dateBaaLicenseeValidTo>",
+			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#wellboreHoleDiameter>",
 					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#dateBaaLicenseeValidTo>",
+			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#wellboreHoleDiameter>",
 					reasonerR2rml.getConnection());
 
 			assertEquals(roleOBDA, roleR2rml);
@@ -465,17 +469,25 @@ public class R2rmlCheckerTest {
 	}
 
 	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
-		String query = "SELECT * WHERE {?x " + description + " ?y.  FILTER isLiteral(?y)}";
+		String query = "SELECT * WHERE {?x " + description + " ?y.}";
+//		String query = "SELECT * WHERE {?x " + description + " ?y. }";
 		QuestOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while (rs.nextRow()) {
-				log.debug("result : "  + rs.getOWLObject("x"));
-				log.debug("result : "  + rs.getOWLLiteral("y"));
+//				log.debug("result : "  + rs.getOWLObject("x"));
+//				log.debug("result : "  + rs.getOWLObject("y"));
+//				log.debug("result : "  + rs.getOWLLiteral("y"));
+				
+				if(n==0){
+					log.debug("result : "  + rs.getOWLObject("x"));
+					log.debug("result : "  + rs.getOWLObject("y"));
+				
+				}
 				n++;
 			}
-			// log.info("description: " + n);
+			
 			return n;
 
 		} catch (Exception e) {

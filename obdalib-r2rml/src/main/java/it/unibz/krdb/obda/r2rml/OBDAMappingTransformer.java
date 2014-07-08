@@ -375,16 +375,16 @@ public class OBDAMappingTransformer {
 					tm.addPredicateObjectMap(pom);
 				} else if (object instanceof Function) {
 					//check if uritemplate
-					Predicate objectPred = ((Function) object).getFunctionSymbol();
+ 					Predicate objectPred = ((Function) object).getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
 						//obm.setTemplate(mfact.createTemplate(objectURI));
 						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-					}else if (objectPred instanceof DataTypePredicate) {
+					}else if (objectPred.isDataTypePredicate()) {
 						Term objectTerm = ((Function) object).getTerm(0);
-
+						
 						if (objectTerm instanceof Variable) {
 							//Now we add the template!!
 							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
@@ -394,10 +394,23 @@ public class OBDAMappingTransformer {
 							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
 							obm.setTermType(R2RMLVocabulary.literal);
 							
-//							obm.setDatatype(vf.createURI(objectPred.getName()));
-						
 							
+							//check if it is not a plain literal
+							if(!objectPred.equals(OBDAVocabulary.RDFS_LITERAL)){
+								
+								//set the datatype for the typed literal								
+								obm.setDatatype(vf.createURI(objectPred.getName()));
+							}
+							else{
+								//check if the plain literal has a lang value
+								if(objectPred.getArity()==2){
+									//TODO check language tag
+									Term langTerm = ((Function) object).getTerm(1);
+									obm.setLanguageTag(langTerm.toString());
+								}
+							}
 							
+	
 							
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
