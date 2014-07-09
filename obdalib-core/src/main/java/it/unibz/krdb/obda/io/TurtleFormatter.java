@@ -37,6 +37,7 @@ import java.util.List;
 /**
  * Utility class to write a conjunctive query in Turtle syntax
  */
+@Deprecated
 public class TurtleFormatter extends CQFormatter {
 
     public TurtleFormatter(PrefixManager pm) {
@@ -93,7 +94,10 @@ public class TurtleFormatter extends CQFormatter {
             } else if (functionSymbol instanceof URITemplatePredicate) {
                 Term uriTemplateConstant = function.getTerms().get(0);
                 String uriTemplate = getAbbreviatedName(TermUtil.toString(uriTemplateConstant), true);
-                StringBuilder template = new StringBuilder(uriTemplate);
+                //remove quotes at the beginning and at the end if present
+                
+                StringBuilder template = new StringBuilder(uriTemplate.replaceAll("^\"|\"$", ""));
+               
                 int startIndex = 0;
                 for (Term uriTemplateArg : function.getTerms()) {
                     if (uriTemplateArg instanceof Variable) {
@@ -103,6 +107,7 @@ public class TurtleFormatter extends CQFormatter {
                         startIndex = insertIndex + termString.length() + 1; // update the start index to find the next '{}' placeholder
                     }
                 }
+                  	
                 return String.format("<%s>", template.toString());
             }
         }
