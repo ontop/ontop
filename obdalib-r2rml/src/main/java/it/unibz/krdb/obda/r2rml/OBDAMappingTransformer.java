@@ -404,7 +404,7 @@ public class OBDAMappingTransformer {
 							else{
 								//check if the plain literal has a lang value
 								if(objectPred.getArity()==2){
-									//TODO check language tag
+									
 									Term langTerm = ((Function) object).getTerm(1);
 									obm.setLanguageTag(langTerm.toString());
 								}

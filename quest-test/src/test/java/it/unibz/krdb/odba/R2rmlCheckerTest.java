@@ -358,6 +358,59 @@ public class R2rmlCheckerTest {
 
 		
 	}
+	
+	/**
+	 * Compare the results of r2rml and obda files over one role
+	 * Added the filter to give as results only Literals
+	 * 
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testOneRoleFilterLiterals() throws Exception {
+
+		// Loading the OWL file
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		ontology = manager
+				.loadOntologyFromOntologyDocument((new File(owlfile)));
+
+		OWLAPI3Translator translator = new OWLAPI3Translator();
+
+		onto = translator.translate(ontology);
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
+				QuestConstants.FALSE);
+
+		loadOBDA(p);
+
+		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
+		String username = "fish";
+		String password = "fish";
+		String driverclass = "com.mysql.jdbc.Driver";
+
+		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+		// String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI = new File(r2rmlfile).toURI();
+		String sourceUrl = obdaURI.toString();
+
+		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+				username, password, driverclass);
+
+		loadR2rml(p, dataSource);
+
+		// Now we are ready for querying
+		log.debug("Comparing roles");
+
+		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",reasonerOBDA.getConnection());
+		int roleR2rml = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerR2rml.getConnection());
+
+		assertEquals(roleOBDA, roleR2rml);
+
+	}
+	
+
 	/**
 	 * Execute Npd query 1 and give the number of results
 	 * @return 
@@ -469,8 +522,7 @@ public class R2rmlCheckerTest {
 	}
 
 	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
-		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER ( lang(?name) = \"en-us\" ) }";
-//		String query = "SELECT * WHERE {?x " + description + " ?y. }";
+		String query = "SELECT * WHERE {?x " + description + " ?y.}";
 		QuestOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
@@ -505,6 +557,39 @@ public class R2rmlCheckerTest {
 
 		}
 
+	}
+	
+	private int runSPARQLRoleFilterQuery(String description, QuestOWLConnection connection) throws OWLException {
+		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER(isLiteral(?y))}";
+		QuestOWLStatement st = connection.createStatement();
+		int n = 0;
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+			while (rs.nextRow()) {
+				if(n==0){
+					log.debug("result : "  + rs.getOWLObject("x"));
+					log.debug("result : "  + rs.getOWLLiteral("y"));
+				
+				}
+				n++;
+			}
+			
+			return n;
+
+		} catch (Exception e) {
+			log.debug(e.toString());
+			throw e;
+
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+			}
+			// conn.close();
+			st.close();
+
+		}
 	}
 
 }
