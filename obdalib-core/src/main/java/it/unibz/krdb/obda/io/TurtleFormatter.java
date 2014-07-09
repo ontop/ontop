@@ -93,13 +93,14 @@ public class TurtleFormatter extends CQFormatter {
             } else if (functionSymbol instanceof URITemplatePredicate) {
                 Term uriTemplateConstant = function.getTerms().get(0);
                 String uriTemplate = getAbbreviatedName(TermUtil.toString(uriTemplateConstant), true);
-                StringBuffer template = new StringBuffer(uriTemplate);
+                StringBuilder template = new StringBuilder(uriTemplate);
                 int startIndex = 0;
                 for (Term uriTemplateArg : function.getTerms()) {
                     if (uriTemplateArg instanceof Variable) {
-                        int insertIndex = uriTemplate.indexOf("{", startIndex);
-                        template.insert(insertIndex + 1, TermUtil.toString(uriTemplateArg));
-                        startIndex = insertIndex + 1; // update the start index to find the next '{}' placeholder
+                        int insertIndex = template.indexOf("{", startIndex);
+                        String termString =TermUtil.toString(uriTemplateArg);
+                        template.insert(insertIndex + 1, termString );
+                        startIndex = insertIndex + termString.length() + 1; // update the start index to find the next '{}' placeholder
                     }
                 }
                 return String.format("<%s>", template.toString());
