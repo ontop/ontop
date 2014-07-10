@@ -22,6 +22,8 @@ package it.unibz.krdb.obda.r2rml;
 
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -95,7 +97,17 @@ class MappingConverterCMD {
 
 				URI obdaURI = new File(mapFile).toURI();
 				R2RMLReader reader = new R2RMLReader(mapFile);
-				OBDAModel model = reader.readModel(obdaURI);
+				
+				String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
+				String username = "sa";
+				String password = "";
+				String driverclass = "com.mysql.jdbc.Driver";
+
+				OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+				String sourceUrl =obdaURI.toString();
+				OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+						username, password, driverclass);
+				OBDAModel model = reader.readModel(dataSource);
 
 				ModelIOManager modelIO = new ModelIOManager(model);
 				modelIO.save(out);
