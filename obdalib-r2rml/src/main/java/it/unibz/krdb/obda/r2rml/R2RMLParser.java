@@ -297,37 +297,55 @@ public class R2RMLParser {
 		//we check if the object map is a constant (can be a iri or a literal)
 		String obj = om.getConstant();
 		if (obj != null) {
-//			boolean isURI = false;
-//			try {
-//				java.net.URI.create(obj);
-//				isURI = true;
-//			} catch (IllegalArgumentException e){
-//
-//			}
+			// boolean isURI = false;
+			// try {
+			// java.net.URI.create(obj);
+			// isURI = true;
+			// } catch (IllegalArgumentException e){
+			//
+			// }
 			Predicate pred;
-			if(obj.startsWith("http://")){ 
+			if (obj.startsWith("http://")) {
 				pred = fac.getUriTemplatePredicate(1);
 			} else {
-				
+
 				pred = OBDAVocabulary.RDFS_LITERAL;
 			}
-			Term newlit = fac.getConstantLiteral(obj);
-			objectAtom = fac.getFunction(pred, newlit);
-			
+
 			// if the literal has a language property or a datatype property we
 			// create the function object later
-			if (lan != null || datatype != null) {
+			if (lan != null || datatype != null) 
+			{
 				objectAtom = fac.getConstantLiteral(obj);
+				
+			} 
+			else 
+			{
+				Term newlit = fac.getConstantLiteral(obj);
+				objectAtom = fac.getFunction(pred, newlit);
+
 			}
-			
+
 		}
 
 		//we check if the object map is a column (can be only literal)
 		String col = om.getColumn();
 		if (col != null) {
-			if (!joinCond.isEmpty())
+			col=trim(col);
+			
+			if (!joinCond.isEmpty()){
 				col = joinCond + col;
-			objectAtom = fac.getVariable(col);
+			}
+			
+			if (lan != null || datatype != null) 
+			{
+				objectAtom = fac.getVariable(col);
+			}
+			else
+			{ //we check later if it has a language tag or if it is a datatype 
+				objectAtom = fac.getFunction(OBDAVocabulary.RDFS_LITERAL, fac.getVariable(col));
+				
+			}
 		}
 
 		

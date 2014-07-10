@@ -180,7 +180,7 @@ public class MappingR2rmlCheckerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testOBDA() throws Exception {
+	public void testOBDAEmpties() throws Exception {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -202,11 +202,11 @@ public class MappingR2rmlCheckerTest {
 		emptyConceptsObda = empties.getEmptyConcepts();
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConceptsObda);
-		assertEquals(162, emptyConceptsObda.size());
+		assertEquals(4, emptyConceptsObda.size());
 
 		emptyRolesObda = empties.getEmptyRoles();
 		log.info("Empty role/s: " + emptyRolesObda);
-		assertEquals(46, emptyRolesObda.size());
+		assertEquals(2, emptyRolesObda.size());
 
 	}
 
@@ -216,7 +216,7 @@ public class MappingR2rmlCheckerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testR2rml() throws Exception {
+	public void testR2rmlEmpties() throws Exception {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager
@@ -227,10 +227,10 @@ public class MappingR2rmlCheckerTest {
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
 				QuestConstants.FALSE);
 
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
+		String jdbcurl = "jdbc:postgresql://10.7.20.39/books";
+		String username = "postgres";
+		String password = "postgres";
+		String driverclass = "org.postgresql.Driver";
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
 
@@ -250,11 +250,11 @@ public class MappingR2rmlCheckerTest {
 		emptyConceptsR2rml = empties.getEmptyConcepts();
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConceptsR2rml);
-		assertEquals(162, emptyConceptsR2rml.size());
+		assertEquals(4, emptyConceptsR2rml.size());
 
 		emptyRolesR2rml = empties.getEmptyRoles();
 		log.info("Empty role/s: " + emptyRolesR2rml);
-		assertEquals(46, emptyRolesR2rml.size());
+		assertEquals(2, emptyRolesR2rml.size());
 	}
 
 
@@ -281,10 +281,10 @@ public class MappingR2rmlCheckerTest {
 
 		loadOBDA(p);
 
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
+		String jdbcurl = "jdbc:postgresql://10.7.20.39/books";
+		String username = "postgres";
+		String password = "postgres";
+		String driverclass = "org.postgresql.Driver";
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
 //		String sourceUrl = "http://example.org/customOBDA";
@@ -308,41 +308,7 @@ public class MappingR2rmlCheckerTest {
 
 		
 	}
-	/**
-	 * Execute Npd query 1 and give the number of results
-	 * @return 
-	 */
-	private int npdQuery(QuestOWLConnection questOWLConnection) throws OWLException {
-		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?licenceURI WHERE { ?licenceURI a npdv:ProductionLicence ."
-				+ "[ ] a npdv:ProductionLicenceLicensee ; "
-				+ "npdv:dateLicenseeValidFrom ?date ;"
-				+ "npdv:licenseeInterest ?interest ;"
-				+ "npdv:licenseeForLicence ?licenceURI . "
-				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
-		QuestOWLStatement st = questOWLConnection.createStatement();
-		int n = 0;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			while (rs.nextRow()) {
-				n++;
-			}
-			log.debug("number of results of q1: " + n);
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			// conn.close();
-			st.close();
-
-		}
-		return n;
-
-	}
 
 	/**
 	 * create obda model from r2rml and prepare the reasoner
