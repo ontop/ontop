@@ -76,7 +76,7 @@ import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ViewKeyReader;
+import it.unibz.krdb.sql.UserConstraints;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
@@ -133,6 +133,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// Filename of file containing list of keys for views. Set in preferences
 	private boolean useViewKeyFile;
 	private String viewKeyFile;
+	private boolean printKeys;
 
 	/***
 	 * Internal components
@@ -444,6 +445,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
 		useViewKeyFile = Boolean.valueOf((String) preferences.getProperty(QuestPreferences.USE_VIEW_KEY_FILE));
 		viewKeyFile = (String) preferences.get(QuestPreferences.VIEW_KEY_FILE);
+		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
@@ -735,8 +737,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			//Adds keys from the text file
 			if(useViewKeyFile){
-				ViewKeyReader.addViewKeys(metadata, viewKeyFile);
-				System.out.println("Read view keys from file");
+				UserConstraints uc = new UserConstraints(viewKeyFile);
+				uc.addConstraints(metadata);
+			}
+			if(printKeys){
 				// Prints all primary keys
 				System.out.println("\n====== Primary keys ==========");
 				List<TableDefinition> table_list = metadata.getTableList();
