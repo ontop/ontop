@@ -28,7 +28,12 @@ import java.util.Set;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
+/**
+ * This class shows how to create an instance of quest giving the metadata manually 
+ * 
+ * @author mrezk
+ *
+ */
 public class ExampleOfUnfolder {
 final String owlfile = "src/main/resources/example/exampleStarql.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
@@ -76,6 +81,7 @@ private TableDefinition defMeasTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
 	Attribute attribute = null;
 	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null);
+	//It starts from 1 !!!
 	tableDefinition.setAttribute(1, attribute);
 	attribute = new Attribute("value", java.sql.Types.NUMERIC, false, null);
 	tableDefinition.setAttribute(2, attribute);
@@ -89,6 +95,7 @@ private TableDefinition defMeasTable(String name){
 private TableDefinition defMessTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
 	Attribute attribute = null;
+	//It starts from 1 !!!
 	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null);
 	tableDefinition.setAttribute(1, attribute);
 	attribute = new Attribute("eventtext", java.sql.Types.VARCHAR, false, null);
@@ -101,6 +108,7 @@ private TableDefinition defMessTable(String name){
 private TableDefinition defStaticTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
 	Attribute attribute = null;
+	//It starts from 1 !!!
 	attribute = new Attribute("domain", java.sql.Types.VARCHAR, false, null);
 	tableDefinition.setAttribute(1, attribute);
 	attribute = new Attribute("range", java.sql.Types.VARCHAR, false, null);
