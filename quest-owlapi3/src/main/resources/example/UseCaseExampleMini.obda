@@ -1,0 +1,56 @@
+[PrefixDeclaration]
+:		http://www.siemens.com/Optique/UseCaseExample1#
+op:		http://www.siemens.com/Optique/OptiquePattern#
+uc:		http://www.siemens.com/Optique/UseCase#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+uce:		http://www.siemens.com/Optique/UseCaseExample1#
+xml:		http://www.w3.org/XML/1998/namespace#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	UseCaseDB
+connectionUrl	jdbc:postgresql://10.7.20.39/PublicData
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId   Mapping - hasVal
+target		op:{sensor} op:hasVal {value}^^xsd:double .
+source		SELECT "value", sensor FROM burner
+
+mappingId   Mapping - hasAssembly
+target		op:{sensor} op:hasAss op:{assembly} .
+source		SELECT assembly, sensor FROM burner
+
+mappingId   Mapping - hasEvent
+target		op:{assembly} op:hasEvent {eventtext}^^xsd:string .
+source		SELECT assembly, eventtext FROM events
+
+mappingId   Mapping - partOf
+target		op:{sensor} op:partOf op:{assembly} .
+source		SELECT sensor, assembly FROM burner
+
+mappingId   Mapping - removeDueToSensor
+target		op:{assembly} op:removeDueToSensor op:{sensor} .
+source		SELECT sensor, assembly FROM burner
+
+mappingId	Mapping - Sensor
+target		op:{sensor} a op:Sensor . 
+source		SELECT DISTINCT sensor FROM burner
+
+mappingId	Mapping - Critical
+target		op:{sensor} a op:Critical ; op:hasVal {value}^^xsd:double . 
+source		SELECT "value", sensor FROM burner WHERE "value" > 80
+
+mappingId	Mapping - Assembly
+target		op:{assembly} a op:Assembly . 
+source		SELECT DISTINCT assembly FROM burner
+
+mappingId	Mapping - TempSensor
+target		op:{domain} a op:TempSensor .
+source		SELECT domain FROM a_static WHERE range = 'TempSensor'
+
+]]
