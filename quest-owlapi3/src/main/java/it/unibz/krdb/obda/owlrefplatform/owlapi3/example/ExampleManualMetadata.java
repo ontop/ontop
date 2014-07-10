@@ -31,10 +31,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 /**
  * This class shows how to create an instance of quest giving the metadata manually 
  * 
- * @author mrezk
+ * @author mrezk, Christian 
  *
  */
-public class ExampleOfUnfolder {
+public class ExampleManualMetadata {
 final String owlfile = "src/main/resources/example/exampleStarql.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
 private OWLAPI3Translator translator = new OWLAPI3Translator();
@@ -136,7 +136,7 @@ public void runQuery() throws Exception {
 
 public static void main(String[] args) {
 	try {
-		ExampleOfUnfolder example = new ExampleOfUnfolder();
+		ExampleManualMetadata example = new ExampleManualMetadata();
 		example.runQuery();
 	} catch (Exception e) {
 		e.printStackTrace();
