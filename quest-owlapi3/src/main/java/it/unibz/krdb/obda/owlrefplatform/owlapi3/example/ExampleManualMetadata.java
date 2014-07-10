@@ -35,7 +35,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  *
  */
 public class ExampleManualMetadata {
-final String owlfile = "src/main/resources/example/exampleStarql.owl";
+final String owlfile = "src/main/resources/example/exampleSensor.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
 private OWLAPI3Translator translator = new OWLAPI3Translator();
 private QuestOWLStatement qst = null;
