@@ -240,6 +240,9 @@ public class ExpressionEvaluator {
 			return evalAndOr(term, false);
 		} else if (pred == OBDAVocabulary.EQ) {
 			return evalEqNeq(term, true);
+			
+		} else if (pred == OBDAVocabulary.OVERLAPS) {
+			return evalSpatialOverlap(term);
 		} else if (pred == OBDAVocabulary.GT) {
 			return term;
 		} else if (pred == OBDAVocabulary.GTE) {
@@ -675,6 +678,45 @@ public class ExpressionEvaluator {
 			return teval;
 		}
 		return term;
+	}
+	
+	private Term evalSpatialOverlap(Function term){
+		Term arg1=null, arg2=null;
+		
+		if (term instanceof Function) { //overlaps		
+			
+		if( term.getTerm(0) instanceof Function){
+			Function f1 = (Function) term.getTerm(0);
+			if (f1.getArity() == 1)
+				 arg1 = f1.getTerm(0);
+			else{
+				arg1 = f1.getTerm(1);
+			}
+				 
+		}else if(term.getTerm(0) instanceof ValueConstant){
+			arg1 = fac.getFunctionGeomFromWKT(term.getTerm(0));
+		}
+		else {
+			arg1 = term.getTerm(0);
+		}
+		
+		if( term.getTerm(1) instanceof Function){
+			Function f2 = (Function) term.getTerm(1);
+			if (f2.getArity() == 1)
+				arg2 = f2.getTerm(0);
+			else
+				arg2 = f2.getTerm(1);
+		}else if(term.getTerm(1) instanceof ValueConstant){
+			arg1 = fac.getFunctionGeomFromWKT(term.getTerm(1));
+		}
+		else {
+			arg2 = term.getTerm(1);
+		}
+							
+		return	fac.getFunctionOverlaps(arg1, arg2);
+		} else{
+			return term;
+			}
 	}
 
 	public Term evalEqNeq(Function term, boolean eq) {
