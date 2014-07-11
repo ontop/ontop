@@ -70,8 +70,6 @@ public class QuestPreferences extends Properties {
 	
 	public static final String JDBC_DRIVER = "JDBC_DRIVER";
 	
-	public static final String VIEW_KEY_FILE = "VIEW_KEY_FILE";
-	public static final String USE_VIEW_KEY_FILE = "USE_VIEW_KEY_FILE";
 	public static final String PRINT_KEYS = "PRINT_KEYS";
 
 	// Tomcat connection pool properties

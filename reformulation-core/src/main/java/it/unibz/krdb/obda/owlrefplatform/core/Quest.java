@@ -130,9 +130,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
 	
-	// Filename of file containing list of keys for views. Set in preferences
-	private boolean useViewKeyFile;
-	private String viewKeyFile;
+	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
 
 	/***
@@ -195,6 +193,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
 	final HashSet<String> templateStrings = new HashSet<String>();
+	
+	/**
+	 * This represents user-supplied constraints, i.e. primary
+	 * and foreign keys not present in the database metadata
+	 */
+	private UserConstraints userConstraints = null;
 
 	/***
 	 * General flags and fields
@@ -328,6 +332,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		this.metadata = metadata;
 	}
 
+	/**
+	 * Supply user constraints: that is primary and foreign keys not in the database
+	 * Can be useful for eliminating self-joins
+	 *
+	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
+	 * 						May be used by ontop to eliminate self-joins
+	 */
+	public void setUserConstraints(UserConstraints userConstraints){
+		this.userConstraints = userConstraints;
+	}
+	
 	protected Map<String, String> getSQLCache() {
 		return querycache;
 	}
@@ -443,8 +458,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
-		useViewKeyFile = Boolean.valueOf((String) preferences.getProperty(QuestPreferences.USE_VIEW_KEY_FILE));
-		viewKeyFile = (String) preferences.get(QuestPreferences.VIEW_KEY_FILE);
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
@@ -736,9 +749,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			mParser.addViewDefs(metadata);
 			
 			//Adds keys from the text file
-			if(useViewKeyFile){
-				UserConstraints uc = new UserConstraints(viewKeyFile);
-				uc.addConstraints(metadata);
+			if(this.userConstraints != null){
+				this.userConstraints.addConstraints(metadata);
 			}
 			if(printKeys){
 				// Prints all primary keys

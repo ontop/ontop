@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.utils.VersionInfo;
+import it.unibz.krdb.sql.UserConstraints;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -165,6 +166,8 @@ public class QuestOWL extends OWLReasonerBase {
 	private OBDAModel obdaModel = null;
 
 	private QuestPreferences preferences = new QuestPreferences();
+	
+	private UserConstraints userConstraints = null;
 
 	private Quest questInstance = null;
 
@@ -176,14 +179,13 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private OWLOntologyManager man;
 
-	/***
-	 * Default constructor.
+	
+	/**
+	 * Initialization code which is called from both of the two constructors. 
+	 * @param obdaModel 
+	 * 
 	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
-
-		super(rootOntology, configuration, bufferingMode);
-
+	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
@@ -199,9 +201,30 @@ public class QuestOWL extends OWLReasonerBase {
 		extractVersion();
 		
 		prepareReasoner();
+	}
+	
+	/***
+	 * Default constructor.
+	 * @param userConstraints 
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences) {
+		super(rootOntology, configuration, bufferingMode);
+		this.init(rootOntology, obdaModel, configuration, preferences);
 
 	}
 
+	/**
+	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
+	 * supplied 
+	 * @param userConstraints User-supplied primary and foreign keys
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, UserConstraints userConstraints) {
+		super(rootOntology, configuration, bufferingMode);
+		this.userConstraints = userConstraints;
+		this.init(rootOntology, obdaModel, configuration, preferences);
+	}
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -267,6 +290,8 @@ public class QuestOWL extends OWLReasonerBase {
 
 		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
+		if(this.userConstraints != null)
+			questInstance.setUserConstraints(userConstraints);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
