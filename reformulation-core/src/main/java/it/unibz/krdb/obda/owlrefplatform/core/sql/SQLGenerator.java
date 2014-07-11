@@ -64,6 +64,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String NOT_OPERATOR = "NOT %s";
 	private static final String IS_NULL_OPERATOR = "%s IS NULL";
 	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
+	
+	/*Spatial operator*/
+	
+	private static final String OVERLAPS_OPERATOR = "%s @ %s";
+	
+	private static final String GEOMFROMWKT_OPERATOR = "ST_GeomFromText(%s)";
 
 	private static final String ADD_OPERATOR = "%s + %s";
 	private static final String SUBTRACT_OPERATOR = "%s - %s";
@@ -1533,6 +1539,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_NOT_NULL_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.IS_TRUE)) {
 			operator = IS_TRUE_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.OVERLAPS)){
+			operator = OVERLAPS_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.GEOMFROMWKT)){
+				operator = GEOMFROMWKT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
 			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
