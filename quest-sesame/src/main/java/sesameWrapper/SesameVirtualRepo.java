@@ -43,10 +43,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	private QuestDBVirtualStore virtualStore;
 	private QuestDBConnection questDBConn;
 
-	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
-			throws Exception {
-		this(name, null, obdaFile, existential, rewriting);
-	}
+	
 	
 	public SesameVirtualRepo(String name, String obdaFile, String configFileName) throws Exception {
 		this(name, null, obdaFile, configFileName);

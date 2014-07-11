@@ -278,6 +278,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
 		return getFunction(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
+	
+	@Override
+	public Function getFunctionOverlaps(Term firstTerm, Term secondTerm) {
+		return getFunction(OBDAVocabulary.OVERLAPS, firstTerm, secondTerm);
+	}
+	
+	@Override
+	public Function getFunctionGeomFromWKT(Term firstTerm) {
+		return getFunction(OBDAVocabulary.GEOMFROMWKT, firstTerm);
+	}
+	
 
 	@Override
 	public Function getFunctionGTE(Term firstTerm, Term secondTerm) {

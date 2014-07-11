@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.*;
+import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -888,14 +888,14 @@ public class SparqlAlgebraToDatalogTranslator {
 		else if (expr instanceof Compare) {
 			switch (((Compare) expr).getOperator()) {
 				case EQ:
-					return ofac.getFunctionEQ(term1, term2);
-				case GE:
-					return ofac.getFunctionGTE(term1, term2);
-				case GT:
-					return ofac.getFunctionGT(term1, term2);
-				case LE:
-					return ofac.getFunctionLTE(term1, term2);
-				case LT:
+		} else if (expr instanceof SpatialOverlapFunc) {
+			if (term1 instanceof Function){
+				Term arg = ((Function) term1).getTerm(0);
+				ofac.getFunctionGeomFromWKT(arg);
+				term1 = arg;
+			}
+			function = ofac.getFunctionOverlaps(term1, term2); 
+		}else if (expr instanceof Compare) {
 					return ofac.getFunctionLT(term1, term2);
 				case NE:
 					return ofac.getFunctionNEQ(term1, term2);
