@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.CloseableIterationBase;
 import info.aduna.iteration.ConvertingIteration;
@@ -1005,6 +1006,9 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
 		}
 		else if (expr instanceof SameTerm) {
 			return evaluate((SameTerm)expr, bindings);
+		}
+		else if (expr instanceof SpatialOverlapFunc) {
+			return evaluate((SpatialOverlapFunc)expr, bindings);
 		}
 		else if (expr instanceof Compare) {
 			return evaluate((Compare)expr, bindings);
