@@ -16,7 +16,7 @@ public class MappingConverterCMDTest {
 	
 	@Test
 	public void testFromR2rml() {
-		MappingConverterCMD.main(new String[]{"src/test/resources/univ-bench-pretty.ttl"});
+		MappingConverterCMD.main(new String[]{"src/test/resources/mapping.ttl"});
 	}
 
 }

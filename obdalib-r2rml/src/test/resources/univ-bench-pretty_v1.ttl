@@ -1,0 +1,45 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix ub: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> .
+
+<#UnderGraduateStudentMap> a rr:TriplesMap ;
+     rr:logicalTable [
+        rr:sqlQuery "select depid, uniid, id, stype, name, degreeuniid, email, phone, advisorid, advisortype from students where stype=0" ;
+#        a rr:R2RMLView ;
+    ];
+    rr:subjectMap [ 
+#         a rr:SubjectMap ;
+         rr:template "http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent{id}" ;
+         rr:class ub:UndergraduateStudent ;
+#         a rr:TermMap ;
+#         rr:termType rr:IRI ;
+    ];
+	rr:predicateObjectMap [ 
+#         a rr:PredicateObjectMap ;
+         rr:predicate ub:memberOf ;
+         rr:objectMap [
+#            rr:termType rr:IRI ;
+            rr:template "http://www.Department{depid}.University{uniid}.edu" ;
+#           a rr:TermMap ;
+#            a rr:ObjectMap ;
+        ]
+    ];
+    rr:predicateObjectMap [ 
+#        a rr:PredicateObjectMap ;
+        rr:predicate ub:emailAddress ;   
+        rr:objectMap [ 
+#            a rr:TermMap ;
+#            a rr:ObjectMap ;
+            rr:column "email" ;
+            rr:termType rr:Literal ;
+        ]
+    ];
+    rr:predicateObjectMap [
+#         a rr:PredicateObjectMap ;
+         rr:predicate ub:telephone ;
+         rr:objectMap [
+#             a rr:TermMap ;
+#             a rr:ObjectMap ;
+             rr:column "phone" ;
+             rr:termType rr:Literal ;
+         ]
+    ].

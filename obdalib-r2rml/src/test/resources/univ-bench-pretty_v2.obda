@@ -13,8 +13,8 @@ password
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	mapping--1759691208
-target		<http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent{id}> a <http://swat.cse.lehigh.edu/onto/univ-bench.owl#UndergraduateStudent> ; <http://swat.cse.lehigh.edu/onto/univ-bench.owl#telephone> {phone}^^rdfs:Literal ; <http://swat.cse.lehigh.edu/onto/univ-bench.owl#memberOf> <http://www.Department{depid}.University{uniid}.edu> ; <http://swat.cse.lehigh.edu/onto/univ-bench.owl#emailAddress> {email}^^rdfs:Literal . 
+mappingId	mapping-613751683
+target		<http://www.Department{depid}.University{uniid}.edu/UndergraduateStudent{id}> a <http://swat.cse.lehigh.edu/onto/univ-bench.owl#UndergraduateStudent> ; <http://swat.cse.lehigh.edu/onto/univ-bench.owl#telephone> {phone}^^rdfs:Literal ; <http://swat.cse.lehigh.edu/onto/univ-bench.owl#emailAddress> {email}^^rdfs:Literal ; <http://swat.cse.lehigh.edu/onto/univ-bench.owl#memberOf> <http://www.Department{depid}.University{uniid}.edu> . 
 source		select depid, uniid, id, stype, name, degreeuniid, email, phone, advisorid, advisortype from students where stype=0
 ]]
 
