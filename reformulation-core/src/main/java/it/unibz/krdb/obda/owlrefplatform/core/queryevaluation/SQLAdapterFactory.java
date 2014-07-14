@@ -37,7 +37,7 @@ public class SQLAdapterFactory {
 			return new H2SQLDialectAdapter();
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			return new DB2SQLDialectAdapter();
-		} else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
+		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
 			return new OracleSQLDialectAdapter();
 		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
 			return new TeiidSQLDialectAdapter();
