@@ -3,7 +3,7 @@
   	<parent>
     	<artifactId>ontop</artifactId>
     	<groupId>it.unibz.inf.ontop</groupId>
-    	<version>1.11.1-SNAPSHOT</version>
+    	<version>1.12.1-SNAPSHOT</version>
     	<relativePath>..</relativePath>
   	</parent>
   	<artifactId>ontop-quest-db</artifactId>
@@ -30,7 +30,12 @@
 			<artifactId>ontop-reformulation-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-	
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-obdalib-r2rml</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -43,7 +48,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>	

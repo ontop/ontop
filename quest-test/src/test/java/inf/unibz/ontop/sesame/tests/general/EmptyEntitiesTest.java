@@ -99,27 +99,27 @@ public class EmptyEntitiesTest {
 	@Before
 	public void setUp() throws Exception {
 
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb;";
-		String username = "sa";
-		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
-
-		connection = DriverManager.getConnection(url, username, password);
-		Statement st = connection.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/smallDatabase-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		connection.commit();
+//		String driver = "org.h2.Driver";
+//		String url = "jdbc:h2:mem:questjunitdb;";
+//		String username = "sa";
+//		String password = "";
+//
+//		fac = OBDADataFactoryImpl.getInstance();
+//
+//		connection = DriverManager.getConnection(url, username, password);
+//		Statement st = connection.createStatement();
+//
+//		FileReader reader = new FileReader("src/test/resources/emptiesDatabase-h2.sql");
+//		BufferedReader in = new BufferedReader(reader);
+//		StringBuilder bf = new StringBuilder();
+//		String line = in.readLine();
+//		while (line != null) {
+//			bf.append(line);
+//			line = in.readLine();
+//		}
+//
+//		st.executeUpdate(bf.toString());
+//		connection.commit();
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -155,32 +155,32 @@ public class EmptyEntitiesTest {
 	@After
 	public void tearDown() throws Exception {
 		try {
-			dropTables();
+//			dropTables();
 			reasoner.dispose();
-			connection.close();
+//			connection.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
 
 	}
 
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = connection.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/smallDatabase-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		connection.commit();
-	}
+//	private void dropTables() throws SQLException, IOException {
+//
+//		Statement st = connection.createStatement();
+//
+//		FileReader reader = new FileReader("src/test/resources/emptiesDatabase-drop-h2.sql");
+//		BufferedReader in = new BufferedReader(reader);
+//		StringBuilder bf = new StringBuilder();
+//		String line = in.readLine();
+//		while (line != null) {
+//			bf.append(line);
+//			line = in.readLine();
+//		}
+//
+//		st.executeUpdate(bf.toString());
+//		st.close();
+//		connection.commit();
+//	}
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";

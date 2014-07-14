@@ -206,8 +206,8 @@ public class QuestOWL extends OWLReasonerBase {
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
 	private void extractVersion() {
-		VersionInfo versonInfo = VersionInfo.getVersionInfo();
-		String versionString = versonInfo.getVersion();
+		VersionInfo versionInfo = VersionInfo.getVersionInfo();
+		String versionString = versionInfo.getVersion();
 		String[] splits = versionString.split("\\.");
 		int major = 0;
 		int minor = 0;
@@ -218,7 +218,7 @@ public class QuestOWL extends OWLReasonerBase {
 			minor = Integer.parseInt(splits[1]);
 			patch = Integer.parseInt(splits[2]);
 			build = Integer.parseInt(splits[3]);
-		} catch (Exception ex) {
+		} catch (Exception ignored) {
 
 		}
 		version = new Version(major, minor, patch, build);
@@ -370,8 +370,8 @@ public class QuestOWL extends OWLReasonerBase {
 		try {
 
 			OWLOntologyManager man = ontology.getOWLOntologyManager();
-			Set<OWLOntology> clousure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = translator.mergeTranslateOntologies(clousure);
+			Set<OWLOntology> closure = man.getImportsClosure(ontology);
+			Ontology mergeOntology = translator.mergeTranslateOntologies(closure);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;

@@ -28,8 +28,8 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 
 import java.io.BufferedWriter;
 import java.io.File;

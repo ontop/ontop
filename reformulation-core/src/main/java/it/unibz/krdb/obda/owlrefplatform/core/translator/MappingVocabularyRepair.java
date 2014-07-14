@@ -109,8 +109,8 @@ public class MappingVocabularyRepair {
 					//if (!p.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
 					if (!p.isTriplePredicate()){
 						//throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
-						log.error("WARNING: Mapping references an unknown class/property: " + p.getName());
-
+						log.warn("WARNING: Mapping references an unknown class/property: " + p.getName());
+						
 						/**
 						 * All this part is to handle the case where the predicate or the class is defined
 						 * by the mapping but not present in the ontology.

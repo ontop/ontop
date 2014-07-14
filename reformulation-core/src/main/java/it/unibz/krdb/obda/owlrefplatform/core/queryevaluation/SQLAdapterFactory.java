@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class SQLAdapterFactory {
 
-	private static Logger log = LoggerFactory.getLogger(JDBCUtility.class);
+	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
 	public static SQLDialectAdapter getSQLDialectAdapter(String className) {
 
@@ -37,17 +37,21 @@ public class SQLAdapterFactory {
 			return new H2SQLDialectAdapter();
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			return new DB2SQLDialectAdapter();
-		} else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
+		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
 			return new OracleSQLDialectAdapter();
 		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
 			return new TeiidSQLDialectAdapter();
 		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
 			return new SQLServerSQLDialectAdapter();
+		} else if (className.equals("madgik.adp.federatedjdbc.AdpDriver")){
+			return new AdpSQLDialectAdapter();
+		} else {
+			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
+			log.warn("WARNING: Contact the authors for further support.");
+			return new SQL99DialectAdapter();
 		}
 
-		log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
-		log.warn("WARNING: Contact the authors for further support.");
-		return new SQL99DialectAdapter();
+		
 
 	}
 

@@ -80,11 +80,16 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubJoin;
@@ -95,7 +100,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Find all used tables within an select statement.
  */
-public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor {
+public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
 
 	/**
 	 * Store the table selected by the SQL query in RelationJSQL
@@ -160,7 +165,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		if (plainSelect.getWhere() != null) {
 			plainSelect.getWhere().accept(this);
 		}
-
+		
+		for (SelectItem expr : plainSelect.getSelectItems()){
+			expr.accept(this);
+		}
 	}
 
 	/*
@@ -216,6 +224,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Column tableColumn) {
+		//it does nothing here, everything is good
 	}
 
 	@Override
@@ -489,7 +498,31 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(SignedExpression arg0) {
-		// TODO Auto-generated method stub
+		System.out.println("WARNING: SignedExpression   not implemented ");
+
+		notSupported = true;
 		
+	}
+
+
+
+	@Override
+	public void visit(AllColumns expr) {
+		//Do nothing!
+	}
+
+
+
+	@Override
+	public void visit(AllTableColumns arg0) {
+		//Do nothing!
+		
+	}
+
+
+
+	@Override
+	public void visit(SelectExpressionItem expr) {
+		expr.getExpression().accept(this);
 	}
 }

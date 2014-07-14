@@ -34,7 +34,7 @@ import java.util.Set;
  * 
  * WARNING: THIS CLASS IS FOR TESTING ONLY 
  */
-
+@Deprecated
 public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
 
 	private EquivalencesDAG<Property> propertyDAG;

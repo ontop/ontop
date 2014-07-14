@@ -45,7 +45,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * 
  * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
-
+@Deprecated
 public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 
 	private DefaultDirectedGraph<Property,DefaultEdge> propertyGraph;

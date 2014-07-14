@@ -30,6 +30,7 @@ import java.util.Set;
  * @author mariano
  * 
  */
+@Deprecated
 public interface TBoxDAG {
 
 	public Set<Set<Description>> getDirectChildren(Description desc);

@@ -54,9 +54,9 @@ public class QuestOWLResultSet {
 		this.owlst = owlst;
 	}
 
-	public int getColumCount() throws OWLException {
+	public int getColumnCount() throws OWLException {
 		try {
-			return res.getColumCount();
+			return res.getColumnCount();
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

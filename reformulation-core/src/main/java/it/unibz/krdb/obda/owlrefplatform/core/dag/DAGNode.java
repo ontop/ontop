@@ -35,6 +35,7 @@ import java.util.Set;
 /**
  * @author Sergejs Pugacs
  */
+@Deprecated
 public class DAGNode implements Serializable {
 
 	/**

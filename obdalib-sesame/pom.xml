@@ -3,7 +3,7 @@
   <parent>
     <artifactId>ontop</artifactId>
     <groupId>it.unibz.inf.ontop</groupId>
-    <version>1.11.1-SNAPSHOT</version>
+    <version>1.12.1-SNAPSHOT</version>
   </parent>
   <artifactId>ontop-obdalib-sesame</artifactId>
   <name>ontop-obdalib-sesame</name>
@@ -26,6 +26,7 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -50,13 +51,15 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
 		</dependency>
+			
+			
 	</dependencies>
 	
+		
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>

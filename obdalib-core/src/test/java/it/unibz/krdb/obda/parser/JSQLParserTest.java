@@ -671,9 +671,18 @@ public class JSQLParserTest extends TestCase {
 
 	}
 	
-	public void test_14() {
-		final boolean result = parseJSQL("select COUNTRY_NAME FROM HR.COUNTRIES WHERE COUNTRIES.COUNTRY_NAME != 'Egypt'");
-		printJSQL("test_14", result);
+	//add support for CAST also in unquoted visited query
+	public void testUnquoted1(){
+		final boolean result = parseUnquotedJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+				+ "FROM people \"QpeopleVIEW0\" "
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+		printJSQL("test_Unquoted1", result);
+		assertTrue(result);
+	}
+	
+	public void testCast(){
+		final boolean result = parseUnquotedJSQL("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
+		printJSQL("testCast", result);
 		assertTrue(result);
 	}
 
@@ -729,6 +738,21 @@ public class JSQLParserTest extends TestCase {
 					+ queryText);
 		}
 		System.out.println();
+	}
+
+	
+	private boolean parseUnquotedJSQL(String input) {
+
+		queryText = input;
+
+		try {
+			queryP = new VisitedQuery(input,true);
+		} catch (Exception e) {
+
+			return false;
+		}
+
+		return true;
 	}
 
 }
