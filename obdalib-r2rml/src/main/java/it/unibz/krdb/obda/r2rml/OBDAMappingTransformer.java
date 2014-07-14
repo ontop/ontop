@@ -361,8 +361,8 @@ public class OBDAMappingTransformer {
 				//add object declaration to predObj node
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
-				
-				if (object instanceof Variable){
+								
+ 				if (object instanceof Variable){ //we create an rr:column
 					if(ontology!= null && objectProperties.contains(prop)){
 						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
 						obm.setTermType(R2RMLVocabulary.iri);
@@ -373,7 +373,7 @@ public class OBDAMappingTransformer {
 					//we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
-				} else if (object instanceof Function) {
+				} else if (object instanceof Function) { //we create a template
 					//check if uritemplate
  					Predicate objectPred = ((Function) object).getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
