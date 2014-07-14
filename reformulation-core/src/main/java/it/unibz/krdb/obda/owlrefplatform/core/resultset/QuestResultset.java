@@ -397,6 +397,8 @@ public class QuestResultset implements TupleResultSet {
         	throw new RuntimeException("typeCode unknown: " + typeCode);
         
         return questType;
+		} else if (sqltype == 10) {
+			return COL_TYPE.GEOMETRY;
 	}
 
 	// @Override
