@@ -166,8 +166,6 @@ public class QuestOWL extends OWLReasonerBase {
 	private OBDAModel obdaModel = null;
 
 	private QuestPreferences preferences = new QuestPreferences();
-	
-	private UserConstraints userConstraints = null;
 
 	private Quest questInstance = null;
 
@@ -178,6 +176,19 @@ public class QuestOWL extends OWLReasonerBase {
 	private QuestOWLConnection owlconn = null;
 
 	private OWLOntologyManager man;
+	
+	
+	// //////////////////////////////////////////////////////////////////////////////////////
+	//
+	//  User Constraints are primary and foreign keys not in the database 
+	//  
+	//
+	// //////////////////////////////////////////////////////////////////////////////////////
+	
+	private UserConstraints userConstraints = null;
+	
+	/* Used to signal whether to apply the user constraints above */
+	private boolean applyUserConstraints = false;
 
 	
 	/**
@@ -205,7 +216,6 @@ public class QuestOWL extends OWLReasonerBase {
 	
 	/***
 	 * Default constructor.
-	 * @param userConstraints 
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences) {
@@ -222,7 +232,11 @@ public class QuestOWL extends OWLReasonerBase {
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, UserConstraints userConstraints) {
 		super(rootOntology, configuration, bufferingMode);
+		
 		this.userConstraints = userConstraints;
+		assert(userConstraints != null);
+		this.applyUserConstraints = true;
+		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
 	/**
@@ -290,7 +304,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
-		if(this.userConstraints != null)
+		if(this.applyUserConstraints)
 			questInstance.setUserConstraints(userConstraints);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());

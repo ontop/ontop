@@ -199,6 +199,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * and foreign keys not present in the database metadata
 	 */
 	private UserConstraints userConstraints = null;
+	
+	/*
+	 * Whether to apply the user-supplied database constraints given above
+	 * userConstraints must be initialized and non-null whenever this is true
+	 */
+	private boolean applyUserConstraints;
 
 	/***
 	 * General flags and fields
@@ -340,7 +346,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * 						May be used by ontop to eliminate self-joins
 	 */
 	public void setUserConstraints(UserConstraints userConstraints){
+		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
+		this.applyUserConstraints = true;
 	}
 	
 	protected Map<String, String> getSQLCache() {
@@ -749,7 +757,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			mParser.addViewDefs(metadata);
 			
 			//Adds keys from the text file
-			if(this.userConstraints != null){
+			if(this.applyUserConstraints){
 				this.userConstraints.addConstraints(metadata);
 			}
 			if(printKeys){

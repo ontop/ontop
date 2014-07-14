@@ -53,7 +53,14 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 
 	private OBDAModel mappingManager = null;
 	private Properties preferences = null;
+	
+	/**
+	 * The user can supply information about keys that are not in the
+	 * database metadata. 
+	 */
 	private UserConstraints userConstraints = null;
+	private boolean applyUserConstraints = false;
+	
 	private String name = "Quest";
 
 	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
@@ -79,6 +86,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	public void setUserConstraints(UserConstraints userConstraints) {
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
+		this.applyUserConstraints = true;
 	}
 	
 	public void setPreferenceHolder(Properties preference) {
@@ -103,7 +111,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
+		if(this.applyUserConstraints)
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
+		else
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
@@ -120,7 +131,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
+		if(this.applyUserConstraints)
+			return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
+		else
+			return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
@@ -136,7 +150,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
+		if(this.applyUserConstraints)
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
+		else
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 	}
 
 	@Override
@@ -152,8 +169,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		QuestOWL questOWL = new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
-		return questOWL;
+		if(this.applyUserConstraints)
+			return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
+		else
+			return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
 	}
 
 }
