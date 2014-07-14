@@ -34,8 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
-import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,12 +44,13 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertTrue;
 
 /***
  * Tests that the SPARQL LIMIT statement is correctly translated to WHERE ROWNUM <= x in oracle
  * Tests with both valid versions of the oracle driverClass string in the SourceDeclaration of the obda file
  */
-public class OracleLIMITTest extends TestCase {
+public class OracleLIMITTest  {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
