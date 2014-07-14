@@ -1,0 +1,103 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.com/ns#> .
+@prefix emp: <http://example.com/emp#> .
+@prefix dept: <http://example.com/dept#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix likes: <http://example.com/likes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<TriplesMap1> 
+    a rr:TriplesMap;
+    rr:logicalTable [ rr:sqlQuery """
+       Select ('Department' || "deptno") AS deptId
+            , "deptno"
+            , "dname"
+            , "loc"
+         from "DEPT"
+       """ ];
+
+    rr:subjectMap [ rr:column "deptId"; rr:termType rr:BlankNode;
+                    rr:inverseExpression "{\"deptno\"} = substr({deptId},length('Department')+1)"];
+
+    rr:predicateObjectMap
+    [ 
+      rr:predicate		dept:deptno ; 
+      rr:objectMap    [ rr:column "\"deptno\""; rr:datatype xsd:positiveInteger ]
+    ];
+
+    rr:predicateObjectMap 
+    [ 
+	  rr:predicateMap [ rr:constant dept:name ]; 
+      rr:objectMap    [ rr:column "\"dname\"" ]
+    ];
+
+    rr:predicateObjectMap 
+    [ 
+      rr:predicate		dept:COMPANY ; 
+      rr:objectMap		[ rr:constant "EXAMPLE Corporation"^^xsd:string ]
+    ]
+.
+
+
+<jobtypeObjectMap>
+    a rr:ObjectMap;
+    rr:template "http://example.com/emp/job/{\"job\"}"
+    .
+
+<emptypeObjectMap>
+    a rr:ObjectMap;
+    rr:template "http://example.com/emp/etype/{\"etype\"}"
+    .
+
+<TriplesMap2>
+    a rr:TriplesMap;
+
+    rr:logicalTable [ rr:tableName "\"EMP\"" ];
+
+    rr:subjectMap [ rr:template "http://example.com/emp/{\"empno\"}"; ];
+
+    rr:predicateObjectMap 
+    [ 
+      rr:predicate		emp:jobtype ; 
+      rr:objectMap    <jobtypeObjectMap>
+    ];
+
+    rr:predicateObjectMap 
+    [ 
+      rr:predicate		rdf:type ; 
+      rr:objectMap    <jobtypeObjectMap>
+    ];
+	
+	 rr:predicateObjectMap 
+    [ 
+      rr:predicate		rdf:type ; 
+      rr:object      dept:Manager ;
+    ];
+
+    rr:predicateObjectMap 
+    [ 
+      rr:predicate		emp:job ; 
+      rr:objectMap    [ rr:column "\"job\"" ]
+    ];
+	
+	 rr:predicateObjectMap
+    [ 
+      rr:predicate	rdfs:label;
+      rr:objectMap	[ rr:column "\"Name\""; rr:language "en" ]
+    ];
+
+
+    rr:predicateObjectMap [
+      rr:predicate		emp:c_ref_deptno ;
+      rr:objectMap    [
+      	a rr:RefObjectMap ;
+        rr:parentTriplesMap <TriplesMap1>;
+        rr:joinCondition [
+          rr:child "\"deptno\"";
+          rr:parent "\"deptno\"";
+        ];
+      ];
+    ]
+    .
