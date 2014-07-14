@@ -91,7 +91,10 @@ public class SesameBindingSet implements BindingSet {
 				Constant c = set.getConstant(bindingName);
 				if (c == null) {
 					return null;
-				} 
+						} else if (col_type == COL_TYPE.GEOMETRY) {
+							URI datatype = fact.createURI(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE);
+							value = fact.createLiteral(c.getValue(), datatype);
+						} 							
 				else {
 					if (c instanceof ValueConstant) {
 						value = helper.getLiteral((ValueConstant)c);

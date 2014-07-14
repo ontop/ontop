@@ -23,10 +23,18 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.regex.Pattern;
 
+
+
 public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+    public static int GEOMETRYSQLDATATYPE = 1111;
+	
 
+	public static int getGEOMETRYSQLDATATYPE() { //add a function in the interface
+		return GEOMETRYSQLDATATYPE;
+	}
+	
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {
@@ -52,6 +60,8 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		String strType = null;
 		if (type == Types.VARCHAR) {
 			strType = "VARCHAR(10485760)";
+		} else if (type == GEOMETRYSQLDATATYPE) { //if the column is a geometry column, a cast is not enough 
+			return "CONCAT('<http://www.opengis.net/def/crs/EPSG/0/4326> ' , ST_AsText(" + value + "))";  
 		} else {
 			throw new RuntimeException("Unsupported SQL type");
 		}

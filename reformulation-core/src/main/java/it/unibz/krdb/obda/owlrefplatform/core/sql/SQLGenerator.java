@@ -861,7 +861,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
 			if (!isStringColType(ht, index)) {
-				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
+				if (isGeomColType(ht, index))
+					mainColumn =  sqladapter.sqlCast(mainColumn, 1111);
+				else
+					mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
 		return String.format(mainTemplate, mainColumn, variableName);
@@ -1137,7 +1140,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 					if (isStringColType(currentTerm, index)) {
 						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
 					} else {
-						repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
+						if (isGeomColType(currentTerm, index)){
+							repl =  sqladapter.sqlCast(getSQLString(currentTerm, index, false), 1111);
+						}
+						else
+							repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
 					}
 					vex.add(repl);
 					if (termIndex < split.length ) {
@@ -1196,6 +1203,52 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return toReturn;
 	}
 
+	private boolean isGeomColType(Term term, QueryAliasIndex index) {
+		if (term instanceof Function) {
+			Function function = (Function) term;
+			Predicate functionSymbol = function.getFunctionSymbol();
+			if (isUnary(function)) {
+					/*
+					 * Update the term with the parent term's first parameter.
+					 * Note: this method is confusing :(
+					 */
+					 term = function.getTerm(0);
+					 return isGeomColType(term, index);
+				}
+			
+		} else if (term instanceof Variable) {
+			Set<String> viewdef = index.getColumnReferences((Variable) term);
+			String def = viewdef.iterator().next();
+			String col = trim(def.split("\\.")[1]);
+			String table = def.split("\\.")[0];
+			if (def.startsWith("QVIEW")) {
+				Map<Function, String> views = index.viewNames;
+				for (Function func : views.keySet()) {
+					String value = views.get(func);
+					if (value.equals(def.split("\\.")[0])) {
+						table = func.getFunctionSymbol().toString();
+						break;
+					}
+				}
+			}
+			List<TableDefinition> tables = metadata.getTableList();
+			for (TableDefinition tabledef: tables) {
+				if (tabledef.getName().equals(table)) {
+					List<Attribute> attr = tabledef.getAttributes();
+					for (Attribute a : attr) {
+						if (a.getName().equals(col)) {
+							if (a.getType()== 1111) 
+								return true;
+							else
+								return false;
+						}
+					}
+				}
+			}
+		}
+			return false;
+		}
+	
 	private boolean isStringColType(Term term, QueryAliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;

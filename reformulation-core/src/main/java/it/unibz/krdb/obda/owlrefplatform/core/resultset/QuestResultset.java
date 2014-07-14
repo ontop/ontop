@@ -191,7 +191,10 @@ public class QuestResultset implements TupleResultSet {
 						} else {
 							result = fac.getConstantLiteral(value, language);
 						}
-					} else if (type == COL_TYPE.BOOLEAN) {
+					}else if (type == COL_TYPE.GEOMETRY) {
+						String value = set.getString(column);
+						result = fac.getConstantLiteral(value, type); 
+					}  else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
 						result = fac.getBooleanConstant(value);
 					} else if (type == COL_TYPE.DOUBLE) {
