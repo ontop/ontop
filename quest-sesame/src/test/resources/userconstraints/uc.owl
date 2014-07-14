@@ -30,6 +30,12 @@
 	<Declaration>
         <DataProperty IRI="#hasVal2"/>
     </Declaration>
+        <Declaration>
+        <DataProperty IRI="#hasVal3"/>
+    </Declaration>
+	<Declaration>
+        <DataProperty IRI="#hasVal4"/>
+    </Declaration>
 	 
 </Ontology>
 

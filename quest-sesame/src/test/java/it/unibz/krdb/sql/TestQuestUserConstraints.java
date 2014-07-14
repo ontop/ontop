@@ -1,7 +1,7 @@
 /**
  * 
  */
-package it.unibz.krdb.obda.parser;
+package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -50,9 +50,9 @@ import org.junit.Test;
 public class TestQuestUserConstraints {
 
 	Quest quest;
-	static String owlfile = "resources/userconstraints/uc.owl";
-	static String obdafile = "resources/userconstraints/uc.obda";
-	static String uc_file = "resources/userconstraints/keys.lst";
+	static String owlfile = "src/test/resources/userconstraints/uc.owl";
+	static String obdafile = "src/test/resources/userconstraints/uc.obda";
+	static String uc_file = "src/test/resources/userconstraints/keys.lst";
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -73,7 +73,7 @@ public class TestQuestUserConstraints {
 			java.sql.Statement s = sqlConnection.createStatement();
 
 			try {
-				String text = new Scanner( new File("resources/userconstraints/create.sql") ).useDelimiter("\\A").next();
+				String text = new Scanner( new File("src/test/resources/userconstraints/create.sql") ).useDelimiter("\\A").next();
 				s.execute(text);
 				//Server.startWebServer(sqlConnection);
 
@@ -155,6 +155,25 @@ public class TestQuestUserConstraints {
 	}
 
 	@Test
+	public void testForeignKeysNoSelfJoinElim() throws Exception {
+		
+		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+
+		// Now we are ready for querying
+		this.conn = reasoner.getConnection();
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
+		QuestOWLStatement st = conn.createStatement();
+		
+		
+		String sql = st.getUnfolding(query);
+		boolean m = sql.matches("(?ms)(.*)TABLE2(.*),(.*)TABLE2(.*)");
+		assertTrue(m);
+		
+		
+	}
+	
+	@Test
 	public void testWithSelfJoinElim() throws Exception {
 		// Parsing user constraints
 		UserConstraints userConstraints = new UserConstraints(uc_file);
@@ -174,7 +193,28 @@ public class TestQuestUserConstraints {
 		
 		
 	}
+	
+	@Test
+	public void testForeignKeysWithSelfJoinElim() throws Exception {
+		// Parsing user constraints
+		UserConstraints userConstraints = new UserConstraints(uc_file);
+		factory.setUserConstraints(userConstraints);
+		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
+
+		// Now we are ready for querying
+		this.conn = reasoner.getConnection();
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
+		QuestOWLStatement st = conn.createStatement();
+		
+		
+		String sql = st.getUnfolding(query);
+		boolean m = sql.matches("(?ms)(.*)TABLE2(.*),(.*)TABLE2(.*)");
+		assertTrue(m);
+		
+		
+	}
+	
 
 
 }
