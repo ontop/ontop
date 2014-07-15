@@ -16,7 +16,21 @@
  */
 package org.openrdf.query.algebra.helpers;
 
+import gr.uoa.di.madgik.sesame.functions.EHContainsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoveredByFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoversFunc;
+import gr.uoa.di.madgik.sesame.functions.EHDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.EHEqualsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHInsideFunc;
+import gr.uoa.di.madgik.sesame.functions.EHOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialContainFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialCrossesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialEqualFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialIntersectsFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialTouchesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialWithinFunc;
 
 import org.openrdf.query.algebra.Add;
 import org.openrdf.query.algebra.And;
@@ -507,6 +521,79 @@ public abstract class QueryModelVisitorBase<X extends Exception> implements Quer
 	}
 	
 	public void meet(SpatialOverlapFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+
+	public void meet(SpatialTouchesFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+
+	public void meet(SpatialWithinFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+
+	public void meet(SpatialDisjointFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(SpatialEqualFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(SpatialIntersectsFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(SpatialCrossesFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(SpatialContainFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHInsideFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHOverlapFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHCoversFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHDisjointFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHEqualsFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHContainsFunc node)
+			throws X
+	{
+		meetBinaryValueOperator(node);
+	}
+	public void meet(EHCoveredByFunc node)
 			throws X
 	{
 		meetBinaryValueOperator(node);

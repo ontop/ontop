@@ -16,6 +16,11 @@
  */
 package org.openrdf.query.parser.sparql;
 
+import gr.uoa.di.madgik.sesame.functions.EHCoveredByFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoversFunc;
+import gr.uoa.di.madgik.sesame.functions.EHDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.EHEqualsFunc;
+
 import org.openrdf.query.parser.sparql.ast.*;
 
 /**
@@ -721,13 +726,96 @@ public abstract class ASTVisitorBase implements SyntaxTreeBuilderVisitor {
 		return node.childrenAccept(this, data);
 	}
 
+	public Object visit(ASTSpatialContain node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
 	public Object visit(ASTSpatialOverlap node, Object data)
 			throws VisitorException
 		{
 			return node.childrenAccept(this, data);
 		}
 
-	
+	public Object visit(ASTSpatialCrosses node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTSpatialDisjoint node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTSpatialEqual node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTSpatialIntersects node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTSpatialTouches node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTSpatialWithin node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHContains node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHCoveredBy node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHCovers node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHDisjoint node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHEquals node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHInside node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
+	public Object visit(ASTEHOverlap node, Object data)
+			throws VisitorException
+		{
+			return node.childrenAccept(this, data);
+		}
+
 	public Object visit(ASTSample node, Object data)
 		throws VisitorException
 	{

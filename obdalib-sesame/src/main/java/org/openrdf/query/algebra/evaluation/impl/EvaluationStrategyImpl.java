@@ -22,7 +22,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import gr.uoa.di.madgik.sesame.functions.EHContainsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoveredByFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoversFunc;
+import gr.uoa.di.madgik.sesame.functions.EHDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.EHEqualsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHInsideFunc;
+import gr.uoa.di.madgik.sesame.functions.EHOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialContainFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialCrossesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialEqualFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialIntersectsFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialTouchesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialWithinFunc;
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.CloseableIterationBase;
 import info.aduna.iteration.ConvertingIteration;
@@ -1010,7 +1024,35 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
 		else if (expr instanceof SpatialOverlapFunc) {
 			return evaluate((SpatialOverlapFunc)expr, bindings);
 		}
-		else if (expr instanceof Compare) {
+		else if (expr instanceof SpatialContainFunc) {
+			return evaluate((SpatialContainFunc)expr, bindings);
+		}else if (expr instanceof SpatialCrossesFunc) {
+			return evaluate((SpatialCrossesFunc)expr, bindings);
+		}else if (expr instanceof SpatialDisjointFunc) {
+			return evaluate((SpatialDisjointFunc)expr, bindings);
+		}else if (expr instanceof SpatialEqualFunc) {
+			return evaluate((SpatialEqualFunc)expr, bindings);
+		}else if (expr instanceof SpatialIntersectsFunc) {
+			return evaluate((SpatialIntersectsFunc)expr, bindings);
+		}else if (expr instanceof SpatialTouchesFunc) {
+			return evaluate((SpatialTouchesFunc)expr, bindings);
+		}else if (expr instanceof SpatialWithinFunc) {
+			return evaluate((SpatialWithinFunc)expr, bindings);
+		}else if (expr instanceof EHCoveredByFunc) {
+			return evaluate((EHCoveredByFunc)expr, bindings);
+		}else if (expr instanceof EHCoversFunc) {
+			return evaluate((EHCoversFunc)expr, bindings);
+		}else if (expr instanceof EHDisjointFunc) {
+			return evaluate((EHDisjointFunc)expr, bindings);
+		}else if (expr instanceof EHEqualsFunc) {
+			return evaluate((EHEqualsFunc)expr, bindings);
+		}else if (expr instanceof EHContainsFunc) {
+			return evaluate((EHContainsFunc)expr, bindings);
+		}else if (expr instanceof EHInsideFunc) {
+			return evaluate((EHInsideFunc)expr, bindings);
+		}else if (expr instanceof EHOverlapFunc) {
+			return evaluate((EHOverlapFunc)expr, bindings);
+		}else if (expr instanceof Compare) {
 			return evaluate((Compare)expr, bindings);
 		}
 		else if (expr instanceof MathExpr) {

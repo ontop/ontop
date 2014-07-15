@@ -16,7 +16,21 @@
  */
 package org.openrdf.query.algebra;
 
+import gr.uoa.di.madgik.sesame.functions.EHContainsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoveredByFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoversFunc;
+import gr.uoa.di.madgik.sesame.functions.EHDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.EHEqualsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHInsideFunc;
+import gr.uoa.di.madgik.sesame.functions.EHOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialContainFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialCrossesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialEqualFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialIntersectsFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialTouchesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialWithinFunc;
 
 /**
  * An interface for query model visitors, implementing the Visitor pattern. Core
@@ -26,17 +40,15 @@ import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
  * model nodes.
  */
 public interface QueryModelVisitor<X extends Exception> {
-
+	
 	public void meet(QueryRoot node)
-		throws X;
-
-
-	public void meet(Add add)
 			throws X;
 
-
+	public void meet(Add node)
+			throws X;
+	
 	public void meet(And node)
-		throws X;
+			throws X;
 
 	public void meet(ArbitraryLengthPath node)
 		throws X;
@@ -226,6 +238,49 @@ public interface QueryModelVisitor<X extends Exception> {
 
 	public void meet(SpatialOverlapFunc node)
 			throws X;
+
+	public void meet(SpatialContainFunc node)
+			throws X;
+	
+	public void meet(SpatialCrossesFunc node)
+			throws X;
+	
+	public void meet(SpatialDisjointFunc node)
+			throws X;
+	
+	public void meet(SpatialEqualFunc node)
+			throws X;
+	
+	public void meet(SpatialIntersectsFunc node)
+			throws X;
+	
+	public void meet(SpatialTouchesFunc node)
+			throws X;
+	
+	public void meet(SpatialWithinFunc node)
+			throws X;
+	
+	
+	public void meet(EHCoveredByFunc node)
+			throws X;
+	
+	public void meet(EHCoversFunc node)
+			throws X;
+	
+	public void meet(EHDisjointFunc node)
+			throws X;
+	
+	public void meet(EHEqualsFunc node)
+			throws X;
+	
+	public void meet(EHInsideFunc node)
+			throws X;
+	
+	public void meet(EHOverlapFunc node)
+			throws X;
+	
+	public void meet(EHContainsFunc node)
+			throws X;
 	
 	public void meet(Sample node)
 		throws X;
@@ -268,4 +323,8 @@ public interface QueryModelVisitor<X extends Exception> {
 
 	public void meetOther(QueryModelNode node)
 		throws X;
+
+
+
+
 }

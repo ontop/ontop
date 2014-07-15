@@ -13,13 +13,13 @@ package org.openrdf.query.parser.sparql.ast;
  * @author Konstantina Bereta <Konstantina.Bereta@di.uoa.gr>
  *
  */
-public class ASTSpatialOverlap extends SimpleNode {
+public class ASTEHCovers extends SimpleNode {
 
-	public ASTSpatialOverlap(int id) {
+	public ASTEHCovers(int id) {
 		super(id);
 	}
 
-	public ASTSpatialOverlap(SyntaxTreeBuilder p, int id) {
+	public ASTEHCovers(SyntaxTreeBuilder p, int id) {
 		super(p, id);
 	}
 

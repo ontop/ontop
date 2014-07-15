@@ -16,7 +16,21 @@
  */
 package org.openrdf.query.parser.sparql;
 
+import gr.uoa.di.madgik.sesame.functions.EHContainsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoveredByFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoversFunc;
+import gr.uoa.di.madgik.sesame.functions.EHDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.EHEqualsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHInsideFunc;
+import gr.uoa.di.madgik.sesame.functions.EHOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialContainFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialCrossesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialEqualFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialIntersectsFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialTouchesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialWithinFunc;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1972,6 +1986,8 @@ public class TupleExprBuilder extends ASTVisitorBase {
 		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
 		return new SpatialOverlapFunc(leftArg, rightArg);
 	}
+	
+	
 
 	@Override
 	public Sample visit(ASTSample node, Object data)
@@ -2905,5 +2921,112 @@ public class TupleExprBuilder extends ASTVisitorBase {
 				node.getParentNode().replaceChildNode(node, replacement);
 			}
 		}
+	}
+
+	@Override
+	public SpatialEqualFunc visit(ASTSpatialEqual node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialEqualFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public SpatialIntersectsFunc visit(ASTSpatialIntersects node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialIntersectsFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public SpatialDisjointFunc visit(ASTSpatialDisjoint node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialDisjointFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public SpatialTouchesFunc visit(ASTSpatialTouches node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialTouchesFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public SpatialWithinFunc visit(ASTSpatialWithin node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialWithinFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public SpatialContainFunc visit(ASTSpatialContain node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialContainFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public SpatialCrossesFunc visit(ASTSpatialCrosses node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new SpatialCrossesFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public EHEqualsFunc visit(ASTEHEquals node, Object data) throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHEqualsFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public EHDisjointFunc visit(ASTEHDisjoint node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHDisjointFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public EHOverlapFunc visit(ASTEHOverlap node, Object data) throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHOverlapFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public EHCoversFunc visit(ASTEHCovers node, Object data) throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHCoversFunc (leftArg, rightArg);
+	}
+
+	@Override
+	public EHCoveredByFunc visit(ASTEHCoveredBy node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHCoveredByFunc(leftArg, rightArg);
+	}
+
+	@Override
+	public EHInsideFunc visit(ASTEHInside node, Object data) throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHInsideFunc(leftArg, rightArg);	}
+
+	@Override
+	public EHContainsFunc visit(ASTEHContains node, Object data)
+			throws VisitorException {
+		ValueExpr leftArg = (ValueExpr)node.jjtGetChild(0).jjtAccept(this, null);
+		ValueExpr rightArg = (ValueExpr)node.jjtGetChild(1).jjtAccept(this, null);
+		return new EHContainsFunc(leftArg, rightArg);
 	}
 }

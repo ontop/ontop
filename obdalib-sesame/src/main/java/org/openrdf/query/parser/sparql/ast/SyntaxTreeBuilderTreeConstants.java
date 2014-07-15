@@ -110,42 +110,56 @@ public interface SyntaxTreeBuilderTreeConstants
   public int JJTBOUND = 104;
   public int JJTSAMETERM = 105;
   public int JJTSPATIALOVERLAP = 106;
-  public int JJTISIRI = 107;
-  public int JJTISBLANK = 108;
-  public int JJTISLITERAL = 109;
-  public int JJTISNUMERIC = 110;
-  public int JJTBNODEFUNC = 111;
-  public int JJTIRIFUNC = 112;
-  public int JJTSTRDT = 113;
-  public int JJTSTRLANG = 114;
-  public int JJTUUID = 115;
-  public int JJTSTRUUID = 116;
-  public int JJTBIND = 117;
-  public int JJTREGEXEXPRESSION = 118;
-  public int JJTEXISTSFUNC = 119;
-  public int JJTNOTEXISTSFUNC = 120;
-  public int JJTRDFLITERAL = 121;
-  public int JJTTRUE = 122;
-  public int JJTFALSE = 123;
-  public int JJTSTRING = 124;
-  public int JJTQNAME = 125;
-  public int JJTBLANKNODE = 126;
-  public int JJTGRAPHREFALL = 127;
-  public int JJTGRAPHORDEFAULT = 128;
-  public int JJTQUADSNOTTRIPLES = 129;
-  public int JJTLOAD = 130;
-  public int JJTCLEAR = 131;
-  public int JJTDROP = 132;
-  public int JJTADD = 133;
-  public int JJTMOVE = 134;
-  public int JJTCOPY = 135;
-  public int JJTCREATE = 136;
-  public int JJTINSERTDATA = 137;
-  public int JJTDELETEDATA = 138;
-  public int JJTDELETEWHERE = 139;
-  public int JJTDELETECLAUSE = 140;
-  public int JJTINSERTCLAUSE = 141;
-  public int JJTMODIFY = 142;
+  public int JJTSPATIALEQUAL = 107;
+  public int JJTSPATIALINTERSECTS = 108;
+  public int JJTSPATIALDISJOINT = 109;
+  public int JJTSPATIALTOUCHES = 110;
+  public int JJTSPATIALWITHIN = 111;
+  public int JJTSPATIALCONTAIN = 112;
+  public int JJTSPATIALCROSSES = 113;
+  public int JJTEHEQUALS = 114;
+  public int JJTEHDISJOINT = 115;
+  public int JJTEHOVERLAP = 116;
+  public int JJTEHCOVERS = 117;
+  public int JJTEHCOVEREDBY = 118;
+  public int JJTEHINSIDE = 119;
+  public int JJTEHCONTAINS = 120;
+  public int JJTISIRI = 121;
+  public int JJTISBLANK = 122;
+  public int JJTISLITERAL = 123;
+  public int JJTISNUMERIC = 124;
+  public int JJTBNODEFUNC = 125;
+  public int JJTIRIFUNC = 126;
+  public int JJTSTRDT = 127;
+  public int JJTSTRLANG = 128;
+  public int JJTUUID = 129;
+  public int JJTSTRUUID = 130;
+  public int JJTBIND = 131;
+  public int JJTREGEXEXPRESSION = 132;
+  public int JJTEXISTSFUNC = 133;
+  public int JJTNOTEXISTSFUNC = 134;
+  public int JJTRDFLITERAL = 135;
+  public int JJTTRUE = 136;
+  public int JJTFALSE = 137;
+  public int JJTSTRING = 138;
+  public int JJTQNAME = 139;
+  public int JJTBLANKNODE = 140;
+  public int JJTGRAPHREFALL = 141;
+  public int JJTGRAPHORDEFAULT = 142;
+  public int JJTQUADSNOTTRIPLES = 143;
+  public int JJTLOAD = 144;
+  public int JJTCLEAR = 145;
+  public int JJTDROP = 146;
+  public int JJTADD = 147;
+  public int JJTMOVE = 148;
+  public int JJTCOPY = 149;
+  public int JJTCREATE = 150;
+  public int JJTINSERTDATA = 151;
+  public int JJTDELETEDATA = 152;
+  public int JJTDELETEWHERE = 153;
+  public int JJTDELETECLAUSE = 154;
+  public int JJTINSERTCLAUSE = 155;
+  public int JJTMODIFY = 156;
 
 
   public String[] jjtNodeName = {
@@ -256,6 +270,20 @@ public interface SyntaxTreeBuilderTreeConstants
     "Bound",
     "SameTerm",
     "SpatialOverlap",
+    "SpatialEqual",
+    "SpatialIntersects",
+    "SpatialDisjoint",
+    "SpatialTouches",
+    "SpatialWithin",
+    "SpatialContain",
+    "SpatialCrosses",
+    "EHEquals",
+    "EHDisjoint",
+    "EHOverlap",
+    "EHCovers",
+    "EHCoveredBy",
+    "EHInside",
+    "EHContains",
     "IsIRI",
     "IsBlank",
     "IsLiteral",
@@ -294,4 +322,4 @@ public interface SyntaxTreeBuilderTreeConstants
     "Modify",
   };
 }
-/* JavaCC - OriginalChecksum=61f779b02e7435c6ed935e5395b1a76b (do not edit this line) */
+/* JavaCC - OriginalChecksum=2e33aafa7b12e7b4b85835db6c5659c6 (do not edit this line) */

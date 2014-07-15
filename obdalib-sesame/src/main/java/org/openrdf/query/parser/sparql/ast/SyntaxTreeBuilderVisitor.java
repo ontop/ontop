@@ -110,6 +110,20 @@ public interface SyntaxTreeBuilderVisitor
   public Object visit(ASTBound node, Object data) throws VisitorException;
   public Object visit(ASTSameTerm node, Object data) throws VisitorException;
   public Object visit(ASTSpatialOverlap node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialEqual node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialIntersects node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialDisjoint node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialTouches node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialWithin node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialContain node, Object data) throws VisitorException;
+  public Object visit(ASTSpatialCrosses node, Object data) throws VisitorException;
+  public Object visit(ASTEHEquals node, Object data) throws VisitorException;
+  public Object visit(ASTEHDisjoint node, Object data) throws VisitorException;
+  public Object visit(ASTEHOverlap node, Object data) throws VisitorException;
+  public Object visit(ASTEHCovers node, Object data) throws VisitorException;
+  public Object visit(ASTEHCoveredBy node, Object data) throws VisitorException;
+  public Object visit(ASTEHInside node, Object data) throws VisitorException;
+  public Object visit(ASTEHContains node, Object data) throws VisitorException;
   public Object visit(ASTIsIRI node, Object data) throws VisitorException;
   public Object visit(ASTIsBlank node, Object data) throws VisitorException;
   public Object visit(ASTIsLiteral node, Object data) throws VisitorException;
@@ -147,4 +161,4 @@ public interface SyntaxTreeBuilderVisitor
   public Object visit(ASTInsertClause node, Object data) throws VisitorException;
   public Object visit(ASTModify node, Object data) throws VisitorException;
 }
-/* JavaCC - OriginalChecksum=a759048bdd36120447a40c19f8b22ca4 (do not edit this line) */
+/* JavaCC - OriginalChecksum=e45353bf93726193ebcff97af537655e (do not edit this line) */
