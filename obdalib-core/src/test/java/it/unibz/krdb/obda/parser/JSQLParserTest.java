@@ -686,6 +686,38 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 	}
 
+	//no support for regexp in mysql
+	public void testRegexMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP '^b'");
+		printJSQL("testRegexMySQL", result);
+		assertFalse(result);
+	}
+	
+	public void testRegexPostgres(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name ~ 'foo'");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	//no support for similar to in postgres
+	public void testRegexPostgresSimilarTo(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
+		printJSQL("testRegexMySQLSimilarTo", result);
+		assertFalse(result);
+	}
+	
+	public void testRegexOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexOracleReplace(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_REPLACE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexMySQLReplace", result);
+		assertTrue(result);
+	}
+
 	private String queryText;
 
 	VisitedQuery queryP;
@@ -698,6 +730,7 @@ public class JSQLParserTest extends TestCase {
 			queryP = new VisitedQuery(input,false);
 		} catch (Exception e) {
 
+			e.printStackTrace();
 			return false;
 		}
 
@@ -748,7 +781,7 @@ public class JSQLParserTest extends TestCase {
 		try {
 			queryP = new VisitedQuery(input,true);
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			return false;
 		}
 

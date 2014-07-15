@@ -426,8 +426,16 @@ public class MappingAnalyzer {
 			funct = dfac.getFunctionMultiply(t1, t2);
 		else if (op.equals("LIKE"))
 			funct = dfac.getFunctionLike(t1, t2);
+		else if (op.equals("~") )
+			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral(""));
+		else if (op.equals("~*") )
+			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral("i")); //i flag for case insensitivity
+		else if ( op.equals("!~") )
+			funct = dfac.getFunctionNOT(dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral("")));
+		else if ( op.equals("!~*")  )
+			funct = dfac.getFunctionNOT(dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral("i")));	
 		else
-			throw new RuntimeException("Unknown opertor: " + op);
+			throw new RuntimeException("Unknown operator: " + op);
 
 		return funct;
 
