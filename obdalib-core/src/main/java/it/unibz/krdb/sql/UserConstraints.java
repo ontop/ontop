@@ -5,6 +5,8 @@ package it.unibz.krdb.sql;
 
 
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -14,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+
+import net.sf.jsqlparser.schema.Table;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,10 +121,44 @@ public class UserConstraints {
 	}
 	
 	/**
-	 * The names of all tables referred to by the user supplied foreign keys
+	 * Used by addReferredTables to check whether a RelationJSQL for the table "given name" 
+	 * already exists
+	 * 
+	 * @param tables The list of tables
+	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
+	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
 	 */
-	public Iterator<String> getReferredTables(){
-		return this.referredTables.iterator();
+	public boolean tableIsInList(ArrayList<RelationJSQL> tables, String tableGivenName){
+		for(RelationJSQL table : tables){
+			if(table.getGivenName().equals(tableGivenName))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Adds RelationJSQL for all tables referred to by the user supplied foreign keys
+	 * 
+	 * @param tables The new table names are added to this list
+	 * @return The parameter tables is returned, possible extended with new tables
+	 */
+	public ArrayList<RelationJSQL> addReferredTables(ArrayList<RelationJSQL> tables){
+		for(String tableGivenName : this.referredTables){
+			if(!tableIsInList(tables, tableGivenName)){
+				String[] tablenames = tableGivenName.split("\\.");
+				Table newTable = null;
+				if(tablenames.length == 1){
+					newTable = new Table(tablenames[0]);
+				} else if (tablenames.length == 2){
+					newTable = new Table(tablenames[0], tablenames[1]);
+				} else {
+					log.warn("Too many dots in table name " + tableGivenName + " in user-supplied constraints");
+					continue;
+				}
+				tables.add(new RelationJSQL(new TableJSQL(newTable)));
+			}
+		}
+		return tables;
 	}
 
 	/**

@@ -2,7 +2,9 @@ package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.RelationJSQL;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.junit.After;
@@ -12,6 +14,7 @@ import org.junit.Test;
 public class UserConstraintTest {
 
 	DBMetadata md;
+	ArrayList<RelationJSQL> tables;
 	
 	@Before
 	public void setupMetadata(){
@@ -25,19 +28,24 @@ public class UserConstraintTest {
 		md.add(td2);
 	}
 	
+	@Before
+	public void initTableList(){
+		tables  = new ArrayList<RelationJSQL>();
+	}
+	
 	@Test
 	public void testEmptyUserConstraints() {
 		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/empty_constraints.lst");
-		Iterator<String> it = uc.getReferredTables();
-		assertFalse(it.hasNext());
+		uc.addReferredTables(tables);
+		assertTrue(tables.size() == 0);
 	}
 
 
 	@Test
 	public void testUserPKeys() {
 		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/pkeys.lst");
-		Iterator<String> it = uc.getReferredTables();
-		assertFalse(it.hasNext());
+		uc.addReferredTables(tables);
+		assertTrue(tables.size() == 0);
 	}
 
 	@Test
@@ -53,9 +61,9 @@ public class UserConstraintTest {
 	@Test
 	public void testGetReferredTables() {
 		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/fkeys.lst");
-		Iterator<String> it = uc.getReferredTables();
-		assertTrue(it.hasNext());
-		assertTrue(it.next().equals("TABLE2"));
+		uc.addReferredTables(tables);
+		assertTrue(tables.size() == 1);
+		assertTrue(uc.tableIsInList(tables, "TABLE2"));
 	}
 
 	@Test

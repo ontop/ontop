@@ -741,6 +741,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 					try{
 						ArrayList<RelationJSQL> realTables = mParser.getRealTables();
+						
+						if(this.applyUserConstraints){
+							// Add the tables referred to by user-supplied foreign keys
+							this.userConstraints.addReferredTables(realTables);
+						}
 						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
 					}catch (JSQLParserException e){
 						System.out.println("Error obtaining the tables"+ e);
@@ -760,6 +765,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if(this.applyUserConstraints){
 				this.userConstraints.addConstraints(metadata);
 			}
+			
+			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
+			// Very useful for debugging of User Constraints (also for the end user)
 			if(printKeys){
 				// Prints all primary keys
 				System.out.println("\n====== Primary keys ==========");
