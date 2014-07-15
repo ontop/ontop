@@ -227,9 +227,9 @@ public class ModelIOManager {
 	            } else {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
-        	} catch (Exception e) {
-        		throw new IOException(String.format("ERROR reading .obda file at line: %s", reader.getLineNumber() + " \nMESSAGE: " + e.getMessage()), e);
-        	}
+	       	} catch (Exception e) {
+	        	throw new IOException(String.format("ERROR reading .obda file at line: %s", reader.getLineNumber() + " \nMESSAGE: " + e.getMessage()), e);
+	        }
         }
         
         // Throw some validation exceptions
@@ -349,7 +349,6 @@ public class ModelIOManager {
     }
 
     private void readMappingDeclaration(LineNumberReader reader, URI dataSourceUri) throws IOException {
-        String line = "";
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
@@ -357,7 +356,10 @@ public class ModelIOManager {
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
         
-        while (!(line = reader.readLine()).equals(END_COLLECTION_SYMBOL)) {
+        String line = "";
+        for(line = reader.readLine(); 
+        		line != null && !line.trim().equals(END_COLLECTION_SYMBOL); 
+        		line = reader.readLine()) {
             int lineNumber = reader.getLineNumber();
             if (line.isEmpty()) {
             	if (!mappingId.isEmpty()) {
@@ -428,6 +430,11 @@ public class ModelIOManager {
                 throw new IOException(msg);
             }
         }
+        
+        if (line == null) {
+        	throw new IOException(String.format("End collection symbol %s is missing.", END_COLLECTION_SYMBOL));
+        }
+        
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
             saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);

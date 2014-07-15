@@ -266,7 +266,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (queryStringIterator.hasNext()) {
 			result.append("\n");
 			result.append(UNION);
-			result.append("\n\n");
+			result.append("\n");
 			result.append(queryStringIterator.next());
 		}
 

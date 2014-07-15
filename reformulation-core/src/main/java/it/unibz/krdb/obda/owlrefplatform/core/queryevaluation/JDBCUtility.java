@@ -72,7 +72,7 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.H2;
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			driver = Driver.DB2;
-		} else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
+		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
 			driver = Driver.ORACLE;
 		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
 			driver = Driver.TEIID;

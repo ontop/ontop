@@ -232,7 +232,7 @@ public class UserConstraints {
 						continue;
 					}
 					if(attr.getReference() != null){
-						System.out.println("Manually supplied foreign key ignored since existing in metadata foreign key for '" + td.getName() + "':'" + attr.getName() + "'");
+						log.warn("Manually supplied foreign key ignored since existing in metadata foreign key for '" + td.getName() + "':'" + attr.getName() + "'");
 						continue;
 					}
 					Reference ref = fKey.get(keyColumn);
