@@ -147,4 +147,4 @@ public interface SyntaxTreeBuilderVisitor
   public Object visit(ASTInsertClause node, Object data) throws VisitorException;
   public Object visit(ASTModify node, Object data) throws VisitorException;
 }
-/* JavaCC - OriginalChecksum=22d52d5748a2c9af833f6fde63666c09 (do not edit this line) */
+/* JavaCC - OriginalChecksum=a759048bdd36120447a40c19f8b22ca4 (do not edit this line) */

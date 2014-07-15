@@ -460,7 +460,7 @@ public interface SyntaxTreeBuilderConstants {
     "\"datatype\"",
     "\"bound\"",
     "\"sameTerm\"",
-    "\"spatialOverlap\"",
+    "<SPATIALOVERLAP>",
     "<IS_IRI>",
     "\"isBlank\"",
     "\"isLiteral\"",
