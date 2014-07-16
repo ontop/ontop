@@ -49,8 +49,8 @@ public class QuestOWLExample {
 	 * Please use the pre-bundled H2 server from the above link
 	 * 
 	 */
-	final String owlfile = "src/main/resources/example/exampleBooks.owl";
-	final String obdafile = "src/main/resources/example/exampleBooks.obda";
+	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
+	final String obdafile = "src/main/resources/example/ontowis-5joins-int.obda";
 
 	public void runQuery() throws Exception {
 
@@ -93,26 +93,38 @@ public class QuestOWLExample {
 		 * Get the book information that is stored in the database
 		 */
 		String sparqlQuery = 
-				"PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" +
-				"SELECT DISTINCT ?x ?title ?author ?genre ?edition \n" +
-				"WHERE { ?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z. \n" +
-				"		 ?y a :Author; :name ?author. \n" +
-				"		 ?z a :Edition; :editionNumber ?edition }";
-
+				"PREFIX :	<http://www.example.org/> \n" +
+						"SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .}  " ;
+			
 		try {
-            long t1 = System.currentTimeMillis();
-			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			int columnSize = rs.getColumnCount();
-			while (rs.nextRow()) {
-				for (int idx = 1; idx <= columnSize; idx++) {
-					OWLObject binding = rs.getOWLObject(idx);
-					System.out.print(binding.toString() + ", ");
+            
+			long time = 0;
+			int count = 0;
+			
+			for (int i=0; i<4; i++){
+				long t1 = System.currentTimeMillis();
+				QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+				int columnSize = rs.getColumnCount();
+				 count = 0;
+				while (rs.nextRow()) {
+					count ++;
+					for (int idx = 1; idx <= columnSize; idx++) {
+						OWLObject binding = rs.getOWLObject(idx);
+						//System.out.print(binding.toString() + ", ");
+					}
+					//System.out.print("\n");
 				}
-				System.out.print("\n");
+				long t2 = System.currentTimeMillis();
+				time = time + (t2-t1);
+				System.out.println("partial time:" + time);
+				rs.close();
 			}
-			rs.close();
-            long t2 = System.currentTimeMillis();
-
+            
+            
+		
+            
+            
+            
 			/*
 			 * Print the query summary
 			 */
@@ -131,8 +143,11 @@ public class QuestOWLExample {
 
             System.out.println("Query Execution Time:");
             System.out.println("=====================");
-            System.out.println((t2-t1) + "ms");
+            System.out.println((time/4) + "ms");
 			
+            System.out.println("The number of results:");
+            System.out.println("=====================");
+            System.out.println(count);
 		} finally {
 			
 			/*
