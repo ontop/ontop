@@ -204,5 +204,11 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name !~ 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
+	
+	public void testAnalysis_20() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where regexp_like(first_name,'foo') ",
+				":S_{StudentId} a :Student .");
+	}
 
 }

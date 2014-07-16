@@ -36,6 +36,9 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -52,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class RegexSQLTest extends TestCase {
+public class RegexOracleSQLTest {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -64,11 +67,11 @@ public class RegexSQLTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/scenario/virtual/stockBolzanoAddress.owl";
-	final String obdafile = "src/test/resources/scenario/virtual/stockexchangeRegex.obda";
+	final String owlfile = "src/test/resources/stockBolzanoAddress.owl";
+	final String obdafile = "src/test/resources/stockexchangeRegexLike.obda";
 	private QuestOWL reasoner;
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		
@@ -100,7 +103,7 @@ public class RegexSQLTest extends TestCase {
 		
 	}
 
-
+ @After
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
@@ -145,13 +148,28 @@ public class RegexSQLTest extends TestCase {
 	}
 
 	/**
-	 * Test use of regex in Postgres
+	 * Test use of regex in Oracle
+	 * select id, street, number, city, state, country from address where  regexp_like(city, 'b.+z', 'i')
 	 * @throws Exception
 	 */
-	public void testPostgresRegex() throws Exception {
+	@Test
+	public void testOracleRegexLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
 		runTests(query);
 	}
+	
+	/**
+	 * Test use of regex in Oracle
+	 * select "ID", "NAME", "LASTNAME", "DATEOFBIRTH", "SSN" from "BROKER" where regexp_like("NAME", 'J.+a')
+	 * @throws Exception
+	 */
+	@Test
+	public void testOracleRegexLikeUppercase() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
+		runTests(query);
+	}
+	
+
 	
 	
 	

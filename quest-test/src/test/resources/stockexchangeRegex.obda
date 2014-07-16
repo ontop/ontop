@@ -24,5 +24,10 @@ mappingId	mapping-addresses
 target		:Address-{id} a :BolzanoAddress ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} . 
 source		select id, street, number, city, state, country from address where city ~* 'b.+z'
 
+mappingId	mapping-brokers
+target		:Person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
+source		select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where  "name" !~* 'J.+a'
+
+
 ]]
 

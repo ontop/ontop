@@ -712,12 +712,13 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 	}
 	
-	
-	public void testRegexOracleReplace(){
-		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_REPLACE(testcol, '[[:alpha:]]')");
-		printJSQL("testRegexMySQLReplace", result);
-		assertTrue(result);
+	//no support for not without parenthesis
+	public void testRegexNotOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexNotMySQL", result);
+		assertFalse(result);
 	}
+	
 
 	private String queryText;
 
