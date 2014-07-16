@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import static org.junit.Assert.assertEquals;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -109,28 +110,23 @@ public class RegexPostgresSQLTest {
 	
 
 	
-	private void runTests(String query) throws Exception {
+	private int runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		StringBuilder bf = new StringBuilder(query);
+		
+		int results=0;
 		try {
 			
 
 			QuestOWLResultSet rs = st.executeTuple(query);
-			/*
-			boolean nextRow = rs.nextRow();
-			
-			*/
-//			assertTrue(rs.nextRow());
+
 			while (rs.nextRow()){
 				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-				System.out.println(ind1.toString());
+				log.debug(ind1.toString());
+				results++;
 			}
 		
-/*
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
-	*/		
+
 
 		} catch (Exception e) {
 			throw e;
@@ -143,6 +139,7 @@ public class RegexPostgresSQLTest {
 			conn.close();
 			reasoner.dispose();
 		}
+		return results;
 	}
 
 	/**
@@ -154,6 +151,8 @@ public class RegexPostgresSQLTest {
 	public void testPostgresRegex() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
 		runTests(query);
+		int numberResults = runTests(query);
+		assertEquals(2, numberResults);
 	}
 	
 	/**
@@ -165,6 +164,8 @@ public class RegexPostgresSQLTest {
 	public void testPostgresRegexNot() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
 		runTests(query);
+		int numberResults = runTests(query);
+		assertEquals(2, numberResults);
 	}
 	
 
