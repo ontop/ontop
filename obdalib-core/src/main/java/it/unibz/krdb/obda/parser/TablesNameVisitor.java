@@ -243,7 +243,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Function function) {
-		if(function.getName().toLowerCase().equals("regexp_like") || function.getName().equals("regexp_replace")) {
+		if(function.getName().toLowerCase().equals("regexp_like") || function.getName().toLowerCase().equals("regexp_replace")) {
 			
 		}
 		else{
