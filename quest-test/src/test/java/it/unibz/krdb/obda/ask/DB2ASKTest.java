@@ -81,13 +81,11 @@ public class DB2ASKTest {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
+	
 			
 			reasoner.dispose();
 			
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 
 	}
 	
@@ -106,6 +104,7 @@ public class DB2ASKTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

@@ -94,8 +94,10 @@ public class MetaMappingExpander {
 	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
+	 * @throws SQLException 
+	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) {
+	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
 		
 		for (OBDAMappingAxiom mapping : mappings) {
 
@@ -183,7 +185,7 @@ public class MetaMappingExpander {
 				
 				
 				Statement st;
-				try {
+				
 					st = connection.createStatement();
 					ResultSet rs = st.executeQuery(distinctParamsSQL);
 					while(rs.next()){
@@ -194,9 +196,7 @@ public class MetaMappingExpander {
 						paramsForClassTemplate.add(params);
 						
 					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				
 				
 				List<SelectExpressionItem>  columnsForValues = new ArrayList<SelectExpressionItem>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
@@ -254,12 +254,13 @@ public class MetaMappingExpander {
 	 * @param columnsForValues
 	 * @param params
 	 * @return
+	 * @throws JSQLParserException 
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
 			Function bodyAtom, VisitedQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
-			List<String> params, int arity) {
+			List<String> params, int arity) throws JSQLParserException {
 		
 		/*
 		 * First construct new Target Query 
@@ -325,15 +326,10 @@ public class MetaMappingExpander {
 		 */
 		
 		VisitedQuery newSourceParsedQuery = null;
-		try {
+
 			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement(),false);
 			newSourceParsedQuery.setProjection(newProjection);
 			newSourceParsedQuery.setSelection(newSelection);
-			
-		} catch (JSQLParserException e) {
-			
-			e.printStackTrace();
-		}
 		
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
@@ -474,8 +470,9 @@ public class MetaMappingExpander {
 	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
+	 * @throws Exception 
 	 */
-	public void expand(OBDAModel obdaModel, URI sourceURI) {
+	public void expand(OBDAModel obdaModel, URI sourceURI) throws Exception {
 		List<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
 		
 		obdaModel.removeAllMappings();
