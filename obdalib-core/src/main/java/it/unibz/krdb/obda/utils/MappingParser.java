@@ -57,7 +57,8 @@ public class MappingParser {
 	
 
 	/**
-	 * Called by getOracleMetaData
+	 * Called by Quest when fetching non-full metadata
+	 * Only metadata for the tables in this list is extracted by Quest
 	 * 
 	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
 	 * @throws JSQLParserException 

@@ -211,13 +211,13 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
+	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
 		model.addSource(source);
 		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
 	}
 	
 	
-	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws SQLException, DuplicateMappingException{			
+	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws Exception{			
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
 		List<TableDefinition> tables = metadata.getTableList();
@@ -253,7 +253,7 @@ public class DirectMappingEngine {
 	 *  @return a List of OBDAMappingAxiom-s
 	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
 		return getMapping(table,conMan.getMetaData(source),baseuri);
 	}
 	
@@ -266,15 +266,14 @@ public class DirectMappingEngine {
 	 * @param baseUri : the base uri needed for direct mapping axiom
 	 * 
 	 *  @return a List of OBDAMappingAxiom-s
+	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) {
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) throws Exception {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 		DirectMappingAxiom dma=null;
-		try {
+
 			dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 		dma.setbaseuri(baseUri);
 		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();

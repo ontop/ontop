@@ -88,13 +88,11 @@ public class R2RMLImportAction extends ProtegeAction {
 
 				try {
 					for (OBDAMappingAxiom mapping : reader.readMappings()) {
-						if (mapping.getTargetQuery().toString().contains("BNODE"))
+						if (mapping.getTargetQuery().toString().contains("BNODE")){
 							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains BNode. -ontoPro- does not support it yet.");
-						else if (mapping.getTargetQuery().toString().contains("triple"))
-						{
-							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains a URI as predicate. -ontoPro- plugin does not support that yet. Please use the -ontop- API.");
-						} else
+						} else{
 							obdaModel.addMapping(sourceID, mapping);
+						}
 					}
 				} catch (DuplicateMappingException dm) {
 					JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: "+dm.getLocalizedMessage());

@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.datatype.DatatypeFactory;
+
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -359,12 +361,8 @@ public class OBDAMappingTransformer {
 				//add object declaration to predObj node
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
-				
-				if(func.toString().contains("dateBaaLicenseeValidTo"))
-					System.out.print("found you");
-				
-
-				if (object instanceof Variable){
+								
+ 				if (object instanceof Variable){ //we create an rr:column
 					if(ontology!= null && objectProperties.contains(prop)){
 						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
 						obm.setTermType(R2RMLVocabulary.iri);
@@ -375,18 +373,18 @@ public class OBDAMappingTransformer {
 					//we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
-				} else if (object instanceof Function) {
+				} else if (object instanceof Function) { //we create a template
 					//check if uritemplate
-					Predicate objectPred = ((Function) object).getFunctionSymbol();
+ 					Predicate objectPred = ((Function) object).getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
 						//obm.setTemplate(mfact.createTemplate(objectURI));
 						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-					}else if (objectPred instanceof DataTypePredicate) {
+					}else if (objectPred.isDataTypePredicate()) {
 						Term objectTerm = ((Function) object).getTerm(0);
-
+						
 						if (objectTerm instanceof Variable) {
 							//Now we add the template!!
 							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
@@ -395,9 +393,24 @@ public class OBDAMappingTransformer {
 							//obm.setTemplate(mfact.createTemplate(objectTemplate));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
 							obm.setTermType(R2RMLVocabulary.literal);
-						
 							
 							
+							//check if it is not a plain literal
+							if(!objectPred.equals(OBDAVocabulary.RDFS_LITERAL)){
+								
+								//set the datatype for the typed literal								
+								obm.setDatatype(vf.createURI(objectPred.getName()));
+							}
+							else{
+								//check if the plain literal has a lang value
+								if(objectPred.getArity()==2){
+									
+									Term langTerm = ((Function) object).getTerm(1);
+									obm.setLanguageTag(langTerm.toString());
+								}
+							}
+							
+	
 							
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
