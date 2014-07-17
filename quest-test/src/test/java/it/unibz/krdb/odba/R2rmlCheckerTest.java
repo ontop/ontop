@@ -436,6 +436,7 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			// conn.close();
 			st.close();
@@ -511,6 +512,7 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			st.close();
 			// conn.close();
@@ -549,6 +551,7 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			// conn.close();
 			st.close();
@@ -583,6 +586,7 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			// conn.close();
 			st.close();

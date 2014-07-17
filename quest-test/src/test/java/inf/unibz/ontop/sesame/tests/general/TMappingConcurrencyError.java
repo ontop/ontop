@@ -117,6 +117,7 @@ public class TMappingConcurrencyError extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
