@@ -727,8 +727,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			URI sourceId = datasource.getSourceID();
 
 			
-			// Parse mappings. Includes extracting view definitions
-			MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -739,6 +737,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
 					
+					// Parse mappings. Just to get the table names in use
+					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
+							
 					try{
 						ArrayList<RelationJSQL> realTables = mParser.getRealTables();
 						
@@ -756,10 +757,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 				}
 			}
-
-			// This call should be used if the ParsedMappings 
-			// are reused for the parsing below
-			mParser.addViewDefs(metadata);
 			
 			//Adds keys from the text file
 			if(this.applyUserConstraints){
