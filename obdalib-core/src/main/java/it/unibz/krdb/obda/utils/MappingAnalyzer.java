@@ -268,36 +268,6 @@ public class MappingAnalyzer {
 		}
 	}
 
-	/**
-	 * Methods to create a {@link Function} starting from a
-	 * {@link IsNullExpression}
-	 * 
-	 * @param pred
-	 *            IsNullExpression
-	 * @param lookupTable
-	 * @return a function from the OBDADataFactory
-	 */
-	private Function getFunction(CastExpression pred, LookupTable lookupTable) {
-
-		Expression column = pred.getLeftExpression();
-		String columnName = column.toString();
-		String variableName = lookupTable.lookup(columnName);
-		if (variableName == null) {
-			throw new RuntimeException(
-					"Unable to find column name for variable: " + columnName);
-		}
-		Term var = dfac.getVariable(variableName);
-
-		ColDataType datatype = pred.getType();
-
-		Term var2 = null;
-
-		// first value is a column, second value is a datatype. It can also have
-		// the size
-
-		return dfac.getFunctionCast(var, var2);
-
-	}
 
 	/**
 	 * Recursive methods to create a {@link Function} starting from a
@@ -440,17 +410,15 @@ public class MappingAnalyzer {
 		else if (op.equals("~"))
 			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral(""));
 		else if (op.equals("~*"))
-			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral("i")); // i
-																					// flag
-																					// for
-																					// case
-																					// insensitivity
+			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral("i")); // i flag for case insensitivity
 		else if (op.equals("!~"))
-			funct = dfac.getFunctionNOT(dfac.getFunctionRegex(t1, t2,
-					dfac.getConstantLiteral("")));
+			funct = dfac.getFunctionNOT(dfac.getFunctionRegex(t1, t2,dfac.getConstantLiteral("")));
 		else if (op.equals("!~*"))
-			funct = dfac.getFunctionNOT(dfac.getFunctionRegex(t1, t2,
-					dfac.getConstantLiteral("i")));
+			funct = dfac.getFunctionNOT(dfac.getFunctionRegex(t1, t2,dfac.getConstantLiteral("i")));
+		else if (op.equals("REGEXP"))
+			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral("i"));
+		else if (op.equals("REGEXP BINARY"))
+			funct = dfac.getFunctionRegex(t1, t2, dfac.getConstantLiteral(""));
 		else
 			throw new RuntimeException("Unknown operator: " + op);
 

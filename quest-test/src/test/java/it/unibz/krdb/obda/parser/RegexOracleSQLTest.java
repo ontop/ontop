@@ -48,13 +48,9 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***
- * A simple test that check if the system is able to handle Mappings for
- * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
- * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
- * there and then query on top.
+/** 
+ * Test to check if the sql parser supports regex correctly when written with oracle syntax. 
+ * Translated in a datalog function and provides the correct results
  */
 public class RegexOracleSQLTest {
 
@@ -68,8 +64,8 @@ public class RegexOracleSQLTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/stockBolzanoAddress.owl";
-	final String obdafile = "src/test/resources/stockexchangeRegexLike.obda";
+	final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
+	final String obdafile = "src/test/resources/regex/stockexchangeRegexLike.obda";
 	private QuestOWL reasoner;
 
 	@Before

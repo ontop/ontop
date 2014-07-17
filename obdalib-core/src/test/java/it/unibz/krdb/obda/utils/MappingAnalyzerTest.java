@@ -181,7 +181,7 @@ public class MappingAnalyzerTest extends TestCase {
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
 
-	public void testAnalysis_21() throws Exception {
+	public void testAnalysis_17() throws Exception {
 		runAnalysis(
 				"select id, first_name, last_name from Student where last_name like '%lli'",
 				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
@@ -208,6 +208,12 @@ public class MappingAnalyzerTest extends TestCase {
 	public void testAnalysis_20() throws Exception {
 		runAnalysis(
 				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where regexp_like(first_name,'foo') ",
+				":S_{StudentId} a :Student .");
+	}
+	
+	public void testAnalysis_21() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name regexp 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
 

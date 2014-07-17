@@ -20,8 +20,7 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -36,6 +35,8 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
+import junit.framework.TestCase;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,12 +47,11 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /** 
- * Test to check if the sql parser supports regex correctly when written with postgres syntax. 
+ * Test to check if the sql parser supports regex correctly when written with mysql syntax. 
  * Translated in a datalog function and provides the correct results
  */
-public class RegexPostgresSQLTest {
+public class RegexMySQLTest {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -64,7 +64,7 @@ public class RegexPostgresSQLTest {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
-	final String obdafile = "src/test/resources/regex/stockexchangeRegex.obda";
+	final String obdafile = "src/test/resources/regex/stockexchangeRegexMySQL.obda";
 	private QuestOWL reasoner;
 
 	@Before
@@ -99,7 +99,7 @@ public class RegexPostgresSQLTest {
 		
 	}
 
-	@After
+ @After
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
@@ -117,6 +117,7 @@ public class RegexPostgresSQLTest {
 
 			QuestOWLResultSet rs = st.executeTuple(query);
 
+//			assertTrue(rs.nextRow());
 			while (rs.nextRow()){
 				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
 				log.debug(ind1.toString());
@@ -140,29 +141,27 @@ public class RegexPostgresSQLTest {
 	}
 
 	/**
-	 * Test use of regex in Postgres
-	 * select id, street, number, city, state, country from address where city ~* 'b.+z'
+	 * Test use of regex in MySQL
+	 * select id, street, number, city, state, country from address where city regexp 'b.+z'
 	 * @throws Exception
 	 */
 	@Test
-	public void testPostgresRegex() throws Exception {
+	public void testOracleRegexLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
-		runTests(query);
 		int numberResults = runTests(query);
 		assertEquals(2, numberResults);
 	}
 	
 	/**
-	 * Test use of regex in Postgres with not
-	 * select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where  "name" !~* 'J.+a'
+	 * Test use of regex in MySQL
+	 * select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where "name" regexp binary 'J.+a'
 	 * @throws Exception
 	 */
 	@Test
-	public void testPostgresRegexNot() throws Exception {
+	public void testOracleRegexLikeUppercase() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
-		runTests(query);
 		int numberResults = runTests(query);
-		assertEquals(2, numberResults);
+		assertEquals(1, numberResults);
 	}
 	
 
