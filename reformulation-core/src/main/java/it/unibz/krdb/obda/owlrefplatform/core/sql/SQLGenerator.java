@@ -67,7 +67,29 @@ public class SQLGenerator implements SQLQueryGenerator {
 	
 	/*Spatial operator*/
 	
+	//TODO this also needs to change because it refers to the PostGIS syntax. Spatial 
+	//databases to not necessarily use the same syntax.
+	
+	//Also,  some of the families use common semantics for their common operators
+	//Should be considered in the higher level
+	
 	private static final String OVERLAPS_OPERATOR = "%s @ %s";
+	
+	public static final String SFEQUALS_OPERATOR = "ST_Equals(%s,%s)";
+	public static final String SFDISJOINT_OPERATOR = "ST_Disjoint(%s,%s)";
+	public static final String SFINTERSECTS_OPERATOR = "ST_Intersects(%s,%s)";
+	public static final String SFTOUCHES_OPERATOR = "ST_Touches(%s,%s)";
+	public static final String SFWITHIN_OPERATOR = "ST_Within(%s,%s)";
+	public static final String SFCONTAINS_OPERATOR = "ST_Contains(%s,%s)";
+	public static final String SFCROSSES_OPERATOR = "ST_Crosses(%s,%s)";
+	
+	public static final String EHEQUALS_OPERATOR = "ST_EQUALS(%s,%s)";
+	public static final String EHDISJOINT_OPERATOR = "ST_Disjoint(%s,%s)";
+	public static final String EHOVERLAP_OPERATOR = "ST_Overlaps(%s,%s)";
+	public static final String EHCOVERS_OPERATOR = "ST_Covers(%s,%s)";
+	public static final String EHCOVEREDBY__OPERATOR = "ST_CoveredBy(%s,%s)";
+	public static final String EHINSIDE_OPERATOR = "ST_Within(%s,%s)";
+	public static final String EHCONTAINS_OPERATOR = "ST_Contains(%s,%s)";
 	
 	private static final String GEOMFROMWKT_OPERATOR = "ST_GeomFromText(%s)";
 
@@ -1596,7 +1618,35 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_TRUE_OPERATOR;
 		} else if(functionSymbol.equals(OBDAVocabulary.OVERLAPS)){
 			operator = OVERLAPS_OPERATOR;
-		} else if(functionSymbol.equals(OBDAVocabulary.GEOMFROMWKT)){
+		} else if(functionSymbol.equals(OBDAVocabulary.SFEQUALS)){
+			operator = SFEQUALS_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.SFDISJOINT)){
+			operator = SFDISJOINT_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.SFINTERSECTS)){
+			operator = SFINTERSECTS_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.SFTOUCHES)){
+			operator = SFTOUCHES_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.SFWITHIN)){
+			operator = SFWITHIN_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.SFCONTAINS)){
+			operator = SFCONTAINS_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.SFCROSSES)){
+			operator = SFCROSSES_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.EHEQUALS)){
+			operator = EHEQUALS_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.EHDISJOINT)){
+			operator = EHDISJOINT_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.EHOVERLAPS)){
+			operator = EHOVERLAP_OPERATOR;
+		}else if(functionSymbol.equals(OBDAVocabulary.EHCOVERS)){
+			operator = EHCOVERS_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.EHCOVEREDBY)){
+			operator = EHCOVEREDBY__OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.EHINSIDE)){
+			operator = EHINSIDE_OPERATOR;
+		} else if(functionSymbol.equals(OBDAVocabulary.EHCONTAINS)){
+			operator = EHCONTAINS_OPERATOR;
+		}  else if(functionSymbol.equals(OBDAVocabulary.GEOMFROMWKT)){
 				operator = GEOMFROMWKT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
 			operator = LIKE_OPERATOR;

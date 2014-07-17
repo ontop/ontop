@@ -28,6 +28,9 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 public class OBDAVocabulary {
 	
+	/*GeoSPARQL namespaces*/
+	
+	public static final String GEOSPARQL_FUNCTION_NS = "<http://www.opengis.net/def/function/geosparql/";
 
 	/* Constants */
 
@@ -92,8 +95,38 @@ public class OBDAVocabulary {
 
 	public static final String strIS_TRUE = "IS_TRUE";
 	
+	/*GeoSPARQL geometry topology functions*/
+	
 	public static final String strOverlaps = "OVERLAPS";
 	
+	public static final String sfEquals = "SF-EQUALS";
+	public static final String sfDisjoint = "SF-DISJOINT";
+	public static final String sfIntersects = "SF-INTERSECTS";
+	public static final String sfTouches = "SF-TOUCHES";
+	public static final String sfWithin = "SF-WITHIN";
+	public static final String sfContains = "SF-CONTAINS";
+	public static final String sfCrosses = "SF-CROSSES";
+	
+	public static final String ehEquals = "EH-EQUALS";
+	public static final String ehDisjoint = "EH-DISJOINT";
+	public static final String ehOverlap = "EH-OVERLAP";
+	public static final String ehCovers = "EH-COVERS";
+	public static final String ehCoveredBy = "EH-COVEREDBY";
+	public static final String ehInside = "EH-INSIDE";
+	public static final String ehContains = "EH-CONTAINS";
+
+	public static final String sfdistance = "SF-DISTANCE";
+	public static final String sfbuffer = "SF-BUFFER";
+	public static final String sfconvexHull = "SF-CONVEXHULL";
+	public static final String sfIntersection = "SF-INTERSECTION";
+	public static final String sfUnion = "SF-UNION";
+	public static final String sfDifference = "SF-DIFFERENCE";
+	public static final String sfSymDifference = "SF-SYMDIFFERENCE";
+	public static final String sfEnvelope = "SF-ENVELOPE";
+	public static final String sfBoundary = "SF-BOUNDARY";
+	public static final String sfGetSRID = "SF-SRID";
+
+
 	public static final String strGeomFromWKT = "GEOMFROMWKT";
 	
 	/* Boolean predicates */
@@ -104,6 +137,59 @@ public class OBDAVocabulary {
 	
 	public static final Predicate OVERLAPS = new BooleanOperationPredicateImpl(
 			strOverlaps, 2);
+	
+	public static final Predicate SFCONTAINS  = new BooleanOperationPredicateImpl(
+			sfContains, 2);
+	
+	public static final Predicate SFCROSSES = new BooleanOperationPredicateImpl(
+			sfCrosses, 2);
+	public static final Predicate SFDISJOINT = new BooleanOperationPredicateImpl(
+			sfDisjoint, 2);
+	public static final Predicate SFINTERSECTS = new BooleanOperationPredicateImpl(
+			sfIntersects, 2);
+	public static final Predicate SFTOUCHES = new BooleanOperationPredicateImpl(
+			sfTouches, 2);
+	public static final Predicate SFWITHIN = new BooleanOperationPredicateImpl(
+			sfWithin, 2);
+	public static final Predicate SFEQUALS = new BooleanOperationPredicateImpl(
+			sfEquals, 2);
+
+	public static final Predicate EHCOVEREDBY = new BooleanOperationPredicateImpl(
+			ehCoveredBy, 2);
+	public static final Predicate EHCOVERS = new BooleanOperationPredicateImpl(
+			ehCovers, 2);
+	public static final Predicate EHDISJOINT = new BooleanOperationPredicateImpl(
+			ehDisjoint, 2);
+	public static final Predicate EHEQUALS = new BooleanOperationPredicateImpl(
+			ehEquals, 2);
+	public static final Predicate EHINSIDE = new BooleanOperationPredicateImpl(
+			ehInside, 2);
+	public static final Predicate EHOVERLAPS = new BooleanOperationPredicateImpl(
+			ehOverlap, 2);
+	public static final Predicate EHCONTAINS = new BooleanOperationPredicateImpl(
+			ehContains, 2);
+	
+	public static final Predicate SFDISTANCE = new BooleanOperationPredicateImpl(
+			sfdistance, 2);
+	public static final Predicate SFBUFFER = new BooleanOperationPredicateImpl(
+			sfbuffer, 2);
+	public static final Predicate SFCONVEXHULL = new BooleanOperationPredicateImpl(
+			sfconvexHull, 2);
+	public static final Predicate SFINTERSECTION = new BooleanOperationPredicateImpl(
+			sfIntersection, 2);
+	public static final Predicate SFUNION = new BooleanOperationPredicateImpl(
+			sfUnion, 2);
+	public static final Predicate SFDIFFERENCE = new BooleanOperationPredicateImpl(
+			sfDifference, 2);
+	public static final Predicate SFSYMDIFFERENCE = new BooleanOperationPredicateImpl(
+			sfSymDifference, 2);
+	public static final Predicate SFENVELOPE = new BooleanOperationPredicateImpl(
+			sfEnvelope, 2);
+	public static final Predicate SFBOUNDARY = new BooleanOperationPredicateImpl(
+			sfBoundary, 2);
+	public static final Predicate SFGETSRID = new BooleanOperationPredicateImpl(
+			sfGetSRID, 2);
+	
 	
 	public static final Predicate GEOMFROMWKT = new BooleanOperationPredicateImpl(
 			strGeomFromWKT, 1);
@@ -211,6 +297,8 @@ public class OBDAVocabulary {
 	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl("str");
 	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl("datatype");
 	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl("lang");
+
+
 
 	
 	/* SPARQL built-in predicates */

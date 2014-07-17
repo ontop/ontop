@@ -20,6 +20,21 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  * #L%
  */
 
+import gr.uoa.di.madgik.sesame.functions.EHContainsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoveredByFunc;
+import gr.uoa.di.madgik.sesame.functions.EHCoversFunc;
+import gr.uoa.di.madgik.sesame.functions.EHDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.EHEqualsFunc;
+import gr.uoa.di.madgik.sesame.functions.EHInsideFunc;
+import gr.uoa.di.madgik.sesame.functions.EHOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialContainFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialCrossesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialDisjointFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialEqualFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialIntersectsFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialTouchesFunc;
+import gr.uoa.di.madgik.sesame.functions.SpatialWithinFunc;
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
@@ -241,7 +256,19 @@ public class ExpressionEvaluator {
 		} else if (pred == OBDAVocabulary.EQ) {
 			return evalEqNeq(term, true);
 			
-		} else if (pred == OBDAVocabulary.OVERLAPS) {
+		} else if (pred == OBDAVocabulary.OVERLAPS || 
+				pred == OBDAVocabulary.SFCONTAINS ||
+				pred == OBDAVocabulary.SFCROSSES ||
+				pred == OBDAVocabulary.SFDISJOINT||
+				pred == OBDAVocabulary.SFEQUALS  ||
+				pred == OBDAVocabulary.SFINTERSECTS ||
+				pred == OBDAVocabulary.SFTOUCHES ||
+				pred == OBDAVocabulary.SFWITHIN ||
+				pred == OBDAVocabulary.EHCONTAINS ||
+				pred == OBDAVocabulary.EHCOVEREDBY ||
+				pred == OBDAVocabulary.EHCOVERS ||
+				pred == OBDAVocabulary.EHDISJOINT ||
+				pred == OBDAVocabulary.EHINSIDE)  {
 			return evalSpatialOverlap(term);
 		} else if (pred == OBDAVocabulary.GT) {
 			return term;
@@ -712,8 +739,41 @@ public class ExpressionEvaluator {
 		else {
 			arg2 = term.getTerm(1);
 		}
-							
-		return	fac.getFunctionOverlaps(arg1, arg2);
+		
+		Predicate pred = term.getFunctionSymbol();
+		//TODO  Definitely need to change this
+		
+		if (pred == OBDAVocabulary.OVERLAPS)
+			return	fac.getFunctionOverlaps(arg1, arg2);
+		else if (pred instanceof SpatialContainFunc)
+			return fac.getFunctionSpatialContains(arg1, arg2);
+		else if (pred == OBDAVocabulary.SFEQUALS)
+			return fac.getFunctionSpatialEquals(arg1, arg2);
+		else if (pred == OBDAVocabulary.SFINTERSECTS)
+			return fac.getFunctionSpatialIntersects(arg1, arg2);
+		else if (pred == OBDAVocabulary.SFTOUCHES)
+			return fac.getFunctionSpatialTouches(arg1, arg2);
+		else if (pred == OBDAVocabulary.SFWITHIN)
+			return fac.getFunctionSpatialWithin(arg1, arg2);
+		else if (pred == OBDAVocabulary.SFCROSSES )
+			return fac.getFunctionSpatialCrosses(arg1, arg2);
+		else if (pred == OBDAVocabulary.SFDISJOINT)
+			return fac.getFunctionSpatialDisjoint(arg1, arg2);
+		else if (pred == OBDAVocabulary.EHEQUALS)
+			return fac.getFunctionEHEquals(arg1, arg2);
+		else if (pred == OBDAVocabulary.EHDISJOINT)
+			return fac.getFunctionEHDisjoint(arg1, arg2);
+		else if (pred == OBDAVocabulary.EHOVERLAPS)
+			return fac.getFunctionEHOverlap(arg1, arg2);
+		else if (pred == OBDAVocabulary.EHCOVERS)
+			return fac.getFunctionEHCovers(arg1, arg2);
+		else if (pred == OBDAVocabulary.EHCOVEREDBY)
+			return fac.getFunctionEHCoveredBy(arg1, arg2);
+		else if (pred == OBDAVocabulary.EHINSIDE)
+			return fac.getFunctionEHInside(arg1, arg2);
+		else //if (term instanceof EHContainsFunc)
+			System.out.println("FUNCTION  NONE OF THE ABOVE: "+ term.toString());
+			return fac.getFunctionEHContains(arg1, arg2);
 		} else{
 			return term;
 			}
