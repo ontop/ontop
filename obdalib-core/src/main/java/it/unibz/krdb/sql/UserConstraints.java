@@ -9,6 +9,7 @@ import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,10 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Dag Hovland
+ *
  *
  * Used for reading user-provided information about keys in views and materialized views. 
  * Necessary for better performance in cases where materialized views do a lot of work
+ * 
+ *  @author Dag Hovland
  *
  */
 public class UserConstraints {
@@ -42,8 +45,8 @@ public class UserConstraints {
 	// Lists all tables referred to with a foreign key. Used to read metadata also from these 
 	HashSet<String> referredTables;
 	
-	// Name of file with the user-supplied constraints
-	String filename;
+	// File with the user-supplied constraints
+	File file;
 	
 	/**
 	 * Reads colon separated pairs of view name and primary key
@@ -51,18 +54,31 @@ public class UserConstraints {
 	 * @throws IOException 
 	 */
 	public UserConstraints(String filename) {
-		this.filename = filename;
+		this(new File(filename));
+	}
+		
+		
+	/**
+	 * Reads colon separated pairs of view name and primary key
+	 * @param The plain-text file with the fake keys
+	 * @throws IOException 
+	 */
+	public UserConstraints(File file) {
+		if(!file.exists()){
+			throw new IllegalArgumentException("File " + file + " does not exist");
+		}
+		this.file = file;
 		this.pKeys = new HashMap<String, ArrayList<ArrayList<String>>>();
 		this.fKeys = new HashMap<String, ArrayList<HashMap<String, Reference>>>();
 		this.referredTables = new HashSet<String>();
 		this.parseConstraints();
 	}
-		
-		
+
+
 	private void parseConstraints(){
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new FileReader(filename));
+			reader = new BufferedReader(new FileReader(file));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(":");
@@ -110,11 +126,11 @@ public class UserConstraints {
 			}
 
 		} catch (FileNotFoundException e) {
-			log.warn("Could not find file " + filename + " in directory " + System.getenv().get("PWD"));
+			log.warn("Could not find file " + file + " in directory " + System.getenv().get("PWD"));
 			String currentDir = System.getProperty("user.dir");
 			log.warn("Current dir using System:" +currentDir);
 		} catch (IOException e) {
-			log.warn("Problem reading keys from  file " + filename);
+			log.warn("Problem reading keys from  file " + file);
 			log.warn(e.getMessage());
 		} 
 		

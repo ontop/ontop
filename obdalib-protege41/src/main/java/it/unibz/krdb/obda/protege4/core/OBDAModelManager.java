@@ -42,6 +42,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.UserConstraints;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,6 +87,7 @@ public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = "obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = "q"; // The default query file extension.
+	private static final String DBPREFS_EXT = "db_prefs"; // The default db_prefs (currently only user constraints) file extension.
 
 	private OWLEditorKit owlEditorKit;
 
@@ -101,6 +103,9 @@ public class OBDAModelManager implements Disposable {
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
+	private boolean applyUserConstraints = false;
+	private UserConstraints userConstraints;
+	
 	private static Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
 	/***
@@ -140,7 +145,7 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		// Printing the version information to the console
-	//	System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
+		//	System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
 	}
 
 	/***
@@ -164,23 +169,23 @@ public class OBDAModelManager implements Disposable {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 					IRI newiri = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
-					
+
 					if (newiri == null)
 						continue;
-					
+
 					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI();
-					
+
 					log.debug("Ontology ID changed");
 					log.debug("Old ID: {}", oldiri);
 					log.debug("New ID: {}", newiri);
-					
+
 					OBDAModel model = obdamodels.get(oldiri.toURI());
-					
+
 					if (model == null) {
 						setupNewOBDAModel();
 						model = getActiveOBDAModel();
 					}
-					
+
 					PrefixManager prefixManager = model.getPrefixManager();
 					prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, newiri.toURI().toString());
 
@@ -346,7 +351,7 @@ public class OBDAModelManager implements Disposable {
 
 		// Setup the prefixes
 		PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
-//		addOBDACommonPrefixes(prefixManager);
+		//		addOBDACommonPrefixes(prefixManager);
 
 		PrefixManagerWrapper prefixwrapper = new PrefixManagerWrapper(prefixManager);
 		activeOBDAModel.setPrefixManager(prefixwrapper);
@@ -365,19 +370,19 @@ public class OBDAModelManager implements Disposable {
 		obdamodels.put(modelUri, activeOBDAModel);
 	}
 
-//	/**
-//	 * Append here all default prefixes used by the system.
-//	 */
-//	private void addOBDACommonPrefixes(PrefixOWLOntologyFormat prefixManager) {
-//		if (!prefixManager.containsPrefixMapping("quest")) {
-////			sb.append("@PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> .\n");
-////			sb.append("@PREFIX rdfs: <http:  //www.w3.org/2000/01/rdf-schema#> .\n");
-////			sb.append("@PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n");
-////			sb.append("@PREFIX owl: <http://www.w3.org/2002/07/owl#> .\n");
-//
-//			prefixManager.setPrefix("quest", OBDAVocabulary.QUEST_NS);
-//		}
-//	}
+	//	/**
+	//	 * Append here all default prefixes used by the system.
+	//	 */
+	//	private void addOBDACommonPrefixes(PrefixOWLOntologyFormat prefixManager) {
+	//		if (!prefixManager.containsPrefixMapping("quest")) {
+	////			sb.append("@PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> .\n");
+	////			sb.append("@PREFIX rdfs: <http:  //www.w3.org/2000/01/rdf-schema#> .\n");
+	////			sb.append("@PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n");
+	////			sb.append("@PREFIX owl: <http://www.w3.org/2002/07/owl#> .\n");
+	//
+	//			prefixManager.setPrefix("quest", OBDAVocabulary.QUEST_NS);
+	//		}
+	//	}
 
 	public QueryController getQueryController() {
 		if (queryController == null) {
@@ -446,6 +451,8 @@ public class OBDAModelManager implements Disposable {
 					ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(QuestPreferences.class.getName());
 					questfactory.setPreferences(reasonerPreference);
 					questfactory.setOBDAModel(getActiveOBDAModel());
+					if(applyUserConstraints)
+						questfactory.setUserConstraints(userConstraints);
 				}
 				fireActiveOBDAModelChange();
 
@@ -470,9 +477,11 @@ public class OBDAModelManager implements Disposable {
 					String owlDocumentIri = source.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology).toString();
 					String obdaDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + OBDA_EXT;
 					String queryDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + QUERY_EXT;
+					String dbprefsDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + DBPREFS_EXT;
 
 					File obdaFile = new File(URI.create(obdaDocumentIri));
 					File queryFile = new File(URI.create(queryDocumentIri));
+					File dbprefsFile = new File(URI.create(dbprefsDocumentIri));
 					IRI ontologyIRI = activeOntology.getOntologyID().getOntologyIRI();
 
 					activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, ontologyIRI.toString());
@@ -492,7 +501,17 @@ public class OBDAModelManager implements Disposable {
 						} catch (Exception ex) {
 							queryController.reset();
 							throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
-						}						
+						}	
+						applyUserConstraints = false;
+						if (dbprefsFile.exists()){
+							try {
+								// Load user-supplied constraints
+								userConstraints = new UserConstraints(dbprefsFile);
+								applyUserConstraints = true;
+							} catch (Exception ex) {
+								throw new Exception("Exception occurred while loading database preference file : " + dbprefsFile + "\n\n" + ex.getMessage());
+							}
+						}
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}

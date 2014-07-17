@@ -130,6 +130,7 @@ public class TestSesameUserConstraints {
 				qest1 = new SesameVirtualRepo("", ontology, model, preference);
 
 		}
+		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.
 		 */
