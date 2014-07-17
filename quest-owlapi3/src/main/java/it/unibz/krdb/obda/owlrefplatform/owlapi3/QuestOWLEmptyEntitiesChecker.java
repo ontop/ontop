@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -147,6 +148,7 @@ public class QuestOWLEmptyEntitiesChecker {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			
 			st.close();
@@ -169,6 +171,7 @@ public class QuestOWLEmptyEntitiesChecker {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			
 			st.close();

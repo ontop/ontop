@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -137,6 +138,7 @@ public class MultiSchemaTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

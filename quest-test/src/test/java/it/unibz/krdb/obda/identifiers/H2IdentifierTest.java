@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.identifiers;
  * #L%
  */
 
+import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -37,7 +38,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
-
 
 import junit.framework.TestCase;
 
@@ -115,11 +115,10 @@ public class H2IdentifierTest extends TestCase {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 		} catch (Exception exc) {
-			try {
+			
 				tearDown();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
+				throw exc;
+			
 		}	
 		
 	}
@@ -159,6 +158,7 @@ public class H2IdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
