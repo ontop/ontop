@@ -45,14 +45,10 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	private QuestDBVirtualStore virtualStore;
 	private QuestDBConnection questDBConn;
 
+	@Deprecated
 	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		this(name, null, obdaFile, existential, rewriting);
-	}
-	
-	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting, UserConstraints userConstraints)
-			throws Exception {
-		this(name, null, obdaFile, existential, rewriting, userConstraints);
 	}
 	
 	
@@ -60,58 +56,32 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		this(name, null, obdaFile, configFileName);
 	}
 	
-	public SesameVirtualRepo(String name, String obdaFile, String configFileName, UserConstraints userConstraints) throws Exception {
-		this(name, null, obdaFile, configFileName, userConstraints);
-	}
-	
+	@Deprecated
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		super();
 		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting), null);
 	}	
 	
-	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting, UserConstraints userConstraints)
-			throws Exception {
-		super();
-		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting), userConstraints);
-	}	
 	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
 		super();
 		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName), null);
 	}
 	
-	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName, UserConstraints userConstraints) throws Exception {
-		super();
-		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName), userConstraints);
-	}
-	
-	
+	@Deprecated	
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName), null);
 	}
 
-	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName, UserConstraints userConstraints) throws Exception {
-		super();
-		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName), userConstraints);
-	}
-	
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, QuestPreferences config) throws Exception {
 		this(name, tbox, mappings, null, config);
 	}
 	
-	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, QuestPreferences config, UserConstraints userConstraints) throws Exception {
-		this(name, tbox, mappings, null, config, userConstraints);
-	}
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, metadata, prop, null);
-	}
-	
-	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences prop, UserConstraints userConstraints) throws Exception {
-		super();
-		createRepo(name, tbox, mappings, metadata, prop, userConstraints);
 	}
 	
 	/**
