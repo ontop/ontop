@@ -44,7 +44,7 @@ import sesameWrapper.SesameVirtualRepo;
  * @author dhovl
  *
  */
-public class TestSesameUserConstraints {
+public class TestSesameImplicitDBConstraints {
 	static String owlfile = "src/test/resources/userconstraints/uc.owl";
 	static String obdafile = "src/test/resources/userconstraints/uc.obda";
 	static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
@@ -112,23 +112,20 @@ public class TestSesameUserConstraints {
 		dbMetadata = getMeta();
 		SesameVirtualRepo qest1;
 		if(provideMetadata){
-		if(applyUserConstraints){
-			// Parsing user constraints
-			UserConstraints userConstraints = new UserConstraints(uc_keyfile);
-
-			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference, userConstraints);
-		} else 
 			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference);
-		} else {
-
 			if(applyUserConstraints){
 				// Parsing user constraints
-				UserConstraints userConstraints = new UserConstraints(uc_keyfile);
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+				qest1.setImplicitDBConstraints(userConstraints);
+			}
+		} else {
+			qest1 = new SesameVirtualRepo("", ontology, model, preference);
+			if(applyUserConstraints){
+				// Parsing user constraints
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
 
-				qest1 = new SesameVirtualRepo("", ontology, model, preference, userConstraints);
-			} else 
-				qest1 = new SesameVirtualRepo("", ontology, model, preference);
-
+				qest1.setImplicitDBConstraints(userConstraints);
+			}
 		}
 		qest1.initialize();
 		/*
@@ -183,7 +180,7 @@ public class TestSesameUserConstraints {
 		boolean m = sql.matches("(?ms)(.*)TABLE1(.*),(.*)TABLE1(.*)");
 		assertFalse(m);
 	}
-	
+
 	@Test
 	public void testWithoutSelfJoinElimManualMetadata() throws Exception {
 		init(false, true);
@@ -192,7 +189,7 @@ public class TestSesameUserConstraints {
 		boolean m = sql.matches("(?ms)(.*)TABLE1(.*),(.*)TABLE1(.*)");
 		assertTrue(m);
 	}
-	
+
 	@Test
 	public void testWithSelfJoinElimNoMetadata() throws Exception {
 		init(true, false);
@@ -201,7 +198,7 @@ public class TestSesameUserConstraints {
 		boolean m = sql.matches("(?ms)(.*)TABLE1(.*),(.*)TABLE1(.*)");
 		assertFalse(m);
 	}
-	
+
 	@Test
 	public void testWithoutSelfJoinElimNoMetadata() throws Exception {
 		init(false, false);

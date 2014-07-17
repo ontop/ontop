@@ -39,7 +39,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,23 +71,17 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 	private OWLAPI3Translator translator = new OWLAPI3Translator();
+	
+	private boolean isinitalized = false;
 
 	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
 		this(name, null, obdaURI, null);
-	}
-
-	public QuestDBVirtualStore(String name, URI obdaURI, UserConstraints userConstraints) throws Exception {
-		this(name, null, obdaURI, null, userConstraints);
 	}
 	
 	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config) throws Exception {
 		this(name, null, obdaURI, config);
 	}
 	
-	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config, UserConstraints userConstraints) throws Exception {
-		this(name, null, obdaURI, config, userConstraints);
-	}
-
 	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI) throws Exception {
 		this(name, tboxFile, obdaURI, null);
 	}
@@ -134,7 +128,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param userConstraints - UserConstraints (or null)
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, UserConstraints userConstraints) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, ImplicitDBConstraints userConstraints) throws Exception {
 
 		super(name);
 
@@ -175,13 +169,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
 
 		//set up Quest
-		setupQuest(tbox, obdaModel, null, config, userConstraints);
+		setupQuest(tbox, obdaModel, null, config);
 	}
 
 	
-	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences config) throws Exception {
-		this(name, tbox, mappings, metadata, config, null);
-	}
 	/**
 	 * Constructor to start Quest given an OWL ontology and an RDF Graph
 	 * representing R2RML mappings
@@ -191,7 +182,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param pref - QuestPreferences
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences config, UserConstraints userConstraints) throws Exception {
+	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences config) throws Exception {
 		//call super constructor -> QuestDBAbstractStore
 		super(name);
 		
@@ -206,7 +197,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		obdaModel.addSource(source);
 		OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
 		//setup Quest
-		setupQuest(ontology, obdaModel, metadata, config, userConstraints);
+		setupQuest(ontology, obdaModel, metadata, config);
 	}
 	
 	
@@ -255,7 +246,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 		return translator.mergeTranslateOntologies(clousure);
 	}
 	
-	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref, UserConstraints userConstraints) throws Exception {
+	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
 		//start Quest with the given ontology and model and preferences
 		if (metadata == null) {
 			//start up quest by obtaining metadata from given data source 
@@ -265,10 +256,20 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 			//start up quest with given metadata 
 			questInstance = new Quest(tbox, obdaModel, metadata, pref);
 		}
-		if(userConstraints != null)
-			questInstance.setUserConstraints(userConstraints);
-		
-		questInstance.setupRepository();
+	}
+	
+	/**
+	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
+	 * Must be called before the call to initialize
+	 * 
+	 * @param userConstraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+		if(userConstraints == null)
+			throw new NullPointerException();
+		if(this.isinitalized)
+			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect");
+		questInstance.setImplicitDBConstraints(userConstraints);
 	}
 
 	/**
@@ -312,11 +313,31 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 		return null;
 	}
 
+
+	/**
+	 * Must be called once after the constructor call and before any queries are run, that is,
+	 * before the call to getQuestConnection.
+	 * 
+	 * Calls {@link Quest.setupRepository()}
+	 * @throws Exception
+	 */
+	public void initialize() throws Exception {
+		if(this.isinitalized){
+			log.warn("Double initialization of QuestDBVirtualStore");
+		} else {
+			this.isinitalized = true;
+			questInstance.setupRepository();
+		}
+	}
+	
+
 	/**
 	 * Get a Quest connection from the Quest instance
 	 * @return the QuestConnection
 	 */
 	public QuestConnection getQuestConnection() {
+		if(!this.isinitalized)
+			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run.");
 		try {
 			// System.out.println("getquestconn..");
 			questConn = questInstance.getConnection();

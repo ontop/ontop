@@ -41,7 +41,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.utils.VersionInfo;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -185,7 +185,7 @@ public class QuestOWL extends OWLReasonerBase {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 	
-	private UserConstraints userConstraints = null;
+	private ImplicitDBConstraints userConstraints = null;
 	
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
@@ -230,7 +230,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, UserConstraints userConstraints) {
+			Properties preferences, ImplicitDBConstraints userConstraints) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
@@ -305,7 +305,7 @@ public class QuestOWL extends OWLReasonerBase {
 		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
 		if(this.applyUserConstraints)
-			questInstance.setUserConstraints(userConstraints);
+			questInstance.setImplicitDBConstraints(userConstraints);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		

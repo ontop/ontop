@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,7 +72,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	@Deprecated	
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
 		super();
-		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName), null);
+		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName));
 	}
 
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, QuestPreferences config) throws Exception {
@@ -81,7 +81,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
 		super();
-		createRepo(name, tbox, mappings, metadata, prop, null);
+		createRepo(name, tbox, mappings, metadata, prop);
 	}
 	
 	/**
@@ -123,13 +123,44 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		return pref;
 	}
 	
-	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref, UserConstraints userConstraints) throws Exception 
+	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
 	{
-		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref, userConstraints);
+		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}
 	
 	
-	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, UserConstraints userConstraints) throws Exception
+	/**
+	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
+	 * Must be called before the call to initialize
+	 * 
+	 * @param userConstraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+		if(userConstraints == null)
+			throw new NullPointerException();
+		if(this.isinitialized)
+			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect");
+		this.virtualStore.setImplicitDBConstraints(userConstraints);
+	}
+
+	/**
+	 * This method leads to the reasoner being initalized, which includes the call to {@link Quest.setupRepository}: connecting to the database, 
+	 * analyzing mappings etc. This must be called before any queries are run, i.e. before {@link getQuestConnection}.
+	 * @throws RepositoryException 
+	 * 
+	 */
+	@Override
+	public void initialize() throws RepositoryException{
+		super.initialize();
+		try {
+			this.virtualStore.initialize();
+		}
+		catch (Exception e){
+			throw new RepositoryException(e);
+		}
+	}
+	
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraints userConstraints) throws Exception
 	{
 		if (mappingFile == null) {
 			//if we have no mappings 
@@ -146,7 +177,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		
 			if (tboxFile == null) {
 				//if we have no owl file
-				this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref, userConstraints);
+				this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);
 			} else {
 				//if we have both owl and mappings file
 				//generate tboxURI
@@ -155,13 +186,20 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 					 tboxURI = URI.create(tboxFile);
 				else 
 					tboxURI = new File(tboxFile).toURI();
-				this.virtualStore = new QuestDBVirtualStore(name, tboxURI,	obdaURI, pref, userConstraints);
+				this.virtualStore = new QuestDBVirtualStore(name, tboxURI,	obdaURI, pref);
 			}
 		}
 	}
 	
+	/**
+	 * Returns a connection which can be used to run queries over the repository
+	 * Before this method can be used, {@link initialize()} must be called once.
+	 */
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
+		if(!super.isinitialized)
+			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run.");
+		
 		questDBConn = this.virtualStore.getConnection();
 		return questDBConn;
 	}

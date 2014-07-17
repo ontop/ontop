@@ -6,7 +6,7 @@ package it.unibz.krdb.sql;
 import static org.junit.Assert.*;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.*;
 import java.sql.Connection;
@@ -184,7 +184,7 @@ public class TestQuestUserConstraints {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		
 		// Parsing user constraints
-		UserConstraints userConstraints = new UserConstraints(uc_keyfile);
+		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
 		factory.setUserConstraints(userConstraints);
 		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -206,7 +206,7 @@ public class TestQuestUserConstraints {
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		// Parsing user constraints
-		UserConstraints userConstraints = new UserConstraints(uc_keyfile);
+		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
 		factory.setUserConstraints(userConstraints);
 		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -259,7 +259,7 @@ public class TestQuestUserConstraints {
 	public void testForeignKeysTablesWithUC() throws Exception {
 		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create);
 		// Parsing user constraints
-		UserConstraints userConstraints = new UserConstraints(fk_keyfile);
+		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(fk_keyfile);
 		factory.setUserConstraints(userConstraints);
 		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

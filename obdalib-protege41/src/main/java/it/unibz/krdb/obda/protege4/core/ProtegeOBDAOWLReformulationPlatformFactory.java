@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.Properties;
 
@@ -57,7 +57,7 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 	 * 
 	 * @param uc The user-supplied database constraints
 	 */
-	public void setUserConstraints(UserConstraints uc) {
+	public void setUserConstraints(ImplicitDBConstraints uc) {
 		if(uc == null)
 			throw new NullPointerException();
 		factory.setUserConstraints(uc);

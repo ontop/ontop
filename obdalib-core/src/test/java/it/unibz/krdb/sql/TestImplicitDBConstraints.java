@@ -11,7 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class UserConstraintTest {
+public class TestImplicitDBConstraints {
 
 	DBMetadata md;
 	ArrayList<RelationJSQL> tables;
@@ -35,7 +35,7 @@ public class UserConstraintTest {
 	
 	@Test
 	public void testEmptyUserConstraints() {
-		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/empty_constraints.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/empty_constraints.lst");
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 0);
 	}
@@ -43,14 +43,14 @@ public class UserConstraintTest {
 
 	@Test
 	public void testUserPKeys() {
-		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/pkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 0);
 	}
 
 	@Test
 	public void testAddPrimaryKeys() {
-		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/pkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addPrimaryKeys(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(0);
@@ -60,7 +60,7 @@ public class UserConstraintTest {
 
 	@Test
 	public void testGetReferredTables() {
-		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/fkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 1);
 		assertTrue(uc.tableIsInList(tables, "TABLE2"));
@@ -68,7 +68,7 @@ public class UserConstraintTest {
 
 	@Test
 	public void testAddForeignKeys() {
-		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/fkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addForeignKeys(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(0);
@@ -80,7 +80,7 @@ public class UserConstraintTest {
 
 	@Test
 	public void testAddKeys() {
-		UserConstraints uc = new UserConstraints("src/test/resources/userconstraints/keys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
 		uc.addConstraints(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(0);

@@ -42,7 +42,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +104,7 @@ public class OBDAModelManager implements Disposable {
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	private boolean applyUserConstraints = false;
-	private UserConstraints userConstraints;
+	private ImplicitDBConstraints userConstraints;
 	
 	private static Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
@@ -506,7 +506,7 @@ public class OBDAModelManager implements Disposable {
 						if (dbprefsFile.exists()){
 							try {
 								// Load user-supplied constraints
-								userConstraints = new UserConstraints(dbprefsFile);
+								userConstraints = new ImplicitDBConstraints(dbprefsFile);
 								applyUserConstraints = true;
 							} catch (Exception ex) {
 								throw new Exception("Exception occurred while loading database preference file : " + dbprefsFile + "\n\n" + ex.getMessage());

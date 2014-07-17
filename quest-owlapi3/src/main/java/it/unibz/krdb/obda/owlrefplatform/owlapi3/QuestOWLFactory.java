@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.Properties;
 
@@ -58,7 +58,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * The user can supply information about keys that are not in the
 	 * database metadata. 
 	 */
-	private UserConstraints userConstraints = null;
+	private ImplicitDBConstraints userConstraints = null;
 	private boolean applyUserConstraints = false;
 	
 	private String name = "Quest";
@@ -83,7 +83,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * 
 	 * @param apic
 	 */
-	public void setUserConstraints(UserConstraints userConstraints) {
+	public void setUserConstraints(ImplicitDBConstraints userConstraints) {
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;

@@ -32,10 +32,10 @@ import org.slf4j.LoggerFactory;
  *  @author Dag Hovland
  *
  */
-public class UserConstraints {
+public class ImplicitDBConstraints {
 	
 	
-	private static Logger log = LoggerFactory.getLogger(UserConstraints.class);
+	private static Logger log = LoggerFactory.getLogger(ImplicitDBConstraints.class);
 	
 	
 	// The key is a table name, each element in the array list is a primary key, which is a list of the keys making up the key
@@ -53,7 +53,7 @@ public class UserConstraints {
 	 * @param The name of the plain-text file with the fake keys
 	 * @throws IOException 
 	 */
-	public UserConstraints(String filename) {
+	public ImplicitDBConstraints(String filename) {
 		this(new File(filename));
 	}
 		
@@ -63,7 +63,7 @@ public class UserConstraints {
 	 * @param The plain-text file with the fake keys
 	 * @throws IOException 
 	 */
-	public UserConstraints(File file) {
+	public ImplicitDBConstraints(File file) {
 		if(!file.exists()){
 			throw new IllegalArgumentException("File " + file + " does not exist");
 		}

@@ -76,7 +76,7 @@ import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.UserConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
@@ -198,7 +198,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
 	 */
-	private UserConstraints userConstraints = null;
+	private ImplicitDBConstraints userConstraints = null;
 	
 	/*
 	 * Whether to apply the user-supplied database constraints given above
@@ -345,7 +345,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
 	 * 						May be used by ontop to eliminate self-joins
 	 */
-	public void setUserConstraints(UserConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
