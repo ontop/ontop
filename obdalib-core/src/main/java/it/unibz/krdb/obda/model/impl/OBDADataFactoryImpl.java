@@ -489,6 +489,150 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	private int suffix = 0;
+
+	@Override
+	public Function getFunctionSpatialEquals(Term term1, Term term2) {
+		
+	 return getFunction(OBDAVocabulary.SFEQUALS, term1, term2);
+	}
+
+	@Override
+	public Function getFunctionSpatialIntersects(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFINTERSECTS, term1, term2);
+	}
+
+	@Override
+	public Function getFunctionSpatialDisjoint(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFDISJOINT, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialTouches(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFTOUCHES, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialCrosses(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFCROSSES, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialWithin(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFWITHIN, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialContains(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFCONTAINS, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHEquals(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFEQUALS, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHDisjoint(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.EHDISJOINT, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHOverlap(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.EHOVERLAPS, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHCovers(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.EHCOVERS, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHCoveredBy(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.EHCOVEREDBY, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHInside(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.EHINSIDE, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionEHContains(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.EHCONTAINS, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialDistance(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFDISTANCE, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialBuffer(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFBUFFER, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialConvexHull(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFCONVEXHULL, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialIntersection(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFINTERSECTION, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialUnion(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFUNION, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialDifference(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFDIFFERENCE, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialsymDifference(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFSYMDIFFERENCE, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialEnvelope(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFENVELOPE, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionSpatialBoundary(Term term1, Term term2) {
+		 return getFunction(OBDAVocabulary.SFBOUNDARY, term1, term2);
+
+	}
+
+	@Override
+	public Function getFunctionGetSRID(Term term) {
+		 return getFunction(OBDAVocabulary.SFEQUALS, term);
+
+	}
+
 	
 	/***
 	 * Replaces each variable 'v' in the query for a new variable constructed

@@ -147,9 +147,25 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getLANGMATCHESFunction(Term term1, Term term2);
 	
-	
+	/*GeoSPARQL geometry topology functions*/
 	public Function getFunctionOverlaps(Term term1, Term term2);
 	
+	public Function getFunctionSpatialEquals(Term term1, Term term2);
+	
+	public Function getFunctionSpatialIntersects(Term term1, Term term2);
+	public Function getFunctionSpatialDisjoint(Term term1, Term term2);
+	public Function getFunctionSpatialTouches(Term term1, Term term2);
+	public Function getFunctionSpatialCrosses(Term term1, Term term2);
+	public Function getFunctionSpatialWithin(Term term1, Term term2);
+	public Function getFunctionSpatialContains(Term term1, Term term2);
+	public Function getFunctionEHEquals(Term term1, Term term2);
+	public Function getFunctionEHDisjoint(Term term1, Term term2);
+	public Function getFunctionEHOverlap(Term term1, Term term2);
+	public Function getFunctionEHCovers(Term term1, Term term2);
+	public Function getFunctionEHCoveredBy(Term term1, Term term2);
+	public Function getFunctionEHInside(Term term1, Term term2);
+	public Function getFunctionEHContains(Term term1, Term term2);
+
 	public Function getFunctionGeomFromWKT(Term term1);
 	
 	public Function getFunctionLike(Term term1, Term term2);
@@ -158,6 +174,26 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
+
+	
+
+		/*Non topological query functions */
+	//TODO implement them: the arguments of some of them will have to change
+	
+	public Function getFunctionSpatialDistance(Term term1, Term term2);
+	public Function getFunctionSpatialBuffer(Term term1, Term term2);
+	public Function getFunctionSpatialConvexHull(Term term1, Term term2);
+	public Function getFunctionSpatialIntersection(Term term1, Term term2);
+	public Function getFunctionSpatialUnion(Term term1, Term term2);
+	public Function getFunctionSpatialDifference(Term term1, Term term2);
+	public Function getFunctionSpatialsymDifference(Term term1, Term term2);
+	public Function getFunctionSpatialEnvelope(Term term1, Term term2);
+	public Function getFunctionSpatialBoundary(Term term1, Term term2);
+	public Function getFunctionGetSRID(Term term);
+
+
+	
+
 
 	/*
 	 * Numerical arithmethic functions
