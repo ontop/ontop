@@ -21,8 +21,8 @@ package it.unibz.krdb.obda.parser;
  */
 
 import it.unibz.krdb.sql.api.AggregationJSQL;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.TableJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -362,7 +362,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 		
 		}
 		String columnName= tableColumn.getColumnName();
-		if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
+		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}

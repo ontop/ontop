@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.VisitedQuery;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.util.HashMap;
 
@@ -162,7 +162,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
-			if(unquote && VisitedQuery.pQuotes.matcher(alias).matches()){
+			if(unquote && ParsedSQLQuery.pQuotes.matcher(alias).matches()){
 				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
 			}
 			else

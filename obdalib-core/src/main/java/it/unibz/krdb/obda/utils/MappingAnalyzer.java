@@ -32,20 +32,19 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.parser.SQLQueryTranslator;
+import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.SelectJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -78,7 +77,7 @@ public class MappingAnalyzer {
 	private List<OBDAMappingAxiom> mappingList;
 	private DBMetadata dbMetaData;
 
-	private SQLQueryTranslator translator;
+	private SQLQueryParser sqlQueryParser;
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl
 			.getInstance();
@@ -91,38 +90,32 @@ public class MappingAnalyzer {
 		this.mappingList = mappingList;
 		this.dbMetaData = dbMetaData;
 
-		translator = new SQLQueryTranslator(dbMetaData);
+		sqlQueryParser = new SQLQueryParser(dbMetaData);
 	}
 
 	public DatalogProgram constructDatalogProgram() {
 		DatalogProgram datalog = dfac.getDatalogProgram();
-		LinkedList<String> errorMessage = new LinkedList<String>();
-		for (OBDAMappingAxiom axiom : mappingList) {
+		List<String> errorMessages = new ArrayList<>();
+		for (OBDAMappingAxiom mappingAxiom : mappingList) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
-				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
+				CQIE targetQuery = (CQIE) mappingAxiom.getTargetQuery();
 
-				// Get the parsed sql, since it is already parsed by the mapping
-				// parser
-				// consider also MetaMappingExpander
-				// VisitedQuery queryParsed = ...;
-
-				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom
+				OBDASQLQuery sourceQuery = (OBDASQLQuery) mappingAxiom
 						.getSourceQuery();
 
-				// Construct the SQL query tree from the source query
-				VisitedQuery queryParsed = translator
-						.constructParser(sourceQuery.toString());
+				// Parse the SQL query tree from the source query
+				ParsedSQLQuery parsedSQLQuery = sqlQueryParser.parseDeeply(sourceQuery.toString());
 
 				// Create a lookup table for variable swapping
-				LookupTable lookupTable = createLookupTable(queryParsed);
+				LookupTable lookupTable = createLookupTable(parsedSQLQuery);
 
 				// We can get easily the table from the SQL
-				ArrayList<RelationJSQL> tableList = queryParsed.getTableSet();
+				List<RelationJSQL> tableList = parsedSQLQuery.getTables();
 
 				// Construct the body from the source query
-				ArrayList<Function> atoms = new ArrayList<Function>();
+				List<Function> atoms = new ArrayList<Function>();
 				
 				
 				
@@ -164,7 +157,7 @@ public class MappingAnalyzer {
 
 				// For the join conditions WE STILL NEED TO CONSIDER NOT EQUI
 				// JOIN
-				ArrayList<Expression> joinConditions = queryParsed.getJoinCondition();
+				List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
 				for (Expression predicate : joinConditions) {
 
 					Function atom = getFunction(predicate, lookupTable);
@@ -172,7 +165,7 @@ public class MappingAnalyzer {
 				}
 
 				// For the selection "where" clause conditions
-				SelectionJSQL selection = queryParsed.getSelection();
+				SelectionJSQL selection = parsedSQLQuery.getWhereClause();
 				if (selection != null) {
 
 					// Stack for filter function
@@ -215,16 +208,16 @@ public class MappingAnalyzer {
 				}
 
 			} catch (Exception e) {
-				errorMessage.add("Error in mapping with id: " + axiom.getId()
-						+ " \n Description: " + e.getMessage()
-						+ " \nMapping: [" + axiom.toString() + "]");
+				errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
+                        + " \n Description: " + e.getMessage()
+                        + " \nMapping: [" + mappingAxiom.toString() + "]");
 
 			}
 		}
 
-		if (errorMessage.size() > 0) {
+		if (errorMessages.size() > 0) {
 			StringBuilder errors = new StringBuilder();
-			for (String error : errorMessage) {
+			for (String error : errorMessages) {
 				errors.append(error + "\n");
 			}
 			final String msg = "There was an error analyzing the following mappings. Please correct the issue(s) to continue.\n"
@@ -532,14 +525,14 @@ public class MappingAnalyzer {
 		return result;
 	}
 
-	private LookupTable createLookupTable(VisitedQuery queryParsed) throws JSQLParserException {
+	private LookupTable createLookupTable(ParsedSQLQuery queryParsed) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
 
 		// Collect all the possible column names from tables.
-		ArrayList<RelationJSQL> tableList = queryParsed.getTableSet();
+		List<RelationJSQL> tableList = queryParsed.getTables();
 
 		// Collect all known column aliases
-		HashMap<String, String> aliasMap = queryParsed.getAliasMap();
+		Map<String, String> aliasMap = queryParsed.getAliasMap();
 		
 		int offset = 0; // the index offset
 
@@ -624,7 +617,7 @@ public class MappingAnalyzer {
 				}
 				
 				//check if we do not have subselect with alias name assigned
-				for(SelectJSQL subSelect: queryParsed.getSubSelectSet()){
+				for(SelectJSQL subSelect: queryParsed.getSubSelects()){
 					String subSelectAlias = subSelect.getAlias();
 					if (subSelectAlias!=null) {
 						String aliasColumnName = subSelectAlias.toLowerCase() + "." + lowercaseColumn;

@@ -100,7 +100,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 /**
  * Find all used tables within an select statement.
  */
-public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
+public class TableNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
 
 	/**
 	 * Store the table selected by the SQL query in RelationJSQL
@@ -115,7 +115,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 */
 	private List<String> otherItemNames;
 	
-	private boolean notSupported = false;
+	private boolean unsupported = false;
 
 
 	/**
@@ -125,7 +125,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 * @param unquote 
 	 * @return
 	 */
-	public ArrayList<RelationJSQL> getTableList(Select select, boolean unquote) throws JSQLParserException {
+	public List<RelationJSQL> getTables(Select select, boolean unquote) throws JSQLParserException {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -134,7 +134,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 		}
 		select.getSelectBody().accept(this);
 		
-		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
+		if(unsupported && unquote) // used to throw exception for the currently unsupported methods
 			throw new JSQLParserException("Query not yet supported");
 		
 		return tables;
@@ -194,10 +194,10 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 			
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
-				notSupported = true;
+				unsupported = true;
 			
 		} else
-			notSupported = true;
+			unsupported = true;
 		subSelect.getSelectBody().accept(this);
 	}
 
@@ -243,7 +243,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Function function) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
@@ -268,7 +268,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
@@ -356,30 +356,30 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(CaseExpression caseExpression) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 
 	@Override
 	public void visit(WhenClause whenClause) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		notSupported = true;
+		unsupported = true;
 		allComparisonExpression.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		notSupported = true;
+		unsupported = true;
 		anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(SubJoin subjoin) {
-		notSupported = true;
+		unsupported = true;
 		subjoin.getLeft().accept(this);
 		subjoin.getJoin().getRightItem().accept(this);
 	}
@@ -391,25 +391,25 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Matches matches) {
-		notSupported = true;
+		unsupported = true;
 		visitBinaryExpression(matches);
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
-		notSupported = true;
+		unsupported = true;
 		visitBinaryExpression(bitwiseAnd);
 	}
 
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
-		notSupported = true;
+		unsupported = true;
 		visitBinaryExpression(bitwiseOr);
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
-		notSupported = true;
+		unsupported = true;
 		visitBinaryExpression(bitwiseXor);
 	}
 
@@ -420,13 +420,13 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(Modulo modulo) {
-		notSupported = true;
+		unsupported = true;
 		visitBinaryExpression(modulo);
 	}
 
 	@Override
 	public void visit(AnalyticExpression analytic) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	/*
@@ -435,7 +435,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	 */
 	@Override
 	public void visit(SetOperationList list) {
-		notSupported = true;
+		unsupported = true;
 		for (PlainSelect plainSelect : list.getPlainSelects()) {
 			visit(plainSelect);
 		}
@@ -443,18 +443,18 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(ExtractExpression eexpr) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
 	public void visit(LateralSubSelect lateralSubSelect) {
-		notSupported = true;
+		unsupported = true;
 		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
 	}
 
 	@Override
 	public void visit(MultiExpressionList multiExprList) {
-		notSupported = true;
+		unsupported = true;
 		for (ExpressionList exprList : multiExprList.getExprList()) {
 			exprList.accept(this);
 		}
@@ -462,7 +462,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(ValuesList valuesList) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	private void init() {
@@ -473,24 +473,24 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 
 	@Override
 	public void visit(IntervalExpression iexpr) {
-		notSupported = true;
+		unsupported = true;
 	}
 
     @Override
     public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		notSupported = true;
+		unsupported = true;
     }
 
 	@Override
 	public void visit(OracleHierarchicalExpression arg0) {
-		notSupported = true;
+		unsupported = true;
 		
 		
 	}
 
 	@Override
 	public void visit(RegExpMatchOperator rexpr) {
-		notSupported = true;
+		unsupported = true;
 		visitBinaryExpression(rexpr);
 	}
 
@@ -500,7 +500,7 @@ public class TablesNameVisitor implements SelectVisitor, FromItemVisitor, Expres
 	public void visit(SignedExpression arg0) {
 		System.out.println("WARNING: SignedExpression   not implemented ");
 
-		notSupported = true;
+		unsupported = true;
 		
 	}
 

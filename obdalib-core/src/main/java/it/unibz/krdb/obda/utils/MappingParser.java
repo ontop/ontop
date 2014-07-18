@@ -21,11 +21,11 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.parser.SQLQueryTranslator;
+import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,13 +45,13 @@ import net.sf.jsqlparser.JSQLParserException;
 public class MappingParser {
 	
 	private ArrayList<OBDAMappingAxiom> mappingList;
-	private SQLQueryTranslator translator;
+	private SQLQueryParser translator;
 	private ArrayList<ParsedMapping> parsedMappings;
 	private ArrayList<RelationJSQL> realTables; // Tables that are not view definitions
 	
 	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingList) throws SQLException{
 		this.mappingList = mappingList;
-		this.translator = new SQLQueryTranslator(conn);
+		this.translator = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();
 	}
 	
@@ -95,8 +95,8 @@ public class MappingParser {
 	public ArrayList<RelationJSQL> getTables() throws JSQLParserException{
 		ArrayList<RelationJSQL> tables = new ArrayList<RelationJSQL>();
 		for(ParsedMapping pm : parsedMappings){
-			VisitedQuery query = pm.getSourceQueryParsed();
-			ArrayList<RelationJSQL> queryTables = query.getTableSet();
+			ParsedSQLQuery query = pm.getSourceQueryParsed();
+			ArrayList<RelationJSQL> queryTables = query.getTables();
 			for(RelationJSQL table : queryTables){
 				if (!(tables.contains(table))){
 					tables.add(table);

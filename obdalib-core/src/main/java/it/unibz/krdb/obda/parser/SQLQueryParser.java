@@ -23,12 +23,11 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.VisitedQuery;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +42,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SQLQueryTranslator {
+public class SQLQueryParser {
 
 	private DBMetadata dbMetaData;
 	private Connection connection;
@@ -55,9 +54,9 @@ public class SQLQueryTranslator {
 	
 	private static int id_counter;
 	
-	private static Logger log = LoggerFactory.getLogger(SQLQueryTranslator.class);
+	private static Logger log = LoggerFactory.getLogger(SQLQueryParser.class);
 	
-	public SQLQueryTranslator(DBMetadata dbMetaData) {
+	public SQLQueryParser(DBMetadata dbMetaData) {
 		connection=null;
 		database=dbMetaData.getDriverName();
  		this.dbMetaData = dbMetaData;
@@ -69,7 +68,7 @@ public class SQLQueryTranslator {
 	 * in MappingParser
 	 */
 	
-	public SQLQueryTranslator(Connection conn) throws SQLException {
+	public SQLQueryParser(Connection conn) throws SQLException {
 		connection=conn;
 		database=connection.getMetaData().getDriverName();
 		this.viewDefinitions = new ArrayList<ViewDefinition>();
@@ -77,7 +76,7 @@ public class SQLQueryTranslator {
 		id_counter = 0;		
 	}
 	
-	public SQLQueryTranslator() {
+	public SQLQueryParser() {
 		database=null;
 		connection=null;
 		this.viewDefinitions = new ArrayList<ViewDefinition>();
@@ -100,8 +99,8 @@ public class SQLQueryTranslator {
 	 * @param query The sql query to be parsed
 	 * @return A VisitedQuery (possible with null values)
 	 */
-	public VisitedQuery constructParserNoView(String query){
-		return constructParser(query, false);
+	public ParsedSQLQuery parseShallowly(String query){
+		return parse(query, false);
 	}
 	
 
@@ -113,21 +112,35 @@ public class SQLQueryTranslator {
 	 * @param query The sql query to be parsed
 	 * @return A ParsedQuery (or a SELECT * FROM table with the generated view)
 	 */
-	public VisitedQuery constructParser(String query) {
-		return constructParser(query, true);
+	public ParsedSQLQuery parseDeeply(String query) {
+		return parse(query, true);
 	}
-	
-	
-	private VisitedQuery constructParser (String query, boolean generateViews){
+
+
+    /**
+     * @param query
+     * @param deeply <ul>
+     *               <li>
+     *               <p/>
+     *               If true, (i) unquote columns, (ii) create a view if an error is generated,
+     *               and (iii) store information about the different part of the query
+     *               </li>
+     *               <li>
+     *               Otherwise the query is simply parsed and we do not check for unsupported
+     *               </li>
+     *               </ul>
+     * @return
+     */
+    private ParsedSQLQuery parse(String query, boolean deeply){
 		boolean errors=false;
-		VisitedQuery queryParser = null;
+		ParsedSQLQuery queryParser = null;
 		
 		
 		try {
 		/*
 		 * 
 		 */
-			queryParser = new VisitedQuery(query,generateViews);
+			queryParser = new ParsedSQLQuery(query,deeply);
 			
 		} catch (JSQLParserException e) 
 		{
@@ -137,7 +150,7 @@ public class SQLQueryTranslator {
 			
 		}
 		
-		if (queryParser == null || (errors && generateViews) )
+		if (queryParser == null || (errors && deeply) )
 		{
 			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
 			queryParser = createView(query);
@@ -146,32 +159,8 @@ public class SQLQueryTranslator {
 		
 		
 	}
-	
-	private VisitedQuery constructParser (VisitedQuery query, boolean generateViews){
-		boolean errors=false;
-		VisitedQuery queryParser = query;
-		
-		try {
-			queryParser.unquote();
-			
-		} catch (JSQLParserException e) 
-		{
-			errors=true;
-			
-		}
-		
-		if (queryParser == null || (errors && generateViews) )
-		{
-			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
-			queryParser = createView(query.toString());
-		}
-		return queryParser;
-		
-		
-	}
-		
-	
-	private VisitedQuery createView(String query){
+
+	private ParsedSQLQuery createView(String query){
 		
 		String viewName = String.format("view_%s", id_counter++);
 		
@@ -184,7 +173,7 @@ public class SQLQueryTranslator {
 			viewDefinitions.add(vd);
 		}
 		
-		VisitedQuery vt = createViewParsed(viewName, query);
+		ParsedSQLQuery vt = createViewParsed(viewName, query);
 		return vt;
 	}
 	
@@ -193,7 +182,7 @@ public class SQLQueryTranslator {
 	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROMitem expression
 	 * We create a query that looks like SELECT * FROM viewName
 	 */
-	private VisitedQuery createViewParsed(String viewName, String query) {		
+	private ParsedSQLQuery createViewParsed(String viewName, String query) {
 		
 		/*
 		 * Create a new SELECT statement containing the viewTable in the FROM clause
@@ -213,9 +202,9 @@ public class SQLQueryTranslator {
 		Select select= new Select();
 		select.setSelectBody(body);
 		
-		VisitedQuery queryParsed = null;
+		ParsedSQLQuery queryParsed = null;
 		try {
-			queryParsed = new VisitedQuery(select,true);
+			queryParsed = new ParsedSQLQuery(select,true);
 			
 		} catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)

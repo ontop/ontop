@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
