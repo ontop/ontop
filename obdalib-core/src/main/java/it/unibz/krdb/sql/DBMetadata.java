@@ -389,7 +389,7 @@ public class DBMetadata implements Serializable {
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					List<Integer> pkeyIdx = new LinkedList<Integer>();
-					for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
+					for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
 						if (column.isPrimaryKey()) {
 							pkeyIdx.add(columnidx);

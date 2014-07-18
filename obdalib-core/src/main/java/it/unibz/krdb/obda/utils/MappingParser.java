@@ -31,6 +31,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import net.sf.jsqlparser.JSQLParserException;
 
@@ -44,14 +45,14 @@ import net.sf.jsqlparser.JSQLParserException;
  */
 public class MappingParser {
 	
-	private ArrayList<OBDAMappingAxiom> mappingList;
-	private SQLQueryParser translator;
-	private ArrayList<ParsedMapping> parsedMappings;
-	private ArrayList<RelationJSQL> realTables; // Tables that are not view definitions
+	private List<OBDAMappingAxiom> mappingList;
+	private SQLQueryParser sqlQueryParser;
+	private List<ParsedMapping> parsedMappings;
+	private List<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingList) throws SQLException{
-		this.mappingList = mappingList;
-		this.translator = new SQLQueryParser(conn);
+	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingAxioms) throws SQLException{
+		this.mappingList = mappingAxioms;
+		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();
 	}
 	
@@ -63,11 +64,11 @@ public class MappingParser {
 	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
 	 * @throws JSQLParserException 
 	 */
-	public ArrayList<RelationJSQL> getRealTables() throws JSQLParserException{
+	public List<RelationJSQL> getRealTables() throws JSQLParserException{
 		if(this.realTables == null){
-			ArrayList<RelationJSQL> _realTables = this.getTables();
-			ArrayList<RelationJSQL> removeThese = new ArrayList<RelationJSQL>();
-			for(ViewDefinition vd : translator.getViewDefinitions()){
+			List<RelationJSQL> _realTables = this.getTables();
+			List<RelationJSQL> removeThese = new ArrayList<>();
+			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
 				for(RelationJSQL rel : _realTables){
 					if(rel.getFullName().equals(vd.getName()))
 						removeThese.add(rel);
@@ -88,15 +89,15 @@ public class MappingParser {
 	 * 
 	 * @return
 	 */
-	public ArrayList<ParsedMapping> getParsedMappings(){
+	public List<ParsedMapping> getParsedMappings(){
 		return parsedMappings;
 	}
 	
-	public ArrayList<RelationJSQL> getTables() throws JSQLParserException{
-		ArrayList<RelationJSQL> tables = new ArrayList<RelationJSQL>();
+	public List<RelationJSQL> getTables() throws JSQLParserException{
+		List<RelationJSQL> tables = new ArrayList<>();
 		for(ParsedMapping pm : parsedMappings){
 			ParsedSQLQuery query = pm.getSourceQueryParsed();
-			ArrayList<RelationJSQL> queryTables = query.getTables();
+			List<RelationJSQL> queryTables = query.getTables();
 			for(RelationJSQL table : queryTables){
 				if (!(tables.contains(table))){
 					tables.add(table);
@@ -115,7 +116,7 @@ public class MappingParser {
 	 * This must be separated out, since the parsing must be done before metadata extraction
 	 */
 	public void addViewDefs(DBMetadata metadata){
-		for (ViewDefinition vd : translator.getViewDefinitions()){
+		for (ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
 			metadata.add(vd);
 		}
 	}
@@ -132,7 +133,7 @@ public class MappingParser {
 		ArrayList<ParsedMapping> parsedMappings = new ArrayList<ParsedMapping>();
 		for (OBDAMappingAxiom axiom : this.mappingList) {
 			try {
-				ParsedMapping parsed = new ParsedMapping(axiom, translator);
+				ParsedMapping parsed = new ParsedMapping(axiom, sqlQueryParser);
 				parsedMappings.add(parsed);
 			} catch (Exception e) {
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "

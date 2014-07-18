@@ -72,31 +72,31 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 
 //import com.hp.hpl.jena.iri.IRI;
 
-public class MappingAnalyzer {
+public class Mapping2DatalogConverter {
 
-	private List<OBDAMappingAxiom> mappingList;
+	private List<OBDAMappingAxiom> mappingAxioms;
 	private DBMetadata dbMetaData;
 
 	private SQLQueryParser sqlQueryParser;
 
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl
+	private static final OBDADataFactory factory = OBDADataFactoryImpl
 			.getInstance();
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public MappingAnalyzer(List<OBDAMappingAxiom> mappingList,
-			DBMetadata dbMetaData) {
-		this.mappingList = mappingList;
+	public Mapping2DatalogConverter(List<OBDAMappingAxiom> mappingAxioms,
+                                    DBMetadata dbMetaData) {
+		this.mappingAxioms = mappingAxioms;
 		this.dbMetaData = dbMetaData;
 
 		sqlQueryParser = new SQLQueryParser(dbMetaData);
 	}
 
 	public DatalogProgram constructDatalogProgram() {
-		DatalogProgram datalog = dfac.getDatalogProgram();
+		DatalogProgram datalog = factory.getDatalogProgram();
 		List<String> errorMessages = new ArrayList<>();
-		for (OBDAMappingAxiom mappingAxiom : mappingList) {
+		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
@@ -111,85 +111,21 @@ public class MappingAnalyzer {
 				// Create a lookup table for variable swapping
 				LookupTable lookupTable = createLookupTable(parsedSQLQuery);
 
-				// We can get easily the table from the SQL
-				List<RelationJSQL> tableList = parsedSQLQuery.getTables();
 
 				// Construct the body from the source query
-				List<Function> atoms = new ArrayList<Function>();
-				
-				
-				
-				for (RelationJSQL table : tableList) {
-					// Construct the URI from the table name
-					String tableName = table.getFullName();
-//					String tableName = table.getTableName();
-					//String predicateName = tableName;
-//					String predicateName = table.getTableName();
+				List<Function> bodyAtoms = new ArrayList<>();
 
-					// Construct the predicate using the table name
-					int arity = dbMetaData.getDefinition(tableName)
-							.countAttribute();
-					
-					
-					
-					Predicate predicate = dfac.getPredicate(tableName,
-							arity);
+                // For each table, creates an atom and adds it to the body
+                addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
-					// Swap the column name with a new variable from the lookup
-					// table
-					List<Term> terms = new ArrayList<Term>();
-					for (int i = 1; i <= arity; i++) {
-						String columnName = dbMetaData
-								.getFullQualifiedAttributeName(tableName,
-										table.getAlias(), i);
-						String termName = lookupTable.lookup(columnName);
-						if (termName == null) {
-							throw new RuntimeException("Column '" + columnName
-									+ "'was not found in the lookup table: ");
-						}
-						Term term = dfac.getVariable(termName);
-						terms.add(term);
-					}
-					// Create an atom for a particular table
-					Function atom = dfac.getFunction(predicate, terms);
-					atoms.add(atom);
-				}
+                // For each join condition, creates an atom and adds it to the body
+                addJoinConditionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
-				// For the join conditions WE STILL NEED TO CONSIDER NOT EQUI
-				// JOIN
-				List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
-				for (Expression predicate : joinConditions) {
+                // For each where clause, creates an atom and adds it to the body
+                addWhereClauseAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
-					Function atom = getFunction(predicate, lookupTable);
-					atoms.add(atom);
-				}
 
-				// For the selection "where" clause conditions
-				SelectionJSQL selection = parsedSQLQuery.getWhereClause();
-				if (selection != null) {
-
-					// Stack for filter function
-					Stack<Function> filterFunctionStack = new Stack<Function>();
-
-					Expression conditions = selection.getRawConditions();
-					Function filterFunction = getFunction(conditions,
-							lookupTable);
-					filterFunctionStack.push(filterFunction);
-
-					// The filter function stack must have 1 element left
-					if (filterFunctionStack.size() == 1) {
-						Function filterFunct = filterFunctionStack.pop();
-						Function atom = dfac.getFunction(
-								filterFunct.getFunctionSymbol(),
-								filterFunct.getTerms());
-						atoms.add(atom);
-					} else {
-						throwInvalidFilterExpressionException(filterFunctionStack);
-					}
-
-				}
-
-				// Construct the head from the target query.
+                // Construct the head from the target query.
 				List<Function> atomList = targetQuery.getBody();
 				// for (Function atom : atomList) {
 				Iterator<Function> atomListIter = atomList.iterator();
@@ -201,9 +137,9 @@ public class MappingAnalyzer {
 					for (Term term : terms) {
 						newterms.add(updateTerm(term, lookupTable));
 					}
-					Function newhead = dfac.getFunction(atom.getPredicate(),
+					Function newhead = factory.getFunction(atom.getPredicate(),
 							newterms);
-					CQIE rule = dfac.getCQIE(newhead, atoms);
+					CQIE rule = factory.getCQIE(newhead, bodyAtoms);
 					datalog.appendRule(rule);
 				}
 
@@ -228,7 +164,71 @@ public class MappingAnalyzer {
 		return datalog;
 	}
 
-	private void throwInvalidFilterExpressionException(
+    private void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+        // For the "where" clause
+        SelectionJSQL whereClause = parsedSQLQuery.getWhereClause();
+        if (whereClause != null) {
+            Expression conditions = whereClause.getRawConditions();
+
+            Function filterFunction = getFunction(conditions,
+                    lookupTable);
+
+            bodyAtoms.add(filterFunction);
+
+        }
+    }
+
+    /**
+     * For each join condition, creates an atom and adds it to the body
+     */
+    private void addJoinConditionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+        List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
+        for (Expression condition : joinConditions) {
+            Function atom = getFunction(condition, lookupTable);
+            bodyAtoms.add(atom);
+        }
+    }
+
+    /**
+     * For each table, creates an atom and adds it to the body
+     * @param bodyAtoms
+     *  will be extended
+     * @param parsedSQLQuery
+     * @param lookupTable
+     */
+    private void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+        // Tables mentioned in the SQL query
+        List<RelationJSQL> tables = parsedSQLQuery.getTables();
+
+        for (RelationJSQL table : tables) {
+            // Construct the URI from the table name
+            String tableName = table.getFullName();
+
+            // Construct the predicate using the table name
+            int arity = dbMetaData.getDefinition(tableName).getNumOfAttributes();
+            Predicate predicate = factory.getPredicate(tableName, arity);
+
+            // Swap the column name with a new variable from the lookup table
+            List<Term> terms = new ArrayList<>();
+            for (int i = 1; i <= arity; i++) {
+                String columnName = dbMetaData
+                        .getFullQualifiedAttributeName(tableName,
+                                table.getAlias(), i);
+                String termName = lookupTable.lookup(columnName);
+                if (termName == null) {
+                    throw new IllegalStateException("Column '" + columnName
+                            + "'was not found in the lookup table: ");
+                }
+                Variable var = factory.getVariable(termName);
+                terms.add(var);
+            }
+            // Create an atom for a particular table
+            Function atom = factory.getFunction(predicate, terms);
+            bodyAtoms.add(atom);
+        }
+    }
+
+    private void throwInvalidFilterExpressionException(
 			Stack<Function> filterFunctionStack) {
 		StringBuilder filterExpression = new StringBuilder();
 		while (!filterFunctionStack.isEmpty()) {
@@ -256,12 +256,12 @@ public class MappingAnalyzer {
 			throw new RuntimeException(
 					"Unable to find column name for variable: " + columnName);
 		}
-		Term var = dfac.getVariable(variableName);
+		Term var = factory.getVariable(variableName);
 
 		if (!pred.isNot()) {
-			return dfac.getFunctionIsNull(var);
+			return factory.getFunctionIsNull(var);
 		} else {
-			return dfac.getFunctionIsNotNull(var);
+			return factory.getFunctionIsNotNull(var);
 		}
 	}
 	
@@ -283,7 +283,7 @@ public class MappingAnalyzer {
 			throw new RuntimeException(
 					"Unable to find column name for variable: " + columnName);
 		}
-		Term var = dfac.getVariable(variableName);
+		Term var = factory.getVariable(variableName);
 
 		ColDataType datatype= pred.getType();
 		
@@ -293,7 +293,7 @@ public class MappingAnalyzer {
 		
 		//first value is a column, second value is a datatype. It can  also have the size
 		
-		return dfac.getFunctionCast(var, var2);
+		return factory.getFunctionCast(var, var2);
 		
 		
 	}
@@ -396,29 +396,29 @@ public class MappingAnalyzer {
 		String op = pred.getStringExpression();
 		Function funct = null;
 		if (op.equals("="))
-			funct = dfac.getFunctionEQ(t1, t2);
+			funct = factory.getFunctionEQ(t1, t2);
 		else if (op.equals(">"))
-			funct = dfac.getFunctionGT(t1, t2);
+			funct = factory.getFunctionGT(t1, t2);
 		else if (op.equals("<"))
-			funct = dfac.getFunctionLT(t1, t2);
+			funct = factory.getFunctionLT(t1, t2);
 		else if (op.equals(">="))
-			funct = dfac.getFunctionGTE(t1, t2);
+			funct = factory.getFunctionGTE(t1, t2);
 		else if (op.equals("<="))
-			funct = dfac.getFunctionLTE(t1, t2);
+			funct = factory.getFunctionLTE(t1, t2);
 		else if (op.equals("<>") || op.equals("!="))
-			funct = dfac.getFunctionNEQ(t1, t2);
+			funct = factory.getFunctionNEQ(t1, t2);
 		else if (op.equals("AND"))
-			funct = dfac.getFunctionAND(t1, t2);
+			funct = factory.getFunctionAND(t1, t2);
 		else if (op.equals("OR"))
-			funct = dfac.getFunctionOR(t1, t2);
+			funct = factory.getFunctionOR(t1, t2);
 		else if (op.equals("+"))
-			funct = dfac.getFunctionAdd(t1, t2);
+			funct = factory.getFunctionAdd(t1, t2);
 		else if (op.equals("-"))
-			funct = dfac.getFunctionSubstract(t1, t2);
+			funct = factory.getFunctionSubstract(t1, t2);
 		else if (op.equals("*"))
-			funct = dfac.getFunctionMultiply(t1, t2);
+			funct = factory.getFunctionMultiply(t1, t2);
 		else if (op.equals("LIKE"))
-			funct = dfac.getFunctionLike(t1, t2);
+			funct = factory.getFunctionLike(t1, t2);
 		else
 			throw new RuntimeException("Unknown opertor: " + op);
 
@@ -433,7 +433,7 @@ public class MappingAnalyzer {
 			if (termName == null) {
 				return null;
 			}
-			return dfac.getVariable(termName);
+			return factory.getVariable(termName);
 		}
 		return null;
 	}
@@ -453,7 +453,7 @@ public class MappingAnalyzer {
 			String columnName = ((Column) pred).getColumnName();
 			if (columnName.toLowerCase().equals("true")
 					|| columnName.toLowerCase().equals("false")) {
-				return dfac
+				return factory
 						.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
 			}
 			else 
@@ -464,31 +464,31 @@ public class MappingAnalyzer {
 		}
 		else if (pred instanceof StringValue) {
 			termRightName = ((StringValue) pred).getValue();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.STRING);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.STRING);
 
 		} else if (pred instanceof DateValue) {
 			termRightName = ((DateValue) pred).getValue().toString();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 
 		} else if (pred instanceof TimeValue) {
 			termRightName = ((TimeValue) pred).getValue().toString();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 
 		} else if (pred instanceof TimestampValue) {
 			termRightName = ((TimestampValue) pred).getValue().toString();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 
 		} else if (pred instanceof LongValue) {
 			termRightName = ((LongValue) pred).getStringValue();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
 
 		} else if (pred instanceof DoubleValue) {
 			termRightName = ((DoubleValue) pred).toString();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
 
 		} else {
 			termRightName = pred.toString();
-			return dfac.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
+			return factory.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 
 		}
 	}
@@ -509,7 +509,7 @@ public class MappingAnalyzer {
 								var);
 				throw new RuntimeException(msg);
 			}
-			result = dfac.getVariable(termName);
+			result = factory.getVariable(termName);
 
 		} else if (term instanceof Function) {
 			Function func = (Function) term;
@@ -518,7 +518,7 @@ public class MappingAnalyzer {
 			for (Term innerTerm : terms) {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 			}
-			result = dfac.getFunction(func.getFunctionSymbol(), newterms);
+			result = factory.getFunction(func.getFunctionSymbol(), newterms);
 		} else if (term instanceof Constant) {
 			result = term.clone();
 		}
@@ -549,7 +549,7 @@ public class MappingAnalyzer {
 				 }
 			
 			
-			int size = def.countAttribute();
+			int size = def.getNumOfAttributes();
 
 			for (int i = 1; i <= size; i++) {
 				// assigned index number
