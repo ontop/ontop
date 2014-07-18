@@ -120,12 +120,10 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+		
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -190,6 +188,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
 			conn.close();
 			reasoner.dispose();
