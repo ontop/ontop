@@ -686,6 +686,47 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 	}
 
+	/* Regex in MySQL, Oracle and Postgres*/
+
+	public void testRegexMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP '^b'");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexBinaryMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
+		printJSQL("testRegexBinaryMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexPostgres(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name ~ 'foo'");
+		printJSQL("testRegexPostgres", result);
+		assertTrue(result);
+	}
+	
+	//no support for similar to in postgres
+	public void testRegexPostgresSimilarTo(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
+		printJSQL("testRegexPostgresSimilarTo", result);
+		assertFalse(result);
+	}
+	
+	public void testRegexOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	//no support for not without parenthesis
+	public void testRegexNotOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexNotMySQL", result);
+		assertFalse(result);
+	}
+	
+
 	private String queryText;
 
 	VisitedQuery queryP;
@@ -698,6 +739,7 @@ public class JSQLParserTest extends TestCase {
 			queryP = new VisitedQuery(input,false);
 		} catch (Exception e) {
 
+			e.printStackTrace();
 			return false;
 		}
 
@@ -748,7 +790,7 @@ public class JSQLParserTest extends TestCase {
 		try {
 			queryP = new VisitedQuery(input,true);
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			return false;
 		}
 

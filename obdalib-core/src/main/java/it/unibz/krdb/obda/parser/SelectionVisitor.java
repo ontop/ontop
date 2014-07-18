@@ -42,6 +42,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.JsonExpression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
@@ -78,6 +79,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
@@ -197,8 +199,17 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 
 	@Override
 	public void visit(Function function) {
-		notSupported=true;
-		
+		if(function.getName().toLowerCase().equals("regexp_like") ) {
+			
+			for(Expression ex :function.getParameters().getExpressions()){
+				ex.accept(this);
+				
+			}
+			
+		}
+		else{
+		notSupported = true;
+		}
 	}
 
 	@Override
@@ -287,17 +298,6 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 
 	/*
 	 * We do the same procedure for all Binary Expressions
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Subtraction)
-	 */
-	@Override
-	public void visit(Subtraction subtraction) {
-		visitBinaryExpression(subtraction);
-		
-		
-	}
-
-	/*
-	 * We do the same procedure for all Binary Expressions
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.conditional.AndExpression)
 	 */
 	@Override
@@ -323,6 +323,17 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 		between.getLeftExpression().accept(this);
 		between.getBetweenExpressionStart().accept(this);
 		between.getBetweenExpressionEnd().accept(this);
+	}
+
+	/*
+	 * We do the same procedure for all Binary Expressions
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Subtraction)
+	 */
+	@Override
+	public void visit(Subtraction subtraction) {
+		visitBinaryExpression(subtraction);
+		
+		
 	}
 
 	/*
@@ -661,12 +672,23 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
-		// TODO Auto-generated method stub
-		notSupported = true;
+
 	}
 
 	@Override
 	public void visit(SignedExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

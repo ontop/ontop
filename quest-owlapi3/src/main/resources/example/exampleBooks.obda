@@ -8,7 +8,7 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	Books
-connectionUrl	jdbc:h2:tcp://localhost/books;DATABASE_TO_UPPER=FALSE
+connectionUrl	jdbc:h2:tcp://localhost/books;
 username	sa
 password	
 driverClass	org.h2.Driver
