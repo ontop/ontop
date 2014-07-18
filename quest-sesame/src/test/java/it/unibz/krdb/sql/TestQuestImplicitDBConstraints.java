@@ -47,7 +47,7 @@ import org.junit.Test;
  * @author dagc
  *
  */
-public class TestQuestUserConstraints {
+public class TestQuestImplicitDBConstraints {
 
 	Quest quest;
 	static String uc_owlfile = "src/test/resources/userconstraints/uc.owl";

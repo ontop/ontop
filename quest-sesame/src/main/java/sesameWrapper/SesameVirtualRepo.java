@@ -45,31 +45,26 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	private QuestDBVirtualStore virtualStore;
 	private QuestDBConnection questDBConn;
 
-	@Deprecated
 	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		this(name, null, obdaFile, existential, rewriting);
 	}
 	
-	
 	public SesameVirtualRepo(String name, String obdaFile, String configFileName) throws Exception {
 		this(name, null, obdaFile, configFileName);
 	}
 	
-	@Deprecated
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		super();
 		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting), null);
 	}	
 	
-	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
 		super();
 		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName), null);
 	}
 	
-	@Deprecated	
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName));

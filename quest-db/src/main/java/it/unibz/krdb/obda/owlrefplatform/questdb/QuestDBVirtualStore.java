@@ -125,7 +125,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param tboxFile - the owl file URI
 	 * @param obdaUri - the obda or ttl file URI
 	 * @param config - QuestPreferences
-	 * @param userConstraints - UserConstraints (or null)
+	 * @param userConstraints - User-supplied database constraints (or null)
 	 * @throws Exception
 	 */
 	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, ImplicitDBConstraints userConstraints) throws Exception {
