@@ -268,7 +268,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 		if(userConstraints == null)
 			throw new NullPointerException();
 		if(this.isinitalized)
-			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect");
+			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		questInstance.setImplicitDBConstraints(userConstraints);
 	}
 
@@ -337,7 +337,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	 */
 	public QuestConnection getQuestConnection() {
 		if(!this.isinitalized)
-			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run.");
+			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
 			questConn = questInstance.getConnection();

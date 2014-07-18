@@ -452,7 +452,7 @@ public class OBDAModelManager implements Disposable {
 					questfactory.setPreferences(reasonerPreference);
 					questfactory.setOBDAModel(getActiveOBDAModel());
 					if(applyUserConstraints)
-						questfactory.setUserConstraints(userConstraints);
+						questfactory.setImplicitDBConstraints(userConstraints);
 				}
 				fireActiveOBDAModelChange();
 

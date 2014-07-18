@@ -83,8 +83,9 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * 
 	 * @param apic
 	 */
-	public void setUserConstraints(ImplicitDBConstraints userConstraints) {
-		assert(userConstraints != null);
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
+		if(userConstraints == null)
+			throw new NullPointerException();
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
 	}

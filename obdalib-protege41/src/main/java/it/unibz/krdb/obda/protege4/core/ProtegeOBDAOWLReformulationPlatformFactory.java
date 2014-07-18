@@ -57,9 +57,9 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 	 * 
 	 * @param uc The user-supplied database constraints
 	 */
-	public void setUserConstraints(ImplicitDBConstraints uc) {
+	public void setImplicitDBConstraints(ImplicitDBConstraints uc) {
 		if(uc == null)
 			throw new NullPointerException();
-		factory.setUserConstraints(uc);
+		factory.setImplicitDBConstraints(uc);
 	}
 }

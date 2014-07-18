@@ -185,7 +185,7 @@ public class TestQuestUserConstraints {
 		
 		// Parsing user constraints
 		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
-		factory.setUserConstraints(userConstraints);
+		factory.setImplicitDBConstraints(userConstraints);
 		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 
@@ -207,7 +207,7 @@ public class TestQuestUserConstraints {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		// Parsing user constraints
 		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
-		factory.setUserConstraints(userConstraints);
+		factory.setImplicitDBConstraints(userConstraints);
 		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 
@@ -260,7 +260,7 @@ public class TestQuestUserConstraints {
 		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create);
 		// Parsing user constraints
 		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(fk_keyfile);
-		factory.setUserConstraints(userConstraints);
+		factory.setImplicitDBConstraints(userConstraints);
 		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 
