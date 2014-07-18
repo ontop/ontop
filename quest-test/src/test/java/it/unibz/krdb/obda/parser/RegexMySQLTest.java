@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.identifiers;
+package it.unibz.krdb.obda.parser;
 
 /*
  * #%L
@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.identifiers;
  * #L%
  */
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -37,6 +37,9 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -44,12 +47,14 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/***
- * Tests that mysql identifiers for tables and columns are treated
- * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
+/** 
+ * Test to check if the sql parser supports regex correctly when written with mysql syntax. 
+ * Translated in a datalog function and provides the correct results
  */
-public class MySQLIdentifierTest extends TestCase {
+public class RegexMySQLTest {
+
+	// TODO We need to extend this test to import the contents of the mappings
+	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -58,11 +63,11 @@ public class MySQLIdentifierTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-mysql.obda";
+	final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
+	final String obdafile = "src/test/resources/regex/stockexchangeRegexMySQL.obda";
 	private QuestOWL reasoner;
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		
@@ -94,7 +99,7 @@ public class MySQLIdentifierTest extends TestCase {
 		
 	}
 
-
+ @After
 	public void tearDown() throws Exception{
 		conn.close();
 		reasoner.dispose();
@@ -102,18 +107,24 @@ public class MySQLIdentifierTest extends TestCase {
 	
 
 	
-	private String runTests(String query) throws Exception {
+	private int runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		//StringBuilder bf = new StringBuilder(query);
-		String retval;
+		StringBuilder bf = new StringBuilder(query);
+		
+		int results=0;
 		try {
 			
 
 			QuestOWLResultSet rs = st.executeTuple(query);
-			
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-			retval = ind1.toString();
+
+//			assertTrue(rs.nextRow());
+			while (rs.nextRow()){
+				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+				log.debug(ind1.toString());
+				results++;
+			}
+		
+
 
 		} catch (Exception e) {
 			throw e;
@@ -122,41 +133,41 @@ public class MySQLIdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
-				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
 		}
-		return retval;
+		return results;
 	}
 
 	/**
-	 * Test use of lowercase column identifiers (also in target)
+	 * Test use of regex in MySQL
+	 * select id, street, number, city, state, country from address where city regexp 'b.+z'
 	 * @throws Exception
 	 */
-	public void testLowercaseUnquoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
-	}
-	public void testUppercaseAlias() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
+	@Test
+	public void testOracleRegexLike() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
+		int numberResults = runTests(query);
+		assertEquals(2, numberResults);
 	}
 	
-	public void testLowercaseNoAlias() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
+	/**
+	 * Test use of regex in MySQL
+	 * select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where "name" regexp binary 'J.+a'
+	 * @throws Exception
+	 */
+	@Test
+	public void testOracleRegexLikeUppercase() throws Exception {
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
+		int numberResults = runTests(query);
+		assertEquals(1, numberResults);
 	}
 	
-	public void testLowercaseQuoted() throws Exception {
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runTests(query);
-		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
-	}
 
 	
-			
+	
+	
+
+		
 }

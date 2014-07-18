@@ -500,6 +500,7 @@ public class QuestOWL extends OWLReasonerBase {
 				errorMessage = e.getMessage();
 				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
 				log.error(e.getMessage(), e);
+				throw e;
 			}
 
 		} catch (Exception e) {
