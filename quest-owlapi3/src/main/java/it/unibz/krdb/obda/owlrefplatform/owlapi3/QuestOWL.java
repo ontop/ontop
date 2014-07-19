@@ -385,6 +385,19 @@ public class QuestOWL extends OWLReasonerBase {
 		return owlconn;
 	}
 
+	/**
+	 * Replaces the owl connection with a new one
+	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
+	 * @return The old connection: The caller must close this connection
+	 * @throws OBDAException
+	 */
+	public QuestOWLConnection replaceConnection() throws OBDAException {
+		QuestOWLConnection oldconn = this.owlconn;
+		conn = questInstance.getNonPoolConnection();
+		owlconn = new QuestOWLConnection(conn);
+		return oldconn;
+	}
+	
 	@Override
 	public String getReasonerName() {
 		return "Quest";
