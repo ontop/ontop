@@ -41,8 +41,6 @@ import it.unibz.krdb.sql.api.SelectJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -70,7 +68,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 
-//import com.hp.hpl.jena.iri.IRI;
+
 
 public class Mapping2DatalogConverter {
 
@@ -94,7 +92,7 @@ public class Mapping2DatalogConverter {
 	}
 
 	public DatalogProgram constructDatalogProgram() {
-		DatalogProgram datalog = factory.getDatalogProgram();
+		DatalogProgram datalogProgram = factory.getDatalogProgram();
 		List<String> errorMessages = new ArrayList<>();
 		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
 			try {
@@ -124,24 +122,16 @@ public class Mapping2DatalogConverter {
                 // For each where clause, creates an atom and adds it to the body
                 addWhereClauseAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
-
-                // Construct the head from the target query.
-				List<Function> atomList = targetQuery.getBody();
-				// for (Function atom : atomList) {
-				Iterator<Function> atomListIter = atomList.iterator();
-
-				while (atomListIter.hasNext()) {
-					Function atom = atomListIter.next();
-					List<Term> terms = atom.getTerms();
-					List<Term> newterms = new LinkedList<Term>();
-					for (Term term : terms) {
-						newterms.add(updateTerm(term, lookupTable));
-					}
-					Function newhead = factory.getFunction(atom.getPredicate(),
-							newterms);
-					CQIE rule = factory.getCQIE(newhead, bodyAtoms);
-					datalog.appendRule(rule);
-				}
+                // For each body atom in the target query,
+                //  (1) renameVariables its variables and
+                //  (2) use it as the head atom of a new rule
+                for (Function atom : targetQuery.getBody()) {
+                    // Construct the head from the target query.
+                    Function head = createHeadAtom(atom, lookupTable);
+                    // Create a new rule from the new head and the body
+                    CQIE rule = factory.getCQIE(head, bodyAtoms);
+                    datalogProgram.appendRule(rule);
+                }
 
 			} catch (Exception e) {
 				errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
@@ -152,17 +142,35 @@ public class Mapping2DatalogConverter {
 		}
 
 		if (errorMessages.size() > 0) {
+
 			StringBuilder errors = new StringBuilder();
 			for (String error : errorMessages) {
 				errors.append(error + "\n");
 			}
 			final String msg = "There was an error analyzing the following mappings. Please correct the issue(s) to continue.\n"
 					+ errors.toString();
-			RuntimeException r = new RuntimeException(msg);
-			throw r;
+
+			throw  new IllegalArgumentException(msg);
 		}
-		return datalog;
+		return datalogProgram;
 	}
+
+    /**
+     * Creates the head atom from the target query.
+     *
+     * @param atom an atom from the body of the target query
+     * @param lookupTable
+     * @return a head atom
+     */
+    private Function createHeadAtom(Function atom, LookupTable lookupTable) {
+        List<Term> terms = atom.getTerms();
+        List<Term> newTerms = new ArrayList<>();
+        for (Term term : terms) {
+            newTerms.add(renameVariables(term, lookupTable));
+        }
+        return factory.getFunction(atom.getFunctionSymbol(),
+                newTerms);
+    }
 
     private void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
         // For the "where" clause
@@ -228,28 +236,18 @@ public class Mapping2DatalogConverter {
         }
     }
 
-    private void throwInvalidFilterExpressionException(
-			Stack<Function> filterFunctionStack) {
-		StringBuilder filterExpression = new StringBuilder();
-		while (!filterFunctionStack.isEmpty()) {
-			filterExpression.append(filterFunctionStack.pop());
-		}
-		throw new RuntimeException("Illegal filter expression: "
-				+ filterExpression.toString());
-	}
-
 	/**
 	 * Methods to create a {@link Function} starting from a
 	 * {@link IsNullExpression}
 	 * 
-	 * @param pred
+	 * @param expression
 	 *            IsNullExpression
 	 * @param lookupTable
 	 * @return a function from the OBDADataFactory
 	 */
-	private Function getFunction(IsNullExpression pred, LookupTable lookupTable) {
+	private Function getFunction(IsNullExpression expression, LookupTable lookupTable) {
 
-		Expression column = pred.getLeftExpression();
+		Expression column = expression.getLeftExpression();
 		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
 		if (variableName == null) {
@@ -258,7 +256,7 @@ public class Mapping2DatalogConverter {
 		}
 		Term var = factory.getVariable(variableName);
 
-		if (!pred.isNot()) {
+		if (!expression.isNot()) {
 			return factory.getFunctionIsNull(var);
 		} else {
 			return factory.getFunctionIsNotNull(var);
@@ -269,14 +267,15 @@ public class Mapping2DatalogConverter {
 	 * Methods to create a {@link Function} starting from a
 	 * {@link IsNullExpression}
 	 * 
-	 * @param pred
+	 * @param expression
 	 *            IsNullExpression
 	 * @param lookupTable
 	 * @return a function from the OBDADataFactory
 	 */
-	private Function getFunction(CastExpression pred, LookupTable lookupTable) {
+    // TODO:
+	private Function getFunction(CastExpression expression, LookupTable lookupTable) {
 
-		Expression column = pred.getLeftExpression();
+		Expression column = expression.getLeftExpression();
 		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
 		if (variableName == null) {
@@ -285,7 +284,7 @@ public class Mapping2DatalogConverter {
 		}
 		Term var = factory.getVariable(variableName);
 
-		ColDataType datatype= pred.getType();
+		ColDataType datatype = expression.getType();
 		
 
 		
@@ -303,20 +302,20 @@ public class Mapping2DatalogConverter {
 	 * {@link BinaryExpression} We consider all possible values of the left and
 	 * right expressions
 	 * 
-	 * @param pred
+	 * @param expression
 	 * @param lookupTable
 	 * @return
 	 */
-	private Function getFunction(Expression pred, LookupTable lookupTable) {
-		if (pred instanceof BinaryExpression) {
-			return getFunction((BinaryExpression) pred, lookupTable);
-		} else if (pred instanceof IsNullExpression) {
-			return getFunction((IsNullExpression) pred, lookupTable);
-		} else if (pred instanceof Parenthesis) {
-			Expression inside = ((Parenthesis) pred).getExpression();
+	private Function getFunction(Expression expression, LookupTable lookupTable) {
+		if (expression instanceof BinaryExpression) {
+			return getFunction((BinaryExpression) expression, lookupTable);
+		} else if (expression instanceof IsNullExpression) {
+			return getFunction((IsNullExpression) expression, lookupTable);
+		} else if (expression instanceof Parenthesis) {
+			Expression inside = ((Parenthesis) expression).getExpression();
 			return getFunction(inside, lookupTable);
-		} else if (pred instanceof Between) {
-			Between between = (Between) pred;
+		} else if (expression instanceof Between) {
+			Between between = (Between) expression;
 			Expression left = between.getLeftExpression();
 			Expression e1 = between.getBetweenExpressionStart();
 			Expression e2 = between.getBetweenExpressionEnd();
@@ -331,8 +330,8 @@ public class Mapping2DatalogConverter {
 
 			AndExpression ande = new AndExpression(gte, mte);
 			return getFunction(ande, lookupTable);
-		} else if (pred instanceof InExpression) {
-			InExpression inExpr = (InExpression)pred;
+		} else if (expression instanceof InExpression) {
+			InExpression inExpr = (InExpression)expression;
 			Expression left = inExpr.getLeftExpression();
 			ExpressionList ilist = (ExpressionList)inExpr.getRightItemsList();
 			
@@ -493,37 +492,41 @@ public class Mapping2DatalogConverter {
 		}
 	}
 
-	/**
-	 * Returns a new term with the updated references.
-	 */
-	private Term updateTerm(Term term, LookupTable lookupTable) {
-		Term result = null;
+    /**
+     * Returns a new term by renaming variables occurring in the  {@code term}
+     *  according to the {@code lookupTable}
+     */
+    private Term renameVariables(Term term, LookupTable lookupTable) {
+        Term result = null;
 
-		if (term instanceof Variable) {
-			Variable var = (Variable) term;
-			String varName = var.getName();
-			String termName = lookupTable.lookup(varName);
-			if (termName == null) {
-				final String msg = String
-						.format("Error in identifying column name \"%s\", please check the query source in the mappings.\nPossible reasons:\n1. The name is ambiguous, or\n2. The name is not defined in the database schema.",
-								var);
-				throw new RuntimeException(msg);
-			}
-			result = factory.getVariable(termName);
+        if (term instanceof Variable) {
+            Variable var = (Variable) term;
+            String varName = var.getName();
+            String termName = lookupTable.lookup(varName);
+            if (termName == null) {
+                String messageFormat = "Error in identifying column name \"%s\", " +
+                        "please check the query source in the mappings.\n" +
+                        "Possible reasons:\n" +
+                        "1. The name is ambiguous, or\n" +
+                        "2. The name is not defined in the database schema.";
+                final String msg = String.format(messageFormat, var);
+                throw new RuntimeException(msg);
+            }
+            result = factory.getVariable(termName);
 
-		} else if (term instanceof Function) {
-			Function func = (Function) term;
-			List<Term> terms = func.getTerms();
-			List<Term> newterms = new LinkedList<Term>();
-			for (Term innerTerm : terms) {
-				newterms.add(updateTerm(innerTerm, lookupTable));
-			}
-			result = factory.getFunction(func.getFunctionSymbol(), newterms);
-		} else if (term instanceof Constant) {
-			result = term.clone();
-		}
-		return result;
-	}
+        } else if (term instanceof Function) {
+            Function func = (Function) term;
+            List<Term> terms = func.getTerms();
+            List<Term> newTerms = new ArrayList<>();
+            for (Term innerTerm : terms) {
+                newTerms.add(renameVariables(innerTerm, lookupTable));
+            }
+            result = factory.getFunction(func.getFunctionSymbol(), newTerms);
+        } else if (term instanceof Constant) {
+            result = term.clone();
+        }
+        return result;
+    }
 
 	private LookupTable createLookupTable(ParsedSQLQuery queryParsed) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
