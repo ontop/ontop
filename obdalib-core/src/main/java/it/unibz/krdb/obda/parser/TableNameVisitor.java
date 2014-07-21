@@ -42,6 +42,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.JsonExpression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
@@ -78,6 +79,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -243,7 +245,15 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(Function function) {
-		unsupported = true;
+		if(function.getName().toLowerCase().equals("regexp_like") ) {
+			for(Expression ex :function.getParameters().getExpressions()){
+				ex.accept(this);
+				
+			}
+		}
+		else{
+		    unsupported = true;
+		}
 	}
 
 	@Override
@@ -490,8 +500,8 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(RegExpMatchOperator rexpr) {
-		unsupported = true;
-		visitBinaryExpression(rexpr);
+//		unsupported = true;
+//		visitBinaryExpression(rexpr);
 	}
 
 
@@ -524,5 +534,21 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(SelectExpressionItem expr) {
 		expr.getExpression().accept(this);
+	}
+
+
+
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -302,20 +302,27 @@ public class Mapping2DatalogConverter {
 	 * {@link BinaryExpression} We consider all possible values of the left and
 	 * right expressions
 	 * 
-	 * @param expression
+	 * @param pred
 	 * @param lookupTable
 	 * @return
 	 */
-	private Function getFunction(Expression expression, LookupTable lookupTable) {
-		if (expression instanceof BinaryExpression) {
-			return getFunction((BinaryExpression) expression, lookupTable);
-		} else if (expression instanceof IsNullExpression) {
-			return getFunction((IsNullExpression) expression, lookupTable);
-		} else if (expression instanceof Parenthesis) {
-			Expression inside = ((Parenthesis) expression).getExpression();
+	private Function getFunction(Expression pred, LookupTable lookupTable) {
+		if (pred instanceof BinaryExpression) {
+			return getFunction((BinaryExpression) pred, lookupTable);
+		} else if (pred instanceof IsNullExpression) {
+			return getFunction((IsNullExpression) pred, lookupTable);
+		} else if (pred instanceof Parenthesis) {
+			Expression inside = ((Parenthesis) pred).getExpression();
+			
+			 //Consider the case of NOT(...)
+			if(((Parenthesis) pred).isNot()){
+				return factory.getFunctionNOT(getFunction(inside, lookupTable));
+			}
+			
 			return getFunction(inside, lookupTable);
-		} else if (expression instanceof Between) {
-			Between between = (Between) expression;
+			
+		} else if (pred instanceof Between) {
+			Between between = (Between) pred;
 			Expression left = between.getLeftExpression();
 			Expression e1 = between.getBetweenExpressionStart();
 			Expression e2 = between.getBetweenExpressionEnd();
@@ -330,11 +337,11 @@ public class Mapping2DatalogConverter {
 
 			AndExpression ande = new AndExpression(gte, mte);
 			return getFunction(ande, lookupTable);
-		} else if (expression instanceof InExpression) {
-			InExpression inExpr = (InExpression)expression;
+		} else if (pred instanceof InExpression) {
+			InExpression inExpr = (InExpression) pred;
 			Expression left = inExpr.getLeftExpression();
-			ExpressionList ilist = (ExpressionList)inExpr.getRightItemsList();
-			
+			ExpressionList ilist = (ExpressionList) inExpr.getRightItemsList();
+
 			List<EqualsTo> eqList = new ArrayList<EqualsTo>();
 			for (Expression item : ilist.getExpressions()) {
 				EqualsTo eq = new EqualsTo();
@@ -345,7 +352,7 @@ public class Mapping2DatalogConverter {
 			int size = eqList.size();
 			if (size > 1) {
 				OrExpression or = new OrExpression(eqList.get(size - 1),
-												   eqList.get(size - 2));
+						eqList.get(size - 2));
 				for (int i = size - 3; i >= 0; i--) {
 					OrExpression orexpr = new OrExpression(eqList.get(i), or);
 					or = orexpr;
@@ -354,8 +361,17 @@ public class Mapping2DatalogConverter {
 			} else {
 				return getFunction(eqList.get(0), lookupTable);
 			}
-		} else
-			return null;
+		} else if (pred instanceof net.sf.jsqlparser.expression.Function) {
+			
+			
+			net.sf.jsqlparser.expression.Function regex = (net.sf.jsqlparser.expression.Function) pred;
+			if (regex.getName().toLowerCase().equals("regexp_like")) {
+				return getFunctionRegexLike(regex, lookupTable);
+
+			}
+
+		}
+		return null;
 	}
 
 	/**
@@ -388,7 +404,7 @@ public class Mapping2DatalogConverter {
 			t2 = getVariable(right, lookupTable);
 		}
 		if (t2 == null) {
-			t2 = getValueConstant(right, lookupTable);
+			t2 = getValueConstant(right);
 		}
 		
 		//get boolean operation
@@ -418,11 +434,81 @@ public class Mapping2DatalogConverter {
 			funct = factory.getFunctionMultiply(t1, t2);
 		else if (op.equals("LIKE"))
 			funct = factory.getFunctionLike(t1, t2);
+		else if (op.equals("~"))
+			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+		else if (op.equals("~*"))
+			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i")); // i flag for case insensitivity
+		else if (op.equals("!~"))
+			funct = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2,factory.getConstantLiteral("")));
+		else if (op.equals("!~*"))
+			funct = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2,factory.getConstantLiteral("i")));
+		else if (op.equals("REGEXP"))
+			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i"));
+		else if (op.equals("REGEXP BINARY"))
+			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
 		else
 			throw new RuntimeException("Unknown opertor: " + op);
 
 		return funct;
 
+	}
+	
+	/**
+	 * create a {@link Function} starting from a
+	 * {@link net.sf.jsqlparser.expression.Function} containing a regexp_like (regex function for oracle)
+	 *  We consider all possible values of the three parameters (source_string, pattern and match_parameter)
+	 * @param regex
+	 * @param lookupTable
+	 * @return
+	 */
+			
+	private Function getFunctionRegexLike(net.sf.jsqlparser.expression.Function regex, LookupTable lookupTable) {
+		// left term can be function or column variable
+		List<Expression> listExpression = regex.getParameters()
+				.getExpressions();
+		if (listExpression.size() == 2 || listExpression.size() == 3) {
+			
+			Term t1 = null; // first parameter is a source_string, generally a column
+			Expression first = listExpression.get(0);
+			t1 = getFunction(first, lookupTable);
+			if (t1 == null) {
+				t1 = getVariable(first, lookupTable);
+			}
+			if (t1 == null)
+				throw new RuntimeException(
+						"Unable to find column name for variable: "
+								+ first);
+
+			
+			Term t2 = null; // second parameter is a pattern, so generally a regex string 
+			Expression second = listExpression.get(1);
+			t2 = getFunction(second, lookupTable);
+			if (t2 == null) {
+				t2 = getVariable(second, lookupTable);
+			}
+			if (t2 == null) {
+				t2 = getValueConstant(second);
+			}
+
+			
+			/*
+			 * Term t3 is optional for match_parameter in regexp_like
+			 */
+			Term t3 = null;
+			
+			try {
+				Expression third = listExpression.get(2);
+				t3 = getValueConstant(third);
+
+				return factory.getFunctionRegex(t1, t2, t3);
+			} catch (IndexOutOfBoundsException e) {
+
+				return factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+			}
+
+		}
+		return null;
+		
 	}
 
 	private Term getVariable(Expression pred, LookupTable lookupTable) {
@@ -436,6 +522,7 @@ public class Mapping2DatalogConverter {
 		}
 		return null;
 	}
+
 	/**
 	 * Return a valueConstant or Variable constructed from the given expression
 	 * 
@@ -445,7 +532,7 @@ public class Mapping2DatalogConverter {
 	 *            in case of variable
 	 * @return constructed valueconstant or variable
 	 */
-	private Term getValueConstant(Expression pred, LookupTable lookupTable) {
+	private Term getValueConstant(Expression pred) {
 		String termRightName = "";
 		if (pred instanceof Column) {
 			// if the columns contains a boolean value
@@ -459,9 +546,8 @@ public class Mapping2DatalogConverter {
 				throw new RuntimeException(
 						"Unable to find column name for variable: "
 								+ columnName);
-			
-		}
-		else if (pred instanceof StringValue) {
+
+		} else if (pred instanceof StringValue) {
 			termRightName = ((StringValue) pred).getValue();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.STRING);
 
@@ -563,67 +649,85 @@ public class Mapping2DatalogConverter {
 				String columnName = dbMetaData.getAttributeName(fullName, i);
 				
 				lookupTable.add(columnName, index);
-				
-				String lowercaseColumn= columnName.toLowerCase();
-				
-				
-				
-				if (aliasMap.containsKey(lowercaseColumn)) { // register the alias name, if any
-						lookupTable.add(aliasMap.get(lowercaseColumn), columnName);
-					}
-				
-				
-				
+
+				String lowercaseColumn = columnName.toLowerCase();
+
+				if (aliasMap.containsKey(lowercaseColumn)) { // register the
+																// alias name,
+																// if any
+					lookupTable.add(aliasMap.get(lowercaseColumn), columnName);
+				}
+
 				// attribute name with table name prefix
 				String tableColumnName = tableName + "." + columnName;
 				lookupTable.add(tableColumnName, index);
-				
-								
+
 				// attribute name with table name prefix
 				String tablecolumnname = tableColumnName.toLowerCase();
-				if (aliasMap.containsKey(tablecolumnname))
-				{ // register the alias name, if any
-					lookupTable.add(aliasMap.get(tablecolumnname), tableColumnName);
-				}	
-				
-				
+				if (aliasMap.containsKey(tablecolumnname)) { // register the
+																// alias name,
+																// if any
+					lookupTable.add(aliasMap.get(tablecolumnname),
+							tableColumnName);
+				}
+
 				// attribute name with table given name prefix
 				String givenTableColumnName = tableGivenName + "." + columnName;
 				lookupTable.add(givenTableColumnName, tableColumnName);
-				
-				String giventablecolumnname= givenTableColumnName.toLowerCase();
-				if (aliasMap.containsKey(giventablecolumnname)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(giventablecolumnname), tableColumnName);
+
+				String giventablecolumnname = givenTableColumnName
+						.toLowerCase();
+				if (aliasMap.containsKey(giventablecolumnname)) { // register
+																	// the alias
+																	// name, if
+																	// any
+					lookupTable.add(aliasMap.get(giventablecolumnname),
+							tableColumnName);
 				}
-				
-				
+
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(fullName, i);
-//				String qualifiedColumnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
+				String qualifiedColumnName = dbMetaData
+						.getFullQualifiedAttributeName(fullName, i);
+				// String qualifiedColumnName =
+				// dbMetaData.getFullQualifiedAttributeName(tableName, i);
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
-				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the alias name, if any
-					lookupTable.add(aliasMap.get(qualifiedcolumnname), tableColumnName);
+				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the
+																	// alias
+																	// name, if
+																	// any
+					lookupTable.add(aliasMap.get(qualifiedcolumnname),
+							tableColumnName);
 				}
-				
+
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
-				if (tableAlias!=null) {
-					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(fullName, tableAlias, i);
-//					String qualifiedColumnAlias = dbMetaData.getFullQualifiedAttributeName(tableName, tableAlias, i);
-					lookupTable.add(qualifiedColumnAlias, index);		
-						String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
-						if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
-							lookupTable.add(aliasMap.get(aliasColumnName), qualifiedColumnAlias);
-						}
-					
+				if (tableAlias != null) {
+					String qualifiedColumnAlias = dbMetaData
+							.getFullQualifiedAttributeName(fullName,
+									tableAlias, i);
+					// String qualifiedColumnAlias =
+					// dbMetaData.getFullQualifiedAttributeName(tableName,
+					// tableAlias, i);
+					lookupTable.add(qualifiedColumnAlias, index);
+					String aliasColumnName = tableAlias.toLowerCase() + "."
+							+ lowercaseColumn;
+					if (aliasMap.containsKey(aliasColumnName)) { // register the
+																	// alias
+																	// name, if
+																	// any
+						lookupTable.add(aliasMap.get(aliasColumnName),
+								qualifiedColumnAlias);
+					}
+
 				}
 				
 				//check if we do not have subselect with alias name assigned
 				for(SelectJSQL subSelect: queryParsed.getSubSelects()){
 					String subSelectAlias = subSelect.getAlias();
-					if (subSelectAlias!=null) {
-						String aliasColumnName = subSelectAlias.toLowerCase() + "." + lowercaseColumn;
+					if (subSelectAlias != null) {
+						String aliasColumnName = subSelectAlias.toLowerCase()
+								+ "." + lowercaseColumn;
 						lookupTable.add(aliasColumnName, index);
 						if (aliasMap.containsKey(aliasColumnName)) { // register the alias name, if any
 							lookupTable.add(aliasMap.get(aliasColumnName), aliasColumnName);
