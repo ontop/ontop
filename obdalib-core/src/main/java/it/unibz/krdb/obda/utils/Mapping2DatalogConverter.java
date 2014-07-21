@@ -332,7 +332,54 @@ public class Mapping2DatalogConverter {
             if (regex.getName().toLowerCase().equals("regexp_like")) {
                 // FIXME
                 //result = getFunction(regex, lookupTable);
-                result = acceptEx(regex);
+                //result = acceptEx(regex);
+
+            List<Expression> listExpression = regex.getParameters().getExpressions();
+		if (listExpression.size() == 2 || listExpression.size() == 3) {
+
+			Term t1 = null; // first parameter is a source_string, generally a column
+			Expression first = listExpression.get(0);
+            t1 = acceptEx(first);
+//			t1 = getFunction(first, lookupTable);
+//			if (t1 == null) {
+//				t1 = getVariable(first, lookupTable);
+//			}
+			if (t1 == null)
+				throw new RuntimeException(
+						"Unable to find column name for variable: "
+								+ first);
+
+
+			Term t2 = null; // second parameter is a pattern, so generally a regex string
+			Expression second = listExpression.get(1);
+//			t2 = getFunction(second, lookupTable);
+//			if (t2 == null) {
+//				t2 = getVariable(second, lookupTable);
+//			}
+//			if (t2 == null) {
+//				t2 = getValueConstant(second);
+//			}
+            t2 = acceptEx(second);
+
+
+			/*
+			 * Term t3 is optional for match_parameter in regexp_like
+			 */
+			Term t3 = null;
+
+			try {
+				Expression third = listExpression.get(2);
+				//t3 = getValueConstant(third);
+                t3 = acceptEx(third);
+
+				result =  factory.getFunctionRegex(t1, t2, t3);
+			} catch (IndexOutOfBoundsException e) {
+
+                result =  factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+			}
+
+		}
+
             }
         }
 
