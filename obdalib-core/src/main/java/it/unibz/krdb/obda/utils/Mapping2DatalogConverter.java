@@ -43,7 +43,6 @@ import it.unibz.krdb.sql.api.SelectionJSQL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -172,12 +171,14 @@ public class Mapping2DatalogConverter {
                 newTerms);
     }
 
+
     private void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
         // For the "where" clause
         SelectionJSQL whereClause = parsedSQLQuery.getWhereClause();
         if (whereClause != null) {
             Expression conditions = whereClause.getRawConditions();
 
+            // Call getFunction(Expression...). No overloading.
             Function filterFunction = getFunction(conditions,
                     lookupTable);
 
@@ -302,27 +303,28 @@ public class Mapping2DatalogConverter {
 	 * {@link BinaryExpression} We consider all possible values of the left and
 	 * right expressions
 	 * 
-	 * @param pred
+	 * @param expression
 	 * @param lookupTable
 	 * @return
 	 */
-	private Function getFunction(Expression pred, LookupTable lookupTable) {
-		if (pred instanceof BinaryExpression) {
-			return getFunction((BinaryExpression) pred, lookupTable);
-		} else if (pred instanceof IsNullExpression) {
-			return getFunction((IsNullExpression) pred, lookupTable);
-		} else if (pred instanceof Parenthesis) {
-			Expression inside = ((Parenthesis) pred).getExpression();
+	private Function getFunction(Expression expression, LookupTable lookupTable) {
+        // When getFunction(Expression...) is called with no overloading support.
+		if (expression instanceof BinaryExpression) {
+			return getFunction((BinaryExpression) expression, lookupTable);
+		} else if (expression instanceof IsNullExpression) {
+			return getFunction((IsNullExpression) expression, lookupTable);
+		} else if (expression instanceof Parenthesis) {
+			Expression inside = ((Parenthesis) expression).getExpression();
 			
 			 //Consider the case of NOT(...)
-			if(((Parenthesis) pred).isNot()){
+			if(((Parenthesis) expression).isNot()){
 				return factory.getFunctionNOT(getFunction(inside, lookupTable));
 			}
 			
 			return getFunction(inside, lookupTable);
 			
-		} else if (pred instanceof Between) {
-			Between between = (Between) pred;
+		} else if (expression instanceof Between) {
+			Between between = (Between) expression;
 			Expression left = between.getLeftExpression();
 			Expression e1 = between.getBetweenExpressionStart();
 			Expression e2 = between.getBetweenExpressionEnd();
@@ -337,12 +339,12 @@ public class Mapping2DatalogConverter {
 
 			AndExpression ande = new AndExpression(gte, mte);
 			return getFunction(ande, lookupTable);
-		} else if (pred instanceof InExpression) {
-			InExpression inExpr = (InExpression) pred;
+		} else if (expression instanceof InExpression) {
+			InExpression inExpr = (InExpression) expression;
 			Expression left = inExpr.getLeftExpression();
 			ExpressionList ilist = (ExpressionList) inExpr.getRightItemsList();
 
-			List<EqualsTo> eqList = new ArrayList<EqualsTo>();
+			List<EqualsTo> eqList = new ArrayList<>();
 			for (Expression item : ilist.getExpressions()) {
 				EqualsTo eq = new EqualsTo();
 				eq.setLeftExpression(left);
@@ -354,19 +356,19 @@ public class Mapping2DatalogConverter {
 				OrExpression or = new OrExpression(eqList.get(size - 1),
 						eqList.get(size - 2));
 				for (int i = size - 3; i >= 0; i--) {
-					OrExpression orexpr = new OrExpression(eqList.get(i), or);
-					or = orexpr;
+					OrExpression orExpression = new OrExpression(eqList.get(i), or);
+					or = orExpression;
 				}
 				return getFunction(or, lookupTable);
 			} else {
 				return getFunction(eqList.get(0), lookupTable);
 			}
-		} else if (pred instanceof net.sf.jsqlparser.expression.Function) {
+		} else if (expression instanceof net.sf.jsqlparser.expression.Function) {
 			
 			
-			net.sf.jsqlparser.expression.Function regex = (net.sf.jsqlparser.expression.Function) pred;
+			net.sf.jsqlparser.expression.Function regex = (net.sf.jsqlparser.expression.Function) expression;
 			if (regex.getName().toLowerCase().equals("regexp_like")) {
-				return getFunctionRegexLike(regex, lookupTable);
+				return getFunction(regex, lookupTable);
 
 			}
 
@@ -379,18 +381,17 @@ public class Mapping2DatalogConverter {
 	 * {@link BinaryExpression} We consider all possible values of the left and
 	 * right expressions
 	 * 
-	 * @param pred
+	 * @param expression
 	 * @param lookupTable
 	 * @return
 	 */
 
-	private Function getFunction(BinaryExpression pred, LookupTable lookupTable) {
-		Expression left = pred.getLeftExpression();
-		Expression right = pred.getRightExpression();
+	private Function getFunction(BinaryExpression expression, LookupTable lookupTable) {
+		Expression left = expression.getLeftExpression();
+		Expression right = expression.getRightExpression();
 
 		//left term can be function or column variable
-		Term t1 = null;
-		t1 = getFunction(left, lookupTable);
+		Term t1 = getFunction(left, lookupTable);
 		if (t1 == null) {
 			t1 = getVariable(left, lookupTable);
 		}
@@ -398,8 +399,7 @@ public class Mapping2DatalogConverter {
 			throw new RuntimeException("Unable to find column name for variable: " +left);
 
 		//right term can be function, column variable or data value
-		Term t2 = null;
-		t2 = getFunction(right, lookupTable);
+		Term t2 = getFunction(right, lookupTable);
 		if (t2 == null) {
 			t2 = getVariable(right, lookupTable);
 		}
@@ -408,48 +408,69 @@ public class Mapping2DatalogConverter {
 		}
 		
 		//get boolean operation
-		String op = pred.getStringExpression();
-		Function funct = null;
-		if (op.equals("="))
-			funct = factory.getFunctionEQ(t1, t2);
-		else if (op.equals(">"))
-			funct = factory.getFunctionGT(t1, t2);
-		else if (op.equals("<"))
-			funct = factory.getFunctionLT(t1, t2);
-		else if (op.equals(">="))
-			funct = factory.getFunctionGTE(t1, t2);
-		else if (op.equals("<="))
-			funct = factory.getFunctionLTE(t1, t2);
-		else if (op.equals("<>") || op.equals("!="))
-			funct = factory.getFunctionNEQ(t1, t2);
-		else if (op.equals("AND"))
-			funct = factory.getFunctionAND(t1, t2);
-		else if (op.equals("OR"))
-			funct = factory.getFunctionOR(t1, t2);
-		else if (op.equals("+"))
-			funct = factory.getFunctionAdd(t1, t2);
-		else if (op.equals("-"))
-			funct = factory.getFunctionSubstract(t1, t2);
-		else if (op.equals("*"))
-			funct = factory.getFunctionMultiply(t1, t2);
-		else if (op.equals("LIKE"))
-			funct = factory.getFunctionLike(t1, t2);
-		else if (op.equals("~"))
-			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
-		else if (op.equals("~*"))
-			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i")); // i flag for case insensitivity
-		else if (op.equals("!~"))
-			funct = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2,factory.getConstantLiteral("")));
-		else if (op.equals("!~*"))
-			funct = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2,factory.getConstantLiteral("i")));
-		else if (op.equals("REGEXP"))
-			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i"));
-		else if (op.equals("REGEXP BINARY"))
-			funct = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
-		else
-			throw new RuntimeException("Unknown opertor: " + op);
+		String op = expression.getStringExpression();
+		Function compositeTerm;
+        switch (op) {
+            case "=":
+                compositeTerm = factory.getFunctionEQ(t1, t2);
+                break;
+            case ">":
+                compositeTerm = factory.getFunctionGT(t1, t2);
+                break;
+            case "<":
+                compositeTerm = factory.getFunctionLT(t1, t2);
+                break;
+            case ">=":
+                compositeTerm = factory.getFunctionGTE(t1, t2);
+                break;
+            case "<=":
+                compositeTerm = factory.getFunctionLTE(t1, t2);
+                break;
+            case "<>":
+            case "!=":
+                compositeTerm = factory.getFunctionNEQ(t1, t2);
+                break;
+            case "AND":
+                compositeTerm = factory.getFunctionAND(t1, t2);
+                break;
+            case "OR":
+                compositeTerm = factory.getFunctionOR(t1, t2);
+                break;
+            case "+":
+                compositeTerm = factory.getFunctionAdd(t1, t2);
+                break;
+            case "-":
+                compositeTerm = factory.getFunctionSubstract(t1, t2);
+                break;
+            case "*":
+                compositeTerm = factory.getFunctionMultiply(t1, t2);
+                break;
+            case "LIKE":
+                compositeTerm = factory.getFunctionLike(t1, t2);
+                break;
+            case "~":
+                compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+                break;
+            case "~*":
+                compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i")); // i flag for case insensitivity
+                break;
+            case "!~":
+                compositeTerm = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("")));
+                break;
+            case "!~*":
+                compositeTerm = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i")));
+                break;
+            case "REGEXP":
+                compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i"));
+                break;
+            case "REGEXP BINARY":
+                compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+                break;
+            default:
+                throw new RuntimeException("Unknown operator: " + op);
+        }
 
-		return funct;
+		return compositeTerm;
 
 	}
 	
@@ -462,7 +483,7 @@ public class Mapping2DatalogConverter {
 	 * @return
 	 */
 			
-	private Function getFunctionRegexLike(net.sf.jsqlparser.expression.Function regex, LookupTable lookupTable) {
+	private Function getFunction(net.sf.jsqlparser.expression.Function regex, LookupTable lookupTable) {
 		// left term can be function or column variable
 		List<Expression> listExpression = regex.getParameters()
 				.getExpressions();
@@ -511,10 +532,10 @@ public class Mapping2DatalogConverter {
 		
 	}
 
-	private Term getVariable(Expression pred, LookupTable lookupTable) {
+	private Term getVariable(Expression expression, LookupTable lookupTable) {
 		String termName = "";
-		if (pred instanceof Column) {
-			termName = lookupTable.lookup(pred.toString());
+		if (expression instanceof Column) {
+			termName = lookupTable.lookup(expression.toString());
 			if (termName == null) {
 				return null;
 			}
@@ -526,17 +547,15 @@ public class Mapping2DatalogConverter {
 	/**
 	 * Return a valueConstant or Variable constructed from the given expression
 	 * 
-	 * @param pred
+	 * @param expression
 	 *            the expression to process
-	 * @param lookupTable
-	 *            in case of variable
 	 * @return constructed valueconstant or variable
 	 */
-	private Term getValueConstant(Expression pred) {
+	private Term getValueConstant(Expression expression) {
 		String termRightName = "";
-		if (pred instanceof Column) {
+		if (expression instanceof Column) {
 			// if the columns contains a boolean value
-			String columnName = ((Column) pred).getColumnName();
+			String columnName = ((Column) expression).getColumnName();
 			if (columnName.toLowerCase().equals("true")
 					|| columnName.toLowerCase().equals("false")) {
 				return factory
@@ -547,32 +566,32 @@ public class Mapping2DatalogConverter {
 						"Unable to find column name for variable: "
 								+ columnName);
 
-		} else if (pred instanceof StringValue) {
-			termRightName = ((StringValue) pred).getValue();
+		} else if (expression instanceof StringValue) {
+			termRightName = ((StringValue) expression).getValue();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.STRING);
 
-		} else if (pred instanceof DateValue) {
-			termRightName = ((DateValue) pred).getValue().toString();
+		} else if (expression instanceof DateValue) {
+			termRightName = ((DateValue) expression).getValue().toString();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 
-		} else if (pred instanceof TimeValue) {
-			termRightName = ((TimeValue) pred).getValue().toString();
+		} else if (expression instanceof TimeValue) {
+			termRightName = ((TimeValue) expression).getValue().toString();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 
-		} else if (pred instanceof TimestampValue) {
-			termRightName = ((TimestampValue) pred).getValue().toString();
+		} else if (expression instanceof TimestampValue) {
+			termRightName = ((TimestampValue) expression).getValue().toString();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
 
-		} else if (pred instanceof LongValue) {
-			termRightName = ((LongValue) pred).getStringValue();
+		} else if (expression instanceof LongValue) {
+			termRightName = ((LongValue) expression).getStringValue();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
 
-		} else if (pred instanceof DoubleValue) {
-			termRightName = ((DoubleValue) pred).toString();
+		} else if (expression instanceof DoubleValue) {
+			termRightName = ((DoubleValue) expression).toString();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
 
 		} else {
-			termRightName = pred.toString();
+			termRightName = expression.toString();
 			return factory.getConstantLiteral(termRightName, COL_TYPE.LITERAL);
 
 		}
@@ -705,7 +724,7 @@ public class Mapping2DatalogConverter {
 				if (tableAlias != null) {
 					String qualifiedColumnAlias = dbMetaData
 							.getFullQualifiedAttributeName(fullName,
-									tableAlias, i);
+                                    tableAlias, i);
 					// String qualifiedColumnAlias =
 					// dbMetaData.getFullQualifiedAttributeName(tableName,
 					// tableAlias, i);
