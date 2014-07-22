@@ -21,7 +21,6 @@ package it.unibz.krdb.sql.api;
  */
 
 import java.io.Serializable;
-import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
@@ -90,7 +89,7 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && VisitedQuery.pQuotes.matcher(schema).matches())
+		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches())
 			this.schema = schema.substring(1, schema.length()-1);
 		else
 			this.schema = schema;
@@ -118,7 +117,7 @@ public class TableJSQL implements Serializable{
 	* @param tableName 
 	*/
 	public void setTableName(String tableName) {
-		if(VisitedQuery.pQuotes.matcher(tableName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(tableName).matches())
 		{
 			this.tableName = tableName.substring(1, tableName.length()-1);
 			quotedTable = true;
