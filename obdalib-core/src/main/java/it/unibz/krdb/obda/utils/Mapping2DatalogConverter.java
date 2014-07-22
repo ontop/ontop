@@ -80,7 +80,7 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 public class Mapping2DatalogConverter {
 
 	private List<OBDAMappingAxiom> mappingAxioms;
-	private DBMetadata dbMetaData;
+	private DBMetadata dbMetadata;
 
 	private SQLQueryParser sqlQueryParser;
 
@@ -91,11 +91,11 @@ public class Mapping2DatalogConverter {
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
 	public Mapping2DatalogConverter(List<OBDAMappingAxiom> mappingAxioms,
-                                    DBMetadata dbMetaData) {
+                                    DBMetadata dbMetadata) {
 		this.mappingAxioms = mappingAxioms;
-		this.dbMetaData = dbMetaData;
+		this.dbMetadata = dbMetadata;
 
-		sqlQueryParser = new SQLQueryParser(dbMetaData);
+		sqlQueryParser = new SQLQueryParser(dbMetadata);
 	}
 
 	public DatalogProgram constructDatalogProgram() {
@@ -220,13 +220,13 @@ public class Mapping2DatalogConverter {
             String tableName = table.getFullName();
 
             // Construct the predicate using the table name
-            int arity = dbMetaData.getDefinition(tableName).getNumOfAttributes();
+            int arity = dbMetadata.getDefinition(tableName).getNumOfAttributes();
             Predicate predicate = factory.getPredicate(tableName, arity);
 
             // Swap the column name with a new variable from the lookup table
             List<Term> terms = new ArrayList<>();
             for (int i = 1; i <= arity; i++) {
-                String columnName = dbMetaData
+                String columnName = dbMetadata
                         .getFullQualifiedAttributeName(tableName,
                                 table.getAlias(), i);
                 String termName = lookupTable.lookup(columnName);
@@ -280,47 +280,47 @@ public class Mapping2DatalogConverter {
         return result;
     }
 
-	private LookupTable createLookupTable(ParsedSQLQuery queryParsed) throws JSQLParserException {
+    /**
+     * Creates a lookupTable:
+     * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
+     * (2) Assigns new variables to them
+      */
+    private LookupTable createLookupTable(ParsedSQLQuery queryParsed) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
 
-		// Collect all the possible column names from tables.
-		List<RelationJSQL> tableList = queryParsed.getTables();
+		List<RelationJSQL> tables = queryParsed.getTables();
 
 		// Collect all known column aliases
 		Map<String, String> aliasMap = queryParsed.getAliasMap();
 		
 		int offset = 0; // the index offset
 
-		for (RelationJSQL table : tableList) {
+		for (RelationJSQL table : tables) {
 			
 			String tableName = table.getTableName();
 			String fullName = table.getFullName();
 			String tableGivenName = table.getGivenName();
-			DataDefinition def = dbMetaData.getDefinition(fullName);
-			
-			
-				 if (def == null) {
-					 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
-				 }
-			
-			
-			int size = def.getNumOfAttributes();
+			DataDefinition tableDefinition = dbMetadata.getDefinition(fullName);
+
+            if (tableDefinition == null) {
+                throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
+            }
+
+            int size = tableDefinition.getNumOfAttributes();
 
 			for (int i = 1; i <= size; i++) {
 				// assigned index number
 				int index = i + offset;
 				
 				// simple attribute name
-//				String columnName = dbMetaData.getAttributeName(tableName, i);
-				String columnName = dbMetaData.getAttributeName(fullName, i);
+				String columnName = dbMetadata.getAttributeName(fullName, i);
 				
 				lookupTable.add(columnName, index);
 
 				String lowercaseColumn = columnName.toLowerCase();
 
-				if (aliasMap.containsKey(lowercaseColumn)) { // register the
-																// alias name,
-																// if any
+                // register the alias name, if any
+                if (aliasMap.containsKey(lowercaseColumn)) {
 					lookupTable.add(aliasMap.get(lowercaseColumn), columnName);
 				}
 
@@ -330,9 +330,9 @@ public class Mapping2DatalogConverter {
 
 				// attribute name with table name prefix
 				String tablecolumnname = tableColumnName.toLowerCase();
-				if (aliasMap.containsKey(tablecolumnname)) { // register the
-																// alias name,
-																// if any
+
+                // register the alias name, if any
+				if (aliasMap.containsKey(tablecolumnname)) {
 					lookupTable.add(aliasMap.get(tablecolumnname),
 							tableColumnName);
 				}
@@ -341,27 +341,22 @@ public class Mapping2DatalogConverter {
 				String givenTableColumnName = tableGivenName + "." + columnName;
 				lookupTable.add(givenTableColumnName, tableColumnName);
 
-				String giventablecolumnname = givenTableColumnName
-						.toLowerCase();
-				if (aliasMap.containsKey(giventablecolumnname)) { // register
-																	// the alias
-																	// name, if
-																	// any
+				String giventablecolumnname = givenTableColumnName.toLowerCase();
+
+                // register the alias name, if any
+                if (aliasMap.containsKey(giventablecolumnname)) {
 					lookupTable.add(aliasMap.get(giventablecolumnname),
 							tableColumnName);
 				}
 
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetaData
-						.getFullQualifiedAttributeName(fullName, i);
-				// String qualifiedColumnName =
-				// dbMetaData.getFullQualifiedAttributeName(tableName, i);
+				String qualifiedColumnName = dbMetadata.getFullQualifiedAttributeName(fullName, i);
+
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
-				if (aliasMap.containsKey(qualifiedcolumnname)) { // register the
-																	// alias
-																	// name, if
-																	// any
+
+                // register the alias name, if any
+                if (aliasMap.containsKey(qualifiedcolumnname)) {
 					lookupTable.add(aliasMap.get(qualifiedcolumnname),
 							tableColumnName);
 				}
@@ -369,21 +364,16 @@ public class Mapping2DatalogConverter {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias != null) {
-					String qualifiedColumnAlias = dbMetaData
+					String qualifiedColumnAlias = dbMetadata
 							.getFullQualifiedAttributeName(fullName,
                                     tableAlias, i);
-					// String qualifiedColumnAlias =
-					// dbMetaData.getFullQualifiedAttributeName(tableName,
-					// tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
-					String aliasColumnName = tableAlias.toLowerCase() + "."
-							+ lowercaseColumn;
-                    if (aliasMap.containsKey(aliasColumnName)) {
-                        // register the alias name, if any
-                        lookupTable.add(aliasMap.get(aliasColumnName),
-                                qualifiedColumnAlias);
-                    }
+					String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
 
+                    // register the alias name, if any
+                    if (aliasMap.containsKey(aliasColumnName)) {
+                        lookupTable.add(aliasMap.get(aliasColumnName), qualifiedColumnAlias);
+                    }
 				}
 				
 				//check if we do not have subselect with alias name assigned
@@ -393,8 +383,9 @@ public class Mapping2DatalogConverter {
 						String aliasColumnName = subSelectAlias.toLowerCase()
 								+ "." + lowercaseColumn;
 						lookupTable.add(aliasColumnName, index);
+
+                        // register the alias name, if any
 						if (aliasMap.containsKey(aliasColumnName)) {
-						    // register the alias name, if any
 							lookupTable.add(aliasMap.get(aliasColumnName), aliasColumnName);
 						}
 					}
