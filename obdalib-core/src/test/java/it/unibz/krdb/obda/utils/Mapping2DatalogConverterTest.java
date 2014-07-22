@@ -217,4 +217,14 @@ public class Mapping2DatalogConverterTest extends TestCase {
 				":S_{StudentId} a :Student .");
 	}
 
+    public void testAnalysis_22() throws Exception{
+        runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)",
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
+    public void testAnalysis_23() throws Exception{
+        runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'",
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
 }

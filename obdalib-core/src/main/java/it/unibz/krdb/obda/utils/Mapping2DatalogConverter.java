@@ -185,11 +185,8 @@ public class Mapping2DatalogConverter {
         if (whereClause != null) {
             Expression conditions = whereClause.getRawConditions();
 
-            ConditionVisitor visitor = new ConditionVisitor(lookupTable);
-
-            conditions.accept(visitor);
-
-            Function filterFunction = (Function)visitor.getResult();
+            Expression2FunctionConverter converter = new Expression2FunctionConverter(lookupTable);
+            Function filterFunction =  converter.convert(conditions);
 
             bodyAtoms.add(filterFunction);
         }
@@ -201,7 +198,7 @@ public class Mapping2DatalogConverter {
     private void addJoinConditionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
         List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
         for (Expression condition : joinConditions) {
-            ConditionVisitor visitor = new ConditionVisitor(lookupTable);
+            Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
             Term atom = visitor.visitEx(condition);
             bodyAtoms.add((Function) atom);
         }
@@ -408,21 +405,27 @@ public class Mapping2DatalogConverter {
 		return lookupTable;
 	}
 
-    private class ConditionVisitor implements ExpressionVisitor {
+    /**
+     * This visitor class converts the SQL Expression to a Function
+     */
+    private class Expression2FunctionConverter implements ExpressionVisitor {
 
         private final LookupTable lookupTable;
 
         private Term result;
 
-        public ConditionVisitor(LookupTable lookupTable) {
+        public Expression2FunctionConverter(LookupTable lookupTable) {
             this.lookupTable = lookupTable;
         }
 
-        public Term getResult(){
-            return result;
+        public Function convert(Expression expression){
+            expression.accept(this);
+            return (Function)result;
         }
 
-        // Visits the visitor and gets the result
+        /**
+         * Visits the expression and gets the result
+         */
         private Term visitEx(Expression expression) {
             expression.accept(this);
             return this.result;
@@ -643,10 +646,9 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(Between expression) {
-            Between between = expression;
-            Expression left = between.getLeftExpression();
-            Expression e1 = between.getBetweenExpressionStart();
-            Expression e2 = between.getBetweenExpressionEnd();
+            Expression left = expression.getLeftExpression();
+            Expression e1 = expression.getBetweenExpressionStart();
+            Expression e2 = expression.getBetweenExpressionEnd();
 
             GreaterThanEquals gte = new GreaterThanEquals();
             gte.setLeftExpression(left);
@@ -678,29 +680,27 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(InExpression expression) {
-            InExpression inExpr = expression;
-            Expression left = inExpr.getLeftExpression();
-            ExpressionList ilist = (ExpressionList) inExpr.getRightItemsList();
+            Expression left = expression.getLeftExpression();
+            ExpressionList rightItemsList = (ExpressionList) expression.getRightItemsList();
 
-            List<EqualsTo> eqList = new ArrayList<>();
-            for (Expression item : ilist.getExpressions()) {
+            List<EqualsTo> equalsToList = new ArrayList<>();
+            for (Expression item : rightItemsList.getExpressions()) {
                 EqualsTo eq = new EqualsTo();
                 eq.setLeftExpression(left);
                 eq.setRightExpression(item);
-                eqList.add(eq);
+                equalsToList.add(eq);
             }
-            int size = eqList.size();
+            int size = equalsToList.size();
             if (size > 1) {
-                OrExpression or = new OrExpression(eqList.get(size - 1),
-                        eqList.get(size - 2));
+                OrExpression or = new OrExpression(equalsToList.get(size - 1),
+                        equalsToList.get(size - 2));
                 for (int i = size - 3; i >= 0; i--) {
-                    or = new OrExpression(eqList.get(i), or);
+                    or = new OrExpression(equalsToList.get(i), or);
                 }
                 result = visitEx(or);
             } else {
-                result = visitEx(eqList.get(0));
+                result = visitEx(equalsToList.get(0));
             }
-
         }
 
         @Override
@@ -851,22 +851,22 @@ public class Mapping2DatalogConverter {
         }
 
         @Override
-        public void visit(AnalyticExpression aexpr) {
+        public void visit(AnalyticExpression expression) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void visit(ExtractExpression eexpr) {
+        public void visit(ExtractExpression expression) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void visit(IntervalExpression iexpr) {
+        public void visit(IntervalExpression expression) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void visit(OracleHierarchicalExpression oexpr) {
+        public void visit(OracleHierarchicalExpression expression) {
             throw new UnsupportedOperationException();
         }
 

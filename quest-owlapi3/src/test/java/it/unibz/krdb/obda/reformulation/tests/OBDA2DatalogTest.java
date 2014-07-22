@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * A simple test that check if the system is able to handle mapping variants
  * to construct the proper datalog program.
  */
-public class Mapping2DatalogConverterTest extends TestCase {
+public class OBDA2DatalogTest extends TestCase {
 	
 	private OBDADataFactory fac;
 	private Connection conn;
