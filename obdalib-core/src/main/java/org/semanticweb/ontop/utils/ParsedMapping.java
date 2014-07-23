@@ -24,8 +24,9 @@ import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.parser.SQLQueryTranslator;
-import org.semanticweb.ontop.sql.api.VisitedQuery;
+import org.semanticweb.ontop.parser.SQLQueryParser;
+
+import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
 
 /**
  * Contains the target query and parsed source part, sql of a mapping
@@ -38,15 +39,15 @@ import org.semanticweb.ontop.sql.api.VisitedQuery;
  */
 public class ParsedMapping {
 
-	VisitedQuery sourceQueryParsed;
+	ParsedSQLQuery sourceQueryParsed;
 	OBDAMappingAxiom axiom;
 	
-	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryTranslator translator){
+	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryParser translator){
 		this.axiom = axiom;
 		OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 		// Construct the SQL parsed query from the source query
-		VisitedQuery queryParsed = translator.constructParserNoView(sourceQuery.toString());
+		ParsedSQLQuery queryParsed = translator.parseShallowly(sourceQuery.toString());
 		this.sourceQueryParsed = queryParsed;
 	}
 	
@@ -54,7 +55,7 @@ public class ParsedMapping {
 	 * This returns the parsed query constructed from the source query
 	 * @return VisitedQuery the parsed query
 	 */
-	public VisitedQuery getSourceQueryParsed(){
+	public ParsedSQLQuery getSourceQueryParsed(){
 		return this.sourceQueryParsed;
 	}
 	

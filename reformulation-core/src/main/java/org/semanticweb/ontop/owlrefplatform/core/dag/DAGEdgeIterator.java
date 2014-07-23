@@ -40,6 +40,7 @@ import java.util.Queue;
  * @author Mariano Rodriguez Muro
  * 
  */
+@Deprecated
 public class DAGEdgeIterator implements Iterator<Edge> {
 
 	DAG				dag								= null;

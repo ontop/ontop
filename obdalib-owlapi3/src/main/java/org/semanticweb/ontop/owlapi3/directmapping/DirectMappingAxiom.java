@@ -109,7 +109,7 @@ public class DirectMappingAxiom {
 		for (Attribute pk : pks)
 			Column += Table + ".\"" + pk.getName() + "\" AS "+this.table.getName()+"_"+pk.getName()+", ";
 		} else {
-			for (int i = 0; i < tableDef.countAttribute(); i++) {
+			for (int i = 0; i < tableDef.getNumOfAttributes(); i++) {
 				String attrName = tableDef.getAttributeName(i + 1);
 				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName()+"_"+attrName +", ";
 			}
@@ -147,7 +147,7 @@ public class DirectMappingAxiom {
 							Column += ", " + refPki + " AS " + tableRef + "_" + pki;
 					}
 				} else {
-					for (int i = 0; i < tdef.countAttribute(); i++) {
+					for (int i = 0; i < tdef.getNumOfAttributes(); i++) {
 						String attrName = tdef.getAttributeName(i + 1);
 						Column += ", \""+ tableRef + "\".\"" + attrName +
 								"\" AS " + tableRef+"_"+attrName;
@@ -170,7 +170,7 @@ public class DirectMappingAxiom {
 		
 		//DataType Atoms
 		TypeMapper typeMapper = TypeMapper.getInstance();
-		for(int i=0;i<table.countAttribute();i++){
+		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
 			Predicate type = typeMapper.getPredicate(att.getType());
 			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
@@ -189,7 +189,7 @@ public class DirectMappingAxiom {
 	
 		//To construct the head, there is no static field about this predicate
 		List<Term> headTerms = new ArrayList<Term>();
-		for(int i=0;i<table.countAttribute();i++){
+		for(int i=0;i<table.getNumOfAttributes();i++){
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
@@ -206,7 +206,7 @@ public class DirectMappingAxiom {
 
 		// Object Atoms
 		// Foreign key reference
-		for (int i = 0; i < table.countAttribute(); i++) {
+		for (int i = 0; i < table.getNumOfAttributes(); i++) {
 			if (table.getAttribute(i + 1).isForeignKey()) {
 				Attribute att = table.getAttribute(i + 1);
 				Reference ref = att.getReference();
@@ -289,7 +289,7 @@ public class DirectMappingAxiom {
 
 		} else {
 			List<Term> vars = new ArrayList<Term>();
-			for (int i = 0; i < td.countAttribute(); i++) {
+			for (int i = 0; i < td.getNumOfAttributes(); i++) {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
 

@@ -28,7 +28,7 @@ public interface TupleResultSet extends ResultSet{
 	 * ResultSet management functions
 	 */
 
-	public int getColumCount() throws OBDAException;
+	public int getColumnCount() throws OBDAException;
 
 	public List<String> getSignature() throws OBDAException;
 

@@ -41,7 +41,7 @@ import org.semanticweb.ontop.ontology.Property;
  * WARNING: THIS CLASS IS FOR TESTING ONLY 
  */
 
-
+@Deprecated
 public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 
 	private EquivalencesDAG<Property> propertyDAG;

@@ -36,8 +36,8 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 public class OptiqueIntegrationTest extends TestCase {
 
-	String owlfile = "src/test/resources/example/npd-ql.owl";
-	String mappingfile = "src/test/resources/example/npd-mapping.ttl";
+	String owlfile = "src/test/resources/example/npd-v2-ql_a.owl";
+	String mappingfile = "src/test/resources/example/npd-v2-ql_a.ttl";
 	String queryfile = "";
 
 	OWLOntology owlontology;
@@ -145,10 +145,11 @@ public class OptiqueIntegrationTest extends TestCase {
 		//read next query
 		String sparqlQuery = "SELECT ?x WHERE {?x a <http://sws.ifi.uio.no/vocab/npd-v2#Field>}" ; 
 		//read expected result
-		int expectedResult = 14366 ;
+		//int expectedResult = 14366 ;
+		int expectedResult = 101;
 		
 		int obtainedResult = runQuery(sparqlQuery);
-		
+		System.out.println(obtainedResult);
 		assertEquals(expectedResult, obtainedResult);
 
 	}

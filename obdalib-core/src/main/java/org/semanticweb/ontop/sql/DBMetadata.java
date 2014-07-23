@@ -37,11 +37,11 @@ import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.parser.SQLQueryTranslator;
+import org.semanticweb.ontop.parser.SQLQueryParser;
 import org.semanticweb.ontop.sql.api.Attribute;
-import org.semanticweb.ontop.sql.api.VisitedQuery;
+import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
 
-import net.sf.jsqlparser.JSQLParserException;
+
 /**
  * This class keeps the meta information from the database, also keeps the 
  * view definitions, table definitions, attributes of DB tables, etc.
@@ -400,7 +400,7 @@ public class DBMetadata implements Serializable {
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					List<Integer> pkeyIdx = new LinkedList<Integer>();
-					for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
+					for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
 						if (column.isPrimaryKey()) {
 							pkeyIdx.add(columnidx);
@@ -427,10 +427,11 @@ public class DBMetadata implements Serializable {
 	 */
 	public ViewDefinition createViewDefinition(String name, String sqlString) {
 
-		VisitedQuery visitedQuery = null;
+		ParsedSQLQuery visitedQuery = null;
 		List<String> columns = null;
-		SQLQueryTranslator translator = new SQLQueryTranslator();
-		visitedQuery = translator.constructParserNoView(sqlString);
+		SQLQueryParser translator = new SQLQueryParser();
+		//visitedQuery = translator.constructParserNoView(sqlString);
+		visitedQuery = translator.parseShallowly(sqlString);
 		
 		columns = visitedQuery.getColumns();
 

@@ -28,6 +28,7 @@ import java.util.List;
 /**
  * Represents a set of continues intervals
  */
+@Deprecated
 public class SemanticIndexRange implements Serializable {
 
     /**

@@ -138,13 +138,11 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
+		
 			dropTables();
 			reasoner.dispose();
 			connection.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 
 	}
 

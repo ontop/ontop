@@ -20,6 +20,11 @@ package org.semanticweb.ontop.protege4.core;
  * #L%
  */
 
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.sql.ImplicitDBConstraints;
+
+
 import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
@@ -50,4 +55,14 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 		factory.setOBDAController(model);
 	}
 
+	/**
+	 * Allows the user to supply database keys that are not in the database metadata
+	 * 
+	 * @param uc The user-supplied database constraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints uc) {
+		if(uc == null)
+			throw new NullPointerException();
+		factory.setImplicitDBConstraints(uc);
+	}
 }

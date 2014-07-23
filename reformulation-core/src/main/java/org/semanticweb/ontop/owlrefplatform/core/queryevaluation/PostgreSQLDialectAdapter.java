@@ -68,10 +68,10 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		//n is newline-sensitive matching
 		String flags = "";
 		if (multiLine)
-			flags = "(?w)"; //partial newline-sensitive matching
+			flags = "(?w)"; //inverse partial newline-sensitive matching
 		else
 		if(dotAllMode)
-			flags = "(?p)"; //inverse partial newline-sensitive matching
+			flags = "(?p)"; //partial newline-sensitive matching
 		
 		return columnname + " ~" + ((caseinSensitive)? "* " : " ") + "'"+ ((multiLine && dotAllMode)? "(?n)" : flags) + pattern + "'";
 	}

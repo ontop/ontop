@@ -28,6 +28,7 @@ import java.io.Serializable;
  *
  * @author Sergejs Pugacs
  */
+@Deprecated
 public class Interval implements Comparable<Interval>, Serializable {
 
     /**

@@ -277,7 +277,7 @@ public class QuestDBCMD {
 	}
 
 	private int printResultSet(TupleResultSet result) throws OBDAException {
-		int cols = result.getColumCount();
+		int cols = result.getColumnCount();
 		List<String> signature = result.getSignature();
 		for (int i = 0; i < signature.size(); i++) {
 			if (i > 0)

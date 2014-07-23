@@ -20,33 +20,12 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
+import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import org.semanticweb.ontop.sql.api.AggregationJSQL;
 import org.semanticweb.ontop.sql.api.TableJSQL;
-import org.semanticweb.ontop.sql.api.VisitedQuery;
 
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.SignedExpression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
 import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
 import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
@@ -363,7 +342,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 		
 		}
 		String columnName= tableColumn.getColumnName();
-		if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
+		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}
@@ -470,11 +449,22 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 		
 	}
 
-	@Override
+    @Override
+    public void visit(JsonExpression jsonExpr) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void visit(RegExpMySQLOperator regExpMySQLOperator) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
 	public void visit(SignedExpression arg0) {
 		// TODO Auto-generated method stub
 		
 	}
+
 
 	
 

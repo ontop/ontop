@@ -32,12 +32,13 @@ import javax.swing.JOptionPane;
 
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
-import org.semanticweb.ontop.sesame.r2rml.R2RMLWriter;
+import org.semanticweb.ontop.r2rml.R2RMLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ public class R2RMLExportAction extends ProtegeAction {
 
 	private OWLEditorKit editorKit = null;
 	private OBDAModel obdaModel = null;
+	private OWLModelManager modelManager= null;
 	
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
@@ -54,6 +56,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
 		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		modelManager = editorKit.getOWLModelManager();
 	}
 
 	@Override
@@ -73,7 +76,7 @@ public class R2RMLExportAction extends ProtegeAction {
           File file = fc.getSelectedFile();
           
     	  
-		R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID);
+		R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
 		writer.write(file);
 
 	}

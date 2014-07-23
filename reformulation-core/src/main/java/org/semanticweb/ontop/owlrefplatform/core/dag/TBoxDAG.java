@@ -30,6 +30,7 @@ import org.semanticweb.ontop.ontology.Description;
  * @author mariano
  * 
  */
+@Deprecated
 public interface TBoxDAG {
 
 	public Set<Set<Description>> getDirectChildren(Description desc);

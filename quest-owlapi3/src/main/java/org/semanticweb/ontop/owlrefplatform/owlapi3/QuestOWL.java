@@ -20,6 +20,31 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
+
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.ResultSet;
+import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.Axiom;
+import org.semanticweb.ontop.ontology.DisjointClassAxiom;
+import org.semanticweb.ontop.ontology.DisjointDescriptionAxiom;
+import org.semanticweb.ontop.ontology.DisjointPropertyAxiom;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.PropertyFunctionalAxiom;
+import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.ontop.utils.VersionInfo;
+import org.semanticweb.ontop.sql.ImplicitDBConstraints;
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -174,15 +199,27 @@ public class QuestOWL extends OWLReasonerBase {
 	private QuestOWLConnection owlconn = null;
 
 	private OWLOntologyManager man;
+	
+	
+	// //////////////////////////////////////////////////////////////////////////////////////
+	//
+	//  User Constraints are primary and foreign keys not in the database 
+	//  
+	//
+	// //////////////////////////////////////////////////////////////////////////////////////
+	
+	private ImplicitDBConstraints userConstraints = null;
+	
+	/* Used to signal whether to apply the user constraints above */
+	private boolean applyUserConstraints = false;
 
-	/***
-	 * Default constructor.
+	
+	/**
+	 * Initialization code which is called from both of the two constructors. 
+	 * @param obdaModel 
+	 * 
 	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
-
-		super(rootOntology, configuration, bufferingMode);
-
+	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
@@ -198,15 +235,40 @@ public class QuestOWL extends OWLReasonerBase {
 		extractVersion();
 		
 		prepareReasoner();
+	}
+	
+	/***
+	 * Default constructor.
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences) {
+		super(rootOntology, configuration, bufferingMode);
+		this.init(rootOntology, obdaModel, configuration, preferences);
 
 	}
 
-	/**
+	
+	 /** This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
+	 * supplied 
+	 * @param userConstraints User-supplied primary and foreign keys
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, ImplicitDBConstraints userConstraints) {
+		super(rootOntology, configuration, bufferingMode);
+		
+		this.userConstraints = userConstraints;
+		assert(userConstraints != null);
+		this.applyUserConstraints = true;
+		
+		this.init(rootOntology, obdaModel, configuration, preferences);
+	}
+	 
+	 /**
 	 * extract version from {@link org.semanticweb.ontop.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
 	private void extractVersion() {
-		VersionInfo versonInfo = VersionInfo.getVersionInfo();
-		String versionString = versonInfo.getVersion();
+		VersionInfo versionInfo = VersionInfo.getVersionInfo();
+		String versionString = versionInfo.getVersion();
 		String[] splits = versionString.split("\\.");
 		int major = 0;
 		int minor = 0;
@@ -217,7 +279,7 @@ public class QuestOWL extends OWLReasonerBase {
 			minor = Integer.parseInt(splits[1]);
 			patch = Integer.parseInt(splits[2]);
 			build = Integer.parseInt(splits[3]);
-		} catch (Exception ex) {
+		} catch (Exception ignored) {
 
 		}
 		version = new Version(major, minor, patch, build);
@@ -266,6 +328,8 @@ public class QuestOWL extends OWLReasonerBase {
 
 		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
+		if(this.applyUserConstraints)
+			questInstance.setImplicitDBConstraints(userConstraints);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
@@ -369,8 +433,8 @@ public class QuestOWL extends OWLReasonerBase {
 		try {
 
 			OWLOntologyManager man = ontology.getOWLOntologyManager();
-			Set<OWLOntology> clousure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = translator.mergeTranslateOntologies(clousure);
+			Set<OWLOntology> closure = man.getImportsClosure(ontology);
+			Ontology mergeOntology = translator.mergeTranslateOntologies(closure);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;
@@ -460,6 +524,7 @@ public class QuestOWL extends OWLReasonerBase {
 				errorMessage = e.getMessage();
 				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
 				log.error(e.getMessage(), e);
+				throw e;
 			}
 
 		} catch (Exception e) {

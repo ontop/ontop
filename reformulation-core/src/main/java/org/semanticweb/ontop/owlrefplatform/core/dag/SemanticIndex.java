@@ -19,7 +19,7 @@ package org.semanticweb.ontop.owlrefplatform.core.dag;
  * limitations under the License.
  * #L%
  */
-
+@Deprecated
 public interface SemanticIndex {
 
 	

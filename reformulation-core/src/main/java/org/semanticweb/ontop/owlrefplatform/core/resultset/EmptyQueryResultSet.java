@@ -77,7 +77,7 @@ public class EmptyQueryResultSet implements TupleResultSet {
 //	}
 
 	@Override
-	public int getColumCount() throws OBDAException {
+	public int getColumnCount() throws OBDAException {
 		return head.size();
 	}
 

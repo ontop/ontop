@@ -20,6 +20,7 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.sql.api.VisitedQuery;
+import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,10 +146,10 @@ public class ParserFileTest extends TestCase {
 	}
 
 	private static boolean parse(String input) {
-		VisitedQuery queryP; 
+		ParsedSQLQuery queryP;
 		
 		try {
-			queryP = new VisitedQuery(input,true);
+			queryP = new ParsedSQLQuery(input,true);
 		} catch (JSQLParserException e) {
 			log.debug(e.getMessage());
 			return false;

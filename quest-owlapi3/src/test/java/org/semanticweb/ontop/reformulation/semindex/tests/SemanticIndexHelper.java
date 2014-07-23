@@ -23,16 +23,11 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
 
 
 
-
-
-
-
-
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -68,7 +63,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Helper class to load ontologies and comapre computed values to expected results
+ * Helper class to load ontologies and compare computed values to expected results
  *
  * @author Sergejs Pugac
  */
@@ -216,10 +211,10 @@ public class SemanticIndexHelper {
         return rv;
     }
 
-    public List<String[]> get_abox(String resname) {
+    public List<String[]> get_abox(String resname) throws Exception {
         String resfile = owlloc + resname + ".abox";
         List<String[]> rv = new LinkedList<String[]>();
-        try {
+      
 
             FileInputStream fstream = new FileInputStream(resfile);
             DataInputStream in = new DataInputStream(fstream);
@@ -229,9 +224,7 @@ public class SemanticIndexHelper {
                 String[] tokens = strLine.split(" ");
                 rv.add(tokens);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       
         return rv;
     }
 

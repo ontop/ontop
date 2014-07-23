@@ -122,7 +122,7 @@ public class QuestOWLCMD {
 		 * Printing the header
 		 */
 
-		int columns = result.getColumCount();
+		int columns = result.getColumnCount();
 		for (int c = 0; c < columns; c++) {
 			String value = result.getSignature().get(c);
 			wr.append(value);

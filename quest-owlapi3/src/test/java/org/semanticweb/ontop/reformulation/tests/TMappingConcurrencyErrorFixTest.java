@@ -131,14 +131,12 @@ public class TMappingConcurrencyErrorFixTest{
 
 	@After
 	public void tearDown() throws Exception{
-		try {
+	
 			dropTables();
 			reasoner.dispose();
 			connection.close();
 			
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 		
 	}
 	
@@ -180,7 +178,9 @@ public class TMappingConcurrencyErrorFixTest{
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
+			
 			conn.close();
 			reasoner.dispose();
 		}

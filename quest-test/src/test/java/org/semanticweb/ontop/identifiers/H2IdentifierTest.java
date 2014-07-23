@@ -20,6 +20,7 @@ package org.semanticweb.ontop.identifiers;
  * #L%
  */
 
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -113,11 +114,10 @@ public class H2IdentifierTest extends TestCase {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 		} catch (Exception exc) {
-			try {
+			
 				tearDown();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
+				throw exc;
+			
 		}	
 		
 	}
@@ -157,6 +157,7 @@ public class H2IdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

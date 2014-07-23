@@ -108,7 +108,7 @@ public abstract class DataDefinition implements Serializable {
 		return -1;
 	}
 
-	public int countAttribute() {
+	public int getNumOfAttributes() {
 		return attributes.size();
 	}
 }
