@@ -210,7 +210,7 @@ public class QuestStatement implements OBDAStatement {
 				break;
 			}
 		}
-
+		
 		public boolean errorStatus() {
 			return error;
 		}

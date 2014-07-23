@@ -202,6 +202,16 @@ public class QuestOWL extends OWLReasonerBase {
 
 	}
 
+	/** 
+	 * @author Davide Lanti
+	 *	
+	 * Extracting the quest instance allows for multiple JDBC connections
+	 * --- by taking them out of the sesame repo	
+	 */
+	public Quest getQuestInstance(){
+		return questInstance;
+	}
+	
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
