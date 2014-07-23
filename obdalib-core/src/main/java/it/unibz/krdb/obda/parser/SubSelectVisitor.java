@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.api.SelectJSQL;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -100,7 +101,7 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
-	private ArrayList<SelectJSQL> subSelects;
+	private List<SelectJSQL> subSelects;
 
 
 	/**
@@ -110,7 +111,7 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * @param unquote 
 	 * @return
 	 */
-	public ArrayList<SelectJSQL> getSubSelectList(Select select, boolean unquote) {
+	public List<SelectJSQL> getSubSelects(Select select, boolean unquote) {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {

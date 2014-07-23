@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.sql.api.VisitedQuery;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -146,10 +146,10 @@ public class ParserFileTest extends TestCase {
 	}
 
 	private static boolean parse(String input) {
-		VisitedQuery queryP; 
+		ParsedSQLQuery queryP;
 		
 		try {
-			queryP = new VisitedQuery(input,true);
+			queryP = new ParsedSQLQuery(input,true);
 		} catch (JSQLParserException e) {
 			log.debug(e.getMessage());
 			return false;

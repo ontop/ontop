@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import net.sf.jsqlparser.schema.Table;
 
@@ -144,7 +145,7 @@ public class ImplicitDBConstraints {
 	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
 	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
 	 */
-	public boolean tableIsInList(ArrayList<RelationJSQL> tables, String tableGivenName){
+	public boolean tableIsInList(List<RelationJSQL> tables, String tableGivenName){
 		for(RelationJSQL table : tables){
 			if(table.getGivenName().equals(tableGivenName))
 				return true;
@@ -158,7 +159,7 @@ public class ImplicitDBConstraints {
 	 * @param tables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public ArrayList<RelationJSQL> addReferredTables(ArrayList<RelationJSQL> tables){
+	public List<RelationJSQL> addReferredTables(List<RelationJSQL> tables){
 		for(String tableGivenName : this.referredTables){
 			if(!tableIsInList(tables, tableGivenName)){
 				String[] tablenames = tableGivenName.split("\\.");

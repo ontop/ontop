@@ -69,7 +69,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
 import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
@@ -741,12 +741,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 							
 					try{
-						ArrayList<RelationJSQL> realTables = mParser.getRealTables();
+						List<RelationJSQL> realTables = mParser.getRealTables();
 						
 						if(this.applyUserConstraints){
 							// Add the tables referred to by user-supplied foreign keys
 							this.userConstraints.addReferredTables(realTables);
 						}
+
 						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
 					}catch (JSQLParserException e){
 						System.out.println("Error obtaining the tables"+ e);
@@ -833,7 +834,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			
 			
-			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+			Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 //			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
@@ -971,7 +972,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
 		//MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()));
-		MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 

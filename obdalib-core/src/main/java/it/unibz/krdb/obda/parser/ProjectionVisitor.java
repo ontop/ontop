@@ -23,9 +23,9 @@ package it.unibz.krdb.obda.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -490,7 +490,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Column tableColumn) {
 		String columnName= tableColumn.getColumnName();
-		if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
+		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 				
 		Table table= tableColumn.getTable();
