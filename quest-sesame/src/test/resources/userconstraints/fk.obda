@@ -1,0 +1,27 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:h2:mem:countries
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	relatedTo
+target		:Class1-{T1C1} :relatedTo :Class2-{T2C1} . 
+source		select "T1C1", "T2C1" FROM "TABLE1", "TABLE2" WHERE "T1C2" = "T2C2"
+
+mappingId	hasVal1
+target		:Class1-{T1C1} :hasVal1 {T1C3} . 
+source		select "T1C1", "T1C3" FROM "TABLE1"
+
+
+mappingId	hasVal2
+target		:Class2-{T2C1} :hasVal2 {T2C3} . 
+source		select "T2C1", "T2C3" FROM "TABLE2"
+
+
+]]
+

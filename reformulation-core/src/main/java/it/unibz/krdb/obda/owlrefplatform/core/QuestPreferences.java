@@ -20,8 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -67,6 +69,8 @@ public class QuestPreferences extends Properties {
 	public static final String DBPASSWORD = "DBPASSWORD";
 	
 	public static final String JDBC_DRIVER = "JDBC_DRIVER";
+	
+	public static final String PRINT_KEYS = "PRINT_KEYS";
 
 	// Tomcat connection pool properties
 	public static final String MAX_POOL_SIZE = "max_pool_size";
