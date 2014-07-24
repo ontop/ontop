@@ -20,16 +20,15 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
+
+
+
 import java.util.HashMap;
 
 /** 
  * Class to create an Alias Map for the select statement
  */
-
-
-
-
-import org.semanticweb.ontop.sql.api.VisitedQuery;
+import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -45,6 +44,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.JsonExpression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
@@ -78,6 +78,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
@@ -162,7 +163,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
-			if(unquote && VisitedQuery.pQuotes.matcher(alias).matches()){
+			if(unquote && ParsedSQLQuery.pQuotes.matcher(alias).matches()){
 				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
 			}
 			else
@@ -465,6 +466,18 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(SignedExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

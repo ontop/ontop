@@ -35,6 +35,7 @@ import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 /**
  * @author Sergejs Pugacs
  */
+@Deprecated
 public class DAGNode implements Serializable {
 
 	/**

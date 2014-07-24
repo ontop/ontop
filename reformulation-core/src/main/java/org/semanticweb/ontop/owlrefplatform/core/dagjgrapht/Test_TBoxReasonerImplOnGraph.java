@@ -44,7 +44,7 @@ import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
  * 
  * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
-
+@Deprecated
 public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 
 	private DefaultDirectedGraph<Property,DefaultEdge> propertyGraph;

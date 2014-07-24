@@ -37,6 +37,7 @@ import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
  * Helper class to dump isa relationships into .dot format for processing them
  * into png
  */
+@Deprecated
 public class GraphGenerator {
 
 	static String isaClsFile = "isaClasses";

@@ -99,8 +99,9 @@ public class QuestOWLExample {
 				"		 ?z a :Edition; :editionNumber ?edition }";
 
 		try {
+            long t1 = System.currentTimeMillis();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			int columnSize = rs.getColumCount();
+			int columnSize = rs.getColumnCount();
 			while (rs.nextRow()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
 					OWLObject binding = rs.getOWLObject(idx);
@@ -109,6 +110,7 @@ public class QuestOWLExample {
 				System.out.print("\n");
 			}
 			rs.close();
+            long t2 = System.currentTimeMillis();
 
 			/*
 			 * Print the query summary
@@ -125,6 +127,10 @@ public class QuestOWLExample {
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
 			System.out.println(sqlQuery);
+
+            System.out.println("Query Execution Time:");
+            System.out.println("=====================");
+            System.out.println((t2-t1) + "ms");
 			
 		} finally {
 			

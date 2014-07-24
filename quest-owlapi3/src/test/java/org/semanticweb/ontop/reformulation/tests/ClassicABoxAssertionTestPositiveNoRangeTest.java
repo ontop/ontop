@@ -81,7 +81,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 		QuestOWLResultSet res = st.executeTuple(query);
 		int count = 0;
-		int columns = res.getColumCount();
+		int columns = res.getColumnCount();
 		while (res.nextRow()) {
 			for (int i = 0; i < columns; i++) {
 				OWLObject o = res.getOWLObject(i+1);

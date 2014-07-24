@@ -20,9 +20,9 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
  * #L%
  */
 
-import org.junit.Ignore;
-import org.semanticweb.ontop.reformulation.tests.SigmaTest;
 import junit.framework.TestSuite;
+
+import org.junit.Ignore;
 
 
 @Ignore("check whether we still need it or not")
@@ -33,7 +33,7 @@ public class SemanticIndexTestSuite {
         TestSuite suite = new TestSuite();
 
         suite.addTestSuite(DAGTest.class);
-        suite.addTestSuite(SigmaTest.class);
+        //suite.addTestSuite(SigmaTest.class);
         suite.addTestSuite(DAGChainTest.class);
         suite.addTestSuite(SemanticReductionTest.class);
 

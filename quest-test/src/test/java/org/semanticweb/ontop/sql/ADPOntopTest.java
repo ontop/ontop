@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.sql;
 
+
 import java.io.File;
 import java.io.FileReader;
 
@@ -83,7 +84,7 @@ public class ADPOntopTest {
 		
 		try {
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			int columnSize = rs.getColumCount();
+			int columnSize = rs.getColumnCount();
 			while (rs.nextRow()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
 					OWLObject binding = rs.getOWLObject(idx);

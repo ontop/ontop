@@ -89,15 +89,15 @@ public class DBMetadataUtil {
 						positionMatch.put(pos1, pos2);
 					}
 					// Construct CQIE
-					Predicate p1 = fac.getPredicate(table1, def.countAttribute());
-					Predicate p2 = fac.getPredicate(table2, def2.countAttribute());
+					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());
+					Predicate p2 = fac.getPredicate(table2, def2.getNumOfAttributes());
 					
 					List<Term> terms1 = new ArrayList<Term>();
-					for (int i=0; i<def.countAttribute(); i++) {
+					for (int i=0; i<def.getNumOfAttributes(); i++) {
 						 terms1.add(fac.getVariable("t"+(i+1)));
 					}
 					List<Term> terms2 = new ArrayList<Term>();
-					for (int i=0; i<def2.countAttribute(); i++) {
+					for (int i=0; i<def2.getNumOfAttributes(); i++) {
 						 terms2.add(fac.getVariable("p"+(i+1)));
 					}
 					// Do the swapping

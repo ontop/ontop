@@ -382,7 +382,11 @@ public class QuestStatement implements OBDAStatement {
 			} else if (SPARQLQueryUtility.isURIDescribe(strquery)) {
 				// DESCRIBE <uri> gives direct results, so we put the
 				// <uri> constant directly in the list of constants
-				constants.add(SPARQLQueryUtility.getDescribeURI(strquery));
+				try {
+					constants.add(SPARQLQueryUtility.getDescribeURI(strquery));
+				} catch (MalformedQueryException e) {
+					e.printStackTrace();
+				}
 			}
 
 			QuestGraphResultSet describeResultSet = null;
@@ -483,12 +487,9 @@ public class QuestStatement implements OBDAStatement {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-			try {
+		
 				throw e;
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);

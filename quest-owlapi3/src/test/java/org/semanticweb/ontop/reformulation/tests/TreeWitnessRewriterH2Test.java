@@ -181,12 +181,10 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {

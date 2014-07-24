@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -226,12 +227,12 @@ public class JDBCConnectionManager {
 	 *            The database id.
 	 * @return The database meta data object.
 	 */
-	public DBMetadata getMetaData(OBDADataSource sourceId, ArrayList<RelationJSQL> tables) throws SQLException {
+	public DBMetadata getMetaData(OBDADataSource sourceId, List<RelationJSQL> tables) throws SQLException {
 		Connection conn = getConnection(sourceId);
 		return getMetaData(conn, tables);
 	}
 	
-	public static DBMetadata getMetaData(Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
+	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
 		if (tables == null || tables.isEmpty())
 			return getMetaData(conn);
 		DBMetadata metadata = null;
@@ -318,7 +319,7 @@ public class JDBCConnectionManager {
 	 * @param tables 
 	 * @param lowerCaseId: Decides whether casing of unquoted object identifiers should be changed
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables, int caseIds) throws SQLException {
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables, int caseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		
@@ -604,7 +605,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * @param tables 
 	 */
-	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
+	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;

@@ -157,7 +157,7 @@ public class LeftJoinTest1Virtual{
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
-			for (int i = 1; i <= rs.getColumCount(); i++) {
+			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				String varName = rs.getSignature().get(i-1);
 				System.out.print(varName);
 				//System.out.print("=" + rs.getOWLObject(i));

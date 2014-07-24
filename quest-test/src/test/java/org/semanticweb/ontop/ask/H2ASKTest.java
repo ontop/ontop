@@ -140,6 +140,7 @@ public class H2ASKTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

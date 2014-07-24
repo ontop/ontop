@@ -71,7 +71,7 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.H2;
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			driver = Driver.DB2;
-		} else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
+		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
 			driver = Driver.ORACLE;
 		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
 			driver = Driver.TEIID;
@@ -258,9 +258,31 @@ public class JDBCUtility implements Serializable {
 
 
 	/**
+	 * Each database handle differently dummy tables
 	 * @return
 	 */
 	public String getDummyTable() {
-		return "(SELECT 1)";
+		String sql = null;
+	
+		switch (driver) {
+		case MYSQL:
+		case H2:
+		case PGSQL:
+			sql= "SELECT 1";
+			break;
+		case DB2:
+			sql= "SELECT 1 from sysibm.sysdummy1";
+			break;
+		case ORACLE:
+			sql= "SELECT 1 from dual";
+			break;
+		case SQLSERVER:
+			sql= "SELECT 1 as \"example\"";
+			break;
+		default:
+			sql= "SELECT 1";
+			break;
+		}
+		return sql;
 	}
 }

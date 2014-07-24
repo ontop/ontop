@@ -21,6 +21,38 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
  */
 
 
+import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
+import org.semanticweb.ontop.model.BNode;
+import org.semanticweb.ontop.model.BooleanOperationPredicate;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.DataTypePredicate;
+import org.semanticweb.ontop.model.DatalogProgram;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.NumericalOperationPredicate;
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.URIConstant;
+import org.semanticweb.ontop.model.URITemplatePredicate;
+import org.semanticweb.ontop.model.ValueConstant;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
+import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
+import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.sql.DataDefinition;
+import org.semanticweb.ontop.sql.TableDefinition;
+import org.semanticweb.ontop.sql.ViewDefinition;
+import org.semanticweb.ontop.sql.api.Attribute;
+
 import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
@@ -120,6 +152,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final SQLDialectAdapter sqladapter;
 	private final String QUEST_TYPE = "QuestType";
 
+
+    private boolean generatingREPLACE = true;
+
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
@@ -156,8 +191,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.sqladapter = sqladapter;
 	}
 
-	@Override
-	public void setUriIds(Map<String, Integer> uriid) {
+    public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
+        this(metadata, jdbcutil, sqladapter);
+        this.generatingREPLACE = sqlGenerateReplace;
+    }
+
+    @Override
+	public void setUriIds (Map<String,Integer> uriid){
 		this.isSI = true;
 		this.uriRefIds = uriid;
 	}
@@ -367,7 +407,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (queryStringIterator.hasNext()) {
 			result.append("\n");
 			result.append(UNION);
-			result.append("\n\n");
+			result.append("\n");
 			result.append(queryStringIterator.next());
 		}
 		return result;
@@ -768,7 +808,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * If process boolean operators is enabled, all boolean conditions will be
 	 * added to the ON clause of the first JOIN.
 	 * 
-	 * @param atoms
+	 * @param inneratoms
 	 * @param index
 	 * @param isTopLevel
 	 *            indicates if the list of atoms is actually the main body of
@@ -1151,6 +1191,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (distinct) {
 			sb.append("DISTINCT ");
 		}
+		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
 			return sb.toString();
@@ -1507,19 +1548,40 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			Predicate pred = ov.getFunctionSymbol();
 
-			// @formatter.off
-			String replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE("
-					+ "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
-			String replace2 = ",' ', '%20')," + "'!', '%21')," + "'@', '%40'),"
-					+ "'#', '%23')," + "'$', '%24')," + "'&', '%26'),"
-					+ "'*', '%42'), " + "'(', '%28'), " + "')', '%29'), "
-					+ "'[', '%5B'), " + "']', '%5D'), " + "',', '%2C'), "
-					+ "';', '%3B'), " + "':', '%3A'), " + "'?', '%3F'), "
-					+ "'=', '%3D'), " + "'+', '%2B'), " + "'''', '%22'), "
-					+ "'/', '%2F')";
-			// @formatter.on
 
-			String template = trim(literalValue);
+
+			String replace1;
+            String replace2;
+            if(generatingREPLACE) {
+
+                replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
+
+                replace2 = ",' ', '%20')," +
+                        "'!', '%21')," +
+                        "'@', '%40')," +
+                        "'#', '%23')," +
+                        "'$', '%24')," +
+                        "'&', '%26')," +
+                        "'*', '%42'), " +
+                        "'(', '%28'), " +
+                        "')', '%29'), " +
+                        "'[', '%5B'), " +
+                        "']', '%5D'), " +
+                        "',', '%2C'), " +
+                        "';', '%3B'), " +
+                        "':', '%3A'), " +
+                        "'?', '%3F'), " +
+                        "'=', '%3D'), " +
+                        "'+', '%2B'), " +
+                        "'''', '%22'), " +
+                        "'/', '%2F')";
+            } else {
+                replace1 = replace2 = "";
+            }
+
+            String template = trim(literalValue);
+
 			String[] split = template.split("[{][}]");
 
 			List<String> vex = new LinkedList<String>();
@@ -1806,8 +1868,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return result;
 				}
 			} else {
-				throw new RuntimeException(
-						"Cannot translate boolean function: " + functionSymbol);
+
+				if (functionSymbol == OBDAVocabulary.SPARQL_REGEX) {
+					boolean caseinSensitive = false;
+					boolean multiLine = false;
+					boolean dotAllMode = false;
+					if (function.getArity() == 3) {
+						if (function.getTerm(2).toString().contains("i")) {
+							caseinSensitive = true;
+						}
+						if (function.getTerm(2).toString().contains("m")) {
+							multiLine = true;
+						}
+						if (function.getTerm(2).toString().contains("s")) {
+							dotAllMode = true;
+						}
+					}
+					Term p1 = function.getTerm(0);
+					Term p2 = function.getTerm(1);
+					
+					String column = getSQLString(p1, index, false);
+					String pattern = getSQLString(p2, index, false);
+					return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+				}
+				else
+					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
@@ -1946,9 +2031,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_TRUE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
 			operator = LIKE_OPERATOR;
-		} else {
-			throw new RuntimeException("Unknown boolean operator: "
-					+ functionSymbol);
+		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
+			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
+		} 
+		else {
+			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
 		return operator;
 	}
@@ -1968,7 +2055,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return operator;
 	}
 
-	/**
+    public boolean isGeneratingREPLACE() {
+        return generatingREPLACE;
+    }
+
+    public void setGeneratingREPLACE(boolean generatingREPLACE) {
+        this.generatingREPLACE = generatingREPLACE;
+    }
+
+    /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
 	 * the existing view definitons of a query.

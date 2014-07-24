@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sergejs Pugac
  */
+@Deprecated
 public class DAGOperations {
 	private static final Logger	log	= LoggerFactory.getLogger(DAGOperations.class);
 

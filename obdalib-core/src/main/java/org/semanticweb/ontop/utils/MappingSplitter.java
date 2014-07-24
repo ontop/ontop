@@ -49,6 +49,19 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
  */
 public class MappingSplitter {
 
+	/**
+	 * This class split the mappings
+	 * 
+	 *  <pre> q1, q2, ... qn <- SQL </pre>
+	 *  
+	 *   into n mappings
+	 *   
+	 *  <pre> q1 <-SQL , ..., qn <- SQL </pre>
+	 * 
+	 * 
+	 * @author xiao
+	 *
+	 */
 	public MappingSplitter() {
 
 	}

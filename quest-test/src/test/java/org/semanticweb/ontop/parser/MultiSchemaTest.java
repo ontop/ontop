@@ -20,6 +20,7 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
+
 import java.io.File;
 
 import junit.framework.TestCase;
@@ -136,6 +137,7 @@ public class MultiSchemaTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

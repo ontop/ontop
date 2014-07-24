@@ -90,7 +90,7 @@ public class QuestResultset implements TupleResultSet {
 
 	}
 
-	public int getColumCount() throws OBDAException {
+	public int getColumnCount() throws OBDAException {
 		return signature.size();
 	}
 

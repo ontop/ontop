@@ -22,6 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.dag;
 
 import java.io.Serializable;
 
+@Deprecated
 public class Edge implements Serializable  {
     /**
 	 * 

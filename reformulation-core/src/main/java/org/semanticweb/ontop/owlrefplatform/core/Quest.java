@@ -41,11 +41,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.sf.jsqlparser.JSQLParserException;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-
 import org.openrdf.query.parser.ParsedQuery;
-
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DatalogProgram;
@@ -96,15 +96,15 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRep
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
-import org.semanticweb.ontop.utils.MappingAnalyzer;
+import org.semanticweb.ontop.sql.TableDefinition;
+import org.semanticweb.ontop.sql.api.Attribute;
+import org.semanticweb.ontop.sql.api.RelationJSQL;
+import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 import org.semanticweb.ontop.utils.MappingParser;
 import org.semanticweb.ontop.utils.MappingSplitter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
-
-
-import org.hsqldb.util.DatabaseManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,6 +130,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected boolean logAbandoned = false;
 	protected int abandonedTimeout = 60; // 60 seconds
 	protected boolean keepAlive = true;
+	
+	// Whether to print primary and foreign keys to stdout.
+	private boolean printKeys;
 
 	/***
 	 * Internal components
@@ -196,6 +199,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 
 	final HashSet<String> templateStrings = new HashSet<String>();
+	
+	/**
+	 * This represents user-supplied constraints, i.e. primary
+	 * and foreign keys not present in the database metadata
+	 */
+	private ImplicitDBConstraints userConstraints = null;
+	
+	/*
+	 * Whether to apply the user-supplied database constraints given above
+	 * userConstraints must be initialized and non-null whenever this is true
+	 */
+	private boolean applyUserConstraints;
 
 	/***
 	 * General flags and fields
@@ -220,6 +235,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean bObtainFromMappings = true;
 	
 	private boolean obtainFullMetadata = false;
+
+    private boolean sqlGenerateReplace = true;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -262,7 +279,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private Map<Predicate, List<Integer>> pkeys;
 
-	/***
+
+    /***
 	 * Will prepare an instance of Quest in "classic ABox mode", that is, to
 	 * work as a triple store. The property
 	 * "org.obda.owlreformulationplatform.aboxmode" must be set to "classic".
@@ -326,6 +344,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		this.metadata = metadata;
 	}
 
+	/**
+	 * Supply user constraints: that is primary and foreign keys not in the database
+	 * Can be useful for eliminating self-joins
+	 *
+	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
+	 * 						May be used by ontop to eliminate self-joins
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+		assert(userConstraints != null);
+		this.userConstraints = userConstraints;
+		this.applyUserConstraints = true;
+	}
+	
 	protected Map<String, String> getSQLCache() {
 		return querycache;
 	}
@@ -440,7 +471,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		aboxSchemaType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 		
-		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));
+		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
+		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
+
+        sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -707,7 +741,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-
+			
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -717,15 +751,62 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				} else {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
+					
+					// Parse mappings. Just to get the table names in use
 					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
-					metadata = JDBCConnectionManager.getMetaData(localConnection, mParser.getRealTables());
-					// This call should be used if the ParsedMappings 
-					// are reused for the parsing below
-					mParser.addViewDefs(metadata);
+							
+					try{
+						List<RelationJSQL> realTables = mParser.getRealTables();
+						
+						if(this.applyUserConstraints){
+							// Add the tables referred to by user-supplied foreign keys
+							this.userConstraints.addReferredTables(realTables);
+						}
+
+						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
+					}catch (JSQLParserException e){
+						System.out.println("Error obtaining the tables"+ e);
+					}catch( SQLException e ){
+						System.out.println("Error obtaining the Metadata"+ e);
+					
+					}
+					
 				}
 			}
 			
-		
+			//Adds keys from the text file
+			if(this.applyUserConstraints){
+				this.userConstraints.addConstraints(metadata);
+			}
+			
+			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
+			// Very useful for debugging of User Constraints (also for the end user)
+			if(printKeys){
+				// Prints all primary keys
+				System.out.println("\n====== Primary keys ==========");
+				List<TableDefinition> table_list = metadata.getTableList();
+				for(TableDefinition dd : table_list){
+					System.out.print("\n" + dd.getName() + ":");
+					for(Attribute attr : dd.getPrimaryKeys() ){
+						System.out.print(attr.getName() + ",");
+					}
+				}
+				// Prints all foreign keys
+				System.out.println("\n====== Foreign keys ==========");
+				for(TableDefinition dd : table_list){
+					System.out.print("\n" + dd.getName() + ":");
+					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
+					for(String fkName : fkeys.keySet() ){
+							System.out.print("(" + fkName + ":");
+							for(Attribute attr : fkeys.get(fkName)){
+								System.out.print(attr.getName() + ",");
+							}
+							System.out.print("),");
+					}
+				}		
+			}
+				
+
 			SQLDialectAdapter sqladapter = SQLAdapterFactory
 					.getSQLDialectAdapter(datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
@@ -734,7 +815,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
-					sqladapter);
+					sqladapter, sqlGenerateReplace);
+
+
+
 			if (isSemanticIdx) {
 				datasourceQueryGenerator.setUriIds(uriRefIds);
 			}
@@ -765,7 +849,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			
 			
-			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+			Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 //			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
@@ -919,7 +1003,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
 		//MappingParser mParser = new MappingParser(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()));
-		MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 

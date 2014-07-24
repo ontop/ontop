@@ -116,6 +116,7 @@ public class PostgresLowercaseIdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

@@ -20,6 +20,7 @@ package org.semanticweb.ontop.unfold;
  * #L%
  */
 
+
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
@@ -31,6 +32,7 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -147,6 +149,7 @@ public class LeftJoinTest2Virtual extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
@@ -158,7 +161,7 @@ public class LeftJoinTest2Virtual extends TestCase {
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
-			for (int i = 1; i <= rs.getColumCount(); i++) {
+			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				String varName = rs.getSignature().get(i-1);
 				System.out.print(varName);
 				//System.out.print("=" + rs.getOWLObject(i));

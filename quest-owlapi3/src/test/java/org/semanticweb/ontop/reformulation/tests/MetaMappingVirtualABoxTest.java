@@ -119,12 +119,10 @@ public class MetaMappingVirtualABoxTest{
 
 	@After
 	public void tearDown() throws Exception {
-		try {
+		
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -189,6 +187,7 @@ public class MetaMappingVirtualABoxTest{
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
 			conn.close();
 			reasoner.dispose();

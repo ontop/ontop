@@ -26,6 +26,7 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -52,37 +53,13 @@
 		</dependency>
 			
 			
-			<!-- Optique R2RML API -->
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api</artifactId>
-		</dependency>
-	
-		<dependency>
-			<groupId>org.optique-project</groupId>
-			<artifactId>r2rml-api-sesame-bridge</artifactId>
-		</dependency>
-	
-	
 	</dependencies>
-	<repositories>
-		<repository>
-			<id>bolzano-nexus-public</id>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+	
 		
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>

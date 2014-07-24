@@ -99,13 +99,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
-			// conn.close();
+//			 conn.close();
 			jdbcconn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -116,8 +113,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 		jdbcconn.commit();
 	}
 
-	public void testDataWithModel() {
-		try {
+	public void testDataWithModel() throws Exception {
+	
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
 			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager man = new ModelIOManager(model);
@@ -140,13 +137,11 @@ public class QuestOWLMaterializerTest extends TestCase {
 			Assert.assertEquals(3, classAss); //3 data rows for T1
 			Assert.assertEquals(21, propAss); //7 tables * 3 data rows each T2-T8
 			Assert.assertEquals(3, objAss); //3 data rows for T9
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 	
-	public void testDataWithModelAndOnto() {
-		try {
+	public void testDataWithModelAndOnto() throws Exception {
+
 			// read model
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
 			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
@@ -178,8 +173,6 @@ public class QuestOWLMaterializerTest extends TestCase {
 			Assert.assertEquals(6, classAss); //3 data rows x2 for subclass prop
 			Assert.assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass
 			Assert.assertEquals(3, objAss); //3 since no subprop for obj prop
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 }

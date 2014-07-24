@@ -41,7 +41,7 @@ import org.semanticweb.ontop.ontology.impl.SubClassAxiomImpl;
 
 
 
-
+@Deprecated
 public class DAGConstructor {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();

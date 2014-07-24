@@ -64,7 +64,7 @@ public class OWLConstructDescribeTest extends TestCase{
 	
 	@Override
 	public void setUp() throws Exception {
-		try {
+		
 			// Loading the OWL file
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
@@ -102,12 +102,8 @@ public class OWLConstructDescribeTest extends TestCase{
 			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			throw e;
-		}
+		
+
 	}
 	
 	@Override

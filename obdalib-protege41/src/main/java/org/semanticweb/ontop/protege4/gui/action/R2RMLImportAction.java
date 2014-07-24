@@ -35,7 +35,7 @@ import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
-import org.semanticweb.ontop.sesame.r2rml.R2RMLReader;
+import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,13 +87,11 @@ public class R2RMLImportAction extends ProtegeAction {
 
 				try {
 					for (OBDAMappingAxiom mapping : reader.readMappings()) {
-						if (mapping.getTargetQuery().toString().contains("BNODE"))
+						if (mapping.getTargetQuery().toString().contains("BNODE")){
 							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains BNode. -ontoPro- does not support it yet.");
-						else if (mapping.getTargetQuery().toString().contains("triple"))
-						{
-							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains a URI as predicate. -ontoPro- plugin does not support that yet. Please use the -ontop- API.");
-						} else
+						} else{
 							obdaModel.addMapping(sourceID, mapping);
+						}
 					}
 				} catch (DuplicateMappingException dm) {
 					JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: "+dm.getLocalizedMessage());

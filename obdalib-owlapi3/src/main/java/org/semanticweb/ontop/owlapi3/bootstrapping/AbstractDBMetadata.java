@@ -39,22 +39,19 @@ public abstract class AbstractDBMetadata
 	private OBDAModel model;
 	private OBDADataSource source;
 	
-	protected DBMetadata getMetadata() 
+	protected DBMetadata getMetadata() throws Exception 
 	{
 		DBMetadata metadata = null;
-		try {
-			Class.forName(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-		}
-		catch (ClassNotFoundException e) { /* NO-OP */ }
 
-		try {
+			Class.forName(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+
+
+		
 			Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
 					source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
 			metadata = JDBCConnectionManager.getMetaData(conn);
 		
-		} catch (SQLException e) { 
-			e.printStackTrace();
-		}
+
 		return metadata;
 	}
 	

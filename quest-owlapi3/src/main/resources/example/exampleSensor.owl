@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY quest "http://obda.org/quest#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.example.org/Pattern#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:uce="http://www.example.org/UseCaseExample1#"
+     xmlns:op= "http://www.example.org/Pattern#"
+	 xmlns:uc= "http://www.example.org/UseCase#">
+    <owl:Ontology rdf:about="http://www.example.org/Pattern#"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+    
+    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#hasAss">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Sensor"/>
+        <rdfs:range rdf:resource="http://www.example.org/Pattern#Assembly"/>
+    </owl:ObjectProperty>    
+    
+    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#partOf">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Sensor"/>
+        <rdfs:range rdf:resource="http://www.example.org/Pattern#Assembly"/>
+    </owl:ObjectProperty> 
+    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#removeDueToSensor">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Sensor"/>
+        <rdfs:range rdf:resource="http://www.example.org/Pattern#Component"/>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#hasEvent">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Assembly"/>
+        <rdfs:range rdf:resource="http://www.example.org/Pattern#Event"/>
+    </owl:ObjectProperty>    
+    
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/Pattern#hasVal">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Sensor"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>    
+    
+    <owl:DatatypeProperty rdf:about="http://www.example.org/Pattern#hasID">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Sensor"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#hasEvent">
+        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Assembly"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:ObjectProperty>  
+    
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    <!-- http://www.example.org/Pattern#Sensor -->
+
+    <owl:Class rdf:about="http://www.example.org/Pattern#Sensor">     
+    </owl:Class>
+    
+
+    
+    <!-- http://www.example.org/Pattern#Critical -->
+
+    <owl:Class rdf:about="http://www.example.org/Pattern#Critical">     
+    <rdfs:subClassOf rdf:resource="http://www.example.org/Pattern#Sensor"/>
+    </owl:Class>
+    
+    <!-- http://www.example.org/Pattern#Component -->
+
+    <owl:Class rdf:about="http://www.example.org/Pattern#Component">     
+    </owl:Class>
+    
+    <!-- http://www.example.org/Pattern#Critical -->
+
+    <owl:Class rdf:about="http://www.example.org/Pattern#Assembly">     
+    <rdfs:subClassOf rdf:resource="http://www.example.org/Pattern#Component"/>
+    </owl:Class>
+    
+    <!-- http://www.example.org/Pattern#TempSensor -->
+
+    <owl:Class rdf:about="http://www.example.org/Pattern#TempSensor">     
+    <rdfs:subClassOf rdf:resource="http://www.example.org/Pattern#Sensor"/>
+    </owl:Class>
+    
+</rdf:RDF>
+
