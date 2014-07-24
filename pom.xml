@@ -86,7 +86,7 @@
 		
 	</modules>
 
-    <!--
+
 	<profiles>
 		<profile>
 			<id>release-sign-artifacts</id>
@@ -115,7 +115,6 @@
 			</build>
 		</profile>
 	</profiles>
-    -->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

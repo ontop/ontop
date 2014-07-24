@@ -1,7 +1,7 @@
 /**
  * 
  */
-package it.unibz.krdb.sql;
+package org.semanticweb.ontop.sql;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
