@@ -1,0 +1,46 @@
+
+<http://www.optique-project.eu/resource/logicalTable40696019875974607080405125743109> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
+	<http://www.w3.org/ns/r2rml#tableName> "public.message" .
+
+<http://www.optique-project.eu/resource/objectMap00455224289804201727031979291575> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
+	<http://www.w3.org/ns/r2rml#column> "state" ;
+	<http://www.w3.org/ns/r2rml#datatype> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.optique-project.eu/resource/objectMap32469516317480364749675803386955> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
+	<http://www.w3.org/ns/r2rml#column> "tag" ;
+	<http://www.w3.org/ns/r2rml#datatype> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://www.optique-project.eu/resource/objectMap78442274697714841324467796331382> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
+	<http://www.w3.org/ns/r2rml#column> "eventtext" ;
+	<http://www.w3.org/ns/r2rml#datatype> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://www.optique-project.eu/resource/predicateMap16036514858807194937998145552083> a <http://www.w3.org/ns/r2rml#PredicateMap> ;
+	<http://www.w3.org/ns/r2rml#constant> <http://www.siemens.com/optique/demo#hasEventtext> .
+
+<http://www.optique-project.eu/resource/predicateMap73002755217023732366991772807905> a <http://www.w3.org/ns/r2rml#PredicateMap> ;
+	<http://www.w3.org/ns/r2rml#constant> <http://www.siemens.com/optique/demo#hasState> .
+
+<http://www.optique-project.eu/resource/predicateMap95903255940798049717073235543779> a <http://www.w3.org/ns/r2rml#PredicateMap> ;
+	<http://www.w3.org/ns/r2rml#constant> <http://www.siemens.com/optique/demo#hasTag> .
+
+<http://www.optique-project.eu/resource/predicateObjectMap15583260476284603304535562951893> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/objectMap78442274697714841324467796331382> ;
+	<http://www.w3.org/ns/r2rml#predicateMap> <http://www.optique-project.eu/resource/predicateMap16036514858807194937998145552083> .
+
+<http://www.optique-project.eu/resource/predicateObjectMap81950861644163639269255042086365> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/objectMap32469516317480364749675803386955> ;
+	<http://www.w3.org/ns/r2rml#predicateMap> <http://www.optique-project.eu/resource/predicateMap95903255940798049717073235543779> .
+
+<http://www.optique-project.eu/resource/predicateObjectMap98550975689104692153770449056760> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/objectMap00455224289804201727031979291575> ;
+	<http://www.w3.org/ns/r2rml#predicateMap> <http://www.optique-project.eu/resource/predicateMap73002755217023732366991772807905> .
+
+<http://www.optique-project.eu/resource/subjectMap86822482778598502348355913865447> a <http://www.w3.org/ns/r2rml#SubjectMap> ;
+	<http://www.w3.org/ns/r2rml#class> <http://www.siemens.com/optique/demo#Message> ;
+	<http://www.w3.org/ns/r2rml#template> "http://www.optique-project.eu/resource/{rowid}" .
+
+<http://www.optique-project.eu/resource/triplesMap41571722036007161900817104780781> a <http://www.w3.org/ns/r2rml#TriplesMap> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "event" ;
+	<http://www.w3.org/ns/r2rml#logicalTable> <http://www.optique-project.eu/resource/logicalTable40696019875974607080405125743109> ;
+	<http://www.w3.org/ns/r2rml#predicateObjectMap> <http://www.optique-project.eu/resource/predicateObjectMap15583260476284603304535562951893> , <http://www.optique-project.eu/resource/predicateObjectMap81950861644163639269255042086365> , <http://www.optique-project.eu/resource/predicateObjectMap98550975689104692153770449056760> ;
+	<http://www.w3.org/ns/r2rml#subjectMap> <http://www.optique-project.eu/resource/subjectMap86822482778598502348355913865447> .
