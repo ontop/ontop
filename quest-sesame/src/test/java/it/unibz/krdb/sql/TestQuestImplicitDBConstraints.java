@@ -154,7 +154,7 @@ public class TestQuestImplicitDBConstraints {
 		
 		
 		String sql = st.getUnfolding(query);
-		boolean m = sql.matches("(?ms)(.*)TABLE1(.*),(.*)TABLE1(.*)");
+		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertTrue(m);
 		
 		
@@ -173,7 +173,7 @@ public class TestQuestImplicitDBConstraints {
 		
 		
 		String sql = st.getUnfolding(query);
-		boolean m = sql.matches("(?ms)(.*)TABLE2(.*),(.*)TABLE2(.*)");
+		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
 		
@@ -196,7 +196,7 @@ public class TestQuestImplicitDBConstraints {
 		
 		
 		String sql = st.getUnfolding(query);
-		boolean m = sql.matches("(?ms)(.*)TABLE1(.*),(.*)TABLE1(.*)");
+		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertFalse(m);
 		
 		
@@ -218,7 +218,7 @@ public class TestQuestImplicitDBConstraints {
 		
 		
 		String sql = st.getUnfolding(query);
-		boolean m = sql.matches("(?ms)(.*)TABLE2(.*),(.*)TABLE2(.*)");
+		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
 		
@@ -244,7 +244,7 @@ public class TestQuestImplicitDBConstraints {
 		
 		String sql = st.getUnfolding(query);
 		System.out.println(sql);
-		boolean m = sql.matches("(?ms)(.*)TABLE2(.*),(.*)TABLE2(.*)");
+		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
 		
@@ -272,7 +272,7 @@ public class TestQuestImplicitDBConstraints {
 		
 		String sql = st.getUnfolding(query);
 		System.out.println(sql);
-		boolean m = sql.matches("(?ms)(.*)TABLE2(.*),(.*)TABLE2(.*)");
+		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
 		
 		
