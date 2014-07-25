@@ -135,7 +135,7 @@ public class TMappingProcessor implements Serializable {
 	 * conditions of m.
 	 * 
 	 * </p>
-	 * If no such m is found, then this method simply adds newmmapping to
+	 * If no such m is found, then this method simply adds newmapping to
 	 * currentMappings.
 	 * 
 	 * 
@@ -300,7 +300,7 @@ public class TMappingProcessor implements Serializable {
 	/***
 	 * Given a set of mappings in {@link originalMappings}, this method will
 	 * return a new set of mappings in which no constants appear in the body of
-	 * database predicates. This is done by replacing the constant occurence
+	 * database predicates. This is done by replacing the constant occurrence
 	 * with a fresh variable, and adding a new equality condition to the body of
 	 * the mapping.
 	 * <p/>

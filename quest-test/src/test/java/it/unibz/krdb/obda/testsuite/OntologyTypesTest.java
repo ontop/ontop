@@ -54,8 +54,8 @@ public class OntologyTypesTest{
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/ontologyType/dataPropertiesOntologyTypes.owl";
-	final String obdafile = "src/test/resources/ontologyType/dataPropertiesontologyType.obda";
+	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyTypes.owl";
+	final String obdaFile = "src/test/resources/ontologyType/dataPropertiesontologyType.obda";
 
 	@Before
 	public void setUp() throws Exception {
@@ -64,13 +64,13 @@ public class OntologyTypesTest{
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
 		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+		ioManager.load(obdaFile);
 		
 	}
 

@@ -661,7 +661,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				if (sources.size() > 1)
 					throw new Exception(
 							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
-									+ sources.size() + " data sources. Please remove the aditional sources.");
+									+ sources.size() + " data sources. Please remove the additional sources.");
 
 				/* Setting up the OBDA model */
 
@@ -792,7 +792,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 				 */
 				ABoxToFactRuleConverter.addFacts(inputTBox.getABox().iterator(), unfoldingProgram, equivalenceMaps);
-				
+
+                //TODO check datatype in ontology for the predicate used in mappings
 
 				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
 
