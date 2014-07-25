@@ -8,11 +8,7 @@
     </encoder>
   </appender>
 
-<<<<<<< HEAD
   <root level="ERROR">
-=======
-  <root level="debug">
->>>>>>> develop
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
