@@ -64,7 +64,8 @@ public class AggregatesTestWP5 extends TestCase {
 
 	private OBDADataFactory fac;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	//Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	private OBDAModel obdaModel;
 	private OWLOntology owlontology;
 	Model mappings;
@@ -73,7 +74,7 @@ public class AggregatesTestWP5 extends TestCase {
 
 	
 	final String owlfile = "src/test/resources/wp5/optique-demo.rdf";
-	final String mappingfile = "src/test/resources/wp5/mapping.ttl";
+	final String mappingfile = "src/test/resources/wp5/mapping-wp5.ttl";
 
 	
 	
@@ -160,7 +161,7 @@ public class AggregatesTestWP5 extends TestCase {
 		//	dropTables();
 			con.close();
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			System.out.println(e.getMessage());
 		}
 	}
 
@@ -179,7 +180,7 @@ public class AggregatesTestWP5 extends TestCase {
 		try {
 			executeQueryAssertResults(query,  expectedvalue);
 		} catch (Exception e) {
-			assertFalse(false);
+			assertFalse(true);
 			throw e;
 		} finally {
 			con.close();
@@ -246,13 +247,29 @@ public class AggregatesTestWP5 extends TestCase {
 	}
 	
 
-	public void testAggrCount2() throws Exception {
+	public void testAggrCount1() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		String query = "select ?x (count(?state) as ?c) where { ?x <http://www.siemens.com/optique/demo#hasState> ?state.} GROUP BY ?x ";
+		String query = "select ?x (count(?state) as ?c) where { ?x <http://www.siemens.com/optique/demo#hasState> ?state.} GROUP BY ?x LIMIT 1 ";
+
+		runTests(p,query,1);
+
+	}
+	
+	public void testMap() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "select *  WHERE { ?measurement a <http://www.siemens.com/optique/demo#Measurement>; " + 
+									"<http://www.siemens.com/optique/demo#measuredBy> <http://www.optique-project.eu/resource/sensor/57>; " +
+									"   <http://www.siemens.com/optique/demo#hasTS> ?ts;" +
+									"   <http://www.siemens.com/optique/demo#hasValue> ?value. " +     
+									"   FILTER(?ts > \"2009-01-05T00:00:00.000\"^^xsd:dateTime && ?ts < \"2009-01-07T15:00:00.000\"^^xsd:dateTime)}  ";
 
 		runTests(p,query,1);
 
