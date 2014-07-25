@@ -239,7 +239,7 @@ public class AggregatesTest extends TestCase {
 		}		
 		assertEquals(expectedRows, count);
 	}
-/*
+
 	public void testAggrCount() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -250,7 +250,7 @@ public class AggregatesTest extends TestCase {
 
 		runTests(p,query,1);
 	}
-*/
+
 
 	public void testAggrCount2() throws Exception {
 
@@ -264,9 +264,44 @@ public class AggregatesTest extends TestCase {
 
 	}
 	
+	public void testAggrCount3() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x";
+
+		runTests(p,query,4);
+
+	}
+
+	public void testAggrCount4() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?y) AS ?count) WHERE { ?x :belongsToCompany ?y } GROUP BY ?x";
+		//String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?y WHERE { ?x :belongsToCompany ?y } ";
+
+		runTests(p,query,10);
+
+	}
+	
+	public void testAggrCount5() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?x) AS ?count) WHERE {?x a :Transaction. }";
+
+		runTests(p,query,1);
+	}
 	
 	/*
-	public void testAggrCount3() throws Exception {
+	public void testAggrCount5() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -281,7 +316,7 @@ public class AggregatesTest extends TestCase {
 
 	}
 	
-
+*/
 	
 	
 	public void testAggrAVG() throws Exception {
@@ -331,7 +366,7 @@ public class AggregatesTest extends TestCase {
 		runTests(p,query,1);
 
 	}
-	*/
+	
 	
 
 	
