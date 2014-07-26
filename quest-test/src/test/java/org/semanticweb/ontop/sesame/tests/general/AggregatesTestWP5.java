@@ -150,7 +150,7 @@ public class AggregatesTestWP5 extends TestCase {
 
 	} catch (Exception e) {
 		e.printStackTrace();
-		assertFalse(false);
+		assertFalse(true);
 	}
 		
 	}
@@ -165,17 +165,27 @@ public class AggregatesTestWP5 extends TestCase {
 		}
 	}
 
+	public void executeQueryAssertResults(String query,  int expectedRows) throws Exception {
+		try {
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,	query);
+			TupleQueryResult result = tupleQuery.evaluate();
+
+			while (result.hasNext()) {
+				for (Binding binding : result.next()) {
+					System.out.print(binding.getValue() + ", ");
+				}
+				System.out.println();
+			}
+			result.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			assertFalse(true);
+		}
+	}
+
 	
 	
-	
-	
-	
-	//TODO: Groupby using more than 1 variable
-	//TODO: Add tests for the rest of the aggregates!!
-	//TODO: Add value test.... check if the answer is correct, not just rows
-	
-	
-	//test queries
 	private void runTests(QuestPreferences p, String query, int expectedvalue) throws Exception {
 		try {
 			executeQueryAssertResults(query,  expectedvalue);
@@ -204,49 +214,15 @@ public class AggregatesTestWP5 extends TestCase {
 	
 	
 	
+
+
+	/*
+	 * 	test queries
+	 */
+
 	
-	public void executeQueryAssertResults(String query,  int expectedRows) throws Exception {
-		
-		
-		int resultCount = 0;
-		try {
-			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
-					query);
-			TupleQueryResult result = tupleQuery.evaluate();
-
-			while (result.hasNext()) {
-	            for (Binding binding : result.next()) {
-	                System.out.print(binding.getValue() + ", ");
-	            }
-	            System.out.println();
-	        }
-			
-//			while (result.hasNext()) {
-//				
-//				
-//				System.out.print(result.getBindingNames().get(0));
-//				
-//				//System.out.print("=" + result.  getOWLObject(resultCount+1));
-//				System.out.print(" ");
-//				
-//				//result.next().getValue();
-//				resultCount++;
-//				System.out.println();
-//			}
-			
-			result.close();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertFalse(true);
-		}
-		
-		
-
-		//assertEquals(expectedRows, count);
-	}
 	
-
+	
 	public void testAggrCount1() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -276,6 +252,26 @@ public class AggregatesTestWP5 extends TestCase {
 	}
 	
 	
+	
+   public void testAggrCount4() throws Exception {
+	   QuestPreferences p = new QuestPreferences();
+	   p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+	   p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+
+	   String query = "select ?ts ( COUNT (?et) AS ?c)  WHERE {\n" +
+			   "?message a <http://www.siemens.com/optique/demo#Message>;\n" +
+			   "   <http://www.siemens.com/optique/demo#hasTS> ?ts;\n" +
+			   "   <http://www.siemens.com/optique/demo#hasEventtext> ?et.\n" +
+			   "   FILTER(?ts > \"2009-01-01T00:00:00Z\"^^xsd:dateTime && ?ts < \"2009-01-07T23:59:59Z\"^^xsd:dateTime)\n" +
+			   "}\n" +
+			   "GROUP BY ?ts\n" +
+			   "LIMIT 20";
+
+	   runTests(p,query,1);
+
+   }	
+
+
 
 	
 }

@@ -721,15 +721,26 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			}
 			
 			List<Predicate> touchedPredicates = new LinkedList<Predicate>();
+			boolean noRewriting = false ;
+			Predicate ans1 = termFactory.getClassPredicate("ans1");
+
 			while (!predicatesMightGotEmpty.isEmpty()){
 				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates);
+				
+				//if I deleted ans1 I dont return anything later
+				if (predicatesMightGotEmpty.contains(ans1)){
+					noRewriting = true;
+					break;
+				}
 			}
 
-			// I add to the working list all the rules touched by the unfolder!
-			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
-			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
-			//System.out.println(workingList);
-
+			if (!noRewriting){
+				// I add to the working list all the rules touched by the unfolder!
+				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
+				addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
+			}
+			
+			
 		}
 
 		/**

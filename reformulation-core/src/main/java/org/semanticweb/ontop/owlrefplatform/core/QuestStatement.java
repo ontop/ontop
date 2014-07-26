@@ -533,7 +533,7 @@ public class QuestStatement implements OBDAStatement {
 			//TODO: can we avoid using this intermediate variable???
 			unfolding.removeAllRules();
 			unfolding.appendRule(newTypedRules);
-		} else{
+		} else if (!unfolding.getRules().isEmpty()){
 			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
 			//System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
 			log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
