@@ -721,15 +721,26 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			}
 			
 			List<Predicate> touchedPredicates = new LinkedList<Predicate>();
+			boolean noRewriting = false ;
+			Predicate ans1 = termFactory.getClassPredicate("ans1");
+
 			while (!predicatesMightGotEmpty.isEmpty()){
 				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates);
+				
+				//if I deleted ans1 I dont return anything later
+				if (predicatesMightGotEmpty.contains(ans1)){
+					noRewriting = true;
+					break;
+				}
 			}
 
-			// I add to the working list all the rules touched by the unfolder!
-			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
-			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
-			//System.out.println(workingList);
-
+			if (!noRewriting){
+				// I add to the working list all the rules touched by the unfolder!
+				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
+				addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
+			}
+			
+			
 		}
 
 		/**
@@ -2218,9 +2229,17 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 				//The rules USING pred
 				Collection<CQIE> rulesUsingPred = ruleIndexByBody.get(buPredicate);
-
+				
 				//The rules DEFINING pred
 				List<CQIE> rulesDefiningPred = (List<CQIE>) ruleIndex.get(buPredicate);
+				
+				//dont push if there are aggregates!
+				if (detectAggregatesHead(rulesDefiningPred)){
+					continue;
+				}
+				
+	
+				
 				
 				//cloning to avoid clashes
 				fatherCollection.clear();
@@ -2379,14 +2398,22 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
-			int arity = ((Function) t).getArity();
+			
+		
+			
+			//int arity = ((Function) t).getArity();
 			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
 			boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-			if (isURI && arity >1){
+			if (isURI && functionArguments.size() >1){
 				//I need to remove the URI part and add the rest, usually the variables
 				functionArguments.remove(0);
 			}
 			untypedArguments.addAll(functionArguments);
+			
+			
+			
+			
+			
 		}else if (t instanceof Function && isProblemTemplate){ // if it is a problematic term we leave it as it is
 			untypedArguments.add(t);
 		}else if(t instanceof Variable){
