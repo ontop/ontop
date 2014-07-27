@@ -1325,15 +1325,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * If the we have a column we need to still CAST to VARCHAR
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
-			if (!isStringColType(ht, index)) {
-				//TODO: See if this breaks something important
-				// We remove the cast, because it doesn't work in case of aggregates
-				// and maybe has lower performance
-				
-				
-				//mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
+			int sqlType = getSQLTypeForTerm(ht,index );
+			
+			if(sqlType != Types.NULL){
+				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);	
 			}
+
+			
 		}
+		
+		
 		String format = String.format(mainTemplate, mainColumn,
 				sqladapter.sqlQuote(varName));
 
@@ -1676,6 +1677,125 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return toReturn;
 	}
 
+	/**
+	 * Returns the sql type of a term in the head of a datalog rule, such as decimal, string...
+	 * 
+	 * @param term
+	 * @param index
+	 * @return java.sql.Types.
+	 */
+	private int getSQLTypeForTerm(Term term, QueryAliasIndex index){
+		
+		if (term instanceof Function) {
+			Function function = (Function) term;
+			Predicate functionSymbol = function.getFunctionSymbol();
+			if (functionSymbol instanceof URITemplatePredicate) {
+				/*
+				 * A URI function always returns a string, thus it is a string
+				 * column type.
+				 */
+				if (isSI)
+					return java.sql.Types.INTEGER;
+				return java.sql.Types.VARCHAR;
+			} else {
+				if (isUnary(function)) {
+					
+					String functionName = functionSymbol.getName();
+					boolean isAnAggregate = (functionName.equals(OBDAVocabulary.SPARQL_AVG_URI))||
+							(functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+							(functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+							(functionName.equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+							(functionName.equals(OBDAVocabulary.SPARQL_MIN_URI));
+					
+					if (isAnAggregate) {
+						return java.sql.Types.DOUBLE;
+					}
+					
+					
+					int type;
+					switch (functionName) {
+					case OBDAVocabulary.XSD_DOUBLE_URI:
+						type = java.sql.Types.DOUBLE;
+						break;
+					case OBDAVocabulary.XSD_DECIMAL_URI:
+						type = java.sql.Types.DECIMAL;
+						break;
+
+					case OBDAVocabulary.XSD_INT_URI:
+						type = java.sql.Types.INTEGER;
+						break;
+					case OBDAVocabulary.XSD_INTEGER_URI:
+						type = java.sql.Types.INTEGER;
+						break;
+
+					case OBDAVocabulary.XSD_BOOLEAN_URI:
+						type = java.sql.Types.BOOLEAN;
+						break;
+					case OBDAVocabulary.XSD_DATETIME_URI:
+						type = java.sql.Types.DATE;
+						break;
+					case OBDAVocabulary.XSD_STRING_URI:
+					case OBDAVocabulary.RDFS_LITERAL_URI:	
+					default:
+						type = java.sql.Types.VARCHAR;
+						break;
+					}
+					
+					return type;
+					
+					/*
+					 * Update the term with the parent term's first parameter.
+					 * Note: this method is confusing :(
+					 */
+					//term = function.getTerm(0);
+					//return isStringColType(term, index);
+				}
+			}
+		} else if (term instanceof Variable) {
+			Collection<String> viewdef = index
+					.getColumnReferences((Variable) term);
+			String def = viewdef.iterator().next();
+			String col = trim(def.split("\\.")[1]);
+			String table = def.split("\\.")[0];
+			if (def.startsWith("QVIEW")) {
+				Map<Function, String> views = index.viewNames;
+				for (Function func : views.keySet()) {
+					String value = views.get(func);
+					if (value.equals(def.split("\\.")[0])) {
+						table = func.getFunctionSymbol().toString();
+						break;
+					}
+				}
+			}
+			List<TableDefinition> tables = metadata.getTableList();
+			for (TableDefinition tabledef : tables) {
+				if (tabledef.getName().equals(table)) {
+					List<Attribute> attr = tabledef.getAttributes();
+					for (Attribute a : attr) {
+						if (a.getName().equals(col)) {
+							switch (a.getType()) {
+							case Types.VARCHAR:
+							case Types.CHAR:
+							case Types.LONGNVARCHAR:
+							case Types.LONGVARCHAR:
+							case Types.NVARCHAR:
+							case Types.NCHAR:
+								return a.getType();
+							default:
+								return a.getType();
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		
+		return  Types.VARCHAR;
+		
+		
+	}
+	
 	private boolean isStringColType(Term term, QueryAliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;

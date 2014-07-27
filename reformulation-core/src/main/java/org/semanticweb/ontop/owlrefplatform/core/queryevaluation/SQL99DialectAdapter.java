@@ -143,11 +143,92 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
-		if (type == Types.VARCHAR) {
+		
+		switch (type) {
+		case Types.VARCHAR:
 			strType = "CHAR";
-		} else {
+			break;
+		case Types.BIT:
+			strType = "BIT";			break;
+		case Types.TINYINT:
+			strType = "TINYINT";			break;
+		case Types.SMALLINT:
+			strType = "SMALLINT";			break;
+		case Types.INTEGER:
+			strType = "INTEGER";			break;
+		case Types.BIGINT:
+			strType = "BIGINT";			break;
+		case Types.FLOAT:
+			strType = "FLOAT";			break;
+		case Types.REAL:
+			strType = "REAL";			break;
+		case Types.DOUBLE:
+			strType = "DOUBLE";			break;
+		case Types.NUMERIC:
+			strType = "NUMERIC";			break;
+		case Types.DECIMAL:
+			strType = "DECIMAL";			break;
+		case Types.CHAR:
+			strType = "CHAR";			break;
+		case Types.LONGVARCHAR:
+			strType = "LONGVARCHAR";			break;
+		case Types.DATE:
+			strType = "DATE";			break;
+		case Types.TIME:
+			strType = "TIME";			break;
+		case Types.TIMESTAMP:
+			strType = "TIMESTAMP";			break;
+		case Types.BINARY:
+			strType = "BINARY";			break;
+		case Types.VARBINARY:
+			strType = "VARBINARY";			break;
+		case Types.LONGVARBINARY:
+			strType = "LONGVARBINARY";			break;
+		case Types.NULL:
+			strType = "NULL";			break;
+		case Types.OTHER:
+			strType = "OTHER";			break;
+		case Types.JAVA_OBJECT:
+			strType = "JAVA_OBJECT";			break;
+		case Types.DISTINCT:
+			strType = "DISTINCT";			break;
+		case Types.STRUCT:
+			strType = "STRUCT";			break;
+		case Types.ARRAY:
+			strType = "ARRAY";			break;
+		case Types.BLOB:
+			strType = "BLOB";			break;
+		case Types.CLOB:
+			strType = "CLOB";			break;
+		case Types.REF:
+			strType = "REF";			break;
+		case Types.DATALINK:
+			strType = "DATALINK";			break;
+		case Types.BOOLEAN:
+			strType = "BOOLEAN";			break;
+		case Types.ROWID:
+			strType = "ROWID";			break;
+		case Types.NCHAR:
+			strType = "NCHAR";			break;
+		case Types.NVARCHAR:
+			strType = "NVARCHAR";			break;
+		case Types.LONGNVARCHAR:
+			strType = "LONGNVARCHAR";			break;
+		case Types.NCLOB:
+			strType = "NCLOB";			break;
+		case Types.SQLXML:
+			strType = "SQLXML";			break;
+
+
+		default:
 			throw new RuntimeException("Unsupported SQL type");
+
 		}
+
+
+
+
+
 		return "CAST(" + value + " AS " + strType + ")";
 	}
 
