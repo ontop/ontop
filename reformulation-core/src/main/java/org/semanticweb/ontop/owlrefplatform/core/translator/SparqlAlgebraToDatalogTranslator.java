@@ -597,13 +597,30 @@ public class SparqlAlgebraToDatalogTranslator {
 				projectedVariables.size());
 		Function head = ofac.getFunction(predicate, projectedVariables);
 
-		Predicate pbody = ofac.getPredicate("ans" + (i + 1), projectedVariables.size());
-		;
-
+		
+		Set<Variable> bodyatomVarsSet = new HashSet<Variable>();
 		List<Term> bodyatomVarsList = new LinkedList<Term>();
-		bodyatomVarsList.addAll(projectedVariables);
+		Predicate pbody =null;
+		
+		
+		/*
+		 * We need to check this. It is a bit hacky. Does the BIND work??
+		 * TODO: Does the BIND work??
+		 */
+		if (te instanceof Extension)
+		{
+			pbody = ofac.getPredicate("ans" + (i + 1), projectedVariables.size());
+			bodyatomVarsList = new LinkedList<Term>();
+			bodyatomVarsList.addAll(projectedVariables);
+		}else{
+			bodyatomVarsSet = getVariables(te);
+			pbody = ofac.getPredicate("ans" + (i + 1), bodyatomVarsSet.size());
+			bodyatomVarsList = new LinkedList<Term>();
+			bodyatomVarsList.addAll(bodyatomVarsSet);
+		}
+		
 		Collections.sort(bodyatomVarsList, comparator);
-
+		
 		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
 		CQIE cq = ofac.getCQIE(head, bodyAtom);
 		pr.appendRule(cq);
