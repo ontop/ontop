@@ -1406,12 +1406,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			}
 		} else if (expr instanceof Avg) {
 			
-			Function function = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
-			builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			builtInFunction  = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
 			
 		} else if (expr instanceof Sum) {
-			Function function =  ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
-			builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			builtInFunction  =  ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
 			
 		} else if (expr instanceof Min) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MIN, getBooleanTerm( expr.getArg()));
