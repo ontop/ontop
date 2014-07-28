@@ -67,7 +67,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		case Types.REAL:
 			strType = "REAL";			break;
 		case Types.DOUBLE:
-			strType = "DECIMAL";			break;
+			strType = "double precision";			break;
 		case Types.NUMERIC:
 			strType = "NUMERIC";			break;
 		case Types.DECIMAL:

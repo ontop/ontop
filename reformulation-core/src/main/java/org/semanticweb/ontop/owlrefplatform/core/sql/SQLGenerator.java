@@ -1708,7 +1708,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 							(functionName.equals(OBDAVocabulary.SPARQL_MIN_URI));
 					
 					if (isAnAggregate) {
-						return java.sql.Types.DOUBLE;
+						return java.sql.Types.DECIMAL;
 					}
 					
 					

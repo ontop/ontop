@@ -1405,13 +1405,22 @@ public class SparqlAlgebraToDatalogTranslator {
 				builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateInteger(),function);
 			}
 		} else if (expr instanceof Avg) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
+			
+			Function function = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
+			builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} else if (expr instanceof Sum) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
+			Function function =  ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
+			builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} else if (expr instanceof Min) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MIN, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} else if (expr instanceof Max) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MAX, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} 
 		else {
 			throw new RuntimeException("The builtin function "
