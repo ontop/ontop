@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
-public class UnfoldingIMDBTest {
+public class UnfoldingIMDbTest {
 	private OBDADataFactory fac;
 	private Connection conn;
 
@@ -33,8 +33,8 @@ public class UnfoldingIMDBTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/ontologyIMDB.owl";
-	final String obdafile = "src/test/resources/ontologyIMDB.obda";
+	final String owlFile = "src/test/resources/ontologyIMDb.owl";
+	final String obdaFile = "src/test/resources/ontologyIMDbSimplify.obda";
 
 	@Before
 	public void setUp() throws Exception {
@@ -43,13 +43,13 @@ public class UnfoldingIMDBTest {
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
 		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+		ioManager.load(obdaFile);
 		
 	}
 

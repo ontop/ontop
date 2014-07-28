@@ -227,6 +227,11 @@ public class TMappingProcessor implements Serializable {
 				Function existingconditions = mergeConditions(strippedExistingConditions);
 				Term newconditionsTerm = fac.getFunction(newconditions.getPredicate(), newconditions.getTerms());
 				Term existingconditionsTerm = fac.getFunction(existingconditions.getPredicate(), existingconditions.getTerms());
+
+                //we do not add a new mapping if the condition are the same
+                if(existingconditions.equals(newconditions)){
+                    continue;
+                }
 				Function orAtom = fac.getFunctionOR(existingconditionsTerm, newconditionsTerm);
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
@@ -545,9 +550,9 @@ public class TMappingProcessor implements Serializable {
 		return currentMappings;
 	}
 
-	
-	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {	
-		
+
+	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {
+
 		CQIE newmapping = fac.getCQIE(head, body);				
 		if (optimize)
 			mergeMappingsWithCQC(mappings, newmapping);
