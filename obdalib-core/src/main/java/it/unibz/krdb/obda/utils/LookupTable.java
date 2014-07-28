@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.utils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,20 +38,22 @@ public class LookupTable {
 	private static final String DEFAULT_NAME_FORMAT = "t%s"; // e.g., t1, t2,
 	
 	/**
-	 * Map of entries that have an alternative name.
+	 * Map of variable names to the corresponding numbers
 	 */
-	private HashMap<String, Integer> log = new HashMap<String, Integer>();
+	private Map<String, Integer> var2NumMap = new HashMap<>();
 
 	/**
-	 * Map of alternative names.
+     * Map of numbers to their canonical variable names
+     *
+     * @see #add(String, int)
 	 */
-	private HashMap<Integer, String> master = new HashMap<Integer, String>();
+	private Map<Integer, String> num2CanonicalVarMap = new HashMap<>();
 
 	/**
 	 * Set with all unsafe names, names with multiple columns (not qualified)
 	 * use for throwing exception.
 	 */
-	private HashSet<String> unsafeEntries = new HashSet<String>();
+	private Set<String> unsafeEntries = new HashSet<>();
 	
 	public LookupTable() {
 		// NO-OP
@@ -195,7 +198,7 @@ public class LookupTable {
 		final String printFormat = "%s --> %s";
 
 		String str = "";
-		for (String entry : log.keySet()) {
+		for (String entry : var2NumMap.keySet()) {
 			String name = lookup(entry);
 			str += String.format(printFormat, entry, name);
 			str += "\n";
@@ -209,7 +212,7 @@ public class LookupTable {
 	 */
 	private boolean exist(String entry) {
 		final String sourceEntry = entry.toLowerCase();
-		return (log.containsKey(trim(sourceEntry)) || log.containsKey(sourceEntry));
+		return (var2NumMap.containsKey(trim(sourceEntry)) || var2NumMap.containsKey(sourceEntry));
 	}
 
 	private String trim(String string) {
@@ -230,16 +233,16 @@ public class LookupTable {
 		 * looking for repeated entries, if they exists they are unsafe
 		 * (generally unqualified names) and they are marked as unsafe.
 		 */
-		boolean isExist = log.containsKey(insertedEntry);
+		boolean isExist = var2NumMap.containsKey(insertedEntry);
 		
 		if (!ambiguous(insertedEntry)) {
 			if (!isExist) {
-				log.put(insertedEntry, index);
+				var2NumMap.put(insertedEntry, index);
 			} else {
 				if (!identical(insertedEntry, index)) {
 					// Add the entry to unsafe entries list if the new entry is ambiguous.
 					unsafeEntries.add(insertedEntry);
-					log.remove(insertedEntry);
+					var2NumMap.remove(insertedEntry);
 				}
 			}
 		}
@@ -255,15 +258,15 @@ public class LookupTable {
 		 * looking for repeated entries, if they exists they are unsafe
 		 * (generally unqualified names) and they are marked as unsafe.
 		 */
-		boolean isExist = log.containsKey(insertedEntry);
+		boolean isExist = var2NumMap.containsKey(insertedEntry);
 		
 		if (!isExist) {
-			log.put(insertedEntry, index);
+			var2NumMap.put(insertedEntry, index);
 		} else {
 			if (!identical(insertedEntry, index)) {
 				// Add the entry to unsafe entries list if the new entry is ambiguous.
 				unsafeEntries.add(insertedEntry);
-				log.remove(insertedEntry);
+				var2NumMap.remove(insertedEntry);
 			}
 		}
 	}
@@ -276,7 +279,7 @@ public class LookupTable {
 	 * Checks if the already existed entry is actually identical entry by checking also its index.
 	 */
 	private boolean identical(String insertedEntry, Integer index) {
-		return (index == log.get(insertedEntry)) ? true : false;
+		return (index == var2NumMap.get(insertedEntry)) ? true : false;
 	}
 
 	/*
@@ -284,7 +287,7 @@ public class LookupTable {
 	 * be written in lower case.
 	 */
 	private Integer getEntry(String entry) {
-		return log.get(trim(entry.toLowerCase()));
+		return var2NumMap.get(trim(entry.toLowerCase()));
 	}
 
 	/*
@@ -293,30 +296,30 @@ public class LookupTable {
 	 */
 	private void removeEntry(String entry) {
 		final String sourceEntry = entry.toLowerCase();
-		log.remove(sourceEntry);
+		var2NumMap.remove(sourceEntry);
 	}
 
 	/*
 	 * Retrieves the alternative name given the index number
 	 */
 	private String retrieve(int index) {
-		return master.get(index);
+		return num2CanonicalVarMap.get(index);
 	}
 
 	/*
 	 * Changes the alternative in the given index number
 	 */
 	private void update(int index, String value) {
-		master.put(index, value);
+		num2CanonicalVarMap.put(index, value);
 	}
 
 	/*
 	 * Assigns the newly added entry to an alternative name.
 	 */
 	private void register(int index) {
-		if (!master.containsKey(index)) {
+		if (!num2CanonicalVarMap.containsKey(index)) {
 			String name = String.format(DEFAULT_NAME_FORMAT, index);
-			master.put(index, name);
+			num2CanonicalVarMap.put(index, name);
 		}
 	}
 
@@ -326,9 +329,9 @@ public class LookupTable {
 	 */
 	private void unregister() {
 		Set<Integer> set = new HashSet<Integer>();
-		Collections.addAll(set, log.values().toArray(new Integer[0]));
+		Collections.addAll(set, var2NumMap.values().toArray(new Integer[0]));
 		Integer[] logIndex = set.toArray(new Integer[0]);
-		Integer[] masterIndex = master.keySet().toArray(new Integer[0]);
+		Integer[] masterIndex = num2CanonicalVarMap.keySet().toArray(new Integer[0]);
 
 		for (int i = 0; i < masterIndex.length; i++) {
 			boolean bExist = false;
@@ -339,7 +342,7 @@ public class LookupTable {
 				}
 			}
 			if (!bExist) {
-				master.remove(masterIndex[i]);
+				num2CanonicalVarMap.remove(masterIndex[i]);
 			}
 		}
 	}

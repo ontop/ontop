@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
-public class MappingAnalyzerTest extends TestCase {
+public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
@@ -78,7 +78,7 @@ public class MappingAnalyzerTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, md);
+		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappingList, md);
 		DatalogProgram dp = analyzer.constructDatalogProgram();
 		
 		assertNotNull(dp);
@@ -216,5 +216,15 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name regexp 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
+
+    public void testAnalysis_22() throws Exception{
+        runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)",
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
+    public void testAnalysis_23() throws Exception{
+        runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'",
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
 
 }
