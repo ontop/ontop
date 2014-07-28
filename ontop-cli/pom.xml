@@ -11,5 +11,11 @@
 
     <artifactId>ontop-cli</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+    </dependencies>
 </project>
