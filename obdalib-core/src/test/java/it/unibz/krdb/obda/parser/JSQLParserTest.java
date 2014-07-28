@@ -20,9 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.VisitedQuery;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
-import net.sf.jsqlparser.JSQLParserException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -686,18 +685,60 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 	}
 
+	/* Regex in MySQL, Oracle and Postgres*/
+
+	public void testRegexMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP '^b'");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexBinaryMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
+		printJSQL("testRegexBinaryMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexPostgres(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name ~ 'foo'");
+		printJSQL("testRegexPostgres", result);
+		assertTrue(result);
+	}
+	
+	//no support for similar to in postgres
+	public void testRegexPostgresSimilarTo(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
+		printJSQL("testRegexPostgresSimilarTo", result);
+		assertFalse(result);
+	}
+	
+	public void testRegexOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	//no support for not without parenthesis
+	public void testRegexNotOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexNotMySQL", result);
+		assertFalse(result);
+	}
+	
+
 	private String queryText;
 
-	VisitedQuery queryP;
+	ParsedSQLQuery queryP;
 
 	private boolean parseJSQL(String input) {
 
 		queryText = input;
 
 		try {
-			queryP = new VisitedQuery(input,false);
+			queryP = new ParsedSQLQuery(input,false);
 		} catch (Exception e) {
 
+			e.printStackTrace();
 			return false;
 		}
 
@@ -709,23 +750,23 @@ public class JSQLParserTest extends TestCase {
 			System.out.println(title + ": " + queryP.toString());
 			
 			try {
-				System.out.println("  Tables: " + queryP.getTableSet());
+				System.out.println("  Tables: " + queryP.getTables());
 				System.out.println("  Projection: " + queryP.getProjection());
 
 				System.out.println("  Selection: "
-						+ ((queryP.getSelection() == null) ? "--" : queryP
-								.getSelection()));
+						+ ((queryP.getWhereClause() == null) ? "--" : queryP
+								.getWhereClause()));
 
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
 				System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  SubSelect: "
-						+ (queryP.getSubSelectSet().isEmpty() ? "--" : queryP
-								.getSubSelectSet()));
+						+ (queryP.getSubSelects().isEmpty() ? "--" : queryP
+								.getSubSelects()));
 				System.out.println("  Join conditions: "
-						+ (queryP.getJoinCondition().isEmpty() ? "--" : queryP
-								.getJoinCondition()));
+						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
+								.getJoinConditions()));
 				System.out.println("  Columns: "
 						+ (queryP.getColumns().isEmpty() ? "--" : queryP
 								.getColumns()));
@@ -746,9 +787,9 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new VisitedQuery(input,true);
+			queryP = new ParsedSQLQuery(input,true);
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			return false;
 		}
 

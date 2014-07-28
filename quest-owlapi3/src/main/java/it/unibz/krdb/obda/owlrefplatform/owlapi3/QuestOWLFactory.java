@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.Properties;
 
@@ -52,6 +53,14 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 
 	private OBDAModel mappingManager = null;
 	private Properties preferences = null;
+	
+	/**
+	 * The user can supply information about keys that are not in the
+	 * database metadata. 
+	 */
+	private ImplicitDBConstraints userConstraints = null;
+	private boolean applyUserConstraints = false;
+	
 	private String name = "Quest";
 
 	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
@@ -68,6 +77,19 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 		this.mappingManager = apic;
 	}
 
+	/***
+	 * Sets the user-suppplied database constraints, i.e.
+	 * Foreign and primary keys that are not in the databse
+	 * 
+	 * @param apic
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
+		if(userConstraints == null)
+			throw new NullPointerException();
+		this.userConstraints = userConstraints;
+		this.applyUserConstraints = true;
+	}
+	
 	public void setPreferenceHolder(Properties preference) {
 		this.preferences = preference;
 	}
@@ -90,7 +112,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
+		if(this.applyUserConstraints)
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
+		else
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
@@ -107,7 +132,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
+		if(this.applyUserConstraints)
+			return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
+		else
+			return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
@@ -123,7 +151,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
+		if(this.applyUserConstraints)
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
+		else
+			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 	}
 
 	@Override
@@ -139,8 +170,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
-		QuestOWL questOWL = new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
-		return questOWL;
+		if(this.applyUserConstraints)
+			return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
+		else
+			return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
 	}
 
 }

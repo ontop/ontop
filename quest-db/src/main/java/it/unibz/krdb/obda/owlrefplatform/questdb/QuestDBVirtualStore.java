@@ -39,6 +39,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,15 +71,17 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 	private OWLAPI3Translator translator = new OWLAPI3Translator();
+	
+	private boolean isinitalized = false;
 
 	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
 		this(name, null, obdaURI, null);
 	}
-
+	
 	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config) throws Exception {
 		this(name, null, obdaURI, config);
 	}
-
+	
 	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI) throws Exception {
 		this(name, tboxFile, obdaURI, null);
 	}
@@ -88,6 +91,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		this(name, (URI)null, null, pref);
 	}
 
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
+		this(name, tboxFile, obdaUri, config, null);
+	}
 	/**
 	 * The method generates the OBDAModel from an
 	 * obda or ttl (r2rml) file
@@ -119,9 +125,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param tboxFile - the owl file URI
 	 * @param obdaUri - the obda or ttl file URI
 	 * @param config - QuestPreferences
+	 * @param userConstraints - User-supplied database constraints (or null)
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, ImplicitDBConstraints userConstraints) throws Exception {
 
 		super(name);
 
@@ -249,8 +256,20 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 			//start up quest with given metadata 
 			questInstance = new Quest(tbox, obdaModel, metadata, pref);
 		}
-		
-		questInstance.setupRepository();
+	}
+	
+	/**
+	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
+	 * Must be called before the call to initialize
+	 * 
+	 * @param userConstraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+		if(userConstraints == null)
+			throw new NullPointerException();
+		if(this.isinitalized)
+			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
+		questInstance.setImplicitDBConstraints(userConstraints);
 	}
 
 	/**
@@ -294,11 +313,31 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 		return null;
 	}
 
+
+	/**
+	 * Must be called once after the constructor call and before any queries are run, that is,
+	 * before the call to getQuestConnection.
+	 * 
+	 * Calls {@link Quest.setupRepository()}
+	 * @throws Exception
+	 */
+	public void initialize() throws Exception {
+		if(this.isinitalized){
+			log.warn("Double initialization of QuestDBVirtualStore");
+		} else {
+			this.isinitalized = true;
+			questInstance.setupRepository();
+		}
+	}
+	
+
 	/**
 	 * Get a Quest connection from the Quest instance
 	 * @return the QuestConnection
 	 */
 	public QuestConnection getQuestConnection() {
+		if(!this.isinitalized)
+			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
 			questConn = questInstance.getConnection();

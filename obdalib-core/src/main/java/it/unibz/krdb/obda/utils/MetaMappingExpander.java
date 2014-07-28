@@ -35,10 +35,10 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.parser.SQLQueryTranslator;
+import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -70,7 +70,7 @@ public class MetaMappingExpander {
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	private Connection connection;
-	private SQLQueryTranslator translator;
+	private SQLQueryParser translator;
 	private List<OBDAMappingAxiom> expandedMappings;
 	private OBDADataFactory dfac;
 
@@ -82,7 +82,7 @@ public class MetaMappingExpander {
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
-		translator = new SQLQueryTranslator();
+		translator = new SQLQueryParser();
 		expandedMappings = new ArrayList<OBDAMappingAxiom>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}
@@ -137,7 +137,7 @@ public class MetaMappingExpander {
 				}
 				
 				// Construct the SQL query tree from the source query we do not work with views 
-				VisitedQuery sourceQueryParsed = translator.constructParserNoView(sourceQuery.toString());
+				ParsedSQLQuery sourceQueryParsed = translator.parseShallowly(sourceQuery.toString());
 //				Select selectQuery;
 //				
 //				try {
@@ -169,9 +169,9 @@ public class MetaMappingExpander {
 				 * we only need to distinct project the columns needed for the template expansion 
 				 */
 				
-				VisitedQuery distinctParsedQuery = null;
+				ParsedSQLQuery distinctParsedQuery = null;
 				try {
-					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement(), false);
+					distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false);
 					
 				} catch (JSQLParserException e1) {
 					throw new IllegalArgumentException(e1);
@@ -257,7 +257,7 @@ public class MetaMappingExpander {
 	 * @throws JSQLParserException 
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
-			Function bodyAtom, VisitedQuery sourceParsedQuery,
+			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
 			List<String> params, int arity) throws JSQLParserException {
@@ -278,7 +278,7 @@ public class MetaMappingExpander {
 		 */
 		SelectionJSQL selection = null;
 		try {
-			selection = sourceParsedQuery.getSelection();
+			selection = sourceParsedQuery.getWhereClause();
 			
 		} catch (JSQLParserException e1) {
 			
@@ -325,11 +325,11 @@ public class MetaMappingExpander {
 		 * we create a new statement with the changed projection and selection
 		 */
 		
-		VisitedQuery newSourceParsedQuery = null;
+		ParsedSQLQuery newSourceParsedQuery = null;
 
-			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement(),false);
+			newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(),false);
 			newSourceParsedQuery.setProjection(newProjection);
-			newSourceParsedQuery.setSelection(newSelection);
+			newSourceParsedQuery.setWhereClause(newSelection);
 		
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
@@ -354,7 +354,7 @@ public class MetaMappingExpander {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
 				String expression=column.getExpression().toString();
-				if(VisitedQuery.pQuotes.matcher(expression).matches()) //remove the quotes when present to compare with var
+				if(ParsedSQLQuery.pQuotes.matcher(expression).matches()) //remove the quotes when present to compare with var
 					expression= expression.substring(1, expression.length()-1);
 									
 				if ((column.getAlias()==null && expression.equals(var.getName())) ||
