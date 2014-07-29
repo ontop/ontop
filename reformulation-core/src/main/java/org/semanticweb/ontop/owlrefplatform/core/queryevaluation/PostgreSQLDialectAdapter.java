@@ -50,7 +50,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		switch (type) {
 		case Types.VARCHAR:
-			strType = "CHAR";
+			strType = "VARCHAR";
 			break;
 		case Types.BIT:
 			strType = "BIT";			break;

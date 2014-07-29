@@ -230,6 +230,10 @@ public class SQLGenerator implements SQLQueryGenerator {
     			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL)
     			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
     			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
+    			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
+    			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
     			.build();
 	}
     
@@ -430,10 +434,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		for(int k = 0; k < ansArtiy; k++){
 			ansTypes.add(null);
 		}
-		
-		if(rules.size() == 1){
-			return ansTypes;
-		} else {
+	
 			for(CQIE rule : rules){
 				Function head = rule.getHead();
 				List<Term> terms = head.getTerms();
@@ -447,11 +448,30 @@ public class SQLGenerator implements SQLQueryGenerator {
 					} else if(term instanceof Function){
 						Function f = (Function)term;
 						Predicate typePred = f.getFunctionSymbol();
+						
 						if (typePred.isDataTypePredicate() || typePred.getName().equals(OBDAVocabulary.QUEST_URI)){
 							Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
 							ansTypes.set(j, unifiedType);
+						
 						} else if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)){
 							ansTypes.set(j, OBDAVocabulary.XSD_STRING);	
+						
+						}else if (  (typePred.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+								(typePred.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+								(typePred.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+								(typePred.getName().equals(OBDAVocabulary.SPARQL_MIN_URI))){
+							
+							Term agTerm= f.getTerm(0);
+							if (agTerm instanceof Function){
+								Function agFunc = (Function)agTerm;
+								typePred = agFunc.getFunctionSymbol();
+								Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
+								ansTypes.set(j, unifiedType);
+							
+							}else{
+								Predicate unifiedType = unifyTypes(ansTypes.get(j), OBDAVocabulary.XSD_DECIMAL);
+								ansTypes.set(j, unifiedType);
+							}
 						} else {
 							throw new IllegalArgumentException();
 						}
@@ -468,7 +488,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						ansTypes.set(j, OBDAVocabulary.XSD_STRING);
 					} 
 				}
-			}
+			
 	
 			
 		}
@@ -496,6 +516,8 @@ public class SQLGenerator implements SQLQueryGenerator {
     	 else if(type1.equals(type2)){
     		return type1;
     	} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
+  
+    		
     		return dataTypePredicateUnifyTable.get(type1, type2);
     	}else if(type2 == null){
     		throw new NullPointerException("type2 cannot be null");
