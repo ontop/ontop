@@ -35,7 +35,7 @@ import java.io.Serializable;
 public interface Predicate extends Cloneable, Serializable {
 
 	public enum COL_TYPE {
-		OBJECT, BNODE, LITERAL, LITERAL_LANG, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN, UNSUPPORTED
+		OBJECT, BNODE, LITERAL, LITERAL_LANG, INTEGER, DECIMAL, DOUBLE, REAL, STRING, DATETIME, BOOLEAN, UNSUPPORTED
 	};
 
 	/**

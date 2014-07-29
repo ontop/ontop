@@ -29,6 +29,7 @@ import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.NumericalOperationPredicate;
 import org.semanticweb.ontop.model.OBDAException;
@@ -39,6 +40,7 @@ import org.semanticweb.ontop.model.URIConstant;
 import org.semanticweb.ontop.model.URITemplatePredicate;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -53,6 +55,7 @@ import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.ViewDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 
+import java.net.URI;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
@@ -102,6 +105,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -152,6 +156,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final SQLDialectAdapter sqladapter;
 	private final String QUEST_TYPE = "QuestType";
 
+	private ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
+	
 
     private boolean generatingREPLACE = true;
 
@@ -168,6 +174,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
+	private OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
+	
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
 
@@ -189,9 +197,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.metadata = metadata;
 		this.jdbcutil = jdbcutil;
 		this.sqladapter = sqladapter;
+		dataTypePredicateUnifyTable = buildPredicateUnifyTable();
 	}
+ 
 
-    public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
+	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
         this(metadata, jdbcutil, sqladapter);
         this.generatingREPLACE = sqlGenerateReplace;
     }
@@ -202,6 +212,27 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.uriRefIds = uriid;
 	}
 
+    private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
+    	return new ImmutableTable.Builder<Predicate, Predicate, Predicate>()
+    			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
+    			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
+    			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
+    			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
+    			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
+    			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL)
+    			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE)
+    			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
+    			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE)
+    			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
+    			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL)
+    			.build();
+	}
+    
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
@@ -364,6 +395,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules
 				.size());
+
+		List<Predicate> headDataTypes = getHeadDataTypes(ansrules);
+		
 		/* Main loop, constructing the SPJ query for each CQ */
 
 		for (CQIE cq : ansrules) {
@@ -373,7 +407,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * form of a normal SQL algebra as possible,
 			 */
 			boolean isAns1 = true;
-			String querystr = generateQueryFromSingleRule(cq, signature, isAns1);
+			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, headDataTypes);
 
 			queryStrings.add(querystr);
 		}
@@ -383,7 +417,95 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return result.toString();
 	}
 
-    /**
+
+	/**
+	 * @param rules
+	 * @return 
+	 */
+	private List<Predicate> getHeadDataTypes(Collection<CQIE> rules) {
+		int ansArtiy = rules.iterator().next().getHead().getTerms().size();
+
+		List<Predicate> ansTypes = Lists.newArrayListWithCapacity(ansArtiy);
+		
+		for(int k = 0; k < ansArtiy; k++){
+			ansTypes.add(null);
+		}
+		
+		if(rules.size() == 1){
+			return ansTypes;
+		} else {
+			for(CQIE rule : rules){
+				Function head = rule.getHead();
+				List<Term> terms = head.getTerms();
+				for (int j = 0; j < terms.size(); j++) {
+					Term term = terms.get(j);
+					if(term instanceof BNode){
+						ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+						// TODO: remove it
+						throw new IllegalArgumentException();
+						
+					} else if(term instanceof Function){
+						Function f = (Function)term;
+						Predicate typePred = f.getFunctionSymbol();
+						if (typePred.isDataTypePredicate() || typePred.getName().equals(OBDAVocabulary.QUEST_URI)){
+							Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
+							ansTypes.set(j, unifiedType);
+						} else if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)){
+							ansTypes.set(j, OBDAVocabulary.XSD_STRING);	
+						} else {
+							throw new IllegalArgumentException();
+						}
+						
+					} else if(term instanceof Variable){
+						// FIXME: properly hanldle the types by checking the metadata
+						ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+					} else if(term instanceof ValueConstant){
+						COL_TYPE type = ((ValueConstant)term).getType();
+						Predicate typePredicate = obdaDataFactory.getTypePredicate(type);
+						Predicate unifiedType = unifyTypes(ansTypes.get(j), typePredicate);
+						ansTypes.set(j, unifiedType);
+					} else if(term instanceof URIConstant){
+						ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+					} 
+				}
+			}
+	
+			
+		}
+		return ansTypes;
+	}
+
+	/**
+	 * Unifies the input types
+	 * 
+	 * For instance,
+	 * 
+	 * [int, double] -> double
+	 * [int, varchar] -> varchar
+	 * [int, int] -> int
+	 * 
+	 * @param predicate
+	 * @param typePred
+	 * @return
+	 */
+    private Predicate unifyTypes(Predicate type1, Predicate type2) {
+
+    	if(type1 == null){
+    		return type2;
+    	} 
+    	 else if(type1.equals(type2)){
+    		return type1;
+    	} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
+    		return dataTypePredicateUnifyTable.get(type1, type2);
+    	}else if(type2 == null){
+    		throw new NullPointerException("type2 cannot be null");
+    	} else {
+    		return OBDAVocabulary.XSD_STRING;
+    	}
+
+	}
+
+	/**
      * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION.... This
      * method complements {@link #generateQueryFromSingleRule}
      *
@@ -420,11 +542,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * 
 	 * @param cq
 	 * @param signature
+	 * @param headDataTypes 
 	 * @return
 	 * @throws OBDAException
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-			boolean isAns1) throws OBDAException {
+			boolean isAns1, List<Predicate> headDataTypes) throws OBDAException {
 		QueryAliasIndex index = new QueryAliasIndex(cq);
 
 		boolean innerdistincts = false;
@@ -437,7 +560,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String FROM = getFROM(cq.getBody(), index);
 		String WHERE = getWHERE(cq.getBody(), index);
 
-		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1);
+		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, headDataTypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);;
 		
@@ -610,6 +733,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		int headArity = 0;
 
+		List<Predicate> headDataTypes = getHeadDataTypes(ruleList);
+		
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
@@ -623,7 +748,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					isAns1);
+					isAns1, headDataTypes);
 
 			sqls.add(sqlQuery);
 		}
@@ -1176,10 +1301,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * 
 	 * @param query
 	 *            the query
+	 * @param headDataTypes 
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-			QueryAliasIndex index, boolean distinct, boolean isAns1)
+			QueryAliasIndex index, boolean distinct, boolean isAns1, List<Predicate> headDataTypes)
 			throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
@@ -1200,9 +1326,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 
+		Iterator<Predicate> headDataTypeIter = headDataTypes.iterator();
+		
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 
+			Predicate headDataTtype = headDataTypeIter.next();
+			
 			String varName;
 
 			/*
@@ -1217,7 +1347,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index);
 
-			String mainColumn = getMainColumnForSELECT(ht, varName, index);
+			String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype);
 			String langColumn = getLangColumnForSELECT(ht, varName, index);
 
 			sb.append("\n   ");
@@ -1235,7 +1365,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getMainColumnForSELECT(Term ht, String varName,
-			QueryAliasIndex index) {
+			QueryAliasIndex index, Predicate typePredicate) {
 
 		String mainColumn = null;
 
@@ -1325,11 +1455,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * If the we have a column we need to still CAST to VARCHAR
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
-			int sqlType = getSQLTypeForTerm(ht,index );
-			
-			if(sqlType != Types.NULL){
-				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);	
+
+			if (typePredicate != null){
+				
+				int sqlType = dataTypePredicateToSQLType(typePredicate); 
+				
+				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);
 			}
+			
+			//int sqlType = getSQLTypeForTerm(ht,index );
+//			
+//			if(sqlType != Types.NULL){
+//				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);	
+//			}
 
 			
 		}
@@ -1700,48 +1838,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				if (isUnary(function)) {
 					
-					String functionName = functionSymbol.getName();
-					boolean isAnAggregate = (functionName.equals(OBDAVocabulary.SPARQL_AVG_URI))||
-							(functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-							(functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-							(functionName.equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-							(functionName.equals(OBDAVocabulary.SPARQL_MIN_URI));
-					
-					if (isAnAggregate) {
-						return java.sql.Types.DECIMAL;
-					}
-					
-					
-					int type;
-					switch (functionName) {
-					case OBDAVocabulary.XSD_DOUBLE_URI:
-						type = java.sql.Types.DOUBLE;
-						break;
-					case OBDAVocabulary.XSD_DECIMAL_URI:
-						type = java.sql.Types.DECIMAL;
-						break;
-
-					case OBDAVocabulary.XSD_INT_URI:
-						type = java.sql.Types.INTEGER;
-						break;
-					case OBDAVocabulary.XSD_INTEGER_URI:
-						type = java.sql.Types.INTEGER;
-						break;
-
-					case OBDAVocabulary.XSD_BOOLEAN_URI:
-						type = java.sql.Types.BOOLEAN;
-						break;
-					case OBDAVocabulary.XSD_DATETIME_URI:
-						type = java.sql.Types.DATE;
-						break;
-					case OBDAVocabulary.XSD_STRING_URI:
-					case OBDAVocabulary.RDFS_LITERAL_URI:	
-					default:
-						type = java.sql.Types.VARCHAR;
-						break;
-					}
-					
-					return type;
+					return dataTypePredicateToSQLType(functionSymbol);
 					
 					/*
 					 * Update the term with the parent term's first parameter.
@@ -1794,6 +1891,56 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return  Types.VARCHAR;
 		
 		
+	}
+
+
+	/**
+	 * @param functionSymbol
+	 * @return
+	 */
+	private int dataTypePredicateToSQLType(Predicate functionSymbol) {
+		String functionName = functionSymbol.getName();
+		boolean isAnAggregate = (functionName.equals(OBDAVocabulary.SPARQL_AVG_URI))||
+				(functionName.equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+				(functionName.equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+				(functionName.equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+				(functionName.equals(OBDAVocabulary.SPARQL_MIN_URI));
+		
+		if (isAnAggregate) {
+			return java.sql.Types.DECIMAL;
+		}
+		
+		
+		int type;
+		switch (functionName) {
+		case OBDAVocabulary.XSD_DOUBLE_URI:
+			type = java.sql.Types.DOUBLE;
+			break;
+		case OBDAVocabulary.XSD_DECIMAL_URI:
+			type = java.sql.Types.DECIMAL;
+			break;
+
+		case OBDAVocabulary.XSD_INT_URI:
+			type = java.sql.Types.INTEGER;
+			break;
+		case OBDAVocabulary.XSD_INTEGER_URI:
+			type = java.sql.Types.INTEGER;
+			break;
+
+		case OBDAVocabulary.XSD_BOOLEAN_URI:
+			type = java.sql.Types.BOOLEAN;
+			break;
+		case OBDAVocabulary.XSD_DATETIME_URI:
+			type = java.sql.Types.DATE;
+			break;
+		case OBDAVocabulary.XSD_STRING_URI:
+		case OBDAVocabulary.RDFS_LITERAL_URI:	
+		default:
+			type = java.sql.Types.VARCHAR;
+			break;
+		}
+		
+		return type;
 	}
 	
 	private boolean isStringColType(Term term, QueryAliasIndex index) {
