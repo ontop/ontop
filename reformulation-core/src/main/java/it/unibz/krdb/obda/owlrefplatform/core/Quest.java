@@ -857,7 +857,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Normalizing equalities
 				 */
 
-				DatalogNormalizer.enforceEqualities(unfoldingProgram);
+				DatalogNormalizer.enforceEqualities(unfoldingProgram, false);
 				
 				/*
 				 * Adding ontology assertions (ABox) as rules (facts, head with no body).
