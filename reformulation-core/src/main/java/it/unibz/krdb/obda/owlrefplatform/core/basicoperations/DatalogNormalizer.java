@@ -264,20 +264,85 @@ public class DatalogNormalizer {
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
 			Unifier.applyUnifier(atom, mgu);
-			if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
-				Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
-				if (s == null) {
-					continue;
-				} else if (!(s instanceof NeutralSubstitution)) {
-					Unifier.composeUnifiers(mgu, s);
-				}
-				body.remove(i);
-				i -= 1;
-			}
-		}
+
+                if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                    Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
+                    if (s == null) {
+                        continue;
+                    } else if (!(s instanceof NeutralSubstitution)) {
+                        Unifier.composeUnifiers(mgu, s);
+                    }
+                    body.remove(i);
+                    i -= 1;
+                }
+                else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){
+                    nestedSubstitutions(atom, mgu);
+                    if(atom.getTerms().isEmpty()){
+                        body.remove(i);
+                        i -= 1;
+                    }
+                    else{
+                        body.set(i, atom);
+
+                    }
+
+
+                }
+
+            }
+
 		result = Unifier.applyUnifier(result, mgu, false);
 		return result;
 	}
+
+
+    /**
+     * EQ could be present inside AND clause
+     * @param atom
+     * @param mgu
+     */
+    private static void nestedSubstitutions(Function atom, Map<Variable, Term> mgu) {
+        List<Term> terms = atom.getTerms();
+        for (int i = 0; i < terms.size(); i++) {
+            Term t = terms.get(i);
+
+			/*
+			 * substitute if EQ or call again the method in the case of variable.
+			 */
+            if (t instanceof Function) {
+                Function t2 = (Function) t;
+                Unifier.applyUnifier(t2, mgu);
+                if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                    Substitution s = Unifier.getSubstitution(t2.getTerm(0), t2.getTerm(1));
+                    if (s == null) {
+                        continue;
+                    } else if (!(s instanceof NeutralSubstitution)) {
+                        Unifier.composeUnifiers(mgu, s);
+                    }
+                    terms.remove(i);
+
+                    i -= 1;
+                }
+                else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){ //consider the case of  AND
+                    nestedSubstitutions(t2, mgu);
+                    if(t2.getTerms().isEmpty()){ //if we have removed all the terms of the atom, we remove it
+                        terms.remove(i);
+                        i -= 1;
+                    }
+                    else{ //we remove possible and block and we set the atom equal to the terms that remained
+
+                        atom.setPredicate(t2.getFunctionSymbol());
+                        atom.updateTerms(t2.getTerms());
+
+
+                    }
+
+                }
+
+            }
+        }
+
+    }
 
 	/***
 	 * See {@link #enforceEqualities(CQIE, boolean)}
