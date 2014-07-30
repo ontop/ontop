@@ -217,7 +217,11 @@ public class QuestResultset implements TupleResultSet {
 					} else if (type == COL_TYPE.DATETIME) {
 						Timestamp value = set.getTimestamp(column);
 						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
-					} else {
+					} else if (type == COL_TYPE.INTEGER) {
+						realValue = String.valueOf(set.getInt(column));
+						result = fac.getConstantLiteral(realValue, type);
+						
+					}else {
 						result = fac.getConstantLiteral(realValue, type);
 					}
 				}

@@ -597,13 +597,30 @@ public class SparqlAlgebraToDatalogTranslator {
 				projectedVariables.size());
 		Function head = ofac.getFunction(predicate, projectedVariables);
 
-		Predicate pbody = ofac.getPredicate("ans" + (i + 1), projectedVariables.size());
-		;
-
+		
+		Set<Variable> bodyatomVarsSet = new HashSet<Variable>();
 		List<Term> bodyatomVarsList = new LinkedList<Term>();
-		bodyatomVarsList.addAll(projectedVariables);
+		Predicate pbody =null;
+		
+		
+		/*
+		 * We need to check this. It is a bit hacky. Does the BIND work??
+		 * TODO: Does the BIND work??
+		 */
+		if (te instanceof Extension)
+		{
+			pbody = ofac.getPredicate("ans" + (i + 1), projectedVariables.size());
+			bodyatomVarsList = new LinkedList<Term>();
+			bodyatomVarsList.addAll(projectedVariables);
+		}else{
+			bodyatomVarsSet = getVariables(te);
+			pbody = ofac.getPredicate("ans" + (i + 1), bodyatomVarsSet.size());
+			bodyatomVarsList = new LinkedList<Term>();
+			bodyatomVarsList.addAll(bodyatomVarsSet);
+		}
+		
 		Collections.sort(bodyatomVarsList, comparator);
-
+		
 		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
 		CQIE cq = ofac.getCQIE(head, bodyAtom);
 		pr.appendRule(cq);
@@ -1388,13 +1405,22 @@ public class SparqlAlgebraToDatalogTranslator {
 				builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateInteger(),function);
 			}
 		} else if (expr instanceof Avg) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
+			
+			builtInFunction  = ofac.getFunction(OBDAVocabulary.SPARQL_AVG, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} else if (expr instanceof Sum) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
+			builtInFunction  =  ofac.getFunction(OBDAVocabulary.SPARQL_SUM, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} else if (expr instanceof Min) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MIN, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} else if (expr instanceof Max) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_MAX, getBooleanTerm( expr.getArg()));
+			//builtInFunction = ofac.getFunction(	ofac.getDataTypePredicateDecimal(),function);
+			
 		} 
 		else {
 			throw new RuntimeException("The builtin function "

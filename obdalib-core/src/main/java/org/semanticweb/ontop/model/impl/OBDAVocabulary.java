@@ -138,7 +138,10 @@ public class OBDAVocabulary {
 
 	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
 
+	//TODO: Remove this if it is not used!!
 	public static final String XSD_INT_URI = "http://www.w3.org/2001/XMLSchema#int";
+
+	public static final String OWL_REAL_URI = "http://www.w3.org/2002/07/owl#real";
 
 	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
 
@@ -166,6 +169,9 @@ public class OBDAVocabulary {
 	public static final Predicate XSD_INTEGER = new DataTypePredicateImpl(
 			XSD_INTEGER_URI, COL_TYPE.INTEGER);
 
+	public static final Predicate OWL_REAL = new DataTypePredicateImpl(
+			OWL_REAL_URI, COL_TYPE.REAL);
+	
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
 			XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
 

@@ -29,10 +29,11 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	private static Map<Integer, String> SqlDatatypes;
 	static {
 		SqlDatatypes = new HashMap<Integer, String>();
-		SqlDatatypes.put(Types.INTEGER, "INT");
+		SqlDatatypes.put(Types.INTEGER, "SIGNED");
 		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
 		SqlDatatypes.put(Types.REAL, "FLOAT");
 		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");
+//		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "CHAR(8000) CHARACTER SET utf8");  // for korean, chinese, etc characters we need to use utf8
 		SqlDatatypes.put(Types.DATE, "DATE");
