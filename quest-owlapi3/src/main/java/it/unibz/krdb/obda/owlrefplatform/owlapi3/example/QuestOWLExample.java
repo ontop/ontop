@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
 
@@ -52,6 +53,7 @@ public class QuestOWLExample {
 	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
 	//final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
+	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
 
 	public void runQuery() throws Exception {
 
@@ -82,6 +84,13 @@ public class QuestOWLExample {
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
 		factory.setPreferenceHolder(preference);
+		
+		/*
+		 * USR CONSTRAINTS !!!!
+		 */
+		ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
+		factory.setImplicitDBConstraints(constr);
+
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
