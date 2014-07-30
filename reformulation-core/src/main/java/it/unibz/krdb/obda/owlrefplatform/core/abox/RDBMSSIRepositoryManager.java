@@ -380,8 +380,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private int maxURIId = -1;
 	
-	private Properties config;
-
 	private TBoxReasoner reasonerDag;
 
 	private SemanticIndexCache cacheSI;
@@ -417,7 +415,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public void setConfig(Properties config) {
-		this.config = config;
 	}
 
 	@Override

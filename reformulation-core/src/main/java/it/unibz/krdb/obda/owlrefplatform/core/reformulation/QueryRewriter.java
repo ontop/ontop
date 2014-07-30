@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 
@@ -36,7 +37,7 @@ public interface QueryRewriter extends Serializable {
 	 * 
 	 * @param ontology
 	 */
-	public void setTBox(Ontology ontology);
+	public void setTBox(TBoxReasoner ontology);
 
 	/**
 	 * Sets the ABox dependencies that the reformulator can use to optimize the

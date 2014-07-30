@@ -34,9 +34,11 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -69,10 +71,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	}
 	
 	@Override
-	public void setTBox(Ontology ontology) {
+	public void setTBox(TBoxReasoner reasoner) {
 		double startime = System.currentTimeMillis();
 
-		reasoner.setTBox(ontology);
+		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
+		this.reasoner.setTBox(ontology);
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

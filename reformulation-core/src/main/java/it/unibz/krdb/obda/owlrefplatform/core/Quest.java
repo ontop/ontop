@@ -930,7 +930,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Setting up the reformulation engine
 			 */
 
-			setupRewriter(reducedOntology, sigma);
+			setupRewriter(new TBoxReasonerImpl(reducedOntology), sigma);
 
 			Ontology saturatedSigma = sigma.clone();
 			saturatedSigma.saturate();
@@ -1008,7 +1008,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	}
 
-	private void setupRewriter(Ontology reformulationOntology, Ontology sigma) {
+	private void setupRewriter(TBoxReasoner reformulationOntology, Ontology sigma) {
 		if (reformulate == false) {
 			rewriter = new DummyReformulator();
 		} else if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {

@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 /***
  * A query reformulator that does nothing on the given query. 
@@ -44,21 +45,18 @@ public class DummyReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(Ontology ontology) {
-		// NO-OP
-		
+	public void setTBox(TBoxReasoner ontology) {
+		// NO-OP		
 	}
 
 	@Override
 	public void setCBox(Ontology sigma) {
 		// NO-OP
-		
 	}
 
 	@Override
 	public void initialize() {
-		// NO-OP
-		
+		// NO-OP		
 	}
 
 }

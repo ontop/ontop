@@ -218,33 +218,7 @@ public class SigmaTBoxOptimizer {
 		return scChildren.containsAll(tcChildren);
 	}
 	
-	
-	
-	
-	
 	public static Ontology getSigmaOntology(TBoxReasoner reasoner) {
-
-		final Ontology sigma = fac.createOntology("sigma");
-
-		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-			
-			@Override
-			public void onInclusion(Property sub, Property sup) {
-				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
-				sigma.addEntities(ax.getReferencedEntities());
-				sigma.addAssertion(ax);						
-			}
-
-			@Override
-			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-				if (!(sup instanceof PropertySomeRestriction)) {
-					Axiom ax = fac.createSubClassAxiom(sub, sup);
-					sigma.addEntities(ax.getReferencedEntities());
-					sigma.addAssertion(ax);						
-				}
-			}
-		});
-		
-		return sigma;
+		return TBoxReasonerToOntology.getOntology(reasoner, true);
 	}
 }
