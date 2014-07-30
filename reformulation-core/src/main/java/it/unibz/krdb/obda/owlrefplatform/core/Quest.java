@@ -101,7 +101,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.Attributes;
 import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -315,7 +314,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Quest(Ontology tbox, OBDAModel mappings, Properties config) {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
-		loadTBox(tbox);
+		
+		inputTBox = tbox;
 
 		setPreferences(config);
 
@@ -393,28 +393,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return inputOBDAModel;
 	}
 
-	public Ontology getOntology() {
-		return inputTBox;
-	}
 
-	/***
-	 * Gets the internal TBox, the one used for reasoning and query answering.
-	 * 
-	 * @return
-	 */
-	public Ontology getTBox() {
-		return reformulationOntology;
-	}
-
-	/***
-	 * Gets the internal Sigma TBox, the one used for reasoning and query
-	 * answering.
-	 * 
-	 * @return
-	 */
-	public Ontology getSigmaTBox() {
-		return sigma;
-	}
 
 	// TODO This method has to be fixed... shouldnt be visible
 	public Map<Predicate, Description> getEquivalenceMap() {
@@ -435,13 +414,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		} catch (Exception e) {
 			log.debug("Error during disconnect: " + e.getMessage());
 		}
-	}
-
-	/***
-	 * Sets up the rewriting TBox
-	 */
-	private void loadTBox(Ontology tbox) {
-		inputTBox = tbox;
 	}
 
 	public Properties getPreferences() {
@@ -563,7 +535,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		unfoldingOBDAModel = fac.getOBDAModel();
 
-		sigma = OntologyFactoryImpl.getInstance().createOntology();
 
 		/*
 		 * Simplifying the vocabulary of the TBox
@@ -642,12 +613,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				TBoxReasoner reformulationDag = new TBoxReasonerImpl(reformulationOntology);
 				dataRepository.setTBox(reformulationDag);
 				
-				Ontology ABoxDependencies = SigmaTBoxOptimizer.getSigmaOntology(reformulationDag);
-
-				for (Axiom axiom :ABoxDependencies.getAssertions()) {
-					sigma.addEntities(axiom.getReferencedEntities());
-					sigma.addAssertion(axiom);
-				}
+				sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationDag);
 
 				if (inmemory) {
 
@@ -691,6 +657,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			} else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 
+				// ROMAN: WHY EMPTY SIGMA?
+				sigma = OntologyFactoryImpl.getInstance().createOntology();
+				
 				// log.debug("Working in virtual mode");
 
 				Collection<OBDADataSource> sources = this.inputOBDAModel.getSources();
@@ -871,7 +840,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				ABoxToFactRuleConverter.addFacts(inputTBox.getABox().iterator(), unfoldingProgram, equivalenceMaps);
 				
 
-				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
+				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, reformulationOntology, sigma, true);
 
 				/*
 				 * Adding data typing on the mapping axioms.
@@ -962,7 +931,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		} finally {
 			if (!(aboxMode.equals(QuestConstants.CLASSIC) && (inmemory))) {
 				/*
-				 * If we are not in classic + inmemory mode we can discconect
+				 * If we are not in classic + inmemory mode we can disconnect
 				 * the house-keeping connection, it has already been used.
 				 */
 				disconnect();
@@ -982,8 +951,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
-		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram, sigma, false);
-		;
+		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram, reformulationOntology, sigma, false);
 
 		/*
 		 * Adding "triple(x,y,z)" mappings for support of unbounded predicates
@@ -1021,8 +989,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
 		}
 
-		rewriter.setTBox(reformulationOntology);
-		rewriter.setCBox(sigma);
+		rewriter.setTBox(reformulationOntology, sigma);
 	}
 
 	private void extendTypesWithMetadata(DBMetadata metadata, DatalogProgram unfoldingProgram) throws OBDAException {
@@ -1072,7 +1039,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-	private DatalogProgram applyTMappings(DBMetadata metadata, boolean optimizeMap, DatalogProgram unfoldingProgram, Ontology sigma,
+	private DatalogProgram applyTMappings(DBMetadata metadata, boolean optimizeMap, DatalogProgram unfoldingProgram, Ontology reformulationOntology, Ontology sigma,
 			boolean full) throws OBDAException {
 		final long startTime = System.currentTimeMillis();
 

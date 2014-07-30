@@ -175,19 +175,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner reasoner) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		assertions.clear();
 		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
 		this.assertions.addAll(ontology.getAssertions());
-	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
+		
 		// This reformulator is not able to handle ABox dependencies
 	}
-
-	@Override
-	public void initialize() {
-	}
-
 }

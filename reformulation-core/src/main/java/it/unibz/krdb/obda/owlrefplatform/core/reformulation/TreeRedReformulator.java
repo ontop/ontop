@@ -392,12 +392,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void initialize() {
-		// nothing to do here
-	}
-
-	@Override
-	public void setTBox(TBoxReasoner reasoner) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
@@ -405,12 +400,8 @@ public class TreeRedReformulator implements QueryRewriter {
 		 * that will be necessary to compute reformulation.
 		 */
 		this.ontology.saturate();
-
-	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-
+		
+		
 		this.sigma = sigma;
 		if (this.sigma != null) {
 			log.debug("Using {} dependencies.", sigma.getAssertions().size());
@@ -418,5 +409,4 @@ public class TreeRedReformulator implements QueryRewriter {
 		}
 
 	}
-
 }

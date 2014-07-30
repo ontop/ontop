@@ -71,7 +71,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	}
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		double startime = System.currentTimeMillis();
 
 		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
@@ -81,20 +81,14 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));
-	}
-	
-	@Override
-	public void setCBox(Ontology sigma) {
+		
 		log.debug("SET SIGMA");
 		for (Axiom ax : sigma.getAssertions()) {
 			log.debug("SIGMA: " + ax);
 		}
 		this.sigma = sigma;
 		extDP.setSigma(sigma);
-	}
-
-	@Override
-	public void initialize() {
+		
 	}
 	
 	

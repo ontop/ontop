@@ -45,18 +45,7 @@ public class DummyReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner ontology) {
+	public void setTBox(TBoxReasoner ontology, Ontology sigma) {
 		// NO-OP		
 	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-		// NO-OP
-	}
-
-	@Override
-	public void initialize() {
-		// NO-OP		
-	}
-
 }
