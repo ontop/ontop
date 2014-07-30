@@ -174,7 +174,4 @@ public class EquivalenceTBoxOptimizer {
 		
 		return optimizedTBox;
 	}
-	
-	public void optimize() {
-	}
 }

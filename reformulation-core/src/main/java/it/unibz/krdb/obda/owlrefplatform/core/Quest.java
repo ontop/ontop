@@ -260,8 +260,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
 
-	//Map<String, Query> jenaQueryCache = new ConcurrentHashMap<String, Query>();
-	
 	Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
 
 	Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
@@ -271,8 +269,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
 	private DBMetadata metadata;
-
-	private Map<Predicate, List<Integer>> pkeys;
 
 
     /***
@@ -395,7 +391,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 
-	// TODO This method has to be fixed... shouldnt be visible
+	// TODO This method has to be fixed... shouldn't be visible
 	public Map<Predicate, Description> getEquivalenceMap() {
 		return equivalenceMaps;
 	}
@@ -542,15 +538,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		if (bOptimizeEquivalences) {
 			EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(inputTBox);
-			equiOptimizer.optimize();
-
-			/* This generates a new TBox with a simpler vocabulary */
+			// generate a new TBox with a simpler vocabulary
 			reformulationOntology = equiOptimizer.getOptimalTBox();
-
-			/*
-			 * This is used to simplify the vocabulary of ABox assertions and
-			 * mappings
-			 */
+			// this is used to simplify the vocabulary of ABox assertions and mappings
 			equivalenceMaps = equiOptimizer.getEquivalenceMap();
 		} else {
 			reformulationOntology = inputTBox;
@@ -718,9 +708,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					try{
 						List<RelationJSQL> realTables = mParser.getRealTables();
 						
-						if(this.applyUserConstraints){
+						if (applyUserConstraints) {
 							// Add the tables referred to by user-supplied foreign keys
-							this.userConstraints.addReferredTables(realTables);
+							userConstraints.addReferredTables(realTables);
 						}
 
 						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
@@ -735,13 +725,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 			
 			//Adds keys from the text file
-			if(this.applyUserConstraints){
-				this.userConstraints.addConstraints(metadata);
+			if (applyUserConstraints) {
+				userConstraints.addConstraints(metadata);
 			}
 			
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
-			if(printKeys){
+			if (printKeys) { 
 				// Prints all primary keys
 				System.out.println("\n====== Primary keys ==========");
 				List<TableDefinition> table_list = metadata.getTableList();
@@ -794,8 +784,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/**
 			 * Split the mapping
 			 */
-			MappingSplitter mappingSplitler = new MappingSplitter();
-			
+			MappingSplitter mappingSplitler = new MappingSplitter();			
 			mappingSplitler.splitMappings(unfoldingOBDAModel, sourceId);
 			
 			
@@ -803,14 +792,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Expand the meta mapping 
 			 */
 			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-			
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
 			
-			
 			Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
-//			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
 
@@ -852,16 +838,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * of all mappings to preserve SQL-RDF semantics
 				 */
 				addNOTNULLToMappings(fac, unfoldingProgram);
-				
-				
-
 			}
 
-			/*
-			 * 
-			 * 
-			 * /* Collecting URI templates
-			 */
+
+			// Collecting URI templates
 			generateURITemplateMatchers(fac, unfoldingProgram);
 
 			/*
@@ -876,14 +856,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			log.debug("DB Metadata: \n{}", metadata);
 
-			/**
-			 * Setting up the unfolder and SQL generation
-			 */
-
-			pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
-
-			unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
-
+			setupUnfolder();
+			
 			/***
 			 * Setting up the TBox we will use for the reformulation
 			 */
@@ -964,16 +938,22 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
-		/**
-		 * Setting up the unfolder and SQL generation
-		 */
 
-		pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
-
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
-
+		setupUnfolder();
+		
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 
+	}
+
+	/**
+	 * Setting up the unfolder and SQL generation
+	 */
+
+	private void setupUnfolder() {
+		
+		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
+
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
 	private void setupRewriter(TBoxReasoner reformulationOntology, Ontology sigma) {
@@ -1138,7 +1118,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		// TODO this code seems buggy, it will probably break easily (check the
 		// part with
-		// parenthesis in the beggining of the for loop.
+		// parenthesis in the beginning of the for loop.
 
 		Statement st = null;
 		try {
@@ -1270,7 +1250,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return rules;
 	}
 
-	private Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
+	private static Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
 		for (CQIE rule : sigmaRules) {
 			Function atom = rule.getBody().get(0); // The rule always has one
@@ -1294,7 +1274,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param unfoldingProgram
 	 * @return
 	 */
-	private List<CQIE> generateTripleMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
+	private static List<CQIE> generateTripleMappings(OBDADataFactory fac, DatalogProgram unfoldingProgram) {
 		List<CQIE> newmappings = new LinkedList<CQIE>();
 
 		for (CQIE mapping : unfoldingProgram.getRules()) {

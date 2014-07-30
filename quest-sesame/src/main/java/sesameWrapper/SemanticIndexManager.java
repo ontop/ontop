@@ -42,8 +42,6 @@ import java.util.Map;
 
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.rio.ntriples.NTriplesParser;
 import org.openrdf.rio.turtle.TurtleParser;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -75,8 +73,6 @@ public class SemanticIndexManager {
 		ontologyClosure = QuestOWL.loadOntologies(tbox);
 
 		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(ontologyClosure);
-		equiOptimizer.optimize();
-
 		/* This generates a new TBox with a simpler vocabulary */
 		optimizedOntology = equiOptimizer.getOptimalTBox();
 
@@ -91,7 +87,6 @@ public class SemanticIndexManager {
 		dataRepository.setTBox(optimizedDag);
 
 		log.debug("TBox has been processed. Ready to ");
-
 	}
 
 	public void restoreRepository() throws SQLException {

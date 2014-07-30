@@ -60,7 +60,6 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
 		Ontology simpleonto = optimizer.getOptimalTBox();
 		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
 
@@ -106,7 +105,6 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 		
 		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
 		Ontology simpleonto = optimizer.getOptimalTBox();
 		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
 
@@ -151,7 +149,6 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
 		Ontology simpleonto = optimizer.getOptimalTBox();
 		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
 
@@ -190,7 +187,6 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
 		Ontology simpleonto = optimizer.getOptimalTBox();
 		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
 
