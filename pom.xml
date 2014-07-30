@@ -36,7 +36,7 @@
 	<developers>
 		<developer>
 			<id>marianormuro</id>
-			<name>Mariano Rodriguez Muro</name>
+			<name>Mariano Rodriguez-Muro</name>
 		</developer>
 		<developer>
 			<id>ghxiao</id>
@@ -314,7 +314,7 @@
 			<dependency>
     			<groupId>com.github.jsqlparser</groupId>
     			<artifactId>jsqlparser</artifactId>
-    			<version>0.9</version>
+    			<version>0.9.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
     			<groupId>com.google.guava</groupId>

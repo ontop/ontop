@@ -154,13 +154,11 @@ public class EmptyEntitiesTest {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
+		
 //			dropTables();
 			reasoner.dispose();
 //			connection.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 
 	}
 
@@ -196,6 +194,7 @@ public class EmptyEntitiesTest {
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
 			st.close();
 			// conn.close();
@@ -218,6 +217,7 @@ public class EmptyEntitiesTest {
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
 			// conn.close();
 			st.close();

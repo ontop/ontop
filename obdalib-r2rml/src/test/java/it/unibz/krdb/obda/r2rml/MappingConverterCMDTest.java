@@ -1,8 +1,5 @@
 package it.unibz.krdb.obda.r2rml;
 
-import static org.junit.Assert.*;
-import it.unibz.krdb.obda.r2rml.MappingConverterCMD;
-
 import org.junit.Test;
 
 public class MappingConverterCMDTest {
@@ -15,6 +12,11 @@ public class MappingConverterCMDTest {
 	@Test
 	public void testWithoutOntology() {
 		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a.obda"});
+	}
+	
+	@Test
+	public void testFromR2rml() {
+		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a_conversion.ttl"});
 	}
 
 }

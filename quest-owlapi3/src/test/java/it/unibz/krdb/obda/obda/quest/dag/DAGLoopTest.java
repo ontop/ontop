@@ -49,22 +49,16 @@ public class DAGLoopTest {
 
 	Ontology onto;
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		
 		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto;
-		try {
+
 			owlonto = man.loadOntologyFromOntologyDocument(new File("src/test/resources/test/dag/final_project_original.owl"));
 		
 		onto = t.translate(owlonto);
-		} catch (OWLOntologyCreationException e) {
-			
-			e.printStackTrace();
-		} catch (PunningException e) {
-			
-			e.printStackTrace();
-		}
+
 	}
 
 	
