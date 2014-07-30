@@ -175,7 +175,7 @@
         <uinteger rdf:datatype="&xsd;integer">+100000</uinteger>
         <uinteger rdf:datatype="&xsd;integer">-1</uinteger>
         <uinteger rdf:datatype="&xsd;integer">0</uinteger>
-        <uinteger rdf:datatype="&xsd;integer">123678967543233</uinteger>
+        <uinteger rdf:datatype="&xsd;integer">67543233</uinteger>
     </owl:NamedIndividual>
 
 
