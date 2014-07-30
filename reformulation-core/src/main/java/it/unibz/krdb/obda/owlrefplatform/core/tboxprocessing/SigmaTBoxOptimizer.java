@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Set;
@@ -41,9 +42,9 @@ import org.slf4j.LoggerFactory;
  */
 public class SigmaTBoxOptimizer {
 
-	private final TBoxReasonerImpl isa;
-	private final TBoxReasonerImpl isaChain;
-	private final TBoxReasonerImpl sigmaChain;
+	private final TBoxReasoner isa;
+	private final TBoxReasoner isaChain;
+	private final TBoxReasoner sigmaChain;
 
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
@@ -221,7 +222,7 @@ public class SigmaTBoxOptimizer {
 	
 	
 	
-	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
+	public static Ontology getSigmaOntology(TBoxReasoner reasoner) {
 
 		final Ontology sigma = fac.createOntology("sigma");
 

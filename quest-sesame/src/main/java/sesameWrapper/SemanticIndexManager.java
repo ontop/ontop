@@ -26,6 +26,8 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
@@ -85,7 +87,8 @@ public class SemanticIndexManager {
 		equivalenceMaps = equiOptimizer.getEquivalenceMap();
 
 		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
-		dataRepository.setTBox(optimizedOntology);
+		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
+		dataRepository.setTBox(optimizedDag);
 
 		log.debug("TBox has been processed. Ready to ");
 

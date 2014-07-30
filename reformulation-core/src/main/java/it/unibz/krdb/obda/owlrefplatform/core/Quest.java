@@ -49,6 +49,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
@@ -637,9 +639,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				dataRepository = new RDBMSSIRepositoryManager(reformulationOntology.getVocabulary());
 				dataRepository.addRepositoryChangedListener(this);
 
-				dataRepository.setTBox(reformulationOntology);
+				TBoxReasoner reformulationDag = new TBoxReasonerImpl(reformulationOntology);
+				dataRepository.setTBox(reformulationDag);
 				
-				for (Axiom axiom : dataRepository.getABoxDependencies().getAssertions()) {
+				Ontology ABoxDependencies = SigmaTBoxOptimizer.getSigmaOntology(reformulationDag);
+
+				for (Axiom axiom :ABoxDependencies.getAssertions()) {
 					sigma.addEntities(axiom.getReferencedEntities());
 					sigma.addAssertion(axiom);
 				}
