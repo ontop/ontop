@@ -81,7 +81,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -389,9 +388,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private SemanticIndexCache cacheSI;
 	
-	private Ontology aboxDependencies;
+	// private Ontology aboxDependencies;
 
-	private Ontology ontology;
+	//private Ontology ontology;
 
 	private boolean isIndexed;
 
@@ -449,8 +448,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public void setTBox(Ontology ontology) {
 
-		this.ontology = ontology;
-
 		log.debug("Ontology: {}", ontology.toString());
 
 		/*
@@ -465,8 +462,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		reasonerDag = new TBoxReasonerImpl(ontology);
 		
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
-				
 		cacheSI = new SemanticIndexCache(reasonerDag);
 		
 
@@ -1620,7 +1615,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public Ontology getABoxDependencies() {
-		return aboxDependencies;
+		return SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
 	}
 	
 	@Override
@@ -1725,14 +1720,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-
 		Set<Property> roleNodes = new HashSet<Property>();
-//		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
-		for (Predicate rolepred : ontology.getRoles()) {
+		for (Equivalences<Property> set: reasonerDag.getProperties()) {
 
-			Property node = reasonerDag.getProperties().getVertex(ofac.createProperty(rolepred)).getRepresentative();
-			// We only map named roles
+			Property node = set.getRepresentative();
+			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
 			

@@ -638,6 +638,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				dataRepository.addRepositoryChangedListener(this);
 
 				dataRepository.setTBox(reformulationOntology);
+				
 				for (Axiom axiom : dataRepository.getABoxDependencies().getAssertions()) {
 					sigma.addEntities(axiom.getReferencedEntities());
 					sigma.addAssertion(axiom);
