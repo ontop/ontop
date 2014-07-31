@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
@@ -93,15 +94,12 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, Ontology sigma, boolean full) throws OBDAException  {
+	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
 		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationReasoner, optimizeMap);
 		unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram, full);
-
-		sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
-		sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
 
 		/*
 		 * Eliminating redundancy from the unfolding program
@@ -266,14 +264,14 @@ public class QuestUnfolder {
 	}
 	
 	
-	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, Ontology sigma) throws OBDAException {
+	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
 
 		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
-		applyTMappings(true, reformulationReasoner, sigma, false);
-
+		applyTMappings(true, reformulationReasoner, false);
+		
 		setupUnfolder();
 
 		log.debug("Final set of mappings: \n{}", unfoldingProgram);	

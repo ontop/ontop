@@ -67,8 +67,6 @@ public class TMappingProcessor implements Serializable {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final Ontology aboxDependencies;
-	
 	private final TBoxReasoner reasoner;
 
 	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
@@ -80,8 +78,6 @@ public class TMappingProcessor implements Serializable {
 		
 		//reasoner = new TBoxReasonerImpl(tbox);
 		this.reasoner = reasoner;
-
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
 	}
 
 	/***
@@ -107,10 +103,6 @@ public class TMappingProcessor implements Serializable {
 		}
 
 		return mappingIndex;
-	}
-
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
 	}
 
 	/***

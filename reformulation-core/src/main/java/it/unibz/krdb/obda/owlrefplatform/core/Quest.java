@@ -33,7 +33,6 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
@@ -150,8 +149,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* TBox axioms translated into rules */
 	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
 
-	/* The TBox used for query reformulation */
-	//protected Ontology reformulationOntology = null;
+	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
 	private TBoxReasoner reformulationReasoner;
 
 	/* The merge and translation of all loaded ontologies */
@@ -165,10 +163,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private QuestUnfolder unfolder;
 	
-	/*
-	 * The equivalence map for the classes/properties that have been simplified
-	 */
-	private EquivalenceMap equivalenceMaps = null;
+	/* The equivalence map for the classes/properties that have been simplified */
+	private EquivalenceMap equivalenceMaps;
 
 	
 	/**
@@ -521,8 +517,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 												equivalenceMaps, inputTBox.getVocabulary());
 			reformulationReasoner = new TBoxReasonerImpl(reformulationOntology);			
 		} else {
-			reformulationOntology = inputTBox;
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
+			reformulationOntology = inputTBox;
 		}
 		
 		try {
@@ -792,7 +788,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Adding ontology assertions (ABox) as rules (facts, head with no body).
 				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
 				
-				unfolder.applyTMappings(optimizeMap, reformulationReasoner, sigma, true);
+				unfolder.applyTMappings(optimizeMap, reformulationReasoner, true);
+				
+				Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
+				sigma.addEntities(aboxDependencies.getVocabulary());
+				sigma.addAssertions(aboxDependencies.getAssertions());
+
 
 				// Adding data typing on the mapping axioms.
 				unfolder.extendTypesWithMetadata();
@@ -893,7 +894,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingOBDAModel.removeAllMappings(obdaSource.getSourceID());
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
-		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), reformulationReasoner, sigma);
+		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
+										reformulationReasoner);
+		
+		Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
+		sigma.addEntities(aboxDependencies.getVocabulary());
+		sigma.addAssertions(aboxDependencies.getAssertions());	
 	}
 	
 	
