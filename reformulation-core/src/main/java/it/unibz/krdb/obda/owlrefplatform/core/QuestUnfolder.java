@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +17,6 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -43,9 +41,8 @@ import it.unibz.krdb.sql.DBMetadata;
 public class QuestUnfolder {
 
 	/* The active unfolding engine */
-	private UnfoldingMechanism unfolder = null;
+	private UnfoldingMechanism unfolder;
 
-	private Map<Predicate, Description> equivalenceMaps;
 	private DBMetadata metadata;
 	
 	/* As unfolding OBDAModel, but experimental */
@@ -55,18 +52,17 @@ public class QuestUnfolder {
 	 * These are pattern matchers that will help transforming the URI's in
 	 * queries into Functions, used by the SPARQL translator.
 	 */
-	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+	private final UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
-	final HashSet<String> templateStrings = new HashSet<String>();
+	private final HashSet<String> templateStrings = new HashSet<String>();
 	
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, Map<Predicate, Description> equivalenceMaps)
+	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
-		this.equivalenceMaps = equivalenceMaps;
 		this.metadata = metadata;
 		
 		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
@@ -194,8 +190,9 @@ public class QuestUnfolder {
 	
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
+	 * @param equivalenceMaps 
 	 */
-	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions) {
+	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions, Map<Predicate, Description> equivalenceMaps) {
 		ABoxToFactRuleConverter.addFacts(assertions, unfoldingProgram, equivalenceMaps);		
 	}
 
@@ -206,10 +203,10 @@ public class QuestUnfolder {
 		templateStrings.clear();
 		uriTemplateMatcher.clear();
 
-		for (int i = 0; i < unfoldingProgram.getRules().size(); i++) {
+		for (CQIE mapping : unfoldingProgram.getRules()) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
 
 			// Looking for mappings with exactly 2 data atoms
-			CQIE mapping = unfoldingProgram.getRules().get(i);
+			// CQIE mapping = unfoldingProgram.getRules().get(i);
 			Function head = mapping.getHead();
 
 			/*
@@ -269,8 +266,7 @@ public class QuestUnfolder {
 
 		setupUnfolder();
 
-		log.debug("Final set of mappings: \n{}", unfoldingProgram);
-	
+		log.debug("Final set of mappings: \n{}", unfoldingProgram);	
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 	}
 

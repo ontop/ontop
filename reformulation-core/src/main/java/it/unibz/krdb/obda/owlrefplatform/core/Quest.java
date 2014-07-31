@@ -80,7 +80,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -772,7 +771,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 
 			List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(obdaSource.getSourceID());
-			unfolder = new QuestUnfolder(mappings, metadata, equivalenceMaps);
+			unfolder = new QuestUnfolder(mappings, metadata);
 
 			/***
 			 * T-Mappings and Fact mappings
@@ -789,7 +788,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				 // Adding ontology assertions (ABox) as rules (facts, head with no body).
-				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
+				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox(), equivalenceMaps);
 				
 				unfolder.applyTMappings(optimizeMap, reformulationOntology, sigma, true);
 
