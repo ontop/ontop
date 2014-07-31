@@ -192,9 +192,19 @@ public class QuestUnfolder {
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 * @param equivalenceMaps 
 	 */
-	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions, Map<Predicate, Description> equivalenceMaps) {
-		ABoxToFactRuleConverter.addFacts(assertions, unfoldingProgram, equivalenceMaps);		
-	}
+	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions) {
+		
+		int count = 0;
+		for (Assertion a : assertions) {
+			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+			if (fact != null) {
+				unfoldingProgram.appendRule(fact);
+				count++;
+			}
+		}
+		log.debug("Appended {} ABox assertions as fact rules", count);		
+	}		
+	
 
 	
 	
