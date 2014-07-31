@@ -512,7 +512,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1");
+		DatalogProgram unfolding = questInstance.unfold((DatalogProgram) query, "ans1");
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		removeNonAnswerQueries(unfolding);

@@ -27,7 +27,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -45,20 +44,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ABoxToFactRuleConverter {
-	private static Logger log = LoggerFactory.getLogger(ABoxToFactRuleConverter.class); 
+	private static final Logger log = LoggerFactory.getLogger(ABoxToFactRuleConverter.class); 
 
-	private static OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 
-	public static void addFacts(Iterator<Assertion> assetions, DatalogProgram p, Map<Predicate, Description> equivalences) {
+	public static void addFacts(Iterable<Assertion> assetions, DatalogProgram p, Map<Predicate, Description> equivalences) {
 		int count = 0;
-		while (assetions.hasNext()) {
-			Assertion next = assetions.next();
-			if (addFact(next, p, equivalences)) {
+		for (Assertion a : assetions) {
+			if (addFact(a, p, equivalences)) {
 				count++;
 			}
 		}
-		log.debug("Appended {} ABox assertions as fact rules", count);
-		
+		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}
 
 	private static boolean addFact(Assertion assertion, DatalogProgram p, Map<Predicate, Description> equivalences) {
