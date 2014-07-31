@@ -234,13 +234,14 @@ public class DatalogNormalizer {
 
 	/***
 	 * Enforces all equalities in the query, that is, for every equivalence
-	 * class (among variables) defined by a set of equialities, it chooses one
-	 * representive variable and replaces all other variables in the equivalence
-	 * class for with the representative varible. For example, if the query body
+	 * class (among variables) defined by a set of equalities, it chooses one
+	 * representative variable and replaces all other variables in the equivalence
+	 * class with the representative variable. For example, if the query body
 	 * is R(x,y,z), x=y, y=z. It will choose x and produce the following body
 	 * R(x,x,x).
 	 * <p>
-	 * Note the process will also remove from the body all the equalities that
+     * We ignore the equalities with disjunctions. For example R(x,y,z), x=y OR y=z
+	 * Note the process will also remove from the body all the equalities that are
 	 * here processed.
 	 * 
 	 * 
@@ -257,7 +258,7 @@ public class DatalogNormalizer {
 			result = result.clone();
 
 		List<Function> body = result.getBody();
-		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
+		Map<Variable, Term> mgu = new HashMap<>();
 
 		/* collecting all equalities as substitutions */
 
@@ -275,19 +276,23 @@ public class DatalogNormalizer {
                     body.remove(i);
                     i -= 1;
                 }
+                //search for nested equalities in AND function
                 else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){
-                    nestedSubstitutions(atom, mgu);
+                    nestedEQSubstitutions(atom, mgu);
+
+                    //we remove the function if empty because all its terms were equalities
                     if(atom.getTerms().isEmpty()){
                         body.remove(i);
                         i -= 1;
                     }
                     else{
 
-                        if(atom.getTerms().size()==1 ) { //if it is the only term left we update the atom
+                        //if there is only a term left we remove the conjunction
+                        if(atom.getTerms().size()==1 ) {
                             body.set(i, (Function) atom.getTerm(0));
                         }
                         else {
-
+                            //update the body with the new values
                             body.set(i, atom);
                         }
 
@@ -304,23 +309,26 @@ public class DatalogNormalizer {
 
 
     /**
-     * EQ could be present inside AND clause
-     * @param atom
-     * @param mgu
+     * We search for equalities in conjunctions. This recursive methods explore AND functions and removes EQ functions,
+     * substituting the values using the class
+     * {@link Unifier#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
+     * @param atom the atom that can contain equalities
+     * @param mgu mapping between a variable and a term
      */
-    private static void nestedSubstitutions(Function atom, Map<Variable, Term> mgu) {
+    private static void nestedEQSubstitutions(Function atom, Map<Variable, Term> mgu) {
         List<Term> terms = atom.getTerms();
         for (int i = 0; i < terms.size(); i++) {
             Term t = terms.get(i);
 
-			/*
-			 * substitute if EQ or call again the method in the case of variable.
-			 */
+
             if (t instanceof Function) {
                 Function t2 = (Function) t;
                 Unifier.applyUnifier(t2, mgu);
+
+                //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
                     Substitution s = Unifier.getSubstitution(t2.getTerm(0), t2.getTerm(1));
+
                     if (s == null) {
                         continue;
                     } else if (!(s instanceof NeutralSubstitution)) {
@@ -332,26 +340,26 @@ public class DatalogNormalizer {
 
 
                 }
-                else if(t2.getFunctionSymbol() == OBDAVocabulary.AND){ //consider the case of  AND
-                    nestedSubstitutions(t2, mgu);
+                //consider the case of  AND function. Calls recursive method to consider nested equalities
+                else {
+                    if (t2.getFunctionSymbol() == OBDAVocabulary.AND) {
+                        nestedEQSubstitutions(t2, mgu);
 
-                    if(t2.getTerms().isEmpty() ){ //if we have removed all the terms of the atom, we remove it
-                        terms.remove(i);
-                        i -= 1;
-                    }
-                    else{ //we remove possible and block and we set the atom equal to the terms that remained
+                        //we remove the function if empty because all its terms were equalities
+                        if (t2.getTerms().isEmpty()) {
+                            terms.remove(i);
+                            i -= 1;
+                        } else {
 
-                        if(t2.getTerms().size()==1) { //if it is the only term left we update the atom
-                            atom.setTerm(i, t2.getTerm(0));
+                            //if there is only a term left we remove the conjunction
+                            //we remove and function and we set  atom equals to the term that remained
+                            if (t2.getTerms().size() == 1) {
+                                atom.setTerm(i, t2.getTerm(0));
+                            }
+
                         }
-
                     }
                 }
-//                if(atom.getTerms().size()==1 && atom.getFunctionSymbol() == OBDAVocabulary.AND) { //if it is the only term left we update the atom
-//                    atom.setPredicate(t2.getFunctionSymbol());
-//                    atom.updateTerms(t2.getTerms());
-//                }
-
 
             }
 

@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
@@ -25,16 +26,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
-public class UnfoldingIMDbTest {
-	private OBDADataFactory fac;
+
+/**
+ * Test class to solve the bug that generates unbound variables in the mapping.
+ * Use the postgres IMDB database and a simple obda file with the problematic mapping.
+ *
+ * Solved modifying the method enforce equalities in DatalogNormalizer
+ * to consider the case of nested equivalences in mapping
+ */
+public class UnboundVariableIMDbTest {
+
+    private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlFile = "src/test/resources/ontologyIMDb.owl";
-	final String obdaFile = "src/test/resources/ontologyIMDbSimplify.obda";
+	final String owlFile = "src/test/resources/ontologyIMDB.owl";
+	final String obdaFile = "src/test/resources/ontologyIMDBSimplify.obda";
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -71,37 +82,35 @@ public class UnfoldingIMDbTest {
 
 	
 		try {
-			executeQuerySPARQL(query1, st);
-			
+			int results = executeQuerySPARQL(query1, st);
+			assertEquals(10, results);
 			
 		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
 
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
+            assertTrue(false);
+			log.error(e.getMessage());
+
+		} finally {
+
+		    st.close();
 			conn.close();
 			reasoner.dispose();
 		}
 	}
 	
-	public void executeQuerySPARQL(String query, QuestOWLStatement st) throws Exception {
+	public int executeQuerySPARQL(String query, QuestOWLStatement st) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 		int count = 0;
 		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
-			}
-			System.out.println();
+
+            count++;
+
+			log.debug("result " + count + " "+ rs.getOWLObject("p"));
+
 		}
 		rs.close();
 
+        return count;
 	}
 	
 
@@ -110,9 +119,9 @@ public class UnfoldingIMDbTest {
 	public void testIMDBSeries() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}

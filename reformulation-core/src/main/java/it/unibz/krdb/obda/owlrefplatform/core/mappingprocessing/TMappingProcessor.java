@@ -224,7 +224,7 @@ public class TMappingProcessor implements Serializable {
 				Term newconditionsTerm = fac.getFunction(newconditions.getFunctionSymbol(), newconditions.getTerms());
 				Term existingconditionsTerm = fac.getFunction(existingconditions.getFunctionSymbol(), existingconditions.getTerms());
 
-                //we do not add a new mapping if the conditions are the same
+                //we do not add a new mapping if the conditions are  exactly the same
                 if(existingconditions.equals(newconditions)){
                     continue;
                 }

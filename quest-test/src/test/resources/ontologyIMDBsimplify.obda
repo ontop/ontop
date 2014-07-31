@@ -7,7 +7,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	postgresDB
-connectionUrl	jdbc:postgresql://10.7.20.39/IMDb
+connectionUrl	jdbc:postgresql://10.7.20.39/imdbobda
 username	postgres
 password	postgres
 driverClass	org.postgresql.Driver
