@@ -27,94 +27,70 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
-import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryVocabularyValidator implements Serializable {
-	/** The source ontology for validating the target query */
+public class QueryVocabularyValidator /*implements Serializable*/ {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2901421485090507301L;
+	//private static final long serialVersionUID = -2901421485090507301L;
 
-	/** List of invalid predicates */
-	private Vector<String> invalidPredicates = new Vector<String>();
+	private final Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
 
-	Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
+	/** The source ontology vocabulary for validating the target query */
+	private final Set<Predicate> vocabulary;
 
-	private Ontology ontology;
+	private final EquivalenceMap equivalences;
 
-	private EquivalenceMap equivalences;
 
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
-	public QueryVocabularyValidator(Ontology ontology, EquivalenceMap equivalences) {
-		this.ontology = ontology;
+	public QueryVocabularyValidator(Set<Predicate> vocabulary, EquivalenceMap equivalences) {
+		this.vocabulary = vocabulary;
 		this.equivalences = equivalences;
 	}
 
 	public boolean validatePredicates(DatalogProgram input) {
-		// Reset the invalid list
-		invalidPredicates.clear();
-
-		List<CQIE> rules = input.getRules();
-		for (CQIE query : rules) {
-			validate(query);
-		}
 
 		boolean isValid = true;
-		if (!invalidPredicates.isEmpty()) {
-			isValid = false; // if the list is not empty means the string is invalid!
+		
+		for (CQIE query : input.getRules()) {
+			for  (Function atom : query.getBody()) {
+				if (!validate(atom))
+					isValid = false;
+			}
 		}
+
 		return isValid;
 	}
 
-	private void validate(CQIE query) {
-		// Get the predicates in the target query.
-		for  (Function atom : query.getBody()) {
-			
-			Predicate predicate = atom.getPredicate();
+	private boolean validate(Function atom) {
 
-			boolean isClass = false;
-			boolean isObjectProp = false;
-			boolean isDataProp = false;
-			boolean isBooleanOpFunction = false;
+		Predicate predicate = atom.getPredicate();
 
-			// TODO: to be replaced by proper method calls (Roman)
-			isClass = isClass || ontology.getConcepts().contains(predicate)
-					|| (equivalences.getValue(predicate) != null);
-			isObjectProp = isObjectProp
-					|| ontology.getRoles().contains(predicate)
-					|| (equivalences.getValue(predicate) != null);
-			isDataProp = isDataProp || ontology.getRoles().contains(predicate)
-					|| (equivalences.getValue(predicate) != null);
-			isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
+//		boolean isClass = vocabulary.contains(predicate)
+//				|| equivalences.containsKey(predicate);
+//		boolean isObjectProp =  vocabulary.contains(predicate)
+//				|| equivalences.containsKey(predicate);
+//		boolean isDataProp = vocabulary.contains(predicate)
+//				|| equivalences.containsKey(predicate);
+//		boolean isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
 
-			// Check if the predicate contains in the ontology vocabulary as one
-			// of these components (i.e., class, object property, data
-			// property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp
-					|| isBooleanOpFunction;
+		// Check if the predicate contains in the ontology vocabulary as one
+		// of these components (i.e., class, object property, data property).
+		// isClass || isObjectProp || isDataProp || isBooleanOpFunction;
+		boolean isPredicateValid = vocabulary.contains(predicate)
+				|| equivalences.containsKey(predicate) 
+				|| (predicate instanceof BooleanOperationPredicate);
 
-			if (!isPredicateValid) {
-				invalidPredicates.add(predicate.toString());
-				String debugMsg = "The predicate: [" + predicate.toString() + "]";
-				log.warn("WARNING: {} is missing in the ontology!", debugMsg);
-			}
+		if (!isPredicateValid) {
+			String debugMsg = "The predicate: [" + predicate.toString() + "]";
+			log.warn("WARNING: {} is missing in the ontology!", debugMsg);
+			return false;
 		}
+		return true;
 	}
 
 	/*
@@ -159,8 +135,4 @@ public class QueryVocabularyValidator implements Serializable {
 			body.set(i, newatom);
 		}
 	}
-
-//	private Vector<String> getInvalidPredicates() {
-//		return invalidPredicates;
-//	}
 }

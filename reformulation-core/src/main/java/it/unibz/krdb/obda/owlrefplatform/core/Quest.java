@@ -520,6 +520,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
 			reformulationOntology = inputTBox;
 		}
+		Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
+		
 		
 		try {
 
@@ -571,7 +573,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationOntology.getVocabulary());
+				dataRepository = new RDBMSSIRepositoryManager(reformulationVocabulary);
 				dataRepository.addRepositoryChangedListener(this);
 
 				dataRepository.setTBox(reformulationReasoner);
@@ -817,7 +819,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (bOptimizeTBoxSigma) {
 				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
-									reformulationOntology.getVocabulary(), sigmaReasoner);
+						reformulationVocabulary, sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} else {
 				reasoner = reformulationReasoner;
@@ -844,7 +846,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			vocabularyValidator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
+			vocabularyValidator = new QueryVocabularyValidator(reformulationVocabulary, equivalenceMaps);
 
 			log.debug("... Quest has been initialized.");
 		} catch (Exception e) {
@@ -872,7 +874,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 
-	private void setupRewriter(TBoxReasoner reformulationOntology, Ontology sigma) {
+	private void setupRewriter(TBoxReasoner reformulationR, Ontology sigma) {
 		if (reformulate == false) {
 			rewriter = new DummyReformulator();
 		} else if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
@@ -885,7 +887,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
 		}
 
-		rewriter.setTBox(reformulationOntology, sigma);
+		rewriter.setTBox(reformulationR, sigma);
 	}
 
 	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {
