@@ -857,7 +857,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Normalizing equalities
 				 */
 
-				DatalogNormalizer.enforceEqualities(unfoldingProgram);
+                unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
 				
 				/*
 				 * Adding ontology assertions (ABox) as rules (facts, head with no body).
@@ -977,7 +977,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
 		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram, sigma, false);
-		;
+
 
 		/*
 		 * Adding "triple(x,y,z)" mappings for support of unbounded predicates
@@ -1030,7 +1030,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
 				Function notnull = fac.getFunctionIsNotNull(var);
-				mapping.getBody().add(notnull);
+                List<Function> body = mapping.getBody();
+                if(!body.contains(notnull)){
+                    body.add(notnull);
+                }
+
 			}
 		}
 
