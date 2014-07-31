@@ -529,10 +529,12 @@ public class QuestStatement implements OBDAStatement {
 //			for (CQIE rule: newTypedRules){
 //				System.out.println(rule);
 //			}
-
-			//TODO: can we avoid using this intermediate variable???
+						//TODO: can we avoid using this intermediate variable???
 			unfolding.removeAllRules();
 			unfolding.appendRule(newTypedRules);
+			log.debug("Types Pushed: \n{}",unfolding);
+
+			
 		} else if (!unfolding.getRules().isEmpty()){
 			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
 			//System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
@@ -550,7 +552,7 @@ public class QuestStatement implements OBDAStatement {
 
 		
 		
-		log.debug("\n Partial evaluation ended.");
+		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 
 		return unfolding;
 	}

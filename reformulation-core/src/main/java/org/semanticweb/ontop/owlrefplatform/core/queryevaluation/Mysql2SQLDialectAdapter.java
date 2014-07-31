@@ -32,13 +32,15 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.INTEGER, "SIGNED");
 		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
 		SqlDatatypes.put(Types.REAL, "FLOAT");
-		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");
+		SqlDatatypes.put(Types.FLOAT, "DECIMAL");
+		SqlDatatypes.put(Types.DOUBLE, "DECIMAL");
 //		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "CHAR(8000) CHARACTER SET utf8");  // for korean, chinese, etc characters we need to use utf8
 		SqlDatatypes.put(Types.DATE, "DATE");
 		SqlDatatypes.put(Types.TIME, "TIME");
 		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
+		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
 	}
 	
 	@Override
@@ -101,8 +103,14 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	    public String sqlCast(String value, int type) {
 		String strType = SqlDatatypes.get(type);
-		if (strType != null) {	
+		
+		boolean noCast = strType.equals("BOOLEAN");
+
+		if (strType != null && !noCast ) {	
 			return "CAST(" + value + " AS " + strType + ")";
+		} else	if (noCast){
+				return value;
+			
 		}
 		throw new RuntimeException("Unsupported SQL type");
 	}
