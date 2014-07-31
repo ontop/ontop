@@ -282,7 +282,14 @@ public class DatalogNormalizer {
                         i -= 1;
                     }
                     else{
-                        body.set(i, atom);
+
+                        if(atom.getTerms().size()==1 ) { //if it is the only term left we update the atom
+                            body.set(i, (Function) atom.getTerm(0));
+                        }
+                        else {
+
+                            body.set(i, atom);
+                        }
 
                     }
 
@@ -319,28 +326,38 @@ public class DatalogNormalizer {
                     } else if (!(s instanceof NeutralSubstitution)) {
                         Unifier.composeUnifiers(mgu, s);
                     }
-                    terms.remove(i);
 
+                    terms.remove(i);
                     i -= 1;
+
+
                 }
-                else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){ //consider the case of  AND
+                else if(t2.getFunctionSymbol() == OBDAVocabulary.AND){ //consider the case of  AND
                     nestedSubstitutions(t2, mgu);
-                    if(t2.getTerms().isEmpty()){ //if we have removed all the terms of the atom, we remove it
+
+                    if(t2.getTerms().isEmpty() ){ //if we have removed all the terms of the atom, we remove it
                         terms.remove(i);
                         i -= 1;
                     }
                     else{ //we remove possible and block and we set the atom equal to the terms that remained
 
-                        atom.setPredicate(t2.getFunctionSymbol());
-                        atom.updateTerms(t2.getTerms());
-
+                        if(t2.getTerms().size()==1) { //if it is the only term left we update the atom
+                            atom.setTerm(i, t2.getTerm(0));
+                        }
 
                     }
-
                 }
+//                if(atom.getTerms().size()==1 && atom.getFunctionSymbol() == OBDAVocabulary.AND) { //if it is the only term left we update the atom
+//                    atom.setPredicate(t2.getFunctionSymbol());
+//                    atom.updateTerms(t2.getTerms());
+//                }
+
 
             }
+
         }
+
+
 
     }
 

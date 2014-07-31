@@ -977,7 +977,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
 		unfoldingProgram = applyTMappings(metadata, true, unfoldingProgram, sigma, false);
-		;
+
 
 		/*
 		 * Adding "triple(x,y,z)" mappings for support of unbounded predicates
