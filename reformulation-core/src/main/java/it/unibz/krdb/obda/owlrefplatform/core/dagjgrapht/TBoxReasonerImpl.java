@@ -276,9 +276,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * 
 	 */
 	
-	public static TBoxReasonerImpl getChainReasoner(Ontology onto) {
-		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
-		
+	public static TBoxReasoner getChainReasoner(TBoxReasonerImpl tbox) {		
 		
 		EquivalencesDAG<BasicClassDescription> classes = tbox.getClasses();
 		
