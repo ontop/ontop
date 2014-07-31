@@ -1,0 +1,300 @@
+[PrefixDeclaration]
+:		http://www.movieontology.org/2009/11/09/movieontology.owl#
+dc:		http://purl.org/dc/elements/1.1/
+mo:		http://www.movieontology.org/2009/10/01/movieontology.owl#
+mo2:		http://www.movieontology.org/2009/11/09/movieontology.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+www:		http://www.movieontology.org/2009/11/09/
+xsd:		http://www.w3.org/2001/XMLSchema#
+imdb:		http://www.imdb.com/
+page:		http://dbpedia.org/page/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+dbpedia:		http://dbpedia.org/ontology/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	imdb-obda
+connectionUrl	jdbc:postgresql://10.7.20.39/imdbobda
+username    postgres
+password    postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Actor
+target		imdb:name/{person_id} a dbpedia:Actor . 
+source		select person_id from cast_info where cast_info.role_id = 1
+
+mappingId	Actress
+target		imdb:name/{person_id} a mo2:Actress . 
+source		select person_id from cast_info where cast_info.role_id = 2
+
+mappingId	Movie
+target		imdb:title/{id} a mo:Movie . 
+source		select id, title, production_year from title where kind_id = 1
+
+mappingId	TV Series
+target		imdb:title/{id} a mo:TVSeries . 
+source		select id from title where kind_id = 2
+
+mappingId	Producer
+target		imdb:name/{person_id} a mo:Producer . 
+source		select person_id from cast_info where cast_info.role_id = 3
+
+mappingId	Writer
+target		imdb:name/{person_id} a dbpedia:Writer . 
+source		select person_id from cast_info where cast_info.role_id = 4
+
+mappingId	Film Director
+target		imdb:name/{person_id} a page:Film_Director . 
+source		select person_id from cast_info where cast_info.role_id = 8
+
+mappingId	Editor
+target		imdb:name/{person_id} a mo:Editor . 
+source		select person_id from cast_info where cast_info.role_id = 9
+
+mappingId	Production Company
+target		imdb:company/{company_id} a mo:Production_Company . 
+source		select company_id from movie_companies where movie_companies.company_type_id = 2
+
+mappingId	Person has Birth Date
+target		imdb:name/{person_id} dbpedia:birthDate {dob}^^xsd:string .
+source		select person_id, info as dob from person_info where info_type_id = 21
+
+mappingId	Person has Birth Name
+target		imdb:name/{person_id} dbpedia:birthName {name} .
+source		select name.id as person_id, name.name as name from name
+
+mappingId	Movie has rating
+target		imdb:title/{movie_id} mo:imdbrating {rating}^^xsd:double .
+source		select movie_id, info as rating from movie_info_idx where info_type_id = 101
+
+mappingId	Movies with any types of genre
+target		imdb:title/{title_id} mo:belongsToGenre imdb:genre/{title_id} . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3
+
+mappingId	Label for Action genre
+target		imdb:genre/{title_id} a mo:Brute_Action . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Action'
+
+mappingId	Label for Adult genre
+target		imdb:genre/{title_id} a mo:Porn . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Adult'
+
+mappingId	Label for Adventure genre
+target		imdb:genre/{title_id} a mo:Imaginational_Entertainment, mo:Actionreach . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Adventure'
+
+mappingId	Label for Animation genre
+target		imdb:genre/{title_id} a mo:Fun . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Animation'
+
+mappingId	Label for Biography genre
+target		imdb:genre/{title_id} a mo:Documentarial_Information . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Biography'
+
+mappingId	Label for Comedy genre
+target		imdb:genre/{title_id} a mo:Fun . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Comedy'
+
+mappingId	Label for Crime genre
+target		imdb:genre/{title_id} a mo:Logical_Thrilling . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Crime'
+
+mappingId	Label for Documentary genre
+target		imdb:genre/{title_id} a mo:Documentarial_Information . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Documentary'
+
+mappingId	Label for Drama genre
+target		imdb:genre/{title_id} a mo:Heavy_Sensible . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Drama'
+
+mappingId	Label for Family genre
+target		imdb:genre/{title_id} a mo:Fun . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Family'
+
+mappingId	Label for Fantasy genre
+target		imdb:genre/{title_id} a mo:SciFi_and_Fantasy . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Fantasy'
+
+mappingId	Label for Film-Noir genre
+target		imdb:genre/{title_id} a mo:Heavy_Sensible . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Film-Noir'
+
+mappingId	Label for Game-Show genre
+target		imdb:genre/{title_id} a mo:TV-Entertainment . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Game-Show'
+
+mappingId	Label for History genre
+target		imdb:genre/{title_id} a mo:Historical_Information . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='History'
+
+mappingId	Label for Horror genre
+target		imdb:genre/{title_id} a mo:Thrilling . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Horror'
+
+mappingId	Label for Music genre
+target		imdb:genre/{title_id} a mo:Musical_Entertainment . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Music'
+
+mappingId	Label for Musical genre
+target		imdb:genre/{title_id} a mo:Musical_Entertainment . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Musical'
+
+mappingId	Label for Mystery genre
+target		imdb:genre/{title_id} a mo:Sensible_Thrilling . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Mystery'
+
+mappingId	Label for News genre
+target		imdb:genre/{title_id} a mo:Info-TV . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='News'
+
+mappingId	Label for Reality-TV genre
+target		imdb:genre/{title_id} a mo:TV-Entertainment . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Reality-TV'
+
+mappingId	Label for Romance genre
+target		imdb:genre/{title_id} a mo:Love . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Romance'
+
+mappingId	Label for Sci-Fi genre
+target		imdb:genre/{title_id} a mo:SciFi_and_Fantasy . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Sci-Fi'
+
+mappingId	Label for Short genre
+target		imdb:genre/{title_id} a mo:Genre . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Short'
+
+mappingId	Label for Sport genre
+target		imdb:genre/{title_id} a mo:Entertaining_Information . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Sport'
+
+mappingId	Label for Talk-Show genre
+target		imdb:genre/{title_id} a mo:Info-TV . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Talk-Show'
+
+mappingId	Label for Thriller genre
+target		imdb:genre/{title_id} a mo:Sensible_Thrilling . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Thriller'
+
+mappingId	Label for War genre
+target		imdb:genre/{title_id} a mo:Brute_Action . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='War'
+
+mappingId	Label for Western genre
+target		imdb:genre/{title_id} a mo:Old_Action . 
+source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Western'
+
+mappingId	Movie has production Budget
+target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:string .
+source		select movie_id, info as budget from movie_info where movie_info.info_type_id = 105
+
+mappingId	Movie gets Gross revenue
+target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string .
+source		select movie_id, info as gross from movie_info where movie_info.info_type_id = 107
+
+mappingId	Movie has Actor
+target		imdb:title/{movie_id} mo:hasMaleActor imdb:name/{person_id} . 
+source		select movie_id, person_id from cast_info where role_id = 1
+
+mappingId	Movie has Actress
+target		imdb:title/{movie_id} mo:hasActress imdb:name/{person_id} . 
+source		select movie_id, person_id from cast_info where role_id = 2
+
+mappingId	Movie has Film Director
+target		imdb:title/{movie_id} mo:hasDirector imdb:name/{person_id} . 
+source		select movie_id, person_id from cast_info where role_id = 8
+
+mappingId	Movie has Editor
+target		imdb:title/{movie_id} mo:hasEditor imdb:name/{person_id} . 
+source		select movie_id, person_id from cast_info where role_id = 9
+
+mappingId	Movie has Producer
+target		imdb:title/{movie_id} mo:hasProducer imdb:name/{person_id} . 
+source		select movie_id, person_id from cast_info where role_id = 3
+
+mappingId	Movie has Production Company
+target		imdb:title/{movie_id} mo:isProducedBy imdb:company/{company_id} . 
+source		select company_id, movie_id from movie_companies where company_type_id = 2
+
+mappingId	Companies in United States
+target		imdb:company/{cid}#country a mo:Northern_America . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[us]'
+
+mappingId	Companies in Great Britain
+target		imdb:company/{cid}#country a mo:Northern_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[gb]'
+
+mappingId	Companies in France
+target		imdb:company/{cid}#country a mo:Western_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[fr]'
+
+mappingId	Companies in Germany
+target		imdb:company/{cid}#country a mo:Western_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[de]'
+
+mappingId	Companies in Japan
+target		imdb:company/{cid}#country a mo:Eastern_Asia . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[jp]'
+
+mappingId	Companies in Italy
+target		imdb:company/{cid}#country a mo:Southern_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[it]'
+
+mappingId	Companies in Canada
+target		imdb:company/{cid}#country a mo:Northern_America . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[ca]'
+
+mappingId	Companies in Spain
+target		imdb:company/{cid}#country a mo:Southern_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[es]'
+
+mappingId	Companies in Mexico
+target		imdb:company/{cid}#country a mo:Central_America . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[mx]'
+
+mappingId	Companies in Denmark
+target		imdb:company/{cid}#country a mo:Northern_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[dk]'
+
+mappingId	Companies in Brazil
+target		imdb:company/{cid}#country a mo:South_America . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[br]'
+
+mappingId	Companies in Australia
+target		imdb:company/{cid}#country a mo:Australia_and_New_Zealand . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[au]'
+
+mappingId	Companies in Sweden
+target		imdb:company/{cid}#country a mo:Northern_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[se]'
+
+mappingId	Companies in Belgium
+target		imdb:company/{cid}#country a mo:Western_Europe . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[be]'
+
+mappingId	Companies in Philippines
+target		imdb:company/{cid}#country a mo:Southeastern_Asia . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[ph]'
+
+mappingId	Companies in India
+target		imdb:company/{cid}#country a mo:Southern_Asia . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[in]'
+
+mappingId	Companies in China
+target		imdb:company/{cid}#country a mo:Eastern_Asia . 
+source		select company_name.id as cid from company_name where company_name.country_code = '[cn]'
+
+mappingId	Company has name
+target		imdb:company/{company_id} mo2:companyName {company_name} .
+source		select company_name.id as company_id, company_name.name as company_name from company_name
+
+mappingId	Movie has title and production year
+target		imdb:title/{id} mo:title {title}; dbpedia:productionStartYear {production_year}^^xsd:integer .
+source		select id, title, production_year from title
+
+mappingId	Country has country code
+target		imdb:company/{cid}#country mo2:countryCode {country_code} . imdb:company/{cid} mo2:hasCompanyLocation imdb:company/{cid}#country .
+source		select company_name.id as cid, company_name.country_code as country_code from company_name
+]]
