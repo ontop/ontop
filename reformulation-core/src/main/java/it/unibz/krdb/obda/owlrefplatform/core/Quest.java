@@ -511,14 +511,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 */
 
 		if (bOptimizeEquivalences) {
-			EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(inputTBox);
-			// generate a new TBox with a simpler vocabulary
-			reformulationOntology = equiOptimizer.getOptimalTBox();
+			TBoxReasoner reasoner = new TBoxReasonerImpl(inputTBox);
 			// this is used to simplify the vocabulary of ABox assertions and mappings
-			equivalenceMaps = equiOptimizer.getEquivalenceMap();
+			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
+			// generate a new TBox with a simpler vocabulary
+			reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, inputTBox.getVocabulary());
 		} else {
 			reformulationOntology = inputTBox;
-			equivalenceMaps = new EquivalenceMap(new HashMap<Predicate, Description>());
+			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
 		}
 
 		try {

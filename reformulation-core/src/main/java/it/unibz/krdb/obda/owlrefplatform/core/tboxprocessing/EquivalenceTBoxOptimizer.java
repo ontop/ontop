@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.HashMap;
@@ -55,68 +56,7 @@ import java.util.Set;
  */
 public class EquivalenceTBoxOptimizer {
 
-	private Ontology optimizedTBox = null;
-	private Map<Predicate, Description> equivalenceMap  = null;
-	private TBoxReasonerImpl reasoner;
-	private Set<Predicate> originalVocabulary;
-
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-	public EquivalenceTBoxOptimizer(Ontology tbox) {
-		originalVocabulary = tbox.getVocabulary();
-		reasoner = new TBoxReasonerImpl(tbox);
-	}
-
-	/**
-	 * the EquivalenceMap maps predicates to the representatives of their equivalence class (in TBox)
-	 * 
-	 * it contains 
-	 * 		- an entry for each property name other than the representative of an equivalence class 
-	 * 				(or its inverse)
-	 * 		- an entry for each class name other than the representative of its equivalence class
-	 */
-	
-	public EquivalenceMap getEquivalenceMap() {
-		
-		if (equivalenceMap == null) {
-			equivalenceMap = new HashMap<Predicate, Description>();
-
-			for(Equivalences<Property> nodes : reasoner.getProperties()) {
-				Property prop = nodes.getRepresentative();
-				
-				for (Property equiProp : nodes) {
-					if (equiProp.equals(prop)) 
-						continue;
-
-					Property inverseProp = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
-					if (equiProp.equals(inverseProp))
-						continue;         // no map entry if the property coincides with its inverse
-
-					// if the property is different from its inverse, an entry is created 
-					// (taking the inverses into account)
-					if (equiProp.isInverse()) 
-						equivalenceMap.put(equiProp.getPredicate(), inverseProp);
-					else 
-						equivalenceMap.put(equiProp.getPredicate(), prop);
-				}
-			}
-			
-			for(Equivalences<BasicClassDescription> nodes : reasoner.getClasses()) {
-				BasicClassDescription node = nodes.getRepresentative();
-				for (BasicClassDescription equivalent : nodes) {
-					if (equivalent.equals(node)) 
-						continue;
-
-					if (equivalent instanceof OClass) {
-						// an entry is created for a named class
-						OClass equiClass = (OClass) equivalent;
-						equivalenceMap.put(equiClass.getPredicate(), node);
-					}
-				}
-			}			
-		}
-		return new EquivalenceMap(equivalenceMap);
-	}
 
 	/***
 	 * Optimize will compute the implied hierarchy of the given ontology and 
@@ -130,48 +70,44 @@ public class EquivalenceTBoxOptimizer {
 	 * inverse of a property.
 	 */
 
-	public Ontology getOptimalTBox() {
+	public static Ontology getOptimalTBox(TBoxReasoner reasoner, final EquivalenceMap equivalenceMap, Set<Predicate> originalVocabulary) {
 		
-		if (optimizedTBox == null) {
+		final Ontology optimizedTBox = ofac.createOntology();
 			
-			optimizedTBox = ofac.createOntology();
-			getEquivalenceMap();
+		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
+
+			@Override
+			public void onInclusion(Property sub, Property sup) {
+				// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
+				if (!isInMap(sub) && !isInMap(sup)) {
+					Axiom axiom = ofac.createSubPropertyAxiom(sub, sup);
+					optimizedTBox.addEntities(axiom.getReferencedEntities());
+					optimizedTBox.addAssertion(axiom);	
+				}
+			}
+
+			@Override
+			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+				// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
+				if (!isInMap(sub) && !isInMap(sup)) {
+					Axiom axiom = ofac.createSubClassAxiom(sub, sup);
+					optimizedTBox.addEntities(axiom.getReferencedEntities());
+					optimizedTBox.addAssertion(axiom);	
+				}
+			}
 			
-			TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
+			public boolean isInMap(Description desc) {
+				Predicate pred = VocabularyExtractor.getPredicate(desc);				
+				return ((pred != null) && equivalenceMap.containsKey(pred));			
+			}
+		});
 
-				@Override
-				public void onInclusion(Property sub, Property sup) {
-					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
-					if (!isInMap(sub) && !isInMap(sup)) {
-						Axiom axiom = ofac.createSubPropertyAxiom(sub, sup);
-						optimizedTBox.addEntities(axiom.getReferencedEntities());
-						optimizedTBox.addAssertion(axiom);	
-					}
-				}
-
-				@Override
-				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-					// add an equivalence axiom ONLY IF the symbol does not appear in the EquivalenceMap
-					if (!isInMap(sub) && !isInMap(sup)) {
-						Axiom axiom = ofac.createSubClassAxiom(sub, sup);
-						optimizedTBox.addEntities(axiom.getReferencedEntities());
-						optimizedTBox.addAssertion(axiom);	
-					}
-				}
-				
-				public boolean isInMap(Description desc) {
-					Predicate pred = VocabularyExtractor.getPredicate(desc);				
-					return ((pred != null) && equivalenceMap.containsKey(pred));			
-				}
-			});
-
-			// Last, add references to all the vocabulary of the original TBox
-			
-			Set<Predicate> extraVocabulary = new HashSet<Predicate>();
-			extraVocabulary.addAll(originalVocabulary);
-			extraVocabulary.removeAll(equivalenceMap.keySet());
-			optimizedTBox.addEntities(extraVocabulary);
-		}
+		// Last, add references to all the vocabulary of the original TBox
+		
+		Set<Predicate> extraVocabulary = new HashSet<Predicate>();
+		extraVocabulary.addAll(originalVocabulary);
+		extraVocabulary.removeAll(equivalenceMap.keySet());
+		optimizedTBox.addEntities(extraVocabulary);
 		
 		return optimizedTBox;
 	}

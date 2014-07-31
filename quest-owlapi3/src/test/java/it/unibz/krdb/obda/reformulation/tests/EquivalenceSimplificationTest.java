@@ -30,6 +30,8 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 
 import java.io.File;
@@ -60,9 +62,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology ontology = translator.translate(owlonto);
 
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		EquivalenceMap eqMap = optimizer.getEquivalenceMap();
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(3, simpleonto.getConcepts().size());
 		assertEquals(0, simpleonto.getRoles().size());
@@ -105,9 +107,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology ontology = translator.translate(owlonto);
 		
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		EquivalenceMap eqMap = optimizer.getEquivalenceMap();
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(0, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
@@ -149,9 +151,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology ontology = translator.translate(owlonto);
 
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		EquivalenceMap eqMap = optimizer.getEquivalenceMap();
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
@@ -187,9 +189,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology ontology = translator.translate(owlonto);
 
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		EquivalenceMap eqMap = optimizer.getEquivalenceMap();
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(12, simpleonto.getAssertions().size());
 		assertEquals(0, simpleonto.getConcepts().size());

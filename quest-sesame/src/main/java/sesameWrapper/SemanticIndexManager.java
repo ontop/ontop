@@ -20,8 +20,6 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
@@ -39,7 +37,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -73,16 +70,12 @@ public class SemanticIndexManager {
 		conn = connection;
 		ontologyClosure = QuestOWL.loadOntologies(tbox);
 
-		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(ontologyClosure);
-		/* This generates a new TBox with a simpler vocabulary */
-		optimizedOntology = equiOptimizer.getOptimalTBox();
-
-		/*
-		 * This is used to simplify the vocabulary of ABox assertions and
-		 * mappings
-		 */
-		equivalenceMaps = equiOptimizer.getEquivalenceMap();
-
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontologyClosure);
+		// this is used to simplify the vocabulary of ABox assertions and mappings
+		equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
+		// generate a new TBox with a simpler vocabulary
+		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, ontologyClosure.getVocabulary());
+			
 		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
 		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
 		dataRepository.setTBox(optimizedDag);

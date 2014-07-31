@@ -39,7 +39,7 @@ public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {
 		File testFile = new File("src/test/resources/test/lubm-data.n3");
 		URI fileURI = testFile.toURI();
-		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, new EquivalenceMap(new HashMap<Predicate, Description>()));
+		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMap.getEmptyEquivalenceMap());
 		
 		int typeCount = 0;
 		int objPropCount = 0;
