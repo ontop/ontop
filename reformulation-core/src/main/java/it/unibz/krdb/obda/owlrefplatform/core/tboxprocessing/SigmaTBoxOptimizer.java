@@ -48,20 +48,19 @@ public class SigmaTBoxOptimizer {
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 	private Ontology optimizedTBox = null;
 
-	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
+	public SigmaTBoxOptimizer(TBoxReasoner isa, Set<Predicate> vocabulary, TBoxReasoner sigma) {
 		
-		vocabulary = isat.getVocabulary();
+		this.vocabulary = vocabulary;
+		this.isa = isa;
 		
-		isa = new TBoxReasonerImpl(isat);
-		//DAGImpl isaChainDAG = isa.getChainDAG();
+		//isa = new TBoxReasonerImpl(isat);
 		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
 		
-		TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
-		//DAGImpl sigmaChainDAG =  reasonerSigma.getChainDAG();
-		sigmaChain = TBoxReasonerImpl.getChainReasoner(reasonerSigma);
+		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
+		sigmaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)sigma);
 	}
 
 	public Ontology getReducedOntology() {

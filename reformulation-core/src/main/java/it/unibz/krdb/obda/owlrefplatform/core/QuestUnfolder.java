@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -92,11 +93,11 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(boolean optimizeMap, Ontology reformulationOntology, Ontology sigma, boolean full) throws OBDAException  {
+	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, Ontology sigma, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
-		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationOntology, optimizeMap);
+		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationReasoner, optimizeMap);
 		unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram, full);
 
 		sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
@@ -265,13 +266,13 @@ public class QuestUnfolder {
 	}
 	
 	
-	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, Ontology reformulationOntology, Ontology sigma) throws OBDAException {
+	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, Ontology sigma) throws OBDAException {
 
 		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
-		applyTMappings(true, reformulationOntology, sigma, false);
+		applyTMappings(true, reformulationReasoner, sigma, false);
 
 		setupUnfolder();
 

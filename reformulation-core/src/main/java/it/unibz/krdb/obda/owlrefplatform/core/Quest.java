@@ -151,7 +151,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
 
 	/* The TBox used for query reformulation */
-	protected Ontology reformulationOntology = null;
+	//protected Ontology reformulationOntology = null;
+	private TBoxReasoner reformulationReasoner;
 
 	/* The merge and translation of all loaded ontologies */
 	protected Ontology inputTBox = null;
@@ -510,17 +511,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Simplifying the vocabulary of the TBox
 		 */
 
+		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
+		Ontology reformulationOntology;
 		if (bOptimizeEquivalences) {
-			TBoxReasoner reasoner = new TBoxReasonerImpl(inputTBox);
 			// this is used to simplify the vocabulary of ABox assertions and mappings
-			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
+			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reformulationReasoner);
 			// generate a new TBox with a simpler vocabulary
-			reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, inputTBox.getVocabulary());
+			reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner, 
+												equivalenceMaps, inputTBox.getVocabulary());
+			reformulationReasoner = new TBoxReasonerImpl(reformulationOntology);			
 		} else {
 			reformulationOntology = inputTBox;
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
 		}
-
+		
 		try {
 
 			/*
@@ -574,10 +578,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				dataRepository = new RDBMSSIRepositoryManager(reformulationOntology.getVocabulary());
 				dataRepository.addRepositoryChangedListener(this);
 
-				TBoxReasoner reformulationDag = new TBoxReasonerImpl(reformulationOntology);
-				dataRepository.setTBox(reformulationDag);
+				dataRepository.setTBox(reformulationReasoner);
 				
-				sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationDag);
+				sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);
 
 				if (inmemory) {
 
@@ -789,7 +792,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Adding ontology assertions (ABox) as rules (facts, head with no body).
 				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
 				
-				unfolder.applyTMappings(optimizeMap, reformulationOntology, sigma, true);
+				unfolder.applyTMappings(optimizeMap, reformulationReasoner, sigma, true);
 
 				// Adding data typing on the mapping axioms.
 				unfolder.extendTypesWithMetadata();
@@ -809,29 +812,34 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/***
 			 * Setting up the TBox we will use for the reformulation
 			 */
-			Ontology reducedOntology;
+			TBoxReasoner reasoner;
 			if (bOptimizeTBoxSigma) {
-				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationOntology, sigma);
-				reducedOntology = reducer.getReducedOntology();
+				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
+				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
+									reformulationOntology.getVocabulary(), sigmaReasoner);
+				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} else {
-				reducedOntology = reformulationOntology;
+				reasoner = reformulationReasoner;
 			}
 
 			/*
 			 * Setting up the reformulation engine
 			 */
 
-			setupRewriter(new TBoxReasonerImpl(reducedOntology), sigma);
+			setupRewriter(reasoner, sigma);
 
-			Ontology saturatedSigma = sigma.clone();
-			saturatedSigma.saturate();
 
-			List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
-			if (optimizeMap)
-				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);
-			else
+			if (optimizeMap) {
+				Ontology saturatedSigma = sigma.clone();
+				saturatedSigma.saturate();
+				
+				List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
+				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);				
+			}
+			else {
 				sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
-
+			}
+			
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
@@ -885,7 +893,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingOBDAModel.removeAllMappings(obdaSource.getSourceID());
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
-		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), reformulationOntology, sigma);
+		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), reformulationReasoner, sigma);
 	}
 	
 	
