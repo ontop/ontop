@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -75,7 +76,7 @@ public class EquivalenceTBoxOptimizer {
 	 * 		- an entry for each class name other than the representative of its equivalence class
 	 */
 	
-	public Map<Predicate, Description> getEquivalenceMap() {
+	public EquivalenceMap getEquivalenceMap() {
 		
 		if (equivalenceMap == null) {
 			equivalenceMap = new HashMap<Predicate, Description>();
@@ -114,7 +115,7 @@ public class EquivalenceTBoxOptimizer {
 				}
 			}			
 		}
-		return equivalenceMap;
+		return new EquivalenceMap(equivalenceMap);
 	}
 
 	/***

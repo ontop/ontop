@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -66,7 +67,7 @@ public class MappingVocabularyTranslator {
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> translateMappings(Collection<OBDAMappingAxiom> originalMappings,
-			Map<Predicate, Description> equivalencesMap) {
+			EquivalenceMap equivalencesMap) {
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			
@@ -75,31 +76,7 @@ public class MappingVocabularyTranslator {
 			List<Function> newbody = new LinkedList<Function>();
 
 			for (Function atom : body) {
-				Predicate p = atom.getPredicate();
-				Function newatom = null;
-				if (p.getArity() == 1) {
-//					Description description = fac.createClass(p);
-					Description equivalent = equivalencesMap.get(p);
-					if (equivalent == null)
-						newatom = atom;
-					else {
-						newatom = dfac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerms());
-
-					}
-				} else {
-//					Description description = fac.createProperty(p);
-					Description equivalent = equivalencesMap.get(p);
-					if (equivalent == null)
-						newatom = atom;
-					else {
-						Property equiprop = (Property) equivalent;
-						if (!equiprop.isInverse()) {
-							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms());
-						} else {
-							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
-						}
-					}
-				}
+				Function newatom = equivalencesMap.getNormal(atom);
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);

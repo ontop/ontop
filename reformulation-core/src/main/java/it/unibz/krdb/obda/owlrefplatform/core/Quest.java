@@ -167,7 +167,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/*
 	 * The equivalence map for the classes/properties that have been simplified
 	 */
-	protected Map<Predicate, Description> equivalenceMaps = null;
+	private EquivalenceMap equivalenceMaps = null;
 
 	
 	/**
@@ -366,8 +366,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 
-	// TODO This method has to be fixed... shouldn't be visible
-	public Map<Predicate, Description> getEquivalenceMap() {
+	public EquivalenceMap getEquivalenceMap() {
 		return equivalenceMaps;
 	}
 
@@ -519,7 +518,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			equivalenceMaps = equiOptimizer.getEquivalenceMap();
 		} else {
 			reformulationOntology = inputTBox;
-			equivalenceMaps = new HashMap<Predicate, Description>();
+			equivalenceMaps = new EquivalenceMap(new HashMap<Predicate, Description>());
 		}
 
 		try {

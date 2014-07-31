@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -62,11 +63,11 @@ public class SemanticIndexManager {
 
 	Ontology optimizedOntology = null;
 
-	private Map<Predicate, Description> equivalenceMaps;
+	private EquivalenceMap equivalenceMaps;
 
 	private RDBMSSIRepositoryManager dataRepository = null;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
@@ -116,7 +117,7 @@ public class SemanticIndexManager {
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
 		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology),
-				equivalenceMaps);
+				equivalenceMaps.getInternalMap());
 
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);

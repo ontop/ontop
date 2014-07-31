@@ -1011,7 +1011,7 @@ public class QuestStatement implements OBDAStatement {
 	 * 
 	 * @param data
 	 * @param recreateIndexes
-	 *            Indicates if indexes (if any) should be droped before
+	 *            Indicates if indexes (if any) should be dropped before
 	 *            inserting the tuples and recreated afterwards. Note, if no
 	 *            index existed before the insert no drop will be done and no
 	 *            new index will be created.

@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,7 +47,7 @@ import java.util.NoSuchElementException;
 
 public class NTripleAssertionIterator implements Iterator<Assertion> {
 
-	private final Map<Predicate, Description> equivalenceMap;
+	private final EquivalenceMap equivalenceMap;
 	private final URI fileURI;
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
@@ -65,7 +66,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 	private final BufferedReader input;
 
-	public NTripleAssertionIterator(URI fileURI, Map<Predicate, Description> equivalenceMap) throws IOException {
+	public NTripleAssertionIterator(URI fileURI, EquivalenceMap equivalenceMap) throws IOException {
 		this.fileURI = fileURI;
 		this.equivalenceMap = equivalenceMap;
 
@@ -81,7 +82,8 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 	private Assertion constructAssertion() {
 		Assertion assertion = null;
 
-		Description replacementDescription = equivalenceMap.get(currentPredicate);
+		// TODO: to be replaced by a proper method call (Roman)
+		Description replacementDescription = equivalenceMap.getValue(currentPredicate);
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 		if (currentPredicate.getArity() == 1) {
@@ -248,7 +250,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 		return staReady;
 	}
 
-	private boolean isWS(char c) {
+	private static boolean isWS(char c) {
 		if (c == '\t' || c == ' ')
 			return true;
 		return false;

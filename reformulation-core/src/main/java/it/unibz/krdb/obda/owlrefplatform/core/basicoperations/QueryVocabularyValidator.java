@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -56,11 +57,11 @@ public class QueryVocabularyValidator implements Serializable {
 
 	private Ontology ontology;
 
-	private Map<Predicate, Description> equivalences;
+	private EquivalenceMap equivalences;
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	public QueryVocabularyValidator(Ontology ontology, Map<Predicate, Description> equivalences) {
+	public QueryVocabularyValidator(Ontology ontology, EquivalenceMap equivalences) {
 		this.ontology = ontology;
 		this.equivalences = equivalences;
 	}
@@ -83,14 +84,8 @@ public class QueryVocabularyValidator implements Serializable {
 
 	private void validate(CQIE query) {
 		// Get the predicates in the target query.
-		Iterator<Function> iterAtom = query.getBody().iterator();
-		while (iterAtom.hasNext()) {
-			Function a1 = iterAtom.next();
-			if (!(a1 instanceof Function)) {
-				continue;
-			}
-			Function atom = (Function) a1;
-
+		for  (Function atom : query.getBody()) {
+			
 			Predicate predicate = atom.getPredicate();
 
 			boolean isClass = false;
@@ -98,13 +93,14 @@ public class QueryVocabularyValidator implements Serializable {
 			boolean isDataProp = false;
 			boolean isBooleanOpFunction = false;
 
+			// TODO: to be replaced by proper method calls (Roman)
 			isClass = isClass || ontology.getConcepts().contains(predicate)
-					|| (equivalences.get(predicate) != null);
+					|| (equivalences.getValue(predicate) != null);
 			isObjectProp = isObjectProp
 					|| ontology.getRoles().contains(predicate)
-					|| (equivalences.get(predicate) != null);
+					|| (equivalences.getValue(predicate) != null);
 			isDataProp = isDataProp || ontology.getRoles().contains(predicate)
-					|| (equivalences.get(predicate) != null);
+					|| (equivalences.getValue(predicate) != null);
 			isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
 
 			// Check if the predicate contains in the ontology vocabulary as one
@@ -121,8 +117,8 @@ public class QueryVocabularyValidator implements Serializable {
 		}
 	}
 
-	/***
-	 * Substite atoms based on the equivalence map.
+	/*
+	 * Substitute atoms based on the equivalence map.
 	 */
 	public DatalogProgram replaceEquivalences(DatalogProgram queries) {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -158,28 +154,13 @@ public class QueryVocabularyValidator implements Serializable {
 			if (atom.isBooleanFunction())
 				continue;
 
-			Description equivalent = equivalences.get(atom.getFunctionSymbol());
-			if (equivalent == null) {
-				/* Nothing to replace */
-				continue;
-			}
-			Function newatom = null;
+			Function newatom = equivalences.getNormal(atom);
 
-			if (equivalent instanceof OClass) {
-				newatom = fac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerm(0));
-			} else if (equivalent instanceof Property) {
-				Property equiproperty = (Property) equivalent;
-				if (!equiproperty.isInverse()) {
-					newatom = fac.getFunction(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
-				} else {
-					newatom = fac.getFunction(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
-				}
-			}
 			body.set(i, newatom);
 		}
 	}
 
-	public Vector<String> getInvalidPredicates() {
-		return invalidPredicates;
-	}
+//	private Vector<String> getInvalidPredicates() {
+//		return invalidPredicates;
+//	}
 }
