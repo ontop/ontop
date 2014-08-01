@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
