@@ -1,30 +1,10 @@
-package it.unibz.krdb.obda.testsuite;
+package it.unibz.krdb.obda.unfold;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import static org.junit.Assert.assertEquals;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
@@ -44,18 +24,28 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.junit.Assert.*;
 
-public class OntologyTypesTest{
 
-	private OBDADataFactory fac;
+/**
+ * Test class to solve the bug that generates unbound variables in the mapping.
+ * Use the postgres IMDB database and a simple obda file with the problematic mapping.
+ *
+ * Solved modifying the method enforce equalities in DatalogNormalizer
+ * to consider the case of nested equivalences in mapping
+ */
+public class UnboundVariableIMDbTest {
+
+    private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyTypes.owl";
-	final String obdaFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.obda";
+	final String owlFile = "src/test/resources/ontologyIMDB.owl";
+	final String obdaFile = "src/test/resources/ontologyIMDBSimplify.obda";
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -88,58 +78,50 @@ public class OntologyTypesTest{
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-						"select * {?x :number ?y}";
+		String query1 = "PREFIX : <http://www.seriology.org/seriology#> SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
+
+	
 		try {
-			executeQueryAssertResults(query1, st, 2);
+			int results = executeQuerySPARQL(query1, st);
+			assertEquals(10, results);
 			
 		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
 
-			} catch (Exception e) {
-				st.close();
-			}
+            assertTrue(false);
+			log.error(e.getMessage());
+
+		} finally {
+
+		    st.close();
 			conn.close();
 			reasoner.dispose();
 		}
 	}
 	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
+	public int executeQuerySPARQL(String query, QuestOWLStatement st) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 		int count = 0;
 		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
-			}
-			System.out.println();
+
+            count++;
+
+			log.debug("result " + count + " "+ rs.getOWLObject("p"));
+
 		}
 		rs.close();
-		assertEquals(expectedRows, count);
+
+        return count;
 	}
 	
-//	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-//		List<OWLAxiom> rs = st.executeGraph(query);
-//		int count = 0;
-//		Iterator<OWLAxiom> axit = rs.iterator();
-//		while (axit.hasNext()) {
-//			System.out.println(axit.next());			
-//			count++;
-//		}		
-//		assertEquals(expectedRows, count);
-//	}
+
 
 	@Test
-	public void testOntologyType() throws Exception {
+	public void testIMDBSeries() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}

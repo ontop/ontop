@@ -25,15 +25,12 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.ClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
@@ -41,13 +38,10 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,20 +60,17 @@ public class TMappingProcessor implements Serializable {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final Ontology aboxDependencies;
-	
-	private final TBoxReasonerImpl reasoner;
+	private final TBoxReasoner reasoner;
 
 	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
 	boolean optimize = true;
 
-	public TMappingProcessor(Ontology tbox, boolean optmize) {
+	public TMappingProcessor(TBoxReasoner reasoner, boolean optmize) {
 		this.optimize = optmize;
 		
-		reasoner = new TBoxReasonerImpl(tbox);
-
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		//reasoner = new TBoxReasonerImpl(tbox);
+		this.reasoner = reasoner;
 	}
 
 	/***
@@ -107,10 +98,6 @@ public class TMappingProcessor implements Serializable {
 		return mappingIndex;
 	}
 
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
-	}
-
 	/***
 	 * 
 	 * This is an optimization mechanism that allows T-mappings to produce a
@@ -135,7 +122,7 @@ public class TMappingProcessor implements Serializable {
 	 * conditions of m.
 	 * 
 	 * </p>
-	 * If no such m is found, then this method simply adds newmmapping to
+	 * If no such m is found, then this method simply adds newmapping to
 	 * currentMappings.
 	 * 
 	 * 
@@ -225,8 +212,13 @@ public class TMappingProcessor implements Serializable {
 				}			
 				Function newconditions = mergeConditions(strippedNewConditions);
 				Function existingconditions = mergeConditions(strippedExistingConditions);
-				Term newconditionsTerm = fac.getFunction(newconditions.getPredicate(), newconditions.getTerms());
-				Term existingconditionsTerm = fac.getFunction(existingconditions.getPredicate(), existingconditions.getTerms());
+				Term newconditionsTerm = fac.getFunction(newconditions.getFunctionSymbol(), newconditions.getTerms());
+				Term existingconditionsTerm = fac.getFunction(existingconditions.getFunctionSymbol(), existingconditions.getTerms());
+
+                //we do not add a new mapping if the conditions are  exactly the same
+                if(existingconditions.equals(newconditions)){
+                    continue;
+                }
 				Function orAtom = fac.getFunctionOR(existingconditionsTerm, newconditionsTerm);
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
@@ -300,7 +292,7 @@ public class TMappingProcessor implements Serializable {
 	/***
 	 * Given a set of mappings in {@link originalMappings}, this method will
 	 * return a new set of mappings in which no constants appear in the body of
-	 * database predicates. This is done by replacing the constant occurence
+	 * database predicates. This is done by replacing the constant occurrence
 	 * with a fresh variable, and adding a new equality condition to the body of
 	 * the mapping.
 	 * <p/>
@@ -353,7 +345,7 @@ public class TMappingProcessor implements Serializable {
 		return newProgram;
 	}
 
-	public DatalogProgram getTMappings(DatalogProgram originalMappings, boolean full) throws OBDAException {
+	public DatalogProgram getTMappings(DatalogProgram originalMappings, boolean full) {
 
 		/*
 		 * Normalizing constants
@@ -545,9 +537,9 @@ public class TMappingProcessor implements Serializable {
 		return currentMappings;
 	}
 
-	
-	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {	
-		
+
+	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {
+
 		CQIE newmapping = fac.getCQIE(head, body);				
 		if (optimize)
 			mergeMappingsWithCQC(mappings, newmapping);

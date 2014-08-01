@@ -114,7 +114,7 @@ public class QuestDBStatement implements OBDAStatement {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				OWLAPI3ABoxIterator aBoxIter = 
-					new OWLAPI3ABoxIterator(ontos, st.questInstance.getEquivalenceMap());
+					new OWLAPI3ABoxIterator(ontos, st.questInstance.getEquivalenceMap().getInternalMap());
 				result = st.insertData(aBoxIter, useFile, commit, batch);
 			} else if (ext.toLowerCase().equals(".nt")) {
 				NTripleAssertionIterator it = 
