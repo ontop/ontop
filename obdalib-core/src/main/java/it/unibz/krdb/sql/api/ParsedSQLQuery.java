@@ -25,14 +25,13 @@ import it.unibz.krdb.obda.parser.AliasMapVisitor;
 import it.unibz.krdb.obda.parser.ColumnsVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
-import it.unibz.krdb.obda.parser.SelectionVisitor;
+import it.unibz.krdb.obda.parser.WhereClauseVisitor;
 import it.unibz.krdb.obda.parser.SubSelectVisitor;
-import it.unibz.krdb.obda.parser.TablesNameVisitor;
+import it.unibz.krdb.obda.parser.TableNameVisitor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -45,22 +44,22 @@ import net.sf.jsqlparser.statement.select.Select;
  * A structure to store the parsed SQL query string. It returns the information
  * about the query using the visitor classes
  */
-public class VisitedQuery implements Serializable {
+public class ParsedSQLQuery implements Serializable {
 
 	private static final long serialVersionUID = -4590590361733833782L;
 
 	private String query;
 	private Statement stm;
-	boolean unquote = false; // used to remove all quotes from the query
+	boolean deepParsing = false; // used to remove all quotes from the query
 
-	private Select select; // the parsed query
+	private Select selectQuery; // the parsed query
 
 	public static Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
-	private ArrayList<RelationJSQL> tableSet;
-	private ArrayList<SelectJSQL> selectsSet;
-	private HashMap<String, String> aliasMap;
-	private ArrayList<Expression> joins;
-	private SelectionJSQL selection;
+	private List<RelationJSQL> tables;
+	private List<SelectJSQL> subSelects;
+	private Map<String, String> aliasMap;
+	private List<Expression> joins;
+	private SelectionJSQL whereClause;
 	private ProjectionJSQL projection;
 	private AggregationJSQL groupByClause;
 
@@ -70,7 +69,7 @@ public class VisitedQuery implements Serializable {
 	 * 
 	 * @param queryString
 	 *            the SQL query to parse
-	 * @param unquote
+	 * @param deepParsing
 	 *            if true removes quotes from columns and generate exceptions
 	 *            for unsupported query in the mapping otherwise, keeps the
 	 *            quotes from the columns, and support all the SQLs which can be
@@ -78,7 +77,8 @@ public class VisitedQuery implements Serializable {
 	 * @throws JSQLParserException
 	 */
 
-	public VisitedQuery(String queryString, boolean unquote)
+
+	public ParsedSQLQuery(String queryString, boolean deepParsing)
 			throws JSQLParserException {
 
 		/**
@@ -88,20 +88,20 @@ public class VisitedQuery implements Serializable {
 
 		query = queryString;
 
-		this.unquote = unquote;
+		this.deepParsing = deepParsing;
 
 		stm = CCJSqlParserUtil.parse(query);
 
 		if (stm instanceof Select) {
-			select = (Select) stm;
+			selectQuery = (Select) stm;
 
 			// getting the values we also eliminate or handle the quotes if
-			// unquote is set to true
-			if (unquote) {
-				tableSet = getTableSet();
-				selection = getSelection();
+			// deepParsing is set to true
+			if (deepParsing) {
+				tables = getTables();
+				whereClause = getWhereClause();
 				projection = getProjection();
-				joins = getJoinCondition();
+				joins = getJoinConditions();
 				aliasMap = getAliasMap();
 				groupByClause = getGroupByClause();
 			}
@@ -119,12 +119,12 @@ public class VisitedQuery implements Serializable {
 	 * 
 	 * @param statement
 	 *            we pass already a parsed statement
-	 * @param unquote
+	 * @param deepParsing
 	 *            if true removes quotes from columns and generate exceptions
 	 *            for unsupported query in the mapping
 	 * @throws JSQLParserException
 	 */
-	public VisitedQuery(Statement statement, boolean unquote)
+	public ParsedSQLQuery(Statement statement, boolean deepParsing)
 			throws JSQLParserException {
 
 		pQuotes = Pattern.compile("[\"`\\[].*[\"`\\]]");
@@ -133,21 +133,21 @@ public class VisitedQuery implements Serializable {
 
 		stm = statement;
 
-		this.unquote = unquote;
+		this.deepParsing = deepParsing;
 
 		if (stm instanceof Select) {
-			select = (Select) stm;
+			selectQuery = (Select) stm;
 
 			/**
 			 * Getting the values we also eliminate or handle the quotes if
-			 * unquote is set to true and we throw errors for unsupported values
+			 * deepParsing is set to true and we throw errors for unsupported values
 			 */
 
-			if (unquote) {
-				tableSet = getTableSet();
-				selection = getSelection();
+			if (deepParsing) {
+				tables = getTables();
+				whereClause = getWhereClause();
 				projection = getProjection();
-				joins = getJoinCondition();
+				joins = getJoinConditions();
 				aliasMap = getAliasMap();
 				groupByClause = getGroupByClause();
 			}
@@ -166,12 +166,12 @@ public class VisitedQuery implements Serializable {
 	 * @throws JSQLParserException
 	 */
 	public void unquote() throws JSQLParserException {
-		this.unquote = true;
+		this.deepParsing = true;
 
-		tableSet = getTableSet();
-		selection = getSelection();
+		tables = getTables();
+		whereClause = getWhereClause();
 		projection = getProjection();
-		joins = getJoinCondition();
+		joins = getJoinConditions();
 		aliasMap = getAliasMap();
 		groupByClause = getGroupByClause();
 
@@ -179,40 +179,40 @@ public class VisitedQuery implements Serializable {
 
 	@Override
 	public String toString() {
-		return select.toString();
+		return selectQuery.toString();
 	}
 
 	/**
 	 * Returns all the tables in this query.
 	 */
-	public ArrayList<RelationJSQL> getTableSet() throws JSQLParserException {
+	public List<RelationJSQL> getTables() throws JSQLParserException {
 
-		if (tableSet == null) {
-			TablesNameVisitor tnp = new TablesNameVisitor();
-			tableSet = tnp.getTableList(select, unquote);
+		if (tables == null) {
+			TableNameVisitor visitor = new TableNameVisitor();
+			tables = visitor.getTables(selectQuery, deepParsing);
 		}
-		return tableSet;
+		return tables;
 	}
 
 	/**
 	 * Returns all the subSelect in this query .
 	 */
-	public ArrayList<SelectJSQL> getSubSelectSet() {
+	public List<SelectJSQL> getSubSelects() {
 
-		if (selectsSet == null) {
-			SubSelectVisitor tnp = new SubSelectVisitor();
-			selectsSet = tnp.getSubSelectList(select, unquote);
+		if (subSelects == null) {
+			SubSelectVisitor visitor = new SubSelectVisitor();
+			subSelects = visitor.getSubSelects(selectQuery, deepParsing);
 		}
-		return selectsSet;
+		return subSelects;
 	}
 
 	/**
 	 * Get the string construction of alias name.
 	 */
-	public HashMap<String, String> getAliasMap() {
+	public Map<String, String> getAliasMap() {
 		if (aliasMap == null) {
-			AliasMapVisitor aliasV = new AliasMapVisitor();
-			aliasMap = aliasV.getAliasMap(select, unquote);
+			AliasMapVisitor visitor = new AliasMapVisitor();
+			aliasMap = visitor.getAliasMap(selectQuery, deepParsing);
 		}
 		return aliasMap;
 	}
@@ -221,10 +221,10 @@ public class VisitedQuery implements Serializable {
 	 * Get the string construction of the join condition. The string has the
 	 * format of "VAR1=VAR2".
 	 */
-	public ArrayList<Expression> getJoinCondition() throws JSQLParserException {
+	public List<Expression> getJoinConditions() throws JSQLParserException {
 		if (joins == null) {
-			JoinConditionVisitor joinCV = new JoinConditionVisitor();
-			joins = joinCV.getJoinConditions(select, unquote);
+			JoinConditionVisitor visitor = new JoinConditionVisitor();
+			joins = visitor.getJoinConditions(selectQuery, deepParsing);
 		}
 		return joins;
 	}
@@ -234,12 +234,12 @@ public class VisitedQuery implements Serializable {
 	 * 
 	 * @throws JSQLParserException
 	 */
-	public SelectionJSQL getSelection() throws JSQLParserException {
-		if (selection == null) {
-			SelectionVisitor sel = new SelectionVisitor();
-			selection = sel.getSelection(select, unquote);
+	public SelectionJSQL getWhereClause() throws JSQLParserException {
+		if (whereClause == null) {
+			WhereClauseVisitor visitor = new WhereClauseVisitor();
+			whereClause = visitor.getWhereClause(selectQuery, deepParsing);
 		}
-		return selection;
+		return whereClause;
 	}
 
 	/**
@@ -249,8 +249,8 @@ public class VisitedQuery implements Serializable {
 	 */
 	public ProjectionJSQL getProjection() throws JSQLParserException {
 		if (projection == null) {
-			ProjectionVisitor proj = new ProjectionVisitor();
-			projection = proj.getProjection(select, unquote);
+			ProjectionVisitor visitor = new ProjectionVisitor();
+			projection = visitor.getProjection(selectQuery, deepParsing);
 		}
 		return projection;
 
@@ -262,9 +262,9 @@ public class VisitedQuery implements Serializable {
 	 * @return
 	 */
 	public List<String> getColumns() {
-		ColumnsVisitor col = new ColumnsVisitor();
+		ColumnsVisitor visitor = new ColumnsVisitor();
 
-		return col.getColumns(select);
+		return visitor.getColumns(selectQuery);
 	}
 
 	/**
@@ -275,8 +275,8 @@ public class VisitedQuery implements Serializable {
 	 */
 
 	public void setProjection(ProjectionJSQL projection) {
-		ProjectionVisitor proj = new ProjectionVisitor();
-		proj.setProjection(select, projection);
+		ProjectionVisitor visitor = new ProjectionVisitor();
+		visitor.setProjection(selectQuery, projection);
 		this.projection = projection;
 	}
 
@@ -284,13 +284,13 @@ public class VisitedQuery implements Serializable {
 	 * Set the object construction for the WHERE clause, modifying the current
 	 * statement
 	 * 
-	 * @param selection
+	 * @param whereClause
 	 */
 
-	public void setSelection(SelectionJSQL selection) {
-		SelectionVisitor sel = new SelectionVisitor();
-		sel.setSelection(select, selection);
-		this.selection = selection;
+	public void setWhereClause(SelectionJSQL whereClause) {
+		WhereClauseVisitor sel = new WhereClauseVisitor();
+		sel.setWhereClause(selectQuery, whereClause);
+		this.whereClause = whereClause;
 	}
 
 	/**
@@ -299,14 +299,14 @@ public class VisitedQuery implements Serializable {
 	public AggregationJSQL getGroupByClause() {
 		if (groupByClause == null) {
 			AggregationVisitor agg = new AggregationVisitor();
-			groupByClause = agg.getAggregation(select, unquote);
+			groupByClause = agg.getAggregation(selectQuery, deepParsing);
 		}
 
 		return groupByClause;
 	}
 
 	public Statement getStatement() {
-		return select;
+		return selectQuery;
 	}
 
 }

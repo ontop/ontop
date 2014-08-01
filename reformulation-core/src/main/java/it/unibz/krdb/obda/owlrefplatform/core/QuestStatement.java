@@ -738,7 +738,7 @@ public class QuestStatement implements OBDAStatement {
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
 
-				log.debug("Normalized program: \n{}", program);
+ 				log.debug("Normalized program: \n{}", program);
 
 				/*
 				 * Empty unfolding, constructing an empty result set

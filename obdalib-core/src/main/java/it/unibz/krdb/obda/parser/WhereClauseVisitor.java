@@ -23,9 +23,9 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -42,6 +42,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.JsonExpression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
@@ -78,6 +79,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
@@ -92,16 +94,16 @@ import net.sf.jsqlparser.statement.select.ValuesList;
 import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
- * Visitor class to retrieve the selection of the statement (WHERE expressions)
+ * Visitor class to retrieve the whereClause of the statement (WHERE expressions)
  * 
  * 
  */
-public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
+public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
 	
 //	ArrayList<SelectionJSQL> selections; // add if we want to consider the UNION case
-	SelectionJSQL selection;
-	boolean notSupported=false;
-	boolean setSel=false;
+	SelectionJSQL whereClause;
+	boolean unsupported =false;
+	boolean isSetting =false;
 	boolean unquote=false; //remove quotes if present from the columns
 	
 	/**
@@ -110,7 +112,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 	 * @return a SelectionJSQL
 	 * @throws JSQLParserException 
 	 */
-	public SelectionJSQL getSelection(Select select, boolean unquote) throws JSQLParserException
+	public SelectionJSQL getWhereClause(Select select, boolean unquote) throws JSQLParserException
 	{
 		
 //		selections= new ArrayList<SelectionJSQL>(); // use when we want to consider the UNION
@@ -122,19 +124,20 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 			}
 		}
 		select.getSelectBody().accept(this);
-		if(notSupported && unquote)
+		if(unsupported && unquote)
 				throw new JSQLParserException("Query not yet supported");
-		return selection;
+		return whereClause;
 		
 	}
-	
-	public void setSelection(Select select, SelectionJSQL selection){
-		
-		setSel= true;
-		this.selection=selection;
-		
-		select.getSelectBody().accept(this);
-	}
+
+    public void setWhereClause(Select selectQuery, SelectionJSQL whereClause) {
+
+        isSetting = true;
+
+        this.whereClause = whereClause;
+
+        selectQuery.getSelectBody().accept(this);
+    }
 
 	/*
 	 * visit Plainselect, search for the where structure that returns an Expression
@@ -147,31 +150,29 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 	public void visit(PlainSelect plainSelect) {
 		
 		/*
-		 * First check if we are setting a new selection. Add the expression contained in the SelectionJSQL
+		 * First check if we are setting a new whereClause. Add the expression contained in the SelectionJSQL
 		 * in the WHERE clause.
 		 */
 		//FROM (subselect) -> process
 		//plainSelect.getFromItem().accept(this);
-		
-		if(setSel){
-			plainSelect.setWhere(selection.getRawConditions());
-			
-		}
-		
-		else{
-			
-         if (plainSelect.getWhere() != null) {
-        	 
-             Expression where=plainSelect.getWhere();
-                 
-        	 selection= new SelectionJSQL();
-			 selection.addCondition(where);
-                	 
-             //we visit the where clause to remove quotes and fix any and all comparison
-             where.accept(this);
 
-         }
-		}
+        if (isSetting) {
+            plainSelect.setWhere(whereClause.getRawConditions());
+
+        } else {
+
+            if (plainSelect.getWhere() != null) {
+
+                Expression where = plainSelect.getWhere();
+
+                whereClause = new SelectionJSQL();
+                whereClause.addCondition(where);
+
+                //we visit the where clause to remove quotes and fix any and all comparison
+                where.accept(this);
+
+            }
+        }
         
          
 		
@@ -197,8 +198,16 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 
 	@Override
 	public void visit(Function function) {
-		notSupported=true;
-		
+		if(function.getName().toLowerCase().equals("regexp_like") ) {
+			
+			for(Expression ex :function.getParameters().getExpressions()){
+				ex.accept(this);
+			}
+			
+		}
+		else{
+            unsupported = true;
+		}
 	}
 
 	@Override
@@ -448,7 +457,7 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 		
 		}
 		String columnName= tableColumn.getColumnName();
-		if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
+		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}
@@ -464,12 +473,12 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 			
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
-				notSupported = true;
+				unsupported = true;
 			} else {
 				subSelBody.accept(this);
 			}
 		} else
-			notSupported = true;
+			unsupported = true;
 		
 	}
 
@@ -638,37 +647,42 @@ public class SelectionVisitor implements SelectVisitor, ExpressionVisitor, FromI
 
 	@Override
 	public void visit(Table tableName) {
-		// TODO Auto-generated method stub
-		
+        // do nothing
 	}
 
 	@Override
 	public void visit(SubJoin subjoin) {
-		// TODO Auto-generated method stub
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
 	public void visit(LateralSubSelect lateralSubSelect) {
-		// TODO Auto-generated method stub
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
 	public void visit(ValuesList valuesList) {
-		// TODO Auto-generated method stub
-	}
+        // do nothing
+    }
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
-		// TODO Auto-generated method stub
-		notSupported = true;
-	}
+        // do nothing
+    }
 
 	@Override
 	public void visit(SignedExpression arg0) {
-		// TODO Auto-generated method stub
-		
+        // do nothing
+	}
+
+	@Override
+	public void visit(JsonExpression arg0) {
+        unsupported = true;		
+	}
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
+        // do nothing
 	}
 
 }

@@ -25,7 +25,7 @@ import java.io.Serializable;
 /**
  * The Relation class is a wrapper class that make the
  * {@link TableJSQL} class compatible with the 
- * abstraction in the {@link VisitedQuery}.
+ * abstraction in the {@link ParsedSQLQuery}.
  */
 public class RelationJSQL implements Serializable, Cloneable  {
 

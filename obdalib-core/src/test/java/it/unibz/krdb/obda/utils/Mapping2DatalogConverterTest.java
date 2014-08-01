@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.utils;
 
 /*
  * #%L
- * ontop-test
+ * ontop-obdalib-core
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
-public class MappingAnalyzerTest extends TestCase {
+public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
@@ -78,16 +78,12 @@ public class MappingAnalyzerTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, md);
+		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappingList, md);
 		DatalogProgram dp = analyzer.constructDatalogProgram();
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());
 	}
-	public void test18() throws Exception{
-		runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)", ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
-	}
-
 	
 	public void testAnalysis_1() throws Exception {
 		runAnalysis(
@@ -184,10 +180,51 @@ public class MappingAnalyzerTest extends TestCase {
 				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
+
+	public void testAnalysis_17() throws Exception {
+		runAnalysis(
+				"select id, first_name, last_name from Student where last_name like '%lli'",
+				":S_{id} a :Student ; :fname {first_name} ; :lname {last_name} .");
+	}
+//	public void testAnalysis_17() throws Exception {
+//		runAnalysis(
+	//RENAME STUDENT.ID TO STUDENT.STUDENT_ID SO THE COLUMN NAMES ARE THE SAME
+//				"select Student.student_id as StudentId from Student JOIN Enrollment USING (student_id) ",
+//				":S_{StudentId} a :Student .");
+//	}
 	
-	public void test17() throws Exception{
-		runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'", ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+	public void testAnalysis_18() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where year> 2010 ",
+				":S_{StudentId} a :Student .");
 	}
 	
+	public void testAnalysis_19() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name !~ 'foo' ",
+				":S_{StudentId} a :Student .");
+	}
 	
+	public void testAnalysis_20() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where regexp_like(first_name,'foo') ",
+				":S_{StudentId} a :Student .");
+	}
+	
+	public void testAnalysis_21() throws Exception {
+		runAnalysis(
+				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name regexp 'foo' ",
+				":S_{StudentId} a :Student .");
+	}
+
+    public void testAnalysis_22() throws Exception{
+        runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)",
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
+    public void testAnalysis_23() throws Exception{
+        runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'",
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
 }

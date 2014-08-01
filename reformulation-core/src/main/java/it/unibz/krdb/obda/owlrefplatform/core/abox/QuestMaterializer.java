@@ -96,8 +96,8 @@ public class QuestMaterializer {
 		
 	}
 	
-	public QuestMaterializer(OBDAModel modell, Ontology onto) throws Exception {
-		this(modell, onto, getDefaultPreferences());
+	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
+		this(model, onto, getDefaultPreferences());
 	}
 	
 	/***
@@ -106,17 +106,17 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel modell, Ontology onto, QuestPreferences preferences) throws Exception {
-		this.model = modell;
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+		this.model = model;
 		this.ontology = onto;
 		this.vocabulary = new HashSet<Predicate>();
 		
-		if (model.getSources()!= null && model.getSources().size() > 1)
+		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
 		
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
-		for (Predicate p: model.getDeclaredPredicates()) {
+		for (Predicate p: this.model.getDeclaredPredicates()) {
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
@@ -130,8 +130,8 @@ public class QuestMaterializer {
 		} else
 		{
 			//from mapping undeclared predicates (can happen)
-			for (URI uri : model.getMappings().keySet()){
-				for (OBDAMappingAxiom axiom : model.getMappings(uri))
+			for (URI uri : this.model.getMappings().keySet()){
+				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
 				{
 					if (axiom.getTargetQuery() instanceof CQIE)
 					{
@@ -149,13 +149,13 @@ public class QuestMaterializer {
 		//start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
-			ontology.addEntities(model.getDeclaredPredicates());
+			ontology.addEntities(this.model.getDeclaredPredicates());
 		}
 		
 		
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = new Quest(ontology, model, preferences);
+		questInstance = new Quest(ontology, this.model, preferences);
 					
 		questInstance.setupRepository();
 	}
