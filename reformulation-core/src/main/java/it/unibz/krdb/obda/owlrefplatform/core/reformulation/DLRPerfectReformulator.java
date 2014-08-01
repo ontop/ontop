@@ -33,6 +33,8 @@ import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.Iterator;
@@ -57,7 +59,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
+	private final static Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
 	public DLRPerfectReformulator() {
 
@@ -173,20 +175,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(Ontology ontology) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		assertions.clear();
+		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
 		this.assertions.addAll(ontology.getAssertions());
-
+		
+		// This reformulator is not able to handle ABox dependencies
 	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-		// This reformulator is not able to handle ABox dependecies
-
-	}
-
-	@Override
-	public void initialize() {
-	}
-
 }

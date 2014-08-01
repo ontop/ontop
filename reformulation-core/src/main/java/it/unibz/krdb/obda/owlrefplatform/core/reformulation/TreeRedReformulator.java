@@ -38,6 +38,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SemanticQueryOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -390,31 +392,21 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void initialize() {
-		// nothing to do here
-	}
-
-	@Override
-	public void setTBox(Ontology ontology) {
-		this.ontology = ontology.clone();
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
+		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
 		 * Our strategy requires saturation to minimize the number of cycles
 		 * that will be necessary to compute reformulation.
 		 */
 		this.ontology.saturate();
-
-	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-
-		this.sigma = (Ontology) sigma;
+		
+		
+		this.sigma = sigma;
 		if (this.sigma != null) {
 			log.debug("Using {} dependencies.", sigma.getAssertions().size());
 			this.sigma.saturate();
 		}
 
 	}
-
 }
