@@ -96,8 +96,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryVocabularyValidator validator = null;
 
-	private OBDAModel unfoldingOBDAModel = null;
-
 	private boolean canceled = false;
 	
 	private boolean queryIsParsed = false;
@@ -172,7 +170,6 @@ public class QuestStatement implements OBDAStatement {
 
 		this.sqlstatement = st;
 		this.validator = questinstance.vocabularyValidator;
-		this.unfoldingOBDAModel = questinstance.unfoldingOBDAModel;
 	}
 
 	private class QueryExecutionThread extends Thread {
@@ -512,7 +509,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1");
+		DatalogProgram unfolding = questInstance.unfold((DatalogProgram) query, "ans1");
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		removeNonAnswerQueries(unfolding);
@@ -1011,7 +1008,7 @@ public class QuestStatement implements OBDAStatement {
 	 * 
 	 * @param data
 	 * @param recreateIndexes
-	 *            Indicates if indexes (if any) should be droped before
+	 *            Indicates if indexes (if any) should be dropped before
 	 *            inserting the tuples and recreated afterwards. Note, if no
 	 *            index existed before the insert no drop will be done and no
 	 *            new index will be created.

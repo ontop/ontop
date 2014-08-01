@@ -25,10 +25,9 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -39,8 +38,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -62,20 +60,17 @@ public class TMappingProcessor implements Serializable {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final Ontology aboxDependencies;
-	
-	private final TBoxReasonerImpl reasoner;
+	private final TBoxReasoner reasoner;
 
 	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
 	boolean optimize = true;
 
-	public TMappingProcessor(Ontology tbox, boolean optmize) {
+	public TMappingProcessor(TBoxReasoner reasoner, boolean optmize) {
 		this.optimize = optmize;
 		
-		reasoner = new TBoxReasonerImpl(tbox);
-
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		//reasoner = new TBoxReasonerImpl(tbox);
+		this.reasoner = reasoner;
 	}
 
 	/***
@@ -101,10 +96,6 @@ public class TMappingProcessor implements Serializable {
 		}
 
 		return mappingIndex;
-	}
-
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
 	}
 
 	/***
