@@ -143,11 +143,6 @@ public class QuestOWLEmptyEntitiesChecker {
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
 			
 			st.close();
 
@@ -165,11 +160,6 @@ public class QuestOWLEmptyEntitiesChecker {
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
 			
 			st.close();
 

@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.Properties;
 
@@ -51,4 +52,14 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 		factory.setOBDAController(model);
 	}
 
+	/**
+	 * Allows the user to supply database keys that are not in the database metadata
+	 * 
+	 * @param uc The user-supplied database constraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints uc) {
+		if(uc == null)
+			throw new NullPointerException();
+		factory.setImplicitDBConstraints(uc);
+	}
 }

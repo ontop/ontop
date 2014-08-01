@@ -3,7 +3,7 @@
   	<parent>
     	<artifactId>ontop</artifactId>
     	<groupId>it.unibz.inf.ontop</groupId>
-    	<version>1.11.1-SNAPSHOT</version>
+    	<version>1.12.1-SNAPSHOT</version>
   	</parent>
   	
   	<artifactId>ontop-rdb2rdf-compliance</artifactId>
@@ -36,16 +36,6 @@
 	</dependencies>
 	             
 	<repositories>
-		<repository>
-			<id>sesame-official-repository</id>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases> 
-			<snapshots>
-    			<enabled>true</enabled>
-    		</snapshots>
-		</repository>
 		<repository>
 			<id>bolzano-nexus-public</id>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>

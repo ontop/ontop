@@ -80,14 +80,11 @@ public class OracleASKTest {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
+
 			
 			reasoner.dispose();
 			
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-
+	
 	}
 	
 	private boolean runTests(String query) throws Exception {
@@ -105,6 +102,7 @@ public class OracleASKTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
