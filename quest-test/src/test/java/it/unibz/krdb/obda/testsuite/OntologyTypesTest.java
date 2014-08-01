@@ -55,7 +55,7 @@ public class OntologyTypesTest{
 	private OWLOntology ontology;
 
 	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyTypes.owl";
-	final String obdaFile = "src/test/resources/ontologyType/dataPropertiesontologyType.obda";
+	final String obdaFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.obda";
 
 	@Before
 	public void setUp() throws Exception {
