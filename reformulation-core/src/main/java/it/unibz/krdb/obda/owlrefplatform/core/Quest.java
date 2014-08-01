@@ -155,12 +155,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* The merge and translation of all loaded ontologies */
 	protected Ontology inputTBox = null;
 
-	/* The OBDA model used for query unfolding */
-	protected OBDAModel unfoldingOBDAModel = null;
-
 	/* The input OBDA model */
 	protected OBDAModel inputOBDAModel = null;
 
+	/* The input OBDA model */
+	private OBDAModel unfoldingOBDAModel;
+	
 	private QuestUnfolder unfolder;
 	
 	/* The equivalence map for the classes/properties that have been simplified */

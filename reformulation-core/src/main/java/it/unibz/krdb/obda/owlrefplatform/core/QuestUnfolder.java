@@ -136,7 +136,10 @@ public class QuestUnfolder {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
 				Function notnull = fac.getFunctionIsNotNull(var);
-				mapping.getBody().add(notnull);
+				   List<Function> body = mapping.getBody();
+				if (!body.contains(notnull)) {
+					body.add(notnull);
+				}
 			}
 		}
 	}
@@ -180,8 +183,7 @@ public class QuestUnfolder {
 	 */
 
 	public void normalizeEqualities() {
-		// ROMAN: double-check -- this call has no effect whatsoever
-		DatalogNormalizer.enforceEqualities(unfoldingProgram);		
+		unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
 	}
 	
 	/***

@@ -633,6 +633,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Variable var = ofac.getVariable(v.getName());
 			int direction = 0;
 			if (c.isAscending()) direction = 1;
+            else direction = 2;
 			pr.getQueryModifiers().addOrderCondition(var, direction);
 		}
 		te = order.getArg(); // narrow down the query
