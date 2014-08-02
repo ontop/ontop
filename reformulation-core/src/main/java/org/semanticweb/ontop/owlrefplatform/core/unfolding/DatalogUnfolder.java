@@ -424,7 +424,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//get the predicate
 				Predicate pred = predicatesInBottomUp.get(predIdx);
 				//get the father predicate
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
 				
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
@@ -450,7 +449,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					//We unfold every rule of the father atom that contains pred
 					for (CQIE fatherRule : fatherCollection) {
 						
-						
+						Predicate preFather =  fatherRule.getHead().getPredicate();
+
 						int queryIdx=workingList.indexOf(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
@@ -638,11 +638,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
-			
-//			System.out.println("Initial-----");
-//			for (CQIE rule: workingList){
-//				System.out.println(rule);
-//			}
+			log.debug("Unfolding w.r.t. Mappings:");
+
 			log.debug("Generating Dependency Graph!");
 			 depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
@@ -658,7 +655,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
 				Predicate pred = extensionalPredicates.get(predIdx);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
+				
 
 			
 				List<CQIE> result = new LinkedList<CQIE>();
@@ -679,6 +676,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					boolean parentIsLeftJoin = false;
 					
 					for (CQIE fatherRule:  fatherCollection) {
+						
+						Predicate preFather =  fatherRule.getHead().getPredicate();
 						List<Term> ruleTerms = getBodyTerms(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 						
@@ -699,10 +698,20 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							
 				
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
+							
+							log.debug(pred + " : " + ruleIndex.get(preFather).toString() );
+							
+							
 						} else{
-//							System.out.println("Empty: "+pred);
-							predicatesMightGotEmpty.add(preFather);
+							log.debug("Empty: "+pred);
+							if (!predicatesMightGotEmpty.contains(preFather)){
+								predicatesMightGotEmpty.add(preFather);
+								
+							}
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
+							
+							System.out.println(ruleIndex.get(preFather).size());
+							System.out.println(ruleIndexByBody.get(pred).size());
 						
 						}
 						if (result.size() >= 2) {
@@ -744,8 +753,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		}
 
 		/**
-		 * It search for the empty predicates that got empty during the unfolding of the existencional 
-		 * predicates, and either generate the right rule for the LJ, or delete de rules. 
+		 * It search for the empty predicates that got empty during the unfolding of the extensional  
+		 * predicates, and either generate the right rule for the LJ, or delete the rules. 
 		 * Returns the predicates that have been deleted.
 		 * 
 		 * @param workingList
@@ -884,10 +893,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 								List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
-
-				Collection<CQIE> rulesToAdd= ruleIndex.get(preFather);
-
+				
+				
+				//Adding the  predicate
 				Collection<CQIE> rulesToAdd2= ruleIndex.get(pred);
 
 				for (CQIE resultingRule: rulesToAdd2){
@@ -896,12 +904,18 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					}
 				}
 				
-				for (CQIE resultingRule: rulesToAdd){
-					if (!workingList.contains(resultingRule)){
-						workingList.add(resultingRule);
+				//Adding the  fathers
+				List<Predicate> preFatherList =  depGraph.getFatherPredicates(pred);
+			
+				for (Predicate predFa: preFatherList){
+					Collection<CQIE> rulesToAdd= ruleIndex.get(predFa);
+
+					for (CQIE resultingRule: rulesToAdd){
+						if (!workingList.contains(resultingRule)){
+							workingList.add(resultingRule);
+						}
 					}
 				}
-
 			}
 		}
 

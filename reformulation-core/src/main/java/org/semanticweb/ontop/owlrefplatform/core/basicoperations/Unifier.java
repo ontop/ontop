@@ -235,8 +235,9 @@ public class Unifier {
 			 */
 			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
-				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL){
-					replacement = replacement.getReferencedVariables().iterator().next();
+				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL && !(replacement instanceof ValueConstant)) {
+					Set<Variable> varSet = replacement.getReferencedVariables();
+					replacement = varSet.iterator().next();
 				}
 				if (replacement != null){
 					if(atom != null){
