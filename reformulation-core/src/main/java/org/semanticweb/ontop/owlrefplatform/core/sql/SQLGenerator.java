@@ -29,6 +29,7 @@ import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.NonBooleanOperationPredicate;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.NumericalOperationPredicate;
@@ -2196,7 +2197,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return result;
 			}
 
-		} else {
+		} else if ((functionSymbol instanceof NonBooleanOperationPredicate)&& (functionSymbol.equals(OBDAVocabulary.SPARQL_LANG)) ) { 
+		
+			
+			Variable var = (Variable) term1;
+			Collection<String> posList = index.getColumnReferences(var);
+			
+			if (posList == null || posList.size() == 0) {
+				throw new RuntimeException(
+						"Unbound variable found in WHERE clause: " + term);
+			}
+			
+			String langC = posList.iterator().next();
+			String langColumn = langC.replaceAll("`$", "Lang`");
+			return langColumn;
+			
+			
+			
+		}else {
 			String functionName = functionSymbol.toString();
 			if (functionName.equals(OBDAVocabulary.QUEST_CAST_STR)) {
 				String columnName = getSQLString(function.getTerm(0), index,

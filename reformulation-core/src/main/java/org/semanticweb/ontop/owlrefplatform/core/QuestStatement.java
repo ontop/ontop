@@ -555,7 +555,7 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
 			DatalogNormalizer.pullOutEqualities(rule);
-		//	System.out.println(rule);
+			System.out.println(rule);
 		}
 
 		
@@ -716,7 +716,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Query object created (or cached) will be set as jenaQueryContainer[0] so
 	 * that it can be used in other process after getUnfolding.
 	 * 
-	 * If the queyr is not already cached, it will be cached in this process.
+	 * If the query is not already cached, it will be cached in this process.
 	 * 
 	 * @param strquery
 	 * @param signatureContainer
@@ -812,7 +812,15 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				unfoldingTime = endTime - startTime;
 
-
+/*
+				DatalogProgram progClone = programAfterUnfolding.clone();
+			
+				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+			
+				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
+				
+	*/			
+				
 				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);

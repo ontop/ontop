@@ -685,33 +685,43 @@ public class ExpressionEvaluator {
 		Term emptyconstant = fac.getFunction(
 				fac.getDataTypePredicateString(), fac.getConstantLiteral("", COL_TYPE.STRING));
 
-		if (!(innerTerm instanceof Function)) {
+		
+		if (!(innerTerm instanceof Function) && !(innerTerm instanceof Variable)) {
 			return emptyconstant;
 		} 
-		Function function = (Function) innerTerm;
-		Predicate predicate = function.getFunctionSymbol();
+		
+		if (innerTerm instanceof Function){
 
-		if (!(predicate instanceof DataTypePredicate)) {
-			return null;
-		}
+			Function function = (Function) innerTerm;
+			Predicate predicate = function.getFunctionSymbol();
 
-		String datatype = predicate.toString();
-		if (!(datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))) {
-			return emptyconstant;
-		}
+			if (!(predicate instanceof DataTypePredicate)) {
+				return null;
+			}
 
-		if (function.getTerms().size() != 2) {
-			return emptyconstant;
-		} else {
-			Term parameter = function.getTerm(1);
-			if (parameter instanceof Variable) {
-				return fac.getFunction(fac.getDataTypePredicateString(),
-						parameter.clone());
-			} else if (parameter instanceof Constant) {
-				return fac.getFunction(fac.getDataTypePredicateString(),
-						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING));
+			String datatype = predicate.toString();
+			if (!(datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))) {
+				return emptyconstant;
+			}
+
+			if (function.getTerms().size() != 2) {
+				return emptyconstant;
+			} else {
+				Term parameter = function.getTerm(1);
+				if (parameter instanceof Variable) {
+					return fac.getFunction(fac.getDataTypePredicateString(),
+							parameter.clone());
+				} else if (parameter instanceof Constant) {
+					return fac.getFunction(fac.getDataTypePredicateString(),
+							fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING));
+				}
 			}
 		}
+		
+		if (innerTerm instanceof Variable){
+			return term.clone();
+		}
+		
 		return term;
 	}
 
@@ -724,7 +734,8 @@ public class ExpressionEvaluator {
 		/*
 		 * Evaluate the first term
 		 */
-		Term teval1 = eval(term.getTerm(0));
+		Term term2 = term.getTerm(0);
+		Term teval1 = eval(term2);
 		if (teval1 == null) {
 			return fac.getConstantFalse();
 		}
@@ -761,10 +772,23 @@ public class ExpressionEvaluator {
 			if (lang.getValue().equals(SELECT_ALL)) {
 				// The char * means to get all languages
 				return fac.getFunctionIsNotNull(var);
-			} else {
+			} 	else {
 				return fac.getFunctionEQ(var, lang);
 			}
 		} else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
+			
+			// Tackling this case LangMatches(lang(text),http://www.w3.org/2001/XMLSchema#string("en"))
+			Predicate pred = ((Function) term2).getFunctionSymbol();
+			Term inner = ((Function) innerTerm2).getTerm(0);
+
+			boolean isLang = pred.equals(OBDAVocabulary.SPARQL_LANG);
+			boolean isConst =  inner instanceof Constant;
+			if (isLang && isConst){
+				Constant lang = (Constant) inner;
+				return fac.getFunctionEQ(term2, lang);
+			}
+			
+			//the rest
 			Function f1 = (Function) teval1;
 			Function f2 = (Function) innerTerm2;
 			return evalLangMatches(fac.getLANGMATCHESFunction(f1.getTerm(0), 
