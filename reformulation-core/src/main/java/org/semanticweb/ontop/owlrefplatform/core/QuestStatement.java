@@ -457,6 +457,10 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
+		DatalogProgram eqProgram = ofac.getDatalogProgram();
+
+
+
 		try {
 			if (questInstance.isSemIdx()) {
 				translator.setSI();
@@ -467,33 +471,39 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Translated query: \n{}", program);
 
 			//TODO: cant we use here QuestInstance???
-			
-	
-			
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
-			
+
 			if (questInstance.isSemIdx()==true){
 				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
 			}
-			//Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+
+			//Flattening !!
 			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
 
-			
-			
-			log.debug("Flattened query: \n{}", program);
-			
-			
+			log.debug("Enforcing equalities...");
+			for (CQIE rule: program.getRules()){
+				CQIE rule2= DatalogNormalizer.enforceEqualities(rule, true);
+				eqProgram.appendRule(rule2);
+			}
+
+
+			log.debug("Flattened query: \n{}", eqProgram);
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-		
-				throw e;
-			
+
+			throw e;
+
 		}
 		log.debug("Replacing equivalences...");
-		program = validator.replaceEquivalences(program);
-		return program;
+		eqProgram = validator.replaceEquivalences(program);
+
+
+
+		return eqProgram;
 	}
 
 

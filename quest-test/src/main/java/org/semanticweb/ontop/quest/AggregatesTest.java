@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.reformulation.tests;
+package org.semanticweb.ontop.quest;
 
 /*
  * #%L
