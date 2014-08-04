@@ -83,8 +83,9 @@
 		<module>quest-rdb2rdf-compliance</module>
 
 		<module>quest-test</module>
-		
-	</modules>
+        <module>ontop-cli</module>
+
+    </modules>
 
 
 	<profiles>
