@@ -2589,7 +2589,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 								
 							}*/
 						}
-					} 
+					} else{ //no variables!
+						log.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
+						
+						mgu.remove(key);
+						exclude.add(value);
+					}
 				} else {
 					log.debug("value: "+value.toString());
 				}
