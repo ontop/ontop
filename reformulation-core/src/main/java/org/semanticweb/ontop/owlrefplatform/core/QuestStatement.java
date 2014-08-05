@@ -268,14 +268,8 @@ public class QuestStatement implements OBDAStatement {
 						// try {
 
 						set = sqlstatement.executeQuery(sql);
-
-						/*
-						 while (set.next()) {
-					          //set.getLong("id");
-					          String string = set.getString("val");
-					          System.out.println(string);
-					        }
-				*/
+					
+				
 					
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results

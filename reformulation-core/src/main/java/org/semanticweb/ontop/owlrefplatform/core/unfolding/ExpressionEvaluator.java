@@ -779,11 +779,22 @@ public class ExpressionEvaluator {
 			
 			// Tackling this case LangMatches(lang(text),http://www.w3.org/2001/XMLSchema#string("en"))
 			Predicate pred = ((Function) term2).getFunctionSymbol();
+			
 			Term inner = ((Function) innerTerm2).getTerm(0);
 
+			// Singling out the case  lang(http://www.w3.org/2000/01/rdf-schema#Literal(t2_1,t3_1))
+			Term arg = ((Function) term2).getTerm(0);
+			
+			boolean isLiteral = false;
+			if (arg instanceof Function){
+			//	if (((Function)arg).getArity()==2){
+					isLiteral=true;
+				//}
+			}
+			
 			boolean isLang = pred.equals(OBDAVocabulary.SPARQL_LANG);
 			boolean isConst =  inner instanceof Constant;
-			if (isLang && isConst){
+			if (isLang && isConst && !isLiteral){
 				Constant lang = (Constant) inner;
 				return fac.getFunctionEQ(term2, lang);
 			}
