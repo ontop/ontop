@@ -215,7 +215,7 @@ public class Unifier {
 		applyUnifier(terms, atom, unifier,0, isEquality);
 	}
 	/***
-	 * Applies the subsittution to all the terms in the list. Note that this
+	 * Applies the subsitution to all the terms in the list. Note that this
 	 * will not clone the list or the terms insdie the list.
 	 * 
 	 * @param terms

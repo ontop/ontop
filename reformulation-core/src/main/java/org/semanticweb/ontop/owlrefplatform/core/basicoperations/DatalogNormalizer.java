@@ -1,8 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 /*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano This source code is
- * available under the terms of the Affero General Public License v3.
  * #%L
  * ontop-reformulation-core
  * %%
@@ -24,7 +22,6 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
@@ -44,20 +40,14 @@ import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
-import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.utils.QueryUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+
+	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 /***
  * Implements several transformations on the rules of a datalog program that
@@ -255,13 +245,14 @@ public class DatalogNormalizer {
 
 	/***
 	 * Enforces all equalities in the query, that is, for every equivalence
-	 * class (among variables) defined by a set of equialities, it chooses one
-	 * representive variable and replaces all other variables in the equivalence
-	 * class for with the representative varible. For example, if the query body
+	 * class (among variables) defined by a set of equalities, it chooses one
+	 * representative variable and replaces all other variables in the equivalence
+	 * class with the representative variable. For example, if the query body
 	 * is R(x,y,z), x=y, y=z. It will choose x and produce the following body
 	 * R(x,x,x).
 	 * <p>
-	 * Note the process will also remove from the body all the equalities that
+     * We ignore the equalities with disjunctions. For example R(x,y,z), x=y OR y=z
+	 * Note the process will also remove from the body all the equalities that are
 	 * here processed.
 	 * 
 	 * 
@@ -278,28 +269,116 @@ public class DatalogNormalizer {
 			result = result.clone();
 
 		List<Function> body = result.getBody();
-		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
+		Map<Variable, Term> mgu = new HashMap<>();
 
 		/* collecting all equalities as substitutions */
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			//TODO: DOUBLE CHECK THIS FALSE
-			Unifier.applyUnifier(atom, mgu,false);
-			if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
-				Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
-				if (s == null) {
-					continue;
-				} else if (!(s instanceof NeutralSubstitution)) {
-					Unifier.composeUnifiers(mgu, s);
-				}
-				body.remove(i);
-				i -= 1;
-			}
-		}
+			Unifier.applyUnifier(atom, mgu);
+
+                if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                    Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
+                    if (s == null) {
+                        continue;
+                    } else if (!(s instanceof NeutralSubstitution)) {
+                        Unifier.composeUnifiers(mgu, s);
+                    }
+                    body.remove(i);
+                    i -= 1;
+                }
+                //search for nested equalities in AND function
+                else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){
+                    nestedEQSubstitutions(atom, mgu);
+
+                    //we remove the function if empty because all its terms were equalities
+                    if(atom.getTerms().isEmpty()){
+                        body.remove(i);
+                        i -= 1;
+                    }
+                    else{
+
+                        //if there is only a term left we remove the conjunction
+                        if(atom.getTerms().size()==1 ) {
+                            body.set(i, (Function) atom.getTerm(0));
+                        }
+                        else {
+                            //update the body with the new values
+                            body.set(i, atom);
+                        }
+
+                    }
+
+
+                }
+
+            }
+
 		result = Unifier.applyUnifier(result, mgu, false);
 		return result;
 	}
+
+
+    /**
+     * We search for equalities in conjunctions. This recursive methods explore AND functions and removes EQ functions,
+     * substituting the values using the class
+     * {@link Unifier#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
+     * @param atom the atom that can contain equalities
+     * @param mgu mapping between a variable and a term
+     */
+    private static void nestedEQSubstitutions(Function atom, Map<Variable, Term> mgu) {
+        List<Term> terms = atom.getTerms();
+        for (int i = 0; i < terms.size(); i++) {
+            Term t = terms.get(i);
+
+
+            if (t instanceof Function) {
+                Function t2 = (Function) t;
+                Unifier.applyUnifier(t2, mgu);
+
+                //in case of equalities do the substitution and remove the term
+                if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                    Substitution s = Unifier.getSubstitution(t2.getTerm(0), t2.getTerm(1));
+
+                    if (s == null) {
+                        continue;
+                    } else if (!(s instanceof NeutralSubstitution)) {
+                        Unifier.composeUnifiers(mgu, s);
+                    }
+
+                    terms.remove(i);
+                    i -= 1;
+
+
+                }
+                //consider the case of  AND function. Calls recursive method to consider nested equalities
+                else {
+                    if (t2.getFunctionSymbol() == OBDAVocabulary.AND) {
+                        nestedEQSubstitutions(t2, mgu);
+
+                        //we remove the function if empty because all its terms were equalities
+                        if (t2.getTerms().isEmpty()) {
+                            terms.remove(i);
+                            i -= 1;
+                        } else {
+
+                            //if there is only a term left we remove the conjunction
+                            //we remove and function and we set  atom equals to the term that remained
+                            if (t2.getTerms().size() == 1) {
+                                atom.setTerm(i, t2.getTerm(0));
+                            }
+
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+
+
+    }
 
 	/***
 	 * See {@link #enforceEqualities(CQIE, boolean)}

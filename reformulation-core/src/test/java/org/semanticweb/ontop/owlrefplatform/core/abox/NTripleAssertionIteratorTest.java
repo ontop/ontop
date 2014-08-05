@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 /*
  * #%L
@@ -31,6 +31,7 @@ import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
 import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
+import org.semanticweb.ontop.ontology.EquivalenceMap;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 
 import junit.framework.TestCase;
@@ -39,7 +40,7 @@ public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {
 		File testFile = new File("src/test/resources/test/lubm-data.n3");
 		URI fileURI = testFile.toURI();
-		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, new HashMap<Predicate, Description>());
+		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMap.getEmptyEquivalenceMap());
 		
 		int typeCount = 0;
 		int objPropCount = 0;

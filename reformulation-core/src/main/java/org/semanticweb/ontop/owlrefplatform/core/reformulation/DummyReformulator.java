@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.reformulation;
+package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 /*
  * #%L
@@ -23,6 +23,7 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.ontology.Ontology;
+import org.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 /***
  * A query reformulator that does nothing on the given query. 
@@ -44,21 +45,7 @@ public class DummyReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(Ontology ontology) {
-		// NO-OP
-		
+	public void setTBox(TBoxReasoner ontology, Ontology sigma) {
+		// NO-OP		
 	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-		// NO-OP
-		
-	}
-
-	@Override
-	public void initialize() {
-		// NO-OP
-		
-	}
-
 }

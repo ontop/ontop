@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 /*
  * #%L
@@ -43,7 +43,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.BNode;
@@ -382,30 +381,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private int maxURIId = -1;
 	
-	private Properties config;
-
-	private TBoxReasonerImpl reasonerDag;
+	private TBoxReasoner reasonerDag;
 
 	private SemanticIndexCache cacheSI;
 	
-	private Ontology aboxDependencies;
-
-	private Ontology ontology;
-
 	private boolean isIndexed;
 
 	private static final boolean mergeUniions = false;
 
-	// private HashMap<Integer, Boolean> emptynessIndexes = new HashMap<Integer,
-	// Boolean>();
-
 	private HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
 
 	private List<RepositoryChangedListener> changeList;
-
-	public RDBMSSIRepositoryManager() {
-		this(null);
-	}
 
 	public RDBMSSIRepositoryManager(Set<Predicate> vocabulary) {
 
@@ -420,14 +406,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.changeList.add(list);
 	}
 
-	// public HashMap<Predicate, Integer> getIndexes() {
-	// return indexes;
-	// }
-
-	// public HashMap<Integer, Boolean> getEmptynessIndexes() {
-	// return emptynessIndexes;
-	// }
-
 	public boolean getIsIndexed() {
 		return this.isIndexed;
 	}
@@ -441,42 +419,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.config = config;
 	}
 
-//	public DAGImpl getDAG() {
-//		return dag;
-//	}
-
 	@Override
-	public void setTBox(Ontology ontology) {
-
-		this.ontology = ontology;
-
-		log.debug("Ontology: {}", ontology.toString());
-
-		/*
-		 * 
-		 * PART 1: Collecting relevant nodes for mappings
-		 */
-
-		/*
-		 * Collecting relevant nodes for each role. For a Role P, the relevant
-		 * nodes are, the DAGNode for P, and the top most inverse children of P
-		 */
-		
-		reasonerDag = new TBoxReasonerImpl(ontology);
-		
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
-				
+	public void setTBox(TBoxReasoner reasonerDag) {
+		this.reasonerDag = reasonerDag;		
 		cacheSI = new SemanticIndexCache(reasonerDag);
-		
-
-		// try {
-		// GraphGenerator.dumpISA(dag, "no-cycles");
-		// GraphGenerator.dumpISA(pureIsa, "isa-indexed");
-		//
-		// } catch (IOException e) {
-		//
-		// }
-
 	}
 
 	@Override
@@ -1714,11 +1660,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
-	}
-	
-	@Override
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -1820,14 +1761,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-
 		Set<Property> roleNodes = new HashSet<Property>();
-//		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
-		for (Predicate rolepred : ontology.getRoles()) {
+		for (Equivalences<Property> set: reasonerDag.getProperties()) {
 
-			Property node = reasonerDag.getProperties().getVertex(ofac.createProperty(rolepred)).getRepresentative();
-			// We only map named roles
+			Property node = set.getRepresentative();
+			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
 			
@@ -3127,23 +3066,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				stm.setInt(3, SemanticIndexCache.CLASS_TYPE);
 				stm.addBatch();
 			}
-			try {
 			stm.executeBatch();
-			} catch (Exception e) {
-				
-			}
-			
+
 			for (String role : cacheSI.getIndexKeys(SemanticIndexCache.ROLE_TYPE)) {
 				stm.setString(1, role.toString());
 				stm.setInt(2, cacheSI.getIndex(role, SemanticIndexCache.ROLE_TYPE));
 				stm.setInt(3, SemanticIndexCache.ROLE_TYPE);
 				stm.addBatch();
 			}
-			try {
 			stm.executeBatch();
-			} catch (Exception e) {
-				
-			}
 			stm.clearBatch();
 			stm.close();
 

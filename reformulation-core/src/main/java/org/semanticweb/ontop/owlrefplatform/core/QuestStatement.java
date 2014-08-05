@@ -98,8 +98,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryVocabularyValidator validator = null;
 
-	private OBDAModel unfoldingOBDAModel = null;
-
 	private boolean canceled = false;
 	
 	private boolean queryIsParsed = false;
@@ -174,7 +172,6 @@ public class QuestStatement implements OBDAStatement {
 
 		this.sqlstatement = st;
 		this.validator = questinstance.vocabularyValidator;
-		this.unfoldingOBDAModel = questinstance.unfoldingOBDAModel;
 	}
 
 	private class QueryExecutionThread extends Thread {
@@ -317,7 +314,7 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 	}
- 
+
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
 	 * uri or var logic Returns the result set for the given query
@@ -443,7 +440,6 @@ public class QuestStatement implements OBDAStatement {
 		}
 		throw new OBDAException("Error, the result set was null");
 	}
-
 
 	/**
 	 * Translates a SPARQL query into Datalog dealing with equivalences and

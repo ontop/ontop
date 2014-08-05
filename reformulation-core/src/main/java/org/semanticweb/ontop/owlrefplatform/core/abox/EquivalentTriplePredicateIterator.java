@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 /*
  * #%L
@@ -36,15 +36,15 @@ import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
 	private Iterator<Assertion> originalIterator;
-	private Map<Predicate, Description> equivalenceMap;
+	private EquivalenceMap equivalenceMap;
 	
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, Map<Predicate, Description> equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
 		originalIterator = iterator;
 		equivalenceMap = equivalences;
 	}
@@ -57,42 +57,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	@Override
 	public Assertion next() {
 		Assertion assertion = originalIterator.next();
-		if (assertion instanceof ClassAssertion) {
-			ClassAssertion ca = (ClassAssertion) assertion;
-			Predicate concept = ca.getConcept();
-			ObjectConstant object = ca.getObject();
-			
-			Description description = equivalenceMap.get(concept);
-			if (description != null) {
-				return ofac.createClassAssertion(((OClass) description).getPredicate(), object);
-			}			
-		} else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			Predicate role = opa.getRole();
-			ObjectConstant object1 = opa.getFirstObject();
-			ObjectConstant object2 = opa.getSecondObject();
-			
-			Description description = equivalenceMap.get(role);
-			if (description != null) {
-				Property property = (Property) description;
-				if (property.isInverse()) {
-					return ofac.createObjectPropertyAssertion(property.getPredicate(), object2, object1);
-				} else {
-					return ofac.createObjectPropertyAssertion(property.getPredicate(), object1, object2);
-				}
-			}
-		} else if (assertion instanceof DataPropertyAssertion) {
-			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
-			Predicate attribute = dpa.getAttribute();
-			ObjectConstant object = dpa.getObject();
-			ValueConstant constant = dpa.getValue();
-			
-			Description description = equivalenceMap.get(attribute);
-			if (description != null) {
-				return ofac.createDataPropertyAssertion(((Property) description).getPredicate(), object, constant);
-			}
-		}
-		return assertion;
+		return equivalenceMap.getNormal(assertion);
 	}
 
 	@Override

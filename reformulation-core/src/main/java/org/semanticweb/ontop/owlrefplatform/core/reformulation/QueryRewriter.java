@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.reformulation;
+package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 /*
  * #%L
@@ -25,31 +25,18 @@ import java.io.Serializable;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public interface QueryRewriter extends Serializable {
 
 	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException;
 
 	/***
-	 * Sets the ontology that this rewriter should use to compute any
-	 * reformulation.
+	 * Sets the ontology and the ABox dependencies that this rewriter should 
+	 * use to compute any reformulation.
 	 * 
 	 * @param ontology
-	 */
-	public void setTBox(Ontology ontology);
-
-	/**
-	 * Sets the ABox dependencies that the reformulator can use to optimize the
-	 * reformulations (if it is able to do so).
-	 * 
 	 * @param sigma
 	 */
-	public void setCBox(Ontology sigma);
-
-	/***
-	 * Initializes the rewriter. This method must be called before calling
-	 * "rewrite" and after the TBox and CBox have been updated.
-	 */
-	public void initialize();
-
+	public void setTBox(TBoxReasoner ontology, Ontology sigma);
 }

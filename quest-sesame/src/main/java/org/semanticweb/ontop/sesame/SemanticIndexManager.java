@@ -61,33 +61,27 @@ public class SemanticIndexManager {
 
 	Ontology optimizedOntology = null;
 
-	private Map<Predicate, Description> equivalenceMaps;
+	private EquivalenceMap equivalenceMaps;
 
 	private RDBMSSIRepositoryManager dataRepository = null;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
 		ontologyClosure = QuestOWL.loadOntologies(tbox);
 
-		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(ontologyClosure);
-		equiOptimizer.optimize();
-
-		/* This generates a new TBox with a simpler vocabulary */
-		optimizedOntology = equiOptimizer.getOptimalTBox();
-
-		/*
-		 * This is used to simplify the vocabulary of ABox assertions and
-		 * mappings
-		 */
-		equivalenceMaps = equiOptimizer.getEquivalenceMap();
-
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontologyClosure);
+		// this is used to simplify the vocabulary of ABox assertions and mappings
+		equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
+		// generate a new TBox with a simpler vocabulary
+		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, ontologyClosure.getVocabulary());
+			
 		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
-		dataRepository.setTBox(optimizedOntology);
+		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
+		dataRepository.setTBox(optimizedDag);
 
 		log.debug("TBox has been processed. Ready to ");
-
 	}
 
 	public void restoreRepository() throws SQLException {
@@ -117,7 +111,7 @@ public class SemanticIndexManager {
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
 		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology),
-				equivalenceMaps);
+				equivalenceMaps.getInternalMap());
 
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);

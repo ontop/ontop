@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 /*
  * #%L
@@ -41,12 +41,13 @@ import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
 
 public class NTripleAssertionIterator implements Iterator<Assertion> {
 
-	private final Map<Predicate, Description> equivalenceMap;
+	private final EquivalenceMap equivalenceMap;
 	private final URI fileURI;
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
@@ -65,7 +66,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 	private final BufferedReader input;
 
-	public NTripleAssertionIterator(URI fileURI, Map<Predicate, Description> equivalenceMap) throws IOException {
+	public NTripleAssertionIterator(URI fileURI, EquivalenceMap equivalenceMap) throws IOException {
 		this.fileURI = fileURI;
 		this.equivalenceMap = equivalenceMap;
 
@@ -81,7 +82,8 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 	private Assertion constructAssertion() {
 		Assertion assertion = null;
 
-		Description replacementDescription = equivalenceMap.get(currentPredicate);
+		// TODO: to be replaced by a proper method call (Roman)
+		Description replacementDescription = equivalenceMap.getValue(currentPredicate);
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 		if (currentPredicate.getArity() == 1) {
@@ -248,7 +250,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 		return staReady;
 	}
 
-	private boolean isWS(char c) {
+	private static boolean isWS(char c) {
 		if (c == '\t' || c == ' ')
 			return true;
 		return false;
