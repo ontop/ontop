@@ -1,41 +1,29 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.owlrefplatform.core.abox.ABoxToFactRuleConverter;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
+import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
+import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
+import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
-import it.unibz.krdb.sql.DBMetadata;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class QuestUnfolder {
 
@@ -47,6 +35,9 @@ public class QuestUnfolder {
 	/* As unfolding OBDAModel, but experimental */
 	private DatalogProgram unfoldingProgram;
 
+     /* The list of predicates that are defined in multiple mappings */
+
+    private  Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
 	 * queries into Functions, used by the SPARQL translator.
@@ -59,6 +50,9 @@ public class QuestUnfolder {
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+
+
 
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
@@ -89,9 +83,23 @@ public class QuestUnfolder {
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
-	}
+        log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
+        unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
+
+
+
+
+    }
+
+    public Multimap<Predicate, Integer> processMultipleTemplatePredicates() {
+
+        multiplePredIdx = unfolder.processMultipleTemplatePredicates(unfoldingProgram);
+
+        return multiplePredIdx;
+
+
+    }
 	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
@@ -188,7 +196,7 @@ public class QuestUnfolder {
 	
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
-	 * @param equivalenceMaps 
+	 * @param assertions
 	 */
 	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions) {
 		
@@ -282,9 +290,7 @@ public class QuestUnfolder {
 	/***
 	 * Creates mappings with heads as "triple(x,y,z)" from mappings with binary
 	 * and unary atoms"
-	 * 
-	 * @param fac
-	 * @param unfoldingProgram
+	 *
 	 * @return
 	 */
 	private List<CQIE> generateTripleMappings() {
@@ -335,4 +341,9 @@ public class QuestUnfolder {
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
 		return unfolder.unfold(query, targetPredicate);
 	}
+
+
+    public UnfoldingMechanism getDatalogUnfolder(){
+        return unfolder;
+    }
 }

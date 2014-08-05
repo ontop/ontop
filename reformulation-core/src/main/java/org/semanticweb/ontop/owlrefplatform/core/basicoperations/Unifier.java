@@ -215,7 +215,7 @@ public class Unifier {
 		applyUnifier(terms, atom, unifier,0, isEquality);
 	}
 	/***
-	 * Applies the subsitution to all the terms in the list. Note that this
+	 * Applies the substitution to all the terms in the list. Note that this
 	 * will not clone the list or the terms insdie the list.
 	 * 
 	 * @param terms
@@ -236,7 +236,11 @@ public class Unifier {
 			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
 				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL){
-					replacement = replacement.getReferencedVariables().iterator().next();
+                    Set<Variable> referencedVariables = replacement.getReferencedVariables();
+                    if(referencedVariables.size() != 0) {
+                        replacement = referencedVariables.iterator().next();
+                    }
+
 				}
 				if (replacement != null){
 					if(atom != null){

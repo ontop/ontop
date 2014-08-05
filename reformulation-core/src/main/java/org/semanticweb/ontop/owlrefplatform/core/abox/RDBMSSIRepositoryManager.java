@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package org.semanticweb.ontop.owlrefplatform.core.abox;
 
 /*
  * #%L
@@ -74,13 +74,10 @@ import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.ontology.impl.OntologyImpl;
+import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Interval;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -381,6 +378,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private int maxURIId = -1;
 	
+	private Properties config;
+
 	private TBoxReasoner reasonerDag;
 
 	private SemanticIndexCache cacheSI;

@@ -1,4 +1,5 @@
-package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
+package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
+
 
 /*
  * #%L
@@ -20,16 +21,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 
 public class MappingVocabularyTranslator {

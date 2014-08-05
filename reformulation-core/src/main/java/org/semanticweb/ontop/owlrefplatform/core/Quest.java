@@ -20,79 +20,34 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * #L%
  */
 
-import java.io.Serializable;
-import java.net.URI;
-import java.security.InvalidParameterException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import net.sf.jsqlparser.JSQLParserException;
-
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
-import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.EvaluationEngine;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.DLRPerfectReformulator;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.DummyReformulator;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeRedReformulator;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
+import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.*;
 import org.semanticweb.ontop.owlrefplatform.core.sql.SQLGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
-import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -100,15 +55,19 @@ import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
-import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 import org.semanticweb.ontop.utils.MappingParser;
 import org.semanticweb.ontop.utils.MappingSplitter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import java.io.Serializable;
+import java.net.URI;
+import java.security.InvalidParameterException;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 //import com.hp.hpl.jena.query.Query;
 
@@ -151,9 +110,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* The active query rewriter */
 	protected QueryRewriter rewriter = null;
 
-	/* The active unfolding engine */
-	protected UnfoldingMechanism unfolder = null;
-
 	/* The active SQL generator */
 	protected SQLQueryGenerator datasourceQueryGenerator = null;
 
@@ -178,7 +134,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* The input OBDA model */
 	private OBDAModel unfoldingOBDAModel;
 	
-	private QuestUnfolder unfolder;
+	protected QuestUnfolder unfolder;
 	
 	/* The equivalence map for the classes/properties that have been simplified */
 	private EquivalenceMap equivalenceMaps;
@@ -188,7 +144,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * queries into Functions, used by the SPARQL translator.
 	 */
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
-	
+
 	/*
 	 * The list of predicates that are defined in multiple mappings
 	 */
@@ -849,10 +805,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			unfolder.setupUnfolder();
 
-			log.debug("Final set of mappings: \n{}", unfolder.getRules());
+            if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
+                multiplePredIdx = unfolder.processMultipleTemplatePredicates();
+			}
+
+
 			log.debug("DB Metadata: \n{}", metadata);
 
-			
+
 			/***
 			 * Setting up the TBox we will use for the reformulation
 			 */

@@ -2551,49 +2551,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 
 	
-				
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	/**
 	 * This method returns the predicates that define two different templates
 	 */

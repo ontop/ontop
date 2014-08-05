@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
+package org.semanticweb.ontop.owlrefplatform.core.reformulation;
 
 /*
  * #%L

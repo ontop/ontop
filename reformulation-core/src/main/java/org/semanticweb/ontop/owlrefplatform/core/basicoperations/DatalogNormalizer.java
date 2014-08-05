@@ -20,34 +20,17 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAQueryModifiers;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.utils.QueryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+import java.security.InvalidParameterException;
+import java.util.*;
 
 /***
  * Implements several transformations on the rules of a datalog program that
@@ -148,7 +131,8 @@ public class DatalogNormalizer {
 	 * the join (the single data atom plus possibly extra boolean conditions and
 	 * adds them to the node that is the parent of the join).
 	 * 
-	 * @param query
+	 * @param body
+     * @param isJoin
 	 * @return
 	 */
 	public static void unfoldJoinTrees(List body, boolean isJoin) {
@@ -275,7 +259,8 @@ public class DatalogNormalizer {
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			Unifier.applyUnifier(atom, mgu);
+            //TODO: DOUBLE CHECK THIS FALSE
+			Unifier.applyUnifier(atom, mgu, false);
 
                 if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
                     Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
@@ -322,7 +307,7 @@ public class DatalogNormalizer {
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions and removes EQ functions,
      * substituting the values using the class
-     * {@link Unifier#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
+     * {@link Unifier#getSubstitution(Term, Term)}
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term
      */
@@ -334,7 +319,8 @@ public class DatalogNormalizer {
 
             if (t instanceof Function) {
                 Function t2 = (Function) t;
-                Unifier.applyUnifier(t2, mgu);
+                //TODO: DOUBLE CHECK THIS FALSE
+                Unifier.applyUnifier(t2, mgu,false);
 
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
@@ -424,8 +410,7 @@ public class DatalogNormalizer {
 	 * JOINs, which generate wrong ON or WHERE conditions.
 	 * 
 	 * 
-	 * @param currentTerms
-	 * @param substitutions
+	 * @param query
 	 */
 	public static CQIE pullOutEqualities(CQIE query) {
 		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
@@ -866,7 +851,7 @@ public class DatalogNormalizer {
 	 * atom is unique.
 	 * 
 	 * @param atoms
-	 * @param branch
+	 * @param focusBranch
 	 * @return
 	 */
 	private static Set<Variable> getProblemVariablesForBranchN(List atoms, int focusBranch) {
@@ -1101,7 +1086,7 @@ public class DatalogNormalizer {
 	 * Takes an AND atom and breaks it into a list of individual condition
 	 * atoms.
 	 * 
-	 * @param atom
+	 * @param term
 	 * @return
 	 */
 	public static List<Term> getUnfolderTermList(Function term) {

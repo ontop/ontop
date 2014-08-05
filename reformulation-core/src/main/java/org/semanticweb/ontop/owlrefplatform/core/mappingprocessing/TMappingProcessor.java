@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
+package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
 
 /*
  * #%L

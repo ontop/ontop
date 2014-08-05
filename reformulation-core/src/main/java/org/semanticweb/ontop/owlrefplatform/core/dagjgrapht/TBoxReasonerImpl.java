@@ -1,5 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
-
+package org.semanticweb.ontop.owlrefplatform.core.dagjgrapht;
 /*
  * #%L
  * ontop-reformulation-core

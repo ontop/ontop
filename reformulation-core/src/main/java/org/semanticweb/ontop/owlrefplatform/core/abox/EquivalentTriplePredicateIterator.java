@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package org.semanticweb.ontop.owlrefplatform.core.abox;
 
 /*
  * #%L
