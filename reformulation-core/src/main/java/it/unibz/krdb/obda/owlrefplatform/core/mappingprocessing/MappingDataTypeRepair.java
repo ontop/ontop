@@ -141,7 +141,7 @@ public class MappingDataTypeRepair {
 			prepareIndex(rule);
 			Function atom = rule.getHead();
 			Predicate predicate = atom.getFunctionSymbol();
-			if (!predicate.isDataProperty()) {
+			if (!(predicate.getArity() == 2)) { // we check both for data and object property
 				continue;
 			}
 
