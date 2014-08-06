@@ -513,7 +513,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								depGraph.addRuleToRuleIndex(preFather, newquery);
 							
 								
-								//Delete the rules from workingList that have been touched
+								//adding the rules from workingList that have been touched
 								workingList.add(queryIdx, newquery);
 
 							
