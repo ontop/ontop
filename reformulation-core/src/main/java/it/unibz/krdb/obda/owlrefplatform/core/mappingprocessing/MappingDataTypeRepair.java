@@ -37,12 +37,10 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.VocabularyExtractor;
 import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -90,7 +88,7 @@ public class MappingDataTypeRepair {
 
     }
 
-    public void getDatatypeFromOntology(){
+    public void getDataTypeFromOntology(){
 
 
         /*
@@ -134,7 +132,7 @@ public class MappingDataTypeRepair {
 
     public void insertDataTyping(DatalogProgram mappingDatalog) throws OBDAException {
 
-        getDatatypeFromOntology();
+        getDataTypeFromOntology();
 
 		List<CQIE> mappingRules = mappingDatalog.getRules();
 		for (CQIE rule : mappingRules) {
@@ -181,8 +179,16 @@ public class MappingDataTypeRepair {
 
                 Variable variable = (Variable) term;
 
-                //Check if a datatype was already assigned in the ontology
-                Predicate dataTypeFunctor = dataTypesMap.get(predicate);
+                Predicate dataTypeFunctor = null;
+
+                //check in the ontology if we have already information about the datatype
+                if (predicate.isDataTypePredicate()){
+
+                    Function normal = equivalenceMap.getNormal(atom);
+                    //Check if a datatype was already assigned in the ontology
+                    dataTypeFunctor= dataTypesMap.get(normal.getFunctionSymbol());
+
+                }
 
                 // If the term has no data-type predicate then by default the
                 // predicate is created following the database metadata of
@@ -210,14 +216,14 @@ public class MappingDataTypeRepair {
 		Object[] o = list.get(0);
 		Function atom = (Function) o[0];
 		Integer pos = (Integer) o[1];
-		
+
 		Predicate functionSymbol = atom.getFunctionSymbol();
 		String tableName = functionSymbol.toString();
 		DataDefinition tableMetadata = metadata.getDefinition(tableName);
 
 		Attribute attribute = tableMetadata.getAttribute(pos);
 
-		return TypeMapper.getInstance().getPredicate(attribute.getType());		
+		return TypeMapper.getInstance().getPredicate(attribute.getType());
 	}
 
 	private void prepareIndex(CQIE rule) {
