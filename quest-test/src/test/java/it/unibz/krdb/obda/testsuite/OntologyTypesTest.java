@@ -21,10 +21,13 @@ package it.unibz.krdb.obda.testsuite;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
@@ -91,16 +94,16 @@ public class OntologyTypesTest{
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
 						"select * {?x :number ?y}";
 		try {
-			executeQueryAssertResults(query1, st, 2);
+			executeQueryAssertResults(query1, st, 3);
 			
 		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
+            st.close();
+            e.printStackTrace();
+            assertTrue(false);
 
-			} catch (Exception e) {
-				st.close();
-			}
+
+		} finally {
+
 			conn.close();
 			reasoner.dispose();
 		}
@@ -121,25 +124,15 @@ public class OntologyTypesTest{
 		rs.close();
 		assertEquals(expectedRows, count);
 	}
-	
-//	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-//		List<OWLAxiom> rs = st.executeGraph(query);
-//		int count = 0;
-//		Iterator<OWLAxiom> axit = rs.iterator();
-//		while (axit.hasNext()) {
-//			System.out.println(axit.next());			
-//			count++;
-//		}		
-//		assertEquals(expectedRows, count);
-//	}
+
 
 	@Test
 	public void testOntologyType() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}
