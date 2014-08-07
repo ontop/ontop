@@ -807,7 +807,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			unfolder.setupUnfolder();
 
-			log.debug("Final set of mappings: \n{}", unfolder.getRules());
 			log.debug("DB Metadata: \n{}", metadata);
 
 			

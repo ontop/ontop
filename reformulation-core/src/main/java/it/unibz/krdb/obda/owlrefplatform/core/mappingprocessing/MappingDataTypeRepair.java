@@ -32,10 +32,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.impl.*;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -45,6 +42,8 @@ import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -62,7 +61,11 @@ public class MappingDataTypeRepair {
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
+    /***
+     * General flags and fields
+     */
 
+    private Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
 
     /**
      * Constructs a new mapping data type resolution. The object requires an
@@ -134,6 +137,7 @@ public class MappingDataTypeRepair {
 
         getDataTypeFromOntology();
 
+
 		List<CQIE> mappingRules = mappingDatalog.getRules();
 		for (CQIE rule : mappingRules) {
 			prepareIndex(rule);
@@ -158,23 +162,34 @@ public class MappingDataTypeRepair {
 				if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = equivalenceMap.getNormal(atom);
-                    Predicate datatype = dataTypesMap.get(normal.getFunctionSymbol());
+                    Predicate dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
                     //if a datatype was already assigned in the ontology
-                    if(datatype!=null){
+                    if(dataType!=null){
 
                         //check that no datatype mismatch is present
-                        if(!functionSymbol.equals(datatype)){
+                        if(!functionSymbol.equals(dataType)){
 
                                 throw new OBDAException("Ontology datatype for " + predicate + " does not confirm with datatype in mappings");
 
                         }
+                    }
+                    if(isBooleanDB2(dataType)){
+
+                        Variable variable = (Variable)  normal.getTerm(1);
+
+                        //No Boolean datatype in DB2 database, the value in the database is used
+                        dataType = getDataTypeFunctor( variable);
+
+                        Term newTerm = dfac.getFunction( dataType, variable);
+                        atom.setTerm(1, newTerm);
                     }
 
 				} else {
 					throw new OBDAException("Unknown data type predicate: "
 							+ functionSymbol.getName());
 				}
+
 			} else if (term instanceof Variable) {
 
                 Variable variable = (Variable) term;
@@ -182,18 +197,17 @@ public class MappingDataTypeRepair {
                 Predicate dataTypeFunctor = null;
 
                 //check in the ontology if we have already information about the datatype
-                if (predicate.isDataTypePredicate()){
 
-                    Function normal = equivalenceMap.getNormal(atom);
+                Function normal = equivalenceMap.getNormal(atom);
                     //Check if a datatype was already assigned in the ontology
-                    dataTypeFunctor= dataTypesMap.get(normal.getFunctionSymbol());
+                dataTypeFunctor= dataTypesMap.get(normal.getFunctionSymbol());
 
-                }
+
 
                 // If the term has no data-type predicate then by default the
                 // predicate is created following the database metadata of
                 // column type.
-                if(dataTypeFunctor==null){
+                if(dataTypeFunctor==null || isBooleanDB2(dataTypeFunctor) ){
 
                     dataTypeFunctor = getDataTypeFunctor(variable);
                 }
@@ -204,6 +218,22 @@ public class MappingDataTypeRepair {
 		}
 	}
 
+    private boolean isBooleanDB2(Predicate dataType){
+
+        if(metadata.getDatabaseProductName().contains("DB2")){
+
+
+            if(dataType.equals(OBDAVocabulary.XSD_BOOLEAN)){
+
+                log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
+                return true;
+
+            }
+
+        }
+        return false;
+
+    }
 //	private boolean isDataProperty(Predicate predicate) {
 //		return predicate.getArity() == 2 && predicate.getType(1) == Predicate.COL_TYPE.LITERAL;
 //	}

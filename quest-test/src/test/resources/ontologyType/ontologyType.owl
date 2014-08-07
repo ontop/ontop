@@ -53,7 +53,7 @@
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty IRI="#number"/>
-        <Datatype abbreviatedIRI="xsd:long"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
     </DataPropertyRange>
 </Ontology>
 

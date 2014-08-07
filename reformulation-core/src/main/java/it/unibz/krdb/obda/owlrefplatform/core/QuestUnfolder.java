@@ -87,9 +87,11 @@ public class QuestUnfolder {
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
-		unfoldingProgram.appendRule(generateTripleMappings());		
+		unfoldingProgram.appendRule(generateTripleMappings());
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
+
+        log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
@@ -276,7 +278,6 @@ public class QuestUnfolder {
 		
 		setupUnfolder();
 
-		log.debug("Final set of mappings: \n{}", unfoldingProgram);	
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 	}
 
