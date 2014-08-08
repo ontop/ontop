@@ -20,21 +20,11 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.CalendarLiteralImpl;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -56,7 +46,6 @@ import org.openrdf.query.algebra.Extension;
 import org.openrdf.query.algebra.ExtensionElem;
 import org.openrdf.query.algebra.Filter;
 import org.openrdf.query.algebra.Group;
-import org.openrdf.query.algebra.GroupElem;
 import org.openrdf.query.algebra.IsBNode;
 import org.openrdf.query.algebra.IsLiteral;
 import org.openrdf.query.algebra.IsURI;
@@ -74,7 +63,6 @@ import org.openrdf.query.algebra.Order;
 import org.openrdf.query.algebra.OrderElem;
 import org.openrdf.query.algebra.Projection;
 import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.Reduced;
 import org.openrdf.query.algebra.Regex;
 import org.openrdf.query.algebra.SameTerm;
@@ -120,8 +108,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SparqlAlgebraToDatalogTranslator {
 
-	
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+    private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	private TermComparator comparator = new TermComparator();
 
@@ -263,10 +250,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		List<ExtensionElem> elements = extend.getElements();
 		Set<Variable> atom2VarsSet = null;
 
+        /**
+         * TODO: why are they outside the LOOP??
+         * Will we really want to accumulate variables???
+         */
 		List<Term> atom2VarsList = new LinkedList<Term>();
 		List<Term> atom1VarsList = new LinkedList<Term>();
 
-		
 		for (ExtensionElem el: elements) {
 			Variable var = null;
 			
@@ -281,6 +271,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			
 			atom1VarsList.add(var);
 			Collections.sort(atom1VarsList, comparator);
+
+            /**
+             * Only variable names, no aggregation formula.
+             */
+            List<Term> atom1Variables = new ArrayList<>(atom1VarsList);
+
 			int indexOfvar = atom1VarsList.indexOf(var);
 			atom1VarsList.set(indexOfvar,term);
 			Predicate leftAtomPred = ofac.getPredicate("ans" + (i),
@@ -296,24 +292,80 @@ public class SparqlAlgebraToDatalogTranslator {
 			Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
 
 			CQIE newrule = ofac.getCQIE(head, rightAtom);
+			
+			/**
+			 * When there is an aggregate in the head,
+			 * the arity of the atom is reduced.
+			 * 
+			 * This atom usually appears in parent rules, so 
+			 * its arity must be fixed in these rules.
+			 */
+			if (vexp instanceof AggregateOperator) {
+				pr = updateArity(leftAtomPred, atom1Variables, pr);
+			}
 			pr.appendRule(newrule);
 		}
-		/*
+
+		/**
 		 * Translating the rest
 		 */
-	
-		
-			List<Variable> vars1 = new LinkedList<Variable>();
-			if (!atom2VarsList.isEmpty()){
-				for (Term var1 : atom2VarsList)
-					vars1.add((Variable) var1);
-				translate(vars1, subte, pr, 2 * i, varcount);
-			} else{
-				translate(vars, subte, pr, i , varcount);
-			}
-	}		    
+        List<Variable> vars1 = new LinkedList<Variable>();
+        if (!atom2VarsList.isEmpty()){
+            for (Term var1 : atom2VarsList)
+                vars1.add((Variable) var1);
+            translate(vars1, subte, pr, 2 * i, varcount);
+        } else{
+            translate(vars, subte, pr, i , varcount);
+        }
+	}
 
-	
+    /**
+     * In some cases (like when aggregates are used), we cannot know in advance the final arity
+     * of a given atom.
+     * The strategy adopted here is to update this arity a posteriori if needed.
+     *
+     * For a given "ans_xy" function symbol, we look at all the already existing rules in the Datalog program
+     * and replace each atom that use this function symbol.
+     *
+     * @param functionSymbol Read-only.
+     * @param atomTerms terms to use to update atoms. Read-only.
+     * @param programToUpdate Will be modified. Also returned.
+     * @return the updated Datalog program
+     */
+	private DatalogProgram updateArity(Predicate functionSymbol, List<Term> atomTerms,
+			DatalogProgram programToUpdate) {
+
+        // New atom
+		Function updatedAtom = ofac.getFunction(functionSymbol, atomTerms);
+
+        /**
+         * Looks at all the already existing rules (mostly parent rules)
+         */
+		for(CQIE rule : programToUpdate.getRules()) {
+
+            /**
+             * Looks at each body atom
+             */
+            List<Function> bodyAtoms = rule.getBody();
+            for(int i = 0; i < bodyAtoms.size(); i++) {
+                /**
+                 * Replaces the atom if it uses the same answer function symbol
+                 */
+                Predicate localFunctionSymbol = bodyAtoms.get(i).getFunctionSymbol();
+                if (localFunctionSymbol.equals(functionSymbol)) {
+                    bodyAtoms.set(i, updatedAtom);
+                }
+            }
+            /**
+             * The rule is updated by side-effect (some people call it a bug).
+             * Unfortunately, we cannot call rule.updateBody(bodyAtoms) ...
+             * 
+             * TODO: stop this practice.
+             */
+        }
+		return programToUpdate;
+	}
+
 	private void translate(List<Variable> vars, Union union,
 			DatalogProgram pr, long i, int[] varcount) {
 		TupleExpr left = union.getLeftArg();
@@ -540,98 +592,63 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 	}
 
-//	private void translate(List<Variable> vars, Projection project,
-//			DatalogProgram pr, long i, int[] varcount) {
-//
-//		TupleExpr te = project.getArg();
-//		Set<Variable> nestedVars = null;
-//		Set<Variable> bodyatomVarsSet = null;
-//		if (te instanceof Extension) {
-//			nestedVars = getBindVariables(((Extension)te).getElements());
-//			bodyatomVarsSet = getBindVariables(((Extension)te).getElements());
-//		} else {
-//			nestedVars = getVariables(te);
-//			bodyatomVarsSet = getVariables(te);
-//		}
-//
-//		List<Term> projectedVariables = new LinkedList<Term>();
-//		for (ProjectionElem var : project.getProjectionElemList().getElements()) {
-//			projectedVariables.add(ofac.getVariable(var.getSourceName()));
-//		}
-//
-//		Predicate predicate = ofac.getPredicate("ans" + i,
-//				projectedVariables.size());
-//		Function head = ofac.getFunction(predicate, projectedVariables);
-//
-//		Predicate pbody = ofac.getPredicate("ans" + (i + 1), nestedVars.size());
-//		;
-//
-//		List<Term> bodyatomVarsList = new LinkedList<Term>();
-//		bodyatomVarsList.addAll(bodyatomVarsSet);
-//		Collections.sort(bodyatomVarsList, comparator);
-//
-//		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
-//		CQIE cq = ofac.getCQIE(head, bodyAtom);
-//		pr.appendRule(cq);
-//
-//		/* Continue the nested tree */
-//
-//		vars = new LinkedList<Variable>();
-//		for (Term var : bodyatomVarsList) {
-//			vars.add((Variable) var);
-//		}
-//		translate(vars, te, pr, i + 1, varcount);
-//	}
-	
+    /**
+     * Projection SPARQL node.
+     *
+     * Creates one rule for the projection and adds it into the Datalog Program.
+     *
+     * In this rule, there is 1 head atom and 1 body atom.
+     *
+     * Basically, the head atom usually takes less arguments than the body atom
+     *   --> that is the most common effect of the projection.
+     *
+     * Pursues by translating its child nodes (from the SPARQL tree).
+     */
 	private void translate(List<Variable> vars, Projection project,
 			DatalogProgram pr, long i, int[] varcount) {
 
 		TupleExpr te = project.getArg();
 
-		List<Term> projectedVariables = new LinkedList<Term>();
+        // Projected variables --> for the head atom
+		List<Variable> projectedVariables = new ArrayList<>();
 		for (ProjectionElem var : project.getProjectionElemList().getElements()) {
 			projectedVariables.add(ofac.getVariable(var.getSourceName()));
 		}
 
+        // All variables --> for the body atom
+        List<Variable> allVariables = new ArrayList<>(getVariables(te));
+
+        /**
+         * Head: considers only the projected variables.
+         */
 		Predicate predicate = ofac.getPredicate("ans" + i,
 				projectedVariables.size());
-		Function head = ofac.getFunction(predicate, projectedVariables);
+		Function headAtom = ofac.getFunction(predicate, new ArrayList<Term>(projectedVariables));
 
-		
-		Set<Variable> bodyatomVarsSet = new HashSet<Variable>();
-		List<Term> bodyatomVarsList = new LinkedList<Term>();
-		Predicate pbody =null;
-		
-		
-		/*
-		 * We need to check this. It is a bit hacky. Does the BIND work??
-		 * TODO: Does the BIND work??
-		 */
-		if (te instanceof Extension)
-		{
-			pbody = ofac.getPredicate("ans" + (i + 1), projectedVariables.size());
-			bodyatomVarsList = new LinkedList<Term>();
-			bodyatomVarsList.addAll(projectedVariables);
-		}else{
-			bodyatomVarsSet = getVariables(te);
-			pbody = ofac.getPredicate("ans" + (i + 1), bodyatomVarsSet.size());
-			bodyatomVarsList = new LinkedList<Term>();
-			bodyatomVarsList.addAll(bodyatomVarsSet);
-		}
-		
-		Collections.sort(bodyatomVarsList, comparator);
-		
-		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
-		CQIE cq = ofac.getCQIE(head, bodyAtom);
-		pr.appendRule(cq);
+        /**
+         * Body atom (just one).
+         * In many cases, the body atom takes more arguments than the head one.
+         *
+         * For this body atom, we don't know yet the right arity because
+         * we don't know if some aggregates are used or not.
+         *
+         * For the moment, we do like if there were no aggregate so all the variables are arguments
+         * of the atom.
+         * If latter, we find some aggregates, the atom arity will be updated.
+         */
+        List<Term> bodyAtomTerms = new ArrayList<Term>(allVariables);
+        Collections.sort(bodyAtomTerms, comparator);
 
-		/* Continue the nested tree */
+        Predicate bodyAtomFunctionSymbol = ofac.getPredicate("ans" + (i + 1), allVariables.size());
+        Function bodyAtom = ofac.getFunction(bodyAtomFunctionSymbol, bodyAtomTerms);
 
-		vars = new LinkedList<Variable>();
-		for (Term var : bodyatomVarsList) {
-			vars.add((Variable) var);
-		}
-		translate(vars, te, pr, i + 1, varcount);
+        CQIE newRule = ofac.getCQIE(headAtom, bodyAtom);
+		pr.appendRule(newRule);
+
+		/**
+         * Continue the nested tree
+         */
+		translate(allVariables, te, pr, i + 1, varcount);
 	}
 
 	private void translate(List<Variable> vars, Slice slice,
