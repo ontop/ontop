@@ -218,10 +218,10 @@ public class JDBCUtility implements Serializable {
 			case MYSQL:
 			case H2:
 			case PGSQL:
-			case DB2:
-			case TEIID:
+        	case TEIID:
 				sql = "TRUE";
 				break;
+            case DB2:
 			case ORACLE:
 				sql = "1";
 				break;
@@ -234,10 +234,10 @@ public class JDBCUtility implements Serializable {
 			case MYSQL:
 			case H2:
 			case PGSQL:
-			case DB2:
 			case TEIID:
 				sql = "FALSE";
 				break;
+            case DB2:
 			case ORACLE:
 				sql = "0";
 				break;
