@@ -38,13 +38,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.URIConstantImpl;
-import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.impl.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -266,8 +260,8 @@ public class Unifier {
 	 * If a term is an ObjectVariableImpl it can't have nested
 	 * ObjectVariableImpl terms.
 	 * 
-	 * @param firstAtom
-	 * @param secondAtom
+	 * @param first
+	 * @param second
 	 * @return
 	 */
 	public static Map<Variable, Term> getMGU(Function first,
@@ -328,9 +322,23 @@ public class Unifier {
 				 */
 				Function fterm1 = (Function) term1;
 				Function fterm2 = (Function) term2;
-				if (!fterm1.getFunctionSymbol().equals(
-						fterm2.getFunctionSymbol())) {
-					return null;
+
+                Predicate functionSymbol1 = fterm1.getFunctionSymbol();
+                Predicate functionSymbol2 = fterm2.getFunctionSymbol();
+
+				if (!functionSymbol1.equals(functionSymbol2)) {
+
+                    if(fterm1.isDataTypeFunction() && fterm2.isDataTypeFunction()){
+
+                        //the 2 values are equal also in the case that they are both datatype and one of the two is a rdfs:literal
+                        if (!(functionSymbol1.equals(OBDAVocabulary.RDFS_LITERAL)
+                                || functionSymbol2.equals(OBDAVocabulary.RDFS_LITERAL)) ){
+
+                            return null;
+                        }
+
+
+                    }
 				}
 				if (fterm1.getTerms().size() != fterm2.getTerms().size()) {
 					return null;
@@ -396,10 +404,8 @@ public class Unifier {
 	 * 
 	 * {x/y, m/y} composed with y/z is equal to {x/z, m/z, y/z}
 	 * 
-	 * @param The
-	 *            unifier that will be composed
-	 * @param The
-	 *            substitution to compose
+	 * @param unifier The unifier that will be composed
+	 * @param s The substitution to compose
 	 */
 	public static void composeUnifiers(Map<Variable, Term> unifier,
 			Substitution s) {

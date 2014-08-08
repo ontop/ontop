@@ -220,7 +220,10 @@ public class MappingDataTypeRepair {
 
     private boolean isBooleanDB2(Predicate dataType){
 
-        if(metadata.getDriverName().contains("DB2")){
+        String databaseName = metadata.getDatabaseProductName();
+        String databaseDriver = metadata.getDriverName();
+        if(databaseName!= null && databaseName.contains("DB2")
+                || databaseDriver != null && databaseDriver.contains("IBM")){
 
 
             if(dataType.equals(OBDAVocabulary.XSD_BOOLEAN)){
