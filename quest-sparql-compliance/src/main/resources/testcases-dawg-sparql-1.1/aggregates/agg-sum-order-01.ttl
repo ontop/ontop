@@ -1,0 +1,23 @@
+# Non-standard query (created our own means)
+@prefix : <http://example/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:org-1 :affiliates :author-1, :author-11 .
+:org-2 :affiliates :author-2, :author-12 .
+:org-3 :affiliates :author-3, :author-13 .
+
+:author-1 :writesBook :book-a1-01, :book-a1-02 .
+:author-2 :writesBook :book-a2-01 .
+
+:author-3 :writesBook :book-a3-01 .
+:author-13 :writesBook :book-a13-01 .
+
+:book-a1-01 :price "2"^^xsd:integer .
+:book-a1-02 :price "0"^^xsd:integer .
+
+:book-a2-01 :price "100"^^xsd:integer .
+
+#:book-a3-01 :price 0.5 .
+#:book-a13-01 :price "0.6"^^xsd:decimal .
+:book-a3-01 :price "2"^^xsd:integer .
+:book-a3-01 :price "4"^^xsd:integer .
