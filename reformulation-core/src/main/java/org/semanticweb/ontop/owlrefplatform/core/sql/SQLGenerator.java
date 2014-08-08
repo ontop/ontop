@@ -1579,10 +1579,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 			
 			if (functionString.equals("Sum")) {
-				return (String.format(typeStr, 6, varName));
-//				ov = (Function) ov.getTerm(0);
-//				function = ov.getFunctionSymbol();
-//				functionString = function.getName();
+//				return (String.format(typeStr, 6, varName));
+				ov = (Function) ov.getTerm(0);
+				function = ov.getFunctionSymbol();
+				functionString = function.getName();
 			}
 			if (functionString.equals("Avg")) {
 				return (String.format(typeStr, 6, varName));
