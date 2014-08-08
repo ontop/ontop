@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.obda;
+package org.semanticweb.ontop.sesame.tests.general;
 
 /**
  * Test case for the IMDB database see wiki Example_MovieOntology
