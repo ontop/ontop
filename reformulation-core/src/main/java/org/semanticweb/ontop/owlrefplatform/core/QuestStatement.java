@@ -528,14 +528,14 @@ public class QuestStatement implements OBDAStatement {
 		
 		//TODO: optimise this????
 		if(unfolder.getMultiplePredList().isEmpty()){
-			List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
+	//		List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
 
 //			for (CQIE rule: newTypedRules){
 //				System.out.println(rule);
 //			}
 						//TODO: can we avoid using this intermediate variable???
-			unfolding.removeAllRules();
-			unfolding.appendRule(newTypedRules);
+		//	unfolding.removeAllRules();
+			//unfolding.appendRule(newTypedRules);
 			log.debug("Types Pushed: \n{}",unfolding);
 
 			
