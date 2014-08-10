@@ -568,9 +568,7 @@ public class DatalogNormalizer {
 		for (int i = 0; i < currentTerms.size(); i++) {
 
 			Term term = (Term) currentTerms.get(i);
-			if	(term.toString().contains("t5_29")) {
-				System.out.println("ups");
-			}
+		
 
 			/*
 			 * We don't expect any functions as terms, data atoms will only have
@@ -750,9 +748,7 @@ public class DatalogNormalizer {
 		Variable var1 = (Variable) subTerm;
 		Variable var2 = (Variable) substitutions.get(var1);
 
-		if (var1.toString().equals("t5_2")){
-			System.out.println("Here");
-		}
+
 		if (var2 == null) {
 			/*
 			 * No substitution exists, hence, no action but generate a new
@@ -791,9 +787,7 @@ public class DatalogNormalizer {
 				//record the change
 				substitutionsTotal.put(var2, newVariable);
 
-				if (newVariable.toString().equals("t5_29")){
-					System.out.println("la cago");
-				}
+				
 				
 				//create the equality
 				Function equality = fac.getFunctionEQ(var2, newVariable);
@@ -1238,7 +1232,6 @@ public class DatalogNormalizer {
 
 				// I changed this, booleans were not being added !!
 				if (secondDataAtomFound && !isLeftJoin) {
-					System.err.println("DatalogNormalizer: I changed this!!");
 					tempTerms.addAll(currentBooleans);
 				}
 
