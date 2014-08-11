@@ -549,7 +549,7 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
 			DatalogNormalizer.pullOutEqualities(rule);
-			System.out.println(rule);
+			//System.out.println(rule);
 		}
 
 		

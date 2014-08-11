@@ -711,8 +711,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							}
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
 							
-							System.out.println(ruleIndex.get(preFather).size());
-							System.out.println(ruleIndexByBody.get(pred).size());
+							//System.out.println(ruleIndex.get(preFather).size());
+//							System.out.println(ruleIndexByBody.get(pred).size());
 						
 						}
 						if (result.size() >= 2) {
