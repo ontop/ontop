@@ -1,0 +1,24 @@
+@prefix test: <http://www.w3.org/2006/03/test-description#> .
+@prefix dcterms: <http://purl.org/dc/elements/1.1/> .
+@prefix rdb2rdftest: <http://purl.org/NET/rdb2rdf-test#> .
+@base <http://www.w3.org/2001/sw/rdb2rdf/test-cases/#> .
+
+<d009> a rdb2rdftest:DataBase;
+	dcterms:title "Two tables, a primary key, a foreign key" ;
+	dcterms:identifier "D009-2tables1primarykey1foreignkey" ;
+	rdb2rdftest:sqlScriptFile "create.sql";
+	rdb2rdftest:relatedTestCase <tc0009a>; ## Join mapping - need to rename variables
+.
+
+
+<tc0009a> a rdb2rdftest:R2RML ;	
+	dcterms:title "Generation of triples from foreign key relations" ; 
+	dcterms:identifier "R2RMLTC0009a" ;
+	test:purpose "Test foreign key relationships among logical tables" ;
+	test:specificationReference "#foreign-key" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d009> ;
+	rdb2rdftest:output "mappeda.nq" ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:mappingDocument "r2rmla.ttl" ;
+.
