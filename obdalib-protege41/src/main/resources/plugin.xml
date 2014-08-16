@@ -162,12 +162,8 @@
 	<!-- Reasoner plugins -->
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
-<<<<<<< HEAD
     <name value="Quest 2.0.0 (ontop)"/>
     <class value="org.semanticweb.ontop.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
-=======
-    <name value="Quest 1.12.0 (ontop)"/>
-    <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
->>>>>>> develop
+
   </extension>
 </plugin>
