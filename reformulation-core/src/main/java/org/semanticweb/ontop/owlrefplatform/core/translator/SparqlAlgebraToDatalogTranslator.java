@@ -637,7 +637,6 @@ public class SparqlAlgebraToDatalogTranslator {
          * If latter, we find some aggregates, the atom arity will be updated.
          */
         List<Term> bodyAtomTerms = new ArrayList<Term>(allVariables);
-        Collections.sort(bodyAtomTerms, comparator);
 
         Predicate bodyAtomFunctionSymbol = ofac.getPredicate("ans" + (i + 1), allVariables.size());
         Function bodyAtom = ofac.getFunction(bodyAtomFunctionSymbol, bodyAtomTerms);
