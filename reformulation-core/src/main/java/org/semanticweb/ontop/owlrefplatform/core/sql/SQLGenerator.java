@@ -1291,23 +1291,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	// return variable SQL data type
 	private int getVariableDataType(Term term, QueryAliasIndex idx) {
-		Function f = (Function) term;
-		if (f.isDataTypeFunction()) {
-			Predicate p = f.getFunctionSymbol();
-            if (p.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI))
-				return Types.BOOLEAN;
-			if (p.getName().equals(OBDAVocabulary.XSD_INT_URI))
-				return Types.INTEGER;
-			if (p.getName().equals(OBDAVocabulary.XSD_INTEGER_URI))
-				return Types.INTEGER;
-			if (p.getName().equals(OBDAVocabulary.XSD_DOUBLE_URI))
-				return Types.DOUBLE;
-			if (p.getName().equals(OBDAVocabulary.XSD_STRING_URI))
-				return Types.VARCHAR;
-			if (p.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI))
-				return Types.VARCHAR;
+
+		if (term instanceof Function){
+			Function f = (Function) term;
+			if (f.isDataTypeFunction()) {
+				Predicate p = f.getFunctionSymbol();
+				if (p.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI))
+					return Types.BOOLEAN;
+				if (p.getName().equals(OBDAVocabulary.XSD_INT_URI))
+					return Types.INTEGER;
+				if (p.getName().equals(OBDAVocabulary.XSD_INTEGER_URI))
+					return Types.INTEGER;
+				if (p.getName().equals(OBDAVocabulary.XSD_DOUBLE_URI))
+					return Types.DOUBLE;
+				if (p.getName().equals(OBDAVocabulary.XSD_STRING_URI))
+					return Types.VARCHAR;
+				if (p.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI))
+					return Types.VARCHAR;
+			}
+			// Return varchar for unknown
+			return Types.VARCHAR;
+		}else if (term instanceof Variable){
+			throw new RuntimeException("Cannot return the SQL type for: "
+					+ term.toString());
 		}
-		// Return varchar for unknown
+		
 		return Types.VARCHAR;
 	}
 

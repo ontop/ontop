@@ -530,15 +530,15 @@ public class QuestStatement implements OBDAStatement {
 		if(unfolder.getMultiplePredList().isEmpty()){
 			List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
 
-//			for (CQIE rule: newTypedRules){
-//				System.out.println(rule);
-//			}
-						//TODO: can we avoid using this intermediate variable???
+			//			for (CQIE rule: newTypedRules){
+			//				System.out.println(rule);
+			//			}
+			//TODO: can we avoid using this intermediate variable???
 			unfolding.removeAllRules();
 			unfolding.appendRule(newTypedRules);
 			log.debug("Types Pushed: \n{}",unfolding);
 
-			
+
 		} else if (!unfolding.getRules().isEmpty()){
 			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
 			//System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
@@ -549,7 +549,7 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
 			DatalogNormalizer.pullOutEqualities(rule);
-			System.out.println(rule);
+			//System.out.println(rule);
 		}
 
 		

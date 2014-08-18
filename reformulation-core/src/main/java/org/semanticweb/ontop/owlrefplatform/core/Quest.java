@@ -1256,7 +1256,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 					{
 						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-						if (st.execute(copySourceQuery)) {
+						boolean execute = st.execute(copySourceQuery);
+						if (execute) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();
 							boolean needComma = false;
 							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {

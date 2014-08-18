@@ -40,7 +40,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.FLOAT, "NUMBER");
 		SqlDatatypes.put(Types.DOUBLE, "NUMBER");
 //		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
-		SqlDatatypes.put(Types.DATE, "DATE");
+		SqlDatatypes.put(Types.DATE, "TIMESTAMP");
 		SqlDatatypes.put(Types.TIME, "TIME");
 		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
 	}

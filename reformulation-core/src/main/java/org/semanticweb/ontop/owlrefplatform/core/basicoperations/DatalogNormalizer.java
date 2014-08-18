@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 
@@ -70,6 +71,7 @@ public class DatalogNormalizer {
 	private static Logger log = LoggerFactory.getLogger(DatalogNormalizer.class);
 	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private final static Map<Variable, Term> substitutionsTotal= new HashMap<Variable,Term>();
+	private static Random rand = new Random();
 	
 	/***
 	 * Normalizes all the rules in a Datalog program, pushing equalities into
@@ -566,6 +568,7 @@ public class DatalogNormalizer {
 		for (int i = 0; i < currentTerms.size(); i++) {
 
 			Term term = (Term) currentTerms.get(i);
+		
 
 			/*
 			 * We don't expect any functions as terms, data atoms will only have
@@ -745,14 +748,16 @@ public class DatalogNormalizer {
 		Variable var1 = (Variable) subTerm;
 		Variable var2 = (Variable) substitutions.get(var1);
 
-		
+
 		if (var2 == null) {
 			/*
 			 * No substitution exists, hence, no action but generate a new
 			 * variable and register in the substitutions, and replace the
 			 * current value with a fresh one.
 			 */
-			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+//			int randomNum = rand.nextInt(20) + 1;
+			//+ randomNum
+			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0] );
 
 			substitutions.put(var1, var2);
 			substitutionsTotal.put(var1, var2);
@@ -766,12 +771,15 @@ public class DatalogNormalizer {
 			 * the new value.
 			 */
 			
-			while (substitutionsTotal.containsKey(var2)){
-				var2=(Variable) substitutionsTotal.get(var2);
+			while (substitutions.containsKey(var2)){
+				Variable variable = (Variable) substitutions.get(var2);
+				var2=variable;
 			}
 
 			if (atom.isDataFunction()) {
-				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+				
+				
+				Variable newVariable = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
 
 				//replace the variable name
 				subterms.set(j, newVariable);
@@ -779,6 +787,7 @@ public class DatalogNormalizer {
 				//record the change
 				substitutionsTotal.put(var2, newVariable);
 
+				
 				
 				//create the equality
 				Function equality = fac.getFunctionEQ(var2, newVariable);
@@ -1223,7 +1232,6 @@ public class DatalogNormalizer {
 
 				// I changed this, booleans were not being added !!
 				if (secondDataAtomFound && !isLeftJoin) {
-					System.err.println("DatalogNormalizer: I changed this!!");
 					tempTerms.addAll(currentBooleans);
 				}
 

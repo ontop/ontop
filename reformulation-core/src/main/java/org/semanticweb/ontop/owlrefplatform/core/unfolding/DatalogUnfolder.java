@@ -714,8 +714,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							}
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
 							
-							System.out.println(ruleIndex.get(preFather).size());
-							System.out.println(ruleIndexByBody.get(pred).size());
+							//System.out.println(ruleIndex.get(preFather).size());
+//							System.out.println(ruleIndexByBody.get(pred).size());
 						
 						}
 						if (result.size() >= 2) {
@@ -2212,9 +2212,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
  */
 	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multPredList) {
 		
-		if (!multPredList.isEmpty()){
-			return unfolding.getRules();
-		}
+	//	if (!multPredList.isEmpty()){
+	//		return unfolding.getRules();
+	//	}
 		
 		
 		List<CQIE> workingList = new LinkedList<CQIE>();
@@ -2238,8 +2238,16 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
 			//get the father predicate
 
-			if (!extensionalPredicates.contains(buPredicate) ) {// it is a defined  predicate, like ans2,3.. etc
+			if (!extensionalPredicates.contains(buPredicate)  ) {// it is a defined  predicate, like ans2,3.. etc
 
+				if (multPredList.containsKey(buPredicate)){
+					// CANT PUSH TYPES IF I HAVE MULTIPLE TEMPLATES, SEE LEFTJOIN3VIRTUAL. PROBLEMS WITH THE JOIN.
+					//SYSTEM.ERR.PRINTLN("TYPES CANNOT BE PUSHED IN THE PRESENCE OF NO MATCHING TEMPLATES. THIS MIGHT LEAD TO A BAD PERFORMANCE.");
+					log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.:", buPredicate);
+					continue;
+
+				}
+				
 				//get all the indexes we need
 				ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
