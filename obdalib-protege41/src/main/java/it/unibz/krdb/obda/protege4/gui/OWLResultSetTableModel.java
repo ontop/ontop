@@ -79,7 +79,7 @@ public class OWLResultSetTableModel implements TableModel {
 		if (needFetchMore()) {
 			fetchSize = INITIAL_FETCH_SIZE;
 		}
-		fetchRows(fetchSize);
+		//fetchRows(fetchSize);
 	}
 	
 	private void fetchRows(int size) throws OWLException {

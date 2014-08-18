@@ -325,7 +325,7 @@ public class QuestOWLStatement {
 
 	public void getMoreResults() throws OWLException {
 		try {
-			st.cancel();
+			st.getMoreResults();
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

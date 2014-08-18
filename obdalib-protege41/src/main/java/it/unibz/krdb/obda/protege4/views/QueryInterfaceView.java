@@ -198,8 +198,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						QuestOWLResultSet result = action.getResult();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
+
 						createTableModelFromResultSet(result);
 						rows = showTupleResultInTablePanel();
+						while(result.nextRow()){
+							rows = showTupleResultInTablePanel();
+						}
 					} else if (internalQuery.isConstructQuery()) {
 						List<OWLAxiom> result = action.getGraphResult();
 						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
@@ -621,6 +625,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							statement = dqr.getStatement();
 							String queryString = query.getQueryString();
 							if (query.isSelectQuery() || query.isAskQuery()) {
+								statement.setFetchSize(1);
 								result = statement.executeTuple(queryString);
 							} else  {
 								graphResult = statement.executeGraph(queryString);
