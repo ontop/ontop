@@ -26,25 +26,26 @@
     ##:agg-groupconcat-01
     ##:agg-groupconcat-02
     ##:agg-groupconcat-03
-    #:agg-sum-01 Mismatching data types
-    :agg-sum-01-ontop 
-    #:agg-sum-02 Mismatching data types
-    :agg-sum-02-ontop
-    #:agg-avg-01 Mismatching data types
-    :agg-avg-01-ontop
+    :agg-sum-01
+    #:agg-sum-01-ontop #Mismatching data types
+    :agg-min-01
+    #:agg-sum-02
+    :agg-sum-02-ontop # Mismatching data types
+    :agg-avg-01
+    #:agg-avg-01-ontop #Mismatching data types
     #:agg-avg-02 NOT SUPPORTED: HAVING
-    #:agg-min-01 Mismatching data types
-    :agg-min-01-ontop
-    #:agg-min-02 Mismatching data types
-    :agg-min-02-ontop
-    #:agg-max-01 Mismatching data types
-    :agg-max-01-ontop
-    #:agg-max-02 Mismatching data types
-    :agg-max-02-ontop
+    :agg-min-01
+    #:agg-min-01-ontop #Mismatching data types
+    #:agg-min-02
+    #:agg-min-02-ontop #Mismatching data types
+    :agg-max-01
+    #:agg-max-01-ontop #Mismatching data types
+    #:agg-max-02
+    :agg-max-02-ontop #Mismatching data types
     ##:agg-sample-01 
     ##:agg-err-01
     ##:agg-err-02
-    
+    :agg-sum-order-01
     
 ) .
 
@@ -428,3 +429,16 @@
            qt:data   <agg-err-02.ttl> ] ;
     mf:result  <agg-err-02.srx>
     .    
+
+:agg-sum-order-01 rdf:type mf:QueryEvaluationTest ;
+                mf:name    "SUM integers and ORDER BY the sum" ;
+            	mf:feature sparql:aggregate ;
+            	rdfs:comment "SUM and ORDER BY the integer sum";
+            	# Not actually approved, but we have to fake it
+            	dawgt:approval dawgt:Approved;
+            	mf:checkOrder "true";
+                mf:action
+                     [ qt:query  <agg-sum-order-01.rq> ;
+                       qt:data   <agg-sum-order-01.ttl> ] ;
+                mf:result  <agg-sum-order-01.srx>
+                .

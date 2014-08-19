@@ -50,7 +50,6 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
@@ -569,48 +568,52 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
  */
 private boolean detectAggregateinSingleRule( CQIE rule) {
 	Function fatherHead = rule.getHead();
-	boolean hasAggregates = false;
 	
 	List<Term> headArgs = fatherHead.getTerms();
 	for (Term arg: headArgs) {
-		if (arg instanceof Function){
-			Predicate func = ((Function) arg).getFunctionSymbol();
-
-			if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
-				Term intArg = ((Function) arg).getTerm(0);
-				if (intArg instanceof Function){
-					func = ((Function) intArg).getFunctionSymbol();
-					boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-							(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-							(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-							(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-							(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-					if (isAnAggregate){
-						//This rule has aggregates so we should 
-						//not unfold the aggregated predicate
-						hasAggregates = true;
-						break;
-					}
-				}
-
-			}//this is integer 
-			else{
-				boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-						(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-				if (isAnAggregate){
-					//This rule has aggregates so we should 
-					//not unfold the aggregated predicate
-					hasAggregates = true;
-					break;
-				}
-				
-			}
-		}
+        if (detectAggregateInArgument(arg)) {
+            return true;
+        }
 	}
-	return hasAggregates;
+	return false;
 }
+
+    private boolean detectAggregateInArgument(Term arg) {
+        if (arg instanceof Function){
+            Predicate func = ((Function) arg).getFunctionSymbol();
+
+            if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
+                Term intArg = ((Function) arg).getTerm(0);
+                if (intArg instanceof Function){
+                    func = ((Function) intArg).getFunctionSymbol();
+                    boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+                            (func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+                            (func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
+                            (func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+                            (func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+                    if (isAnAggregate){
+                        //This rule has aggregates so we should
+                        //not unfold the aggregated predicate
+                        return true;
+                    }
+                }
+
+            }//this is integer
+            else{
+                boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
+                        (func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
+                        (func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
+                        (func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
+                if (isAnAggregate){
+                    //This rule has aggregates so we should
+                    //not unfold the aggregated predicate
+                    return true;
+                }
+
+            }
+        }
+        return false;
+    }
 
 		/**
 		 * Clones the rules in ruleCollection into fatherCollection
@@ -2255,14 +2258,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				
 				//The rules DEFINING pred
 				List<CQIE> rulesDefiningPred = (List<CQIE>) ruleIndex.get(buPredicate);
-				
-				//dont push if there are aggregates!
-				if (detectAggregatesHead(rulesDefiningPred)){
-					continue;
-				}
-				
-	
-				
+
+                // Beware of aggregates
+                boolean containsAggregates = detectAggregatesHead(rulesDefiningPred);
+
 				
 				//cloning to avoid clashes
 				fatherCollection.clear();
@@ -2271,6 +2270,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				cloneRules(fatherCollection, rulesUsingPred);
 
 				//We unfold every rule of the father atom that contains pred
+				// TODO: unfold????
 				for (CQIE fatherRule : fatherCollection) {
 					int fails = 0;
 
@@ -2293,7 +2293,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						//Later when we compute the new source rule, we will not eliminate the types from the terms in this list
 						List<Term> termsToExclude = new LinkedList<Term>();
 						
-						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude);
+						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude,
+                                containsAggregates);
 
 
 						if (result == null && fails==rulesDefiningPred.size()) {
@@ -2310,16 +2311,28 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							 * Each of the new queries could still require more steps of
 							 * evaluation, so we decrease the index.
 							 */
-							
-							//Here we remove the types, if possible, of the source query
-							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
-							
-							//Now we update the indexes for the source query
-							List<CQIE> newSourceRuleList= new LinkedList<CQIE>();
-							newSourceRuleList.add(newsourceRule);
-							int srcIdx=workingList.indexOf(sourceRule);
-							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
+
+                            /**
+                             * Simplifies the source query by removing its types.
+                             *
+                             * This simplification is disabled if some aggregates
+                             * are detected because the current algorithm would remove
+                             * the aggregation operators... The resulting Datalog Program
+                             * would then be inconsistent.
+                             *
+                             */
+                            if (!containsAggregates) {
+
+                                //Here we remove the types, if possible, of the source query
+                                CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
+
+                                //Now we update the indexes for the source query
+                                List<CQIE> newSourceRuleList = new LinkedList<CQIE>();
+                                newSourceRuleList.add(newsourceRule);
+                                int srcIdx = workingList.indexOf(sourceRule);
+                                Predicate srchead = sourceRule.getHead().getFunctionSymbol();
+                                updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
+                            }
 							
 							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
@@ -2460,13 +2473,22 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param fatherRule
 	 * @return
 	 */
-	
-	
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
-			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude) {
+			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude, boolean containsAggregates) {
 
+			/**
+			 * The reference rule is a cleaned version of the source rule:
+			 * it has no aggregate operator in its head.
+			 */
+            CQIE referenceRule;
+            if (!containsAggregates) {
+                referenceRule = sourceRule;
+            }
+            else {
+                referenceRule = removeAggregatesFromHead(sourceRule);
+            }
 
-			Function sourceHead = sourceRule.getHead();
+			Function sourceHead = referenceRule.getHead();
 			List<CQIE> result=new LinkedList<CQIE>();
 
 			//Iterate over the term of the father rule
@@ -2478,13 +2500,16 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
-					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude));
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), referenceRule, fatherRule, termsToExclude, containsAggregates));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
 						
-						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule,termsToExclude);
+						/**
+						 * TODO: a rule named "addTypes"???????
+						 */
+						CQIE addTypes = addTypes(sourceHead,referenceRule,focus,fatherRule,termsToExclude);
 						result.add(addTypes);
 						break;
 					} else{
@@ -2502,13 +2527,46 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 	}
 
-	
+    /**
+     * Removes aggregate symbols found in the head of a given rule.
+     * 
+     * For instance, 
+     *    ans2(arg1, sum(arg2)) :- ...
+     * becomes
+     *    ans2(arg1, arg2) :- ...
+     * 
+     * @param rule. Read-only.
+     * @return the new rule
+     */
+    private CQIE removeAggregatesFromHead(CQIE rule) {
+        CQIE newRule = rule.clone();
 
-	
+        /**
+         *  This list is the list object used by the head of the rule.
+         *  By modifying, we implicitly update the rule.
+         *  
+         *  TODO: stop this side-effect practice.
+         */
+        List<Term> arguments = newRule.getHead().getTerms();
 
-	
-	
-	/**
+        for (int i = 0; i < arguments.size() ; i++) {
+            Term argument = arguments.get(i);
+            /**
+             * When a aggregate symbol is used by the argument,
+             * we replace the argument by its (unique) sub-term.
+             * 
+             */
+            if (detectAggregateInArgument(argument)) {
+                Term subTerm = ((Function) argument).getTerm(0);
+                arguments.set(i, subTerm);
+            }
+        }
+
+        return newRule;
+    }
+
+
+    /**
 	 * This method add the type of the variables in sourceHead to the targetAtom, and then
 	 * uses this atom to update the head of fatherRule
 	 * 
