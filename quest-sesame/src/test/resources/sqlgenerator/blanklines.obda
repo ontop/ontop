@@ -1,0 +1,21 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	blanklines
+connectionUrl	jdbc:h2:mem:countries
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Map1
+target		:Class1-{c1} a :Class1 . 
+source		select "c1" FROM "T1"
+
+mappingId	Map2
+target		:Class1-{c1} a :Class1 . 
+source		select "c1" FROM "T2"
+
+]]
+

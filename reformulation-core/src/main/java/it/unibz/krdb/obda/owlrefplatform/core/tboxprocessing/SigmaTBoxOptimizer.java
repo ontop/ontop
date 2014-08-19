@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -29,6 +28,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Set;
@@ -41,27 +41,26 @@ import org.slf4j.LoggerFactory;
  */
 public class SigmaTBoxOptimizer {
 
-	private final TBoxReasonerImpl isa;
-	private final TBoxReasonerImpl isaChain;
-	private final TBoxReasonerImpl sigmaChain;
+	private final TBoxReasoner isa;
+	private final TBoxReasoner isaChain;
+	private final TBoxReasoner sigmaChain;
 
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 	private Ontology optimizedTBox = null;
 
-	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
+	public SigmaTBoxOptimizer(TBoxReasoner isa, Set<Predicate> vocabulary, TBoxReasoner sigma) {
 		
-		vocabulary = isat.getVocabulary();
+		this.vocabulary = vocabulary;
+		this.isa = isa;
 		
-		isa = new TBoxReasonerImpl(isat);
-		//DAGImpl isaChainDAG = isa.getChainDAG();
-		isaChain = TBoxReasonerImpl.getChainReasoner(isat);
+		//isa = new TBoxReasonerImpl(isat);
+		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
 		
 		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
-		//DAGImpl sigmaChainDAG =  reasonerSigma.getChainDAG();
-		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigmat);
+		sigmaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)sigma);
 	}
 
 	public Ontology getReducedOntology() {
@@ -217,33 +216,7 @@ public class SigmaTBoxOptimizer {
 		return scChildren.containsAll(tcChildren);
 	}
 	
-	
-	
-	
-	
-	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
-
-		final Ontology sigma = fac.createOntology("sigma");
-
-		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-			
-			@Override
-			public void onInclusion(Property sub, Property sup) {
-				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
-				sigma.addEntities(ax.getReferencedEntities());
-				sigma.addAssertion(ax);						
-			}
-
-			@Override
-			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-				if (!(sup instanceof PropertySomeRestriction)) {
-					Axiom ax = fac.createSubClassAxiom(sub, sup);
-					sigma.addEntities(ax.getReferencedEntities());
-					sigma.addAssertion(ax);						
-				}
-			}
-		});
-		
-		return sigma;
+	public static Ontology getSigmaOntology(TBoxReasoner reasoner) {
+		return TBoxReasonerToOntology.getOntology(reasoner, true);
 	}
 }

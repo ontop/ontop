@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.identifiers;
  * #L%
  */
 
+import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -33,7 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
-
 
 import junit.framework.TestCase;
 
@@ -118,6 +118,7 @@ public class PostgresLowercaseIdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

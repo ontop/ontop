@@ -1,0 +1,127 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+
+_:node18svpo8kkx2 a rr:SubjectMap .
+
+_:node18svpo8kkx5 a rr:TermMap .
+
+_:node18svpo8kkx1 a rr:R2RMLView .
+
+_:node18svpo8kkx5 a rr:ObjectMap .
+
+_:node18svpo8kkx6 rr:predicate <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#hasVal1> .
+
+_:node18svpo8kkx5 rr:termType rr:Literal .
+
+_:node18svpo8kkx6 a rr:PredicateObjectMap .
+
+_:node18svpo8kkx2 rr:termType rr:IRI .
+
+_:node18svpo8kkx3 a rr:TriplesMap .
+
+_:node18svpo8kkx6 rr:objectMap _:node18svpo8kkx5 .
+
+_:node18svpo8kkx3 rr:subjectMap _:node18svpo8kkx2 ;
+	rr:predicateObjectMap _:node18svpo8kkx6 .
+
+_:node18svpo8kkx2 a rr:TermMap .
+
+_:node18svpo8kkx5 rr:column "COL1" .
+
+_:node18svpo8kkx3 rr:logicalTable _:node18svpo8kkx1 .
+
+_:node18svpo8kkx2 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-{COL1}" .
+
+_:node18svpo8kkx1 rr:sqlQuery "select \"COL1\" FROM \"TABLE1\"" .
+
+_:node18svpo8kkx8 a rr:TermMap .
+
+_:node18svpo8kkx11 rr:termType rr:Literal .
+
+_:node18svpo8kkx12 rr:predicate <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#hasVal2> .
+
+_:node18svpo8kkx8 a rr:SubjectMap .
+
+_:node18svpo8kkx12 rr:objectMap _:node18svpo8kkx11 .
+
+_:node18svpo8kkx7 rr:sqlQuery "select \"COL1\", \"COL2\" FROM \"TABLE1\"" .
+
+_:node18svpo8kkx9 a rr:TriplesMap .
+
+_:node18svpo8kkx8 rr:termType rr:IRI .
+
+_:node18svpo8kkx9 rr:logicalTable _:node18svpo8kkx7 ;
+	rr:predicateObjectMap _:node18svpo8kkx12 .
+
+_:node18svpo8kkx11 a rr:ObjectMap .
+
+_:node18svpo8kkx7 a rr:R2RMLView .
+
+_:node18svpo8kkx9 rr:subjectMap _:node18svpo8kkx8 .
+
+_:node18svpo8kkx12 a rr:PredicateObjectMap .
+
+_:node18svpo8kkx11 a rr:TermMap ;
+	rr:column "COL2" .
+
+_:node18svpo8kkx8 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class1-{COL1}" .
+
+_:node18svpo8kkx15 rr:logicalTable _:node18svpo8kkx13 ;
+	a rr:TriplesMap .
+
+_:node18svpo8kkx13 a rr:R2RMLView .
+
+_:node18svpo8kkx15 rr:predicateObjectMap _:node18svpo8kkx18 .
+
+_:node18svpo8kkx13 rr:sqlQuery "select \"COL1\" FROM \"TABLE2\"" .
+
+_:node18svpo8kkx14 a rr:SubjectMap ;
+	rr:termType rr:IRI .
+
+_:node18svpo8kkx18 rr:predicate <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#hasVal3> .
+
+_:node18svpo8kkx17 a rr:TermMap .
+
+_:node18svpo8kkx18 rr:objectMap _:node18svpo8kkx17 .
+
+_:node18svpo8kkx17 a rr:ObjectMap ;
+	rr:termType rr:Literal .
+
+_:node18svpo8kkx14 a rr:TermMap .
+
+_:node18svpo8kkx18 a rr:PredicateObjectMap .
+
+_:node18svpo8kkx14 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class2-{COL1}" .
+
+_:node18svpo8kkx15 rr:subjectMap _:node18svpo8kkx14 .
+
+_:node18svpo8kkx17 rr:column "COL1" .
+
+_:node18svpo8kkx20 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Class2-{COL1}" .
+
+_:node18svpo8kkx23 a rr:ObjectMap .
+
+_:node18svpo8kkx19 a rr:R2RMLView ;
+	rr:sqlQuery "select \"COL1\", \"COL2\" FROM \"TABLE2\"" .
+
+_:node18svpo8kkx20 a rr:SubjectMap ;
+	rr:termType rr:IRI .
+
+_:node18svpo8kkx23 a rr:TermMap .
+
+_:node18svpo8kkx24 a rr:PredicateObjectMap ;
+	rr:predicate <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#hasVal4> .
+
+_:node18svpo8kkx21 rr:predicateObjectMap _:node18svpo8kkx24 .
+
+_:node18svpo8kkx23 rr:column "COL2" .
+
+_:node18svpo8kkx21 rr:subjectMap _:node18svpo8kkx20 .
+
+_:node18svpo8kkx20 a rr:TermMap .
+
+_:node18svpo8kkx23 rr:termType rr:Literal .
+
+_:node18svpo8kkx21 a rr:TriplesMap ;
+	rr:logicalTable _:node18svpo8kkx19 .
+
+_:node18svpo8kkx24 rr:objectMap _:node18svpo8kkx23 .

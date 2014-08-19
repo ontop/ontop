@@ -35,9 +35,9 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
-
 import junit.framework.TestCase;
 
 
@@ -74,8 +74,8 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
-		//TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
-		TBoxReasonerImpl reasoner = TBoxReasonerImpl.getChainReasoner(ontology);
+		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
 		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
 		
 		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
@@ -183,7 +183,8 @@ public class DAGChainTest extends TestCase {
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
 		//DAGImpl dagChain221 = reasoner221.getChainDAG();
-		TBoxReasonerImpl reasoner = TBoxReasonerImpl.getChainReasoner(ontology);
+		TBoxReasonerImpl resoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(resoner0);
 
 		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
 		
