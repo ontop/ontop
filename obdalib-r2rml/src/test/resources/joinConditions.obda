@@ -1,0 +1,36 @@
+[PrefixDeclaration]
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+quest:		http://obda.org/quest#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	file:/Users/Sarah/develop/ontop/obdalib-r2rml/src/test/resources/joinConditions.ttl
+connectionUrl	jdbc:h2:tcp://localhost/DBName
+username	sa
+password	
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-727565077
+target		<http://example.com/resource/Student/{sid}> a <http://example.com/ns#Student> . 
+source		SELECT * FROM student
+
+mappingId	mapping-join--46597149
+target		<http://example.com/resource/Student/{sid}> <http://example.com/ns#isAuthorOf> <http://example.com/resource/Thesis/{aid}> . 
+source		SELECT * FROM (SELECT * FROM student) AS child, (SELECT author , aid FROM article WHERE article type='ths ') AS parent WHERE child.sid=parent.author
+
+mappingId	mapping-join--342983229
+target		<http://example.com/resource/Student/{sid}> <http://example.com/ns#isAuthorOf> <http://example.com/resource/Paper/{aid}> . 
+source		SELECT * FROM (SELECT * FROM student) AS child, (SELECT author , aid FROM article WHERE article type='ppr ') AS parent WHERE child.sid=parent.author
+
+mappingId	mapping--1588524726
+target		<http://example.com/resource/Thesis/{aid}> a <http://example.com/ns#Student> , <http://example.com/ns#Thesis> , <http://example.com/ns#Student> , <http://example.com/ns#Paper> , <http://example.com/ns#Thesis> . 
+source		SELECT author , aid FROM article WHERE article type='ths '
+
+mappingId	mapping-618232574
+target		<http://example.com/resource/Paper/{aid}> a <http://example.com/ns#Paper> . 
+source		SELECT author , aid FROM article WHERE article type='ppr '
+]]
+

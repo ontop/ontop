@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+quest:		http://obda.org/quest#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	file:/Users/Sarah/develop/ontop/obdalib-r2rml/src/test/resources/simpleJoin.ttl
+connectionUrl	jdbc:h2:tcp://localhost/DBName
+username	sa
+password	
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-join--1282227322
+target		<http://example.org/resource/Student/{sid}> <http://example.com/ns#countryOfBirth> <http://example.org/resource/Country/{cid}> . 
+source		SELECT * FROM (SELECT * FROM student) AS child, (SELECT * FROM country) AS parent WHERE child.countryOfBirth=parent.cid
+]]
+
