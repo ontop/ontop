@@ -13,7 +13,15 @@ password
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	mapping-join--1282227322
+mappingId	mapping-194915620
+target		<http://example.org/resource/Country/{cid}> a <http://example.com/ns#Country> . 
+source		SELECT * FROM country
+
+mappingId	mapping-777030563
+target		<http://example.org/resource/Student/{sid}> a <http://example.com/ns#Student> . 
+source		SELECT * FROM student
+
+mappingId	mapping-join--1183254266
 target		<http://example.org/resource/Student/{sid}> <http://example.com/ns#countryOfBirth> <http://example.org/resource/Country/{cid}> . 
 source		SELECT * FROM (SELECT * FROM student) AS child, (SELECT * FROM country) AS parent WHERE child.countryOfBirth=parent.cid
 ]]

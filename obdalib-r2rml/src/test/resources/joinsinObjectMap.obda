@@ -13,16 +13,16 @@ password
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	mapping--2114448730
+mappingId	mapping-59014694
 target		<http://example.com/resource/Student/{firstname}{surname}> a <http://example.com/ns#Student> . 
 source		SELECT * FROM student
 
-mappingId	mapping-join--715618423
+mappingId	mapping-join--1147251417
 target		<http://example.com/resource/Student/{firstname}{surname}> <http://example.com/ns#isAuthorOf> <http://example.com/resource/Paper/{aid}> . 
-source		SELECT * FROM (SELECT * FROM student) AS child, (SELECT authorName, authorSurname, aid FROM article WHERE article type='ppr ') AS parent WHERE child.firstname=parent.authorName AND child.surname=parent.authorSurname
+source		SELECT * FROM (SELECT * FROM student) AS child, (SELECT authorName, authorSurname, aid FROM article WHERE article type='ppr ') AS parent WHERE child.surname=parent.authorSurname AND child.firstname=parent.authorName
 
-mappingId	mapping--2131438088
-target		<http://example.com/resource/Paper/{aid}> a <http://example.com/ns#Student> , <http://example.com/ns#Paper> , <http://example.com/ns#Paper> . 
+mappingId	mapping--428548580
+target		<http://example.com/resource/Paper/{aid}> a <http://example.com/ns#Paper> . 
 source		SELECT authorName, authorSurname, aid FROM article WHERE article type='ppr '
 ]]
 
