@@ -273,6 +273,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private Map<Predicate, List<Integer>> pkeys;
 
+	// Davide> Options about T-Mappings
+	private Boolean tMappings = true;
+
 
     /***
 	 * Will prepare an instance of Quest in "classic ABox mode", that is, to
@@ -470,6 +473,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
+        // Davide> T-Mappings
+        tMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.T_MAPPINGS));
+        
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
 			aboxJdbcUser = preferences.getProperty(QuestPreferences.DBUSER);
@@ -712,13 +718,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * Processing mappings with respect to the vocabulary
 				 * simplification
 				 */
-
 				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
 				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(
 						this.inputOBDAModel.getMappings(obdaSource.getSourceID()), equivalenceMaps);
-
+				
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
-
 			}
 
 			// NOTE: Currently the system only supports one data source.
@@ -843,7 +847,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * T-Mappings and Fact mappings
 			 */
 			boolean optimizeMap = true;
-
+			
 			if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
 				log.debug("Original mapping size: {}", unfoldingProgram.getRules().size());
 
@@ -864,9 +868,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 				ABoxToFactRuleConverter.addFacts(inputTBox.getABox().iterator(), unfoldingProgram, equivalenceMaps);
 				
-
-				unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
-
+				// Davide> Option to disable T-Mappings (TODO: Test)
+				if( tMappings ){
+					unfoldingProgram = applyTMappings(metadata, optimizeMap, unfoldingProgram, sigma, true);
+				}
+				
 				/*
 				 * Adding data typing on the mapping axioms.
 				 */

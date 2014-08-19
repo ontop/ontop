@@ -41,7 +41,20 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
+interface ParamConst{
+	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
+	public static final String POSTGRES = "src/main/resources/example/ontowis-5joins-int-postgres.obda";
+	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
+	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
+	public static final String POSTGRES_VIEW = "src/main/resources/example/ontowis-5joins-int-view-postgres.obda";
+	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
+}
+
 public class QuestOWLExample {
+	
+	public QuestOWLExample(String obdaFile){
+		this.obdafile = obdaFile;
+	}
 	
 	/*
 	 * Use the sample database using H2 from
@@ -52,7 +65,7 @@ public class QuestOWLExample {
 	 */
 	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
 	//final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
-	final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
+	final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
 
 	public void runQuery() throws Exception {
@@ -77,6 +90,7 @@ public class QuestOWLExample {
 		 */
 		QuestPreferences preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -144,6 +158,8 @@ public class QuestOWLExample {
 
 		queries[24]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 . } ";
 
+		StringBuilder csvOut = new StringBuilder();
+		
 		
 		int j=0;
 		while (j < queries.length){
@@ -233,14 +249,48 @@ public class QuestOWLExample {
 ////						"SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .}  " ;
 //					"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .}    " ;   
 	
+	
+//		FileWriter statsWriter = new FileWriter(statsFile);
+//		statsWriter.write(Statistics.printStats());
+//		statsWriter.flush();
+//		statsWriter.close();
+		
 	}
 
 	/**
 	 * Main client program
 	 */
 	public static void main(String[] args) {
+		
+		String obdaFile = null;
+		
+		switch(args[0]){
+		case "--MYSQL":{
+			obdaFile = ParamConst.MYSQL;
+			break;
+		}
+		case "--POSTGRES":{
+			obdaFile = ParamConst.POSTGRES;
+			break;
+		}
+		case "--DB2" :{
+			obdaFile = ParamConst.DB2;
+			break;
+		}
+		case "--MYSQL-VIEW":{
+			obdaFile = ParamConst.MYSQL_VIEW;
+			break;
+		}
+		case "--POSTGRES-VIEW":{ //In the old jar, view is uncapitalized
+			obdaFile = ParamConst.POSTGRES_VIEW;
+			break;
+		}
+		case "--DB2-VIEW":{
+			obdaFile = ParamConst.DB2_VIEW;
+		}
+		}	
 		try {
-			QuestOWLExample example = new QuestOWLExample();
+			QuestOWLExample example = new QuestOWLExample(obdaFile);
 			example.runQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
