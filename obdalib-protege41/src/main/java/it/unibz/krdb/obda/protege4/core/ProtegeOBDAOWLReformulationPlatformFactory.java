@@ -32,7 +32,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeOWLReasonerInfo {
 
-	QuestOWLFactory factory = new QuestOWLFactory();
+	OntopOWLFactory factory = new OntopOWLFactory();
 
 	@Override
 	public BufferingMode getRecommendedBuffering() {
