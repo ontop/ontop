@@ -326,33 +326,12 @@ public class Unifier {
                 Predicate functionSymbol1 = fterm1.getFunctionSymbol();
                 Predicate functionSymbol2 = fterm2.getFunctionSymbol();
 
-                if (fterm1.getTerms().size() != fterm2.getTerms().size()) {
-                    return null;
+                if (!fterm1.getFunctionSymbol().equals( fterm2.getFunctionSymbol())) {
+                   return null;
                 }
-
-				if (!functionSymbol1.equals(functionSymbol2)) {
-
-//                    if(fterm1.isDataTypeFunction() && fterm2.isDataTypeFunction()) {
-//
-////                        //the 2 values are equal also in the case that they are both datatype and one of the two is a rdfs:literal
-////                        if (!(functionSymbol1.equals(OBDAVocabulary.RDFS_LITERAL)
-////                                || functionSymbol2.equals(OBDAVocabulary.RDFS_LITERAL)) ){
-////
-////                            return null;
-////                        }
-//
-//                        if (functionSymbol1.equals(OBDAVocabulary.RDFS_LITERAL) && functionSymbol2.equals(OBDAVocabulary.XSD_STRING)) {
-////                            fterm1.setPredicate(functionSymbol2);
-//                        } else if (functionSymbol2.equals(OBDAVocabulary.RDFS_LITERAL) && functionSymbol1.equals(OBDAVocabulary.XSD_STRING)) {
-////                            fterm2.setPredicate(functionSymbol1);
-//                        } else {
-//                            return null;
-//                        }
-//                    } else {
-
-                        return null;
-//                    }
-				}
+                if (fterm1.getTerms().size() != fterm2.getTerms().size()) {
+                   return null;
+                }
 
 				int innerarity = fterm1.getTerms().size();
 				List<Term> innerterms1 = fterm1.getTerms();
