@@ -91,7 +91,11 @@ public class MappingDataTypeRepair {
 
     }
 
-    public void getDataTypeFromOntology(){
+    /**
+     * Private method that gets the datatypes already present in the ontology and stores them in a map
+     * It will be used later in insertDataTyping
+     */
+    private void getDataTypeFromOntology(){
 
 
         /*
@@ -135,6 +139,7 @@ public class MappingDataTypeRepair {
 
     public void insertDataTyping(DatalogProgram mappingDatalog) throws OBDAException {
 
+        //get all the datatypes in the ontology
         getDataTypeFromOntology();
 
 
@@ -218,6 +223,11 @@ public class MappingDataTypeRepair {
 		}
 	}
 
+    /**
+     * Private method, since DB2 does not support boolean value, we use the database metadata value
+     * @param dataType
+     * @return boolean to check if the database is DB2 and we assign  a boolean value
+     */
     private boolean isBooleanDB2(Predicate dataType){
 
         String databaseName = metadata.getDatabaseProductName();
