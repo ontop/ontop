@@ -115,6 +115,7 @@ public class R2RMLParser {
 
 	/**
 	 * Get classes
+     * They can be retrieved only once, after retrieving everything is cleared.
 	 * @return
 	 */
 	public List<Predicate> getClassPredicates() {
@@ -148,6 +149,7 @@ public class R2RMLParser {
 	
 	/**
 	 * Get subject
+     *
 	 * @param tm
 	 * @param joinCond
 	 * @return
@@ -157,6 +159,7 @@ public class R2RMLParser {
 			throws Exception {
 		Term subjectAtom = null;
 		String subj = "";
+        classPredicates.clear();
 
 		// SUBJECT
 		SubjectMap sMap = tm.getSubjectMap();
