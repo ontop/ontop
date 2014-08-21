@@ -258,6 +258,19 @@ public class OntologyTypesStockexchangeTest {
 
         runTests(p, query1, 5 );
     }
+    
+    @Test //a quoted integer is treated as a literal
+    public void testQuotedInteger() throws Exception {
+
+    	  QuestPreferences p = new QuestPreferences();
+          p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+          p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+          p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+          String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\" . }";
+
+          runTests(p, query1, 0 );
+    }
 
 
 }
