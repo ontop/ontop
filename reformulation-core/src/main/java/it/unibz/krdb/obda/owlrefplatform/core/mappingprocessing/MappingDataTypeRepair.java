@@ -170,7 +170,7 @@ public class MappingDataTypeRepair {
                         //check that no datatype mismatch is present
                         if(!functionSymbol.equals(dataType)){
 
-                                throw new OBDAException("Ontology datatype for " + predicate + " does not confirm with datatype in mappings");
+                                throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\ndoes not correspond to datatype " + functionSymbol + " in mappings");
 
                         }
                     }

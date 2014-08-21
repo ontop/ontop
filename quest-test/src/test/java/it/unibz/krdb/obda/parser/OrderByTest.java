@@ -125,7 +125,7 @@ public class OrderByTest {
     @Test
     public void testBolzanoOrderingAsc() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
-                + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\" ; :inStreet ?street } "
+                + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\"^^<http://www.w3.org/2001/XMLSchema#string>; :inStreet ?street } "
                 + "ORDER BY ?street "
                 ;
 
@@ -138,7 +138,7 @@ public class OrderByTest {
     @Test
     public void testBolzanoOrderingAsc2() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
-                + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\" ; :inStreet ?street } "
+                + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\"^^<http://www.w3.org/2001/XMLSchema#string>; :inStreet ?street } "
                 + "ORDER BY ASC(?street)"
                 ;
 
@@ -151,7 +151,7 @@ public class OrderByTest {
     @Test
     public void testBolzanoOrderingDesc() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
-                + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\" ; :inStreet ?street } "
+                + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\"^^<http://www.w3.org/2001/XMLSchema#string>; :inStreet ?street } "
                 + "ORDER BY DESC(?street)"
                 ;
 

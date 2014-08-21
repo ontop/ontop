@@ -4678,7 +4678,7 @@
         <sql:comment>NPD&apos;s official field name (column: fldName)</sql:comment>
         <sql:column>bsns_arr_area.baaName</sql:column>
         <sql:label>Wellbore name (column: wlbName)</sql:label>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
     </owl:DatatypeProperty>
     
 
@@ -5293,7 +5293,7 @@
         <sql:comment>Current phase for the facility. Example of legal values: ABANDONED IN PLACE, DECOMMISSIONED, FABRICATION, FUTURE, IN SERVICE, INSTALLATION, LAID UP, REMOVED (column: fclPhase)</sql:comment>
         <sql:comment>Phase. Example of legal values: INITIAL, INITIAL EXTENDED, PRODUCTION, PRODUCTION EXTENDED (column: prlPhase)</sql:comment>
         <sql:datatype>VARCHAR(100) (column: prlTaskStatusNo)</sql:datatype>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
     </owl:DatatypeProperty>
     
 
@@ -10596,7 +10596,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&npdv;name"/>
-                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+                <owl:someValuesFrom rdf:resource="&rdfs;Literal"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <sql:table>wellbore_npdid_overview (ex)</sql:table>

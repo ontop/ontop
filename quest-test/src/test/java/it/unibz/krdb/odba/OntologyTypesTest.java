@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
@@ -48,6 +48,14 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Test if the datatypes are assigned correctly.
+ * Add datatype from the ontology, modifying extendTypeswithMetadata. First it adds value from ontology than it compares the ontology datatype with the mapping datatype, if the 2 value are not equal it throws an error.
+ * If no information is present in the ontology or in the mappings it adds datatype from database.
+ * NOTE: xsd:string and rdfs:Literal are different.
+ * 
+ */
+
 public class OntologyTypesTest{
 
 	private OBDADataFactory fac;
@@ -57,8 +65,9 @@ public class OntologyTypesTest{
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyTypes.owl";
+	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.owl";
 	final String obdaFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.obda";
+	final String obdaErroredFile = "src/test/resources/ontologyType/erroredOntologyType.obda";
 
 	@Before
 	public void setUp() throws Exception {
@@ -69,15 +78,11 @@ public class OntologyTypesTest{
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdaFile);
+
 		
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(Properties p, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -91,10 +96,9 @@ public class OntologyTypesTest{
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-						"select * {?x :number ?y}";
+		
 		try {
-			executeQueryAssertResults(query1, st, 3);
+			executeQueryAssertResults(query, st, numberResults);
 			
 		} catch (Exception e) {
             st.close();
@@ -129,12 +133,77 @@ public class OntologyTypesTest{
 	@Test
 	public void testOntologyType() throws Exception {
 
+		// Loading the OBDA data
+		obdaModel = fac.getOBDAModel();
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(obdaFile);
+				
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		
+		//no value in the mapping
+		//xsd:long is not supported for ontology, it is translated into integer
+		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
+				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-		runTests(p);
+		runTests(p, query1, 3);
+		
+		//no value in the mapping 
+		//xsd:string in the ontology
+		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
+				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
+
+		runTests(p, query2, 3);
+		
+		//no value in the ontology 
+		//rdfs:Literal in the mapping
+		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
+				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
+
+		runTests(p, query3, 3);
+		
+		//no value in the ontology 
+		//no value in the mapping
+		//value in the oracle database is decimal
+		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
+						"select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
+
+		runTests(p, query4, 3);		
+		
+	}
+	
+	@Test	
+	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
+	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
+	public void failedMapping()  throws Exception  {
+		// Loading the OBDA data
+		obdaModel = fac.getOBDAModel();
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(obdaErroredFile);
+		
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		
+		try {
+			// Creating a new instance of the reasoner
+			QuestOWLFactory factory = new QuestOWLFactory();
+			factory.setOBDAController(obdaModel);
+
+			factory.setPreferenceHolder(p);
+
+			QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+			
+		} catch (Exception e) {
+           
+            
+            assertEquals(e.getCause().getClass().getCanonicalName(), "it.unibz.krdb.obda.model.OBDAException" );
+
+
+		} 
 	}
 
 }

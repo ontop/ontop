@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.krdb.odba;
 
 /*
  * #%L

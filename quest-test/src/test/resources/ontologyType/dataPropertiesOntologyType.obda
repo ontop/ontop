@@ -1,20 +1,17 @@
 [PrefixDeclaration]
 :		http://www.company.com/ARES#
+franz:	http://www.franz.com/
 
 [SourceDeclaration]
-sourceUri	novartis
+sourceUri	ontologyType
 connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
 username	system
 password	obdaps83
 driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
-mappingId	MAPID-e250eda48e0e42e5a0624a86e2106fb1
-target		<http://www.semanticweb.org/mrezk/ontologies/2014/5/untitled-ontology-8#assay{ID}> a :Assay ; :AssayID {ID} ; :number {ID} . 
-source		select   "HR"."T_ASSAY".ID, "HR"."T_ASSAY".SHORT_NAME,   "HR"."T_ASSAY".DESCRIPTION , "HR"."T_ASSAY".DEPARTMENT_CODE,    "HR"."T_ASSAY"."PTT_REF"   from "HR"."T_ASSAY"
-
 mappingId	MAPID-e250eda48e0e42e5a0624a86e2106fb1(0)
-target		:{ID} a :Assay ; :AssayID {ID} ; :numberDouble {ID}^^xsd:double . 
+target		:{ID} a :Assay ; :AssayID {ID} ; :assayName {SHORT_NAME}^^xsd:string ; :hasARESID {ID}^^xsd:integer ; :number {ID} ; :hasDepartment {DEPARTMENT_CODE}^^rdfs:Literal ; :hasPTTName {PTT_REF}^^xsd:string .
 source		select   "HR"."T_ASSAY".ID, "HR"."T_ASSAY".SHORT_NAME,   "HR"."T_ASSAY".DESCRIPTION , "HR"."T_ASSAY".DEPARTMENT_CODE,    "HR"."T_ASSAY"."PTT_REF"   from "HR"."T_ASSAY"
 ]]
 

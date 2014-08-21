@@ -70,10 +70,10 @@ public class R2rmlCheckerTest {
 	private OWLOntology ontology;
 	private Ontology onto;
 
-	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
-	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
+	final String owlfile = "src/test/resources/r2rml/npd-v2-datatype.owl";
+	final String obdafile = "src/test/resources/r2rml/npd-v2-datatype.obda";
 
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_different.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-datatype.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
 	private List<Predicate> emptyRolesObda = new ArrayList<Predicate>();
@@ -85,7 +85,36 @@ public class R2rmlCheckerTest {
 
 	@Before
 	public void setUp() throws Exception {
+		// Loading the OWL file
+		
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		ontology = manager
+				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
+		OWLAPI3Translator translator = new OWLAPI3Translator();
+
+		onto = translator.translate(ontology);
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
+				QuestConstants.FALSE);
+
+		loadOBDA(p);
+
+		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
+		String username = "fish";
+		String password = "fish";
+		String driverclass = "com.mysql.jdbc.Driver";
+
+		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+		// String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI = new File(r2rmlfile).toURI();
+		String sourceUrl = obdaURI.toString();
+		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+				username, password, driverclass);
+
+		loadR2rml(p, dataSource);
 	}
 
 	@After
@@ -115,35 +144,7 @@ public class R2rmlCheckerTest {
 
 	@Test
 	public void testDescriptionsCheck() throws Exception {
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-
-		onto = translator.translate(ontology);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
+		
 
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
@@ -180,17 +181,6 @@ public class R2rmlCheckerTest {
 //	@Test
 	public void testOBDAEmpties() throws Exception {
 
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
@@ -215,30 +205,6 @@ public class R2rmlCheckerTest {
 	 */
 //	@Test
 	public void testR2rmlEmpties() throws Exception {
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
@@ -262,39 +228,14 @@ public class R2rmlCheckerTest {
 	 */
 //	@Test
 	public void testComparesNpdQuery() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-		// Now we are ready for querying
+		
+		// Now we are ready for querying obda
 		// npd query 1
 		int obdaResult = npdQuery(reasonerOBDA.getConnection());
 		// reasoner.dispose();
 
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
 
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
-
-		// Now we are ready for querying
+		// Now we are ready for querying r2rml
 		// npd query 1
 		int r2rmlResult = npdQuery(reasonerR2rml.getConnection());
 		
@@ -312,37 +253,6 @@ public class R2rmlCheckerTest {
 	 */
 //	@Test
 	public void testOneRole() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-
-		onto = translator.translate(ontology);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
 
 		// Now we are ready for querying
 		log.debug("Comparing roles");
@@ -366,37 +276,6 @@ public class R2rmlCheckerTest {
 	 */
 	@Test
 	public void testOneRoleFilterLiterals() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-
-		onto = translator.translate(ontology);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-		// String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI = new File(r2rmlfile).toURI();
-		String sourceUrl = obdaURI.toString();
-
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
 
 		// Now we are ready for querying
 		log.debug("Comparing roles");
@@ -453,6 +332,7 @@ public class R2rmlCheckerTest {
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 */
 	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource) {
+		log.info("Loading r2rml file");
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
@@ -478,6 +358,7 @@ public class R2rmlCheckerTest {
 
 	private void loadOBDA(QuestPreferences p) throws Exception {
 		// Loading the OBDA data
+		log.info("Loading obda file");
 		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 

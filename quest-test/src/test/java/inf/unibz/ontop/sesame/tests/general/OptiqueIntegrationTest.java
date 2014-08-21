@@ -38,8 +38,8 @@ import sesameWrapper.SesameVirtualRepo;
 
 public class OptiqueIntegrationTest extends TestCase {
 
-	String owlfile = "src/test/resources/example/npd-v2-ql_a.owl";
-	String mappingfile = "src/test/resources/example/npd-v2-ql_a.ttl";
+	String owlfile = "src/test/resources/example/npd-v2-datatype.owl";
+	String mappingfile = "src/test/resources/example/npd-v2-datatype.ttl";
 	String queryfile = "";
 
 	OWLOntology owlontology;

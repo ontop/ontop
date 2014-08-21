@@ -5166,7 +5166,8 @@ _:node18sb2u752x971 rr:column "fclGeodeticDatum" .
 
 _:node18sb2u752x967 a rr:R2RMLView .
 
-_:node18sb2u752x971 rr:termType rr:Literal .
+_:node18sb2u752x971 rr:termType rr:Literal ;
+rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
 
 _:node18sb2u752x968 rr:template "http://sws.ifi.uio.no/data/npd-v2/facility/{fclNpdidFacility}" .
 
@@ -17943,8 +17944,6 @@ _:node18sb2u752x3387 rr:subjectMap _:node18sb2u752x3386 .
 _:node18sb2u752x3386 a rr:SubjectMap .
 
 _:node18sb2u752x3390 rr:objectMap _:node18sb2u752x3389 .
-
-_:node18sb2u752x3389 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
 
 _:node18sb2u752x3386 rr:template "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}" ;
 	a rr:TermMap .

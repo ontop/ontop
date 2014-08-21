@@ -17,15 +17,28 @@
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      ontologyIRI="http://www.company.com/ARES">
     <Prefix name="" IRI="http://www.company.com/ARES#"/>
-    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
-    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="franz" IRI="http://www.franz.com/"/>
     <Declaration>
         <Class IRI="#Assay"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#AssayID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#assayName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasARESID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDepartment"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasPTTName"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#number"/>
@@ -33,6 +46,21 @@
     <Declaration>
         <DataProperty IRI="#numberDouble"/>
     </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="franz:solrDocid"/>
+    </Declaration>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasARESID"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDepartment"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasPTTName"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </SubDataPropertyOf>
     <FunctionalDataProperty>
         <DataProperty IRI="#AssayID"/>
     </FunctionalDataProperty>
@@ -48,12 +76,24 @@
         <Class IRI="#Assay"/>
     </DataPropertyDomain>
     <DataPropertyRange>
-        <DataProperty IRI="#AssayID"/>
+        <DataProperty IRI="#assayName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasARESID"/>
         <Datatype abbreviatedIRI="xsd:integer"/>
     </DataPropertyRange>
     <DataPropertyRange>
-        <DataProperty IRI="#number"/>
+        <DataProperty IRI="#hasPTTName"/>
         <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#number"/>
+        <Datatype abbreviatedIRI="xsd:long"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="franz:solrDocid"/>
+        <Datatype abbreviatedIRI="xsd:long"/>
     </DataPropertyRange>
 </Ontology>
 

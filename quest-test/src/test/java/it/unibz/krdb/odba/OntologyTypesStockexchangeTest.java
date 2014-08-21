@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
@@ -42,6 +42,13 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+/**
+ * Test if the datatypes are assigned correctly.
+ * 
+ * NOTE: xsd:string and rdfs:Literal are different.
+ * 
+ */
 
 public class OntologyTypesStockexchangeTest {
 
@@ -120,8 +127,8 @@ public class OntologyTypesStockexchangeTest {
 	}
 
 
-	@Test
-	public void testQuotedString() throws Exception {
+	@Test //we need xsd:string to work correctly 
+	public void testQuotedLiteral() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -130,7 +137,7 @@ public class OntologyTypesStockexchangeTest {
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\".}";
 
-		runTests(p, query1, 2 );
+		runTests(p, query1, 0 );
 	}
 
     @Test
@@ -145,10 +152,12 @@ public class OntologyTypesStockexchangeTest {
 
         runTests(p, query1, 2 );
     }
+    
+    
 
 
-    @Test
-    public void testAddressesQuotedString() throws Exception {
+    @Test //we need xsd:string to work correctly 
+    public void testAddressesQuotedLiteral() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -166,10 +175,10 @@ public class OntologyTypesStockexchangeTest {
                 "\t\t$x :hasNumber $number.\n" +
                 "}";
 
-        runTests(p, query1, 1 );
+        runTests(p, query1, 0 );
     }
 
-    @Test
+    @Test //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false
     public void testBooleanDatatype() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
