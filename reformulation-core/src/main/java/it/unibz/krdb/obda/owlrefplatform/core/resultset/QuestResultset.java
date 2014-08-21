@@ -159,7 +159,7 @@ public class QuestResultset implements TupleResultSet {
 						}
 					}
 
-					result = fac.getConstantURI(realValue);
+					result = fac.getConstantURI(realValue.trim());
 
 				} else if (type == COL_TYPE.BNODE) {
 					String rawLabel = set.getString(column);
