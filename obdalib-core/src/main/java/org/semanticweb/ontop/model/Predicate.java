@@ -85,4 +85,6 @@ public interface Predicate extends Cloneable, Serializable {
 	boolean isDataTypePredicate();
 
 	boolean isTriplePredicate();
+
+    public boolean isAggregationPredicate();
 }

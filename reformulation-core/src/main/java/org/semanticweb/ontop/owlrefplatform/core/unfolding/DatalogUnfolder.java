@@ -21,19 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
@@ -579,39 +568,20 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 }
 
     private boolean detectAggregateInArgument(Term arg) {
-        if (arg instanceof Function){
-            Predicate func = ((Function) arg).getFunctionSymbol();
+        if (arg instanceof Function) {
+            Function compositeTerm = ((Function) arg);
+            Predicate functionSymbol = compositeTerm.getFunctionSymbol();
 
-            if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
-                Term intArg = ((Function) arg).getTerm(0);
-                if (intArg instanceof Function){
-                    func = ((Function) intArg).getFunctionSymbol();
-                    boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-                            (func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-                            (func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-                            (func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-                            (func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-                    if (isAnAggregate){
-                        //This rule has aggregates so we should
-                        //not unfold the aggregated predicate
-                        return true;
-                    }
-                }
-
-            }//this is integer
-            else{
-                boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-                        (func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-                        (func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-                        (func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-                if (isAnAggregate){
-                    //This rule has aggregates so we should
-                    //not unfold the aggregated predicate
-                    return true;
-                }
-
+            if (functionSymbol.isAggregationPredicate()) {
+                return true;
             }
+
+            /**
+             * Looks recursively at the sub(-sub)-terms
+             */
+            return detectAggregateInArgument(compositeTerm.getTerm(0));
         }
+
         return false;
     }
 
