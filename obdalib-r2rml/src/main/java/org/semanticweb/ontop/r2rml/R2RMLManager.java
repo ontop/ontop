@@ -97,7 +97,7 @@ public class R2RMLManager {
 	
 	/**
 	 * Constructor to start the parser from an RDF Model
-	 * @param Model - the sesame Model containing mappings
+	 * @param model - the sesame Model containing mappings
 	 */
 	public R2RMLManager(Model model){
 		myModel = model;
@@ -160,6 +160,11 @@ public class R2RMLManager {
 		Function head = getHeadAtom(body);
 		CQIE targetQuery = fac.getCQIE(head, body);
 		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), sourceQuery, targetQuery);
+        if (body.isEmpty()){
+            //we do not have a target query
+            System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
+            return null;
+        }
 		return mapping;
 	}
 	
@@ -211,8 +216,9 @@ public class R2RMLManager {
 				throw new Exception("Could not create source query for join in "+tm.toString());
 			}
 			//finally, create mapping and add it to the list
-			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+tm.hashCode(), sourceQuery, targetQuery);
-			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
+            //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
+            OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), sourceQuery, targetQuery);
+            System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}
 			
