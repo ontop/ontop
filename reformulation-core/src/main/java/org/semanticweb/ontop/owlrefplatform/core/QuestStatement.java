@@ -76,6 +76,7 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatal
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
+import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -525,26 +526,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-		
-		//TODO: optimise this????
-		if(unfolder.getMultiplePredList().isEmpty()){
-			List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
-
-			//			for (CQIE rule: newTypedRules){
-			//				System.out.println(rule);
-			//			}
-			//TODO: can we avoid using this intermediate variable???
-			unfolding.removeAllRules();
-			unfolding.appendRule(newTypedRules);
-			log.debug("Types Pushed: \n{}",unfolding);
-
-
-		} else if (!unfolding.getRules().isEmpty()){
-			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
-			//System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
-			log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
-		}
-		
+        unfolding = pushTypes(unfolding, unfolder);
 		
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
@@ -552,14 +534,56 @@ public class QuestStatement implements OBDAStatement {
 			//System.out.println(rule);
 		}
 
-		
-
-		
-		
 		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 
 		return unfolding;
 	}
+
+    /**
+     * Tests if the conditions are met to push types into the Datalog program.
+     * If it ok, pushes them.
+     *
+     * @param datalogProgram
+     * @param unfolder
+     * @return the updated Datalog program
+     */
+    private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder) {
+        boolean canPush = true;
+
+        /**
+         * Disables type pushing if a functionSymbol of the Datalog program is known as
+         * being multi-typed.
+         *
+         * TODO: explain what we mean by multi-typed .
+         * Happens for instance with URI templates.
+         *
+         * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
+         */
+        Multimap<Predicate,Integer> multiTypedFunctionSymbolMap = unfolder.getMultiplePredList();
+        if (!multiTypedFunctionSymbolMap.isEmpty()) {
+            DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
+
+            for (Predicate functionSymbol : multiTypedFunctionSymbolMap.keys()) {
+                if (dependencyGraph.getRuleIndex().containsKey(functionSymbol)) {
+                    canPush = false;
+                    log.debug(String.format("The Datalog program is using at least one multi-typed function symbol" +
+                            " (%s) so type pushing is disabled.", functionSymbol.getName()));
+                    break;
+                }
+            }
+        }
+
+        if (canPush) {
+            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, unfolder.getMultiplePredList());
+
+            //TODO: can we avoid using this intermediate variable???
+            datalogProgram.removeAllRules();
+            datalogProgram.appendRule(newTypedRules);
+            log.debug("Types Pushed: \n{}",datalogProgram);
+        }
+
+        return datalogProgram;
+    }
 
 	
 	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
