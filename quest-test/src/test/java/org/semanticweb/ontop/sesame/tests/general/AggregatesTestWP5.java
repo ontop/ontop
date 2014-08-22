@@ -74,7 +74,7 @@ public class AggregatesTestWP5 extends TestCase {
 
 	
 	final String owlfile = "src/test/resources/wp5/optique-demo.ttl";
-	final String mappingfile = "src/test/resources/wp5/mapping.ttl";
+	final String mappingfile = "src/test/resources/wp5/mapping-1.ttl";
 
 	
 	

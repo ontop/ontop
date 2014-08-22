@@ -21,6 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 
+import info.aduna.iteration.OffsetIteration;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -28,6 +30,7 @@ import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -38,6 +41,7 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.ontology.DataType;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
@@ -2446,19 +2450,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
 			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude, boolean containsAggregates) {
 
-			/**
-			 * The reference rule is a cleaned version of the source rule:
-			 * it has no aggregate operator in its head.
-			 */
-            CQIE referenceRule;
-            if (!containsAggregates) {
-                referenceRule = sourceRule;
-            }
-            else {
-                referenceRule = removeAggregatesFromHead(sourceRule);
-            }
 
-			Function sourceHead = referenceRule.getHead();
+			Function sourceHead = sourceRule.getHead();
 			List<CQIE> result=new LinkedList<CQIE>();
 
 			//Iterate over the term of the father rule
@@ -2470,7 +2463,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
-					result.addAll(computeRuleExtendedTypes(focus.getTerms(), referenceRule, fatherRule, termsToExclude, containsAggregates));
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude, containsAggregates));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
@@ -2479,7 +2472,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						/**
 						 * TODO: a rule named "addTypes"???????
 						 */
-						CQIE addTypes = addTypes(sourceHead,referenceRule,focus,fatherRule,termsToExclude);
+						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule,termsToExclude);
 						result.add(addTypes);
 						break;
 					} else{
@@ -2508,8 +2501,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
      * @param rule. Read-only.
      * @return the new rule
      */
+	//TODO: remove this method if possible!!
     private CQIE removeAggregatesFromHead(CQIE rule) {
         CQIE newRule = rule.clone();
+        Function typedArg =null;
 
         /**
          *  This list is the list object used by the head of the rule.
@@ -2527,8 +2522,29 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
              * 
              */
             if (detectAggregateInArgument(argument)) {
-                Term subTerm = ((Function) argument).getTerm(0);
-                arguments.set(i, subTerm);
+            	Function subTerm = ((Function) argument);
+
+
+            	Predicate pred =  subTerm.getFunctionSymbol();
+
+            	if (pred instanceof DataTypePredicate){
+            		Function AggArg = ((Function) subTerm.getTerm(0)) ; 
+            		Term arg = AggArg.getTerm(0) ;
+            		typedArg = termFactory.getFunction(pred, arg);
+            		arguments.set(i, typedArg);
+
+            		//TODO: homogenize these if statements !
+            	} else if (pred.isAggregationPredicate()){
+            		Term myTypedArg = subTerm.getTerm(0);
+            		arguments.set(i, myTypedArg);
+
+            	}else{
+            		throw new NullPointerException("Unkown Aggregate Term!");
+            	}
+
+
+
+
             }
         }
 
