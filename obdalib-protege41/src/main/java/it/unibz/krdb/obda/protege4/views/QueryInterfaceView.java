@@ -175,6 +175,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor.stop();
 				}
 			}
+			@Override
+			public boolean isRunning() {
+				return false;
+			}
 		});
 
 		queryEditorPanel.setExecuteUCQAction(new OBDADataQueryAction() {
@@ -200,10 +204,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						time = end - startTime;
 
 						createTableModelFromResultSet(result);
-						rows = showTupleResultInTablePanel();
-						while(result.nextRow()){
-							rows = showTupleResultInTablePanel();
-						}
+						showTupleResultInTablePanel();
 					} else if (internalQuery.isConstructQuery()) {
 						List<OWLAxiom> result = action.getGraphResult();
 						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
@@ -233,7 +234,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 			@Override
 			public int getNumberOfRows() {
-				return rows;
+				return getTableModel().getRowCount();
+				//return rows;
+			}
+			public boolean isRunning(){
+				return getTableModel().isFetching();
 			}
 		});
 
@@ -270,6 +275,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public int getNumberOfRows() {
 				return -1;
 			}
+			@Override
+			public boolean isRunning() {
+				return false;
+			}
 		});
 
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction() {
@@ -304,6 +313,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public int getNumberOfRows() {
 				return -1;
+			}
+			@Override
+			public boolean isRunning() {
+				return false;
 			}
 		});
 
@@ -616,6 +629,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		public void run() {
 			thread = new Thread() {
+		
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
@@ -625,7 +639,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							statement = dqr.getStatement();
 							String queryString = query.getQueryString();
 							if (query.isSelectQuery() || query.isAskQuery()) {
-								statement.setFetchSize(1);
 								result = statement.executeTuple(queryString);
 							} else  {
 								graphResult = statement.executeGraph(queryString);

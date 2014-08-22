@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -42,12 +43,20 @@ public class OWLResultSetTableModel implements TableModel {
 	private int fetchSizeLimit;
 	private boolean isHideUri;
 	private boolean isFetchAll;
+	
+	// True while table is fetching sql results
+	private boolean isFetching = false;
+	// Set to true to signal the fetching thread to stop
+	private boolean stopFetching = false;
 
+	// The thread where the rows are fetched
+	Thread rowFetcher;
+	
 	// Tabular data for exporting result
 	private Vector<String[]> tabularData;
 	// Vector data for presenting result to table GUI
 	private Vector<String[]> resultsTable;
-	
+
 	private Vector<TableModelListener> listener;
 
 	private PrefixManager prefixman;
@@ -68,20 +77,65 @@ public class OWLResultSetTableModel implements TableModel {
 		this.isHideUri = hideUri;
 		this.isFetchAll = fetchAll;
 		this.fetchSizeLimit = fetchSizeLimit;
-
+		this.isFetching = true;
+		this.stopFetching = false;
+		
 		numcols = results.getColumnCount();
 		numrows = 0;
-		
+
 		resultsTable = new Vector<String[]>();
 		listener = new Vector<TableModelListener>();
-		
+
 		int fetchSize = fetchSizeLimit;
 		if (needFetchMore()) {
 			fetchSize = INITIAL_FETCH_SIZE;
 		}
-		//fetchRows(fetchSize);
+		fetchRowsAsync();
 	}
-	
+
+	private void fetchRowsAsync() throws OWLException{
+		rowFetcher = new Thread(){
+			public void run() {
+				if (results == null) {
+					return;
+				}
+				try {
+					while (results.nextRow() && !stopFetching) {
+						String[] crow = new String[numcols];
+						for (int j = 0; j < numcols; j++) {
+							OWLPropertyAssertionObject constant = results
+									.getOWLPropertyAssertionObject(j + 1);
+							if (constant != null) {
+								crow[j] = constant.toString();
+							}
+							else {
+								crow[j] = "";
+							}
+						}
+						resultsTable.add(crow);
+						updateRowCount();
+					}
+				} catch (OWLException e){
+					JOptionPane.showMessageDialog(
+							null,
+							"Error when fetching results. Aborting. " + e.toString());
+				}
+				isFetching = false;
+				
+			}
+		};
+		rowFetcher.start();
+	}
+
+	/**
+	 * Returns whether the table is still being populated by SQL fetched from the result object. 
+	 * Called from the QueryInterfacePanel to decide whether to continue updating the result count
+	 * @return
+	 */
+	public boolean isFetching(){
+		return this.isFetching;
+	}
+
 	private void fetchRows(int size) throws OWLException {
 		if (results == null) {
 			return;
@@ -103,7 +157,7 @@ public class OWLResultSetTableModel implements TableModel {
 				resultsTable.add(crow);
 				counter++;
 				updateRowCount();
-				
+
 				// Determine if the loop should stop now
 				if (counter == size) {
 					break;
@@ -151,6 +205,7 @@ public class OWLResultSetTableModel implements TableModel {
 	 * Statement object used to create it.
 	 */
 	public void close() {
+		stopFetching = true;
 		try {
 			results.close();
 		} catch (OWLException e) {
@@ -223,11 +278,11 @@ public class OWLResultSetTableModel implements TableModel {
 	public boolean needFetchMore() {
 		return isFetchingAll() || fetchSizeLimit > INITIAL_FETCH_SIZE;
 	}
-	
+
 	private boolean isFetchingAll() {
 		return isFetchAll;
 	}
-	
+
 	private void checkNextRowAvailability(int currentRowNumber) {
 		try {
 			int nextRowNumber = currentRowNumber + getRowCount() / 4;
@@ -249,7 +304,7 @@ public class OWLResultSetTableModel implements TableModel {
 			// NO-OP
 		}
 	}
-	
+
 	// Our table isn't editable
 	public boolean isCellEditable(int row, int column) {
 		return false;
