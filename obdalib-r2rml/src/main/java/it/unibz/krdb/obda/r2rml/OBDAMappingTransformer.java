@@ -49,10 +49,7 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 
 import eu.optique.api.mapping.LogicalTable;
@@ -76,6 +73,8 @@ public class OBDAMappingTransformer {
 	private ValueFactory vf;
 	private OWLOntology ontology;
 	private Set<OWLObjectProperty> objectProperties;
+    private Set<OWLDataProperty> dataProperties;
+
 	
 	public OBDAMappingTransformer() {
 		this.vf = new ValueFactoryImpl();
@@ -336,7 +335,8 @@ public class OBDAMappingTransformer {
 			
 			IRI propname = IRI.create(predURIString);
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
-			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
+			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
+            OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
 			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
 				// The term is actually a SubjectMap (class)
@@ -363,14 +363,27 @@ public class OBDAMappingTransformer {
 				Term object = func.getTerm(1);
 								
  				if (object instanceof Variable){ //we create an rr:column
-					if(ontology!= null && objectProperties.contains(prop)){
+					if(ontology!= null && objectProperties.contains(objectProperty)){
 						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
 						obm.setTermType(R2RMLVocabulary.iri);
-					}
-					else{
-					obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
-					}
-					//we add the predicate object map in case of literal
+					} else {
+                        if (ontology != null && dataProperties.contains(dataProperty)) {
+
+                            obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
+                            //set the datatype for the typed literal
+
+                            Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            //assign the datatype if present
+                            if (ranges.size() == 1) {
+                                IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
+                                obm.setDatatype(vf.createURI(dataRange.toString()));
+                            }
+
+                        } else {
+                            obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
+                        }
+                    }
+                    //we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
 				} else if (object instanceof Function) { //we create a template
@@ -438,7 +451,11 @@ public class OBDAMappingTransformer {
 	public void setOntology(OWLOntology ontology) {
 		this.ontology = ontology;
 		if(ontology != null){
+            //gets all object properties from the ontology
 			objectProperties = ontology.getObjectPropertiesInSignature();
+
+            //gets all data properties from the ontology
+            dataProperties = ontology.getDataPropertiesInSignature();
 		}
 	}
 	
