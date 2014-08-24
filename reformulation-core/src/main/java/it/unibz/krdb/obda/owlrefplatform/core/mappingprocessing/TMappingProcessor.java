@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -73,13 +74,28 @@ public class TMappingProcessor implements Serializable {
 	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
 	boolean optimize = true;
-
+	
+	/** List of predicates that need to be excluded from T-Mappings **/
+	List<SimplePredicate> excludeFromTMappings;
+	
 	public TMappingProcessor(Ontology tbox, boolean optmize) {
 		this.optimize = optmize;
 		
 		reasoner = new TBoxReasonerImpl(tbox);
 
 		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		
+		excludeFromTMappings = new ArrayList<SimplePredicate>();
+	}
+	
+	public TMappingProcessor(Ontology tbox, boolean optmize, List<SimplePredicate> excludeFromTMappings) {
+		this.optimize = optmize;
+		
+		reasoner = new TBoxReasonerImpl(tbox);
+
+		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		
+		this.excludeFromTMappings = excludeFromTMappings;
 	}
 
 	/***
@@ -385,6 +401,14 @@ public class TMappingProcessor implements Serializable {
 		for (Equivalences<Property> propertySet : reasoner.getProperties()) {
 
 			Property current = propertySet.getRepresentative();
+			
+			// Davide> Let's skip?
+			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
+			
+			if( excludeFromTMappings.contains(curSimp) ){
+				// Skip this guy
+				continue;
+			}				
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
@@ -459,6 +483,14 @@ public class TMappingProcessor implements Serializable {
 
 			OClass current = (OClass)classSet.getRepresentative();
 
+			// Davide> Let's skip?
+			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
+			
+			if( excludeFromTMappings.contains(curSimp) ){
+				// Skip this guy
+				continue;
+			}	
+			
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
 			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);

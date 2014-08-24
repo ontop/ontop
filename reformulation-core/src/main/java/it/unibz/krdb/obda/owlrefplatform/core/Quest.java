@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -206,6 +207,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private boolean applyUserConstraints;
 
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private List<SimplePredicate> excludeFromTMappings;
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	private boolean applyExcludeFromTMappings;
+	
 	/***
 	 * General flags and fields
 	 */
@@ -249,7 +260,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private String aboxJdbcPassword;
 
 	private String aboxJdbcDriver;
-
+	
+	/** Davide> Options about T-Mappings **/
+	private Boolean tMappings = true;
+		
 	/*
 	 * The following are caches to queries that Quest has seen in the past. They
 	 * are used by the statements
@@ -273,8 +287,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private Map<Predicate, List<Integer>> pkeys;
 
-	// Davide> Options about T-Mappings
-	private Boolean tMappings = true;
+
 
 
     /***
@@ -339,6 +352,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
 		this(tbox, mappings, config);
 		this.metadata = metadata;
+	}
+	
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	public void setExcludeFromTMappings(List<SimplePredicate> excludeFromTMappings){
+		assert(excludeFromTMappings != null);
+		this.excludeFromTMappings = excludeFromTMappings;
 	}
 
 	/**
@@ -1075,8 +1094,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private DatalogProgram applyTMappings(DBMetadata metadata, boolean optimizeMap, DatalogProgram unfoldingProgram, Ontology sigma,
 			boolean full) throws OBDAException {
 		final long startTime = System.currentTimeMillis();
-
-		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationOntology, optimizeMap);
+		
+		// Davide> Here now I put another TMappingProcessor taking
+		//         also a list of Predicates as input, that represents
+		//         what needs to be excluded from the T-Mappings
+		TMappingProcessor tmappingProc = null;
+		if( applyExcludeFromTMappings )
+			tmappingProc = new TMappingProcessor(reformulationOntology, optimizeMap, excludeFromTMappings);
+		else
+			tmappingProc = new TMappingProcessor(reformulationOntology, optimizeMap);
+		assert(tmappingProc != null);
+		
 		unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram, full);
 
 		sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());

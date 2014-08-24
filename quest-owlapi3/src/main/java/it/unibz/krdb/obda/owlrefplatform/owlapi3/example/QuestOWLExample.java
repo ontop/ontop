@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
  * #L%
  */
 
+import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -34,6 +35,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -67,7 +69,10 @@ public class QuestOWLExample {
 	//final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
-
+	
+	// Exclude from T-Mappings
+	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
+	
 	public void runQuery() throws Exception {
 
 		/*
@@ -91,7 +96,7 @@ public class QuestOWLExample {
 		QuestPreferences preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
-
+		
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
@@ -104,6 +109,11 @@ public class QuestOWLExample {
 		 */
 		ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
 		factory.setImplicitDBConstraints(constr);
+		
+		/*
+		 * T-Mappings Handling!!
+		 */
+		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
