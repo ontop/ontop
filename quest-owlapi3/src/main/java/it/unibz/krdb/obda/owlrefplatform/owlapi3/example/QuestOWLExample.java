@@ -114,6 +114,7 @@ public class QuestOWLExample {
 		 * T-Mappings Handling!!
 		 */
 		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
+		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
