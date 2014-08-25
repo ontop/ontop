@@ -95,7 +95,7 @@ public class QuestOWLStatement {
 
 	private QuestStatement st;
 	private QuestOWLConnection conn;
-
+	
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
@@ -105,6 +105,10 @@ public class QuestOWLStatement {
 		return st;
 	}
 
+	public boolean isCanceled(){
+		return st.isCanceled();
+	}
+	
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
