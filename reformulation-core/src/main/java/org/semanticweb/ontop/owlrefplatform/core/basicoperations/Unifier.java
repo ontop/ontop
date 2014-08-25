@@ -671,17 +671,9 @@ public class Unifier {
 						Term aggArg2 = ((Function) AggrOrSomethingElse).getTerm(0);
 
 						if (aggArg2 instanceof Function){
-							Predicate typeOrUri = ((Function) aggArg2).getFunctionSymbol();
-
-							if (typeOrUri.isDataTypePredicate()){
-								t1 = term2;
-								t2 = ofac.getFunction(typeOrUri	,term2);
-							} else{
-								t1 = term2;
-								t2 = ofac.getFunction(type	,term2);;
-							}
+							t1 = term2;
+							t2 = ofac.getFunction(type	,term2);
 						}
-
 						
 					}else{
 						t1 = term2;
