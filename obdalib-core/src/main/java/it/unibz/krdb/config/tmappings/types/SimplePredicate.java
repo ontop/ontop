@@ -37,4 +37,9 @@ public class SimplePredicate {
 	public int hashCode() {
 		return this.name.hashCode() + arity;
 	}
+	
+	@Override
+	public String toString(){
+		return this.name + "/" + this.arity; 
+	}
 }
