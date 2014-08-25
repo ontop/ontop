@@ -35,6 +35,8 @@ public class SQLAdapterFactory {
 			return new Mysql2SQLDialectAdapter();
 		} else if (className.equals("org.h2.Driver")) {
 			return new H2SQLDialectAdapter();
+		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+			return new HSQLDBDialectAdapter();
 		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
 			return new DB2SQLDialectAdapter();
 		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
