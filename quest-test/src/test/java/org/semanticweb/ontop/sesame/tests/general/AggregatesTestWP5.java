@@ -420,10 +420,6 @@ public class AggregatesTestWP5 extends TestCase {
 
 
         String assemblyPrefix = "http://www.optique-project.eu/resource/assembly/Assembly-";
-        /**
-         * FIXME (bug in the mapping?)
-         */
-        assemblyPrefix += "http%3A%2F%2Fwww.optique-project.eu%2Fresource%2Fassembly%2FAssembly-";
 
         String assemblyKey = "assembly";
         String eventFrequencyKey = "eventFrequency";

@@ -2286,27 +2286,24 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							 * evaluation, so we decrease the index.
 							 */
 
+
                             /**
-                             * Simplifies the source query by removing its types.
+                             * Here we remove the types, if possible, of the source query.
+                             * Note that we do no remove of terms that contains an aggregation.
                              *
-                             * This simplification is disabled if some aggregates
-                             * are detected because the current algorithm would remove
-                             * the aggregation operators... The resulting Datalog Program
-                             * would then be inconsistent.
-                             *
+                             * This un-typing is for instance important for URI templates: we
+                             * want these templates to be used in the top-level query, not in sub-queries.
+                             * Indeed, joining URIs is more expensive than joining ids because the former are not indexed.
+                             * Said differently, URIs are sargable while IDs are.
                              */
-                            if (!containsAggregates) {
+                            CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
 
-                                //Here we remove the types, if possible, of the source query
-                                CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
-
-                                //Now we update the indexes for the source query
-                                List<CQIE> newSourceRuleList = new LinkedList<CQIE>();
-                                newSourceRuleList.add(newsourceRule);
-                                int srcIdx = workingList.indexOf(sourceRule);
-                                Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-                                updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
-                            }
+                            //Now we update the indexes for the source query
+                            List<CQIE> newSourceRuleList = new LinkedList<CQIE>();
+                            newSourceRuleList.add(newsourceRule);
+                            int srcIdx = workingList.indexOf(sourceRule);
+                            Predicate srchead = sourceRule.getHead().getFunctionSymbol();
+                            updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
 							
 							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
@@ -2404,8 +2401,15 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		if (termsToExclude.contains(t)){
 			isProblemTemplate = true;
 		}
+
+        /**
+         * Does not untyped aggregations
+         */
+        if (detectAggregateInArgument(t)) {
+            untypedArguments.add(t);
+        }
 		
-		if (t instanceof Function && !isProblemTemplate){
+		else if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
 			
