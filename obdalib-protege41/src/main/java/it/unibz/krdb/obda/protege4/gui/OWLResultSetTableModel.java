@@ -43,7 +43,7 @@ public class OWLResultSetTableModel implements TableModel {
 	private int fetchSizeLimit;
 	private boolean isHideUri;
 	private boolean isFetchAll;
-	
+
 	// True while table is fetching sql results
 	private boolean isFetching = false;
 	// Set to true to signal the fetching thread to stop
@@ -51,7 +51,7 @@ public class OWLResultSetTableModel implements TableModel {
 
 	// The thread where the rows are fetched
 	Thread rowFetcher;
-	
+
 	// Tabular data for exporting result
 	private Vector<String[]> tabularData;
 	// Vector data for presenting result to table GUI
@@ -79,7 +79,7 @@ public class OWLResultSetTableModel implements TableModel {
 		this.fetchSizeLimit = fetchSizeLimit;
 		this.isFetching = true;
 		this.stopFetching = false;
-		
+
 		numcols = results.getColumnCount();
 		numrows = 0;
 
@@ -96,32 +96,14 @@ public class OWLResultSetTableModel implements TableModel {
 	private void fetchRowsAsync() throws OWLException{
 		rowFetcher = new Thread(){
 			public void run() {
-				if (results == null) {
-					return;
-				}
 				try {
-					while (results.nextRow() && !stopFetching) {
-						String[] crow = new String[numcols];
-						for (int j = 0; j < numcols; j++) {
-							OWLPropertyAssertionObject constant = results
-									.getOWLPropertyAssertionObject(j + 1);
-							if (constant != null) {
-								crow[j] = constant.toString();
-							}
-							else {
-								crow[j] = "";
-							}
-						}
-						resultsTable.add(crow);
-						updateRowCount();
-					}
+					fetchRows(fetchSizeLimit);
 				} catch (OWLException e){
 					JOptionPane.showMessageDialog(
 							null,
 							"Error when fetching results. Aborting. " + e.toString());
 				}
-				isFetching = false;
-				
+
 			}
 		};
 		rowFetcher.start();
@@ -140,34 +122,29 @@ public class OWLResultSetTableModel implements TableModel {
 		if (results == null) {
 			return;
 		}
-		if (size != 0) {
-			int counter = 0;
-			while (results.nextRow()) {
-				String[] crow = new String[numcols];
-				for (int j = 0; j < numcols; j++) {
-					OWLPropertyAssertionObject constant = results
-							.getOWLPropertyAssertionObject(j + 1);
-					if (constant != null) {
-						crow[j] = constant.toString();
-					}
-					else {
-						crow[j] = "";
-					}
+		while (results.nextRow() && !stopFetching) {
+			String[] crow = new String[numcols];
+			for (int j = 0; j < numcols; j++) {
+				OWLPropertyAssertionObject constant = results
+						.getOWLPropertyAssertionObject(j + 1);
+				if (constant != null) {
+					crow[j] = constant.toString();
 				}
-				resultsTable.add(crow);
-				counter++;
-				updateRowCount();
-
-				// Determine if the loop should stop now
-				if (counter == size) {
-					break;
+				else {
+					crow[j] = "";
 				}
 			}
+			resultsTable.add(crow);
+			this.updateRowCount();
+			//this.fireNewRowEvent();
 		}
+		this.fireModelChangedEvent();
+		isFetching = false;
 	}
 
 	private void updateRowCount() {
 		numrows++;
+
 	}
 
 	/**
@@ -322,6 +299,7 @@ public class OWLResultSetTableModel implements TableModel {
 	public void removeTableModelListener(TableModelListener l) {
 		listener.remove(l);
 	}
+
 
 	private void fireModelChangedEvent() {
 		Iterator<TableModelListener> it = listener.iterator();

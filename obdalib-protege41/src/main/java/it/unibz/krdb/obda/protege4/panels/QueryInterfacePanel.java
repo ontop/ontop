@@ -333,17 +333,17 @@ TableModelListener, OBDAPreferenceChangeListener {
 				public void run() {
 					OBDADataQueryAction action = QueryInterfacePanel.this.getExecuteUCQAction();
 					action.run(queryTextPane.getText());
+					execTime = action.getExecutionTime();
 					do {
-
-						execTime = action.getExecutionTime();
 						int rows = action.getNumberOfRows();
-						updateStatus(rows);
+						updateStatus(rows);	
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
-							;
+							break;
 						}
 					} while (action.isRunning());
+					updateStatus(action.getNumberOfRows());
 				};
 			});
 			queryRunnerThread.start();
