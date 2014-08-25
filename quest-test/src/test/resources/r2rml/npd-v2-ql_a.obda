@@ -807,7 +807,7 @@ target		npd:licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidC
 source		SELECT prlNpdidLicence,prlTransferDirection,cmpNpdidCompany,prlTransferDateValidFrom,prlTransferredInterest FROM licence_transfer_hst
 
 mappingId	Mapping:00197:Literal:facility_fixed:fclPhase
-target		npd:facility/{fclNpdidFacility} npdv:status {fclPhase} . 
+target		npd:facility/{fclNpdidFacility} npdv:status {fclPhase}^^xsd:string .
 source		SELECT fclNpdidFacility,fclPhase FROM facility_fixed
 
 mappingId	Mapping:00198:Literal:wellbore_exploration_all:wlbNsSec
