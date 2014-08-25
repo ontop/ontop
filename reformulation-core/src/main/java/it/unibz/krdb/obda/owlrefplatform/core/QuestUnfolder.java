@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,9 +87,11 @@ public class QuestUnfolder {
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
-		unfoldingProgram.appendRule(generateTripleMappings());		
+		unfoldingProgram.appendRule(generateTripleMappings());
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
+
+        log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
@@ -120,8 +124,9 @@ public class QuestUnfolder {
 	 * Adding data typing on the mapping axioms.
 	 */
 	
-	public void extendTypesWithMetadata() throws OBDAException {
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, EquivalenceMap equivalenceMaps) throws OBDAException {
+
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(tBoxReasoner, equivalenceMaps, metadata);
 		typeRepair.insertDataTyping(unfoldingProgram);
 	}
 
@@ -188,7 +193,6 @@ public class QuestUnfolder {
 	
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
-	 * @param equivalenceMaps 
 	 */
 	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions) {
 		
@@ -274,7 +278,6 @@ public class QuestUnfolder {
 		
 		setupUnfolder();
 
-		log.debug("Final set of mappings: \n{}", unfoldingProgram);	
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 	}
 
@@ -282,9 +285,7 @@ public class QuestUnfolder {
 	/***
 	 * Creates mappings with heads as "triple(x,y,z)" from mappings with binary
 	 * and unary atoms"
-	 * 
-	 * @param fac
-	 * @param unfoldingProgram
+	 *
 	 * @return
 	 */
 	private List<CQIE> generateTripleMappings() {
@@ -335,4 +336,6 @@ public class QuestUnfolder {
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
 		return unfolder.unfold(query, targetPredicate);
 	}
+
+
 }

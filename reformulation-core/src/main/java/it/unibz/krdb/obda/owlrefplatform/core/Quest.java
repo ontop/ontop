@@ -521,8 +521,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			reformulationOntology = inputTBox;
 		}
 		Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
-		
-		
+
 		try {
 
 			/*
@@ -796,9 +795,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				sigma.addEntities(aboxDependencies.getVocabulary());
 				sigma.addAssertions(aboxDependencies.getAssertions());
 
-
 				// Adding data typing on the mapping axioms.
-				unfolder.extendTypesWithMetadata();
+				unfolder.extendTypesWithMetadata(reformulationReasoner, equivalenceMaps);
+
 				
 				 // Adding NOT NULL conditions to the variables used in the head
 				 // of all mappings to preserve SQL-RDF semantics
@@ -808,7 +807,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			unfolder.setupUnfolder();
 
-			log.debug("Final set of mappings: \n{}", unfolder.getRules());
 			log.debug("DB Metadata: \n{}", metadata);
 
 			
