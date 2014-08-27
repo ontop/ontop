@@ -21,24 +21,16 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import info.aduna.iteration.OffsetIteration;
+
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -49,8 +41,8 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.ontology.DataType;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
@@ -284,6 +276,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
+
 	
 
 		if (includeMappings){
@@ -424,7 +417,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//get the predicate
 				Predicate pred = predicatesInBottomUp.get(predIdx);
 				//get the father predicate
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
 				
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
@@ -450,7 +442,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					//We unfold every rule of the father atom that contains pred
 					for (CQIE fatherRule : fatherCollection) {
 						
-						
+						Predicate preFather =  fatherRule.getHead().getPredicate();
+
 						int queryIdx=workingList.indexOf(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
@@ -512,7 +505,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								depGraph.addRuleToRuleIndex(preFather, newquery);
 							
 								
-								//Delete the rules from workingList that have been touched
+								//adding the rules from workingList that have been touched
 								workingList.add(queryIdx, newquery);
 
 							
@@ -568,48 +561,33 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
  */
 private boolean detectAggregateinSingleRule( CQIE rule) {
 	Function fatherHead = rule.getHead();
-	boolean hasAggregates = false;
 	
 	List<Term> headArgs = fatherHead.getTerms();
 	for (Term arg: headArgs) {
-		if (arg instanceof Function){
-			Predicate func = ((Function) arg).getFunctionSymbol();
-
-			if (func.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
-				Term intArg = ((Function) arg).getTerm(0);
-				if (intArg instanceof Function){
-					func = ((Function) intArg).getFunctionSymbol();
-					boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-							(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-							(func.getName().equals(OBDAVocabulary.SPARQL_COUNT_URI)) ||
-							(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-							(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-					if (isAnAggregate){
-						//This rule has aggregates so we should 
-						//not unfold the aggregated predicate
-						hasAggregates = true;
-						break;
-					}
-				}
-
-			}//this is integer 
-			else{
-				boolean isAnAggregate = (func.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
-						(func.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-						(func.getName().equals(OBDAVocabulary.SPARQL_MIN_URI));
-				if (isAnAggregate){
-					//This rule has aggregates so we should 
-					//not unfold the aggregated predicate
-					hasAggregates = true;
-					break;
-				}
-				
-			}
-		}
+        if (detectAggregateInArgument(arg)) {
+            return true;
+        }
 	}
-	return hasAggregates;
+	return false;
 }
+
+    private boolean detectAggregateInArgument(Term arg) {
+        if (arg instanceof Function) {
+            Function compositeTerm = ((Function) arg);
+            Predicate functionSymbol = compositeTerm.getFunctionSymbol();
+
+            if (functionSymbol.isAggregationPredicate()) {
+                return true;
+            }
+
+            /**
+             * Looks recursively at the sub(-sub)-terms
+             */
+            return detectAggregateInArgument(compositeTerm.getTerm(0));
+        }
+
+        return false;
+    }
 
 		/**
 		 * Clones the rules in ruleCollection into fatherCollection
@@ -638,11 +616,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
-			
-//			System.out.println("Initial-----");
-//			for (CQIE rule: workingList){
-//				System.out.println(rule);
-//			}
+			log.debug("Unfolding w.r.t. Mappings:");
+
 			log.debug("Generating Dependency Graph!");
 			 depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
@@ -658,7 +633,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
 				Predicate pred = extensionalPredicates.get(predIdx);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
+				
 
 			
 				List<CQIE> result = new LinkedList<CQIE>();
@@ -679,6 +654,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					boolean parentIsLeftJoin = false;
 					
 					for (CQIE fatherRule:  fatherCollection) {
+						
+						Predicate preFather =  fatherRule.getHead().getPredicate();
 						List<Term> ruleTerms = getBodyTerms(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 						
@@ -699,10 +676,20 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							
 				
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
+							
+							log.debug(pred + " : " + ruleIndex.get(preFather).toString() );
+							
+							
 						} else{
-//							System.out.println("Empty: "+pred);
-							predicatesMightGotEmpty.add(preFather);
+							log.debug("Empty: "+pred);
+							if (!predicatesMightGotEmpty.contains(preFather)){
+								predicatesMightGotEmpty.add(preFather);
+								
+							}
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
+							
+							//System.out.println(ruleIndex.get(preFather).size());
+//							System.out.println(ruleIndexByBody.get(pred).size());
 						
 						}
 						if (result.size() >= 2) {
@@ -744,8 +731,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		}
 
 		/**
-		 * It search for the empty predicates that got empty during the unfolding of the existencional 
-		 * predicates, and either generate the right rule for the LJ, or delete de rules. 
+		 * It search for the empty predicates that got empty during the unfolding of the extensional  
+		 * predicates, and either generate the right rule for the LJ, or delete the rules. 
 		 * Returns the predicates that have been deleted.
 		 * 
 		 * @param workingList
@@ -884,10 +871,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 								List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
-
-				Collection<CQIE> rulesToAdd= ruleIndex.get(preFather);
-
+				
+				
+				//Adding the  predicate
 				Collection<CQIE> rulesToAdd2= ruleIndex.get(pred);
 
 				for (CQIE resultingRule: rulesToAdd2){
@@ -896,12 +882,18 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					}
 				}
 				
-				for (CQIE resultingRule: rulesToAdd){
-					if (!workingList.contains(resultingRule)){
-						workingList.add(resultingRule);
+				//Adding the  fathers
+				List<Predicate> preFatherList =  depGraph.getFatherPredicates(pred);
+			
+				for (Predicate predFa: preFatherList){
+					Collection<CQIE> rulesToAdd= ruleIndex.get(predFa);
+
+					for (CQIE resultingRule: rulesToAdd){
+						if (!workingList.contains(resultingRule)){
+							workingList.add(resultingRule);
+						}
 					}
 				}
-
 			}
 		}
 
@@ -2194,9 +2186,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
  */
 	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multPredList) {
 		
-		if (!multPredList.isEmpty()){
-			return unfolding.getRules();
-		}
+	//	if (!multPredList.isEmpty()){
+	//		return unfolding.getRules();
+	//	}
 		
 		
 		List<CQIE> workingList = new LinkedList<CQIE>();
@@ -2220,8 +2212,16 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
 			//get the father predicate
 
-			if (!extensionalPredicates.contains(buPredicate) ) {// it is a defined  predicate, like ans2,3.. etc
+			if (!extensionalPredicates.contains(buPredicate)  ) {// it is a defined  predicate, like ans2,3.. etc
 
+				if (multPredList.containsKey(buPredicate)){
+					// CANT PUSH TYPES IF I HAVE MULTIPLE TEMPLATES, SEE LEFTJOIN3VIRTUAL. PROBLEMS WITH THE JOIN.
+					//SYSTEM.ERR.PRINTLN("TYPES CANNOT BE PUSHED IN THE PRESENCE OF NO MATCHING TEMPLATES. THIS MIGHT LEAD TO A BAD PERFORMANCE.");
+					log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.:", buPredicate);
+					continue;
+
+				}
+				
 				//get all the indexes we need
 				ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
@@ -2232,14 +2232,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				
 				//The rules DEFINING pred
 				List<CQIE> rulesDefiningPred = (List<CQIE>) ruleIndex.get(buPredicate);
-				
-				//dont push if there are aggregates!
-				if (detectAggregatesHead(rulesDefiningPred)){
-					continue;
-				}
-				
-	
-				
+
+                // Beware of aggregates
+                boolean containsAggregates = detectAggregatesHead(rulesDefiningPred);
+
 				
 				//cloning to avoid clashes
 				fatherCollection.clear();
@@ -2248,6 +2244,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				cloneRules(fatherCollection, rulesUsingPred);
 
 				//We unfold every rule of the father atom that contains pred
+				// TODO: unfold????
 				for (CQIE fatherRule : fatherCollection) {
 					int fails = 0;
 
@@ -2270,7 +2267,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						//Later when we compute the new source rule, we will not eliminate the types from the terms in this list
 						List<Term> termsToExclude = new LinkedList<Term>();
 						
-						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude);
+						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude,
+                                containsAggregates);
 
 
 						if (result == null && fails==rulesDefiningPred.size()) {
@@ -2287,16 +2285,25 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							 * Each of the new queries could still require more steps of
 							 * evaluation, so we decrease the index.
 							 */
-							
-							//Here we remove the types, if possible, of the source query
-							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
-							
-							//Now we update the indexes for the source query
-							List<CQIE> newSourceRuleList= new LinkedList<CQIE>();
-							newSourceRuleList.add(newsourceRule);
-							int srcIdx=workingList.indexOf(sourceRule);
-							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
+
+
+                            /**
+                             * Here we remove the types, if possible, of the source query.
+                             * Note that we do no remove of terms that contains an aggregation.
+                             *
+                             * This un-typing is for instance important for URI templates: we
+                             * want these templates to be used in the top-level query, not in sub-queries.
+                             * Indeed, joining URIs is more expensive than joining ids because the former are not indexed.
+                             * Said differently, URIs are sargable while IDs are.
+                             */
+                            CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
+
+                            //Now we update the indexes for the source query
+                            List<CQIE> newSourceRuleList = new LinkedList<CQIE>();
+                            newSourceRuleList.add(newsourceRule);
+                            int srcIdx = workingList.indexOf(sourceRule);
+                            Predicate srchead = sourceRule.getHead().getFunctionSymbol();
+                            updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
 							
 							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
@@ -2394,8 +2401,15 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		if (termsToExclude.contains(t)){
 			isProblemTemplate = true;
 		}
+
+        /**
+         * Does not untyped aggregations
+         */
+        if (detectAggregateInArgument(t)) {
+            untypedArguments.add(t);
+        }
 		
-		if (t instanceof Function && !isProblemTemplate){
+		else if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
 			
@@ -2437,10 +2451,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param fatherRule
 	 * @return
 	 */
-	
-	
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
-			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude) {
+			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude, boolean containsAggregates) {
 
 
 			Function sourceHead = sourceRule.getHead();
@@ -2455,12 +2467,15 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
-					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude));
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude, containsAggregates));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
 						
+						/**
+						 * TODO: a rule named "addTypes"???????
+						 */
 						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule,termsToExclude);
 						result.add(addTypes);
 						break;
@@ -2479,13 +2494,69 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 	}
 
-	
+    /**
+     * Removes aggregate symbols found in the head of a given rule.
+     * 
+     * For instance, 
+     *    ans2(arg1, sum(arg2)) :- ...
+     * becomes
+     *    ans2(arg1, arg2) :- ...
+     * 
+     * @param rule. Read-only.
+     * @return the new rule
+     */
+	//TODO: remove this method if possible!!
+    private CQIE removeAggregatesFromHead(CQIE rule) {
+        CQIE newRule = rule.clone();
+        Function typedArg =null;
 
-	
+        /**
+         *  This list is the list object used by the head of the rule.
+         *  By modifying, we implicitly update the rule.
+         *  
+         *  TODO: stop this side-effect practice.
+         */
+        List<Term> arguments = newRule.getHead().getTerms();
 
-	
-	
-	/**
+        for (int i = 0; i < arguments.size() ; i++) {
+            Term argument = arguments.get(i);
+            /**
+             * When a aggregate symbol is used by the argument,
+             * we replace the argument by its (unique) sub-term.
+             * 
+             */
+            if (detectAggregateInArgument(argument)) {
+            	Function subTerm = ((Function) argument);
+
+
+            	Predicate pred =  subTerm.getFunctionSymbol();
+
+            	if (pred instanceof DataTypePredicate){
+            		Function AggArg = ((Function) subTerm.getTerm(0)) ; 
+            		Term arg = AggArg.getTerm(0) ;
+            		typedArg = termFactory.getFunction(pred, arg);
+            		arguments.set(i, typedArg);
+
+            		//TODO: homogenize these if statements !
+            	} else if (pred.isAggregationPredicate()){
+            		Term myTypedArg = subTerm.getTerm(0);
+            		arguments.set(i, myTypedArg);
+
+            	}else{
+            		throw new NullPointerException("Unkown Aggregate Term!");
+            	}
+
+
+
+
+            }
+        }
+
+        return newRule;
+    }
+
+
+    /**
 	 * This method add the type of the variables in sourceHead to the targetAtom, and then
 	 * uses this atom to update the head of fatherRule
 	 * 
@@ -2574,7 +2645,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 								
 							}*/
 						}
-					} 
+					} else{ //no variables!
+						log.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
+						
+						mgu.remove(key);
+						exclude.add(value);
+					}
 				} else {
 					log.debug("value: "+value.toString());
 				}

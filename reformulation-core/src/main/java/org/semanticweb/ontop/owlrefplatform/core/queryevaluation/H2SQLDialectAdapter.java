@@ -96,7 +96,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		case Types.DATE:
 			strType = "DATE";			break;
 		case Types.TIME:
-			strType = "TIME";			break;
+			strType = "TIMESTAMP";			break;
 		case Types.TIMESTAMP:
 			strType = "TIMESTAMP";			break;
 		case Types.BINARY:

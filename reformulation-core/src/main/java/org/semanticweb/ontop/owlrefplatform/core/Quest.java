@@ -596,6 +596,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Preparing the data source
 			 */
 
+			URI sourceID = null;
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				isSemanticIdx = true;
 				if (inmemory) {
@@ -693,7 +694,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/* Setting up the OBDA model */
 
 				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
+				sourceID= obdaSource.getSourceID();
+				Collection<OBDAMappingAxiom> mappings = dataRepository.getMappings();
+				unfoldingOBDAModel.addMappings(sourceID, mappings);
 
 				uriRefIds = dataRepository.getUriIds();
 				uriMap = dataRepository.getUriMap();
@@ -729,10 +732,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 */
 
 				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
-				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(
-						this.inputOBDAModel.getMappings(obdaSource.getSourceID()), equivalenceMaps);
+				sourceID= obdaSource.getSourceID();
+				ArrayList<OBDAMappingAxiom> mappingsOB = this.inputOBDAModel.getMappings(sourceID);
+				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(mappingsOB, equivalenceMaps);
 
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
+				unfoldingOBDAModel.addMappings(sourceID, newMappings);
 
 			}
 
@@ -783,39 +787,34 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			// Very useful for debugging of User Constraints (also for the end user)
 			if(printKeys){
 				// Prints all primary keys
-				System.out.println("\n====== Primary keys ==========");
+				log.debug("\n====== Primary keys ==========");
 				List<TableDefinition> table_list = metadata.getTableList();
 				for(TableDefinition dd : table_list){
-					System.out.print("\n" + dd.getName() + ":");
+					log.debug("\n" + dd.getName() + ":");
 					for(Attribute attr : dd.getPrimaryKeys() ){
-						System.out.print(attr.getName() + ",");
+						log.debug(attr.getName() + ",");
 					}
 				}
 				// Prints all foreign keys
-				System.out.println("\n====== Foreign keys ==========");
+				log.debug("\n====== Foreign keys ==========");
 				for(TableDefinition dd : table_list){
-					System.out.print("\n" + dd.getName() + ":");
+					log.debug("\n" + dd.getName() + ":");
 					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
 					for(String fkName : fkeys.keySet() ){
-							System.out.print("(" + fkName + ":");
+						log.debug("(" + fkName + ":");
 							for(Attribute attr : fkeys.get(fkName)){
-								System.out.print(attr.getName() + ",");
+								log.debug(attr.getName() + ",");
 							}
-							System.out.print("),");
+							log.debug("),");
 					}
 				}		
 			}
 				
 
-			SQLDialectAdapter sqladapter = SQLAdapterFactory
-					.getSQLDialectAdapter(datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-
-			JDBCUtility jdbcutil = new JDBCUtility(
-					datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
-					sqladapter, sqlGenerateReplace);
+			String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
+			JDBCUtility jdbcutil = new JDBCUtility(parameter);
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
 
 
 
@@ -849,7 +848,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			
 			
-			Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), metadata);
+			Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(unfoldingOBDAModel.getMappings(sourceID), metadata);
 //			MappingAnalyzer analyzer = new MappingAnalyzer(mParser.getParsedMappings(), metadata);
 
  			unfoldingProgram = analyzer.constructDatalogProgram();
@@ -1257,7 +1256,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 					{
 						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-						if (st.execute(copySourceQuery)) {
+						boolean execute = st.execute(copySourceQuery);
+						if (execute) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();
 							boolean needComma = false;
 							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {

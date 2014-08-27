@@ -35,6 +35,14 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(4000)");
 		SqlDatatypes.put(Types.CLOB, "CLOB");
 		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
+		SqlDatatypes.put(Types.INTEGER, "INTEGER");
+		SqlDatatypes.put(Types.REAL, "NUMBER");
+		SqlDatatypes.put(Types.FLOAT, "NUMBER");
+		SqlDatatypes.put(Types.DOUBLE, "NUMBER");
+//		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
+		SqlDatatypes.put(Types.DATE, "TIMESTAMP");
+		SqlDatatypes.put(Types.TIME, "TIME");
+		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
 	}
 	
 	@Override
@@ -45,8 +53,13 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = SqlDatatypes.get(type);
-		if (strType != null) {	
+		boolean noCast = strType.equals("BOOLEAN");
+
+		if (strType != null && !noCast ) {	
 			return "CAST(" + value + " AS " + strType + ")";
+		} else	if (noCast){
+				return value;
+			
 		}
 		throw new RuntimeException("Unsupported SQL type");
 	}

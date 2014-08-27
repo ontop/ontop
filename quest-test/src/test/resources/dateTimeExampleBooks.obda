@@ -1,0 +1,45 @@
+[PrefixDeclaration]
+:		http://meraka/moss/exampleBooks.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[SourceDeclaration]
+sourceUri	BookPublication
+connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
+username	system
+password	obdaps83
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	RE-001
+target		:author/{wr_code}/ a :Author ; :name {wr_name} . 
+source		select wr_code,wr_name from tb_affiliated_writers
+
+mappingId	RE-002
+target		:book/{bk_code}/ a :Book ; :title {bk_title} . 
+source		select bk_code,bk_title from tb_books
+
+mappingId	RE-003
+target		:editor/{ed_code}/ a :Editor ; :name {ed_name} . 
+source		select ed_code,ed_name from tb_editor
+
+mappingId	RE-004
+target		:book/{bk_code}/ a :AudioBook . 
+source		select bk_code from tb_books where bk_type='A'
+
+mappingId	RE-005
+target		:author/{wr_code}/ a :EmergingWriter ; :name {wr_name} . 
+source		select wr_code,wr_name from tb_on_prob_wr
+
+mappingId	RE-006a
+target		:edition/{ed_code}/ a :Edition ; :dateOfPublication {myDate}^^xsd:dateTime ; :editionNumber {ed_code} . 
+source		select ed_code, TO_CHAR(pub_date, 'yyyy-mm-dd') || ' ' || TO_CHAR(pub_date, 'HH24:MM:SS') AS myDate, n_edt from tb_edition
+
+mappingId	RE-006b
+target		:edition/{ed_code}/ a :SpecialEdition . 
+source		select ed_code,pub_date,n_edt from tb_edition where ed_type='S'
+]]
+

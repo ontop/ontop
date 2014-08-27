@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.identifiers;
+package org.semanticweb.ontop.identifiers;
 
 /*
  * #%L

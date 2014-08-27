@@ -77,7 +77,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		case Types.LONGVARCHAR:
 			strType = "LONGVARCHAR";			break;
 		case Types.DATE:
-			strType = "DATE";			break;
+			strType = "TIMESTAMP";			break;
 		case Types.TIME:
 			strType = "TIME";			break;
 		case Types.TIMESTAMP:

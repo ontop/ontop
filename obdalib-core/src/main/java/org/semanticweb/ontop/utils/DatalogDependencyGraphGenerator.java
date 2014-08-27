@@ -86,11 +86,18 @@ public class DatalogDependencyGraphGenerator {
 	 * @param pred 
 	 * @return
 	 */
-	public Predicate getFatherPredicate(Predicate pred){
+	public List<Predicate> getFatherPredicates(Predicate pred){
 		Set<DefaultEdge> fatherEdges = predicateDependencyGraph.incomingEdgesOf(pred);
-		DefaultEdge fatherEdge = fatherEdges.iterator().next();
-		Predicate father = predicateDependencyGraph.getEdgeSource(fatherEdge);
-		return father;
+		
+		List<Predicate>	fathers = new LinkedList<Predicate>();
+		
+		for (DefaultEdge fatherEdge: fatherEdges){
+			Predicate father = predicateDependencyGraph.getEdgeSource(fatherEdge);
+			fathers.add(father);
+		}
+		 //= fatherEdges.iterator().next();
+		
+		return fathers;
 	}
 	
 	/**

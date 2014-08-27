@@ -29,6 +29,7 @@ import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.NonBooleanOperationPredicate;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.NumericalOperationPredicate;
@@ -42,8 +43,6 @@ import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -55,7 +54,6 @@ import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.ViewDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 
-import java.net.URI;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,37 +66,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.NumericalOperationPredicate;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.DataDefinition;
-import org.semanticweb.ontop.sql.TableDefinition;
-import org.semanticweb.ontop.sql.ViewDefinition;
-import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.semanticweb.ontop.utils.QueryUtils;
 import org.slf4j.LoggerFactory;
@@ -156,6 +124,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final SQLDialectAdapter sqladapter;
 	private final String QUEST_TYPE = "QuestType";
 
+    private static final String TYPE_STR = "%s AS \"%sQuestType\"" ;
+
+    private static final int UNDEFINED_TYPE_CODE = -1;
+
 	private ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
 	
 
@@ -179,7 +151,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
 
-	/**
+    /**
 	 * This method is in charge of generating the SQL query from a Datalog
 	 * program
 	 * 
@@ -1290,23 +1262,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	// return variable SQL data type
 	private int getVariableDataType(Term term, QueryAliasIndex idx) {
-		Function f = (Function) term;
-		if (f.isDataTypeFunction()) {
-			Predicate p = f.getFunctionSymbol();
-            if (p.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI))
-				return Types.BOOLEAN;
-			if (p.getName().equals(OBDAVocabulary.XSD_INT_URI))
-				return Types.INTEGER;
-			if (p.getName().equals(OBDAVocabulary.XSD_INTEGER_URI))
-				return Types.INTEGER;
-			if (p.getName().equals(OBDAVocabulary.XSD_DOUBLE_URI))
-				return Types.DOUBLE;
-			if (p.getName().equals(OBDAVocabulary.XSD_STRING_URI))
-				return Types.VARCHAR;
-			if (p.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI))
-				return Types.VARCHAR;
+
+		if (term instanceof Function){
+			Function f = (Function) term;
+			if (f.isDataTypeFunction()) {
+				Predicate p = f.getFunctionSymbol();
+				if (p.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI))
+					return Types.BOOLEAN;
+				if (p.getName().equals(OBDAVocabulary.XSD_INT_URI))
+					return Types.INTEGER;
+				if (p.getName().equals(OBDAVocabulary.XSD_INTEGER_URI))
+					return Types.INTEGER;
+				if (p.getName().equals(OBDAVocabulary.XSD_DOUBLE_URI))
+					return Types.DOUBLE;
+				if (p.getName().equals(OBDAVocabulary.XSD_STRING_URI))
+					return Types.VARCHAR;
+				if (p.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI))
+					return Types.VARCHAR;
+			}
+			// Return varchar for unknown
+			return Types.VARCHAR;
+		}else if (term instanceof Variable){
+			throw new RuntimeException("Cannot return the SQL type for: "
+					+ term.toString());
 		}
-		// Return varchar for unknown
+		
 		return Types.VARCHAR;
 	}
 
@@ -1501,6 +1481,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return format;
 	}
 
+    /**
+    * Adding the ColType column to the projection (used in the result
+    * set to know the type of constant)
+    */
 	private String getLangColumnForSELECT(Term ht, String varName,
 			QueryAliasIndex index) {
 
@@ -1554,128 +1538,195 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
-	private String getTypeColumnForSELECT(Term ht, String varName,
+    /**
+     * Infers the type of a projected term.
+     *
+     * @param projectedTerm
+     * @param varName Name of the variable
+     * @param index Used when the term correspond to a column name
+     * @return A string like "5 AS ageQuestType"
+     */
+	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
 			QueryAliasIndex index) {
 
-		String typeStr = "%s AS \"%sQuestType\"";
-
-		if (ht instanceof Function) {
-			Function ov = (Function) ht;
-			Predicate function = ov.getFunctionSymbol();
-			String functionString = function.getName();
-
-			/*
-			 * Adding the ColType column to the projection (used in the result
-			 * set to know the type of constant)
-			 */
-
-			// TODO: DO NOT use magic numbers, extract them to constants
-
-			if (functionString.equals("Count")) {
-				return (String.format(typeStr, 4, varName));
-			}
-
-			
-			
-			if (functionString.equals("Sum")) {
-				return (String.format(typeStr, 6, varName));
-//				ov = (Function) ov.getTerm(0);
-//				function = ov.getFunctionSymbol();
-//				functionString = function.getName();
-			}
-			if (functionString.equals("Avg")) {
-				return (String.format(typeStr, 6, varName));
-//				ov = (Function) ov.getTerm(0);
-//				function = ov.getFunctionSymbol();
-//				functionString = function.getName();
-			}
-			if (functionString.equals("Min")) {
-				return (String.format(typeStr, 6, varName));
-//				ov = (Function) ov.getTerm(0);
-//				function = ov.getFunctionSymbol();
-//				functionString = function.getName();
-			}
-			if (functionString.equals("Max")) {
-				return (String.format(typeStr, 6, varName));
-//				ov = (Function) ov.getTerm(0);
-//				function = ov.getFunctionSymbol();
-//				functionString = function.getName();
-			}
-
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName())) {
-				return (String.format(typeStr, 9, varName));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, 8, varName));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, 5, varName));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, 6, varName));
-			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, 4, varName));
-			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, 7, varName));
-			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, 3, varName));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				return (String.format(typeStr, 1, varName));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				return (String.format(typeStr, 2, varName));
-			}
-		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, 1, varName));
-		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, 0, varName));
-		} else if (ht instanceof Variable) {
-			/*
-			 * var itself does not have the info of type. We try to find the
-			 * type from the index.
-			 */
-
-			Variable var = (Variable) ht;
-			Collection<String> columnRefs = index.getColumnReferences(var);
-
-			if (columnRefs == null || columnRefs.size() == 0) {
-				throw new RuntimeException(
-						"Unbound variable found in WHERE clause: " + var);
-			}
-
-			for (String columnRef : columnRefs) {
-				// for instance, columnRef is `Qans4View`.`v1`
-				String columnType, tableColumnType;
-
-				String[] splits = columnRef.split("\\.");
-
-				String quotedTable = splits[0];
-				String table = unquote(splits[0]);
-				String column = unquote(splits[1]);
-
-				DataDefinition definition = metadata.getDefinition(table);
-				/*
-				 * If the var is defined in a ViewDefinition, then there is a
-				 * column for the type and we just need to refer to that column
-				 */
-				if (definition instanceof ViewDefinition) {
-					// for instance, tableColumnType becomes
-					// `Qans4View`.`v1QuestType`
-					columnType = column + QUEST_TYPE;
-					tableColumnType = sqladapter.sqlQualifiedColumn(
-							quotedTable, columnType);
-					return (String.format(typeStr, tableColumnType, varName));
-				}
-
-			}
-
-			/*
-			 * Here we cannot find the type from the index. Assume it is a URI
-			 */
-			return String.format(typeStr, 1, varName);
-
-
+		if (projectedTerm instanceof Function) {
+           return getCompositeTermType((Function) projectedTerm, varName);
 		}
+        else if (projectedTerm instanceof URIConstant) {
+			return String.format(TYPE_STR, 1, varName);
+		}
+        else if (projectedTerm == OBDAVocabulary.NULL) {
+			return String.format(TYPE_STR, 0, varName);
+		}
+        else if (projectedTerm instanceof Variable) {
+			return getTypeFromVariable((Variable) projectedTerm, index, varName);
+		}
+
+        // Unusual term
 		throw new RuntimeException("Cannot generate SELECT for term: "
-				+ ht.toString());
+				+ projectedTerm.toString());
 
 	}
+
+    /**
+     * Gets the type expression for a composite term.
+     *
+     * There is two common form of composite terms considered here:
+     *   1. Typed variable. For instance, "http://...#decimal(cost)"
+     *         should return something like "5 AS costQuestType"
+     *   2. Aggregation. For instance, "SUM(http://...#decimal(cost))"
+     *         should return something like "5 AS totalCostQuestType"
+     *
+     *   Basically, it tries to infer the type by looking at function symbols.
+     *
+     */
+    private String getCompositeTermType(Function compositeTerm, String varName) {
+        Predicate mainFunctionSymbol = compositeTerm.getFunctionSymbol();
+
+        int typeCode = UNDEFINED_TYPE_CODE;
+
+        switch(mainFunctionSymbol.getName()) {
+            /**
+             * Aggregation cases
+             */
+            case "Count":
+                // Integer
+                // TODO: DO NOT use magic numbers, extract them from constants
+                return String.format(TYPE_STR, 4, varName);
+            case "Sum":
+            case "Avg":
+            case "Min":
+            case "Max":
+
+                // We look at the sub-term
+                Term subTerm = compositeTerm.getTerm(0);
+
+                if (subTerm instanceof Function) {
+                    Function compositeSubTerm = (Function) subTerm;
+
+                    typeCode = getCodeTypeFromFunctionSymbol(compositeSubTerm.getFunctionSymbol());
+                }
+
+                /**
+                 * Sometimes we cannot infer the type by looking at the term.
+                 *
+                 * In such a case, we cast the aggregate to a xsd:double
+                 * (any number can be promoted to a double http://www.w3.org/TR/xpath20/#promotion) .
+                 */
+                if (typeCode == UNDEFINED_TYPE_CODE) {
+                    // TODO: DO NOT use magic numbers, extract them from constants
+                    typeCode = 6;
+                }
+                break;
+
+            /**
+             * Not a (known) aggregation function symbol
+             */
+            default:
+                typeCode = getCodeTypeFromFunctionSymbol(mainFunctionSymbol);
+
+                if (typeCode == UNDEFINED_TYPE_CODE) {
+                    throw new RuntimeException("Cannot generate the SQL query " +
+                            "because of an untyped term: " + compositeTerm.toString());
+                }
+        }
+
+        return String.format(TYPE_STR, typeCode, varName);
+    }
+
+    /**
+     * Converts a function symbol into a code type (integer).
+     *
+     * May return an UNDEFINED_TYPE_CODE value.
+     *
+     * @param functionSymbol
+     * @return
+     */
+    private int getCodeTypeFromFunctionSymbol(Predicate functionSymbol) {
+        switch (functionSymbol.getName()) {
+            case OBDAVocabulary.XSD_BOOLEAN_URI:
+                return 9;
+            case OBDAVocabulary.XSD_DATETIME_URI:
+                return 8;
+            case OBDAVocabulary.XSD_STRING_URI:
+                return 7;
+            case OBDAVocabulary.XSD_DOUBLE_URI:
+                return 6;
+            case OBDAVocabulary.XSD_DECIMAL_URI:
+                return 5;
+            case OBDAVocabulary.XSD_INTEGER_URI:
+                return 4;
+            case OBDAVocabulary.RDFS_LITERAL_URI:
+                return 3;
+            case OBDAVocabulary.QUEST_BNODE:
+                return 2;
+            case OBDAVocabulary.QUEST_URI:
+                return 1;
+            default:
+                return UNDEFINED_TYPE_CODE;
+        }
+    }
+
+    /**
+     * Gets the type of a variable.
+     *
+     * Such variable does not hold this information, so we have to look
+     * at the database metadata.
+     *
+     *
+     * @param var
+     * @param index
+     * @return
+     */
+    private String getTypeFromVariable(Variable var, QueryAliasIndex index, String varName) {
+        Collection<String> columnRefs = index.getColumnReferences(var);
+
+        if (columnRefs == null || columnRefs.size() == 0) {
+            throw new RuntimeException(
+                    "Unbound variable found in WHERE clause: " + var);
+        }
+
+        /**
+         * By default, we assume that the variable is an IRI.
+         *
+         * TODO: why?
+         * TODO: do not use such a "magical" number.
+         */
+        String typeCode = "1";
+
+        /**
+         * For each column reference corresponding to the variable.
+         *
+         * For instance, columnRef is `Qans4View`.`v1` .
+         */
+        for (String columnRef : columnRefs) {
+            String columnType, tableColumnType;
+
+            String[] splits = columnRef.split("\\.");
+
+            String quotedTable = splits[0];
+            String table = unquote(splits[0]);
+            String column = unquote(splits[1]);
+
+            DataDefinition definition = metadata.getDefinition(table);
+            /**
+             * If the var is defined in a ViewDefinition, then there is a
+             * column for the type and we just need to refer to that column.
+             *
+             * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
+             */
+            if (definition instanceof ViewDefinition) {
+                columnType = column + QUEST_TYPE;
+                tableColumnType = sqladapter.sqlQualifiedColumn(
+                        quotedTable, columnType);
+                typeCode = tableColumnType ;
+                break;
+            }
+        }
+
+        return String.format(TYPE_STR, typeCode, varName);
+    }
+
 
 	private static String unquote(String string) {
 		if (string.charAt(0) == '\'' || string.charAt(0) == '\"'
@@ -2196,7 +2247,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return result;
 			}
 
-		} else {
+		} else if ((functionSymbol instanceof NonBooleanOperationPredicate)&& (functionSymbol.equals(OBDAVocabulary.SPARQL_LANG)) ) { 
+		
+			
+			Variable var = (Variable) term1;
+			Collection<String> posList = index.getColumnReferences(var);
+			
+			if (posList == null || posList.size() == 0) {
+				throw new RuntimeException(
+						"Unbound variable found in WHERE clause: " + term);
+			}
+			
+			String langC = posList.iterator().next();
+			String langColumn = langC.replaceAll("`$", "Lang`");
+			return langColumn;
+			
+			
+			
+		}else {
 			String functionName = functionSymbol.toString();
 			if (functionName.equals(OBDAVocabulary.QUEST_CAST_STR)) {
 				String columnName = getSQLString(function.getTerm(0), index,

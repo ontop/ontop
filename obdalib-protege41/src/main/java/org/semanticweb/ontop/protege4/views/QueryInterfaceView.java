@@ -38,10 +38,12 @@ import javax.swing.table.DefaultTableModel;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.OWLResultSetWriter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
@@ -73,17 +75,17 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	private ResultViewTablePanel resultTablePanel;
 
 	private OWLOntologyChangeListener ontologyListener;
-	
+
 	private OBDAModelManager obdaController;
-	
+
 	private PrefixManager prefixManager;
-	
+
 	private OWLResultSetTableModel tableModel;
 
 	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
-	
+
 	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
-	
+
 	@Override
 	protected void disposeOWLView() {
 		this.getOWLModelManager().removeOntologyChangeListener(ontologyListener);
@@ -106,17 +108,17 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
-		
+
 		prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
-		
+
 		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
 		queryEditorPanel.setPreferredSize(new Dimension(400, 250));
 		queryEditorPanel.setMinimumSize(new Dimension(400, 250));
-		
+
 		resultTablePanel = new ResultViewTablePanel(queryEditorPanel);
 		resultTablePanel.setMinimumSize(new java.awt.Dimension(400, 250));
 		resultTablePanel.setPreferredSize(new java.awt.Dimension(400, 250));
-		
+
 		JSplitPane splQueryInterface = new JSplitPane();
 		splQueryInterface.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		splQueryInterface.setResizeWeight(0.5);
@@ -124,14 +126,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		splQueryInterface.setOneTouchExpandable(true);
 		splQueryInterface.setTopComponent(queryEditorPanel);
 		splQueryInterface.setBottomComponent(resultTablePanel);
-		
+
 		JPanel pnlQueryInterfacePane = new JPanel();
 		pnlQueryInterfacePane.setLayout(new BorderLayout());
 		pnlQueryInterfacePane.add(splQueryInterface, BorderLayout.CENTER);
-		
+
 		setLayout(new BorderLayout());		
 		add(pnlQueryInterfacePane, BorderLayout.CENTER);
-		
+
 		// Setting up model listeners
 		ontologyListener = new OWLOntologyChangeListener() {
 			@Override
@@ -141,7 +143,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		};
 		this.getOWLModelManager().addOntologyChangeListener(ontologyListener);
 		setupListeners();
-		
+
 		// Setting up actions for all the buttons of this view.
 		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction() {
 			@Override
@@ -426,6 +428,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread = null;
 		private String result = null;
 		private String query = null;
+		private QuestOWLConnection oldconn;
 
 		private UnfoldQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -438,19 +441,22 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		public void run() {
 			thread = new Thread() {
+
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 					if (reasoner instanceof QuestOWL) {
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							QuestOWLStatement st = (QuestOWLStatement)dqr.getStatement();
-							result = st.getUnfolding(query);
+                            statement = (QuestOWLStatement)dqr.getStatement();
+							result = statement.getUnfolding(query);
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.error(e.getMessage(), e);
-							DialogUtils.showQuickErrorDialog(null, e, "Error while unfolding query.");
+							if(!e.getMessage().contains("Statement cancelled due to client request")){
+								log.error(e.getMessage(), e);
+								DialogUtils.showQuickErrorDialog(null, e, "Error while unfolding query.");
+							}
 						}
 					} else {
 						latch.countDown();
@@ -465,20 +471,34 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		@Override
 		public void actionCanceled() {
+			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 			try {
-				closeConnection();
-				latch.countDown();
-			} catch (Exception e) {
-				latch.countDown();
-				log.error("Error while canceling unfolding action.", e);
-				DialogUtils.showQuickErrorDialog(null, e, "Error while canceling unfolding action.");
+				oldconn = reasoner.replaceConnection();
+				Thread canceller = new Thread() {
+					public void run(){
+						try {
+                            statement.cancel();
+							closeConnection();
+							oldconn.close();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error("Error while canceling unfolding action.", e);
+							DialogUtils.showQuickErrorDialog(null, e, "Error while canceling unfolding action.");
+						}
+					}
+				};
+				canceller.start();
+			} catch (OBDAException e) {
+				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
 			}
 		}
-		
+
 		public void closeConnection() throws OWLException {
 			if (statement != null) {
-				statement.close();
+                statement.close();
 			}
+
 		}
 	}
 
@@ -489,6 +509,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread = null;
 		private String result = null;
 		private String query = null;
+		private QuestOWLConnection oldconn;
 
 		private ExpandQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -507,12 +528,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (reasoner instanceof QuestOWL) {
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							QuestOWLStatement st = (QuestOWLStatement)dqr.getStatement();
-							result = st.getRewriting(query);
+							statement = (QuestOWLStatement)dqr.getStatement();
+							result = statement.getRewriting(query);
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							DialogUtils.showQuickErrorDialog(null, e, "Error computing query rewriting");
+							if(!e.getMessage().contains("Statement cancelled due to client request")){
+								DialogUtils.showQuickErrorDialog(null, e, "Error computing query rewriting");
+							}
 						}
 					} else {
 						latch.countDown();
@@ -527,26 +550,40 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		@Override
 		public void actionCanceled() {
+			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 			try {
-				closeConnection();
-				latch.countDown();
-			} catch (Exception e) {
-				latch.countDown();
-				log.error("Error while counting.", e);
-				DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
+				oldconn = reasoner.replaceConnection();
+				Thread canceller = new Thread() {
+					public void run(){
+						try {
+							statement.cancel();
+							closeConnection();
+							oldconn.close();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error("Error while counting.", e);
+							DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
+						}
+					}
+				};
+				canceller.start();
+			} catch (OBDAException e) {
+				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
 			}
 		}
-		
+
 		public void closeConnection() throws OWLException {
 			if (statement != null) {
 				statement.close();
-			}
+			}			
 		}
 	}
 
 	private class ExecuteQueryAction implements OBDAProgressListener {
 
 		private QuestOWLStatement statement = null;
+		private QuestOWLConnection oldconn = null;
 		private CountDownLatch latch = null;
 		private Thread thread = null;
 		private QuestOWLResultSet result = null;
@@ -564,7 +601,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		public QuestOWLResultSet getResult() {
 			return result;
 		}
-		
+
 		/**
 		 * Returns results from executing CONSTRUCT and DESCRIBE query.
 		 */
@@ -588,10 +625,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 								graphResult = statement.executeGraph(queryString);
 							} 
 							latch.countDown();
+
 						} catch (Exception e) {
 							latch.countDown();
-							log.error(e.getMessage(), e);
-							DialogUtils.showQuickErrorDialog(null, e);
+							if(!e.getMessage().contains("Statement cancelled due to client request")){
+								log.error(e.getMessage(), e);
+								DialogUtils.showQuickErrorDialog(null, e);
+							}
 						}
 					} else {
 						latch.countDown();
@@ -606,19 +646,35 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		@Override
 		public void actionCanceled() {
+			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 			try {
-				closeConnection();
-				latch.countDown();
-			} catch (Exception e) {
-				latch.countDown();
-				DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
+				oldconn = reasoner.replaceConnection();
+				Thread canceller = new Thread() {
+					public void run(){
+						try {
+							statement.cancel();
+							closeConnection();
+							oldconn.close();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
+						}
+					}
+				};
+				canceller.start();
+			} catch (OBDAException e) {
+				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
 			}
 		}
-		
+
 		public void closeConnection() throws OWLException {
 			if (statement != null) {
 				statement.close();
 			}
+			//if (connection != null) {
+			//	connection.close();
+			//}
 		}
 	}
 
@@ -629,6 +685,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread = null;
 		private int result = -1;
 		private String query = null;
+		private QuestOWLConnection oldconn;
 
 		private CountAllTuplesAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -647,16 +704,18 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (reasoner instanceof QuestOWL) {
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							QuestOWLStatement st = dqr.getStatement();
-							result = st.getTupleCount(query);
+							statement = dqr.getStatement();
+							result = statement.getTupleCount(query);
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.debug(e.getMessage());
-							JOptionPane.showMessageDialog(
-									null, 
-									"Error while counting tuples.\n " + e.getMessage()
-									+ "\nPlease refer to the log for more information.");
+							if(!e.getMessage().contains("Statement cancelled due to client request")){
+								log.debug(e.getMessage());
+								JOptionPane.showMessageDialog(
+										null, 
+										"Error while counting tuples.\n " + e.getMessage()
+										+ "\nPlease refer to the log for more information.");
+							}
 						}
 					} else {
 						latch.countDown();
@@ -671,16 +730,29 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		@Override
 		public void actionCanceled() {
+			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 			try {
-				closeConnection();
-				latch.countDown();
-			} catch (Exception e) {
-				latch.countDown();
-				log.error("Error while counting.", e);
-				DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
+				oldconn = reasoner.replaceConnection();
+				Thread canceller = new Thread() {
+					public void run(){
+						try {
+							statement.cancel();
+							closeConnection();
+							oldconn.close();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error("Error while counting.", e);
+							DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
+						}
+					}
+				};
+				canceller.start();
+			} catch (OBDAException e) {
+				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
 			}
 		}
-		
+
 		public void closeConnection() throws OWLException {
 			if (statement != null) {
 				statement.close();
@@ -694,13 +766,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread;
 		private List<String[]> rawData;
 		private Writer writer;
-		
+
 		private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
 			this.latch = latch;
 			this.rawData = rawData;
 			this.writer = writer;
 		}
-		
+
 		public void run() {
 			thread = new Thread() {
 				@Override
@@ -717,7 +789,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			};
 			thread.start();
 		}
-		
+
 		@Override
 		public void actionCanceled() throws Exception {
 			try {
@@ -731,7 +803,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		}
 	}
-	
+
 	@Override
 	public void activeOntologyChanged() {
 		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModel());

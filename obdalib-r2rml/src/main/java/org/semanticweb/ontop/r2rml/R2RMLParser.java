@@ -152,6 +152,7 @@ public class R2RMLParser {
 			throws Exception {
 		Term subjectAtom = null;
 		String subj = "";
+        classPredicates.clear();
 
 		// SUBJECT
 		SubjectMap sMap = tm.getSubjectMap();

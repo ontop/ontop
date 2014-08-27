@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 
@@ -70,6 +71,7 @@ public class DatalogNormalizer {
 	private static Logger log = LoggerFactory.getLogger(DatalogNormalizer.class);
 	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private final static Map<Variable, Term> substitutionsTotal= new HashMap<Variable,Term>();
+	private static Random rand = new Random();
 	
 	/***
 	 * Normalizes all the rules in a Datalog program, pushing equalities into
@@ -278,29 +280,119 @@ public class DatalogNormalizer {
 			result = result.clone();
 
 		List<Function> body = result.getBody();
-		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
+		Map<Variable, Term> mgu = new HashMap<>();
 
 		/* collecting all equalities as substitutions */
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			//TODO: DOUBLE CHECK THIS FALSE
 			Unifier.applyUnifier(atom, mgu,false);
-			if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
-				Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
-				if (s == null) {
-					continue;
-				} else if (!(s instanceof NeutralSubstitution)) {
-					Unifier.composeUnifiers(mgu, s);
-				}
-				body.remove(i);
-				i -= 1;
-			}
-		}
+
+                if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                    Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
+                    if (s == null) {
+                        continue;
+                    } else if (!(s instanceof NeutralSubstitution)) {
+                        Unifier.composeUnifiers(mgu, s);
+                    }
+                    body.remove(i);
+                    i -= 1;
+                }
+                //search for nested equalities in AND function
+                else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){
+                    nestedEQSubstitutions(atom, mgu);
+
+                    //we remove the function if empty because all its terms were equalities
+                    if(atom.getTerms().isEmpty()){
+                        body.remove(i);
+                        i -= 1;
+                    }
+                    else{
+
+                        //if there is only a term left we remove the conjunction
+                        if(atom.getTerms().size()==1 ) {
+                            body.set(i, (Function) atom.getTerm(0));
+                        }
+                        else {
+                            //update the body with the new values
+                            body.set(i, atom);
+                        }
+
+                    }
+
+
+                }
+
+            }
+
 		result = Unifier.applyUnifier(result, mgu, false);
 		return result;
 	}
+	
+	
+	
+	  /**
+     * We search for equalities in conjunctions. This recursive methods explore AND functions and removes EQ functions,
+     * substituting the values using the class
+     * {@link Unifier#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
+     * @param atom the atom that can contain equalities
+     * @param mgu mapping between a variable and a term
+     */
+    private static void nestedEQSubstitutions(Function atom, Map<Variable, Term> mgu) {
+        List<Term> terms = atom.getTerms();
+        for (int i = 0; i < terms.size(); i++) {
+            Term t = terms.get(i);
 
+
+            if (t instanceof Function) {
+                Function t2 = (Function) t;
+                Unifier.applyUnifier(t2, mgu,false);
+
+                //in case of equalities do the substitution and remove the term
+                if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                    Substitution s = Unifier.getSubstitution(t2.getTerm(0), t2.getTerm(1));
+
+                    if (s == null) {
+                        continue;
+                    } else if (!(s instanceof NeutralSubstitution)) {
+                        Unifier.composeUnifiers(mgu, s);
+                    }
+
+                    terms.remove(i);
+                    i -= 1;
+
+
+                }
+                //consider the case of  AND function. Calls recursive method to consider nested equalities
+                else {
+                    if (t2.getFunctionSymbol() == OBDAVocabulary.AND) {
+                        nestedEQSubstitutions(t2, mgu);
+
+                        //we remove the function if empty because all its terms were equalities
+                        if (t2.getTerms().isEmpty()) {
+                            terms.remove(i);
+                            i -= 1;
+                        } else {
+
+                            //if there is only a term left we remove the conjunction
+                            //we remove and function and we set  atom equals to the term that remained
+                            if (t2.getTerms().size() == 1) {
+                                atom.setTerm(i, t2.getTerm(0));
+                            }
+
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+
+
+    }
+
+    
 	/***
 	 * See {@link #enforceEqualities(CQIE, boolean)}
 	 * 
@@ -476,6 +568,7 @@ public class DatalogNormalizer {
 		for (int i = 0; i < currentTerms.size(); i++) {
 
 			Term term = (Term) currentTerms.get(i);
+		
 
 			/*
 			 * We don't expect any functions as terms, data atoms will only have
@@ -655,14 +748,16 @@ public class DatalogNormalizer {
 		Variable var1 = (Variable) subTerm;
 		Variable var2 = (Variable) substitutions.get(var1);
 
-		
+
 		if (var2 == null) {
 			/*
 			 * No substitution exists, hence, no action but generate a new
 			 * variable and register in the substitutions, and replace the
 			 * current value with a fresh one.
 			 */
-			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+//			int randomNum = rand.nextInt(20) + 1;
+			//+ randomNum
+			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0] );
 
 			substitutions.put(var1, var2);
 			substitutionsTotal.put(var1, var2);
@@ -676,12 +771,15 @@ public class DatalogNormalizer {
 			 * the new value.
 			 */
 			
-			while (substitutionsTotal.containsKey(var2)){
-				var2=(Variable) substitutionsTotal.get(var2);
+			while (substitutions.containsKey(var2)){
+				Variable variable = (Variable) substitutions.get(var2);
+				var2=variable;
 			}
 
 			if (atom.isDataFunction()) {
-				Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+				
+				
+				Variable newVariable = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
 
 				//replace the variable name
 				subterms.set(j, newVariable);
@@ -689,6 +787,7 @@ public class DatalogNormalizer {
 				//record the change
 				substitutionsTotal.put(var2, newVariable);
 
+				
 				
 				//create the equality
 				Function equality = fac.getFunctionEQ(var2, newVariable);
@@ -1133,7 +1232,6 @@ public class DatalogNormalizer {
 
 				// I changed this, booleans were not being added !!
 				if (secondDataAtomFound && !isLeftJoin) {
-					System.err.println("DatalogNormalizer: I changed this!!");
 					tempTerms.addAll(currentBooleans);
 				}
 

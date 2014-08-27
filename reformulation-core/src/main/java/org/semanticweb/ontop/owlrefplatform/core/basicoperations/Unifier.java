@@ -235,8 +235,9 @@ public class Unifier {
 			 */
 			if (t instanceof Variable) {
 				Term replacement = unifier.get(t);
-				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL){
-					replacement = replacement.getReferencedVariables().iterator().next();
+				if (isequality && replacement!=null && replacement!= OBDAVocabulary.NULL && !(replacement instanceof ValueConstant)) {
+					Set<Variable> varSet = replacement.getReferencedVariables();
+					replacement = varSet.iterator().next();
 				}
 				if (replacement != null){
 					if(atom != null){
@@ -639,23 +640,57 @@ public class Unifier {
 			t2 = term2;
 		} else if (term1 instanceof Function) {
 			Predicate functionSymbol = ((Function)term1).getFunctionSymbol();
-			boolean isAggFunc = false;
-			
-			if (functionSymbol.getName().equals(OBDAVocabulary.XSD_INTEGER_URI)){
-				Term intArg = ((Function) term1).getTerm(0);
-				if (intArg instanceof Function){
-					functionSymbol = ((Function) intArg).getFunctionSymbol();
-					isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+			//boolean isAggFunc = functionSymbol.equals(OBDAVocabulary.SPARQL_AVG) || functionSymbol.equals(OBDAVocabulary.SPARQL_SUM) || functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT) || functionSymbol.equals(OBDAVocabulary.SPARQL_MAX) || functionSymbol.equals(OBDAVocabulary.SPARQL_MIN);
+
+			//if the term is an aggregate
+			if (functionSymbol.isAggregationPredicate()){
+				Term aggArg = ((Function) term1).getTerm(0);
+
+				if (aggArg instanceof Function){
+					Predicate typeOrUri = ((Function) aggArg).getFunctionSymbol();
+
+					if (typeOrUri.isDataTypePredicate()){
+						t1 = term2;
+						t2 = ofac.getFunction(typeOrUri	,term2);
+					} else{
+						t1 = term2;
+						t2 = term1;
+					}
 
 				}
-			}
+			//the term is a data type? has is aggregate inside?
+			}else if (functionSymbol.isDataTypePredicate()){
+				Predicate type =functionSymbol;
+				Term AggrOrSomethingElse = ((Function) term1).getTerm(0);
+
+				//case where the aggregate is inside type, Count for instance
+				if (AggrOrSomethingElse instanceof Function){
+					functionSymbol = ((Function) AggrOrSomethingElse).getFunctionSymbol();
+
+					if (functionSymbol.isAggregationPredicate()){
+						Term aggArg2 = ((Function) AggrOrSomethingElse).getTerm(0);
+
+						if (aggArg2 instanceof Function){
+							t1 = term2;
+							t2 = ofac.getFunction(type	,term2);
+						}
+						
+					}else{
+						t1 = term2;
+						t2 = term1;
+					}
 				
-			if (! isAggFunc){
-				t1 = term2;
-				t2 = term1;
+				}else{
+					t1 = term2;
+					t2 = term1;
+					
+				}
+				
+				
+				
 			}else{
 				t1 = term2;
-				t2 = ofac.getFunction(	ofac.getDataTypePredicateInteger(),term2);
+				t2 = term1;
 			}
 			
 		} else {

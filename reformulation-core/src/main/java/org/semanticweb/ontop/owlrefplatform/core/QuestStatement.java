@@ -76,6 +76,7 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatal
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
+import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -268,14 +269,8 @@ public class QuestStatement implements OBDAStatement {
 						// try {
 
 						set = sqlstatement.executeQuery(sql);
-
-						/*
-						 while (set.next()) {
-					          //set.getLong("id");
-					          String string = set.getString("val");
-					          System.out.println(string);
-					        }
-				*/
+					
+				
 					
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
@@ -457,6 +452,10 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
+		DatalogProgram eqProgram = ofac.getDatalogProgram();
+
+
+
 		try {
 			if (questInstance.isSemIdx()) {
 				translator.setSI();
@@ -467,33 +466,39 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Translated query: \n{}", program);
 
 			//TODO: cant we use here QuestInstance???
-			
-	
-			
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
-			
+
 			if (questInstance.isSemIdx()==true){
 				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
 			}
-			//Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+
+			//Flattening !!
 			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
 
-			
-			
-			log.debug("Flattened query: \n{}", program);
-			
-			
+			log.debug("Enforcing equalities...");
+			for (CQIE rule: program.getRules()){
+				CQIE rule2= DatalogNormalizer.enforceEqualities(rule, true);
+				eqProgram.appendRule(rule2);
+			}
+
+
+			log.debug("Flattened query: \n{}", eqProgram);
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-		
-				throw e;
-			
+
+			throw e;
+
 		}
 		log.debug("Replacing equivalences...");
-		program = validator.replaceEquivalences(program);
-		return program;
+		eqProgram = validator.replaceEquivalences(program);
+
+
+
+		return eqProgram;
 	}
 
 
@@ -521,39 +526,64 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-		
-		//TODO: optimise this????
-		if(unfolder.getMultiplePredList().isEmpty()){
-			List<CQIE> newTypedRules= questInstance.unfolder.pushTypes(unfolding, unfolder.getMultiplePredList());
-
-//			for (CQIE rule: newTypedRules){
-//				System.out.println(rule);
-//			}
-
-			//TODO: can we avoid using this intermediate variable???
-			unfolding.removeAllRules();
-			unfolding.appendRule(newTypedRules);
-		} else if (!unfolding.getRules().isEmpty()){
-			// CANT push types if I have multiple templates, see LeftJoin3Virtual. Problems with the Join.
-			//System.err.println("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
-			log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.");
-		}
-		
+        unfolding = pushTypes(unfolding, unfolder);
 		
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
 			DatalogNormalizer.pullOutEqualities(rule);
-		//	System.out.println(rule);
+			//System.out.println(rule);
 		}
 
-		
-
-		
-		
-		log.debug("\n Partial evaluation ended.");
+		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 
 		return unfolding;
 	}
+
+    /**
+     * Tests if the conditions are met to push types into the Datalog program.
+     * If it ok, pushes them.
+     *
+     * @param datalogProgram
+     * @param unfolder
+     * @return the updated Datalog program
+     */
+    private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder) {
+        boolean canPush = true;
+
+        /**
+         * Disables type pushing if a functionSymbol of the Datalog program is known as
+         * being multi-typed.
+         *
+         * TODO: explain what we mean by multi-typed .
+         * Happens for instance with URI templates.
+         *
+         * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
+         */
+        Multimap<Predicate,Integer> multiTypedFunctionSymbolMap = unfolder.getMultiplePredList();
+        if (!multiTypedFunctionSymbolMap.isEmpty()) {
+            DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
+
+            for (Predicate functionSymbol : multiTypedFunctionSymbolMap.keys()) {
+                if (dependencyGraph.getRuleIndex().containsKey(functionSymbol)) {
+                    canPush = false;
+                    log.debug(String.format("The Datalog program is using at least one multi-typed function symbol" +
+                            " (%s) so type pushing is disabled.", functionSymbol.getName()));
+                    break;
+                }
+            }
+        }
+
+        if (canPush) {
+            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, unfolder.getMultiplePredList());
+
+            //TODO: can we avoid using this intermediate variable???
+            datalogProgram.removeAllRules();
+            datalogProgram.appendRule(newTypedRules);
+            log.debug("Types Pushed: \n{}",datalogProgram);
+        }
+
+        return datalogProgram;
+    }
 
 	
 	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
@@ -704,7 +734,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Query object created (or cached) will be set as jenaQueryContainer[0] so
 	 * that it can be used in other process after getUnfolding.
 	 * 
-	 * If the queyr is not already cached, it will be cached in this process.
+	 * If the query is not already cached, it will be cached in this process.
 	 * 
 	 * @param strquery
 	 * @param signatureContainer
@@ -800,7 +830,15 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				unfoldingTime = endTime - startTime;
 
-
+/*
+				DatalogProgram progClone = programAfterUnfolding.clone();
+			
+				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+			
+				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
+				
+	*/			
+				
 				
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);

@@ -21,9 +21,26 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
  */
 
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
-
+	private static Map<Integer, String> SqlDatatypes;
+	static {
+		SqlDatatypes = new HashMap<Integer, String>();
+		SqlDatatypes.put(Types.INTEGER, "INTEGER");
+		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
+		SqlDatatypes.put(Types.REAL, "REAL");
+		SqlDatatypes.put(Types.FLOAT, "DOUBLE");
+		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");
+//		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
+		SqlDatatypes.put(Types.CHAR, "CHAR");
+		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(100)");  // for korean, chinese, etc characters we need to use utf8
+		SqlDatatypes.put(Types.DATE, "TIMESTAMP");
+		SqlDatatypes.put(Types.TIME, "TIME");
+		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
+		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
+	}
 	@Override
 	public String strconcat(String[] strings) {
 		if (strings.length == 0)
@@ -62,6 +79,19 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlCast(String value, int type) {
+		String strType = SqlDatatypes.get(type);
+		
+		boolean noCast = strType.equals("BOOLEAN");
+
+		if (strType != null && !noCast ) {	
+			return "CAST(" + value + " AS " + strType + ")";
+		} else	if (noCast){
+				return value;
+			
+		}
+		throw new RuntimeException("Unsupported SQL type");
+	}
+	/*
 		String strType = null;
 		if (type == Types.VARCHAR) {
 			strType = "VARCHAR(500)";
@@ -69,5 +99,5 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 			throw new RuntimeException("Unsupported SQL type");
 		}
 		return "CAST(" + value + " AS " + strType + ")";
-	}
+	}*/
 }
