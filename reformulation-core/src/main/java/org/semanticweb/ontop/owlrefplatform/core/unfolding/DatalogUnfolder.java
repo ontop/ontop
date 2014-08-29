@@ -2294,7 +2294,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                              * This un-typing is for instance important for URI templates: we
                              * want these templates to be used in the top-level query, not in sub-queries.
                              * Indeed, joining URIs is more expensive than joining ids because the former are not indexed.
-                             * Said differently, URIs are sargable while IDs are.
+                             * Said differently, URIs are not sargable while IDs are.
                              */
                             CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
 
