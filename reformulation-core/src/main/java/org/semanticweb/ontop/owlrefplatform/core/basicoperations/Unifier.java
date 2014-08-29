@@ -262,9 +262,6 @@ public class Unifier {
 		}
 	}
 	
-	
-	
-	
 	/**
 	 * This method differs from the previous one in that, if the term is URI(p), and we have the replacement
 	 * p=URI(p) then we remove that unification.
@@ -347,8 +344,8 @@ public class Unifier {
 	 * If a term is an ObjectVariableImpl it can't have nested
 	 * ObjectVariableImpl terms.
 	 * 
-	 * @param firstAtom
-	 * @param secondAtom
+	 * @param first
+	 * @param second
 	 * @return
 	 */
 	public static Map<Variable, Term> getMGU(Function first,
@@ -493,10 +490,8 @@ public class Unifier {
 	 * 
 	 * {x/y, m/y} composed with y/z is equal to {x/z, m/z, y/z}
 	 * 
-	 * @param The
-	 *            unifier that will be composed
-	 * @param The
-	 *            substitution to compose
+	 * @param unifier The unifier that will be composed
+	 * @param s The substitution to compose
 	 */
 	public static void composeUnifiers(Map<Variable, Term> unifier,
 			Substitution s) {

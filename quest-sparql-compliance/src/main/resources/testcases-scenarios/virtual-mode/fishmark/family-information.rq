@@ -4,7 +4,7 @@ PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
 SELECT ?noOfGenera ?noOfSpecies ?marine ?brackish ?freshwater 
        ?aquarium ?remark  ?division ?activityLevel ?author ?year ?repguild ?SpeciesCount
 WHERE {
-   ?familiesID fd:families_Family "Bothidae" .
+   ?familiesID fd:families_Family "Bothidae"^^xsd:string .
    ?familiesID fd:families_SpeciesCount ?SpeciesCount .
    ?familiesID fd:families_Genera ?noOfGenera .
    ?familiesID fd:families_Species ?noOfSpecies .

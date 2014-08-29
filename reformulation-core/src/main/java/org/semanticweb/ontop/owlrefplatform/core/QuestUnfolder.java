@@ -51,9 +51,6 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-
-
-
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
 		this.metadata = metadata;
@@ -79,7 +76,7 @@ public class QuestUnfolder {
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
-		unfoldingProgram.appendRule(generateTripleMappings());		
+		unfoldingProgram.appendRule(generateTripleMappings());
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
@@ -128,8 +125,9 @@ public class QuestUnfolder {
 	 * Adding data typing on the mapping axioms.
 	 */
 	
-	public void extendTypesWithMetadata() throws OBDAException {
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, EquivalenceMap equivalenceMaps) throws OBDAException {
+
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(tBoxReasoner, equivalenceMaps, metadata);
 		typeRepair.insertDataTyping(unfoldingProgram);
 	}
 
@@ -282,7 +280,6 @@ public class QuestUnfolder {
 		
 		setupUnfolder();
 
-		log.debug("Final set of mappings: \n{}", unfoldingProgram);	
 		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 	}
 

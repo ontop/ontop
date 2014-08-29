@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.sesame.tests.general;
+package org.semanticweb.ontop.obda;
 
 /*
  * #%L

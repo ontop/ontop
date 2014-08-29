@@ -1085,13 +1085,14 @@ public class OWLAPI3Translator {
 		} else if (datatype.isInteger()
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER // xsd:integer
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT // xsd:int
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG // xsd:long
+//				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG // xsd:long
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG) {
+//				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG
+        ) {
 			return Predicate.COL_TYPE.INTEGER;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DECIMAL) { // xsd:decimal
 			return Predicate.COL_TYPE.DECIMAL;
