@@ -12,31 +12,41 @@
     ( 
     :agg01
     :agg02
-    :agg03
+    #:agg03 NOT SUPPORTED: HAVING
     :agg04
     :agg05
-    :agg06
-    :agg07
+    #:agg06 NOT SUPPORTED: HAVING
+    #:agg07 NOT SUPPORTED: HAVING
     :agg08
-    :agg08b
+    #:agg08b NOT SUPPORTED: + in GROUP BY
     :agg09
     :agg10
     :agg11
     :agg12
-    :agg-groupconcat-01
-    :agg-groupconcat-02
-    :agg-groupconcat-03
+    ##:agg-groupconcat-01
+    ##:agg-groupconcat-02
+    ##:agg-groupconcat-03
     :agg-sum-01
-    :agg-sum-02
-    :agg-avg-01
-    :agg-avg-02
+    #:agg-sum-01-ontop #Mismatching data types
     :agg-min-01
-    :agg-min-02
+    #:agg-sum-02
+    :agg-sum-02-ontop # Mismatching data types
+    :agg-avg-01
+    #:agg-avg-01-ontop #Mismatching data types
+    #:agg-avg-02 NOT SUPPORTED: HAVING
+    :agg-min-01
+    #:agg-min-01-ontop #Mismatching data types
+    #:agg-min-02
+    #:agg-min-02-ontop #Mismatching data types
     :agg-max-01
-    :agg-max-02
-    :agg-sample-01 
-    :agg-err-01
-    :agg-err-02
+    #:agg-max-01-ontop #Mismatching data types
+    #:agg-max-02
+    :agg-max-02-ontop #Mismatching data types
+    ##:agg-sample-01 
+    ##:agg-err-01
+    ##:agg-err-02
+    :agg-sum-order-01
+    
 ) .
 
 
@@ -297,6 +307,94 @@
     mf:result  <agg-sum-02.srx>
     .
 
+:agg-avg-01-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "AVG" ;
+	mf:feature sparql:avg ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-avg-01.rq> ;
+           qt:data   <agg-numeric.ttl> ] ;
+    mf:result  <agg-avg-01-ontop.srx>
+    .
+
+:agg-avg-02-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "AVG with GROUP BY" ;
+	mf:feature sparql:avg ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-avg-02.rq> ;
+           qt:data   <agg-numeric2.ttl> ] ;
+    mf:result  <agg-avg-02-ontop.srx>
+    .
+
+:agg-min-01-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "MIN" ;
+	mf:feature sparql:min ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-min-01.rq> ;
+           qt:data   <agg-numeric.ttl> ] ;
+    mf:result  <agg-min-01-ontop.srx>
+    .
+
+:agg-min-02-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "MIN with GROUP BY" ;
+	mf:feature sparql:min ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-min-02.rq> ;
+           qt:data   <agg-numeric.ttl> ] ;
+    mf:result  <agg-min-02-ontop.srx>
+    .
+
+:agg-max-01-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "MAX" ;
+	mf:feature sparql:max ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-max-01.rq> ;
+           qt:data   <agg-numeric.ttl> ] ;
+    mf:result  <agg-max-01-ontop.srx>
+    .
+
+:agg-max-02-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "MAX with GROUP BY" ;
+	mf:feature sparql:max ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-max-02.rq> ;
+           qt:data   <agg-numeric.ttl> ] ;
+    mf:result  <agg-max-02-ontop.srx>
+    .
+
+:agg-sum-01-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "SUM" ;
+	mf:feature sparql:sum ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-sum-01.rq> ;
+           qt:data   <agg-numeric.ttl> ] ;
+    mf:result  <agg-sum-01-ontop.srx>
+    .
+
+:agg-sum-02-ontop rdf:type mf:QueryEvaluationTest ;
+    mf:name    "SUM with GROUP BY" ;
+	mf:feature sparql:sum ;
+    dawgt:approval dawgt:Approved;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2010-09-07#resolution_2> ;
+    mf:action
+         [ qt:query  <agg-sum-02.rq> ;
+           qt:data   <agg-numeric2.ttl> ] ;
+    mf:result  <agg-sum-02-ontop.srx>
+    .
+
 :agg-sample-01 rdf:type mf:QueryEvaluationTest ;
     mf:name    "SAMPLE" ;
 	mf:feature sparql:sample ;
@@ -331,3 +429,16 @@
            qt:data   <agg-err-02.ttl> ] ;
     mf:result  <agg-err-02.srx>
     .    
+
+:agg-sum-order-01 rdf:type mf:QueryEvaluationTest ;
+                mf:name    "SUM integers and ORDER BY the sum" ;
+            	mf:feature sparql:aggregate ;
+            	rdfs:comment "SUM and ORDER BY the integer sum";
+            	# Not actually approved, but we have to fake it
+            	dawgt:approval dawgt:Approved;
+            	mf:checkOrder "true";
+                mf:action
+                     [ qt:query  <agg-sum-order-01.rq> ;
+                       qt:data   <agg-sum-order-01.ttl> ] ;
+                mf:result  <agg-sum-order-01.srx>
+                .

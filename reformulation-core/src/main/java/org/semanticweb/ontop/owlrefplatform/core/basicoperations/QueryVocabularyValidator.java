@@ -22,6 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +118,9 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 			 * Calling recursively for nested expressions
 			 */
 			if (atom.isAlgebraFunction()) {
-				replaceEquivalences(atom.getTerms());
+				if (!atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)){
+					replaceEquivalences(atom.getTerms());
+				}
 				continue;
 			}
 			

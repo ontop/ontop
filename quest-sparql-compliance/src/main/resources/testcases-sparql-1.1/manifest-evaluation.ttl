@@ -6,13 +6,13 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "SPARQL 1.1 Query Evaluation tests" ;
     mf:include (
-    	<bsbm/manifest.ttl>
-    	<bindings/manifest.ttl>
-    	<property-paths/manifest.ttl>
-        <builtin/manifest.ttl>
-    	<expressions/manifest.ttl>
-    	<negation/manifest.ttl>
-    	<subquery/manifest.ttl>
+    	#<bsbm/manifest.ttl>
+    	#<bindings/manifest.ttl>
+    	#<property-paths/manifest.ttl>
+        #<builtin/manifest.ttl>
+    	#<expressions/manifest.ttl>
+    	#<negation/manifest.ttl>
+    	#<subquery/manifest.ttl>
     	<aggregates/manifest.ttl>
    ).
 

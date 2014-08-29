@@ -138,7 +138,10 @@ public class OBDAVocabulary {
 
 	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
 
+	//TODO: Remove this if it is not used!!
 	public static final String XSD_INT_URI = "http://www.w3.org/2001/XMLSchema#int";
+
+	public static final String OWL_REAL_URI = "http://www.w3.org/2002/07/owl#real";
 
 	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
 
@@ -166,6 +169,9 @@ public class OBDAVocabulary {
 	public static final Predicate XSD_INTEGER = new DataTypePredicateImpl(
 			XSD_INTEGER_URI, COL_TYPE.INTEGER);
 
+	public static final Predicate OWL_REAL = new DataTypePredicateImpl(
+			OWL_REAL_URI, COL_TYPE.REAL);
+	
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
 			XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
 
@@ -252,6 +258,20 @@ public class OBDAVocabulary {
 	public static final String SPARQL_REGEX_URI = "regex";
 	
 	public static final String SPARQL_LIKE_URI = "like";
+	
+	public static final String SPARQL_COUNT_URI = "Count";
+	
+	public static final String SPARQL_AVG_URI = "Avg";
+	
+	public static final String SPARQL_SUM_URI = "Sum";
+	
+	public static final String SPARQL_MIN_URI = "Min";
+	
+	public static final String SPARQL_MAX_URI = "Max";
+
+	public static final String SPARQL_GROUP_URI = "Group";
+	
+	public static final String SPARQL_HAVING_URI = "Having";
 
 	/* SPARQL Algebra predicate */
 
@@ -261,9 +281,16 @@ public class OBDAVocabulary {
 	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl(
 			SPARQL_LEFTJOIN_URI, COL_TYPE.STRING);
 
+	
+	public static final Predicate SPARQL_GROUP = new AlgebraOperatorPredicateImpl(
+			SPARQL_GROUP_URI, COL_TYPE.STRING);
+
+	public static final Predicate SPARQL_HAVING = new BooleanOperationPredicateImpl(
+			SPARQL_HAVING_URI);
+	
 	public static final Predicate SPARQL_IS_LITERAL = new BooleanOperationPredicateImpl(
 			SPARQL_IS_LITERAL_URI);
-
+	
 	public static final Predicate SPARQL_IS_URI = new BooleanOperationPredicateImpl(
 			SPARQL_IS_URI_URI);
 
@@ -290,6 +317,17 @@ public class OBDAVocabulary {
 	
 	public static final Predicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
 			SPARQL_LIKE_URI, 2);
+	
+	public static final Predicate SPARQL_COUNT = new NonBooleanOperationPredicateImpl(
+			SPARQL_COUNT_URI);
+	public static final Predicate SPARQL_AVG = new NonBooleanOperationPredicateImpl(
+			SPARQL_AVG_URI);
+	public static final Predicate SPARQL_SUM = new NonBooleanOperationPredicateImpl(
+			SPARQL_SUM_URI);
+	public static final Predicate SPARQL_MIN = new NonBooleanOperationPredicateImpl(
+			SPARQL_MIN_URI);
+	public static final Predicate SPARQL_MAX = new NonBooleanOperationPredicateImpl(
+			SPARQL_MAX_URI);
 
 	
 }

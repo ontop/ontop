@@ -444,7 +444,8 @@ public class ModelIOManager {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<TargetQueryParser, TargetQueryParserException>();
 		for (TargetQueryParser parser : getParsers()) {
             try {
-            	return parser.parse(targetString);
+            	CQIE parse = parser.parse(targetString);
+				return parse;
             } catch (TargetQueryParserException e) {
             	exceptions.put(parser, e);
             }     

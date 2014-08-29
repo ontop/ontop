@@ -184,6 +184,47 @@ public class QueryUtils {
 		return results;
 
 	}
+	
+	
+	/**
+	 * 
+	 * collects the variable names in the input <code>atom</code>
+	 * 
+	 * 
+	 * 
+	 * @param atom
+	 *            
+	 * @return 
+	 */
+	public static List<Variable> getVariablesInAtom(Function atom) {
+
+		List<Variable> results = new ArrayList<>();
+
+		Queue<Term> queue = new LinkedList<Term>();
+
+		queue.add(atom);
+		while (!queue.isEmpty()) {
+			Term queueHead = queue.poll();
+
+			if (queueHead instanceof Function) {
+				Function funcRoot = (Function) queueHead;
+
+				if (funcRoot.isDataTypeFunction()
+						|| funcRoot.isAlgebraFunction()
+						|| funcRoot.isDataFunction()) {
+					for (Term term : funcRoot.getTerms()) {
+						queue.add(term);
+					}
+				}
+			} else if (queueHead instanceof Variable) {
+				Variable var = (Variable) queueHead;
+				results.add(var);
+			}
+
+		} // end while innerAtom
+		return results;
+
+	}
 
 	/**
 	 * we need to update the cache of this rule manually, as Unifier sometimes is not smart enough 

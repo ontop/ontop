@@ -20,9 +20,12 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+
+
 import java.util.List;
 
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.Variable;
 
 public interface SQLDialectAdapter {
 
@@ -63,5 +66,11 @@ public interface SQLDialectAdapter {
 	 */
 	public String sqlCast(String value, int type);
 	
+
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
+
+	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive);
+
+	public String sqlGroupBy(List<Variable> groupby, String viewname);
+
 }

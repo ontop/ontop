@@ -7,12 +7,12 @@
     rdfs:label "SPARQL Query Evaluation tests" ;
     mf:include (
 
-       <basic/manifest.ttl>
-       <triple-match/manifest.ttl>
+      <basic/manifest.ttl>
+      <triple-match/manifest.ttl>
          
-       <open-world/manifest.ttl>
-       <algebra/manifest.ttl>
-       <bnode-coreference/manifest.ttl>
+      <open-world/manifest.ttl>
+      <algebra/manifest.ttl>
+      <bnode-coreference/manifest.ttl>
          
        <optional/manifest.ttl>
        <optional-filter/manifest.ttl>

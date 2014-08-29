@@ -21,24 +21,16 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import info.aduna.iteration.OffsetIteration;
+
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -49,8 +41,8 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.ontology.DataType;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
@@ -284,6 +276,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
 
+
 	
 
 		if (includeMappings){
@@ -424,7 +417,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//get the predicate
 				Predicate pred = predicatesInBottomUp.get(predIdx);
 				//get the father predicate
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
 				
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
@@ -450,19 +442,35 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					//We unfold every rule of the father atom that contains pred
 					for (CQIE fatherRule : fatherCollection) {
 						
-						
+						Predicate preFather =  fatherRule.getHead().getPredicate();
+
 						int queryIdx=workingList.indexOf(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 
 						List<Term> fatherTerms = getBodyTerms(fatherRule);
+
+						//This is to search for aggregates in the head of the
+						//father rule and stop unfolding.
+						boolean hasAggregates = false;
+						hasAggregates = detectAggregatesHead(workingRules);
 						
+						
+
 						/*
 						 * This we compute the partial evaluation. The variable parentIsLeftJoin is false because here we do not process 
 						 * the atom itself, but we delegate this task to computePartialEvaluation. Inside that method we check if the atom
 						 * is a leftjoin, in case that it is an algebra atom.
 						 */
 						boolean parentIsLeftJoin = false;
-						List<CQIE> result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,includingMappings);
+						
+						List<CQIE> result = new LinkedList<CQIE>();
+						if (!hasAggregates){
+							 result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,includingMappings);
+						}else{
+							// result is the empty list
+							//TODO: This can be optmised I think. Here we could still unfold atoms in the body that are not 
+							//affected by the aggregate
+						}
 						
 						if (result == null) {
 							/*
@@ -477,7 +485,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 */
 							continue;
 						}else if (result.size() >= 2) {
-							detectMissmatchArgumentType(result);
+							detectMissmatchArgumentType(result,false);
 						}
 						/*
 						 * One more step in the partial evaluation was computed, we
@@ -497,7 +505,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								depGraph.addRuleToRuleIndex(preFather, newquery);
 							
 								
-								//Delete the rules from workingList that have been touched
+								//adding the rules from workingList that have been touched
 								workingList.add(queryIdx, newquery);
 
 							
@@ -531,6 +539,56 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			return rcount[1];
 		}
 
+/**
+ * This is a helper method to find aggregate functions in the head of the rule.
+ * 
+ * @param workingRules
+ * @return
+ */
+private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
+	boolean hasAggregates = false;
+
+	for (CQIE rule: workingRules){
+		hasAggregates = detectAggregateinSingleRule( rule);
+	}
+	return hasAggregates;
+}
+
+/**
+ * @param hasAggregates
+ * @param rule
+ * @return
+ */
+private boolean detectAggregateinSingleRule( CQIE rule) {
+	Function fatherHead = rule.getHead();
+	
+	List<Term> headArgs = fatherHead.getTerms();
+	for (Term arg: headArgs) {
+        if (detectAggregateInArgument(arg)) {
+            return true;
+        }
+	}
+	return false;
+}
+
+    private boolean detectAggregateInArgument(Term arg) {
+        if (arg instanceof Function) {
+            Function compositeTerm = ((Function) arg);
+            Predicate functionSymbol = compositeTerm.getFunctionSymbol();
+
+            if (functionSymbol.isAggregationPredicate()) {
+                return true;
+            }
+
+            /**
+             * Looks recursively at the sub(-sub)-terms
+             */
+            return detectAggregateInArgument(compositeTerm.getTerm(0));
+        }
+
+        return false;
+    }
+
 		/**
 		 * Clones the rules in ruleCollection into fatherCollection
 		 * 
@@ -558,11 +616,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
-			
-//			System.out.println("Initial-----");
-//			for (CQIE rule: workingList){
-//				System.out.println(rule);
-//			}
+			log.debug("Unfolding w.r.t. Mappings:");
+
 			log.debug("Generating Dependency Graph!");
 			 depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
@@ -578,7 +633,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
 				Predicate pred = extensionalPredicates.get(predIdx);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
+				
 
 			
 				List<CQIE> result = new LinkedList<CQIE>();
@@ -596,16 +651,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					
 					cloneRules(fatherCollection, ruleCollection);
 					
+					boolean parentIsLeftJoin = false;
+					
 					for (CQIE fatherRule:  fatherCollection) {
+						
+						Predicate preFather =  fatherRule.getHead().getPredicate();
 						List<Term> ruleTerms = getBodyTerms(fatherRule);
 						Stack<Integer> termidx = new Stack<Integer>();
 						
 						//here we perform the partial evaluation
-						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, false, includeMappings);
+						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, parentIsLeftJoin,  includeMappings);
 						
 						
 						
 						if (partialEvaluation != null){
+
 //							System.out.print("Result: ");
 //							for (CQIE rule: partialEvaluation){
 //								System.out.println(rule);
@@ -613,38 +673,66 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						
 							addDistinctList(result, partialEvaluation);
 							//updating indexes with intermediate results
+							
+				
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
+							
+							log.debug(pred + " : " + ruleIndex.get(preFather).toString() );
+							
+							
 						} else{
-//							System.out.println("Empty: "+pred);
-							predicatesMightGotEmpty.add(preFather);
+							log.debug("Empty: "+pred);
+							if (!predicatesMightGotEmpty.contains(preFather)){
+								predicatesMightGotEmpty.add(preFather);
+								
+							}
 							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
+							
+							//System.out.println(ruleIndex.get(preFather).size());
+//							System.out.println(ruleIndexByBody.get(pred).size());
+						
 						}
+						if (result.size() >= 2) {
+							detectMissmatchArgumentType(result,false);
+						}
+		
 					} //end for father collection
 					
 					
 				if (result.isEmpty() )
 				{
-					keepLooping = false;
+					keepLooping = parentIsLeftJoin;
 				}
 					
 				}while(keepLooping);
 			}
 			
 			List<Predicate> touchedPredicates = new LinkedList<Predicate>();
+			boolean noRewriting = false ;
+			Predicate ans1 = termFactory.getClassPredicate("ans1");
+
 			while (!predicatesMightGotEmpty.isEmpty()){
 				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates);
+				
+				//if I deleted ans1 I dont return anything later
+				if (predicatesMightGotEmpty.contains(ans1)){
+					noRewriting = true;
+					break;
+				}
 			}
 
-			// I add to the working list all the rules touched by the unfolder!
-			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
-			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
-			//System.out.println(workingList);
-
+			if (!noRewriting){
+				// I add to the working list all the rules touched by the unfolder!
+				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
+				addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
+			}
+			
+			
 		}
 
 		/**
-		 * It search for the empty predicates that got empty during the unfolding of the existencional 
-		 * predicates, and either generate the right rule for the LJ, or delete de rules. 
+		 * It search for the empty predicates that got empty during the unfolding of the extensional  
+		 * predicates, and either generate the right rule for the LJ, or delete the rules. 
 		 * Returns the predicates that have been deleted.
 		 * 
 		 * @param workingList
@@ -783,16 +871,29 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								List<Predicate> predicatesToAdd) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
-				Predicate preFather =  depGraph.getFatherPredicate(pred);
+				
+				
+				//Adding the  predicate
+				Collection<CQIE> rulesToAdd2= ruleIndex.get(pred);
 
-				Collection<CQIE> rulesToAdd= ruleIndex.get(preFather);
-
-				for (CQIE resultingRule: rulesToAdd){
+				for (CQIE resultingRule: rulesToAdd2){
 					if (!workingList.contains(resultingRule)){
 						workingList.add(resultingRule);
 					}
 				}
+				
+				//Adding the  fathers
+				List<Predicate> preFatherList =  depGraph.getFatherPredicates(pred);
+			
+				for (Predicate predFa: preFatherList){
+					Collection<CQIE> rulesToAdd= ruleIndex.get(predFa);
 
+					for (CQIE resultingRule: rulesToAdd){
+						if (!workingList.contains(resultingRule)){
+							workingList.add(resultingRule);
+						}
+					}
+				}
 			}
 		}
 
@@ -925,49 +1026,50 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				}
 	
 			}			
-			
-			
-			
-			
-			for (CQIE newquery : result) {
-				//Update the ruleIndex
-				depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
-				depGraph.addRuleToRuleIndex(preFather, newquery);
 
-				//Delete the rules from workingList that have been touched
-				if (workingList.contains(fatherRule)){
-					workingList.remove(fatherRule);
+
+
+
+			for (CQIE newquery : result) {
+				Predicate ruleHead = newquery.getHead().getPredicate();
+				boolean sameHeadFromFather = ruleHead.equals(preFather);
+				if (!fatherRule.equals(newquery) && sameHeadFromFather){
+					//Update the ruleIndex
+					depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
+					depGraph.addRuleToRuleIndex(preFather, newquery);
+
+					//Delete the rules from workingList that have been touched
+					if (workingList.contains(fatherRule) && !result.contains(fatherRule)){
+						workingList.remove(fatherRule);
+					}
+
+					//List<Term> bodyTerms = getBodyTerms(newquery);
+					//Update the bodyIndex
+					depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
+					depGraph.updateRuleIndexByBodyPredicate(newquery);
+				} else if (depGraph.getExtensionalPredicates().contains(ruleHead)){ //it means I added mappings to the result !!
+					depGraph.addRuleToRuleIndex(pred, newquery);
 				}
 
 
-
-				//Update the bodyIndex
-				depGraph.removeOldRuleIndexByBodyPredicate(fatherRule);
-				depGraph.updateRuleIndexByBodyPredicate(newquery);
-
-				
-				
-				
-
 			} // end for queries in result
-			
-			
-			
-			//TODO: check what happens here when the concept has several mappings and it appears several times in the rule
-			
 			//Determine if there is a need to keep unfolding pred
+
+
+
+
 			if (ruleIndexByBody.get(pred).isEmpty()){
 				return false; //I finish with pred I can move on
 			}else if (result.contains(fatherRule)){ 
-				return false; // otherwise it will loop for ever. I am in the case when a concept in the LJ has several mappings
+				return false; // otherwise it will loop for ever. I am in the case when a concept in the LJ has several mappings, or aggregates
 			}else{
 				return true; // keep doing the loop
 			}
-			
+
 		}
 
-		
-		
+
+
 		
 	
 
@@ -1054,6 +1156,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 *            The number of resolution attemts done globaly, needed to spawn
 		 *            fresh variables.
 		 * @param includingMappings 
+		 * @param parentIsAggr 
 		 * @param atomindx
 		 *            The location of the focustAtom in the currentlist
 		 * @return <ul>
@@ -1067,7 +1170,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * @see Unifier
 		 */	
 	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
-				boolean isSecondAtomInLeftJoin, boolean includingMappings) {
+				boolean isSecondAtomInLeftJoin, boolean includingMappings, boolean parentIsAggr) {
 
 			if (!focusedAtom.isDataFunction())
 				throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
@@ -1130,16 +1233,22 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 //					result = new LinkedList<CQIE>();
 //					result.add(newRuleWithNullBindings);
 				}
-			} else if (hasOneMapping || !isSecondAtomInLeftJoin){
-				
-				//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
-				result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
-			} else if (!hasOneMapping && isSecondAtomInLeftJoin) {
-				// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and
-				result = Lists.newArrayListWithExpectedSize(1 + rulesDefiningTheAtom.size() + 1);
-				//result = new LinkedList<CQIE>();
-				result.add(rule);
-				result.addAll(rulesDefiningTheAtom);
+			} else {
+				boolean freeToFlatten = !isSecondAtomInLeftJoin && !parentIsAggr;
+				if (hasOneMapping || freeToFlatten){
+					
+					//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+					result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
+				} else {
+					boolean noUnfoldingNeededAddMappings = isSecondAtomInLeftJoin || parentIsAggr;
+					if (!hasOneMapping && noUnfoldingNeededAddMappings) {
+						// This case takes place when ans has only 1 definition, but the extensional atom have more than 1 mapping, and
+						result = Lists.newArrayListWithExpectedSize(1 + rulesDefiningTheAtom.size() + 1);
+						//result = new LinkedList<CQIE>();
+						result.add(rule);
+						result.addAll(rulesDefiningTheAtom);
+					}
+				}
 			}
 			
 			
@@ -1340,6 +1449,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param termidx
 	 * 			a stack used to track the depth first searching (DFS) 
 	 * @param includingMappings 
+	 * @param parentIsAggr 
 	 * @return
 	 */
 
@@ -1405,10 +1515,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                     boolean isLeftJoinSecondArgument = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
                     List<CQIE> result = null;
                     Predicate pred = focusedLiteral.getFunctionSymbol();
+                    boolean parentIsAggr = false;
                     
+                    //Here we check if the head has an aggregate, if it does, it should not be distributed over the union of mappings
                     if (pred.equals(resolvPred)) {
+                    	if (includingMappings){
+                    		parentIsAggr= detectAggregateinSingleRule(rule);
+                    	}
                     	result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
-                    			isLeftJoinSecondArgument, includingMappings);
+                    			isLeftJoinSecondArgument, includingMappings, parentIsAggr);
                     	if (result == null)
                     		return null;
 
@@ -2071,9 +2186,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
  */
 	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multPredList) {
 		
-		if (!multPredList.isEmpty()){
-			return unfolding.getRules();
-		}
+	//	if (!multPredList.isEmpty()){
+	//		return unfolding.getRules();
+	//	}
 		
 		
 		List<CQIE> workingList = new LinkedList<CQIE>();
@@ -2097,8 +2212,16 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			Predicate buPredicate = predicatesInBottomUp.get(predIdx);
 			//get the father predicate
 
-			if (!extensionalPredicates.contains(buPredicate) ) {// it is a defined  predicate, like ans2,3.. etc
+			if (!extensionalPredicates.contains(buPredicate)  ) {// it is a defined  predicate, like ans2,3.. etc
 
+				if (multPredList.containsKey(buPredicate)){
+					// CANT PUSH TYPES IF I HAVE MULTIPLE TEMPLATES, SEE LEFTJOIN3VIRTUAL. PROBLEMS WITH THE JOIN.
+					//SYSTEM.ERR.PRINTLN("TYPES CANNOT BE PUSHED IN THE PRESENCE OF NO MATCHING TEMPLATES. THIS MIGHT LEAD TO A BAD PERFORMANCE.");
+					log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.:", buPredicate);
+					continue;
+
+				}
+				
 				//get all the indexes we need
 				ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
@@ -2106,9 +2229,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 				//The rules USING pred
 				Collection<CQIE> rulesUsingPred = ruleIndexByBody.get(buPredicate);
-
+				
 				//The rules DEFINING pred
 				List<CQIE> rulesDefiningPred = (List<CQIE>) ruleIndex.get(buPredicate);
+
+                // Beware of aggregates
+                boolean containsAggregates = detectAggregatesHead(rulesDefiningPred);
+
 				
 				//cloning to avoid clashes
 				fatherCollection.clear();
@@ -2117,6 +2244,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				cloneRules(fatherCollection, rulesUsingPred);
 
 				//We unfold every rule of the father atom that contains pred
+				// TODO: unfold????
 				for (CQIE fatherRule : fatherCollection) {
 					int fails = 0;
 
@@ -2139,7 +2267,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						//Later when we compute the new source rule, we will not eliminate the types from the terms in this list
 						List<Term> termsToExclude = new LinkedList<Term>();
 						
-						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude);
+						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude,
+                                containsAggregates);
 
 
 						if (result == null && fails==rulesDefiningPred.size()) {
@@ -2156,16 +2285,25 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 * Each of the new queries could still require more steps of
 							 * evaluation, so we decrease the index.
 							 */
-							
-							//Here we remove the types, if possible, of the source query
-							CQIE newsourceRule= computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
-							
-							//Now we update the indexes for the source query
-							List<CQIE> newSourceRuleList= new LinkedList<CQIE>();
-							newSourceRuleList.add(newsourceRule);
-							int srcIdx=workingList.indexOf(sourceRule);
-							Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,srcIdx,newSourceRuleList, srchead,sourceRule);
+
+
+                            /**
+                             * Here we remove the types, if possible, of the source query.
+                             * Note that we do no remove of terms that contains an aggregation.
+                             *
+                             * This un-typing is for instance important for URI templates: we
+                             * want these templates to be used in the top-level query, not in sub-queries.
+                             * Indeed, joining URIs is more expensive than joining ids because the former are not indexed.
+                             * Said differently, URIs are sargable while IDs are.
+                             */
+                            CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
+
+                            //Now we update the indexes for the source query
+                            List<CQIE> newSourceRuleList = new LinkedList<CQIE>();
+                            newSourceRuleList.add(newsourceRule);
+                            int srcIdx = workingList.indexOf(sourceRule);
+                            Predicate srchead = sourceRule.getHead().getFunctionSymbol();
+                            updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
 							
 							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
@@ -2263,18 +2401,33 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (termsToExclude.contains(t)){
 			isProblemTemplate = true;
 		}
+
+        /**
+         * Does not untyped aggregations
+         */
+        if (detectAggregateInArgument(t)) {
+            untypedArguments.add(t);
+        }
 		
-		if (t instanceof Function && !isProblemTemplate){
+		else if (t instanceof Function && !isProblemTemplate){
 			//if it is a function, we add the inner variables and values
 			List<Term>  functionArguments = ((Function) t).getTerms();
-			int arity = ((Function) t).getArity();
+			
+		
+			
+			//int arity = ((Function) t).getArity();
 			Predicate functionSymbol = ((Function) t).getFunctionSymbol();
 			boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-			if (isURI && arity >1){
+			if (isURI && functionArguments.size() >1){
 				//I need to remove the URI part and add the rest, usually the variables
 				functionArguments.remove(0);
 			}
 			untypedArguments.addAll(functionArguments);
+			
+			
+			
+			
+			
 		}else if (t instanceof Function && isProblemTemplate){ // if it is a problematic term we leave it as it is
 			untypedArguments.add(t);
 		}else if(t instanceof Variable){
@@ -2298,10 +2451,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param fatherRule
 	 * @return
 	 */
-	
-	
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
-			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude) {
+			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude, boolean containsAggregates) {
 
 
 			Function sourceHead = sourceRule.getHead();
@@ -2316,12 +2467,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					continue;
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
-					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude));
+					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule, termsToExclude, containsAggregates));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
 						
+						/**
+						 * TODO: a rule named "addTypes"???????
+						 */
 						CQIE addTypes = addTypes(sourceHead,sourceRule,focus,fatherRule,termsToExclude);
 						result.add(addTypes);
 						break;
@@ -2340,13 +2494,69 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		
 	}
 
-	
+    /**
+     * Removes aggregate symbols found in the head of a given rule.
+     * 
+     * For instance, 
+     *    ans2(arg1, sum(arg2)) :- ...
+     * becomes
+     *    ans2(arg1, arg2) :- ...
+     * 
+     * @param rule. Read-only.
+     * @return the new rule
+     */
+	//TODO: remove this method if possible!!
+    private CQIE removeAggregatesFromHead(CQIE rule) {
+        CQIE newRule = rule.clone();
+        Function typedArg =null;
 
-	
+        /**
+         *  This list is the list object used by the head of the rule.
+         *  By modifying, we implicitly update the rule.
+         *  
+         *  TODO: stop this side-effect practice.
+         */
+        List<Term> arguments = newRule.getHead().getTerms();
 
-	
-	
-	/**
+        for (int i = 0; i < arguments.size() ; i++) {
+            Term argument = arguments.get(i);
+            /**
+             * When a aggregate symbol is used by the argument,
+             * we replace the argument by its (unique) sub-term.
+             * 
+             */
+            if (detectAggregateInArgument(argument)) {
+            	Function subTerm = ((Function) argument);
+
+
+            	Predicate pred =  subTerm.getFunctionSymbol();
+
+            	if (pred instanceof DataTypePredicate){
+            		Function AggArg = ((Function) subTerm.getTerm(0)) ; 
+            		Term arg = AggArg.getTerm(0) ;
+            		typedArg = termFactory.getFunction(pred, arg);
+            		arguments.set(i, typedArg);
+
+            		//TODO: homogenize these if statements !
+            	} else if (pred.isAggregationPredicate()){
+            		Term myTypedArg = subTerm.getTerm(0);
+            		arguments.set(i, myTypedArg);
+
+            	}else{
+            		throw new NullPointerException("Unkown Aggregate Term!");
+            	}
+
+
+
+
+            }
+        }
+
+        return newRule;
+    }
+
+
+    /**
 	 * This method add the type of the variables in sourceHead to the targetAtom, and then
 	 * uses this atom to update the head of fatherRule
 	 * 
@@ -2435,7 +2645,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								
 							}*/
 						}
-					} 
+					} else{ //no variables!
+						log.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
+						
+						mgu.remove(key);
+						exclude.add(value);
+					}
 				} else {
 					log.debug("value: "+value.toString());
 				}
@@ -2583,7 +2798,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			//There is more than 1 rule, we need to see if it uses different templates
 			
 			
-			detectMissmatchArgumentType(rules);
+			detectMissmatchArgumentType(rules,true);
 			
 		} //end for predicates
 		
@@ -2597,82 +2812,122 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param focusPred
 	 * @param rules
 	 */
-	private void detectMissmatchArgumentType(List<CQIE> rules) {
-		// I pick the pred atom in the body of the first rule
-		CQIE firstRule = (CQIE) rules.get(0);
-		Function focusAtom= firstRule.getHead();
-		Predicate focusPred = focusAtom.getPredicate();
-					
-		for (int i=1; i<rules.size(); i++){
-			Function pickedAtom = null;
-			CQIE tgt = (CQIE) rules.get(i);
-			pickedAtom=  tgt.getHead();
+	private void detectMissmatchArgumentType(List<CQIE> rules, boolean isComputingMappings ) {
 
-			//TODO: is this if needed??
-			boolean found = false;
-			for (int p=0;p<focusAtom.getArity();p++){
-				boolean templateProblem = false;
-				Term term1 = focusAtom.getTerm(p);
-				Term term2 =  pickedAtom.getTerm(p);
-
-				if ((term1 instanceof Function ) &&  (term2 instanceof Function )){
-					Function t1 = (Function)term1;
-					Function t2 = (Function)term2;
-
-
-
-
-					//it has different types
-					if (!t1.getFunctionSymbol().equals(t2.getFunctionSymbol())){
-						templateProblem = true;
-					}
-
-					//it has different templates regarding the variable
-
-
-					//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
-					//See Test COmplex Optional Semantics
-
-					//int arity = t1.getArity();
-					int arity = t1.getTerms().size();
-
-					//						int arity2 = t2.getArity();
-					int arity2 = t2.getTerms().size();
-
-					if (arity !=  arity2){
-						templateProblem = true;
-					}
-
-					//it has different templates regarding the uri
-					if (t1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
-						Term string1 = t1.getTerm(0);
-						Term string2 = t2.getTerm(0);
-						if (!string1.equals(string2)){
-							templateProblem = true;
-						}
-					}
+		List<Predicate> predList= new LinkedList<Predicate>();
+		
+		//I check all the different predicates in the head of each result. Usually it will be only 1
+		//TODO: This can be done more efficiently by having a flag that is true when I add mappings to the result
+		
+		if (!isComputingMappings){
+			for (CQIE rule: rules){
+				Function focusAtom= rule.getHead();
+				Predicate focusPred = focusAtom.getPredicate();
+				if (!predList.contains(focusPred)){
+					predList.add(focusPred);
 				}
-				else if ((term1 instanceof Variable ) &&  (term2 instanceof Constant)){
-					templateProblem = true;
-				}else if ((term2 instanceof Variable ) &&  (term1 instanceof Constant)){
-					templateProblem = true;
+			}
+		} else{
+			CQIE firstRule = (CQIE) rules.get(0);
+			Function focusAtom= firstRule.getHead();
+			Predicate focusPred = focusAtom.getPredicate();
+			predList.add(focusPred);
+		}
+		//TODO: Inefficeint !!!!! :( Fix!
+		
+		
+		for (Predicate pred: predList){
+			// I pick the pred atom in the body of the first rule
+			
+			List<CQIE> rulesubset =new LinkedList<CQIE>();
+			if (!isComputingMappings){
+				rulesubset = (List<CQIE> ) ruleIndex.get(pred);
+			}else{
+				rulesubset= rules;
+			}
+			
+			CQIE firstRule = (CQIE) rulesubset.get(0);
+			Function focusAtom= firstRule.getHead();
+			Predicate focusPred = focusAtom.getPredicate();
+		
+			for (int i=1; i<rules.size(); i++){
+				Function pickedAtom = null;
+				CQIE tgt = (CQIE) rules.get(i);
+				 pickedAtom= tgt.getHead();
+				Predicate focusPred2 = pickedAtom.getPredicate();
+				if (!focusPred2.equals(pred)){
+					continue;
 				}
 				
-				if (templateProblem){
-					if (!multPredList.containsEntry(focusPred,p)) {
-						multPredList.put(focusPred,p);
-						found = true;
-						break;
+				
+				
+
+				//TODO: is this if needed??
+				boolean found = false;
+				for (int p=0;p<focusAtom.getArity();p++){
+					boolean templateProblem = false;
+					Term term1 = focusAtom.getTerm(p);
+					Term term2 =  pickedAtom.getTerm(p);
+
+					if ((term1 instanceof Function ) &&  (term2 instanceof Function )){
+						Function t1 = (Function)term1;
+						Function t2 = (Function)term2;
+
+
+
+
+						//it has different types
+						if (!t1.getFunctionSymbol().equals(t2.getFunctionSymbol())){
+							templateProblem = true;
+						}
+
+						//it has different templates regarding the variable
+
+
+						//TODO: FIX ME!! super slow!! Literals have arity 1 always, even when they have 2 arguments!
+						//See Test COmplex Optional Semantics
+
+						//int arity = t1.getArity();
+						int arity = t1.getTerms().size();
+
+						//						int arity2 = t2.getArity();
+						int arity2 = t2.getTerms().size();
+
+						if (arity !=  arity2){
+							templateProblem = true;
+						}
+
+						//it has different templates regarding the uri
+						if (t1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)){
+							Term string1 = t1.getTerm(0);
+							Term string2 = t2.getTerm(0);
+							if (!string1.equals(string2)){
+								templateProblem = true;
+							}
+						}
 					}
+					else if ((term1 instanceof Variable ) &&  (term2 instanceof Constant)){
+						templateProblem = true;
+					}else if ((term2 instanceof Variable ) &&  (term1 instanceof Constant)){
+						templateProblem = true;
+					}
+
+					if (templateProblem){
+						if (!multPredList.containsEntry(focusPred,p)) {
+							multPredList.put(focusPred,p);
+							found = true;
+							break;
+						}
+					}
+				}//end for terms	
+
+
+
+				if (found ==true){
+					continue;
 				}
-			}//end for terms	
-
-
-
-			if (found ==true){
-				continue;
-			}
-		}//end for rules
+			}//end for rules
+		}
 	}
 
 	/**

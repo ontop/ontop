@@ -141,4 +141,9 @@ public class EmptyQueryResultSet implements TupleResultSet {
 //		return null;
 //	}
 
+	@Override
+	public int getCountValue() throws OBDAException {
+		return 0;
+	}
+
 }

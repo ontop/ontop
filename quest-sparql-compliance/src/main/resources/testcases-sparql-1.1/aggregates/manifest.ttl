@@ -11,27 +11,27 @@
     mf:entries
     (
     	:sparql11-count-01
-    	:sparql11-count-02
-    	:sparql11-count-03
-    	:sparql11-count-04
-    	:sparql11-order-01
-    	:sparql11-order-02
-    	:sparql11-order-03
-    	:sparql11-max-01
-    	:sparql11-min-01
-    	:sparql11-sum-01
-    	:sparql11-sum-02
-    	:sparql11-sum-03
-    	:sparql11-sum-04
-    	:sparql11-having-01
-    	:sparql11-avg-01
-    	:sparql11-avg-02
-    	:sparql11-aggregate-subquery-01
-    	:sparql11-aggregate-subquery-02
-    	:sparql11-aggregate-group-01
-    	:sparql11-aggregate-group-02
+    	#:sparql11-count-02
+    	#:sparql11-count-03
+    	#:sparql11-count-04
+    	#:sparql11-order-01
+    	#:sparql11-order-02
+    	#:sparql11-order-03
+    	#:sparql11-max-01
+    	#:sparql11-min-01
+    	#:sparql11-sum-01
+    	#:sparql11-sum-02
+    	#:sparql11-sum-03
+    	#:sparql11-sum-04
+    	#:sparql11-having-01
+    	#:sparql11-avg-01
+    	#:sparql11-avg-02
+    	#:sparql11-aggregate-subquery-01
+    	#:sparql11-aggregate-subquery-02
+    	#:sparql11-aggregate-group-01
+    	#:sparql11-aggregate-group-02
 # test case for issue SES-772. commented because not yet fixed
-    	:sparql11-aggregate-expression-01
+    	#:sparql11-aggregate-expression-01
     ).
 
 
