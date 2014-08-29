@@ -133,8 +133,10 @@ public class R2RMLManager {
 			try {
 				mapping = getMapping(tm);
 
-				// add it to the list of mappings
-				mappings.add(mapping);
+                if(mapping!=null) {
+                    // add it to the list of mappings
+                    mappings.add(mapping);
+                }
 
 				// pass 2 - check for join conditions, add to list
 				List<OBDAMappingAxiom> joinMappings = getJoinMappings(tripleMaps, tm);

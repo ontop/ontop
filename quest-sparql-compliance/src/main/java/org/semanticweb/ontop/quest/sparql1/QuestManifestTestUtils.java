@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.quest.sparql11;
+package org.semanticweb.ontop.quest.sparql1;
 
 /*
  * #%L

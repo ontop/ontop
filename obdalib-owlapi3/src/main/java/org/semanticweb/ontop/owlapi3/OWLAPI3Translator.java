@@ -1091,7 +1091,8 @@ public class OWLAPI3Translator {
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG) {
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG
+        ) {
 			return Predicate.COL_TYPE.INTEGER;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DECIMAL) { // xsd:decimal
 			return Predicate.COL_TYPE.DECIMAL;

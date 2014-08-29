@@ -225,7 +225,7 @@ public class SQLQueryParser {
 			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
 		}
 			
-		if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2")) {
+		if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
 			// If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
 			uppercase=true;
 		}
