@@ -138,7 +138,7 @@ public class OntologyTypesTest{
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		
-		//xsd:long is not supported
+		//xsd:long is transformed in integer
         //the value in the ontology throw an error
 
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
@@ -169,14 +169,7 @@ public class OntologyTypesTest{
 		runTests(p, query4, 3);
 
 
-        //no value in the ontology
-        //no value in the mapping
-        //value in the oracle database is decimal
-        String query5 = "PREFIX : <http://www.company.com/ARES#>" +
-                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-        runTests(p, query5, 3);
-		
 	}
 	
 	@Test	
