@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
 
+
 /*
  * #%L
  * ontop-reformulation-core
@@ -20,27 +21,18 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 
 public class MappingVocabularyTranslator {
 
-	private static OntologyFactory	fac		= OntologyFactoryImpl.getInstance();
 	private static OBDADataFactory	dfac	= OBDADataFactoryImpl.getInstance();
 
 	/***
@@ -65,8 +57,8 @@ public class MappingVocabularyTranslator {
 	 * @param equivalencesMap
 	 * @return
 	 */
-	public Collection<OBDAMappingAxiom> translateMappings(Collection<OBDAMappingAxiom> originalMappings,
-			Map<Predicate, Description> equivalencesMap) {
+	public static Collection<OBDAMappingAxiom> translateMappings(Collection<OBDAMappingAxiom> originalMappings,
+			EquivalenceMap equivalencesMap) {
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			
@@ -75,31 +67,7 @@ public class MappingVocabularyTranslator {
 			List<Function> newbody = new LinkedList<Function>();
 
 			for (Function atom : body) {
-				Predicate p = atom.getPredicate();
-				Function newatom = null;
-				if (p.getArity() == 1) {
-//					Description description = fac.createClass(p);
-					Description equivalent = equivalencesMap.get(p);
-					if (equivalent == null)
-						newatom = atom;
-					else {
-						newatom = dfac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerms());
-
-					}
-				} else {
-//					Description description = fac.createProperty(p);
-					Description equivalent = equivalencesMap.get(p);
-					if (equivalent == null)
-						newatom = atom;
-					else {
-						Property equiprop = (Property) equivalent;
-						if (!equiprop.isInverse()) {
-							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms());
-						} else {
-							newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
-						}
-					}
-				}
+				Function newatom = equivalencesMap.getNormal(atom);
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);

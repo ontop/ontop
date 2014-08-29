@@ -39,23 +39,7 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
-import org.semanticweb.ontop.model.BuiltinPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.GraphResultSet;
-import org.semanticweb.ontop.model.OBDAConnection;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.OBDAStatement;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.TupleResultSet;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
@@ -175,7 +159,6 @@ public class QuestStatement implements OBDAStatement {
 
 		this.sqlstatement = st;
 		this.validator = questinstance.vocabularyValidator;
-		this.unfoldingOBDAModel = questinstance.unfoldingOBDAModel;
 	}
 
 	private class QueryExecutionThread extends Thread {
@@ -312,7 +295,7 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 	}
- 
+
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
 	 * uri or var logic Returns the result set for the given query
@@ -439,7 +422,6 @@ public class QuestStatement implements OBDAStatement {
 		throw new OBDAException("Error, the result set was null");
 	}
 
-
 	/**
 	 * Translates a SPARQL query into Datalog dealing with equivalences and
 	 * verifying that the vocabulary of the query matches the one in the
@@ -447,7 +429,8 @@ public class QuestStatement implements OBDAStatement {
 	 * (i.e., renaming atoms that use predicates that have been replaced by a
 	 * canonical one.
 	 * 
-	 * @param query
+	 * @param pq
+     * @param signature
 	 * @return
 	 */
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
@@ -466,10 +449,12 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Translated query: \n{}", program);
 
 			//TODO: cant we use here QuestInstance???
+
+			
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
 
 			if (questInstance.isSemIdx()==true){
-				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates(questInstance.unfoldingProgram);
+				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates();
 			}
 
 			//Flattening !!
@@ -507,7 +492,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder;
+		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder.getDatalogUnfolder();
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,questInstance.multiplePredIdx);
@@ -527,6 +512,7 @@ public class QuestStatement implements OBDAStatement {
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
         unfolding = pushTypes(unfolding, unfolder);
+		
 		
 		log.debug("Pulling out equalities...");
 		for (CQIE rule: unfolding.getRules()){
@@ -737,8 +723,6 @@ public class QuestStatement implements OBDAStatement {
 	 * If the query is not already cached, it will be cached in this process.
 	 * 
 	 * @param strquery
-	 * @param signatureContainer
-	 * @param jenaQueryContainer
 	 * @return
 	 * @throws Exception
 	 */
@@ -865,7 +849,7 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * 
 	 * @param program
-	 * @param rules
+	 * @param rulesIndex
 	 */
 	private void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
 		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
@@ -1070,11 +1054,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Inserts a stream of ABox assertions into the repository.
 	 * 
 	 * @param data
-	 * @param recreateIndexes
-	 *            Indicates if indexes (if any) should be droped before
-	 *            inserting the tuples and recreated afterwards. Note, if no
-	 *            index existed before the insert no drop will be done and no
-	 *            new index will be created.
+
 	 * @throws SQLException
 	 */
 	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {

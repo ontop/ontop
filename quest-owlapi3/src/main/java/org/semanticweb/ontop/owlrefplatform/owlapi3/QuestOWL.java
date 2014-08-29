@@ -354,7 +354,7 @@ public class QuestOWL extends OWLReasonerBase {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
-							questInstance.getEquivalenceMap());
+							questInstance.getEquivalenceMap().getInternalMap());
 					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}

@@ -27,9 +27,9 @@ public class SemanticIndexCache {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private final TBoxReasonerImpl reasonerDag; 
+	private final TBoxReasoner reasonerDag; 
 	
-	public SemanticIndexCache(TBoxReasonerImpl reasonerDag) {
+	public SemanticIndexCache(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
 		
 		//create the indexes		

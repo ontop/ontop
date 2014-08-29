@@ -39,6 +39,8 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PositiveInclusi
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.utils.QueryUtils;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
+	private final static Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
 	public DLRPerfectReformulator() {
 
@@ -172,20 +174,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(Ontology ontology) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		assertions.clear();
+		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
 		this.assertions.addAll(ontology.getAssertions());
-
+		
+		// This reformulator is not able to handle ABox dependencies
 	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-		// This reformulator is not able to handle ABox dependecies
-
-	}
-
-	@Override
-	public void initialize() {
-	}
-
 }

@@ -1,8 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 /*
- * Copyright (C) 2009-2013, Free University of Bozen Bolzano This source code is
- * available under the terms of the Affero General Public License v3.
  * #%L
  * ontop-reformulation-core
  * %%
@@ -22,32 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.Stack;
-
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAQueryModifiers;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -56,9 +29,8 @@ import org.semanticweb.ontop.utils.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.security.InvalidParameterException;
+import java.util.*;
 
 /***
  * Implements several transformations on the rules of a datalog program that
@@ -160,7 +132,8 @@ public class DatalogNormalizer {
 	 * the join (the single data atom plus possibly extra boolean conditions and
 	 * adds them to the node that is the parent of the join).
 	 * 
-	 * @param query
+	 * @param body
+     * @param isJoin
 	 * @return
 	 */
 	public static void unfoldJoinTrees(List body, boolean isJoin) {
@@ -257,13 +230,14 @@ public class DatalogNormalizer {
 
 	/***
 	 * Enforces all equalities in the query, that is, for every equivalence
-	 * class (among variables) defined by a set of equialities, it chooses one
-	 * representive variable and replaces all other variables in the equivalence
-	 * class for with the representative varible. For example, if the query body
+	 * class (among variables) defined by a set of equalities, it chooses one
+	 * representative variable and replaces all other variables in the equivalence
+	 * class with the representative variable. For example, if the query body
 	 * is R(x,y,z), x=y, y=z. It will choose x and produce the following body
 	 * R(x,x,x).
 	 * <p>
-	 * Note the process will also remove from the body all the equalities that
+     * We ignore the equalities with disjunctions. For example R(x,y,z), x=y OR y=z
+	 * Note the process will also remove from the body all the equalities that are
 	 * here processed.
 	 * 
 	 * 
@@ -286,7 +260,8 @@ public class DatalogNormalizer {
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			Unifier.applyUnifier(atom, mgu,false);
+            //TODO: DOUBLE CHECK THIS FALSE
+			Unifier.applyUnifier(atom, mgu, false);
 
                 if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
                     Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
@@ -346,6 +321,7 @@ public class DatalogNormalizer {
 
             if (t instanceof Function) {
                 Function t2 = (Function) t;
+                //TODO: DOUBLE CHECK THIS FALSE
                 Unifier.applyUnifier(t2, mgu,false);
 
                 //in case of equalities do the substitution and remove the term
@@ -437,8 +413,7 @@ public class DatalogNormalizer {
 	 * JOINs, which generate wrong ON or WHERE conditions.
 	 * 
 	 * 
-	 * @param currentTerms
-	 * @param substitutions
+	 * @param query
 	 */
 	public static CQIE pullOutEqualities(CQIE query) {
 		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
@@ -891,7 +866,7 @@ public class DatalogNormalizer {
 	 * atom is unique.
 	 * 
 	 * @param atoms
-	 * @param branch
+	 * @param focusBranch
 	 * @return
 	 */
 	private static Set<Variable> getProblemVariablesForBranchN(List atoms, int focusBranch) {
@@ -1131,7 +1106,7 @@ public class DatalogNormalizer {
 	 * Takes an AND atom and breaks it into a list of individual condition
 	 * atoms.
 	 * 
-	 * @param atom
+	 * @param term
 	 * @return
 	 */
 	public static List<Term> getUnfolderTermList(Function term) {

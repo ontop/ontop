@@ -2766,49 +2766,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 
 	
-				
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	/**
 	 * This method returns the predicates that define two different templates
 	 */

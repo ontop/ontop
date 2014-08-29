@@ -20,47 +20,43 @@ package org.semanticweb.ontop.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import java.util.Set;
-
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  * Prune Ontology for redundant assertions based on dependencies
  */
 public class SigmaTBoxOptimizer {
 
-	private final TBoxReasonerImpl isa;
-	private final TBoxReasonerImpl isaChain;
-	private final TBoxReasonerImpl sigmaChain;
+	private final TBoxReasoner isa;
+	private final TBoxReasoner isaChain;
+	private final TBoxReasoner sigmaChain;
 
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 	private Ontology optimizedTBox = null;
 
-	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
+	public SigmaTBoxOptimizer(TBoxReasoner isa, Set<Predicate> vocabulary, TBoxReasoner sigma) {
 		
-		vocabulary = isat.getVocabulary();
+		this.vocabulary = vocabulary;
+		this.isa = isa;
 		
-		isa = new TBoxReasonerImpl(isat);
-		//DAGImpl isaChainDAG = isa.getChainDAG();
-		isaChain = TBoxReasonerImpl.getChainReasoner(isat);
+		//isa = new TBoxReasonerImpl(isat);
+		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
 		
 		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
-		//DAGImpl sigmaChainDAG =  reasonerSigma.getChainDAG();
-		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigmat);
+		sigmaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)sigma);
 	}
 
 	public Ontology getReducedOntology() {
@@ -216,33 +212,7 @@ public class SigmaTBoxOptimizer {
 		return scChildren.containsAll(tcChildren);
 	}
 	
-	
-	
-	
-	
-	public static Ontology getSigmaOntology(TBoxReasonerImpl reasoner) {
-
-		final Ontology sigma = fac.createOntology("sigma");
-
-		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-			
-			@Override
-			public void onInclusion(Property sub, Property sup) {
-				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
-				sigma.addEntities(ax.getReferencedEntities());
-				sigma.addAssertion(ax);						
-			}
-
-			@Override
-			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-				if (!(sup instanceof PropertySomeRestriction)) {
-					Axiom ax = fac.createSubClassAxiom(sub, sup);
-					sigma.addEntities(ax.getReferencedEntities());
-					sigma.addAssertion(ax);						
-				}
-			}
-		});
-		
-		return sigma;
+	public static Ontology getSigmaOntology(TBoxReasoner reasoner) {
+		return TBoxReasonerToOntology.getOntology(reasoner, true);
 	}
 }

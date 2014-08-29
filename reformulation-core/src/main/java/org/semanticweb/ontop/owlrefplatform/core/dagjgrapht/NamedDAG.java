@@ -44,7 +44,7 @@ public class NamedDAG  {
 	private final SimpleDirectedGraph <Property,DefaultEdge> propertyDAG;
 	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
 	
-	public NamedDAG(TBoxReasonerImpl reasoner) {			
+	public NamedDAG(TBoxReasoner reasoner) {			
 		propertyDAG = getNamedDAG(reasoner.getProperties());
 		classDAG = getNamedDAG(reasoner.getClasses());
 	}
