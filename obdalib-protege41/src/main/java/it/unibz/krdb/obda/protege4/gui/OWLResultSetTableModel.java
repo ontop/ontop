@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -43,17 +44,23 @@ public class OWLResultSetTableModel implements TableModel {
 	private boolean isHideUri;
 	private boolean isFetchAll;
 
+	// True while table is fetching sql results
+	private boolean isFetching = false;
+	// Set to true to signal the fetching thread to stop
+	private boolean stopFetching = false;
+
+	// The thread where the rows are fetched
+	Thread rowFetcher;
+
 	// Tabular data for exporting result
 	private Vector<String[]> tabularData;
 	// Vector data for presenting result to table GUI
 	private Vector<String[]> resultsTable;
-	
+
 	private Vector<TableModelListener> listener;
 
 	private PrefixManager prefixman;
 
-	private final int INITIAL_FETCH_SIZE = 100;
-	private final int NEXT_FETCH_SIZE = 100;
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -68,63 +75,94 @@ public class OWLResultSetTableModel implements TableModel {
 		this.isHideUri = hideUri;
 		this.isFetchAll = fetchAll;
 		this.fetchSizeLimit = fetchSizeLimit;
+		this.isFetching = true;
+		this.stopFetching = false;
 
 		numcols = results.getColumnCount();
 		numrows = 0;
-		
+
 		resultsTable = new Vector<String[]>();
 		listener = new Vector<TableModelListener>();
-		
-		int fetchSize = fetchSizeLimit;
-		if (needFetchMore()) {
-			fetchSize = INITIAL_FETCH_SIZE;
-		}
-		fetchRows(fetchSize);
+
+		fetchRowsAsync();
 	}
-	
-	private void fetchRows(int size) throws OWLException {
+
+	private void fetchRowsAsync() throws OWLException{
+		rowFetcher = new Thread(){
+			public void run() {
+				try {
+					fetchRows(fetchSizeLimit);
+				} catch (OWLException e){
+					if(!stopFetching){
+						JOptionPane.showMessageDialog(
+								null,
+								"Error when fetching results. Aborting. " + e.toString());
+					}
+				} catch (InterruptedException e){
+					JOptionPane.showMessageDialog(
+							null,
+							"Error when fetching results. Aborting. " + e.toString());
+				}
+
+			}
+		};
+		rowFetcher.start();
+	}
+
+	/**
+	 * Returns whether the table is still being populated by SQL fetched from the result object. 
+	 * Called from the QueryInterfacePanel to decide whether to continue updating the result count
+	 * @return
+	 */
+	public boolean isFetching(){
+		return this.isFetching;
+	}
+
+	private void fetchRows(int size) throws OWLException, InterruptedException {
 		if (results == null) {
 			return;
 		}
-		if (size != 0) {
-			int counter = 0;
-			while (results.nextRow()) {
-				String[] crow = new String[numcols];
-				for (int j = 0; j < numcols; j++) {
-					OWLPropertyAssertionObject constant = results
-							.getOWLPropertyAssertionObject(j + 1);
-					if (constant != null) {
-						crow[j] = constant.toString();
-					}
-					else {
-						crow[j] = "";
-					}
-				}
-				resultsTable.add(crow);
-				counter++;
-				updateRowCount();
-				
-				// Determine if the loop should stop now
-				if (counter == size) {
+
+		for (int rows_fetched = 0; results.nextRow() && !stopFetching && (isFetchingAll() || rows_fetched < size);rows_fetched++) {
+			String[] crow = new String[numcols];
+			for (int j = 0; j < numcols; j++) {
+				if(stopFetching)
 					break;
+				OWLPropertyAssertionObject constant = results
+						.getOWLPropertyAssertionObject(j + 1);
+				if (constant != null) {
+					crow[j] = constant.toString();
+				}
+				else {
+					crow[j] = "";
 				}
 			}
+			if(!stopFetching){
+				resultsTable.add(crow);
+				this.updateRowCount();
+				this.fireModelChangedEvent();
+			}
 		}
+		isFetching = false;
 	}
 
 	private void updateRowCount() {
 		numrows++;
+
 	}
 
 	/**
 	 * Fetch all the tuples returned by the result set.
 	 */
-	public List<String[]> getTabularData() throws OWLException {
+	public List<String[]> getTabularData() throws OWLException, InterruptedException {
 		if (tabularData == null) {
 			tabularData = new Vector<String[]>();
 			String[] columnName = results.getSignature().toArray(new String[numcols]);		
 			// Append the column names
 			tabularData.add(columnName);
+			while(this.isFetching){
+				Thread.sleep(100);
+			}
 			// Append first the already fetched tuples
 			tabularData.addAll(resultsTable); 
 			// Append the rest
@@ -151,10 +189,12 @@ public class OWLResultSetTableModel implements TableModel {
 	 * Statement object used to create it.
 	 */
 	public void close() {
+		stopFetching = true;
 		try {
 			results.close();
 		} catch (OWLException e) {
-			// NO-OP
+			// TODO: Handle this in a reasonable manner
+			System.out.println(e);
 		}
 	}
 
@@ -203,9 +243,6 @@ public class OWLResultSetTableModel implements TableModel {
 	 * numbers start at 0.
 	 */
 	public Object getValueAt(int row, int column) {
-		if (needFetchMore()) {
-			checkNextRowAvailability(row);
-		}
 		String value = resultsTable.get(row)[column];
 		if (value == null) {
 			return "";
@@ -217,39 +254,14 @@ public class OWLResultSetTableModel implements TableModel {
 		}
 	}
 
-	/**
-	 * Determine if the table need to fetch more tuples.
-	 */
-	public boolean needFetchMore() {
-		return isFetchingAll() || fetchSizeLimit > INITIAL_FETCH_SIZE;
-	}
-	
+
+
 	private boolean isFetchingAll() {
 		return isFetchAll;
 	}
-	
-	private void checkNextRowAvailability(int currentRowNumber) {
-		try {
-			int nextRowNumber = currentRowNumber + getRowCount() / 4;
-			if (nextRowNumber >= getRowCount()) {
-				if (isFetchingAll()) {
-					fetchRows(NEXT_FETCH_SIZE);
-				} else {
-					int remainder = fetchSizeLimit - getRowCount();
-					int c = remainder / NEXT_FETCH_SIZE;
-					if (c != 0) {
-						fetchRows(NEXT_FETCH_SIZE);
-					} else {
-						fetchRows(remainder);
-					}
-				}				
-				fireModelChangedEvent();
-			}
-		} catch (OWLException e) {
-			// NO-OP
-		}
-	}
-	
+
+
+
 	// Our table isn't editable
 	public boolean isCellEditable(int row, int column) {
 		return false;
@@ -268,9 +280,10 @@ public class OWLResultSetTableModel implements TableModel {
 		listener.remove(l);
 	}
 
+
 	private void fireModelChangedEvent() {
 		Iterator<TableModelListener> it = listener.iterator();
-		while (it.hasNext()) {
+		while (!stopFetching && it.hasNext()) {
 			it.next().tableChanged(new TableModelEvent(this));
 		}
 	}

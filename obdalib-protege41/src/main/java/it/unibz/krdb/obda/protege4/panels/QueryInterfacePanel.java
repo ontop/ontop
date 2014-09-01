@@ -185,6 +185,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
             }
         });
         pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
+        chkShowAll.doClick();
 
         chkShowShortURI.setText("Short IRI");
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -333,10 +334,17 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 				public void run() {
 					OBDADataQueryAction action = QueryInterfacePanel.this.getExecuteUCQAction();
 					action.run(queryTextPane.getText());
-
 					execTime = action.getExecutionTime();
-					int rows = action.getNumberOfRows();
-					updateStatus(rows);
+					do {
+						int rows = action.getNumberOfRows();
+						updateStatus(rows);	
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							break;
+						}
+					} while (action.isRunning());
+					updateStatus(action.getNumberOfRows());
 				};
 			});
 			queryRunnerThread.start();
