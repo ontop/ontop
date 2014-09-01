@@ -332,9 +332,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor = new OBDAProgessMonitor("Writing output files...");
 					monitor.start();
 					CountDownLatch latch = new CountDownLatch(1);
+					List<String[]> data = tableModel.getTabularData();
+					if(monitor.isCanceled())
+						return;
 					File output = new File(fileLocation);
 					BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, tableModel.getTabularData(), writer);
+					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, data, writer);
 					monitor.addProgressListener(action);
 					action.run();
 					latch.await();
@@ -811,7 +814,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread;
 		private List<String[]> rawData;
 		private Writer writer;
-
+		
 		private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
 			this.latch = latch;
 			this.rawData = rawData;

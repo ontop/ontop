@@ -92,16 +92,15 @@ public class OWLResultSetTableModel implements TableModel {
 			public void run() {
 				try {
 					fetchRows(fetchSizeLimit);
-				} catch (OWLException e){
+				} catch (Exception e){
 					if(!stopFetching){
 						JOptionPane.showMessageDialog(
 								null,
 								"Error when fetching results. Aborting. " + e.toString());
-					}
-				} catch (InterruptedException e){
-					JOptionPane.showMessageDialog(
-							null,
-							"Error when fetching results. Aborting. " + e.toString());
+					} 
+					e.printStackTrace();
+				} finally {
+					isFetching = false;
 				}
 
 			}
@@ -161,12 +160,14 @@ public class OWLResultSetTableModel implements TableModel {
 			// Append the column names
 			tabularData.add(columnName);
 			while(this.isFetching){
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
+			if(stopFetching)
+				return null;
 			// Append first the already fetched tuples
 			tabularData.addAll(resultsTable); 
 			// Append the rest
-			while (results.nextRow()) {
+			while (!stopFetching && results.nextRow()) {
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
 					OWLPropertyAssertionObject constant = results
@@ -190,6 +191,8 @@ public class OWLResultSetTableModel implements TableModel {
 	 */
 	public void close() {
 		stopFetching = true;
+		if(rowFetcher != null)
+			rowFetcher.interrupt();
 		try {
 			results.close();
 		} catch (OWLException e) {
@@ -197,7 +200,9 @@ public class OWLResultSetTableModel implements TableModel {
 			System.out.println(e);
 		}
 	}
+	
 
+	
 	/** Automatically close when we're garbage collected */
 	@Override
 	protected void finalize() {
@@ -282,9 +287,11 @@ public class OWLResultSetTableModel implements TableModel {
 
 
 	private void fireModelChangedEvent() {
-		Iterator<TableModelListener> it = listener.iterator();
-		while (!stopFetching && it.hasNext()) {
-			it.next().tableChanged(new TableModelEvent(this));
+		for(int i = 0; !stopFetching && i < listener.size(); i++) {
+			TableModelListener tl = listener.get(i);
+			synchronized (tl){
+				tl.tableChanged(new TableModelEvent(this));
+			}
 		}
 	}
 }
