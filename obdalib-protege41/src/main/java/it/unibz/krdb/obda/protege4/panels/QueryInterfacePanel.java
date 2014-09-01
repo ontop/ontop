@@ -185,7 +185,8 @@ TableModelListener, OBDAPreferenceChangeListener {
 			}
 		});
 		pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
-
+		chkShowAll.doClick();
+		
 		chkShowShortURI.setText("Short IRI");
 		chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
 		chkShowShortURI.setMaximumSize(new java.awt.Dimension(95, 23));
