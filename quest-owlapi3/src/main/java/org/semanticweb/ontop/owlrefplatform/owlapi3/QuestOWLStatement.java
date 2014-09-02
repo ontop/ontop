@@ -94,7 +94,7 @@ public class QuestOWLStatement {
 
 	private QuestStatement st;
 	private QuestOWLConnection conn;
-
+	
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
@@ -104,6 +104,10 @@ public class QuestOWLStatement {
 		return st;
 	}
 
+	public boolean isCanceled(){
+		return st.isCanceled();
+	}
+	
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
@@ -324,7 +328,7 @@ public class QuestOWLStatement {
 
 	public void getMoreResults() throws OWLException {
 		try {
-			st.cancel();
+			st.getMoreResults();
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

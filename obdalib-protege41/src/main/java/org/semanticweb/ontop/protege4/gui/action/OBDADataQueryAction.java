@@ -27,4 +27,6 @@ public interface OBDADataQueryAction{
 	public long getExecutionTime();
 	
 	public int getNumberOfRows();
+
+	public boolean isRunning();
 }

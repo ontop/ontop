@@ -214,6 +214,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		public void cancel() throws SQLException {
+			canceled = true;
 			if (!executingSQL) {
 				this.stop();
 			} else {
@@ -950,6 +951,7 @@ public class QuestStatement implements OBDAStatement {
 	
 	@Override
 	public void cancel() throws OBDAException {
+		canceled = true;
 		try {
 			QuestStatement.this.executionthread.cancel();
 		} catch (Exception e) {
@@ -957,6 +959,14 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
+	/**
+	 * Called to check whether the statement was cancelled on purpose
+	 * @return
+	 */
+	public boolean isCanceled(){
+		return canceled;
+	}
+	
 	@Override
 	public int executeUpdate(String query) throws OBDAException {
 		// TODO Auto-generated method stub

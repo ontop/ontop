@@ -174,6 +174,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor.stop();
 				}
 			}
+			@Override
+			public boolean isRunning() {
+				return false;
+			}
 		});
 		
 		queryEditorPanel.setExecuteUCQAction(new OBDADataQueryAction() {
@@ -185,6 +189,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				try {
 					monitor = new OBDAProgessMonitor("Executing queries...");
 					monitor.start();
+					removeResultTable();
 					CountDownLatch latch = new CountDownLatch(1);
 					SPARQLQueryUtility internalQuery = new SPARQLQueryUtility(query);
 					ExecuteQueryAction action = new ExecuteQueryAction(latch, internalQuery);
@@ -195,10 +200,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor.stop();
 					if (internalQuery.isSelectQuery() || internalQuery.isAskQuery()) {
 						QuestOWLResultSet result = action.getResult();
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						createTableModelFromResultSet(result);
-						rows = showTupleResultInTablePanel();
+						if(!action.isCanceled()){
+							long end = System.currentTimeMillis();
+							time = end - startTime;
+							createTableModelFromResultSet(result);
+							showTupleResultInTablePanel();
+						}
 					} else if (internalQuery.isConstructQuery()) {
 						List<OWLAxiom> result = action.getGraphResult();
 						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
@@ -228,7 +235,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 			@Override
 			public int getNumberOfRows() {
-				return rows;
+				OWLResultSetTableModel tm = getTableModel();
+				if (tm == null)
+					return 0;
+				return getTableModel().getRowCount();
+			}
+			public boolean isRunning(){
+				return getTableModel().isFetching();
 			}
 		});
 		
@@ -265,6 +278,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public int getNumberOfRows() {
 				return -1;
 			}
+			@Override
+			public boolean isRunning() {
+				return false;
+			}
 		});
 		
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction() {
@@ -300,6 +317,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public int getNumberOfRows() {
 				return -1;
 			}
+			@Override
+			public boolean isRunning() {
+				return false;
+			}
 		});
 		
 		resultTablePanel.setOBDASaveQueryToFileAction(new OBDASaveQueryResultToFileAction() {
@@ -310,9 +331,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor = new OBDAProgessMonitor("Writing output files...");
 					monitor.start();
 					CountDownLatch latch = new CountDownLatch(1);
+					List<String[]> data = tableModel.getTabularData();
+					if(monitor.isCanceled())
+						return;
 					File output = new File(fileLocation);
 					BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, tableModel.getTabularData(), writer);
+					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, data, writer);
 					monitor.addProgressListener(action);
 					action.run();
 					latch.await();
@@ -357,6 +381,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	private void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
+		if (result == null)
+			throw new NullPointerException("An error occured. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
 		if (result != null) {
 			tableModel = new OWLResultSetTableModel(result, prefixManager, 
 					queryEditorPanel.isShortURISelect(),
@@ -365,7 +391,20 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			tableModel.addTableModelListener(queryEditorPanel);
 		}
 	}
-	
+
+	/**
+	 * removes the result table. 
+	 * Could be called at data query execution, or at cancelling
+	 * Not necessary when replacing with a new result, just to remove old 
+	 * results that are outdated 
+	 */
+	private void removeResultTable(){
+		OWLResultSetTableModel tm = getTableModel();
+		if (tm != null){
+			tm.close();
+		}
+	}
+
 	private OWLResultSetTableModel getTableModel() {
 		return tableModel;
 	}
@@ -595,6 +634,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			this.query = query;
 		}
 
+
+
 		/**
 		 * Returns results from executing SELECT query.
 		 */
@@ -610,7 +651,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 
 		public void run() {
+
 			thread = new Thread() {
+
 				@Override
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
@@ -628,7 +671,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 						} catch (Exception e) {
 							latch.countDown();
-							if(!e.getMessage().contains("Statement cancelled due to client request")){
+							if(!statement.isCanceled()){
 								log.error(e.getMessage(), e);
 								DialogUtils.showQuickErrorDialog(null, e);
 							}
@@ -666,6 +709,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			} catch (OBDAException e) {
 				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
 			}
+		}
+
+		public boolean isCanceled(){
+			return statement != null && statement.isCanceled();
 		}
 
 		public void closeConnection() throws OWLException {
@@ -766,7 +813,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private Thread thread;
 		private List<String[]> rawData;
 		private Writer writer;
-
+		
 		private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
 			this.latch = latch;
 			this.rawData = rawData;
