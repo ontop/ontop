@@ -42,6 +42,7 @@ public class SesameTupleQuery implements TupleQuery {
 	private String queryString;
 	private String baseURI;
 	private QuestDBConnection conn;
+	private int queryTimeout;
 	
 	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
 			throws MalformedQueryException {
@@ -49,6 +50,7 @@ public class SesameTupleQuery implements TupleQuery {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
 			this.conn = conn;
+			this.queryTimeout = 0;
 //		} else {
 //			throw new MalformedQueryException("Tuple query expected!");
 //		}
@@ -60,6 +62,8 @@ public class SesameTupleQuery implements TupleQuery {
 		QuestDBStatement stm = null;
 		try {
 			stm = conn.createStatement();
+			if(this.queryTimeout > 0)
+				stm.setQueryTimeout(this.queryTimeout);
 			res = (TupleResultSet) stm.execute(queryString);
 			List<String> signature = res.getSignature();
 			return new SesameTupleQueryResult(res, signature);
@@ -81,12 +85,15 @@ public class SesameTupleQuery implements TupleQuery {
 		handler.endQueryResult();
 	}
 
+	@Override
 	public int getMaxQueryTime() {
-		return -1;
+		return this.queryTimeout;
 	}
 
+	@Override
 	public void setMaxQueryTime(int maxQueryTime) {
-		// NO-OP
+		assert(maxQueryTime >= 0);
+		this.queryTimeout = maxQueryTime;
 	}
 
 	public void clearBindings() {
