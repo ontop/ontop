@@ -223,7 +223,7 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public void setQueryTimeout(int seconds) throws Exception {
+	public void setQueryTimeout(int seconds) throws OBDAException {
 		st.setQueryTimeout(seconds);
 	}
 
