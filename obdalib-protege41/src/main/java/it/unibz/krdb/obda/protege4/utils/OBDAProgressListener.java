@@ -39,5 +39,6 @@ public interface OBDAProgressListener {
 	 * 
 	 * @return
 	 */
-	boolean isErrorShown();
+	public boolean isErrorShown();
+	
 }
