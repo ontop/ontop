@@ -201,7 +201,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					monitor.stop();
 					if (internalQuery.isSelectQuery() || internalQuery.isAskQuery()) {
 						QuestOWLResultSet result = action.getResult();
-						if(!action.isCancelled() && !(result == null && action.isAborted())){
+						if(!action.isCancelled() && !(result == null && action.isErrorShown())){
 							long end = System.currentTimeMillis();
 							time = end - startTime;
 							createTableModelFromResultSet(result);
@@ -470,12 +470,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private String query = null;
 		private QuestOWLConnection oldconn;
 		private boolean isCancelled;
-		private boolean isAborted;
+		private boolean errorShown;
 
 		private UnfoldQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
 			this.query = query;
-			this.isAborted = false;
+			this.errorShown = false;
 			this.isCancelled = false;
 		}
 
@@ -498,7 +498,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						} catch (Exception e) {
 							latch.countDown();
 							if(!isCancelled()){
-								isAborted = true;
+								errorShown = true;
 								log.error(e.getMessage(), e);
 								DialogUtils.showQuickErrorDialog(null, e, "Error while unfolding query.");
 							}
@@ -553,8 +553,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 
 		@Override
-		public boolean isAborted() {
-			return this.isAborted;
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 
@@ -567,7 +567,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private String query = null;
 		private QuestOWLConnection oldconn;
 		private boolean isCancelled;
-		private boolean isAborted;
+		private boolean errorShown;
 
 		private ExpandQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -592,7 +592,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						} catch (Exception e) {
 							latch.countDown();
 							if(!isCancelled()){
-								isAborted = true;
+								errorShown = true;
 								DialogUtils.showQuickErrorDialog(null, e, "Error computing query rewriting");
 							}
 						}
@@ -645,14 +645,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 
 		@Override
-		public boolean isAborted() {
-			return this.isAborted;
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 
 	private class ExecuteQueryAction implements OBDAProgressListener {
 
-		private boolean isAborted;
+		private boolean errorShown;
 		private QuestOWLStatement statement = null;
 		private QuestOWLConnection oldconn = null;
 		private CountDownLatch latch = null;
@@ -665,7 +665,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private ExecuteQueryAction(CountDownLatch latch, SPARQLQueryUtility query) {
 			this.latch = latch;
 			this.query = query;
-			this.isAborted = false;
+			this.errorShown = false;
 			this.isCanceled = true;
 		}
 
@@ -707,7 +707,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						} catch (Exception e) {
 							latch.countDown();
 							if(!isCancelled()){
-								isAborted = true;
+								errorShown = true;
 								log.error(e.getMessage(), e);
 								DialogUtils.showQuickErrorDialog(null, e);
 							}
@@ -754,8 +754,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 		
 		@Override
-		public boolean isAborted(){
-			return this.isAborted;
+		public boolean isErrorShown(){
+			return this.errorShown;
 		}
 
 		public void closeConnection() throws OWLException {
@@ -778,12 +778,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private String query = null;
 		private QuestOWLConnection oldconn;
 		private boolean isCancelled;
-		private boolean isAborted;
+		private boolean errorShown;
 
 		private CountAllTuplesAction(CountDownLatch latch, String query) {
 			this.latch = latch;
 			this.query = query;
-			this.isAborted = false;
+			this.errorShown = false;
 			this.isCancelled = false;
 		}
 
@@ -805,7 +805,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						} catch (Exception e) {
 							latch.countDown();
 							if(!isCancelled()){
-								isAborted = true;
+								errorShown = true;
 								log.debug(e.getMessage());
 								JOptionPane.showMessageDialog(
 										null, 
@@ -862,8 +862,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 
 		@Override
-		public boolean isAborted() {
-			return this.isAborted;
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 
@@ -874,13 +874,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		private List<String[]> rawData;
 		private Writer writer;
 		private boolean isCancelled;
-		private boolean isAborted;
+		private boolean errorShown;
 		
 		private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
 			this.latch = latch;
 			this.rawData = rawData;
 			this.writer = writer;
-			this.isAborted = false;
+			this.errorShown = false;
 			this.isCancelled = false;
 		}
 
@@ -893,7 +893,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						latch.countDown();
 					} catch (Exception e) {
 						if(!isCancelled()){
-							isAborted = true;
+							errorShown = true;
 							latch.countDown();
 							log.error(e.getMessage());
 							DialogUtils.showQuickErrorDialog(null, e, "Error while writing output file.");
@@ -924,8 +924,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 
 		@Override
-		public boolean isAborted() {
-			return this.isAborted;
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 
