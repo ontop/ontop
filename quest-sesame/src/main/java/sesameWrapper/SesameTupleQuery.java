@@ -60,11 +60,21 @@ public class SesameTupleQuery implements TupleQuery {
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
 		TupleResultSet res = null;
 		QuestDBStatement stm = null;
+		long start = System.currentTimeMillis();
 		try {
 			stm = conn.createStatement();
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
-			res = (TupleResultSet) stm.execute(queryString);
+			try {
+				res = (TupleResultSet) stm.execute(queryString);
+			} catch (OBDAException e) {
+				long end = System.currentTimeMillis();
+				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){
+					throw new QueryEvaluationException("SesameTupleQuery timed out. More than " + this.queryTimeout + " seconds passed", e);
+				} else 
+					throw e;
+			}
+			
 			List<String> signature = res.getSignature();
 			return new SesameTupleQueryResult(res, signature);
 
