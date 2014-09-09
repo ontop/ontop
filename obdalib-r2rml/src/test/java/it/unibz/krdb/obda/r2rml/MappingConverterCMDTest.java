@@ -16,7 +16,7 @@ public class MappingConverterCMDTest {
 	
 	@Test
 	public void testFromR2rml() {
-		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a_conversion.ttl"});
+		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a.pretty.ttl"});
 	}
 
 }

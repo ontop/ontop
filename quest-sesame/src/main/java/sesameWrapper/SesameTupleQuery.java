@@ -48,6 +48,7 @@ public class SesameTupleQuery implements TupleQuery {
 	private String queryString;
 	private String baseURI;
 	private QuestDBConnection conn;
+	private int queryTimeout;
 	
 	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
 			throws MalformedQueryException {
@@ -55,6 +56,7 @@ public class SesameTupleQuery implements TupleQuery {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
 			this.conn = conn;
+			this.queryTimeout = 0;
 //		} else {
 //			throw new MalformedQueryException("Tuple query expected!");
 //		}
@@ -64,9 +66,20 @@ public class SesameTupleQuery implements TupleQuery {
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
 		TupleResultSet res = null;
 		QuestDBStatement stm = null;
+		long start = System.currentTimeMillis();
 		try {
 			stm = conn.createStatement();
-			res = (TupleResultSet) stm.execute(queryString);
+			if(this.queryTimeout > 0)
+				stm.setQueryTimeout(this.queryTimeout);
+			try {
+				res = (TupleResultSet) stm.execute(queryString);
+			} catch (OBDAException e) {
+				long end = System.currentTimeMillis();
+				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){
+					throw new QueryEvaluationException("SesameTupleQuery timed out. More than " + this.queryTimeout + " seconds passed", e);
+				} else 
+					throw e;
+			}
 			
 			List<String> signature = res.getSignature();
 			Set<String> bindingNames = new HashSet<String>(signature);
@@ -122,12 +135,15 @@ public class SesameTupleQuery implements TupleQuery {
 		handler.endQueryResult();
 	}
 
+	@Override
 	public int getMaxQueryTime() {
-		return -1;
+		return this.queryTimeout;
 	}
 
+	@Override
 	public void setMaxQueryTime(int maxQueryTime) {
-		// NO-OP
+		assert(maxQueryTime >= 0);
+		this.queryTimeout = maxQueryTime;
 	}
 
 	public void clearBindings() {

@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
-
+import  org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
@@ -44,7 +44,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	// The string shown to the user in the dialog during execution of action
 	String msg;
 
-	OWLEditorKit owlEditorKit;
 
 	// The result object
 	T result;
@@ -54,7 +53,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 
 	private boolean errorShown = false;
 	private QuestOWLStatement statement = null;
-	private QuestOWLConnection oldconn = null;
 	private CountDownLatch latch = null;
 	private Thread thread = null;
 	private String queryString = null;
@@ -68,9 +66,8 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
 
 
-	public OBDADataQueryAction(String msg, OWLEditorKit owlEditorKit){
+	public OBDADataQueryAction(String msg){
 		this.msg = msg;
-		this.owlEditorKit = owlEditorKit;
 	}
 
 	/**
@@ -80,6 +77,11 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	 */
 	public abstract T executeQuery(QuestOWLStatement st, String queryString) throws OWLException;
 
+	/**
+	 * Must be implemented by the subclass for getting the current reasoner
+	 * 
+	 */
+	public abstract OWLEditorKit getEditorKit(); 
 
 	/**
 	 * This function displays or handles the result
@@ -90,12 +92,16 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 
 	public void run(String query) {
 		this.queryString = query;
+		this.actionStarted = true;
+		this.isCanceled = false;
+		this.errorShown = false;
 		OBDAProgessMonitor monitor = null;
 		try {
 			monitor = new OBDAProgessMonitor(this.msg);
 			monitor.start();
 			latch = new CountDownLatch(1);
-			OWLReasoner r = this.owlEditorKit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
+			OWLEditorKit kit = this.getEditorKit();
+			OWLReasoner r = kit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
 			if (r instanceof QuestOWL) {
 				this.reasoner = (QuestOWL) r;
 				monitor.addProgressListener(this);
@@ -138,6 +144,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 
 			@Override
 			public void run() {
+
 				try {
 					statement = reasoner.getStatement();
 					if(statement == null)
@@ -159,28 +166,50 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 		thread.start();
 	}
 
+	/**
+	 * This thread handles the cancelling of a request. 
+	 * To speed up the process for the user, this thread is given the old connection, statement and latch,
+	 * while these are replaced in the containing class
+	 * @author Dag Hovland
+	 *
+	 */
+	private class Canceller extends Thread{
+		private CountDownLatch old_latch;
+		private QuestOWLConnection old_conn;
+		private QuestOWLStatement old_stmt;
+
+		Canceller() throws OBDAException{
+			super();
+			this.old_latch = latch;
+			this.old_stmt = statement;
+			this.old_conn = reasoner.replaceConnection();
+		}
+
+
+		public void run(){
+			try {
+				this.old_stmt.cancel();
+				this.old_stmt.close();
+				this.old_conn.close();
+				this.old_latch.countDown();
+			} catch (Exception e) {
+				this.old_latch.countDown();
+				DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
+			}
+		}
+	};
+	
 	public void actionCanceled() {
 		this.isCanceled = true;
 		if(!actionStarted)
-			throw new Error("Query execution has not been started, and cannot be cancelled. The statement object is null");
+			throw new Error("Query execution has not been started, and cannot be cancelled.");
 		try {
-			oldconn = reasoner.replaceConnection();
-			Thread canceller = new Thread() {
-				public void run(){
-					try {
-						statement.cancel();
-						closeConnection();
-						oldconn.close();
-						latch.countDown();
-					} catch (Exception e) {
-						latch.countDown();
-						DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
-					}
-				}
-			};
+			Canceller canceller = new Canceller();
 			canceller.start();
 		} catch (OBDAException e) {
 			DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
+		} finally {
+			this.actionStarted = false;
 		}
 	}
 
