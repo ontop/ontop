@@ -23,4 +23,22 @@ package org.semanticweb.ontop.protege4.utils;
 public interface OBDAProgressListener {
 
 	public void actionCanceled() throws Exception;
+
+	/**
+	 * Set to true if the user has requested the operation to be cancelled, e.g.
+	 * by clicking "Cancel"
+	 * 
+	 * @return
+	 */
+	public boolean isCancelled();
+
+	/**
+	 * Set to true if the user has been shown an error message of the exception leading to 
+	 * unsuccessful result. This is used to avoid multiple error messages, and to avoid passing on
+	 * null result values
+	 * 
+	 * @return
+	 */
+	public boolean isErrorShown();
+	
 }
