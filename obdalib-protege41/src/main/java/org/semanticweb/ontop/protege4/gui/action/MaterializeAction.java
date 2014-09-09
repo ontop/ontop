@@ -46,6 +46,7 @@ public class MaterializeAction implements OBDAProgressListener {
 	private Iterator<OWLIndividualAxiom> iterator = null;
 	private Container cont = null;
 	private boolean bCancel = false;
+	private boolean errorShown = false;
 
 	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer materialize, Container cont) {
 		this.currentOntology = currentOntology;
@@ -67,6 +68,7 @@ public class MaterializeAction implements OBDAProgressListener {
 			catch (Exception e) {
 				log.error(e.getMessage(), e);
 				JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+				this.errorShown = true;
 				return;
 			}
 		}
@@ -99,6 +101,16 @@ public class MaterializeAction implements OBDAProgressListener {
 			latch.countDown();
 			thread.interrupt();
 		}
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return this.bCancel;
+	}
+
+	@Override
+	public boolean isErrorShown() {
+		return this.errorShown;
 	}
 
 }
