@@ -30,13 +30,14 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.net.URISyntaxException;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -200,6 +201,12 @@ public class QuestResultset implements TupleResultSet {
 
 					} else if (type == COL_TYPE.DATETIME) {
 						Timestamp value = set.getTimestamp(column);
+						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+					} else if (type == COL_TYPE.DATE) {
+						Date value = set.getDate(column);
+						result = fac.getConstantLiteral(value.toString(), type);
+					} else if (type == COL_TYPE.TIME) {
+						Time value = set.getTime(column);						
 						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 					} else {
 						result = fac.getConstantLiteral(realValue, type);
