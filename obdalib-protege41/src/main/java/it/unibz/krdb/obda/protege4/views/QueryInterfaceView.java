@@ -58,6 +58,7 @@ import javax.swing.JSplitPane;
 import javax.swing.table.DefaultTableModel;
 
 import org.protege.editor.core.ProtegeManager;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
@@ -146,93 +147,49 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		setupListeners();
 
 		// Setting up actions for all the buttons of this view.
-		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction() {
+		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Integer>("Counting tuples...") {
 			@Override
-			public long getExecutionTime() {
-				return -1;
+			public OWLEditorKit getEditorKit(){
+				return getOWLEditorKit();
 			}
 			@Override
 			public int getNumberOfRows() {
 				return -1;
 			}
 			@Override
-			public void run(String query) {
-				OBDAProgessMonitor monitor = null;
-				try {
-					monitor = new OBDAProgessMonitor("Counting tuples...");
-					CountDownLatch latch = new CountDownLatch(1);
-					CountAllTuplesAction action = new CountAllTuplesAction(latch, query);
-					monitor.addProgressListener(action);
-					monitor.start();
-					action.run();
-					latch.await();
-					monitor.stop();
-					int result = action.getResult();
-					updateTablePanelStatus(result);
-				} catch (Exception e) {
-					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-				} finally {
-					monitor.stop();
-				}
+			public void handleResult(Integer result){
+				updateTablePanelStatus(result);	
 			}
+			
+
+			@Override
+			public Integer executeQuery(QuestOWLStatement st, String query) throws OWLException {
+				return st.getTupleCount(query);
+			}
+			
 			@Override
 			public boolean isRunning() {
 				return false;
 			}
 		});
 
-		queryEditorPanel.setExecuteUCQAction(new OBDADataQueryAction() {
-			private long time = 0;
-			private int rows = 0;
+		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<QuestOWLResultSet>("Executing queries...") {
+			
 			@Override
-			public void run(String query) {
-				OBDAProgessMonitor monitor = null;
-				try {
-					monitor = new OBDAProgessMonitor("Executing queries...");
-					monitor.start();
-					removeResultTable();
-					CountDownLatch latch = new CountDownLatch(1);
-					SPARQLQueryUtility internalQuery = new SPARQLQueryUtility(query);
-					ExecuteQueryAction action = new ExecuteQueryAction(latch, internalQuery);
-					monitor.addProgressListener(action);
-					long startTime = System.currentTimeMillis();
-					action.run();
-					latch.await();
-					monitor.stop();
-					if (internalQuery.isSelectQuery() || internalQuery.isAskQuery()) {
-						QuestOWLResultSet result = action.getResult();
-						if(!action.isCanceled()){
-							long end = System.currentTimeMillis();
-							time = end - startTime;
-							createTableModelFromResultSet(result);
-							showTupleResultInTablePanel();
-						}
-					} else if (internalQuery.isConstructQuery()) {
-						List<OWLAxiom> result = action.getGraphResult();
-						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
-						populateResultUsingVisitor(result, owlVisitor);
-						showGraphResultInTextPanel(owlVisitor);
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						rows = result.size();
-					} else if (internalQuery.isDescribeQuery()) {
-						List<OWLAxiom> result = action.getGraphResult();
-						OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
-						populateResultUsingVisitor(result, owlVisitor);
-						showGraphResultInTextPanel(owlVisitor);
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						rows = result.size();
-					}
-				} catch (Exception e) {
-					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-				} finally {
-					monitor.stop();
-				}
+			public OWLEditorKit getEditorKit(){
+				return getOWLEditorKit();
 			}
+			
 			@Override
-			public long getExecutionTime() {
-				return time;
+			public void handleResult(QuestOWLResultSet result) throws OWLException{
+				createTableModelFromResultSet(result);
+				showTupleResultInTablePanel();
+			}
+			
+			@Override
+			public void run(String query){
+				removeResultTable();
+				super.run(query);
 			}
 			@Override
 			public int getNumberOfRows() {
@@ -242,38 +199,71 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				return getTableModel().getRowCount();
 			}
 			public boolean isRunning(){
-				return getTableModel().isFetching();
+				OWLResultSetTableModel tm = getTableModel();
+				if (tm == null)
+					return false;
+				return tm.isFetching();
 			}
+			@Override
+			public QuestOWLResultSet executeQuery(QuestOWLStatement st,
+					String queryString) throws OWLException {
+				return st.executeTuple(queryString);
+			}
+	
 		});
 
-		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction() {
-			private long time = 0;
+		queryEditorPanel.setExecuteGraphQueryAction(new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...") {
+			
 			@Override
-			public void run(String query) {
-				OBDAProgessMonitor monitor = null;
-				try {
-					monitor = new OBDAProgessMonitor("Rewriting query...");
-					CountDownLatch latch = new CountDownLatch(1);
-					ExpandQueryAction action = new ExpandQueryAction(latch, query);
-					monitor.addProgressListener(action);
-					monitor.start();
-					long startTime = System.currentTimeMillis();
-					action.run();
-					latch.await();
-					monitor.stop();
-					String result = action.getResult();
-					long end = System.currentTimeMillis();
-					time = end - startTime;
-					showActionResultInTextPanel("UCQ Expansion Result", result);
-				} catch (InterruptedException e) {
-					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-				}finally {
-					monitor.stop();
-				}
+			public OWLEditorKit getEditorKit(){
+				return getOWLEditorKit();
 			}
+			
 			@Override
-			public long getExecutionTime() {
-				return time;
+			public List<OWLAxiom> executeQuery(QuestOWLStatement st, String queryString) throws OWLException {
+				return st.executeGraph(queryString); 
+			}
+			
+			@Override
+			public void handleResult(List<OWLAxiom> result){
+				OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
+				populateResultUsingVisitor(result, owlVisitor);
+				showGraphResultInTextPanel(owlVisitor);	
+			}
+			
+			@Override
+			public int getNumberOfRows() {
+				OWLResultSetTableModel tm = getTableModel();
+				if (tm == null)
+					return 0;
+				return getTableModel().getRowCount();
+			}
+			public boolean isRunning(){
+				OWLResultSetTableModel tm = getTableModel();
+				if (tm == null)
+					return false;
+				return tm.isFetching();
+			}
+			
+		
+		});
+
+		
+		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...") {
+
+			@Override
+			public String executeQuery(QuestOWLStatement st, String query) throws OWLException {
+				return st.getRewriting(query);
+			}
+
+			@Override
+			public OWLEditorKit getEditorKit(){
+				return getOWLEditorKit();
+			}
+			
+			@Override
+			public void handleResult(String result){
+				showActionResultInTextPanel("UCQ Expansion Result", result);
 			}
 			@Override
 			public int getNumberOfRows() {
@@ -285,34 +275,20 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
-		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction() {
-			private long time = 0;
+		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...") {
 			@Override
-			public void run(String query) {
-				OBDAProgessMonitor monitor = null;
-				try {
-					monitor = new OBDAProgessMonitor("Unfolding queries...");
-					CountDownLatch latch = new CountDownLatch(1);
-					UnfoldQueryAction action = new UnfoldQueryAction(latch, query);
-					monitor.addProgressListener(action);
-					monitor.start();
-					long startTime = System.currentTimeMillis();
-					action.run();
-					latch.await();
-					monitor.stop();
-					String result = action.getResult();
-					long end = System.currentTimeMillis();
-					time = end - startTime;
-					showActionResultInTextPanel("UCQ Unfolding Result", result);
-				} catch (InterruptedException e) {
-					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-				}finally {
-					monitor.stop();
-				}
+			public String executeQuery(QuestOWLStatement st, String query) throws OWLException{
+				return st.getUnfolding(query);
 			}
+
 			@Override
-			public long getExecutionTime() {
-				return time;
+			public OWLEditorKit getEditorKit(){
+				return getOWLEditorKit();
+			}
+
+			@Override
+			public void handleResult(String result){
+				showActionResultInTextPanel("UCQ Unfolding Result", result);
 			}
 			@Override
 			public int getNumberOfRows() {
@@ -349,6 +325,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		});
 		log.debug("Query Manager view initialized");
 	}
+
+
 
 	private void showActionResultInTextPanel(String title, String result) {
 
@@ -462,363 +440,22 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 	}
 
-	private class UnfoldQueryAction implements OBDAProgressListener {
-		private QuestOWLStatement st = null;
-		private CountDownLatch latch = null;
-		private Thread thread = null;
-		private String result = null;
-		private String query = null;
-		private QuestOWLConnection oldconn;
-
-		private UnfoldQueryAction(CountDownLatch latch, String query) {
-			this.latch = latch;
-			this.query = query;
-		}
-
-		public String getResult() {
-			return result;
-		}
-
-		public void run() {
-			thread = new Thread() {
-
-				@Override
-				public void run() {
-					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof QuestOWL) {
-						try {
-							QuestOWL dqr = (QuestOWL) reasoner;
-							st = (QuestOWLStatement)dqr.getStatement();
-							result = st.getUnfolding(query);
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							if(!e.getMessage().contains("Statement cancelled due to client request")){
-								log.error(e.getMessage(), e);
-								DialogUtils.showQuickErrorDialog(null, e, "Error while unfolding query.");
-							}
-						}
-					} else {
-						latch.countDown();
-						JOptionPane.showMessageDialog(
-								null,
-								QUEST_START_MESSAGE);
-					}
-				}
-			};
-			thread.start();
-		}
-
-		@Override
-		public void actionCanceled() {
-			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-			try {
-				oldconn = reasoner.replaceConnection();
-				Thread canceller = new Thread() {
-					public void run(){
-						try {
-							st.cancel();
-							closeConnection();
-							oldconn.close();
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							log.error("Error while canceling unfolding action.", e);
-							DialogUtils.showQuickErrorDialog(null, e, "Error while canceling unfolding action.");
-						}
-					}
-				};
-				canceller.start();
-			} catch (OBDAException e) {
-				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
-			}
-		}
-
-		public void closeConnection() throws OWLException {
-			if (st != null) {
-				st.close();
-			}
-
-		}
-	}
-
-	private class ExpandQueryAction implements OBDAProgressListener {
-
-		private QuestOWLStatement statement = null;
-		private CountDownLatch latch = null;
-		private Thread thread = null;
-		private String result = null;
-		private String query = null;
-		private QuestOWLConnection oldconn;
-
-		private ExpandQueryAction(CountDownLatch latch, String query) {
-			this.latch = latch;
-			this.query = query;
-		}
-
-		public String getResult() {
-			return result;
-		}
-
-		public void run() {
-			thread = new Thread() {
-				@Override
-				public void run() {
-					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof QuestOWL) {
-						try {
-							QuestOWL dqr = (QuestOWL) reasoner;
-							statement = (QuestOWLStatement)dqr.getStatement();
-							result = statement.getRewriting(query);
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							if(!e.getMessage().contains("Statement cancelled due to client request")){
-								DialogUtils.showQuickErrorDialog(null, e, "Error computing query rewriting");
-							}
-						}
-					} else {
-						latch.countDown();
-						JOptionPane.showMessageDialog(
-								null,
-								QUEST_START_MESSAGE);
-					}
-				}
-			};
-			thread.start();
-		}
-
-		@Override
-		public void actionCanceled() {
-			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-			try {
-				oldconn = reasoner.replaceConnection();
-				Thread canceller = new Thread() {
-					public void run(){
-						try {
-							statement.cancel();
-							closeConnection();
-							oldconn.close();
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							log.error("Error while counting.", e);
-							DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
-						}
-					}
-				};
-				canceller.start();
-			} catch (OBDAException e) {
-				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
-			}
-		}
-
-		public void closeConnection() throws OWLException {
-			if (statement != null) {
-				statement.close();
-			}			
-		}
-	}
-
-	private class ExecuteQueryAction implements OBDAProgressListener {
-
-		private QuestOWLStatement statement = null;
-		private QuestOWLConnection oldconn = null;
-		private CountDownLatch latch = null;
-		private Thread thread = null;
-		private QuestOWLResultSet result = null;
-		private List<OWLAxiom> graphResult = null;
-		private SPARQLQueryUtility query = null;
-
-		private ExecuteQueryAction(CountDownLatch latch, SPARQLQueryUtility query) {
-			this.latch = latch;
-			this.query = query;
-		}
-
-
-
-		/**
-		 * Returns results from executing SELECT query.
-		 */
-		public QuestOWLResultSet getResult() {
-			return result;
-		}
-
-		/**
-		 * Returns results from executing CONSTRUCT and DESCRIBE query.
-		 */
-		public List<OWLAxiom> getGraphResult() {
-			return graphResult;
-		}
-
-		public void run() {
-
-			thread = new Thread() {
-
-				@Override
-				public void run() {
-					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof QuestOWL) {
-						try {
-							QuestOWL dqr = (QuestOWL) reasoner;
-							statement = dqr.getStatement();
-							String queryString = query.getQueryString();
-							if (query.isSelectQuery() || query.isAskQuery()) {
-								result = statement.executeTuple(queryString);
-							} else  {
-								graphResult = statement.executeGraph(queryString);
-							} 
-							latch.countDown();
-
-						} catch (Exception e) {
-							latch.countDown();
-							if(!statement.isCanceled()){
-								log.error(e.getMessage(), e);
-								DialogUtils.showQuickErrorDialog(null, e);
-							}
-						}
-					} else {
-						latch.countDown();
-						JOptionPane.showMessageDialog(
-								null,
-								QUEST_START_MESSAGE);
-					}
-				}
-			};
-			thread.start();
-		}
-
-		@Override
-		public void actionCanceled() {
-			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-			try {
-				oldconn = reasoner.replaceConnection();
-				Thread canceller = new Thread() {
-					public void run(){
-						try {
-							statement.cancel();
-							closeConnection();
-							oldconn.close();
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
-						}
-					}
-				};
-				canceller.start();
-			} catch (OBDAException e) {
-				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
-			}
-		}
-
-		public boolean isCanceled(){
-			return statement != null && statement.isCanceled();
-		}
-
-		public void closeConnection() throws OWLException {
-			if (statement != null) {
-				statement.close();
-			}
-			//if (connection != null) {
-			//	connection.close();
-			//}
-		}
-	}
-
-	private class CountAllTuplesAction implements OBDAProgressListener {
-
-		private QuestOWLStatement statement = null;
-		private CountDownLatch latch = null;
-		private Thread thread = null;
-		private int result = -1;
-		private String query = null;
-		private QuestOWLConnection oldconn;
-
-		private CountAllTuplesAction(CountDownLatch latch, String query) {
-			this.latch = latch;
-			this.query = query;
-		}
-
-		public int getResult() {
-			return result;
-		}
-
-		public void run() {
-			thread = new Thread() {
-				@Override
-				public void run() {
-					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof QuestOWL) {
-						try {
-							QuestOWL dqr = (QuestOWL) reasoner;
-							statement = dqr.getStatement();
-							result = statement.getTupleCount(query);
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							if(!e.getMessage().contains("Statement cancelled due to client request")){
-								log.debug(e.getMessage());
-								JOptionPane.showMessageDialog(
-										null, 
-										"Error while counting tuples.\n " + e.getMessage()
-										+ "\nPlease refer to the log for more information.");
-							}
-						}
-					} else {
-						latch.countDown();
-						JOptionPane.showMessageDialog(
-								null,
-								QUEST_START_MESSAGE);
-					}
-				}
-			};
-			thread.start();
-		}
-
-		@Override
-		public void actionCanceled() {
-			QuestOWL reasoner = (QuestOWL) getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-			try {
-				oldconn = reasoner.replaceConnection();
-				Thread canceller = new Thread() {
-					public void run(){
-						try {
-							statement.cancel();
-							closeConnection();
-							oldconn.close();
-							latch.countDown();
-						} catch (Exception e) {
-							latch.countDown();
-							log.error("Error while counting.", e);
-							DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
-						}
-					}
-				};
-				canceller.start();
-			} catch (OBDAException e) {
-				DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
-			}
-		}
-
-		public void closeConnection() throws OWLException {
-			if (statement != null) {
-				statement.close();
-			}
-		}
-	}
-
+	
 	private class SaveQueryToFileAction implements OBDAProgressListener {
 
 		private CountDownLatch latch;
 		private Thread thread;
 		private List<String[]> rawData;
 		private Writer writer;
+		private boolean isCancelled;
+		private boolean errorShown;
 		
 		private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
 			this.latch = latch;
 			this.rawData = rawData;
 			this.writer = writer;
+			this.errorShown = false;
+			this.isCancelled = false;
 		}
 
 		public void run() {
@@ -829,9 +466,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						OWLResultSetWriter.writeCSV(rawData, writer);
 						latch.countDown();
 					} catch (Exception e) {
-						latch.countDown();
-						log.error(e.getMessage());
-						DialogUtils.showQuickErrorDialog(null, e, "Error while writing output file.");
+						if(!isCancelled()){
+							errorShown = true;
+							latch.countDown();
+							log.error(e.getMessage());
+							DialogUtils.showQuickErrorDialog(null, e, "Error while writing output file.");
+						}
 					}
 				}
 			};
@@ -840,6 +480,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		@Override
 		public void actionCanceled() throws Exception {
+			this.isCancelled = true;
 			try {
 				writer.flush();
 				writer.close();
@@ -849,6 +490,16 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				latch.countDown();
 				DialogUtils.showQuickErrorDialog(null, e, "Error during cancel action.");
 			}
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return this.isCancelled;
+		}
+
+		@Override
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 
