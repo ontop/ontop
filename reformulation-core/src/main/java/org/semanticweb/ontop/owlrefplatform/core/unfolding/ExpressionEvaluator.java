@@ -829,8 +829,20 @@ public class ExpressionEvaluator {
 	public Term evalIsNullNotNull(Function term, boolean isnull) {
 		Term innerTerm = term.getTerms().get(0);
 		if (innerTerm instanceof Function) {
+			// in case we have a IS_NOT_NULL(datatype(X)), we evaluate IS_NOT_NULL(X)
+			//
+			// For instance, for  IS_NOT_NULL(http://www.w3.org/2000/01/rdf-schema#Literal(t5_1)),
+			// we evaluate IS_NOT_NULL(t5_1)
+			
 			Function f = (Function) innerTerm;
-			if (f.isDataTypeFunction()) return innerTerm;
+			if (f.isDataTypeFunction()) {
+				Function isNotNullInnerInnerTerm = fac.getFunction(OBDAVocabulary.IS_NOT_NULL, 
+						((Function) innerTerm).getTerms());
+				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull);
+				
+				//return innerTerm;
+			}
+				
 		}
 		Term result = eval(innerTerm);
 		if (result == OBDAVocabulary.NULL) {
