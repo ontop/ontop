@@ -2,5 +2,5 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 
 SELECT ?x
 WHERE {
-   ?x a :Row; :hasTimeTZ "18:12:10-08" .
+   ?x a :Row; :hasTimeTZ "18:12:10-08:00"^^xsd:time .
 }

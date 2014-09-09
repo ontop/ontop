@@ -1,4 +1,4 @@
-// $ANTLR 3.5 /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2014-08-21 14:02:58
+// $ANTLR 3.5.2 /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2014-09-09 11:13:08
 
 package it.unibz.krdb.obda.parser;
 
@@ -1551,6 +1551,12 @@ public class TurtleOBDAParser extends Parser {
 					          functionSymbol = dfac.getDataTypePredicateDateTime();
 					      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 					          functionSymbol = dfac.getDataTypePredicateBoolean();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateDate();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateTime();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateYear();
 					      } else {
 						  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					      }
@@ -1575,7 +1581,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "language"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:503:1: language returns [Term value] : ( languageTag | variable );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:509:1: language returns [Term value] : ( languageTag | variable );
 	public final Term language() throws RecognitionException {
 		Term value = null;
 
@@ -1584,7 +1590,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable27 =null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:504:3: ( languageTag | variable )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:510:3: ( languageTag | variable )
 			int alt14=2;
 			int LA14_0 = input.LA(1);
 			if ( (LA14_0==VARNAME) ) {
@@ -1602,7 +1608,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt14) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:504:5: languageTag
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:510:5: languageTag
 					{
 					pushFollow(FOLLOW_languageTag_in_language616);
 					languageTag26=languageTag();
@@ -1614,7 +1620,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:507:5: variable
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:513:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_language624);
 					variable27=variable();
@@ -1642,7 +1648,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "terms"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:512:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:518:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
 	public final Vector<Term> terms() throws RecognitionException {
 		Vector<Term> value = null;
 
@@ -1654,15 +1660,15 @@ public class TurtleOBDAParser extends Parser {
 		  value = new Vector<Term>();
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:516:3: (t1= term ( COMMA t2= term )* )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:516:5: t1= term ( COMMA t2= term )*
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:522:3: (t1= term ( COMMA t2= term )* )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:522:5: t1= term ( COMMA t2= term )*
 			{
 			pushFollow(FOLLOW_term_in_terms650);
 			t1=term();
 			state._fsp--;
 
 			 value.add(t1); 
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:516:40: ( COMMA t2= term )*
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:522:40: ( COMMA t2= term )*
 			loop15:
 			while (true) {
 				int alt15=2;
@@ -1673,7 +1679,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt15) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:516:41: COMMA t2= term
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:522:41: COMMA t2= term
 					{
 					match(input,COMMA,FOLLOW_COMMA_in_terms655); 
 					pushFollow(FOLLOW_term_in_terms659);
@@ -1706,7 +1712,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "term"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:519:1: term returns [Term value] : ( function | variable | literal );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:525:1: term returns [Term value] : ( function | variable | literal );
 	public final Term term() throws RecognitionException {
 		Term value = null;
 
@@ -1716,7 +1722,7 @@ public class TurtleOBDAParser extends Parser {
 		Term literal30 =null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:520:3: ( function | variable | literal )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:526:3: ( function | variable | literal )
 			int alt16=3;
 			switch ( input.LA(1) ) {
 			case PREFIXED_NAME:
@@ -1753,7 +1759,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt16) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:520:5: function
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:526:5: function
 					{
 					pushFollow(FOLLOW_function_in_term680);
 					function28=function();
@@ -1763,7 +1769,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:521:5: variable
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:527:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_term688);
 					variable29=variable();
@@ -1773,7 +1779,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:522:5: literal
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:528:5: literal
 					{
 					pushFollow(FOLLOW_literal_in_term696);
 					literal30=literal();
@@ -1799,7 +1805,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "literal"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:525:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:531:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
 	public final Term literal() throws RecognitionException {
 		Term value = null;
 
@@ -1811,7 +1817,7 @@ public class TurtleOBDAParser extends Parser {
 		ValueConstant booleanLiteral35 =null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:526:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:532:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
 			int alt18=4;
 			switch ( input.LA(1) ) {
 			case STRING_WITH_QUOTE_DOUBLE:
@@ -1864,13 +1870,13 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt18) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:526:5: stringLiteral ( AT language )?
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:532:5: stringLiteral ( AT language )?
 					{
 					pushFollow(FOLLOW_stringLiteral_in_literal715);
 					stringLiteral31=stringLiteral();
 					state._fsp--;
 
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:526:19: ( AT language )?
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:532:19: ( AT language )?
 					int alt17=2;
 					int LA17_0 = input.LA(1);
 					if ( (LA17_0==AT) ) {
@@ -1878,7 +1884,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					switch (alt17) {
 						case 1 :
-							// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:526:20: AT language
+							// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:532:20: AT language
 							{
 							match(input,AT,FOLLOW_AT_in_literal718); 
 							pushFollow(FOLLOW_language_in_literal720);
@@ -1902,7 +1908,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:535:5: dataTypeString
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:541:5: dataTypeString
 					{
 					pushFollow(FOLLOW_dataTypeString_in_literal730);
 					dataTypeString33=dataTypeString();
@@ -1912,7 +1918,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:536:5: numericLiteral
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:542:5: numericLiteral
 					{
 					pushFollow(FOLLOW_numericLiteral_in_literal738);
 					numericLiteral34=numericLiteral();
@@ -1922,7 +1928,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 4 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:537:5: booleanLiteral
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:543:5: booleanLiteral
 					{
 					pushFollow(FOLLOW_booleanLiteral_in_literal746);
 					booleanLiteral35=booleanLiteral();
@@ -1948,7 +1954,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "stringLiteral"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:540:1: stringLiteral returns [ValueConstant value] : STRING_WITH_QUOTE_DOUBLE ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:546:1: stringLiteral returns [ValueConstant value] : STRING_WITH_QUOTE_DOUBLE ;
 	public final ValueConstant stringLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -1956,8 +1962,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_QUOTE_DOUBLE36=null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:541:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:541:5: STRING_WITH_QUOTE_DOUBLE
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:547:3: ( STRING_WITH_QUOTE_DOUBLE )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:547:5: STRING_WITH_QUOTE_DOUBLE
 			{
 			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral765); 
 
@@ -1981,7 +1987,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "dataTypeString"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:547:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:553:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
 	public final Term dataTypeString() throws RecognitionException {
 		Term value = null;
 
@@ -1990,8 +1996,8 @@ public class TurtleOBDAParser extends Parser {
 		Term resource38 =null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:548:3: ( stringLiteral REFERENCE resource )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:548:6: stringLiteral REFERENCE resource
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:554:3: ( stringLiteral REFERENCE resource )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:554:6: stringLiteral REFERENCE resource
 			{
 			pushFollow(FOLLOW_stringLiteral_in_dataTypeString785);
 			stringLiteral37=stringLiteral();
@@ -2023,6 +2029,12 @@ public class TurtleOBDAParser extends Parser {
 			    	functionSymbol = dfac.getDataTypePredicateDateTime();
 			      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 			    	functionSymbol = dfac.getDataTypePredicateBoolean();
+			      } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
+			    	functionSymbol = dfac.getDataTypePredicateDate();
+			      } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
+			    	functionSymbol = dfac.getDataTypePredicateTime();
+			      } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+			    	functionSymbol = dfac.getDataTypePredicateYear();
 			      } else {
 			        throw new RuntimeException("Unsupported datatype: " + functionName);
 			      }
@@ -2045,7 +2057,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericLiteral"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:576:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:588:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
 	public final ValueConstant numericLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2055,7 +2067,7 @@ public class TurtleOBDAParser extends Parser {
 		ValueConstant numericNegative41 =null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:577:3: ( numericUnsigned | numericPositive | numericNegative )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:589:3: ( numericUnsigned | numericPositive | numericNegative )
 			int alt19=3;
 			switch ( input.LA(1) ) {
 			case DECIMAL:
@@ -2086,7 +2098,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt19) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:577:5: numericUnsigned
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:589:5: numericUnsigned
 					{
 					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral808);
 					numericUnsigned39=numericUnsigned();
@@ -2096,7 +2108,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:578:5: numericPositive
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:590:5: numericPositive
 					{
 					pushFollow(FOLLOW_numericPositive_in_numericLiteral816);
 					numericPositive40=numericPositive();
@@ -2106,7 +2118,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:579:5: numericNegative
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:591:5: numericNegative
 					{
 					pushFollow(FOLLOW_numericNegative_in_numericLiteral824);
 					numericNegative41=numericNegative();
@@ -2132,11 +2144,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "nodeID"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:582:1: nodeID : BLANK_PREFIX name ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:594:1: nodeID : BLANK_PREFIX name ;
 	public final void nodeID() throws RecognitionException {
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:583:3: ( BLANK_PREFIX name )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:583:5: BLANK_PREFIX name
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:595:3: ( BLANK_PREFIX name )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:595:5: BLANK_PREFIX name
 			{
 			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID839); 
 			pushFollow(FOLLOW_name_in_nodeID841);
@@ -2159,11 +2171,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "relativeURI"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:586:1: relativeURI : STRING_URI ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:598:1: relativeURI : STRING_URI ;
 	public final void relativeURI() throws RecognitionException {
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:587:3: ( STRING_URI )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:587:5: STRING_URI
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:599:3: ( STRING_URI )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:599:5: STRING_URI
 			{
 			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI855); 
 			}
@@ -2185,14 +2197,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "namespace"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:590:1: namespace : NAMESPACE ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:602:1: namespace : NAMESPACE ;
 	public final TurtleOBDAParser.namespace_return namespace() throws RecognitionException {
 		TurtleOBDAParser.namespace_return retval = new TurtleOBDAParser.namespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:591:3: ( NAMESPACE )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:591:5: NAMESPACE
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:603:3: ( NAMESPACE )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:603:5: NAMESPACE
 			{
 			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace868); 
 			}
@@ -2217,14 +2229,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "defaultNamespace"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:594:1: defaultNamespace : COLON ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:606:1: defaultNamespace : COLON ;
 	public final TurtleOBDAParser.defaultNamespace_return defaultNamespace() throws RecognitionException {
 		TurtleOBDAParser.defaultNamespace_return retval = new TurtleOBDAParser.defaultNamespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:595:3: ( COLON )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:595:5: COLON
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:607:3: ( COLON )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:607:5: COLON
 			{
 			match(input,COLON,FOLLOW_COLON_in_defaultNamespace883); 
 			}
@@ -2246,11 +2258,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "name"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:598:1: name : VARNAME ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:610:1: name : VARNAME ;
 	public final void name() throws RecognitionException {
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:599:3: ( VARNAME )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:599:5: VARNAME
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:611:3: ( VARNAME )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:611:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_name896); 
 			}
@@ -2272,14 +2284,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "languageTag"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:602:1: languageTag : VARNAME ;
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:614:1: languageTag : VARNAME ;
 	public final TurtleOBDAParser.languageTag_return languageTag() throws RecognitionException {
 		TurtleOBDAParser.languageTag_return retval = new TurtleOBDAParser.languageTag_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:603:3: ( VARNAME )
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:603:5: VARNAME
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:615:3: ( VARNAME )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:615:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag909); 
 			}
@@ -2301,7 +2313,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "booleanLiteral"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:606:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:618:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
 	public final ValueConstant booleanLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2310,7 +2322,7 @@ public class TurtleOBDAParser extends Parser {
 		Token FALSE43=null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:607:3: ( TRUE | FALSE )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:619:3: ( TRUE | FALSE )
 			int alt20=2;
 			int LA20_0 = input.LA(1);
 			if ( (LA20_0==TRUE) ) {
@@ -2328,14 +2340,14 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt20) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:607:5: TRUE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:619:5: TRUE
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral926); 
 					 value = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:608:5: FALSE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:620:5: FALSE
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral935); 
 					 value = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
@@ -2358,7 +2370,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericUnsigned"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:611:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:623:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
 	public final ValueConstant numericUnsigned() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2368,7 +2380,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL46=null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:612:3: ( INTEGER | DOUBLE | DECIMAL )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:624:3: ( INTEGER | DOUBLE | DECIMAL )
 			int alt21=3;
 			switch ( input.LA(1) ) {
 			case INTEGER:
@@ -2393,21 +2405,21 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt21) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:612:5: INTEGER
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:624:5: INTEGER
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned954); 
 					 value = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:613:5: DOUBLE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:625:5: DOUBLE
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned962); 
 					 value = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:614:5: DECIMAL
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:626:5: DECIMAL
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned971); 
 					 value = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
@@ -2430,7 +2442,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericPositive"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:617:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:629:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
 	public final ValueConstant numericPositive() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2440,7 +2452,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL_POSITIVE49=null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:618:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:630:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
 			int alt22=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_POSITIVE:
@@ -2465,21 +2477,21 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt22) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:618:5: INTEGER_POSITIVE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:630:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive990); 
 					 value = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:619:5: DOUBLE_POSITIVE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:631:5: DOUBLE_POSITIVE
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive998); 
 					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:620:5: DECIMAL_POSITIVE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:632:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1007); 
 					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
@@ -2502,7 +2514,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericNegative"
-	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:623:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
+	// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:635:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
 	public final ValueConstant numericNegative() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2512,7 +2524,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL_NEGATIVE52=null;
 
 		try {
-			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:624:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
+			// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:636:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
 			int alt23=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_NEGATIVE:
@@ -2537,21 +2549,21 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt23) {
 				case 1 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:624:5: INTEGER_NEGATIVE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:636:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1026); 
 					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:625:5: DOUBLE_NEGATIVE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:637:5: DOUBLE_NEGATIVE
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1034); 
 					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:626:5: DECIMAL_NEGATIVE
+					// /Users/mariano/Code/obda_eclipse_workspace_release/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:638:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1043); 
 					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 
