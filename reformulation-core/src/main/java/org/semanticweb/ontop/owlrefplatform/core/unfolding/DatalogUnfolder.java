@@ -2222,7 +2222,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 				}
 				
-				//get all the indexes we need
+				//depGraph is modified later in the code, so we need to update ruleIndex and ruleIndexByBody
 				ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
@@ -2237,41 +2237,49 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                 boolean containsAggregates = detectAggregatesHead(rulesDefiningPred);
 
 				
-				//cloning to avoid clashes
+				//cloning to avoid clashes --- Elena: which clashes?
 				fatherCollection.clear();
 				predCollection.clear();
-				cloneRules(predCollection, rulesDefiningPred);
 				cloneRules(fatherCollection, rulesUsingPred);
+				cloneRules(predCollection, rulesDefiningPred);
 
+					
+				//currentFatherRule = fatherRule
 				//We unfold every rule of the father atom that contains pred
 				// TODO: unfold????
 				for (CQIE fatherRule : fatherCollection) {
 					int fails = 0;
 
 					
-					
+					//Elena: may be a check if fatherIdx is not -1? 
 					int fatherIdx=workingList.indexOf(fatherRule);
-					List<CQIE> result = new LinkedList<CQIE>();
+
+					//the rules that will replace fatherRule in the workingList
+					List<CQIE> newFatherRules = new LinkedList<CQIE>();
 					
 					//the terms where buPredicate should appear
 					List<Function> currentTerms = fatherRule.getBody();
 
-					int listsize = rulesDefiningPred.size();
 					
+					//Elena: if listsize>1, then in the second iteration we will remove an element with fatherIdx, which is not fatherRule
+					//at the moment I added a check if fatherRule is in workingList
+					//
 					//Here I iterate over the rules defining pred
+					int listsize = predCollection.size();
 					for (int i=0; i<listsize; i++){  
 					//(CQIE sourceRule:workingRules){
 						
 						CQIE sourceRule = predCollection.get(i);
-						
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
 						//Later when we compute the new source rule, we will not eliminate the types from the terms in this list
 						List<Term> termsToExclude = new LinkedList<Term>();
 						
-						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude,
+						newFatherRules = computeRuleExtendedTypes(currentTerms, sourceRule, fatherRule.clone(), termsToExclude,
                                 containsAggregates);
 
 
-						if (result == null && fails==rulesDefiningPred.size()) {
+						//Elena: predCollection.size() is the same as listsize, why not using listsize here?
+						if (newFatherRules == null && fails==predCollection.size()) {
 							//This means The rule cannot be unified, and therefore can be deleted
 							
 							//TODO: CHECK WHAT HAPPENS AFTER THIS!!!!!! !   !
@@ -2288,12 +2296,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 
                             /**
-                             * Here we remove the types, if possible, of the source query.
-                             * Note that we do no remove of terms that contains an aggregation.
+                             * Here we remove the types, if possible, from the source query, and "add" them to the fatherRule.
+                             * Note that we do not remove terms that contain an aggregation.
                              *
                              * This un-typing is for instance important for URI templates: we
                              * want these templates to be used in the top-level query, not in sub-queries.
-                             * Indeed, joining URIs is more expensive than joining ids because the former are not indexed.
+                             * Indeed, joining URIs is more expensive than joining, e.g., IDs because the former are not indexed.
                              * Said differently, URIs are not sargable while IDs are.
                              */
                             CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude);
@@ -2303,12 +2311,13 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                             newSourceRuleList.add(newsourceRule);
                             int srcIdx = workingList.indexOf(sourceRule);
                             Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-                            updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
+                            updateIndexesinTypes(workingList, srcIdx, sourceRule, newSourceRuleList, srchead);
 							
 							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
+							updateIndexesinTypes(workingList, fatherIdx, fatherRule, newFatherRules, fathead);
 							
+							//currentFatherRule=newRule
 							continue;
 						}
 					}
@@ -2446,9 +2455,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	
 	/**
 	 * Given the terms in the father rule, it will iterate over the term trying to find an atom fo unify with the head of the source rule.
+	 * 
 	 * @param currentTerms
 	 * @param sourceRule
 	 * @param fatherRule
+	 * @param termsToExclude
+	 * @param containsAggregates
 	 * @return
 	 */
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
@@ -2564,7 +2576,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param sourceRule 
 	 * @param targetAtom 
 	 * @param fatherRule
-	 * @return
+	 * @param exclude
+     * @return
 	 */
 	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule, List<Term> exclude) {
 
@@ -2652,7 +2665,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						exclude.add(value);
 					}
 				} else {
-					log.debug("value: "+value.toString());
+					//Elena: should we allow value to be null? 
+					log.debug("value of "+key.toString() + " is: "+value.toString());
 				}
 
 			}
@@ -2718,27 +2732,32 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 	}
 
+	
 	/**
-	 * Since we have new rules, we need to update all the index as usual.
+	 * Update the rules in workingList, hence, the dependency graph index as well.
 	 * 
-	 * @param workingList
-	 * @param fatherIdx
-	 * @param depGraph
-	 * @param result
-	 * @param preFather
-	 * @param fatherRule
+	 * @param workingList contains the current rules of the program
+	 * @param fatherIdx is the index of fatherRule in workingList
+	 * @param fatherRule is the rule to be updated
+	 * @param newFatherRules is a list with the new rules to substitute fatherRule
+	 * @param fatherHead is the name of the head predicate in fatherRule
 	 */
-	private  void updateIndexesinTypes(List<CQIE> workingList, int fatherIdx, List<CQIE> result, 
-			Predicate preFather, CQIE fatherRule)
+	private  void updateIndexesinTypes(List<CQIE> workingList, int fatherIdx, CQIE fatherRule, 
+			List<CQIE> newFatherRules, Predicate fatherHead)
 	{
-		workingList.remove(fatherIdx);
-
-		for (CQIE newquery : result) {
+		//Elena: a workaround to avoid "removing" fatherRule two times (second time we would remove something else) 
+		int fatIdx=workingList.indexOf(fatherRule);
+		if(fatIdx != -1){
+			if(fatIdx==fatherIdx)
+				workingList.remove(fatherIdx);
+		}
+		
+		for (CQIE newquery : newFatherRules) {
 			if (!workingList.contains(newquery)) {
 
 				//Here we update the index head atom -> rule
-				depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
-				depGraph.addRuleToRuleIndex(preFather, newquery);
+				depGraph.removeRuleFromRuleIndex(fatherHead, fatherRule);
+				depGraph.addRuleToRuleIndex(fatherHead, newquery);
 
 
 				//Delete the rules from workingList that have been touched
