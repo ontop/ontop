@@ -1,5 +1,21 @@
 package org.semanticweb.ontop.sesame;
 
+import java.util.List;
+
+import org.openrdf.model.Value;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.Dataset;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.TupleQueryResultHandler;
+import org.openrdf.query.TupleQueryResultHandlerException;
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
+import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
+
 /*
  * #%L
  * ontop-quest-sesame
@@ -20,40 +36,19 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import org.openrdf.model.Value;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.TupleQueryResultHandler;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.impl.MapBindingSet;
-import org.openrdf.query.impl.TupleQueryResultImpl;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.TupleResultSet;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 
 public class SesameTupleQuery implements TupleQuery {
 
 	private String queryString;
-	private String baseURI;
 	private QuestDBConnection conn;
+	private int queryTimeout;
 	
 	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
 			throws MalformedQueryException {
 //		if (queryString.toLowerCase().contains("select")) {
 			this.queryString = queryString;
-			this.baseURI = baseURI;
 			this.conn = conn;
+			this.queryTimeout = 0;
 //		} else {
 //			throw new MalformedQueryException("Tuple query expected!");
 //		}
@@ -63,52 +58,28 @@ public class SesameTupleQuery implements TupleQuery {
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
 		TupleResultSet res = null;
 		QuestDBStatement stm = null;
+		long start = System.currentTimeMillis();
 		try {
 			stm = conn.createStatement();
-			res = (TupleResultSet) stm.execute(queryString);
-			
-			List<String> signature = res.getSignature();
-			Set<String> bindingNames = new HashSet<String>(signature);
-			List<BindingSet> results = new LinkedList<BindingSet>();
-			while (res.nextRow()) {
-				MapBindingSet set = new MapBindingSet(signature.size() * 2);
-				for (String name : signature) {
-					Binding binding = createBinding(name, res, bindingNames);
-					if (binding != null) {
-						set.addBinding(binding);
-					}
-				}
-				results.add(set);
+			if(this.queryTimeout > 0)
+				stm.setQueryTimeout(this.queryTimeout);
+			try {
+				res = (TupleResultSet) stm.execute(queryString);
+			} catch (OBDAException e) {
+				long end = System.currentTimeMillis();
+				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){
+					throw new QueryEvaluationException("SesameTupleQuery timed out. More than " + this.queryTimeout + " seconds passed", e);
+				} else 
+					throw e;
 			}
 			
-			// TODO this code is suboptimal, we are collecting ALL results from the resultset in memory!!! 
-			// TODO we must make an iterable interace over the resultset that allows to advance through the resultset
-			return new TupleQueryResultImpl(signature, results);
+			List<String> signature = res.getSignature();
+			return new SesameTupleQueryResult(res, signature);
 
 		} catch (OBDAException e) {
 			e.printStackTrace();
 			throw new QueryEvaluationException(e);
 		}
-		finally{
-			try {
-				if (res != null)
-				res.close();
-			} catch (OBDAException e) {
-				e.printStackTrace();
-			}
-			try {
-				if (stm != null)
-				stm.close();
-			} catch (OBDAException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private Binding createBinding(String bindingName, TupleResultSet set, Set<String> bindingnames) {
-		SesameBindingSet bset = new SesameBindingSet(set, bindingnames);
-		Binding binding = bset.getBinding(bindingName);
-		return binding;
 	}
 
 	// needed by TupleQuery interface
@@ -122,12 +93,14 @@ public class SesameTupleQuery implements TupleQuery {
 		handler.endQueryResult();
 	}
 
+	@Override
 	public int getMaxQueryTime() {
-		return -1;
+		return this.queryTimeout;
 	}
 
+	@Override
 	public void setMaxQueryTime(int maxQueryTime) {
-		// NO-OP
+		this.queryTimeout = maxQueryTime;
 	}
 
 	public void clearBindings() {

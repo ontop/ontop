@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,6 +46,8 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PositiveInclusi
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SemanticQueryOptimizer;
 import org.semanticweb.ontop.utils.QueryUtils;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -389,31 +392,21 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void initialize() {
-		// nothing to do here
-	}
-
-	@Override
-	public void setTBox(Ontology ontology) {
-		this.ontology = ontology.clone();
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
+		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
 		 * Our strategy requires saturation to minimize the number of cycles
 		 * that will be necessary to compute reformulation.
 		 */
 		this.ontology.saturate();
-
-	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-
-		this.sigma = (Ontology) sigma;
+		
+		
+		this.sigma = sigma;
 		if (this.sigma != null) {
 			log.debug("Using {} dependencies.", sigma.getAssertions().size());
 			this.sigma.saturate();
 		}
 
 	}
-
 }

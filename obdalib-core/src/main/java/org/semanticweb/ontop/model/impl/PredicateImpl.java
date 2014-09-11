@@ -140,4 +140,22 @@ public class PredicateImpl implements Predicate {
 		}
 		return false;
 	}
+
+    @Override
+    public boolean isAggregationPredicate() {
+        // The arity is supposed to be one
+        // but we prefer robustness to
+        // ill-defined arities
+
+        switch(getName()) {
+            case OBDAVocabulary.SPARQL_AVG_URI:
+            case OBDAVocabulary.SPARQL_SUM_URI:
+            case OBDAVocabulary.SPARQL_COUNT_URI:
+            case OBDAVocabulary.SPARQL_MAX_URI:
+            case OBDAVocabulary.SPARQL_MIN_URI:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

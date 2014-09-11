@@ -59,7 +59,7 @@ target		imdb:company/{company_id} a mo:Production_Company .
 source		select company_id from movie_companies where movie_companies.company_type_id = 2
 
 mappingId	Person has Birth Date
-target		imdb:name/{person_id} dbpedia:birthDate {dob}^^xsd:string .
+target		imdb:name/{person_id} dbpedia:birthDate {dob}^^xsd:dateTime .
 source		select person_id, info as dob from person_info where info_type_id = 21
 
 mappingId	Person has Birth Name
@@ -187,11 +187,11 @@ target		imdb:genre/{title_id} a mo:Old_Action .
 source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Western'
 
 mappingId	Movie has production Budget
-target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:string .
+target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:double .
 source		select movie_id, info as budget from movie_info where movie_info.info_type_id = 105
 
 mappingId	Movie gets Gross revenue
-target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string .
+target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:double .
 source		select movie_id, info as gross from movie_info where movie_info.info_type_id = 107
 
 mappingId	Movie has Actor

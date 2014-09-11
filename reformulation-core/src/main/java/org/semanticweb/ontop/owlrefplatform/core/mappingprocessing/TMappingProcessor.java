@@ -44,8 +44,6 @@ import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.ClassDescription;
-import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.Property;
@@ -53,9 +51,8 @@ import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+
 
 public class TMappingProcessor implements Serializable {
 
@@ -66,20 +63,17 @@ public class TMappingProcessor implements Serializable {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final Ontology aboxDependencies;
-	
-	private final TBoxReasonerImpl reasoner;
+	private final TBoxReasoner reasoner;
 
 	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
 	
 	boolean optimize = true;
 
-	public TMappingProcessor(Ontology tbox, boolean optmize) {
+	public TMappingProcessor(TBoxReasoner reasoner, boolean optmize) {
 		this.optimize = optmize;
 		
-		reasoner = new TBoxReasonerImpl(tbox);
-
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		//reasoner = new TBoxReasonerImpl(tbox);
+		this.reasoner = reasoner;
 	}
 
 	/***
@@ -107,10 +101,6 @@ public class TMappingProcessor implements Serializable {
 		return mappingIndex;
 	}
 
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
-	}
-
 	/***
 	 * 
 	 * This is an optimization mechanism that allows T-mappings to produce a
@@ -135,7 +125,7 @@ public class TMappingProcessor implements Serializable {
 	 * conditions of m.
 	 * 
 	 * </p>
-	 * If no such m is found, then this method simply adds newmmapping to
+	 * If no such m is found, then this method simply adds newmapping to
 	 * currentMappings.
 	 * 
 	 * 
@@ -225,8 +215,13 @@ public class TMappingProcessor implements Serializable {
 				}			
 				Function newconditions = mergeConditions(strippedNewConditions);
 				Function existingconditions = mergeConditions(strippedExistingConditions);
-				Term newconditionsTerm = fac.getFunction(newconditions.getPredicate(), newconditions.getTerms());
-				Term existingconditionsTerm = fac.getFunction(existingconditions.getPredicate(), existingconditions.getTerms());
+				Term newconditionsTerm = fac.getFunction(newconditions.getFunctionSymbol(), newconditions.getTerms());
+				Term existingconditionsTerm = fac.getFunction(existingconditions.getFunctionSymbol(), existingconditions.getTerms());
+
+                //we do not add a new mapping if the conditions are  exactly the same
+                if(existingconditions.equals(newconditions)){
+                    continue;
+                }
 				Function orAtom = fac.getFunctionOR(existingconditionsTerm, newconditionsTerm);
 				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
@@ -300,7 +295,7 @@ public class TMappingProcessor implements Serializable {
 	/***
 	 * Given a set of mappings in {@link originalMappings}, this method will
 	 * return a new set of mappings in which no constants appear in the body of
-	 * database predicates. This is done by replacing the constant occurence
+	 * database predicates. This is done by replacing the constant occurrence
 	 * with a fresh variable, and adding a new equality condition to the body of
 	 * the mapping.
 	 * <p/>
@@ -353,7 +348,7 @@ public class TMappingProcessor implements Serializable {
 		return newProgram;
 	}
 
-	public DatalogProgram getTMappings(DatalogProgram originalMappings, boolean full) throws OBDAException {
+	public DatalogProgram getTMappings(DatalogProgram originalMappings, boolean full) {
 
 		/*
 		 * Normalizing constants
@@ -545,9 +540,9 @@ public class TMappingProcessor implements Serializable {
 		return currentMappings;
 	}
 
-	
-	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {	
-		
+
+	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {
+
 		CQIE newmapping = fac.getCQIE(head, body);				
 		if (optimize)
 			mergeMappingsWithCQC(mappings, newmapping);

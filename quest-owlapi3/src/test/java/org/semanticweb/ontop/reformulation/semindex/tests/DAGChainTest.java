@@ -35,6 +35,7 @@ import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
@@ -74,8 +75,8 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
-		//TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
-		TBoxReasonerImpl reasoner = TBoxReasonerImpl.getChainReasoner(ontology);
+		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
 		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
 		
 		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
@@ -183,7 +184,8 @@ public class DAGChainTest extends TestCase {
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
 		//DAGImpl dagChain221 = reasoner221.getChainDAG();
-		TBoxReasonerImpl reasoner = TBoxReasonerImpl.getChainReasoner(ontology);
+		TBoxReasonerImpl resoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(resoner0);
 
 		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
 		

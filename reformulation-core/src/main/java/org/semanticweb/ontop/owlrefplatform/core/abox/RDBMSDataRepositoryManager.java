@@ -20,6 +20,13 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.impl.PunningException;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -29,13 +36,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
-
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.impl.PunningException;
 
 /***
  * A Data Repository Manager is an utility setup the data back end of the
@@ -70,7 +70,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	//
 	// public void setDatabase(Connection conn);
 
-	public void setTBox(Ontology ontology);
+	public void setTBox(TBoxReasoner reasonerDag);
 
 	public void setVocabulary(Set<Predicate> vocabulary) throws PunningException;
 
@@ -142,7 +142,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	 */
 	public boolean isIndexed(Connection conn);
 
-	public Ontology getABoxDependencies();
+	//public Ontology getABoxDependencies();
 
 	/***
 	 * Attempts to load the metadata from the database. This will override the

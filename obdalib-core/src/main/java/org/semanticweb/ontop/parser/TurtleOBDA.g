@@ -494,7 +494,7 @@ typedLiteral returns [Function value]
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
           functionSymbol = dfac.getDataTypePredicateBoolean();
       } else {
-          throw new RecognitionException();
+	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
       }
       $value = dfac.getFunction(functionSymbol, var);
      }
@@ -567,7 +567,7 @@ dataTypeString returns [Term value]
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
       } else {
-        throw new RuntimeException("Unknown datatype: " + functionName);
+        throw new RuntimeException("Unsupported datatype: " + functionName);
       }
       $value = dfac.getFunction(functionSymbol, constant);
     }

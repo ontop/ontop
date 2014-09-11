@@ -20,31 +20,23 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.ontology.*;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
+import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
+import org.semanticweb.ontop.utils.QueryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
-import org.semanticweb.ontop.utils.QueryUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -68,29 +60,24 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	}
 	
 	@Override
-	public void setTBox(Ontology ontology) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		double startime = System.currentTimeMillis();
 
-		reasoner.setTBox(ontology);
+		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
+		this.reasoner.setTBox(ontology);
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));
-	}
-	
-	@Override
-	public void setCBox(Ontology sigma) {
+		
 		log.debug("SET SIGMA");
 		for (Axiom ax : sigma.getAssertions()) {
 			log.debug("SIGMA: " + ax);
 		}
 		this.sigma = sigma;
 		extDP.setSigma(sigma);
-	}
-
-	@Override
-	public void initialize() {
+		
 	}
 	
 	

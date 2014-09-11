@@ -27,7 +27,7 @@ import org.semanticweb.ontop.ontology.Property;
  */
 public class SemanticIndexBuilder  {
 
-	private final TBoxReasonerImpl reasoner;
+	private final TBoxReasoner reasoner;
 	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
 	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
 	private int index_counter = 1;
@@ -105,7 +105,7 @@ public class SemanticIndexBuilder  {
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
 	
-	public SemanticIndexBuilder(TBoxReasonerImpl reasoner)  {
+	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
 		this.reasoner = reasoner;
 		
 		namedDAG = new NamedDAG(reasoner);

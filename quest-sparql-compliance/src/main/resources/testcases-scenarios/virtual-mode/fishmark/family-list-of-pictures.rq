@@ -9,5 +9,5 @@ WHERE {
    ?code fd:species_Species ?species;
    fd:species_Genus ?genus ;
    fd:species_FamCode ?fcode .
-   ?fcode fd:families_Family "Bothidae" .
+   ?fcode fd:families_Family "Bothidae"^^xsd:string .
 }

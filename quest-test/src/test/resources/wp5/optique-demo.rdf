@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns="http://www.siemens.com/optique/demo#"
+	xmlns:siemensOptiqueDemo="http://www.siemens.com/optique/demo#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:arg="http://spinrdf.org/arg#"
+	xmlns:spl="http://spinrdf.org/spl#"
+	xmlns:sp="http://spinrdf.org/sp#"
+	xmlns:spin="http://spinrdf.org/spin#"
+	xmlns:indextype="http://www.fluidops.com/ontologies/RelationalSchemaOntology/IndexType/"
+	xmlns:tabletype="http://www.fluidops.com/ontologies/RelationalSchemaOntology/TableType/">
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#Message">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x14"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x15"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x16"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x17"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#hasTS">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#forAssembly">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<rdfs:range rdf:resource="http://www.siemens.com/optique/demo#Assembly"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#hasEventtext">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#hasTag">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<rdfs:domain rdf:resource="http://www.siemens.com/optique/demo#Message"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#isProcess">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<rdfs:domain rdf:resource="http://www.siemens.com/optique/demo#Message"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#hasState">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#hasCategory">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<rdfs:domain rdf:resource="http://www.siemens.com/optique/demo#Message"/>
+	<rdfs:range rdf:resource="http://www.siemens.com/optique/demo#EventCategory"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#Measurement">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x12"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x13"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#measuredBy">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<rdfs:domain rdf:resource="http://www.siemens.com/optique/demo#Measurement"/>
+	<rdfs:range rdf:resource="http://www.siemens.com/optique/demo#Sensor"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#hasValue">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<rdfs:domain rdf:resource="http://www.siemens.com/optique/demo#Message"/>
+	<rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#Assembly">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#EventCategory">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x10"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Ontology"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#inAssembly">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<rdfs:domain rdf:resource="http://www.siemens.com/optique/demo#Sensor"/>
+	<rdfs:range rdf:resource="http://www.siemens.com/optique/demo#Assembly"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.siemens.com/optique/demo#Sensor">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<rdfs:subClassOf rdf:nodeID="node17uujpof4x18"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x10">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:nodeID="node17uujpof4x11"/>
+	<owl:someValuesFrom rdf:resource="http://www.siemens.com/optique/demo#Message"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x11">
+	<owl:inverseOf rdf:resource="http://www.siemens.com/optique/demo#hasCategory"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x12">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#measuredBy"/>
+	<owl:someValuesFrom rdf:resource="http://www.siemens.com/optique/demo#Sensor"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x13">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#hasValue"/>
+	<owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x14">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#hasCategory"/>
+	<owl:someValuesFrom rdf:resource="http://www.siemens.com/optique/demo#EventCategory"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x15">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#hasState"/>
+	<owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x16">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#hasEventtext"/>
+	<owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x17">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#hasTag"/>
+	<owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node17uujpof4x18">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<owl:onProperty rdf:resource="http://www.siemens.com/optique/demo#inAssembly"/>
+	<owl:someValuesFrom rdf:resource="http://www.siemens.com/optique/demo#Assembly"/>
+</rdf:Description>
+
+</rdf:RDF>

@@ -1,5 +1,4 @@
 package org.semanticweb.ontop.owlrefplatform.core.dagjgrapht;
-
 /*
  * #%L
  * ontop-reformulation-core
@@ -20,17 +19,9 @@ package org.semanticweb.ontop.owlrefplatform.core.dagjgrapht;
  * #L%
  */
 
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -282,9 +273,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * 
 	 */
 	
-	public static TBoxReasonerImpl getChainReasoner(Ontology onto) {
-		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
-		
+	public static TBoxReasoner getChainReasoner(TBoxReasonerImpl tbox) {		
 		
 		EquivalencesDAG<BasicClassDescription> classes = tbox.getClasses();
 		

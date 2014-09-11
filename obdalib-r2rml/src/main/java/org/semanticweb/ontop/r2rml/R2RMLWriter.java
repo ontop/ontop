@@ -54,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.callimachusproject.io.TurtleStreamWriter;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
@@ -157,32 +156,7 @@ public class R2RMLWriter {
 		}
 	}
 	
-	/**
-	 * "Pretty" R2RML output
-	 * @param file
-	 */
-	public void writePretty(File file) {
-		try {
-			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
-			Collection<TriplesMap> coll = getTriplesMaps();
-			Model m = mm.exportMappings(coll, Model.class);			
-			FileWriter fw = new FileWriter(file);
-			TurtleWriter writer = new TurtleStreamWriter(fw, null);
-			writer.startRDF();
-			Map<String, String> map = prefixmng.getPrefixMap();
-			for (String key : map.keySet()) {
-				//System.out.println(key + "->" + map.get(key));
-				writer.handleNamespace(key, map.get(key));
-			}
-			Iterator<Statement> it = m.iterator();
-			while(it.hasNext()){
-				writer.handleStatement(it.next());
-			}
-			writer.endRDF();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+
 
 	
 	public static void main(String args[])
@@ -197,7 +171,7 @@ public class R2RMLWriter {
 //		Iterator<Statement> st = g.iterator();
 //		while (st.hasNext())
 //			System.out.println(st.next());
-		writer.writePretty(out);
+		writer.write(out);
 		
 	}
 }

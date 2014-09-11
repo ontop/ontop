@@ -79,17 +79,9 @@ public class ExpressionEvaluator {
 	}
 
 	public boolean evaluateExpressions(CQIE q) {
-		
-		Stack<Integer> termidx = new Stack<Integer>();
-		
-		
 		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
-			
-			termidx.push(atomidx);
-			 
 			Function atom = q.getBody().get(atomidx);
 			Term newatom = eval(atom);
-	
 			if (newatom == fac.getConstantTrue()) {
 				q.getBody().remove(atomidx);
 				atomidx -= 1;

@@ -155,7 +155,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getEquivalenceMap());
+			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getEquivalenceMap().getInternalMap());
 			int count = st.insertData(aBoxIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}

@@ -20,110 +20,76 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryVocabularyValidator implements Serializable {
-	/** The source ontology for validating the target query */
+import java.util.List;
+import java.util.Set;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2901421485090507301L;
+public class QueryVocabularyValidator /*implements Serializable*/ {
 
-	/** List of invalid predicates */
-	private Vector<String> invalidPredicates = new Vector<String>();
+	//private static final long serialVersionUID = -2901421485090507301L;
 
-	Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
+	private final Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
 
-	private Ontology ontology;
+	/** The source ontology vocabulary for validating the target query */
+	private final Set<Predicate> vocabulary;
 
-	private Map<Predicate, Description> equivalences;
+	private final EquivalenceMap equivalences;
 
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	public QueryVocabularyValidator(Ontology ontology, Map<Predicate, Description> equivalences) {
-		this.ontology = ontology;
+	public QueryVocabularyValidator(Set<Predicate> vocabulary, EquivalenceMap equivalences) {
+		this.vocabulary = vocabulary;
 		this.equivalences = equivalences;
 	}
 
 	public boolean validatePredicates(DatalogProgram input) {
-		// Reset the invalid list
-		invalidPredicates.clear();
-
-		List<CQIE> rules = input.getRules();
-		for (CQIE query : rules) {
-			validate(query);
-		}
 
 		boolean isValid = true;
-		if (!invalidPredicates.isEmpty()) {
-			isValid = false; // if the list is not empty means the string is invalid!
+		
+		for (CQIE query : input.getRules()) {
+			for  (Function atom : query.getBody()) {
+				if (!validate(atom))
+					isValid = false;
+			}
 		}
+
 		return isValid;
 	}
 
-	private void validate(CQIE query) {
-		// Get the predicates in the target query.
-		Iterator<Function> iterAtom = query.getBody().iterator();
-		while (iterAtom.hasNext()) {
-			Function a1 = iterAtom.next();
-			if (!(a1 instanceof Function)) {
-				continue;
-			}
-			Function atom = (Function) a1;
+	private boolean validate(Function atom) {
 
-			Predicate predicate = atom.getPredicate();
+		Predicate predicate = atom.getPredicate();
 
-			boolean isClass = false;
-			boolean isObjectProp = false;
-			boolean isDataProp = false;
-			boolean isBooleanOpFunction = false;
+//		boolean isClass = vocabulary.contains(predicate)
+//				|| equivalences.containsKey(predicate);
+//		boolean isObjectProp =  vocabulary.contains(predicate)
+//				|| equivalences.containsKey(predicate);
+//		boolean isDataProp = vocabulary.contains(predicate)
+//				|| equivalences.containsKey(predicate);
+//		boolean isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
 
-			isClass = isClass || ontology.getConcepts().contains(predicate)
-					|| (equivalences.get(predicate) != null);
-			isObjectProp = isObjectProp
-					|| ontology.getRoles().contains(predicate)
-					|| (equivalences.get(predicate) != null);
-			isDataProp = isDataProp || ontology.getRoles().contains(predicate)
-					|| (equivalences.get(predicate) != null);
-			isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
+		// Check if the predicate contains in the ontology vocabulary as one
+		// of these components (i.e., class, object property, data property).
+		// isClass || isObjectProp || isDataProp || isBooleanOpFunction;
+		boolean isPredicateValid = vocabulary.contains(predicate)
+				|| equivalences.containsKey(predicate) 
+				|| (predicate instanceof BooleanOperationPredicate);
 
-			// Check if the predicate contains in the ontology vocabulary as one
-			// of these components (i.e., class, object property, data
-			// property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp
-					|| isBooleanOpFunction;
-
-			if (!isPredicateValid) {
-				invalidPredicates.add(predicate.toString());
-				String debugMsg = "The predicate: [" + predicate.toString() + "]";
-				log.warn("WARNING: {} is missing in the ontology!", debugMsg);
-			}
+		if (!isPredicateValid) {
+			String debugMsg = "The predicate: [" + predicate.toString() + "]";
+			log.warn("WARNING: {} is missing in the ontology!", debugMsg);
+			return false;
 		}
+		return true;
 	}
 
-	/***
-	 * Substite atoms based on the equivalence map.
+	/*
+	 * Substitute atoms based on the equivalence map.
 	 */
 	public DatalogProgram replaceEquivalences(DatalogProgram queries) {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -161,28 +127,9 @@ public class QueryVocabularyValidator implements Serializable {
 			if (atom.isBooleanFunction())
 				continue;
 
-			Description equivalent = equivalences.get(atom.getFunctionSymbol());
-			if (equivalent == null) {
-				/* Nothing to replace */
-				continue;
-			}
-			Function newatom = null;
+			Function newatom = equivalences.getNormal(atom);
 
-			if (equivalent instanceof OClass) {
-				newatom = fac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerm(0));
-			} else if (equivalent instanceof Property) {
-				Property equiproperty = (Property) equivalent;
-				if (!equiproperty.isInverse()) {
-					newatom = fac.getFunction(equiproperty.getPredicate(), atom.getTerm(0), atom.getTerm(1));
-				} else {
-					newatom = fac.getFunction(equiproperty.getPredicate(), atom.getTerm(1), atom.getTerm(0));
-				}
-			}
 			body.set(i, newatom);
 		}
-	}
-
-	public Vector<String> getInvalidPredicates() {
-		return invalidPredicates;
 	}
 }

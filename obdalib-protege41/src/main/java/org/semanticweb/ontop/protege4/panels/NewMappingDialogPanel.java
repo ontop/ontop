@@ -489,6 +489,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		Thread thread = null;
 		ResultSet result = null;
 		Statement statement = null;
+		private boolean isCancelled = false;
+		private boolean errorShown = false;
+		
 
 		private ExecuteSQLQueryAction(CountDownLatch latch) {
 			this.latch = latch;
@@ -496,6 +499,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		@Override
 		public void actionCanceled() throws SQLException {
+			this.isCancelled = true;
 			if (thread != null) {
 				thread.interrupt();
 			}
@@ -536,10 +540,21 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					} catch (Exception e) {
 						latch.countDown();
 						DialogUtils.showQuickErrorDialog(null, e);
+					    errorShown = true;
 					}
 				}
 			};
 			thread.start();
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return this.isCancelled;
+		}
+
+		@Override
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 
