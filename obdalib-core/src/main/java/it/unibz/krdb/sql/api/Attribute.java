@@ -23,6 +23,7 @@ package it.unibz.krdb.sql.api;
 import it.unibz.krdb.sql.Reference;
 
 import java.io.Serializable;
+import java.sql.Types;
 
 public class Attribute implements Serializable{
 	
@@ -34,6 +35,8 @@ public class Attribute implements Serializable{
 	private boolean bPrimaryKey;
 	private Reference foreignKey;
 	private int canNull;
+
+	private String typeName;
 	
 	public String toString() {
 		return name + ":" + type;
@@ -68,11 +71,16 @@ public class Attribute implements Serializable{
 	}
 	
 	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) {
+		this(name,type,primaryKey,foreignKey,canNull,null);		
+	}
+	
+	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName) {
 		this.name = name;
 		this.type = type;
 		this.bPrimaryKey = primaryKey;
 		this.foreignKey = foreignKey;
 		this.canNull = canNull;
+		this.typeName = typeName;
 	}
 	
 	public String getName() {
@@ -110,5 +118,22 @@ public class Attribute implements Serializable{
 	 */
 	public boolean hasName(String name) {
 		return (this.name.equals(name)) ? true : false;
+	}
+
+	/***
+	 * Returns the name of the SQL type asssociated with this attribute. Note, the name maybe not match
+	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
+	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
+	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in dissambiguating this 
+	 * cases.
+	 * 
+	 * @return
+	 */
+	public String getSQLTypeName() {
+		return typeName;
+	}
+
+	public void setSQLTypeName(String typeName) {
+		this.typeName = typeName;
 	}
 }

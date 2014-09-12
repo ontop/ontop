@@ -129,15 +129,26 @@ public class SesameBindingSet implements BindingSet {
 						} else if (col_type == COL_TYPE.STRING) {
 							URI datatype = XMLSchema.STRING;
 							value = fact.createLiteral(c.getValue(), datatype);
-						}						
+						} else if (col_type == COL_TYPE.DATE) {
+							URI datatype = XMLSchema.DATE;
+							value = fact.createLiteral(c.getValue(), datatype);
+						} else if (col_type == COL_TYPE.TIME) {
+							URI datatype = XMLSchema.TIME;
+							value = fact.createLiteral(c.getValue(), datatype);
+						} else if (col_type == COL_TYPE.YEAR) {
+							URI datatype = XMLSchema.GYEAR;
+							value = fact.createLiteral(c.getValue(), datatype);
+						} else {
+							throw new RuntimeException("Found unknown TYPE for constant: " + c + " with COL_TYPE="+ col_type + " and variable=" + bindingName);
+						}
 					}
 				}
 			}
 			return new BindingImpl(bindingName, value);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return null;
+//		return null;
 	}
 
 	public boolean hasBinding(String bindingName) {

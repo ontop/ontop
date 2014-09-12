@@ -32,6 +32,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -282,10 +283,17 @@ public class JDBCConnectionManager {
 					}
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
-						final int dataType = rsColumns.getInt("DATA_TYPE");
+						int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
+						
+						final String typeName = rsColumns.getString("TYPE_NAME");
+						
+						if (dataType == 91 && typeName.equals("YEAR")) {
+							dataType = -10000;
+						}
+						
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 
 						// Check if the columns are unique regardless their letter cases
@@ -382,12 +390,32 @@ public class JDBCConnectionManager {
 					continue;
 				}
 				for (int pos = 1; rsColumns.next(); pos++) {
+					
+					// Print JDBC metadata returned by the driver, enable for debugging
+					int metadataCount = rsColumns.getMetaData().getColumnCount();
+					for (int j = 1; j < metadataCount+1; j++) {
+						String columnName = rsColumns.getMetaData().getColumnName(j);
+						log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
+					}
+					
+					
 					final String columnName = rsColumns.getString("COLUMN_NAME");
-					final int dataType = rsColumns.getInt("DATA_TYPE");
+					int dataType = rsColumns.getInt("DATA_TYPE");
 					final boolean isPrimaryKey = primaryKeys.contains(columnName);
 					final Reference reference = foreignKeys.get(columnName);
 					final int isNullable = rsColumns.getInt("NULLABLE");
-					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+					
+					/***
+					 * Fix for MySQL YEAR
+					 */
+					final String typeName = rsColumns.getString("TYPE_NAME");
+					
+					if (dataType == 91 && typeName.equals("YEAR")) {
+						dataType = -10000;
+					}
+					
+					
+					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 				
 					// Check if the columns are unique regardless their letter cases
 					if (!tableColumns.add(columnName.toLowerCase())) {
@@ -568,12 +596,33 @@ public class JDBCConnectionManager {
 					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 					
+					
+					
 					for (int pos = 1; rsColumns.next(); pos++) {
+						log.debug("=============== COLUMN METADATA ========================");
+						// Print JDBC metadata returned by the driver, enable for debugging
+						int metadataCount = rsColumns.getMetaData().getColumnCount();
+						for (int j = 1; j < metadataCount+1; j++) {
+							String columnName = rsColumns.getMetaData().getColumnName(j);
+							log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
+						}
+						
 						final String columnName = rsColumns.getString("COLUMN_NAME");
-						final int dataType = rsColumns.getInt("DATA_TYPE");
+						int dataType = rsColumns.getInt("DATA_TYPE");
+						
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
+						
+						/***
+						 * To fix bug in Oracle 11 and up driver retruning wrong datatype
+						 */
+						final String typeName = rsColumns.getString("TYPE_NAME");
+						
+						if (dataType == 93 && typeName.equals("DATE")) {
+							dataType = 91;
+						}
+						
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 					}
 					// Add this information to the DBMetadata
@@ -668,12 +717,41 @@ public class JDBCConnectionManager {
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 			
 					for (int pos = 1; rsColumns.next(); pos++) {
+						
+						log.debug("=============== COLUMN METADATA ========================");
+
+						// Print JDBC metadata returned by the driver, enable for debugging
+						int metadataCount = rsColumns.getMetaData().getColumnCount();
+						for (int j = 1; j < metadataCount+1; j++) {
+							String columnName = rsColumns.getMetaData().getColumnName(j);
+							log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
+						}
+						
 						final String columnName = rsColumns.getString("COLUMN_NAME");
-						final int dataType = rsColumns.getInt("DATA_TYPE");
+						
+						//TODO Oracle bug here - wrong automatic typing - Date vs DATETIME - driver ojdbc16-11.2.0.3
+						/* Oracle returns 93 for DATE SQL types, but this corresponds to 
+						 * TIMESTAMP. This causes a wrong typing to xsd:dateTime and later
+						 * parsing errors. To avoid this bug manually type the column in the
+						 * mapping. This may be a problem of the driver, try with other version
+						 * I tried oracle thin driver ojdbc16-11.2.0.3
+						 */
+						int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						
+						/***
+						 * To fix bug in Oracle 11 and up driver retruning wrong datatype
+						 */
+						final String typeName = rsColumns.getString("TYPE_NAME");
+						
+						if (dataType == 93 && typeName.equals("DATE")) {
+							dataType = 91;
+						}
+						
+						
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);

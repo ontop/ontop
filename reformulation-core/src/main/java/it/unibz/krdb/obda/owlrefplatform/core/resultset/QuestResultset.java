@@ -35,8 +35,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +60,9 @@ public class QuestResultset implements TupleResultSet {
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private Map<Integer, String> uriMap; 
+	private Map<Integer, String> uriMap;
+	private String vendor;
+	private boolean isOracle; 
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -88,6 +93,13 @@ public class QuestResultset implements TupleResultSet {
 		DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
+		try {
+			 vendor = st.questInstance.getConnection().getDriverName();
+			 isOracle = vendor.startsWith("Oracle");
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		}					
+
 
 	}
 
@@ -142,7 +154,7 @@ public class QuestResultset implements TupleResultSet {
 
 		try {
 			realValue = set.getString(column);
-			COL_TYPE type = getQuestType((byte) set.getInt(column - 2));
+			COL_TYPE type = getQuestType( set.getInt(column - 2));
 
 			if (type == null || realValue == null) {
 				return null;
@@ -200,11 +212,42 @@ public class QuestResultset implements TupleResultSet {
 						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						Timestamp value = set.getTimestamp(column);
-						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+						
+						
+						if (!isOracle) {
+							Timestamp value = set.getTimestamp(column);
+							result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+						} else {
+							String value = set.getString(column);
+							//TODO Oracle driver - this date format depends on the version of the driver
+							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+//							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+							java.util.Date date;
+							try {
+								date = df.parse(value);
+							} catch (ParseException e) {
+								throw new RuntimeException(e);
+							}
+							Timestamp ts = new Timestamp(date.getTime());
+							result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+						}
 					} else if (type == COL_TYPE.DATE) {
-						Date value = set.getDate(column);
-						result = fac.getConstantLiteral(value.toString(), type);
+						if (!isOracle) {
+							Date value = set.getDate(column);
+							result = fac.getConstantLiteral(value.toString(), type);
+						} else {
+							String value = set.getString(column);
+							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+							java.util.Date date;
+							try {
+								date = df.parse(value);
+							} catch (ParseException e) {
+								throw new RuntimeException(e);
+							}
+							result = fac.getConstantLiteral(value.toString(), type);
+						}
+						
+						
 					} else if (type == COL_TYPE.TIME) {
 						Time value = set.getTime(column);						
 						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
@@ -255,7 +298,7 @@ public class QuestResultset implements TupleResultSet {
 		return getConstant(columnIndex);
 	}
 
-	private COL_TYPE getQuestType(byte sqltype) {
+	private COL_TYPE getQuestType(int sqltype) {
 		if (sqltype == 1) {
 			return COL_TYPE.OBJECT;
 		} else if (sqltype == 2) {
@@ -274,6 +317,12 @@ public class QuestResultset implements TupleResultSet {
 			return COL_TYPE.DATETIME;
 		} else if (sqltype == 9) {
 			return COL_TYPE.BOOLEAN;
+		} else if (sqltype == 10) {
+			return COL_TYPE.DATE;
+		} else if (sqltype == 11) {
+			return COL_TYPE.TIME;
+		} else if (sqltype == 12) {
+			return COL_TYPE.YEAR;
 		} else if (sqltype == 0) {
 			return null;
 		} else {
