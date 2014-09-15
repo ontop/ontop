@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.obda.quest.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Random;
@@ -138,7 +139,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(o);
+		TBoxReasoner reasoner= new TBoxReasonerImpl(o);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -231,7 +232,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasonerImpl  reasoner = new TBoxReasonerImpl(o);
+		TBoxReasoner  reasoner = new TBoxReasonerImpl(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -328,7 +329,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o);
+		TBoxReasoner  reasoner= new TBoxReasonerImpl(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
@@ -25,6 +25,10 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +50,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
 @Deprecated
-public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
+public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
 	private DefaultDirectedGraph<Property,DefaultEdge> propertyGraph;
 	private DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph;
@@ -54,7 +58,7 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 	private EquivalencesDAGImplOnGraph<Property> propertyDAG;
 	private EquivalencesDAGImplOnGraph<BasicClassDescription> classDAG;
 
-	public Test_TBoxReasonerImplOnGraph(TBoxReasonerImpl reasoner) {	
+	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
 		this.propertyGraph = reasoner.getPropertyGraph();
 		this.classGraph = reasoner.getClassGraph();
 		

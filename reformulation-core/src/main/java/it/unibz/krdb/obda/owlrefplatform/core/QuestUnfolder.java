@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

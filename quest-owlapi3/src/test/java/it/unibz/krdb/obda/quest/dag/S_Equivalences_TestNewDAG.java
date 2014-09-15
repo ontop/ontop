@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.obda.quest.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -103,7 +102,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			String fileInput=input.get(i);
 
 			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-			Test_TBoxReasonerImplOnGraph graphReasoner = new Test_TBoxReasonerImplOnGraph(reasoner);
+			TestTBoxReasonerImpl_OnGraph graphReasoner = new TestTBoxReasonerImpl_OnGraph(reasoner);
 
 			
 			log.debug("Input number {}", i+1 );
@@ -210,7 +209,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	}
 
 
-	private boolean checkVertexReduction(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean checkVertexReduction(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
 
 		//number of vertexes in the graph
 		int numberVertexesD1= reasonerd1.vertexSetSize();
@@ -239,7 +238,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	}
 
-	private boolean checkEdgeReduction(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean checkEdgeReduction(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
 		//number of edges in the graph
 		int numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag

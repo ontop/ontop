@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.obda.quest.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
@@ -23,14 +23,11 @@ package it.unibz.krdb.obda.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -107,7 +104,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			String fileInput=input.get(i);
 
 			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-			Test_TBoxReasonerImplOnGraph reasonerd1 = new Test_TBoxReasonerImplOnGraph(dag2);
+			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", dag2.getPropertyGraph());
@@ -121,7 +118,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 
-	private boolean testRedundantEdges(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean testRedundantEdges(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
 		//number of edges in the graph
 		int  numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag

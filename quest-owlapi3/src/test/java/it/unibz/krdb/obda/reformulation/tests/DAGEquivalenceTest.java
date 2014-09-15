@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
@@ -71,7 +72,7 @@ public class DAGEquivalenceTest extends TestCase {
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getIntervals(ofac
@@ -128,7 +129,7 @@ public class DAGEquivalenceTest extends TestCase {
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
@@ -191,7 +192,7 @@ public class DAGEquivalenceTest extends TestCase {
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		

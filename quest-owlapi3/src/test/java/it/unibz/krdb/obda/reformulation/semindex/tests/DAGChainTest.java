@@ -37,7 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
+import it.unibz.krdb.obda.quest.dag.TestTBoxReasonerImpl_OnGraph;
 import junit.framework.TestCase;
 
 
@@ -126,7 +126,7 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(res0);
+		TestTBoxReasonerImpl_OnGraph reasoner = new TestTBoxReasonerImpl_OnGraph(res0);
 		reasoner.convertIntoChainDAG();
 
 		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();

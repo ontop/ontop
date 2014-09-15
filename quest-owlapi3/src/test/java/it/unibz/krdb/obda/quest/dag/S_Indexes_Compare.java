@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.obda.quest.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph
