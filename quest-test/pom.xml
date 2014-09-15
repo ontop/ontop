@@ -68,7 +68,6 @@
 		<dependency>
 			<groupId>com.ibm</groupId>
 			<artifactId>db2jcc4.jar</artifactId>
-			<scope>test</scope>		
 		</dependency>
 		<dependency>
 			<groupId>madgik.adp</groupId>

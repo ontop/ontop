@@ -392,11 +392,11 @@ public class JDBCConnectionManager {
 				for (int pos = 1; rsColumns.next(); pos++) {
 					
 					// Print JDBC metadata returned by the driver, enable for debugging
-					int metadataCount = rsColumns.getMetaData().getColumnCount();
-					for (int j = 1; j < metadataCount+1; j++) {
-						String columnName = rsColumns.getMetaData().getColumnName(j);
-						log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
-					}
+//					int metadataCount = rsColumns.getMetaData().getColumnCount();
+//					for (int j = 1; j < metadataCount+1; j++) {
+//						String columnName = rsColumns.getMetaData().getColumnName(j);
+//						log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
+//					}
 					
 					
 					final String columnName = rsColumns.getString("COLUMN_NAME");
