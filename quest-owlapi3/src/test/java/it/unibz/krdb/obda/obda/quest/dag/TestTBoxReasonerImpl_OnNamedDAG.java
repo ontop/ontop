@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
+package it.unibz.krdb.obda.obda.quest.dag;
 
 /*
  * #%L
@@ -23,6 +23,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -43,7 +47,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
  */
 
 @Deprecated
-public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
+public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 
 	private EquivalencesDAG<Property> propertyDAG;
 	private EquivalencesDAG<BasicClassDescription> classDAG;
@@ -52,7 +56,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
-	public Test_TBoxReasonerImplOnNamedDAG(TBoxReasonerImpl reasoner) {
+	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
 		NamedDAG dag = new NamedDAG(reasoner);
 		
 		this.propertyDAG = new EquivalencesDAGImpl<Property>(dag.getPropertyDag(), reasoner.getProperties());

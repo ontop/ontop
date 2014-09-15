@@ -25,9 +25,8 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnNamedDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Test_NamedTBoxReasonerImpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -105,12 +104,12 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 			//transform in a named graph
-			Test_TBoxReasonerImplOnNamedDAG namedDag2 = new Test_TBoxReasonerImplOnNamedDAG(reasoner);
+			TestTBoxReasonerImpl_OnNamedDAG namedDag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", reasoner.getClassGraph());
 			log.info("First graph {}", reasoner.getPropertyGraph());
 			log.info("Second dag {}", namedDag2);
-			Test_NamedTBoxReasonerImpl dag2 = new Test_NamedTBoxReasonerImpl(reasoner);
+			TestTBoxReasonerImpl_Named dag2 = new TestTBoxReasonerImpl_Named(reasoner);
 
 			assertTrue(testDescendants(dag2.getClasses(), namedDag2.getClasses()));
 			assertTrue(testDescendants(dag2.getProperties(), namedDag2.getProperties()));
@@ -507,7 +506,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */			
-	private boolean checkforNamedVertexesOnly(Test_TBoxReasonerImplOnNamedDAG dag, TBoxReasonerImpl reasoner){
+	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
 		for(Equivalences<Property> node: dag.getProperties()) {
 			Property vertex = node.getRepresentative();
 			if(!reasoner.getProperties().getVertex(vertex).isIndexed())

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
+package it.unibz.krdb.obda.obda.quest.dag;
 
 /*
  * #%L
@@ -23,6 +23,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -35,12 +38,12 @@ import java.util.Set;
  * WARNING: THIS CLASS IS FOR TESTING ONLY 
  */
 @Deprecated
-public class Test_NamedTBoxReasonerImpl implements TBoxReasoner {
+public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 	private EquivalencesDAG<Property> propertyDAG;
 	private EquivalencesDAG<BasicClassDescription> classDAG;
 
-	public Test_NamedTBoxReasonerImpl(TBoxReasonerImpl reasoner) {
+	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
 		this.propertyDAG = new EquivalencesDAGImpl<Property>(reasoner.getProperties());
 		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(reasoner.getClasses());
 	}
