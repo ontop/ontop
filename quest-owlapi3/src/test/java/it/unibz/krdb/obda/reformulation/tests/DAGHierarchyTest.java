@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 
-import it.unibz.krdb.obda.obda.quest.dag.TestTBoxReasonerImpl_OnNamedDAG;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -33,6 +32,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.quest.dag.TestTBoxReasonerImpl_OnNamedDAG;
 
 import java.io.File;
 import java.util.HashSet;

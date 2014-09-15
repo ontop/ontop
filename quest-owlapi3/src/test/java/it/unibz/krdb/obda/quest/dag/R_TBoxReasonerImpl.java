@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.obda.quest.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
