@@ -62,7 +62,8 @@ public class QuestResultset implements TupleResultSet {
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private Map<Integer, String> uriMap;
 	private String vendor;
-	private boolean isOracle; 
+	private boolean isOracle;
+    private boolean isDB2;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -96,6 +97,7 @@ public class QuestResultset implements TupleResultSet {
 		try {
 			 vendor = st.questInstance.getConnection().getDriverName();
 			 isOracle = vendor.startsWith("Oracle");
+             isDB2 = vendor.startsWith("11.00.3000");
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}					
@@ -212,8 +214,22 @@ public class QuestResultset implements TupleResultSet {
 						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						
-						
+						if(isDB2){
+
+                            String value = set.getString(column);
+
+                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+                            java.util.Date date;
+                            try {
+                                date = df.parse(value);
+
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
+                            Timestamp ts = new Timestamp(date.getTime());
+                            result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+                        }
+						else
 						if (!isOracle) {
 							Timestamp value = set.getTimestamp(column);
 							result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
