@@ -90,7 +90,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
-	private Multimap<Predicate, CQIE> ruleIndex;
+	//private Multimap<Predicate, CQIE> ruleIndex;
 	private Multimap<Predicate, CQIE> ruleIndexByBody;
 	private static Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
 	private Multimap<Predicate, Integer> multPredList;
@@ -172,9 +172,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 	/**
 	 * Since we need the mappings here to treat correctly the unfolding of the leftjoin even when we unfold with respect to the program alone
-	 * @param unfoldingProgram
-	 * @param hashMap
-	 * @param mappings2
 	 */
 /*	public DatalogUnfolder(DatalogProgram unfoldingProgram,
 			HashMap<Predicate, List<Integer>> hashMap,
@@ -326,13 +323,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * otherwise it does nothing (i.e., variables, constants, etc cannot be
 	 * resolved against rule
 	 * @param includeMappings 
-	 * 
-	 * @param resolvent
-	 * @param term
-	 * @param termidx
+	 *
 	 * @return
 //	 */
 	private int computePartialEvaluationTDown(List<CQIE> workingList, boolean includeMappings) {
+
+
+        /**
+         * Rule indexing: copied from computePartialEvaluationBUP()
+         */
+        depGraph = new DatalogDependencyGraphGenerator(workingList);
+        Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
+
 
 		int[] rcount = { 0, 0 };
 
@@ -344,7 +346,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			List<Term> tempList = getBodyTerms(rule);
 
-			List<CQIE> result = computePartialEvaluation(null, tempList, rule, rcount, termidx, false, includeMappings);
+			List<CQIE> result = computePartialEvaluation(null, tempList, rule, rcount, termidx, false,
+                    includeMappings, ruleIndex);
 
 			if (result == null) {
 
@@ -421,7 +424,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!extensionalPredicates.contains(pred)) {// it is a defined  predicate, like ans2,3.. etc
 
 					//get all the indexes we need
-					ruleIndex = depGraph.getRuleIndex();
+                    Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 					
 					//TODO: I already have a field for this!!!
 					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
@@ -465,7 +468,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						
 						List<CQIE> result = new LinkedList<CQIE>();
 						if (!hasAggregates){
-							 result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,includingMappings);
+							 result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,
+                                     includingMappings, ruleIndex);
 						}else{
 							// result is the empty list
 							//TODO: This can be optmised I think. Here we could still unfold atoms in the body that are not 
@@ -485,7 +489,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 */
 							continue;
 						}else if (result.size() >= 2) {
-							detectMissmatchArgumentType(result,false);
+							detectMissmatchArgumentType(result,false, ruleIndex);
 						}
 						/*
 						 * One more step in the partial evaluation was computed, we
@@ -554,11 +558,6 @@ private boolean detectAggregatesHead(Collection<CQIE> workingRules) {
 	return hasAggregates;
 }
 
-/**
- * @param hasAggregates
- * @param rule
- * @return
- */
 private boolean detectAggregateinSingleRule( CQIE rule) {
 	Function fatherHead = rule.getHead();
 	
@@ -627,7 +626,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			boolean includeMappings=true;
 			boolean keepLooping=true;
 			extensionalPredicates =  depGraph.getExtensionalPredicates();
-			ruleIndex = depGraph.getRuleIndex();
+            Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 			ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
@@ -660,7 +659,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						Stack<Integer> termidx = new Stack<Integer>();
 						
 						//here we perform the partial evaluation
-						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx, parentIsLeftJoin,  includeMappings);
+						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx,
+                                parentIsLeftJoin,  includeMappings, ruleIndex);
 						
 						
 						
@@ -693,7 +693,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						
 						}
 						if (result.size() >= 2) {
-							detectMissmatchArgumentType(result,false);
+							detectMissmatchArgumentType(result,false, ruleIndex);
 						}
 		
 					} //end for father collection
@@ -712,7 +712,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			Predicate ans1 = termFactory.getClassPredicate("ans1");
 
 			while (!predicatesMightGotEmpty.isEmpty()){
-				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates);
+				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates,
+                        ruleIndex);
 				
 				//if I deleted ans1 I dont return anything later
 				if (predicatesMightGotEmpty.contains(ans1)){
@@ -723,8 +724,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			if (!noRewriting){
 				// I add to the working list all the rules touched by the unfolder!
-				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates);
-				addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates);
+				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates, ruleIndex);
+				addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates, ruleIndex);
 			}
 			
 			
@@ -734,14 +735,11 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * It search for the empty predicates that got empty during the unfolding of the extensional  
 		 * predicates, and either generate the right rule for the LJ, or delete the rules. 
 		 * Returns the predicates that have been deleted.
-		 * 
-		 * @param workingList
-		 * @param depGraph
-		 * @param predicatesMightGotEmpty
-		 * @param touchedPredicates 
+		 *
 		 */
 		private List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
-				 		List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates) {
+				 		List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates,
+                        Multimap<Predicate, CQIE> ruleIndex) {
 			//TODO: this is not optimal. The best would be that the generateNullBinding takes care of this
 			
 			//This loop is to update the ans rules that could be affected by the elimination of
@@ -863,18 +861,15 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 		/**
 		 * I add to the working list all the rules touched by the unfolder w.r.t. mappings
-		 * @param workingList
-		 * @param depGraph
-		 * @param predicatesToAdd
 		 */
 		private void addNewRules2WorkingListFromBodyAtoms(List<CQIE> workingList,
-								List<Predicate> predicatesToAdd) {
+								List<Predicate> predicatesToAdd, Multimap<Predicate, CQIE> ruleIndex) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 				
 				
 				//Adding the  predicate
-				Collection<CQIE> rulesToAdd2= ruleIndex.get(pred);
+				Collection<CQIE> rulesToAdd2 = ruleIndex.get(pred);
 
 				for (CQIE resultingRule: rulesToAdd2){
 					if (!workingList.contains(resultingRule)){
@@ -899,12 +894,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 		/**
 		 * I add to the working list all the rules touched by the unfolder w.r.t. mappings
-		 * @param workingList
-		 * @param depGraph
-		 * @param predicatesToAdd
 		 */
 		private void addNewRules2WorkingListFromHeadAtoms(List<CQIE> workingList,
-							List<Predicate> predicatesToAdd) {
+							List<Predicate> predicatesToAdd, Multimap<Predicate, CQIE> ruleIndex) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 
@@ -934,13 +926,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 		/**
 		 * This method will update the indexes when the result of unfolding fatherRule is null.
-		 * 
-		 * @param depGraph
-		 * @param pred
-		 * @param preFather
-		 * @param fatherRule
-		 * @param workingList
-		 * @return
 		 */
 		private boolean updateNullIndexes(Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
 			
@@ -987,13 +972,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * <li> Determine if there is a need to keep unfolding pred
 		 * <li> Delete the rules from workingList that have been touched
 		 * </ul>
-		 * @param depGraph
-		 * @param pred
-		 * @param preFather
-		 * @param result
-		 * @param fatherRule
-		 * @param workingList
-		 * @return
 		 */
 		private boolean updateIndexes(Predicate pred,
 				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
@@ -1091,9 +1069,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					
 					
 		/**
-		 * Returns the list functions inside the functions atoms 
-		 * @param rule
-		 * @return
+		 * Returns the list functions inside the functions atoms
 		 */
 		private List<Function> getAtomFunctions(Function func) {
 
@@ -1157,7 +1133,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 *            fresh variables.
 		 * @param includingMappings 
 		 * @param parentIsAggr 
-		 * @param atomindx
+		 * @param termidx
 		 *            The location of the focustAtom in the currentlist
 		 * @return <ul>
 		 *         <li>null if there is no s whos head unifies with a, we return
@@ -1170,7 +1146,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * @see Unifier
 		 */	
 	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
-				boolean isSecondAtomInLeftJoin, boolean includingMappings, boolean parentIsAggr) {
+				boolean isSecondAtomInLeftJoin, boolean includingMappings, boolean parentIsAggr,
+                Multimap<Predicate, CQIE> ruleIndex) {
 
 			if (!focusedAtom.isDataFunction())
 				throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
@@ -1448,13 +1425,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param resolutionCount
 	 * @param termidx
 	 * 			a stack used to track the depth first searching (DFS) 
-	 * @param includingMappings 
-	 * @param parentIsAggr 
+	 * @param includingMappings
 	 * @return
 	 */
 
     private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
-            boolean parentIsLeftJoin, boolean includingMappings) {
+            boolean parentIsLeftJoin, boolean includingMappings, Multimap<Predicate, CQIE> ruleIndex) {
 
 	    int nonBooleanAtomCounter = 0;
 	
@@ -1487,7 +1463,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 //                    	return emptyList;
 //                    }
                     
-                    List<CQIE> result = computePartialEvaluation(resolvPred,  focusedLiteral.getTerms(), rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings);
+                    List<CQIE> result = computePartialEvaluation(resolvPred, focusedLiteral.getTerms(),
+                            rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings, ruleIndex);
 
                     if (result == null)
                     	if (!isLeftJoinSecondArgument){
@@ -1523,7 +1500,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                     		parentIsAggr= detectAggregateinSingleRule(rule);
                     	}
                     	result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
-                    			isLeftJoinSecondArgument, includingMappings, parentIsAggr);
+                    			isLeftJoinSecondArgument, includingMappings, parentIsAggr, ruleIndex);
                     	if (result == null)
                     		return null;
 
@@ -1979,8 +1956,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param partialEvalution
 	 *            The CQIE currently being optimized, i.e., the result of the
 	 *            resolution step.
-	 * 
-	 * @param innerAtoms
 	 */
 	private void joinEliminationPKBased(Stack<Integer> termidx, int newatomcount, CQIE partialEvalution) {
 
@@ -2223,7 +2198,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				}
 				
 				//get all the indexes we need
-				ruleIndex = depGraph.getRuleIndex();
+                Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
 
@@ -2388,7 +2363,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 	/**
 	 * Takes a Term of the form Type(x) and returns the list [x]
-	 * @param untypedArguments
 	 * @param t
 	 * @param termIdx 
 	 * @param isProblemTemplate 
@@ -2502,7 +2476,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
      * becomes
      *    ans2(arg1, arg2) :- ...
      * 
-     * @param rule. Read-only.
+     * @param rule . Read-only.
      * @return the new rule
      */
 	//TODO: remove this method if possible!!
@@ -2669,11 +2643,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		}
 	}
 
-	/**
-	 * @param targetAtom
-	 * @param fatherBody
-	 * @param nt
-	 */
 	private void replaceAtomInBody(Function targetAtom,
 			List<Function> fatherBody, Function newAtom) {
 		for (Function func: fatherBody){
@@ -2723,7 +2692,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * 
 	 * @param workingList
 	 * @param fatherIdx
-	 * @param depGraph
 	 * @param result
 	 * @param preFather
 	 * @param fatherRule
@@ -2798,7 +2766,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			//There is more than 1 rule, we need to see if it uses different templates
 			
 			
-			detectMissmatchArgumentType(rules,true);
+			detectMissmatchArgumentType(rules,true, ruleIndex);
 			
 		} //end for predicates
 		
@@ -2809,10 +2777,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	
 	/**
 	 * This is a helper method that takes a set of rules and calculate wich argument have different types
-	 * @param focusPred
 	 * @param rules
 	 */
-	private void detectMissmatchArgumentType(List<CQIE> rules, boolean isComputingMappings ) {
+	private void detectMissmatchArgumentType(List<CQIE> rules, boolean isComputingMappings, Multimap<Predicate, CQIE> ruleIndex ) {
 
 		List<Predicate> predList= new LinkedList<Predicate>();
 		
