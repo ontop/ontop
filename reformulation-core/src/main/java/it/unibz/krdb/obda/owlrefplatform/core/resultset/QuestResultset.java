@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.net.URISyntaxException;
@@ -94,8 +95,10 @@ public class QuestResultset implements TupleResultSet {
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
 		try {
-			 vendor = st.questInstance.getConnection().getDriverName();
+			 QuestConnection connection = st.questInstance.getConnection();
+			 vendor = connection.getDriverName();
 			 isOracle = vendor.startsWith("Oracle");
+			 connection.close();
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}					
