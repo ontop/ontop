@@ -330,6 +330,8 @@ public class TMappingProcessor {
 
 	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean optimize, boolean full) {
 
+		long tm0 = System.currentTimeMillis();
+		
 		/*
 		 * Normalizing constants
 		 */
@@ -341,6 +343,10 @@ public class TMappingProcessor {
 		 */
 		if (optimize)
 			optimizeMappingProgram(mappingIndex);
+
+		long tm1 = System.currentTimeMillis();
+		if (tm1 - tm0 > 2)
+			System.out.println("TIME1 " + (tm1 - tm0));
 		
 		/*
 		 * Processing mappings for all Properties
@@ -379,17 +385,16 @@ public class TMappingProcessor {
 					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
 
 					for (CQIE childmapping : childMappings) {
-						Function newMappingHead = null;
-						Function oldMappingHead = childmapping.getHead();
+						List<Term> terms = childmapping.getHead().getTerms();
+
+						Function newMappingHead;
 						if (!requiresInverse) {
 							if (!full)
 								continue;
-							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
+							newMappingHead = fac.getFunction(currentPredicate, terms);
 						} 
 						else {
-							Term term0 = oldMappingHead.getTerms().get(1);
-							Term term1 = oldMappingHead.getTerms().get(0);
-							newMappingHead = fac.getFunction(currentPredicate, term0, term1);
+							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
 						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
 					}
@@ -407,17 +412,14 @@ public class TMappingProcessor {
 				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
 				
 				for(CQIE currentNodeMapping : mappingList){
+					List<Term> terms = currentNodeMapping.getHead().getTerms();
 					
-					if (equivProperty.isInverse() == current.isInverse()) {
-						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody(), optimize);
-					} 
-					else {
-						Term term0 = currentNodeMapping.getHead().getTerms().get(1);
-						Term term1 = currentNodeMapping.getHead().getTerms().get(0);
-						Function newhead = fac.getFunction(p, term0, term1);
-						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody(), optimize);
-					}
+					Function newhead;
+					if (equivProperty.isInverse() == current.isInverse()) 
+						newhead = fac.getFunction(p, terms);
+					else 
+						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
+					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody(), optimize);
 				}
 			}
 		} // Properties loop ended
@@ -446,9 +448,10 @@ public class TMappingProcessor {
 					 * class, or when it is an \exists P or \exists \inv P. 
 					 */
 					
-					Predicate childPredicate = null;
 					boolean isClass = true;
 					boolean isInverse = false;
+
+					Predicate childPredicate;					
 					if (childDescription instanceof OClass) {
 						if (!full)
 							continue;
@@ -465,17 +468,17 @@ public class TMappingProcessor {
 					List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);
 
 					for (CQIE childmapping : desendantMappings) {
-						Function newMappingHead = null;
-						Function oldMappingHead = childmapping.getHead();
+						List<Term> terms = childmapping.getHead().getTerms();
 
+						Function newMappingHead;
 						if (isClass) {
-							newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms());
+							newMappingHead = fac.getFunction(currentPredicate, terms);
 						} 
 						else {
 							if (!isInverse) 
-								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(0));
+								newMappingHead = fac.getFunction(currentPredicate, terms.get(0));
 							else 
-								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
+								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
 						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
 					}
@@ -500,15 +503,26 @@ public class TMappingProcessor {
 				}
 			}
 		}
+		long tm2 = System.currentTimeMillis();
+		if (tm2 - tm1 > 2)
+			System.out.println("TIME2 " + (tm2 - tm1));
+		
 		DatalogProgram tmappingsProgram = fac.getDatalogProgram();
 		for (Predicate key : mappingIndex.keySet()) {
 			for (CQIE mapping : mappingIndex.get(key)) {
 				tmappingsProgram.appendRule(mapping);
 			}
 		}
+		long tm3 = System.currentTimeMillis();
+		if (tm3 - tm2 > 2)
+			System.out.println("TIME3 " + (tm3 - tm2));
 		
 		tmappingsProgram = DatalogNormalizer.enforceEqualities(tmappingsProgram);
-		
+
+		long tm4 = System.currentTimeMillis();
+		if (tm4 - tm3 > 2)
+			System.out.println("TIME4 " + (tm4 - tm3));
+
 		return tmappingsProgram;	
 	}
 
