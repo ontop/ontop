@@ -64,7 +64,6 @@ import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 //import com.hp.hpl.jena.query.Query;
@@ -452,7 +451,7 @@ public class QuestStatement implements OBDAStatement {
 			//TODO: cant we use here QuestInstance???
 
 			
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 
 			if (questInstance.isSemIdx()==true){
 				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates();
@@ -496,7 +495,8 @@ public class QuestStatement implements OBDAStatement {
 		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder.getDatalogUnfolder();
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
-		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,questInstance.multiplePredIdx);
+		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
+                questInstance.multiplePredIdx);
 		
 		log.debug("Partial evaluation: \n{}", unfolding);
 
@@ -512,7 +512,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-        unfolding = pushTypes(unfolding, unfolder);
+        unfolding = pushTypes(unfolding, unfolder, questInstance.multiplePredIdx);
 		
 		
 		log.debug("Pulling out equalities...");
@@ -534,7 +534,8 @@ public class QuestStatement implements OBDAStatement {
      * @param unfolder
      * @return the updated Datalog program
      */
-    private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder) {
+    private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder,
+                                     Multimap<Predicate,Integer> multiTypedFunctionSymbolMap) {
         boolean canPush = true;
 
         /**
@@ -546,7 +547,6 @@ public class QuestStatement implements OBDAStatement {
          *
          * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
          */
-        Multimap<Predicate,Integer> multiTypedFunctionSymbolMap = unfolder.getMultiplePredList();
         if (!multiTypedFunctionSymbolMap.isEmpty()) {
             DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
 
@@ -561,7 +561,7 @@ public class QuestStatement implements OBDAStatement {
         }
 
         if (canPush) {
-            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, unfolder.getMultiplePredList());
+            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, multiTypedFunctionSymbolMap);
 
             //TODO: can we avoid using this intermediate variable???
             datalogProgram.removeAllRules();

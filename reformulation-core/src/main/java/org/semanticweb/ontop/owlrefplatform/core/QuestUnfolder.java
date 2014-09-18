@@ -82,10 +82,7 @@ public class QuestUnfolder {
 
         log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
-        unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
-
-
-
+        unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
     }
 
