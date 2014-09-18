@@ -122,12 +122,12 @@ public class QuestStatement implements OBDAStatement {
 	final SparqlAlgebraToDatalogTranslator translator;
 
     /**
-     * Map containing the function symbols (predicate) that have multiple types.
+     * Index function symbols (predicate) that have multiple types.
      * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
      *
-     * TODO: simplify this collection to a set. The count does not seem to be important.
+     * Not that this index may be modified by the DatalogUnfolder.
      */
-    private Multimap<Predicate,Integer> multiTypedFunctionSymbols = ArrayListMultimap.create();
+    private Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ArrayListMultimap.create();
 	
 	SesameConstructTemplate templ = null;
 
@@ -461,11 +461,11 @@ public class QuestStatement implements OBDAStatement {
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 
 			if (questInstance.isSemIdx()==true){
-				multiTypedFunctionSymbols = questInstance.copyMultiTypedFunctionSymbols();
+				multiTypedFunctionSymbolIndex = questInstance.copyMultiTypedFunctionSymbolIndex();
 			}
 
 			//Flattening !!
-			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, multiTypedFunctionSymbols);
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, multiTypedFunctionSymbolIndex);
 
 			log.debug("Enforcing equalities...");
 			for (CQIE rule: program.getRules()){
@@ -503,7 +503,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
-                multiTypedFunctionSymbols);
+                multiTypedFunctionSymbolIndex);
 		
 		log.debug("Partial evaluation: \n{}", unfolding);
 
@@ -519,7 +519,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-        unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbols);
+        unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbolIndex);
 		
 		
 		log.debug("Pulling out equalities...");
@@ -825,9 +825,9 @@ public class QuestStatement implements OBDAStatement {
 /*
 				DatalogProgram progClone = programAfterUnfolding.clone();
 			
-				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiTypedFunctionSymbols);
+				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiTypedFunctionSymbolIndex);
 			
-				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiTypedFunctionSymbols);
+				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiTypedFunctionSymbolIndex);
 				
 	*/			
 				

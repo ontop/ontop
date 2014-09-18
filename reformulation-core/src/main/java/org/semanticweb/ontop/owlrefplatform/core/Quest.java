@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core;
  */
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -145,14 +146,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
 	/*
-	 * The list of predicates that are defined in multiple mappings
-	 *
-	 * Set of function symbols that have multiple types.
-	 * Initialized during repository setup.
-	 *
-	 * TODO: simplify to an unmodifiable set.
+	 * Index of the function symbols that have multiple types.
+	 * This index, built from the mappings, is immutable.
+     *
 	 */
-	private Multimap<Predicate,Integer> multiTypedFunctionSymbols;
+	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
 
 	final HashSet<String> templateStrings = new HashSet<String>();
 	
@@ -350,9 +348,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return inputOBDAModel;
 	}
 
-
-    public Multimap<Predicate,Integer> copyMultiTypedFunctionSymbols() {
-        return ArrayListMultimap.create(multiTypedFunctionSymbols);
+    /**
+     * Returns a mutable copy of the index of the multi-typed function symbols.
+     */
+    public Multimap<Predicate,Integer> copyMultiTypedFunctionSymbolIndex() {
+        return ArrayListMultimap.create(multiTypedFunctionSymbolIndex);
     }
 
 	public EquivalenceMap getEquivalenceMap() {
@@ -808,7 +808,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			unfolder.setupUnfolder();
 
             //if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
-            multiTypedFunctionSymbols = unfolder.processMultipleTemplatePredicates();
+            multiTypedFunctionSymbolIndex = ImmutableMultimap.copyOf(unfolder.processMultipleTemplatePredicates());
 			//}
 
 

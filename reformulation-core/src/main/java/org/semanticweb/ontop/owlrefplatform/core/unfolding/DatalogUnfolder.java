@@ -155,17 +155,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
      * replacing B(x,newvar1), R(x,newvar2)
      *
      * TODO: comment other parameters
-     * @param multiplePredIdx
-     *          Predicates having multiple types
+     * @param multiTypedFunctionSymbolIndex
+     *          Index of predicates having multiple types
 	 * 
 	 */
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate, String strategy, boolean includeMappings,
-                                 Multimap<Predicate,Integer> multiplePredIdx) {
+                                 Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
 		
 		inputquery = QueryAnonymizer.deAnonymize(inputquery);
 
 		DatalogProgram partialEvaluation = flattenUCQ(inputquery, targetPredicate, strategy,  includeMappings,
-                multiplePredIdx);
+                multiTypedFunctionSymbolIndex);
 
         //TODO: remove this noise
 		DatalogProgram dp = termFactory.getDatalogProgram();
@@ -232,7 +232,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 	 */
 	private DatalogProgram flattenUCQ(DatalogProgram inputquery, String targetPredicate, String strategy,
-                                      boolean includeMappings, Multimap<Predicate, Integer> multiPredicateMap) {
+                                      boolean includeMappings, Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		workingSet.addAll(inputquery.getRules());
@@ -241,12 +241,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	
 
 		if (includeMappings){
-			computePartialEvaluationWRTMappings(workingSet, multiPredicateMap);
+			computePartialEvaluationWRTMappings(workingSet, multiTypedFunctionSymbolIndex);
 		} else{
 			if (QuestConstants.BUP.equals(strategy)){
-				computePartialEvaluationBUP(workingSet,includeMappings, multiPredicateMap);
+				computePartialEvaluationBUP(workingSet,includeMappings, multiTypedFunctionSymbolIndex);
 			}else if (QuestConstants.TDOWN.equals(strategy)){
-				computePartialEvaluationTDown(workingSet,includeMappings, multiPredicateMap);
+				computePartialEvaluationTDown(workingSet,includeMappings, multiTypedFunctionSymbolIndex);
 			}
 		}
 
@@ -292,7 +292,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @return
 //	 */
 	private int computePartialEvaluationTDown(List<CQIE> workingList, boolean includeMappings,
-                                              Multimap<Predicate, Integer> multiPredicateMap) {
+                                              Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 
         /**
@@ -313,7 +313,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			List<Term> tempList = getBodyTerms(rule);
 
 			List<CQIE> result = computePartialEvaluation(null, tempList, rule, rcount, termidx, false,
-                    includeMappings, ruleIndex, multiPredicateMap);
+                    includeMappings, ruleIndex, multiTypedFunctionSymbolIndex);
 
 			if (result == null) {
 
@@ -369,7 +369,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
  * @return
  */
 		private int computePartialEvaluationBUP(List<CQIE> workingList, boolean includingMappings,
-                                                Multimap<Predicate, Integer> multiPredicateMap) {
+                                                Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 
@@ -390,10 +390,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 					//get all the indexes we need
                     Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
-					
-					//TODO: I already have a field for this!!!
 					Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
-					
 					
 					
 					fatherCollection.clear();
@@ -434,7 +431,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						List<CQIE> result = new LinkedList<CQIE>();
 						if (!hasAggregates){
 							 result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,
-                                     includingMappings, ruleIndex, multiPredicateMap);
+                                     includingMappings, ruleIndex, multiTypedFunctionSymbolIndex);
 						}else{
 							// result is the empty list
 							//TODO: This can be optmised I think. Here we could still unfold atoms in the body that are not 
@@ -454,7 +451,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 							 */
 							continue;
 						}else if (result.size() >= 2) {
-							multiPredicateMap = detectMissmatchArgumentType(result, false, ruleIndex, multiPredicateMap);
+							multiTypedFunctionSymbolIndex = detectMissmatchArgumentType(result, false, ruleIndex, multiTypedFunctionSymbolIndex);
 						}
 						/*
 						 * One more step in the partial evaluation was computed, we
@@ -577,7 +574,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * @param workingList
 		 */
 		private void computePartialEvaluationWRTMappings(List<CQIE> workingList,
-                                                         Multimap<Predicate, Integer> multiPredicateMap) {
+                                                         Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
 		
@@ -626,7 +623,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						
 						//here we perform the partial evaluation
 						List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx,
-                                parentIsLeftJoin,  includeMappings, ruleIndex, multiPredicateMap);
+                                parentIsLeftJoin,  includeMappings, ruleIndex, multiTypedFunctionSymbolIndex);
 						
 						
 						
@@ -642,7 +639,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							
 				
 							keepLooping = updateIndexes(pred, preFather, result, fatherRule,
-                                    workingList, depGraph, multiPredicateMap);
+                                    workingList, depGraph, multiTypedFunctionSymbolIndex);
 							
 							log.debug(pred + " : " + ruleIndex.get(preFather).toString() );
 							
@@ -660,7 +657,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						
 						}
 						if (result.size() >= 2) {
-							multiPredicateMap = detectMissmatchArgumentType(result,false, ruleIndex, multiPredicateMap);
+							multiTypedFunctionSymbolIndex = detectMissmatchArgumentType(result,false, ruleIndex, multiTypedFunctionSymbolIndex);
 						}
 		
 					} //end for father collection
@@ -680,7 +677,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			while (!predicatesMightGotEmpty.isEmpty()){
 				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates,
-                        depGraph, multiPredicateMap);
+                        depGraph, multiTypedFunctionSymbolIndex);
 				
 				//if I deleted ans1 I dont return anything later
 				if (predicatesMightGotEmpty.contains(ans1)){
@@ -707,7 +704,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		private List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
 				 		List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates,
                         DatalogDependencyGraphGenerator dependencyGraph,
-                        Multimap<Predicate, Integer> multiPredicateMap) {
+                        Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 			//TODO: this is not optimal. The best would be that the generateNullBinding takes care of this
 			
 			//This loop is to update the ans rules that could be affected by the elimination of
@@ -752,7 +749,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							//System.out.println(newrule);
 							result.add(newrule);
 							updateIndexes(predEmpty, fatherpred, result, fatherRule,  workingList, dependencyGraph,
-                                    multiPredicateMap);
+                                    multiTypedFunctionSymbolIndex);
 							touchedPredicates.add(fatherpred);
 						} else{
 							//here I remove fatherRule, since it is either a join, or it is the first argument of the LJ
@@ -949,19 +946,19 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 */
 		private boolean updateIndexes(Predicate pred,
 				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList,
-                DatalogDependencyGraphGenerator depGraph, Multimap<Predicate, Integer> multiPredicateMap) {
+                DatalogDependencyGraphGenerator depGraph, Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 			//boolean hasPred = false;
 
             Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 			
 			//Update MultipleTemplateList
-			if (multiPredicateMap.containsKey(pred))
+			if (multiTypedFunctionSymbolIndex.containsKey(pred))
 			{
 				Function head = fatherRule.getHead();
 				List<Function> ruleBody = fatherRule.getBody(); 
 				Function oldFun = getAtomFromBody(pred, ruleBody);
 				
-				int oldIdx = multiPredicateMap.get(pred).iterator().next();
+				int oldIdx = multiTypedFunctionSymbolIndex.get(pred).iterator().next();
 				Term t = oldFun.getTerm(oldIdx);
 				
 				//here I find the new index in the head
@@ -974,10 +971,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					count++;
 				}
 
-                multiPredicateMap.removeAll(pred);
+                multiTypedFunctionSymbolIndex.removeAll(pred);
 				//if the problematic term was in the head
 				if (newIdx>-1){
-                    multiPredicateMap.put(preFather,newIdx);
+                    multiTypedFunctionSymbolIndex.put(preFather,newIdx);
 				}
 	
 			}			
@@ -1108,7 +1105,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx,
                                        int[] resolutionCount, boolean isLeftJoin, boolean isSecondAtomInLeftJoin,
                                        boolean includingMappings, boolean parentIsAggr, Multimap<Predicate, CQIE> ruleIndex,
-                                       Multimap<Predicate, Integer> multiPredicateMap) {
+                                       Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 			if (!focusedAtom.isDataFunction())
 				throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
@@ -1178,7 +1175,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount,
 					// rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
 					result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom,
-                            isLeftJoin, isSecondAtomInLeftJoin, multiPredicateMap);
+                            isLeftJoin, isSecondAtomInLeftJoin, multiTypedFunctionSymbolIndex);
 				} else {
 					boolean noUnfoldingNeededAddMappings = isSecondAtomInLeftJoin || parentIsAggr;
 					if (!hasOneMapping && noUnfoldingNeededAddMappings) {
@@ -1282,12 +1279,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 //		result.addAll(relevantrules);
 //		return termFactory.getDatalogProgram(result);
 //	}
-
-
-	
-
-	
-
 	
 
 	/***
@@ -1394,7 +1385,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
     private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
             boolean parentIsLeftJoin, boolean includingMappings, Multimap<Predicate, CQIE> ruleIndex,
-            Multimap<Predicate, Integer> multiPredicateMap) {
+            Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 	    int nonBooleanAtomCounter = 0;
 	
@@ -1429,7 +1420,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                     
                     List<CQIE> result = computePartialEvaluation(resolvPred, focusedLiteral.getTerms(),
                             rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings, ruleIndex,
-                            multiPredicateMap);
+                            multiTypedFunctionSymbolIndex);
 
                     if (result == null)
                     	if (!isLeftJoinSecondArgument){
@@ -1466,7 +1457,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                     	}
                     	result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
                     			isLeftJoinSecondArgument, includingMappings, parentIsAggr, ruleIndex,
-                                multiPredicateMap);
+                                multiTypedFunctionSymbolIndex);
                     	if (result == null)
                     		return null;
 
@@ -1587,7 +1578,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 */
 	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount,
 			Collection<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin,
-            Multimap<Predicate, Integer> multiPredicateMap) {
+            Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
 //		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
@@ -1731,8 +1722,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						
 						
 						if (templateProblem){
-							if (!multiPredicateMap.containsEntry(focusPred,p)) {
-								multiPredicateMap.put(focusPred,p);
+							if (!multiTypedFunctionSymbolIndex.containsEntry(focusPred,p)) {
+								multiTypedFunctionSymbolIndex.put(focusPred,p);
 								found = true;
 								
 							}
@@ -2124,10 +2115,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
      * TODO: complete
      *
      * @param unfolding
-     * @param multiPredicateMap
-     *          Predicates having multiple types
+     * @param multiTypedFunctionSymbolIndex
+     *          Function symbols having multiple types
      */
-	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multiPredicateMap) {
+	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
 		
 		List<CQIE> workingList = new LinkedList<CQIE>();
 		cloneRules(workingList, unfolding.getRules());
@@ -2151,7 +2142,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			if (!extensionalPredicates.contains(buPredicate)  ) {// it is a defined  predicate, like ans2,3.. etc
 
-				if (multiPredicateMap.containsKey(buPredicate)){
+				if (multiTypedFunctionSymbolIndex.containsKey(buPredicate)){
 					// CANT PUSH TYPES IF I HAVE MULTIPLE TEMPLATES, SEE LEFTJOIN3VIRTUAL. PROBLEMS WITH THE JOIN.
 					//SYSTEM.ERR.PRINTLN("TYPES CANNOT BE PUSHED IN THE PRESENCE OF NO MATCHING TEMPLATES. THIS MIGHT LEAD TO A BAD PERFORMANCE.");
 					log.debug("Types cannot be pushed in the presence of no matching templates. This might lead to a bad performance.:", buPredicate);
@@ -2205,7 +2196,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 						List<Term> termsToExclude = new LinkedList<Term>();
 						
 						result = computeRuleExtendedTypes(currentTerms,  sourceRule, fatherRule.clone(),termsToExclude,
-                                containsAggregates, multiPredicateMap);
+                                containsAggregates, multiTypedFunctionSymbolIndex);
 
 
 						if (result == null && fails==rulesDefiningPred.size()) {
@@ -2234,7 +2225,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                              * Said differently, URIs are not sargable while IDs are.
                              */
                             CQIE newsourceRule = computeSourceRuleNoTypes(sourceRule.clone(), termsToExclude,
-                                    multiPredicateMap);
+                                    multiTypedFunctionSymbolIndex);
 
                             //Now we update the indexes for the source query
                             List<CQIE> newSourceRuleList = new LinkedList<CQIE>();
@@ -2286,7 +2277,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @return
 	 */
 	private  CQIE computeSourceRuleNoTypes(CQIE sourceRule, List<Term> termsToExclude,
-                                           Multimap<Predicate, Integer> multiPredicateMap){
+                                           Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex){
 
 		Function sourceHead=sourceRule.getHead();
 
@@ -2303,8 +2294,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			boolean isProblemTemplate = false;
 			
 			Predicate functionSymbol = sourceHead.getFunctionSymbol();
-			if (multiPredicateMap.containsKey(functionSymbol)){
-				if (multiPredicateMap.get(functionSymbol).contains(termIdx)){
+			if (multiTypedFunctionSymbolIndex.containsKey(functionSymbol)){
+				if (multiTypedFunctionSymbolIndex.get(functionSymbol).contains(termIdx)){
 					isProblemTemplate = true;
 				}
 			}
@@ -2391,7 +2382,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 */
 	private  List<CQIE> computeRuleExtendedTypes(List currentTerms,
 			CQIE sourceRule, CQIE fatherRule, List<Term> termsToExclude,
-            boolean containsAggregates, Multimap<Predicate, Integer> multiPredicateMap) {
+            boolean containsAggregates, Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 
 			Function sourceHead = sourceRule.getHead();
@@ -2407,13 +2398,13 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				} else if (focus.isAlgebraFunction()) {
 					//iterate inside the atom
 					result.addAll(computeRuleExtendedTypes(focus.getTerms(), sourceRule, fatherRule,
-                            termsToExclude, containsAggregates, multiPredicateMap));
+                            termsToExclude, containsAggregates, multiTypedFunctionSymbolIndex));
 					
 				} else if (focus.isDataFunction()) {
 					//add type 
 					if (focus.getFunctionSymbol().equals(sourceHead.getFunctionSymbol())){
 						CQIE newRule = addTypes(sourceHead,sourceRule,focus,fatherRule,
-                                termsToExclude, multiPredicateMap);
+                                termsToExclude, multiTypedFunctionSymbolIndex);
 						result.add(newRule);
 						break;
 					} else{
@@ -2504,12 +2495,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @return
 	 */
 	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule,
-                           List<Term> exclude, Multimap<Predicate, Integer> multiPredicateMap) {
+                           List<Term> exclude, Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
 		//TODO: Check this variable!!!
 		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		boolean oneWayMGU = true;
-		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU, multiPredicateMap);
+		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU, multiTypedFunctionSymbolIndex);
 		
 		
 		
@@ -2697,7 +2688,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 */
 	public Multimap<Predicate,Integer> processMultipleTemplatePredicates(DatalogProgram mappings) {
 
-        Multimap<Predicate,Integer> multiPredicateMap = ArrayListMultimap.create();
+        Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ArrayListMultimap.create();
 		
 		 Multimap<Predicate, CQIE> ruleIndex;
 		 DatalogDependencyGraphGenerator depGraph;
@@ -2724,11 +2715,11 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			//There is more than 1 rule, we need to see if it uses different templates
 			
 			
-			multiPredicateMap = detectMissmatchArgumentType(rules,true, ruleIndex, multiPredicateMap);
+			multiTypedFunctionSymbolIndex = detectMissmatchArgumentType(rules,true, ruleIndex, multiTypedFunctionSymbolIndex);
 			
 		} //end for predicates
 		
-		return multiPredicateMap;
+		return multiTypedFunctionSymbolIndex;
 
 	}
 
@@ -2739,7 +2730,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 */
 	private Multimap<Predicate,Integer> detectMissmatchArgumentType(List<CQIE> rules, boolean isComputingMappings,
                                              Multimap<Predicate, CQIE> ruleIndex,
-                                             Multimap<Predicate,Integer> multiPredicateMap) {
+                                             Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
 
 		List<Predicate> predList= new LinkedList<Predicate>();
 		
@@ -2840,8 +2831,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					}
 
 					if (templateProblem){
-						if (!multiPredicateMap.containsEntry(focusPred,p)) {
-							multiPredicateMap.put(focusPred,p);
+						if (!multiTypedFunctionSymbolIndex.containsEntry(focusPred,p)) {
+							multiTypedFunctionSymbolIndex.put(focusPred,p);
 							found = true;
 							break;
 						}
@@ -2855,7 +2846,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				}
 			}//end for rules
 		}
-        return multiPredicateMap;
+        return multiTypedFunctionSymbolIndex;
 	}
 
 	/**
