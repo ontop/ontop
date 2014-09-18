@@ -55,6 +55,32 @@ public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
+	/***
+	 * Splits a given {@link mapping} into builtin predicates ({@link conditions})
+	 * and all other atoms ({@link stripped}), which are checked for containment 
+	 * by the main algorithm.
+	 */
+
+	private static class TMappingRule {
+		public CQIE stripped;
+		public List<Function> conditions;
+
+		public TMappingRule(CQIE mapping) {
+			conditions = new LinkedList<Function>();
+			List<Function> newbody = new LinkedList<Function>();
+			for (Function atom : mapping.getBody()) {
+				Function clone = (Function)atom.clone();
+				if (clone.getPredicate() instanceof BuiltinPredicate) 
+					conditions.add(clone);
+				else 
+					newbody.add(clone);
+				
+			}
+			Function head = (Function)mapping.getHead().clone();
+			stripped = fac.getCQIE(head, newbody);
+		}
+	}
+	
 
 	/***
 	 * Creates an index of all mappings based on the predicate of the head of
@@ -133,8 +159,11 @@ public class TMappingProcessor {
 	 *            The new mapping for A/P
 	 */
 	private static void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
-		List<Function> strippedNewConditions = new LinkedList<Function>();
-		CQIE strippedNewMapping = getStrippedMapping(newmapping, strippedNewConditions);
+		
+		TMappingRule newrule = new TMappingRule(newmapping);
+		
+		List<Function> strippedNewConditions = newrule.conditions;
+		CQIE strippedNewMapping =  newrule.stripped;
 		Ontology sigma = null;
 		
 		CQCUtilities cqc1 = new CQCUtilities(strippedNewMapping, sigma);
@@ -150,8 +179,11 @@ public class TMappingProcessor {
 		
 		while (mappingIterator.hasNext()) {
 			CQIE currentMapping = mappingIterator.next();
-			List<Function> strippedExistingConditions = new LinkedList<Function>();
-			CQIE strippedCurrentMapping = getStrippedMapping(currentMapping, strippedExistingConditions);
+			
+			TMappingRule currentRule = new TMappingRule(currentMapping);
+			
+			List<Function> strippedExistingConditions = currentRule.conditions;
+			CQIE strippedCurrentMapping =  currentRule.stripped;
 
 			if (!cqc1.isContainedIn(strippedCurrentMapping))
 				continue;
@@ -242,35 +274,6 @@ public class TMappingProcessor {
 		return nestedAnd;
 	}
 
-	/***
-	 * Returns a new CQIE obtained from {@link mapping} where all builtin
-	 * predicates (conditionals) have been removed. The removed conditional
-	 * atoms will be added to the {@link strippedConditionsHolder} list.
-	 * 
-	 * <p>
-	 * This method is used by mergeMappingsWithCQC to test for containtment of
-	 * the stripped bodies.
-	 * 
-	 * @param mapping
-	 * @param strippedConditionsHolder
-	 * @return
-	 */
-	private static CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
-		strippedConditionsHolder.clear();
-		Function head = (Function)mapping.getHead().clone();
-		List<Function> body = mapping.getBody();
-		List<Function> newbody = new LinkedList<Function>();
-		for (int i = 0; i < body.size(); i++) {
-			Function atom = body.get(i);
-			Function clone = (Function)atom.clone();
-			if (clone.getPredicate() instanceof BuiltinPredicate) {
-				strippedConditionsHolder.add(clone);
-			} else {
-				newbody.add(clone);
-			}
-		}
-		return fac.getCQIE(head, newbody);
-	}
 
 	/***
 	 * Given a set of mappings in {@link originalMappings}, this method will
