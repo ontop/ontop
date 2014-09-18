@@ -83,8 +83,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryVocabularyValidator validator = null;
 
-	private OBDAModel unfoldingOBDAModel = null;
-
 	private boolean canceled = false;
 	
 	private boolean queryIsParsed = false;
@@ -97,13 +95,11 @@ public class QuestStatement implements OBDAStatement {
 
 	private QuestConnection conn;
 
-	public final Quest questInstance;
+	private final Quest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
-	Thread runningThread = null;
 
 	private QueryExecutionThread executionthread;
 
@@ -114,8 +110,6 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, String> querycache;
 
 	final Map<String, List<String>> signaturecache;
-
-	//private Map<String, Query> jenaQueryCache;
 	
 	private Map<String, ParsedQuery> sesameQueryCache;
 
@@ -126,6 +120,14 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, Boolean> isdescribecache;
 
 	final SparqlAlgebraToDatalogTranslator translator;
+
+    /**
+     * Map containing the function symbols (predicate) that have multiple types.
+     * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
+     *
+     * TODO: simplify this collection to a set. The count does not seem to be important.
+     */
+    private Multimap<Predicate,Integer> multiTypedFunctionSymbols = ArrayListMultimap.create();
 	
 	SesameConstructTemplate templ = null;
 
@@ -137,14 +139,6 @@ public class QuestStatement implements OBDAStatement {
 	private long rewritingTime = 0;
 
 	private long unfoldingTime = 0;
-
-    /**
-     * Map containing the function symbols (predicate) that have multiple types.
-     * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
-     *
-     * TODO: simplify this collection to a set. The count does not seem to be important.
-     */
-    private Multimap<Predicate,Integer> multiTypedFunctionSymbols = ArrayListMultimap.create();
 
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
 
@@ -168,6 +162,10 @@ public class QuestStatement implements OBDAStatement {
 		this.sqlstatement = st;
 		this.validator = questinstance.vocabularyValidator;
 	}
+
+    public Quest getQuestInstance() {
+        return questInstance;
+    }
 
 	private class QueryExecutionThread extends Thread {
 
