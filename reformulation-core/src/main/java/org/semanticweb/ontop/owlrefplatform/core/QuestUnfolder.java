@@ -35,9 +35,6 @@ public class QuestUnfolder {
 	/* As unfolding OBDAModel, but experimental */
 	private DatalogProgram unfoldingProgram;
 
-     /* The list of predicates that are defined in multiple mappings */
-
-    private  Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
 	 * queries into Functions, used by the SPARQL translator.
@@ -88,12 +85,10 @@ public class QuestUnfolder {
 
     public Multimap<Predicate, Integer> processMultipleTemplatePredicates() {
 
-        multiplePredIdx = unfolder.processMultipleTemplatePredicates(unfoldingProgram);
-
-        return multiplePredIdx;
-
+       return unfolder.processMultipleTemplatePredicates(unfoldingProgram);
 
     }
+
 	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();

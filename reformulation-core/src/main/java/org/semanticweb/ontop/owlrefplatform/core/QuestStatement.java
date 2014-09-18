@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.common.collect.ArrayListMultimap;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -96,7 +97,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private QuestConnection conn;
 
-	public Quest questInstance;
+	public final Quest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
@@ -136,6 +137,14 @@ public class QuestStatement implements OBDAStatement {
 	private long rewritingTime = 0;
 
 	private long unfoldingTime = 0;
+
+    /**
+     * Map containing the function symbols (predicate) that have multiple types.
+     * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
+     *
+     * TODO: simplify this collection to a set. The count does not seem to be important.
+     */
+    private Multimap<Predicate,Integer> multiTypedFunctionSymbols = ArrayListMultimap.create();
 
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
 
@@ -454,11 +463,11 @@ public class QuestStatement implements OBDAStatement {
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 
 			if (questInstance.isSemIdx()==true){
-				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates();
+				multiTypedFunctionSymbols = questInstance.copyMultiTypedFunctionSymbols();
 			}
 
 			//Flattening !!
-			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, multiTypedFunctionSymbols);
 
 			log.debug("Enforcing equalities...");
 			for (CQIE rule: program.getRules()){
@@ -496,7 +505,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
-                questInstance.multiplePredIdx);
+                multiTypedFunctionSymbols);
 		
 		log.debug("Partial evaluation: \n{}", unfolding);
 
@@ -512,7 +521,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-        unfolding = pushTypes(unfolding, unfolder, questInstance.multiplePredIdx);
+        unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbols);
 		
 		
 		log.debug("Pulling out equalities...");
@@ -818,9 +827,9 @@ public class QuestStatement implements OBDAStatement {
 /*
 				DatalogProgram progClone = programAfterUnfolding.clone();
 			
-				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiTypedFunctionSymbols);
 			
-				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
+				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiTypedFunctionSymbols);
 				
 	*/			
 				

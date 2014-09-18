@@ -48,7 +48,6 @@ import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGene
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
-import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -147,8 +146,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/*
 	 * The list of predicates that are defined in multiple mappings
+	 *
+	 * Set of function symbols that have multiple types.
+	 * Initialized during repository setup.
+	 *
+	 * TODO: simplify to an unmodifiable set.
 	 */
-	protected Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+	private Multimap<Predicate,Integer> multiTypedFunctionSymbols;
 
 	final HashSet<String> templateStrings = new HashSet<String>();
 	
@@ -347,6 +351,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 
+    public Multimap<Predicate,Integer> copyMultiTypedFunctionSymbols() {
+        return ArrayListMultimap.create(multiTypedFunctionSymbols);
+    }
 
 	public EquivalenceMap getEquivalenceMap() {
 		return equivalenceMaps;
@@ -800,9 +807,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			unfolder.setupUnfolder();
 
-            if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
-                multiplePredIdx = unfolder.processMultipleTemplatePredicates();
-			}
+            //if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
+            multiTypedFunctionSymbols = unfolder.processMultipleTemplatePredicates();
+			//}
 
 
 			log.debug("DB Metadata: \n{}", metadata);
