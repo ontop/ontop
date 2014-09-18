@@ -62,8 +62,9 @@ public class TMappingProcessor {
 	 */
 
 	private static class TMappingRule {
-		public CQIE stripped;
-		public List<Function> conditions;
+		public final CQIE stripped;
+		private final List<Function> conditions;
+		private final CQCUtilities cqc;
 
 		public TMappingRule(CQIE mapping) {
 			conditions = new LinkedList<Function>();
@@ -78,7 +79,42 @@ public class TMappingProcessor {
 			}
 			Function head = (Function)mapping.getHead().clone();
 			stripped = fac.getCQIE(head, newbody);
+			cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/);
 		}
+		
+		public boolean isConditionsEmpty() {
+			return conditions.isEmpty();
+		}
+		
+		public boolean isContainedIn(TMappingRule other) {
+			return cqc.isContainedIn(other.stripped);
+		}
+		
+		/***
+		 * Takes a conjunctive boolean atoms and returns one single atom
+		 * representing the conjunction (it might be a single atom if
+		 * conditions.size() == 1.
+		 * 
+		 * @return
+		 */
+		public Function getMergedConditions() {
+			if (conditions.size() == 1)
+				return conditions.get(0);
+			Function atom0 = conditions.remove(0);
+			Function atom1 = conditions.remove(0);
+			Term f0 = fac.getFunction(atom0.getPredicate(), atom0.getTerms());
+			Term f1 = fac.getFunction(atom1.getPredicate(), atom1.getTerms());
+			Function nestedAnd = fac.getFunctionAND(f0, f1);
+			while (conditions.size() != 0) {
+				Function condition = conditions.remove(0);
+				Term term0 = nestedAnd.getTerm(1);
+				Term term1 = fac.getFunction(condition.getPredicate(), condition.getTerms());
+				Term newAND = fac.getFunctionAND(term0, term1);
+				nestedAnd.setTerm(1, newAND);
+			}
+			return nestedAnd;
+		}
+		
 	}
 	
 
@@ -160,15 +196,6 @@ public class TMappingProcessor {
 	 */
 	private static void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
 		
-		TMappingRule newrule = new TMappingRule(newmapping);
-		
-		List<Function> strippedNewConditions = newrule.conditions;
-		CQIE strippedNewMapping =  newrule.stripped;
-		Ontology sigma = null;
-		
-		CQCUtilities cqc1 = new CQCUtilities(strippedNewMapping, sigma);
-		Iterator<CQIE> mappingIterator = currentMappings.iterator();
-		
 		/***
 		 * Facts are just added
 		 */
@@ -176,41 +203,39 @@ public class TMappingProcessor {
 			currentMappings.add(newmapping);
 			return;
 		}
-		
+
+		TMappingRule newRule = new TMappingRule(newmapping);
+				
+		Iterator<CQIE> mappingIterator = currentMappings.iterator();
 		while (mappingIterator.hasNext()) {
-			CQIE currentMapping = mappingIterator.next();
-			
+			CQIE currentMapping = mappingIterator.next();		
 			TMappingRule currentRule = new TMappingRule(currentMapping);
 			
-			List<Function> strippedExistingConditions = currentRule.conditions;
-			CQIE strippedCurrentMapping =  currentRule.stripped;
-
-			if (!cqc1.isContainedIn(strippedCurrentMapping))
+			if (!newRule.isContainedIn(currentRule))
 				continue;
 
-			CQCUtilities cqc = new CQCUtilities(strippedCurrentMapping, sigma);
-			if (!cqc.isContainedIn(strippedNewMapping))
+			if (!currentRule.isContainedIn(newRule))
 				continue;
 
 			/*
 			 * We found an equivalence, we will try to merge the conditions of
 			 * newmapping into the currentMapping.
 			 */
-			if (strippedNewConditions.size() != 0 && strippedExistingConditions.size() == 0) {
+			if (!newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
 				/*
 				 * There is a containment and there is no need to add the new
 				 * mapping since there there is no extra conditions in the new
 				 * mapping
 				 */
 				return;
-			} else if (strippedNewConditions.size() == 0 && strippedExistingConditions.size() != 0) {
+			} else if (newRule.isConditionsEmpty() && !currentRule.isConditionsEmpty()) {
 				/*
 				 * The existing query is more specific than the new query, so we
 				 * need to add the new query and remove the old
 				 */
 				mappingIterator.remove();
 				break;
-			} else if (strippedNewConditions.size() == 0 && strippedExistingConditions.size() == 0) {
+			} else if (newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
 				/*
 				 * There are no conditions, and the new mapping is redundant, do not add anything
 				 */
@@ -220,23 +245,23 @@ public class TMappingProcessor {
 				 * Here we can merge conditions of the new query with the one we
 				 * just found.
 				 */
+				Function newconditions = newRule.getMergedConditions();
+				Function existingconditions = currentRule.getMergedConditions();
 				
-				Map<Variable,Term> mgu = null;
-				if (strippedCurrentMapping.getBody().size() == 1) {
-					mgu = Unifier.getMGU(strippedCurrentMapping.getBody().get(0), strippedNewMapping.getBody().get(0));
-				}			
-				Function newconditions = mergeConditions(strippedNewConditions);
-				Function existingconditions = mergeConditions(strippedExistingConditions);
-				Term newconditionsTerm = fac.getFunction(newconditions.getFunctionSymbol(), newconditions.getTerms());
-				Term existingconditionsTerm = fac.getFunction(existingconditions.getFunctionSymbol(), existingconditions.getTerms());
-
-                //we do not add a new mapping if the conditions are  exactly the same
-                if(existingconditions.equals(newconditions)){
+                // we do not add a new mapping if the conditions are exactly the same
+                if (existingconditions.equals(newconditions)) {
                     continue;
                 }
-				Function orAtom = fac.getFunctionOR(existingconditionsTerm, newconditionsTerm);
-				strippedCurrentMapping.getBody().add(orAtom);
 				mappingIterator.remove();
+
+				CQIE strippedCurrentMapping =  currentRule.stripped;			
+				Map<Variable,Term> mgu = null;
+				if (strippedCurrentMapping.getBody().size() == 1) {
+					mgu = Unifier.getMGU(strippedCurrentMapping.getBody().get(0), newRule.stripped.getBody().get(0));
+				}			
+				
+				Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
+				strippedCurrentMapping.getBody().add(orAtom);
 				newmapping = strippedCurrentMapping;
 				
 				if (mgu != null) {
@@ -248,31 +273,6 @@ public class TMappingProcessor {
 		currentMappings.add(newmapping);
 	}
 
-	/***
-	 * Takes a conjunctive boolean atoms and returns one single atom
-	 * representing the conjunction (it might be a single atom if
-	 * conditions.size() == 1.
-	 * 
-	 * @param conditions
-	 * @return
-	 */
-	private static Function mergeConditions(List<Function> conditions) {
-		if (conditions.size() == 1)
-			return conditions.get(0);
-		Function atom0 = conditions.remove(0);
-		Function atom1 = conditions.remove(0);
-		Term f0 = fac.getFunction(atom0.getPredicate(), atom0.getTerms());
-		Term f1 = fac.getFunction(atom1.getPredicate(), atom1.getTerms());
-		Function nestedAnd = fac.getFunctionAND(f0, f1);
-		while (conditions.size() != 0) {
-			Function condition = conditions.remove(0);
-			Term term0 = nestedAnd.getTerm(1);
-			Term term1 = fac.getFunction(condition.getPredicate(), condition.getTerms());
-			Term newAND = fac.getFunctionAND(term0, term1);
-			nestedAnd.setTerm(1, newAND);
-		}
-		return nestedAnd;
-	}
 
 
 	/***
