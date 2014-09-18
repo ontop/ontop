@@ -98,17 +98,15 @@ public class QuestUnfolder {
 		
 		final long startTime = System.currentTimeMillis();
 
-		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationReasoner, optimizeMap);
-		unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram, full);
+		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, optimizeMap, full);
 
 		/*
 		 * Eliminating redundancy from the unfolding program
 		 */
-		unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
-		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
-
 		if (optimizeMap) {
 			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+			
+			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
 		}
 

@@ -36,11 +36,11 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,27 +51,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class TMappingProcessor implements Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 6032320436478004010L;
+public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private final TBoxReasoner reasoner;
-
-	// private final static Logger log = LoggerFactory.getLogger(TMappingProcessor.class);
-	
-	boolean optimize = true;
-
-	public TMappingProcessor(TBoxReasoner reasoner, boolean optmize) {
-		this.optimize = optmize;
-		
-		//reasoner = new TBoxReasonerImpl(tbox);
-		this.reasoner = reasoner;
-	}
 
 	/***
 	 * Creates an index of all mappings based on the predicate of the head of
@@ -83,7 +66,7 @@ public class TMappingProcessor implements Serializable {
 	 * @return A map from a predicate to the list of mappings that have that
 	 *         predicate in the head atom.
 	 */
-	private Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
+	private static Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
 		Map<Predicate, Set<CQIE>> mappingIndex = new HashMap<Predicate, Set<CQIE>>();
 
 		for (CQIE mapping : mappings.getRules()) {
@@ -149,7 +132,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param newmapping
 	 *            The new mapping for A/P
 	 */
-	public void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
+	private static void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
 		List<Function> strippedNewConditions = new LinkedList<Function>();
 		CQIE strippedNewMapping = getStrippedMapping(newmapping, strippedNewConditions);
 		Ontology sigma = null;
@@ -241,7 +224,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param conditions
 	 * @return
 	 */
-	private Function mergeConditions(List<Function> conditions) {
+	private static Function mergeConditions(List<Function> conditions) {
 		if (conditions.size() == 1)
 			return conditions.get(0);
 		Function atom0 = conditions.remove(0);
@@ -272,7 +255,7 @@ public class TMappingProcessor implements Serializable {
 	 * @param strippedConditionsHolder
 	 * @return
 	 */
-	private CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
+	private static CQIE getStrippedMapping(CQIE mapping, List<Function> strippedConditionsHolder) {
 		strippedConditionsHolder.clear();
 		Function head = (Function)mapping.getHead().clone();
 		List<Function> body = mapping.getBody();
@@ -310,7 +293,7 @@ public class TMappingProcessor implements Serializable {
 	 * @return A new DatalogProgram that has been normalized in the way
 	 *         described above.
 	 */
-	public DatalogProgram normalizeConstants(DatalogProgram originalMappings) {
+	private static DatalogProgram normalizeConstants(DatalogProgram originalMappings) {
 		DatalogProgram newProgram = fac.getDatalogProgram();
 		newProgram.setQueryModifiers(originalMappings.getQueryModifiers());
 		for (CQIE currentMapping : originalMappings.getRules()) {
@@ -345,7 +328,7 @@ public class TMappingProcessor implements Serializable {
 		return newProgram;
 	}
 
-	public DatalogProgram getTMappings(DatalogProgram originalMappings, boolean full) {
+	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean optimize, boolean full) {
 
 		/*
 		 * Normalizing constants
@@ -408,7 +391,7 @@ public class TMappingProcessor implements Serializable {
 							Term term1 = oldMappingHead.getTerms().get(0);
 							newMappingHead = fac.getFunction(currentPredicate, term0, term1);
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody());
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
 					}
 				}
 			}
@@ -427,13 +410,13 @@ public class TMappingProcessor implements Serializable {
 					
 					if (equivProperty.isInverse() == current.isInverse()) {
 						Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
+						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody(), optimize);
 					} 
 					else {
 						Term term0 = currentNodeMapping.getHead().getTerms().get(1);
 						Term term1 = currentNodeMapping.getHead().getTerms().get(0);
 						Function newhead = fac.getFunction(p, term0, term1);
-						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody());
+						addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody(), optimize);
 					}
 				}
 			}
@@ -494,7 +477,7 @@ public class TMappingProcessor implements Serializable {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, oldMappingHead.getTerms().get(1));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody());
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
 					}
 				}
 			}
@@ -513,7 +496,7 @@ public class TMappingProcessor implements Serializable {
 
 				for (CQIE currentNodeMapping : mappingList) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody());
+					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody(), optimize);
 				}
 			}
 		}
@@ -523,11 +506,14 @@ public class TMappingProcessor implements Serializable {
 				tmappingsProgram.appendRule(mapping);
 			}
 		}
-		return tmappingsProgram;
+		
+		tmappingsProgram = DatalogNormalizer.enforceEqualities(tmappingsProgram);
+		
+		return tmappingsProgram;	
 	}
 
 	
-	private Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
+	private static Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
 		
 		Set<CQIE> currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {
@@ -538,7 +524,7 @@ public class TMappingProcessor implements Serializable {
 	}
 
 
-	private void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body) {
+	private static void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body, boolean optimize) {
 
 		CQIE newmapping = fac.getCQIE(head, body);				
 		if (optimize)
@@ -547,7 +533,7 @@ public class TMappingProcessor implements Serializable {
 			mappings.add(newmapping);					
 	}
 	
-	private void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
+	private static void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
 			Set<CQIE> similarMappings = mappingIndex.get(p);
 			Set<CQIE> result = new HashSet<CQIE>();
